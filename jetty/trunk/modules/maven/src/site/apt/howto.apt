@@ -1,0 +1,163 @@
+ ------
+ Maven2 Jetty6 Plugin: Configuration Guide
+ ------
+ Jan Bartel
+ <janb@mortbay.com>
+ ------
+ October 26 2005
+
+Introduction
+  
+  In order to run Jetty6 on a webapp project which is structured according to the usual Maven defaults (resources in <<<${basedir}/src/main/webapp>>>, classes in <<<${project.build.outputDirectory}>>> and the <<<web.xml>>> descriptor at <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>), you don't need to configure anything. 
+
+  Simply type: 
+
++--------+
+  mvn jetty6:run
++--------+
+
+  This will start Jetty6 running on port 8080 and serving your project.  Jetty will continue to run until the plugin is explicitly stopped, for example, by a <<<\<cntrl-c\>>>>.
+
+  It is extremely convenient to leave the plugin running because it can be configured to periodically scan for changes and automatically redeploy the webapp. This makes the development cycle much more productive by eliminating the build and deploy steps: you use your IDE to make changes to the project and the running web container will automatically pick them up, allowing you to test them straight away.
+  
+  This brings us to the configuration of the plugin.
+
+
+Simple Configuration Example
+
+  Let's take a look at an example where we override all of the default parameter settings.
+
++--------+
+<project>
+  ...
+  <plugins>
+    ...
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <configuration>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <contextPath>/biggerstrongerbetterfaster</contextPath>
+          <webAppSourceDirectory>src/some/other/location</webAppSourceDirectory> 
+          <webXmlFile>src/over/here/web.xml</webXmlFile>
+          <classesDirectory>target/never/do/this</classesDirectory>
+        </configuration>
+      </plugin>
+  </plugins>
+</project>
++--------+
+
+  * <<scanIntervalSeconds>> By default, this is 0, which disables hot deployment scanning. Set it to an integer to have the plugin check periodically if any class files, dependencies, web.xml file or other configuration information has changed, and automatically redeploy the webapp if so.
+
+  * <<contextPath>> By default, this is set to the <<<artifactId>>> from the project's pom.xml. You can override it and set it to anything you like here.
+
+  * <<webAppSourceDirectory>> By default, this is set to <<<${basedir}/src/main/webapp>>>. Set this parameter to change the location.
+
+  * <<webXmlFile>> By default, this is set to either the variable <<<${maven.war.webxml}>>> or <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>, whichever is not null. Otherwise, set this parameter to override these defaults.
+
+  * <<classesDirectory>> You should never need to set this parameter. Instead, you should set <<<\<build\>\<outputDirectory\>>>> in your <<<pom.xml>>>.
+
+
+
+Complex Configuration Example
+
+  Now let's examine how to configure connectors, realms and other Jetty objects in the plugin configuration.  First, here's an example of how a normal Jetty6 jetty.xml file looks:
+
++--------+
+<Configure id="Server" class="org.mortbay.jetty.Server">
+    <Set name="connectors">
+      <Array type="org.mortbay.jetty.Connector">
+        <Item>
+          <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+            <Set name="port">9090</Set>
+            <Set name="maxIdleTime">60000</Set>
+          </New>
+        </Item>
+      </Array>
+    </Set>
+    ....
+    <Set name="UserRealms">
+      <Array type="org.mortbay.jetty.security.UserRealm">
+        <Item>
+          <New class="org.mortbay.jetty.security.HashUserRealm">
+            <Set name="name">Test Realm</Set>
+            <Set name="config">etc/realm.properties</Set>
+          </New>
+        </Item>
+      </Array>
+    </Set>
+    ...
+</Configure>
++--------+
+
+  Now, here is the same configuration for the Jetty6 Maven plugin:
+
++--------+
+<project>
+  ...
+  <plugins>
+    ...
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <configuration>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <connectors>
+            <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+              <port>9090</port>
+              <maxIdleTime>60000</maxIdleTime>
+            </connector>
+          </connectors>
+          <userRealms>
+            <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
+              <name>Test Realm</name>
+              <config>etc/realm.properties</config>
+            </userRealm>
+          </userRealms>
+        </configuration>
+      </plugin>
+  </plugins>
+</project>
++---------+
+
+  As you can see, there is quite a straighforward transformation from one to the other. The elements that can be configured are:
+
+  * <<connectors>> This example sets up only one connector on port 9090, but others can be configured by specifying more <<<connector>>> elements. Don't forget to use the <<<implementation>>> attribute to set up the type of connector to configure.
+
+  * <<userRealms>> Security realms for the webapp can be setup by specifying one or more <<<userRealm>>> elements. Again, use the <<<implementation>>> attribute to specify the type of realm to be used.
+
+
+
+Setting System Properties
+
+  The plugin allows you to specify property name/value pairs that will be set as System properties for the execution of the plugin. Note that if a System property is found that is already set (eg from the command line), then these configured properties DO NOT override them. This feature is useful to tidy up the command line and save a lot of typing. For example, to set up Commons logging you would usually need to type:
+
+
++---------+
+  mvn -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog jetty6:run
++---------+
+
+  Using the <<<systemProperty>>> configuration the command line can again be shorted to <<<mvn jetty6:run>>> by placing the following in the pom.xml:
+
++---------+
+<project>
+  ...
+  <plugins>
+    ...
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <configuration>
+         ...
+         <systemProperties>
+            <systemProperty>
+              <name>org.apache.commons.logging.Log</name>
+               <value>org.apache.commons.logging.impl.SimpleLog</value>
+            </systemProperty>
+            ...
+         </systemProperties>
+        </configuration>
+      </plugin>
+  </plugins>
+</project>
++---------+
