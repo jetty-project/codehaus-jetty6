@@ -1,0 +1,117 @@
+<project>
+  <parent>
+    <artifactId>project</artifactId>
+    <groupId>org.mortbay.jetty</groupId>
+    <version>6.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>jsp</artifactId>
+  <packaging>pom</packaging>
+  <name>Jasper JSP dependancies</name>
+  <version>5.5.12-SNAPSHOT</version>
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy todir="../../lib/jsp" flatten="true">
+                  <fileset dir="${user.home}/.m2/repository/xerces/xercesImpl/2.6.2">
+                    <include name="**/*.jar"></include>
+                  </fileset>
+                  <fileset dir="${user.home}/.m2/repository/xerces/xmlParserAPIs/2.6.2">
+                    <include name="**/*.jar"></include>
+                  </fileset>
+                  <fileset dir="${user.home}/.m2/repository/ant/ant/1.6.4">
+                    <include name="**/*.jar"></include>
+                  </fileset>
+                  <fileset dir="${user.home}/.m2/repository/commons-el/commons-el/1.0">
+                    <include name="**/*.jar"></include>
+                  </fileset>
+                  <fileset dir="${user.home}/.m2/repository/org/slf4j/jcl104-over-slf4j/1.0-rc1">
+                    <include name="**/*.jar"></include>
+                  </fileset>
+                  <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-simple/1.0-rc1">
+                    <include name="**/*.jar"></include>
+                  </fileset>
+                  <fileset dir="${user.home}/.m2/repository/tomcat">
+                    <include name="**/5.5.9/*.jar"></include>
+                  </fileset>
+                </copy>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jasper-compiler-jdt</artifactId>
+      <version>5.5.12</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-el</groupId>
+      <artifactId>commons-el</artifactId>
+      <version>1.0</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.6.2</version>
+      <scope>runtime</scope>
+    </dependency>
+    <!--
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging-api</artifactId>
+      <version>1.0.4</version>
+      <scope>runtime</scope>
+    </dependency>
+    -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl104-over-slf4j</artifactId>
+      <version>1.0-rc1</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.0-rc1</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jasper-compiler</artifactId>
+      <version>5.5.9</version>
+    </dependency>
+    <dependency>
+      <groupId>ant</groupId>
+      <artifactId>ant</artifactId>
+      <version>1.6.4</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jasper-runtime</artifactId>
+      <version>5.5.9</version>
+    </dependency>
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xmlParserAPIs</artifactId>
+      <version>2.6.2</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+</project>
