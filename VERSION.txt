@@ -1,0 +1,73 @@
+
+    + Moved to SVN
+    + Fixed writer char[] creations
+
+Jetty-6.0.0Beta4
+    + System property support in plugin
+    + Fixed JSP visibility security issue.
+    + Improved jetty-web.xml access to org.mortbay classes.
+    + Jasper 5.5.12
+
+Jetty-6.0.0Beta3
+    + Fixed error in block read
+    + Named dispatch.
+    + Fixed classloader issue with server classes
+
+Jetty-6.0.0Beta2
+    + merged util jar back into jetty jar
+    + Simpler continuation API
+    + loosely coupled with JSP servlet
+    + loosely coupled with SLF4J
+    + Improved reuse of HttpField values and cookies.
+    + Improved buffer return
+
+Jetty-6.0.0Beta1
+    + Servlet 2.5 API
+    + SSL connector
+    + maven2 plugin
+    + shutdown hook
+    + refactored start/stop
+    + Implemented all listeners
+    + Error pages
+    + Virtual hosts
+    + Multiple select sets
+
+Jetty-6.0.0Beta0
+    + Maven 2 build
+    + Dispatcher parameters
+    + UTF-8 encoding for URLs
+    + Fixed blocking read
+
+Jetty-6.0.0APLPA3
+    + Added demo for Continuations
+    + Jasper and associated libraries.
+
+Jetty-6.0.0ALPHA2
+    + Continuations - way cool way to suspend a request and retry later.
+    + Dispatchers
+    + Security
+
+Jetty-6.0.0ALPHA1
+    + Filters
+    + web.xml handling
+
+Jetty-6.0.0ALPHA0
+    * Totally rearchitected and rebuilt, so 10 years of cruft could be removed!
+    * Improved "dependancy injection" and "inversion of control" design of components
+    * Improved "interceptor" design of handlers
+    * Smart split buffer design allows large buffers to only be allocated to active connections. The
+      resulting memory savings allow very large buffers to be used, which increases the chance of efficient
+      asynchronous flushing and of avoiding chunking.
+    * Optional use of NIO Buffering so that efficient direct buffers and memory mapped files can be
+      used.
+    * Optional use of NIO non-blocking scheduling so that threads are not allocated per connection.
+    * Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped
+    * file may be sent as sent is a single operation.
+    - Missing Security
+    - Missing Request Dispatchers
+    - Missing web.xml based configuration
+    - Missing war support
+
+
+
+

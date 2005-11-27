@@ -1,0 +1,88 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty</groupId>
+  <artifactId>project</artifactId>
+  <packaging>pom</packaging>
+  <name>Jetty Servlet Server</name>
+  <version>6.0-SNAPSHOT</version>
+  <url>http://jetty.mortbay.org</url>
+  <mailingLists>
+    <mailingList>
+      <name>Jetty Discuss List</name>
+      <archive>http://lists.sourceforge.net/lists/listinfo/jetty-discuss</archive>
+    </mailingList>
+    <mailingList>
+      <name>Jetty Support List</name>
+      <archive>http://lists.sourceforge.net/lists/listinfo/jetty-support</archive>
+    </mailingList>
+    <mailingList>
+      <name>Jetty Announce List</name>
+      <archive>http://lists.sourceforge.net/lists/listinfo/jetty-announce</archive>
+    </mailingList>
+  </mailingLists>
+  <developers>
+    <developer>
+      <id>gregw</id>
+      <name>Greg Wilkins</name>
+      <email>gregw@apache.org</email>
+      <organization></organization>
+    </developer>
+    <developer>
+      <id>janb</id>
+      <name>Jan Bartel</name>
+      <email>janb@apache.org</email>
+      <organization></organization>
+    </developer>
+    <developer>
+      <id>jules</id>
+      <name>Jules Gosnell</name>
+      <email>jules@apache.org</email>
+      <organization></organization>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>Apache License Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/jetty:JettyExperimental</connection>
+    <developerConnection>scm:cvs:ext:gregwilkins@cvs.sourceforge.net:/cvsroot/jetty:JettyExperimental</developerConnection>
+    <url>http://cvs.sourceforge.net/viewcvs.py/jetty/JettyExperimental/</url>
+  </scm>
+  <organization>
+    <name>Mort Bay Consulting</name>
+    <url>http://www.mortbay.com</url>
+  </organization>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>1.0-alpha-5</version>
+      </extension>
+    </extensions>
+    <defaultGoal>install</defaultGoal>
+  </build>
+  <modules>
+    <module>modules/servlet-api-2.5</module>
+    <module>modules/jetty</module>
+    <module>modules/jsp</module>
+    <module>modules/test</module>
+    <module>modules/start</module>
+    <module>modules/maven</module>
+  </modules>
+  <distributionManagement>
+    <repository>
+      <id>MortBayRelease</id>
+      <name>Mort Bay Maven2 Release Repository</name>
+      <url>scpexe://jetty.mortbay.org/home/ftp/pub/maven2/release</url>
+    </repository>
+    <snapshotRepository>
+      <id>MortBaySnapshot</id>
+      <name>Mort Bay Maven2 Snapshot Repository</name>
+      <url>scpexe://jetty.mortbay.org/home/ftp/pub/maven2/snapshot</url>
+    </snapshotRepository>
+  </distributionManagement>
+</project>
