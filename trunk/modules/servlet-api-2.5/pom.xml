@@ -17,11 +17,10 @@
     </license>
   </licenses>
   <build>
-    <sourceDirectory>src</sourceDirectory>
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>src/main/java</directory>
         <includes>
           <include>**/*.properties</include>
           <include>**/*.dtd</include>

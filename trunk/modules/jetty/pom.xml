@@ -11,14 +11,10 @@
   <version>6.0-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test</testSourceDirectory>
-    <outputDirectory>target/classes</outputDirectory>
-    <testOutputDirectory>target/test-classes</testOutputDirectory>
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>src/main/java</directory>
         <includes>
           <include>org/mortbay/**/*.properties</include>
           <include>org/mortbay/**/*.dtd</include>
@@ -28,7 +24,7 @@
     </resources>
     <testResources>
       <testResource>
-        <directory>test</directory>
+        <directory>src/test/java</directory>
         <includes>
           <include>**/*Test.java</include>
         </includes>
