@@ -126,21 +126,21 @@ public class ResourceTest extends junit.framework.TestCase
             __userURL.toString().endsWith("/modules/jetty"))
         {
             __userURL=new URL(__userURL.toString()+
-                              "test/org/mortbay/resource/");
+                              "src/test/java/org/mortbay/resource/");
             FilePermission perm = (FilePermission)
                 __userURL.openConnection().getPermission();
             __userDir=new File(perm.getName()).getCanonicalPath()+File.separatorChar;
-            __relDir="test/org/mortbay/resource/"
+            __relDir="src/test/java/org/mortbay/resource/"
                 .replace('/',File.separatorChar);
         }
         else
         {
             __userURL=new URL(__userURL.toString()+
-                              "modules/jetty/test/org/mortbay/resource/");
+                              "modules/jetty/src/test/java/org/mortbay/resource/");
             FilePermission perm = (FilePermission)
                 __userURL.openConnection().getPermission();
             __userDir=new File(perm.getName()).getCanonicalPath()+File.separatorChar;
-            __relDir="modules/jetty/test/org/mortbay/resource/"
+            __relDir="modules/jetty/src/test/java/org/mortbay/resource/"
                 .replace('/',File.separatorChar);
         }
         
