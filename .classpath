@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry output="modules/javax-servlet/target/classes" kind="src" path="modules/javax-servlet/src"/>
+	<classpathentry output="modules/servlet-api-2.5/target/classes" kind="src" path="modules/servlet-api-2.5/src"/>
+	<classpathentry output="modules/test/target/classes" kind="src" path="modules/test/src/main/java"/>
 	<classpathentry output="modules/start/target/classes" kind="src" path="modules/start/src"/>
 	<classpathentry kind="src" path="modules/jetty/test"/>
 	<classpathentry output="modules/maven-plugin/target/classes" kind="src" path="modules/maven-plugin/src/main/java"/>
-	<classpathentry output="modules/test-webapp/target/classes" kind="src" path="modules/test-webapp/src/main/java"/>
 	<classpathentry output="modules/jetty/target/classes" kind="src" path="modules/jetty/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/jsp/ant-1.6.4.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/commons-el-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/xercesImpl-2.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/xmlParserAPIs-2.6.2.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0-1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0-1.jar"/>

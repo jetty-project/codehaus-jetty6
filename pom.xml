@@ -48,7 +48,7 @@
   </licenses>
   <scm>
     <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/jetty:JettyExperimental</connection>
-    <developerConnection>scm:cvs:ext:gregwilkins@cvs.sourceforge.net:/cvsroot/jetty:JettyExperimental</developerConnection>
+    <developerConnection>scm:svn+ssh://svn.jetty.codehaus.org/home/projects/jetty/scm/jetty</developerConnection>
     <url>http://cvs.sourceforge.net/viewcvs.py/jetty/JettyExperimental/</url>
   </scm>
   <organization>

@@ -9,11 +9,10 @@
   <name>Jetty start jar</name>
   <version>6.0-SNAPSHOT</version>
   <build>
-    <sourceDirectory>src</sourceDirectory>
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>src/main/java</directory>
         <includes>
           <include>org/mortbay/start/*.config</include>
         </includes>
