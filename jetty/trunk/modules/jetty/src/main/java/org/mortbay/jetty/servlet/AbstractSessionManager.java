@@ -36,11 +36,11 @@ import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.HttpOnlyCookie;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.log.Log;
-import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 

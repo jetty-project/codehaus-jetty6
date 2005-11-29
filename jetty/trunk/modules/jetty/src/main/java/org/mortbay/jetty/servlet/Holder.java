@@ -21,8 +21,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.log.Log;
-import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.util.Loader;
 
 

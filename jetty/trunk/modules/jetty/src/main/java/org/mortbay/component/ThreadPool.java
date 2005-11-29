@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.thread;
+package org.mortbay.component;
 
 /* ------------------------------------------------------------ */
 /** ThreadPool.
