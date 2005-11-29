@@ -69,9 +69,9 @@
     <module>modules/servlet-api-2.5</module>
     <module>modules/jetty</module>
     <module>modules/jsp</module>
-    <module>modules/test</module>
+    <module>modules/test-webapp</module>
     <module>modules/start</module>
-    <module>modules/maven</module>
+    <module>modules/maven-plugin</module>
   </modules>
   <distributionManagement>
     <repository>

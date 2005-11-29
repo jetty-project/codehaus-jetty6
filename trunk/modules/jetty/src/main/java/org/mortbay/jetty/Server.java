@@ -26,13 +26,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.component.BoundedThreadPool;
+import org.mortbay.component.ThreadPool;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
-import org.mortbay.thread.BoundedThreadPool;
-import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.MultiException;
 
 /* ------------------------------------------------------------ */

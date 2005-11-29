@@ -21,7 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.thread.LifeCycle;
+import org.mortbay.component.LifeCycle;
 
 
 public interface Handler extends LifeCycle
