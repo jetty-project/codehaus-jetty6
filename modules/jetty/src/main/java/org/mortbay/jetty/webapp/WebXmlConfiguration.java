@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: WebXmlConfiguration.java,v 1.13 2005/11/16 22:02:45 gregwilkins Exp $
 // Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,7 +46,6 @@ import org.mortbay.util.Loader;
 import org.mortbay.xml.XmlParser;
 /* ------------------------------------------------------------------------------- */
 /**
- * @version $Revision: 1.13 $
  * @author gregw
  */
 public class WebXmlConfiguration implements Configuration

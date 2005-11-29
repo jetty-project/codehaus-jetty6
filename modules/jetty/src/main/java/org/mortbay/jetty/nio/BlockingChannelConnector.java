@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: BlockingChannelConnector.java,v 1.4 2005/11/11 22:55:40 gregwilkins Exp $
 // Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +35,6 @@ import org.mortbay.log.Log;
  * 
  * This connector is best used when there are a few very active connections.
  * 
- * @version $Revision: 1.4 $
  * @author gregw
  */
 public class BlockingChannelConnector extends AbstractConnector

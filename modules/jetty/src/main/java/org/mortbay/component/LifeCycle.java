@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: LifeCycle.java,v 1.1 2005/10/05 14:09:28 janb Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +19,6 @@ package org.mortbay.component;
  * Represents the life cycle interface for an abstract
  * software component. 
  *
- * @version $Id: LifeCycle.java,v 1.1 2005/10/05 14:09:28 janb Exp $
  * @author Greg Wilkins (gregw)
  */
 public interface LifeCycle

@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: StringUtil.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +24,6 @@ import java.io.UnsupportedEncodingException;
  * main aim of the optimizations is to avoid object creation unless
  * absolutely required.
  *
- * @version $Revision: 1.3 $
  * @author Greg Wilkins (gregw)
  */
 public class StringUtil

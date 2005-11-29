@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: XmlConfiguration.java,v 1.6 2005/11/14 17:45:54 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +42,6 @@ import org.xml.sax.SAXException;
  * Configure Objects from XML. This class reads an XML file conforming to the configure.dtd DTD and
  * uses it to configure and object by calling set, put or other methods on the object.
  *
- * @version $Id: XmlConfiguration.java,v 1.6 2005/11/14 17:45:54 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class XmlConfiguration

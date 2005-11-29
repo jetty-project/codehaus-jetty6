@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: FormAuthenticator.java,v 1.2 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 199-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +36,6 @@ import org.mortbay.util.URIUtil;
  * user, which can be distributed.
  * If the realm implements SSORealm, SSO is supported.
  *
- * @version $Id: FormAuthenticator.java,v 1.2 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  * @author dan@greening.name
  */

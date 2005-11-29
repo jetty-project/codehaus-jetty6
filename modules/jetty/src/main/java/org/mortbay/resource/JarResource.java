@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: JarResource.java,v 1.4 2005/11/11 22:55:38 gregwilkins Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");

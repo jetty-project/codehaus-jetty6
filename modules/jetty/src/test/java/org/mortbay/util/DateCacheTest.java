@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: DateCacheTest.java,v 1.3 2005/11/14 17:45:51 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +22,6 @@ import junit.framework.TestSuite;
 
 /* ------------------------------------------------------------ */
 /** Util meta Tests.
- * @version $Id: DateCacheTest.java,v 1.3 2005/11/14 17:45:51 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class DateCacheTest extends junit.framework.TestCase

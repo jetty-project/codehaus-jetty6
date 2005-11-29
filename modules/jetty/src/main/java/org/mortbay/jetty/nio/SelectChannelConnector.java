@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SelectChannelConnector.java,v 1.11 2005/11/24 18:19:08 gregwilkins Exp $
 // Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,7 +60,6 @@ import org.mortbay.util.ajax.Continuation;
  * associated object of the Continuation instance.
  * </p>
  * 
- * @version $Revision: 1.11 $
  * @author gregw
  */
 public class SelectChannelConnector extends AbstractConnector

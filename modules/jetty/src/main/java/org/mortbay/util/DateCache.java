@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: DateCache.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +35,6 @@ import java.util.TimeZone;
  * If consecutive calls are frequently very different, then this
  * may be a little slower than a normal DateFormat.
  *
- * @version $Id: DateCache.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
  * @author Kent Johnson <KJohnson@transparent.com>
  * @author Greg Wilkins (gregw)
  */

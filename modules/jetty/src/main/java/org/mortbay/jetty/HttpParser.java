@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: HttpParser.java,v 1.4 2005/11/14 11:00:31 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +26,6 @@ import org.mortbay.io.View;
 
 /* ------------------------------------------------------------------------------- */
 /**
- * @version $Revision: 1.4 $
  * @author gregw
  */
 public class HttpParser implements HttpTokens

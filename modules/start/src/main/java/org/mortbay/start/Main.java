@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: Main.java,v 1.1 2005/10/05 14:09:23 janb Exp $
 // Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,7 +76,6 @@ import java.util.StringTokenizer;
  * 
  * @author Jan Hlavaty (hlavac@code.cz)
  * @author Greg Wilkins
- * @version $Revision: 1.1 $
  */
 public class Main
 {

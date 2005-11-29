@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SelectBlockingChannelConnector.java,v 1.4 2005/11/11 22:55:40 gregwilkins Exp $
 // Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +42,6 @@ import org.mortbay.log.Log;
  * This connector is best used when there are a very many low activity connections. Even then
  * the SelectChannelConnector may give better performance.
  * 
- * @version $Revision: 1.4 $
  * @author gregw
  */
 public class SelectBlockingChannelConnector extends AbstractConnector

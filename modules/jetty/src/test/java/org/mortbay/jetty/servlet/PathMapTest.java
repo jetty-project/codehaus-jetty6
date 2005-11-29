@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: PathMapTest.java,v 1.1 2005/10/05 14:09:41 janb Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +22,6 @@ import org.mortbay.jetty.HttpParserTest;
 /**
  * Top level test harness.
  * 
- * @version $Id: PathMapTest.java,v 1.1 2005/10/05 14:09:41 janb Exp $
  * @author Greg Wilkins (gregw)
  */
 public class PathMapTest extends TestCase

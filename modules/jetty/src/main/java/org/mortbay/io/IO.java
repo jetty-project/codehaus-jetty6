@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: IO.java,v 1.3 2005/11/11 22:55:41 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");

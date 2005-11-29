@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: Version.java,v 1.1 2005/10/05 14:09:23 janb Exp $
 // Copyright 2002-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");

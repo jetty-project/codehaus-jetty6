@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: XmlParser.java,v 1.5 2005/11/11 22:55:40 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,7 +46,6 @@ import org.xml.sax.helpers.DefaultHandler;
  * By default, the parser is created as a validating parser only if xercers is present. This can be 
  * configured by setting the "org.mortbay.xml.XmlParser.Validating" system property.
  * 
- * @version $Id: XmlParser.java,v 1.5 2005/11/11 22:55:40 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class XmlParser

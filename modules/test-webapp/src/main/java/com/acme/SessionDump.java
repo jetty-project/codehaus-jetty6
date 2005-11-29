@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SessionDump.java,v 1.5 2005/10/30 09:54:52 gregwilkins Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +29,6 @@ import javax.servlet.http.HttpSession;
 /* ------------------------------------------------------------ */
 /** Test Servlet Sessions.
  *
- * @version $Revision: 1.5 $
  * @author Greg Wilkins (gregw)
  */
 public class SessionDump extends HttpServlet

@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: ResourceTest.java,v 1.1 2005/11/19 00:31:34 gregwilkins Exp $
 // Copyright 1997-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");

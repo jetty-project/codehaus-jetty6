@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: ErrorHandler.java,v 1.2 2005/10/21 23:03:40 gregwilkins Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +31,6 @@ import org.mortbay.util.StringUtil;
  * context attributed and called by the HttpResponse.sendError method to write a
  * error page.
  * 
- * @version $Id: ErrorHandler.java,v 1.2 2005/10/21 23:03:40 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class ErrorHandler extends AbstractHandler

@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: URIUtil.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +26,6 @@ import java.io.UnsupportedEncodingException;
  * <P>ISO_8859_1 encoding is used by default for % encoded characters. This
  * may be overridden with the org.mortbay.util.URI.charset system property.
  * @see UrlEncoded
- * @version $Id: URIUtil.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class URIUtil

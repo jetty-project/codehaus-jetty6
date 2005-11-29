@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: B64Code.java,v 1.1 2005/10/05 14:09:14 janb Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +26,6 @@ import org.mortbay.util.StringUtil;
  * <p> Note that in a web context the usual case is to not want
  * linebreaks or other white space in the encoded output.
  *
- * @version $Revision: 1.1 $
  * @author Brett Sealey (bretts)
  * @author Greg Wilkins (gregw)
  */

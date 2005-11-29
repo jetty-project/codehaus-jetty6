@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: NotFoundHandler.java,v 1.3 2005/10/30 09:54:52 gregwilkins Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +33,6 @@ import org.mortbay.util.StringUtil;
 /** Handler for resources that were not found.
  * Implements OPTIONS and TRACE methods for the server.
  * 
- * @version $Id: NotFoundHandler.java,v 1.3 2005/10/30 09:54:52 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class NotFoundHandler extends AbstractHandler

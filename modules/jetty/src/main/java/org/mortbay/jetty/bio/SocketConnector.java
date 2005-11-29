@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SocketConnector.java,v 1.5 2005/11/11 22:55:40 gregwilkins Exp $
 // Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +38,6 @@ import org.mortbay.log.Log;
  * 
  * This Connector should only be used if NIO is not available.
  * 
- * @version $Revision: 1.5 $
  * @author gregw
  */
 public class SocketConnector extends AbstractConnector

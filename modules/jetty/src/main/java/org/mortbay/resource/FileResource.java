@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: FileResource.java,v 1.4 2005/11/19 00:31:34 gregwilkins Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,7 +41,6 @@ import org.mortbay.log.Log;
  * If alias checking is turned on, then aliased resources are
  * treated as if they do not exist, nor can they be created.
  *
- * @version $Revision: 1.4 $
  * @author Greg Wilkins (gregw)
  */
 public class FileResource extends URLResource

@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: MultiException.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +23,6 @@ import java.util.List;
  *
  * Allows multiple exceptions to be thrown as a single exception.
  *
- * @version $Id: MultiException.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class MultiException extends Exception
