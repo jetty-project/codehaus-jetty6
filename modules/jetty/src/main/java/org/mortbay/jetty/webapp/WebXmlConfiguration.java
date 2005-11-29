@@ -662,17 +662,21 @@ public class WebXmlConfiguration implements Configuration
         try
         {
             XmlParser.Node auths = node.get("auth-constraint");
+            
             if (auths != null)
             {
                 scBase.setAuthenticate(true);
                 // auth-constraint
                 Iterator iter = auths.iterator("role-name");
+                Object roles=null;
                 while (iter.hasNext())
                 {
                     String role = ((XmlParser.Node) iter.next()).toString(false, true);
-                    scBase.addRole(role);
+                    roles=LazyList.add(roles,role);
                 }
+                scBase.setRoles(LazyList.toStringArray(roles));
             }
+            
             XmlParser.Node data = node.get("user-data-constraint");
             if (data != null)
             {
