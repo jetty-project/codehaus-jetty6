@@ -133,8 +133,8 @@ public class Password extends Credential
             {
                 byte b1 = b[i];
                 byte b2 = b[s.length()-(i+1)];
-                int i1= (int)b1+(int)b2+127;
-                int i2= (int)b1-(int)b2+127;
+                int i1= 127+b1+b2;
+                int i2= 127+b1-b2;
                 int i0=i1*256+i2;
                 String x=Integer.toString(i0,36);
 

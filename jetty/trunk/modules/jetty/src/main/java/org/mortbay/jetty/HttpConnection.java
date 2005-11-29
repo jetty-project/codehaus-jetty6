@@ -22,8 +22,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.Locale;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -787,14 +785,14 @@ public class HttpConnection
     {
         int _maxChar;
         String _characterEncoding;
-        Writer _writer;
+        Writer _converter;
         ByteArrayOutputStream2 _bytes;
 
 
         public void setCharacterEncoding(String encoding)
         {
             if (_characterEncoding==null || !_characterEncoding.equalsIgnoreCase(encoding))
-                _writer=null;
+                _converter=null;
             _characterEncoding=encoding;
         }
         
@@ -833,16 +831,16 @@ public class HttpConnection
                     _bytes.write(c);
                 else
                 {
-                    if (_writer==null)
-                        _writer=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
+                    if (_converter==null)
+                        _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
                     
                     int i0=i++;
                     if (_maxChar==0)
                         i=end;
                     else while(i<end && s.charAt(i)>=_maxChar) 
                         i++;
-                    _writer.write(s,i0,i-i0);
-                    _writer.flush();
+                    _converter.write(s,i0,i-i0);
+                    _converter.flush();
                 }
             }
             
@@ -877,9 +875,9 @@ public class HttpConnection
                     _bytes.write(c);
                 else
                 {
-                    if (_writer==null)
+                    if (_converter==null)
                     {
-                        _writer=new OutputStreamWriter(_bytes,_characterEncoding);
+                        _converter=new OutputStreamWriter(_bytes,_characterEncoding);
                         System.err.println("writer for "+_characterEncoding);
                     }
                     
@@ -888,8 +886,8 @@ public class HttpConnection
                         i=end;
                     else while(i<end && s[i]>=_maxChar) 
                         i++;
-                    _writer.write(s,i0,i-i0);
-                    _writer.flush();
+                    _converter.write(s,i0,i-i0);
+                    _converter.flush();
                 }
             }
             

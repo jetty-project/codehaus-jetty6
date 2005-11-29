@@ -15,10 +15,7 @@
 
 package org.mortbay.jetty;
 
-import java.util.HashMap;
-
 
 public class RetryRequest extends RuntimeException
 {
-    private HashMap idMap;
 }
