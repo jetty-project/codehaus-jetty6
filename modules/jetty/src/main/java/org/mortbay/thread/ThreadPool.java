@@ -13,7 +13,9 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.component;
+package org.mortbay.thread;
+
+import org.mortbay.component.LifeCycle;
 
 /* ------------------------------------------------------------ */
 /** ThreadPool.

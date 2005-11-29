@@ -21,8 +21,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.mortbay.component.BoundedThreadPool;
 import org.mortbay.log.Log;
+import org.mortbay.thread.BoundedThreadPool;
 
 /* ======================================================================== */
 /** IO Utilities.

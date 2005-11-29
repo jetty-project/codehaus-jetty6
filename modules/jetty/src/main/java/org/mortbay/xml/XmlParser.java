@@ -79,7 +79,8 @@ public class XmlParser
             }
             catch (Exception e)
             {
-                if (Log.isDebugEnabled()) Log.warn("Schema validation may not be supported: ", e);
+                Log.info("Apache schema validation is not supported");
+                Log.ignore(e);
             }
 
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation",validating);

@@ -256,7 +256,7 @@ public class XmlConfiguration
         if (value != null) vClass[0] = value.getClass();
 
         if (Log.isDebugEnabled())
-                Log.debug(obj + "." + name + "(" + vClass[0] + " " + value + ")");
+                Log.debug("XML "+(obj!=null?obj.toString():oClass.getName()) + "." + name + "(" + value + ")");
 
         // Try for trivial match
         try
@@ -399,7 +399,7 @@ public class XmlConfiguration
         String name = node.getAttribute("name");
         Object value = value(obj, node);
         map.put(name, value);
-        if (Log.isDebugEnabled()) Log.debug(obj + ".put(" + name + "+" + value + ")");
+        if (Log.isDebugEnabled()) Log.debug("XML "+obj + ".put(" + name + "," + value + ")");
     }
 
     /* ------------------------------------------------------------ */
@@ -417,7 +417,7 @@ public class XmlConfiguration
 
         String name = node.getAttribute("name");
         String id = node.getAttribute("id");
-        if (Log.isDebugEnabled()) Log.debug("get " + name);
+        if (Log.isDebugEnabled()) Log.debug("XML get " + name);
 
         try
         {
@@ -484,7 +484,7 @@ public class XmlConfiguration
         }
 
         String method = node.getAttribute("name");
-        if (Log.isDebugEnabled()) Log.debug("call " + method);
+        if (Log.isDebugEnabled()) Log.debug("XML call " + method);
 
         // Lets just try all methods for now
         Method[] methods = oClass.getMethods();
@@ -553,7 +553,7 @@ public class XmlConfiguration
             arg[j++] = value(obj, (XmlParser.Node) o);
         }
 
-        if (Log.isDebugEnabled()) Log.debug("new " + oClass);
+        if (Log.isDebugEnabled()) Log.debug("XML new " + oClass);
 
         // Lets just try all constructors for now
         Constructor[] constructors = oClass.getConstructors();
