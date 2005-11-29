@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SecurityHandler.java,v 1.5 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 199-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +36,6 @@ import org.mortbay.util.LazyList;
 /* ------------------------------------------------------------ */
 /** Handler to enforce SecurityConstraints.
  *
- * @version $Id: SecurityHandler.java,v 1.5 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class SecurityHandler extends WrappedHandler

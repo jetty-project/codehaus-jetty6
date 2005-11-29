@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: Dump.java,v 1.6 2005/11/25 21:01:45 gregwilkins Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");

@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: BadResource.java,v 1.1 2005/10/05 14:09:23 janb Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +27,6 @@ import java.net.URL;
  * A Resource that is returned for a bade URL.  Acts as a resource
  * that does not exist and throws appropriate exceptions.
  *
- * @version $Revision: 1.1 $
  * @author Greg Wilkins (gregw)
  */
 class BadResource extends URLResource

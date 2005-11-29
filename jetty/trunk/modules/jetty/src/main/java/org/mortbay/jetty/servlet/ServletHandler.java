@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: ServletHandler.java,v 1.10 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 199-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,7 +60,6 @@ import org.mortbay.util.URIUtil;
  * java.util.Random generator is created.
  * <P>
  * @see org.mortbay.jetty.servlet.WebAppContext
- * @version $Id: ServletHandler.java,v 1.10 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins
  */
 public class ServletHandler extends WrappedHandler

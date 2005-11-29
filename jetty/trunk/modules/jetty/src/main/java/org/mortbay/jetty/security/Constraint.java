@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: Constraint.java,v 1.3 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 200-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +20,6 @@ import java.io.Serializable;
 /* ------------------------------------------------------------ */
 /** Describe an auth and/or data constraint. 
  *
- * @version $Revision: 1.3 $
  * @author Greg Wilkins (gregw)
  */
 public class Constraint implements Cloneable, Serializable

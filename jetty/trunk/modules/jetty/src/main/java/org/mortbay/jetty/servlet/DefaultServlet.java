@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: DefaultServlet.java,v 1.4 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 199-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,7 +91,6 @@ import org.mortbay.util.URIUtil;
  *                                                               
  * The MOVE method is allowed if PUT and DELETE are allowed             
  *
- * @version $Id: DefaultServlet.java,v 1.4 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory

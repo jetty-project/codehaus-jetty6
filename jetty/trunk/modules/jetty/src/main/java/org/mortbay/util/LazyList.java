@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: LazyList.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,7 +47,6 @@ import java.util.ListIterator;
  * An ArrayList of default size is used as the initial LazyList.
  *
  * @see java.util.List
- * @version $Revision: 1.3 $
  * @author Greg Wilkins (gregw)
  */
 public class LazyList

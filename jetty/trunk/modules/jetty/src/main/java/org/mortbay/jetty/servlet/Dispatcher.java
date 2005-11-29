@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: Dispatcher.java,v 1.7 2005/11/16 22:02:44 gregwilkins Exp $
 // Copyright 199-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +40,6 @@ import org.mortbay.util.UrlEncoded;
 /* ------------------------------------------------------------ */
 /** Servlet RequestDispatcher.
  * 
- * @version $Id: Dispatcher.java,v 1.7 2005/11/16 22:02:44 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class Dispatcher implements RequestDispatcher

@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SingletonList.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +24,6 @@ import java.util.NoSuchElementException;
  * element is provided for JDK 1.2 JVMs, which do not provide
  * the Collections.singletonList method.
  *
- * @version $Revision: 1.3 $
  * @author Greg Wilkins (gregw)
  */
 public class SingletonList extends AbstractList

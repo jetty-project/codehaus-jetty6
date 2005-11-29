@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SSORealm.java,v 1.1 2005/10/05 14:09:14 janb Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +27,6 @@ import org.mortbay.jetty.Response;
  * is supported for that realm.
  
  * @see UserRealm
- * @version $Id: SSORealm.java,v 1.1 2005/10/05 14:09:14 janb Exp $
  * @author Greg Wilkins (gregw)
  */
 

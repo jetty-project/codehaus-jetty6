@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: HttpFields.java,v 1.3 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,7 +55,6 @@ import org.mortbay.util.StringUtil;
  * This class is not synchronized as it is expected that modifications will only be performed by a
  * single thread.
  * 
- * @version $Id: HttpFields.java,v 1.3 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class HttpFields

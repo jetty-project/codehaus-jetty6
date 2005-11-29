@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: ServletWriter.java,v 1.4 2005/11/25 21:01:45 gregwilkins Exp $
 // Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +19,6 @@ package org.mortbay.jetty;
 /** Servlet PrintWriter.
  * This writer can be disabled.
  *
- * @version $Revision: 1.4 $
  * @author Greg Wilkins (gregw)
  */
 class ServletWriter

@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SessionManager.java,v 1.3 2005/10/30 11:07:33 gregwilkins Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +29,6 @@ import org.mortbay.component.LifeCycle;
 /** Session Manager.
  * The API required to manage sessions for a servlet context.
  *
- * @version $Id: SessionManager.java,v 1.3 2005/10/30 11:07:33 gregwilkins Exp $
  * @author Greg Wilkins
  */
 public interface SessionManager extends LifeCycle, Serializable

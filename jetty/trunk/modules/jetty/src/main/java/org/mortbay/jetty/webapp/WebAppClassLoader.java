@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: WebAppClassLoader.java,v 1.8 2005/11/15 13:35:06 gregwilkins Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +39,6 @@ import org.mortbay.resource.Resource;
  * parent loader.  Java2 compliant loading, where the parent loader
  * always has priority, can be selected with the setJava2Complient method.
  *
- * @version $Id: WebAppClassLoader.java,v 1.8 2005/11/15 13:35:06 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class WebAppClassLoader extends URLClassLoader

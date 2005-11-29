@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: HashUserRealm.java,v 1.6 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +53,6 @@ import org.mortbay.resource.Resource;
  * SSORealm implementation. 
  *
  * @see Password
- * @version $Id: HashUserRealm.java,v 1.6 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class HashUserRealm implements UserRealm, SSORealm

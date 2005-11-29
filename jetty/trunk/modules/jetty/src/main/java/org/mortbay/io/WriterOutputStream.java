@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: WriterOutputStream.java,v 1.1 2005/10/05 14:09:25 janb Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +24,6 @@ import java.io.Writer;
  * When all you have is a Writer and only an OutputStream will do.
  * Try not to use this as it indicates that your design is a dogs
  * breakfast (JSP made me write it).
- * @version $Id: WriterOutputStream.java,v 1.1 2005/10/05 14:09:25 janb Exp $
  * @author Greg Wilkins (gregw)
  */
 public class WriterOutputStream extends OutputStream
