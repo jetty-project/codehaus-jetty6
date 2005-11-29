@@ -270,17 +270,19 @@ public class SecurityHandler extends WrappedHandler
                     }
                     else
                     {
-                        List scr= sc.getRoles();
-                        if (scr == null || scr.size() == 0)
+                        String[] scr= sc.getRoles();
+                        if (scr == null || scr.length == 0)
                         {
                             forbidden= true;
                             break;
                         }
                         else
                         {
+                            // TODO - this looks inefficient!
                             if (roles != Constraint.ANY_ROLE)
                             {
-                                roles= LazyList.addCollection(roles, scr);
+                                for (int r=scr.length;r-->0;)
+                                    roles= LazyList.add(roles, scr[r]);
                             }
                         }
                     }

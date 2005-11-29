@@ -85,7 +85,7 @@ public class Timeout
         
         while (_head._next!=_head)
         {
-            Task task = (Task)_head._next;
+            Task task = _head._next;
             if (task._timestamp>_expiry)
                 break;
             

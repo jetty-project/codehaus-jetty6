@@ -16,10 +16,7 @@
 package org.mortbay.jetty.security;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 
-import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
 /** Describe an auth and/or data constraint. 
@@ -43,16 +40,12 @@ public class Constraint implements Cloneable, Serializable
     public final static String NONE= "NONE";
     public final static String ANY_ROLE= "*";
 
-
     /* ------------------------------------------------------------ */
     private String _name;
-    private Object _roles;
+    private String[] _roles;
     private int _dataConstraint= DC_UNSET;
     private boolean _anyRole= false;
     private boolean _authenticate= false;
-
-    private transient List _umMethods;
-    private transient List _umRoles;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -68,9 +61,15 @@ public class Constraint implements Cloneable, Serializable
     public Constraint(String name, String role)
     {
         setName(name);
-        addRole(role);
+        _roles=new String[]{role};
     }
 
+    /* ------------------------------------------------------------ */
+    public Object clone() throws CloneNotSupportedException
+    {
+        return super.clone();
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param name 
@@ -81,23 +80,9 @@ public class Constraint implements Cloneable, Serializable
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param role The rolename.  If the rolename is '*' all other
-     * roles are removed and anyRole is set true and subsequent
-     * addRole calls are ignored.
-     * Authenticate is forced true by this call.
-     */
-    public synchronized void addRole(String role)
+    public void setRoles(String[] roles)
     {
-        _authenticate= true;
-        if (ANY_ROLE.equals(role))
-        {
-            _roles= null;
-            _umRoles= null;
-            _anyRole= true;
-        }
-        else if (!_anyRole)
-            _roles= LazyList.add(_roles, role);
+        _roles=roles;
     }
 
     /* ------------------------------------------------------------ */
@@ -113,11 +98,9 @@ public class Constraint implements Cloneable, Serializable
     /** 
      * @return List of roles for this constraint.
      */
-    public List getRoles()
+    public String[] getRoles()
     {
-        if (_umRoles == null && _roles != null)
-            _umRoles= Collections.unmodifiableList(LazyList.getList(_roles));
-        return _umRoles;
+        return _roles;
     }
 
     /* ------------------------------------------------------------ */
@@ -127,7 +110,11 @@ public class Constraint implements Cloneable, Serializable
      */
     public boolean hasRole(String role)
     {
-        return LazyList.contains(_roles, role);
+        if (_roles!=null)
+            for (int i=_roles.length;i-->0;)
+                if (role.equals(_roles[i]))
+                    return true;
+        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -154,7 +141,7 @@ public class Constraint implements Cloneable, Serializable
      */
     public boolean isForbidden()
     {
-        return _authenticate && !_anyRole && LazyList.size(_roles) == 0;
+        return _authenticate && !_anyRole && (_roles==null || _roles.length == 0);
     }
 
     /* ------------------------------------------------------------ */
@@ -184,16 +171,6 @@ public class Constraint implements Cloneable, Serializable
     public boolean hasDataConstraint()
     {
         return _dataConstraint >= DC_NONE;
-    }
-
-    /* ------------------------------------------------------------ */
-    public Object clone()
-	throws CloneNotSupportedException
-    {
-	Constraint sc = (Constraint) super.clone();
-	sc._umMethods=null;
-	sc._umRoles=null;
-	return sc;
     }
 
     /* ------------------------------------------------------------ */

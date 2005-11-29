@@ -305,7 +305,7 @@ public class Dispatcher implements RequestDispatcher
         public void setAttribute(String key, Object value)
         {
 
-            if (_named==null && ((String)key).startsWith("javax.servlet."))
+            if (_named==null && key.startsWith("javax.servlet."))
             {
                 if (key.equals(__FORWARD_PATH_INFO))         _pathInfo=(String)value;
                 else if (key.equals(__FORWARD_REQUEST_URI))  _requestURI=(String)value;
@@ -415,7 +415,7 @@ public class Dispatcher implements RequestDispatcher
         public void setAttribute(String key, Object value)
         {
 
-            if (_named==null && ((String)key).startsWith("javax.servlet."))
+            if (_named==null && key.startsWith("javax.servlet."))
             {
                 if (key.equals(__INCLUDE_PATH_INFO))         _pathInfo=(String)value;
                 else if (key.equals(__INCLUDE_REQUEST_URI))  _requestURI=(String)value;

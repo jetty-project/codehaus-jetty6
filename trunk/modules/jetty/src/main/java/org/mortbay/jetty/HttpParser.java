@@ -68,7 +68,6 @@ public class HttpParser implements HttpTokens
     private Buffer _buffer; // The current buffer in use (either _header or _content)
     private int _headerBufferSize;
     private int _contentBufferSize;
-    private boolean _close = false;
     private boolean _hasContent = false;
     private EventHandler _handler;
     private View _tok0; // Saved token: header name, request method or response version
@@ -392,8 +391,6 @@ public class HttpParser implements HttpTokens
                                     case HttpHeaders.CONNECTION_ORDINAL:
                                         // TODO comma list of connections !!!
                                         value = HttpHeaderValues.CACHE.lookup(value);
-                                        vo=HttpHeaderValues.CACHE.getOrdinal(value);
-                                        _close = (HttpHeaderValues.CLOSE_ORDINAL == vo);
                                         break;
 
                                     case HttpHeaders.TRANSFER_ENCODING_ORDINAL:
@@ -672,7 +669,6 @@ public class HttpParser implements HttpTokens
         _contentLength = UNKNOWN_CONTENT;
         _contentPosition = 0;
         _length = 0;
-        _close = false;
         _hasContent = false;
         _response = false;
         
