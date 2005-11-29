@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.component.Container;
 import org.mortbay.jetty.Handler;
 import org.mortbay.util.MultiException;
 
@@ -57,6 +58,7 @@ public class HandlerCollection extends AbstractHandler implements Handler
      */
     public void setHandlers(Handler[] handlers)
     {
+        Container.update(this, _handlers, handlers, "handler");
         _handlers = handlers;
     }
 

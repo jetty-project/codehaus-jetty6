@@ -34,6 +34,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.component.Container;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
@@ -712,6 +713,7 @@ public class ServletHandler extends WrappedHandler
      */
     public void setFilterMappings(FilterMapping[] filterMappings)
     {
+        Container.update(this,_filterMappings,filterMappings,"filterMapping");
         _filterMappings = filterMappings;
         if (isStarted())
             updateMappings();
@@ -723,6 +725,7 @@ public class ServletHandler extends WrappedHandler
      */
     public synchronized void setFilters(FilterHolder[] holders)
     {
+        Container.update(this,_filterHolders,holders,"filter");
         _filterHolders=holders;
     }
     
@@ -732,6 +735,7 @@ public class ServletHandler extends WrappedHandler
      */
     public void setServletMappings(ServletMapping[] servletMappings)
     {
+        Container.update(this,_servletMappings,servletMappings,"servletMapping");
         _servletMappings = servletMappings;
         if (isStarted())
             updateMappings();
@@ -743,6 +747,7 @@ public class ServletHandler extends WrappedHandler
      */
     public synchronized void setServlets(ServletHolder[] holders)
     {
+        Container.update(this,_servlets,holders,"servlet");
         _servlets=holders;
         updateMappings();
     }

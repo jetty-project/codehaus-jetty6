@@ -25,13 +25,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.component.BoundedThreadPool;
-import org.mortbay.component.ThreadPool;
+import org.mortbay.component.Container;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
+import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.MultiException;
 
 /* ------------------------------------------------------------ */
@@ -94,12 +95,13 @@ public class Server extends HandlerCollection implements Handler
             for (int i=0;i<_connectors.length;i++)
                 _connectors[i].setServer(null);
         }
-        _connectors = connectors;
-        if (_connectors!=null)
+        if (connectors!=null)
         {
-            for (int i=0;i<_connectors.length;i++)
-                _connectors[i].setServer(this);
+            for (int i=0;i<connectors.length;i++)
+                connectors[i].setServer(this);
         }
+        Container.update(this, _connectors, connectors, "connector");
+        _connectors = connectors;
     }
     
     /* ------------------------------------------------------------ */
@@ -117,6 +119,7 @@ public class Server extends HandlerCollection implements Handler
      */
     public void setThreadPool(ThreadPool threadPool)
     {
+        Container.update(this,_threadPool,threadPool, "threadpool");
         _threadPool = threadPool;
     }
     
@@ -200,7 +203,7 @@ public class Server extends HandlerCollection implements Handler
                     NotFoundHandler nfh=new NotFoundHandler();
                     nfh.setServer(this);
                     nfh.start();
-                    _notFoundHandler=nfh;
+                    setNotFoundHandler(nfh);
                 }
                 catch(Exception e)
                 {
@@ -260,7 +263,27 @@ public class Server extends HandlerCollection implements Handler
      */
     public void setUserRealms(UserRealm[] realms)
     {
+        Container.update(this,_realms,realms, "realm");
         _realms=realms;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the notFoundHandler.
+     */
+    public Handler getNotFoundHandler()
+    {
+        return _notFoundHandler;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param notFoundHandler The notFoundHandler to set.
+     */
+    public void setNotFoundHandler(Handler notFoundHandler)
+    {
+        Container.update(this, _notFoundHandler, notFoundHandler, "notFoundHandler");
+        _notFoundHandler = notFoundHandler;
     }
     
     /* ------------------------------------------------------------ */
@@ -390,21 +413,4 @@ public class Server extends HandlerCollection implements Handler
         }
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the notFoundHandler.
-     */
-    public Handler getNotFoundHandler()
-    {
-        return _notFoundHandler;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param notFoundHandler The notFoundHandler to set.
-     */
-    public void setNotFoundHandler(Handler notFoundHandler)
-    {
-        _notFoundHandler = notFoundHandler;
-    }
 }
