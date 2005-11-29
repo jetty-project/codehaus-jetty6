@@ -1,6 +1,6 @@
 //========================================================================
 //$Id: TestListener.java,v 1.1 2005/10/26 10:12:55 gregwilkins Exp $
-//Copyright 2004 Mort Bay Consulting Pty. Ltd.
+//Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
