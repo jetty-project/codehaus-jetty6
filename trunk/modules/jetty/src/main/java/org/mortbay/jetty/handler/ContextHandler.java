@@ -1,6 +1,6 @@
 //========================================================================
 //$Id: ContextHandler.java,v 1.16 2005/11/17 11:19:45 gregwilkins Exp $
-//Copyright 2004 Mort Bay Consulting Pty. Ltd.
+//Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.

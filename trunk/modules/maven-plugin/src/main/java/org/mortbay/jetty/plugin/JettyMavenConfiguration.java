@@ -1,6 +1,6 @@
 //========================================================================
 //$Id: JettyMavenConfiguration.java,v 1.7 2005/11/25 20:58:59 janb Exp $
-//Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
+//Copyright 2000-2005 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
