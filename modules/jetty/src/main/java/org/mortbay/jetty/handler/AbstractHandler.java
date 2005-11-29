@@ -15,9 +15,9 @@
 
 package org.mortbay.jetty.handler;
 
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Handler;
 import org.mortbay.log.Log;
-import org.mortbay.thread.AbstractLifeCycle;
 
 
 /* ------------------------------------------------------------ */
