@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: SslSocketConnector.java,v 1.2 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,7 +49,6 @@ import org.mortbay.resource.Resource;
  * This is heavily based on the work from Court Demas, which in turn is based on the work from Forge
  * Research.
  * 
- * @version $Id: SslSocketConnector.java,v 1.2 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd ACN 003 491 576

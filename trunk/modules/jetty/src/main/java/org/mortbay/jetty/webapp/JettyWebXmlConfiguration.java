@@ -27,7 +27,6 @@ import org.mortbay.xml.XmlConfiguration;
  * Looks for Xmlconfiguration files in WEB-INF.  Searches in order for the first of jetty6-web.xml, jetty-web.xml or web-jetty.xml
  *
  * @author janb
- * @version $Revision: 1.5 $ $Date: 2005/11/19 00:32:42 $
  *
  */
 public class JettyWebXmlConfiguration implements Configuration

@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: ClientCertAuthenticator.java,v 1.2 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 2002-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +32,6 @@ import org.mortbay.log.Log;
  * Each client certificate supplied is tried against the realm using the
  * Principal name as the username and a string representation of the
  * certificate as the credential.
- * @version $Id: ClientCertAuthenticator.java,v 1.2 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class ClientCertAuthenticator implements Authenticator

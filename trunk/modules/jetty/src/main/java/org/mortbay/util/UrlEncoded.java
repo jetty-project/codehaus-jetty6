@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: UrlEncoded.java,v 1.4 2005/11/14 17:45:52 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +34,6 @@ import java.util.Map;
  * get operations are not protected from concurrent updates.
  *
  * @see java.net.URLEncoder
- * @version $Id: UrlEncoded.java,v 1.4 2005/11/14 17:45:52 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class UrlEncoded extends MultiMap

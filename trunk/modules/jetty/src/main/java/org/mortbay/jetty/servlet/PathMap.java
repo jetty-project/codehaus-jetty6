@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: PathMap.java,v 1.1 2005/10/05 14:09:29 janb Exp $
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +53,6 @@ import org.mortbay.util.StringMap;
  * This class is not synchronized for get's.  If concurrent modifications are
  * possible then it should be synchronized at a higher level.
  *
- * @version $Id: PathMap.java,v 1.1 2005/10/05 14:09:29 janb Exp $
  * @author Greg Wilkins (gregw)
  */
 public class PathMap extends HashMap implements Externalizable

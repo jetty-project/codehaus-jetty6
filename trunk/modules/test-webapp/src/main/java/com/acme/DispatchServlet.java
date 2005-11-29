@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: DispatchServlet.java,v 1.3 2005/10/30 11:07:34 gregwilkins Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +32,6 @@ import javax.servlet.http.HttpServletResponseWrapper;
 /* ------------------------------------------------------------ */
 /** Test Servlet RequestDispatcher.
  * 
- * @version $Id: DispatchServlet.java,v 1.3 2005/10/30 11:07:34 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class DispatchServlet extends HttpServlet

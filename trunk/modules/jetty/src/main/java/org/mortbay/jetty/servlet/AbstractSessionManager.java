@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: AbstractSessionManager.java,v 1.5 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 199-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +57,6 @@ import org.mortbay.util.MultiMap;
  * org.mortbay.jetty.servlet.AbstractSessionManager.23Notifications is set to
  * true, the 2.3 servlet spec notification style will be used.
  * <p>
- * @version $Id: AbstractSessionManager.java,v 1.5 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public abstract class AbstractSessionManager extends AbstractLifeCycle implements SessionManager
@@ -882,7 +880,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     /** 
      * Null returning implementation of HttpSessionContext
-     * @version $Id: AbstractSessionManager.java,v 1.5 2005/11/11 22:55:39 gregwilkins Exp $
      * @author Greg Wilkins (gregw)
      */
     public static class NullSessionContext implements HttpSessionContext

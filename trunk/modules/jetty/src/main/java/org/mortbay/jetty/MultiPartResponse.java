@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: MultiPartResponse.java,v 1.1 2005/10/05 14:09:21 janb Exp $
 // Copyright 1996-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +22,6 @@ import org.mortbay.util.StringUtil;
 /* ================================================================ */
 /** Handle a multipart MIME response.
  *
- * @version $Id: MultiPartResponse.java,v 1.1 2005/10/05 14:09:21 janb Exp $
  * @author Greg Wilkins
  * @author Jim Crossley
 */

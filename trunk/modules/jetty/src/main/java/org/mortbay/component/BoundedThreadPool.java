@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: BoundedThreadPool.java,v 1.2 2005/11/20 11:30:38 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,9 +35,8 @@ import java.util.Set;
  * Derived implementations may specialize getJob(timeout) to
  * obtain jobs from other sources without queing overheads.
  *
- * @version $Id: BoundedThreadPool.java,v 1.2 2005/11/20 11:30:38 gregwilkins Exp $
- * @author Juancarlo A�ez <juancarlo@modelistica.com>
  * @author Greg Wilkins <gregw@mortbay.com>
+ * @author Juancarlo Anez <juancarlo@modelistica.com>
  */
 public class BoundedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
 {

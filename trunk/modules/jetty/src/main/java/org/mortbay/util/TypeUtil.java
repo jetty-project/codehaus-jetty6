@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: TypeUtil.java,v 1.3 2005/11/14 17:45:52 gregwilkins Exp $
 // Copyright 2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +28,6 @@ import java.util.HashMap;
  * string representations.
  *
  * @since Jetty 4.1
- * @version $Revision: 1.3 $
  * @author Greg Wilkins (gregw)
  */
 public class TypeUtil

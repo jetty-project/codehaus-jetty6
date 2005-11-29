@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: Password.java,v 1.3 2005/11/11 22:55:39 gregwilkins Exp $
 // Copyright 1998-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,7 +41,6 @@ import org.mortbay.log.Log;
  * than recovered.  Note that it is not strong security - specially if
  * simple passwords are used.
  * 
- * @version $Id: Password.java,v 1.3 2005/11/11 22:55:39 gregwilkins Exp $
  * @author Greg Wilkins (gregw)
  */
 public class Password extends Credential

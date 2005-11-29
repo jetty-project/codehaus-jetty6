@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id: ServletSSL.java,v 1.1 2005/10/28 12:18:06 gregwilkins Exp $
 // Copyright 2001-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +24,6 @@ package org.mortbay.jetty.security;
  * <p>
  * Used by the SSL listener classes.
  * 
- * @version $Id: ServletSSL.java,v 1.1 2005/10/28 12:18:06 gregwilkins Exp $
  * @author Brett Sealey
  */
 public class ServletSSL
