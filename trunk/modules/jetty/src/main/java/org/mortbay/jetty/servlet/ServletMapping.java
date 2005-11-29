@@ -77,6 +77,6 @@ public class ServletMapping
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "[S="+_servletName+","+(_pathSpecs==null?"[]":Arrays.asList(_pathSpecs).toString())+"]"; 
+        return "(S="+_servletName+","+(_pathSpecs==null?"[]":Arrays.asList(_pathSpecs).toString())+")"; 
     }
 }

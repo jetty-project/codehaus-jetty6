@@ -12,13 +12,15 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.component;
+package org.mortbay.thread;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import org.mortbay.component.AbstractLifeCycle;
 
 /* ------------------------------------------------------------ */
 /** A pool of threads.

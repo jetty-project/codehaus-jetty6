@@ -6,6 +6,7 @@
 <!-- Configure the Jetty Server                                      -->
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.Server">
+    <Call class="org.mortbay.component.ContainmentMap" name="enable"/>
  
     <Set name="ThreadPool">
       <New class="org.mortbay.thread.BoundedThreadPool">
@@ -159,6 +160,7 @@
     <!-- Start the server                                            -->
     <!-- =========================================================== -->
     <Set name="stopAtShutdown">true</Set>
+    <Call class="org.mortbay.component.ContainmentMap" name="dump"/>
     <Call name="start"/>
 
 </Configure>
