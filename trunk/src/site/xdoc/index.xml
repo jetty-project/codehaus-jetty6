@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<document>
+  <properties>
+    <title>jetty6 WebServer</title>
+    <head>
+     <META http-equiv="Cache-Control" content="no-cache,no-store"/>
+    </head>
+  </properties>
+  <body>
+    <section>
+     <div class="study">
+       <img src="http://jetty.mortbay.org/jetty/images/casestudy.gif" />
+       <h2><a href="http://www.mortbay.com/MB/log/gregw/?permalink=ScalingConnections.html">Scaling Connections for AJAX with Jetty 6</a></h2>
+       <div>
+Jetty 6 employs a number of innovative strategies to ensure that only the resources that are actually required are assigned to a connection and only for the duration of they are needed. This careful resource management gives Jetty an architecture designed to scale to meet the needs of AJAX applications.
+      </div>
+       <a href="http://www.mortbay.com/MB/log/gregw/?permalink=ScalingConnections.html">Read more ...</a>
+    </div>
+<div class="siteheader">
+jetty6
+</div>
+
+<div class="summary">
+<span>jetty6</span> is a new implementation of the popular 
+<a href="http://jetty.mortbay.org/jetty">Jetty</a> HTTP Server and Servlet Container.  
+The idea behind jetty6 is to build on over 10 years experience creating and maintaining
+Jetty to produce a new container. With jetty6, we've concentrated
+on keeping the footprint to a minimum by reducing the dependencies on 3rd party libraries and
+by being rigorous with clean code, making it even easier to embed Jetty.
+
+<P>Our other paramount concerns are efficiency and scalability. For example, jetty6 comes with the same set of 
+connector types as standard Jetty, but also now includes connectors based on Sun's non-blocking IO 
+<a href="http://java.sun.com/j2se/1.4.2/docs/api/java/nio/channels/package-summary.html">(NIO)</a> package.
+</P>
+<P>
+Scalability is a particlarly important concern with the advent of <a href="http://en.wikipedia.org/wiki/AJAX">AJAX</a>. In the AJAX model, clients
+continuously poll the server, which often delays processing the request until there is data to 
+send or a timeout happens. This means that server threads are being held open leading to scalability
+problems for heavily loaded sites. jetty6's response is to offer a feature called <a href="/jetty6/jetty-util/javadoc/apidocs/index.html">Continuations</a>
+allowing a request to be suspended (and therefore the thread freed) and resumed later.
+</P>
+Here's a summary of the new features of jetty6:
+<div class="feature">
+<div class="featureitem">Codebase completely rearchitected and slimlined</div>
+<div class="featureitem"><a href="/jetty6/jetty-util/javadoc/apidocs/index.html">Continuations API</a> for efficient AJAX polling</div>
+<div class="featureitem">Improved dependancy injection and inversion of control design of components</div>
+<div class="featureitem">Improved interceptor design of handlers</div>
+<div class="featureitem">Smart split buffer design for efficient asynchronous flushing and avoiding chunking.</div>
+<div class="featureitem">Optional use of NIO Buffering so that efficient direct buffers and memory mapped files can be used.</div>
+<div class="featureitem">Optional use of NIO non-blocking scheduling so that threads are not allocated per connection.</div>
+<div class="featureitem">Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be sent as sent is a single operation.</div>
+</div>
+</div>
+
+
+  </section>
+  </body>
+</document>

@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>servlet-api-2.5</artifactId>
-  <name>Servlet API</name>
+  <name>Servlet Specification 2.5 API</name>
   <version>6.0-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
   <licenses>
@@ -44,6 +44,13 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <destDir>../../target/site/${project.artifactId}/javadoc</destDir>
+          <stylesheetfile>${basedir}/../../src/resources/javadoc.css</stylesheetfile>
+        </configuration>
       </plugin>
     </plugins>
   </build>
