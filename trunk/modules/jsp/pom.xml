@@ -2,14 +2,14 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta5</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jsp</artifactId>
   <packaging>pom</packaging>
   <name>Jasper JSP dependancies</name>
-  <version>5.5.12-SNAPSHOT</version>
+  <version>6.0.0beta5</version>
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
@@ -59,13 +59,13 @@
       <artifactId>jasper-compiler-jdt</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-el</groupId>
-      <artifactId>commons-el</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xercesImpl</artifactId>
+      <groupId>commons-el</groupId>
+      <artifactId>commons-el</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -74,8 +74,8 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
