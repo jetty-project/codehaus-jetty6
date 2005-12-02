@@ -132,7 +132,7 @@ public class Server extends HandlerCollection implements Handler
         {
             BoundedThreadPool btp=new BoundedThreadPool();
             btp.setQueue(true);
-            _threadPool=btp;
+            setThreadPool(btp);
         }
         
         try{_threadPool.start();} catch(Throwable e) { mex.add(e);}

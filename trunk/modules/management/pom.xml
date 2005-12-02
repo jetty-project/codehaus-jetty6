@@ -7,31 +7,27 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
-  <artifactId>jetty</artifactId>
-  <name>Jetty Server</name>
+  <artifactId>jetty-management</artifactId>
+  <packaging>jar</packaging>
+  <name>Jetty Management</name>
   <version>6.0-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
-        <directory>src/main/java</directory>
+        <directory>src/main/resources</directory>
         <includes>
-          <include>org/mortbay/**/*.properties</include>
-          <include>org/mortbay/**/*.dtd</include>
-          <include>org/mortbay/**/*.xml</include>
+          <include>**</include>
         </includes>
       </resource>
     </resources>
     <testResources>
       <testResource>
-        <directory>src/test/java</directory>
+        <directory>src/test/resources</directory>
         <includes>
-          <include>**/*Test.java</include>
+          <include>**</include>
         </includes>
-        <excludes>
-          <exclude>**/Abstract*.java</exclude>
-        </excludes>
       </testResource>
     </testResources>
     <plugins>
@@ -45,30 +41,36 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}.${project.packaging}"></copy>
+                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/management/${project.artifactId}.${project.packaging}"></copy>
+                <copy todir="../../lib/management" flatten="true">
+                  <fileset dir="${user.home}/.m2/repository/mx4j/mx4j/3.0.1">
+                    <include name="**/*.jar"></include>
+                  </fileset>
+		</copy>
               </tasks>
             </configuration>
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-         <configuration>
-           <destDir>../../target/site/${project.artifactId}/javadoc</destDir>
-           <stylesheetfile>${basedir}/../../src/resources/javadoc.css</stylesheetfile>
-         </configuration>
-      </plugin>
     </plugins>
   </build>
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>servlet-api-2.5</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>mx4j</groupId>
+      <artifactId>mx4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

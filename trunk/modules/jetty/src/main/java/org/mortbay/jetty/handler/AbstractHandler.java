@@ -27,6 +27,8 @@ import org.mortbay.log.Log;
  */
 public abstract class AbstractHandler extends AbstractLifeCycle implements Handler
 {
+    protected String _string;
+    
     /* ------------------------------------------------------------ */
     /**
      * 
@@ -53,4 +55,14 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
         Log.debug("stopping {}",this);
     }
 
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        if (_string==null)
+        {
+            _string=super.toString();
+            _string=_string.substring(_string.lastIndexOf('.')+1);
+        }
+        return _string;
+    }
 }
