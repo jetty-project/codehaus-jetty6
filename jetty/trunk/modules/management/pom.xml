@@ -2,15 +2,14 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta5</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-management</artifactId>
-  <packaging>jar</packaging>
   <name>Jetty Management</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta5</version>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -46,7 +45,7 @@
                   <fileset dir="${user.home}/.m2/repository/mx4j/mx4j/3.0.1">
                     <include name="**/*.jar"></include>
                   </fileset>
-		</copy>
+                </copy>
               </tasks>
             </configuration>
           </execution>
@@ -55,6 +54,11 @@
     </plugins>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
@@ -66,11 +70,6 @@
     <dependency>
       <groupId>mx4j</groupId>
       <artifactId>mx4j</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
