@@ -80,6 +80,9 @@ public class MultiPartFilter implements Filter
         }
         BufferedInputStream in = new BufferedInputStream(request.getInputStream());
         String content_type=srequest.getContentType();
+        
+        // TODO - handle encodings
+        
         String boundary="--"+value(content_type.substring(content_type.indexOf("boundary=")));
         byte[] byteBoundary=(boundary+"--").getBytes(StringUtil.__ISO_8859_1);
         MultiMap params = new MultiMap();
