@@ -209,8 +209,12 @@ public class Dispatcher implements RequestDispatcher
                             for (int i=0;i<LazyList.size(values);i++)
                                 parameters.add(name, LazyList.get(values, i));
                         }
-                        query=UrlEncoded.encode(parameters,null,false);
+                        
                     }
+                    
+                    if (old_query!=null && old_query.length()>0)
+                        query=query+"&"+old_query;
+                    
                     base_request.setParameters(parameters);
                     base_request.setQueryString(query);
                 }

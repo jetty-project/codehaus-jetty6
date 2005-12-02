@@ -19,7 +19,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,15 +45,10 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.modelmbean.ModelMBean;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import javax.management.modelmbean.ModelMBeanInfoSupport;
-import javax.management.modelmbean.ModelMBeanNotificationInfo;
-import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
-import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
 /* ------------------------------------------------------------ */
@@ -288,15 +282,15 @@ public class ObjectMBean implements DynamicMBean
                 {
                     ObjectName[] on = new ObjectName[Array.getLength(r)];
                     for (int i=0;i<on.length;i++)
-                        on[i]=MBeanContainer.findMBean(Array.get(r, i)).getObjectName();
+                        on[i]=MBeanContainer.findMBean(Array.get(r, i));
                     r=on;
                 }
                 else
                 {
-                    ObjectInstance mbean = MBeanContainer.findMBean(r);
+                    ObjectName mbean = MBeanContainer.findMBean(r);
                     if (mbean==null)
                         throw new IllegalStateException("cannot convert to ObjectName: "+r);
-                    r=mbean.getObjectName();
+                    r=mbean;
                 }
             }
             return r;
