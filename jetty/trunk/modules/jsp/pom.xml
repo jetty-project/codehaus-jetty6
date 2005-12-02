@@ -3,6 +3,7 @@
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
     <version>6.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jsp</artifactId>
@@ -56,61 +57,43 @@
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-compiler-jdt</artifactId>
-      <version>5.5.12</version>
     </dependency>
     <dependency>
       <groupId>commons-el</groupId>
       <artifactId>commons-el</artifactId>
-      <version>1.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
-      <version>2.6.2</version>
       <scope>runtime</scope>
     </dependency>
-    <!--
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging-api</artifactId>
-      <version>1.0.4</version>
-      <scope>runtime</scope>
-    </dependency>
-    -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl104-over-slf4j</artifactId>
-      <version>1.0-rc1</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.0-rc1</version>
       <scope>runtime</scope>
     </dependency>
-
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-compiler</artifactId>
-      <version>5.5.9</version>
     </dependency>
     <dependency>
       <groupId>ant</groupId>
       <artifactId>ant</artifactId>
-      <version>1.6.4</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-runtime</artifactId>
-      <version>5.5.9</version>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xmlParserAPIs</artifactId>
-      <version>2.6.2</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>

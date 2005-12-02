@@ -14,6 +14,11 @@
 
 package org.mortbay.util;
 
+import java.net.URL;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
 /* ------------------------------------------------------------ */
 /** ClassLoader Helper.
  * This helper class allows classes to be loaded either from the
@@ -32,37 +37,72 @@ package org.mortbay.util;
  */
 public class Loader
 {
+
+    /* ------------------------------------------------------------ */
+    public static URL getResource(Class loadClass,String name, boolean checkParents)
+        throws ClassNotFoundException
+    {
+        URL url =null;
+        ClassLoader loader=Thread.currentThread().getContextClassLoader();
+        while (url==null && loader!=null )
+        {
+            url=loader.getResource(name); 
+            loader=(url==null&&checkParents)?loader.getParent():null;
+        }      
+        
+        loader=loadClass==null?null:loadClass.getClassLoader();
+        while (url==null && loader!=null )
+        {
+            url=loader.getResource(name); 
+            loader=(url==null&&checkParents)?loader.getParent():null;
+        }       
+
+        if (url==null)
+        {
+            url=ClassLoader.getSystemResource(name);
+        }   
+
+        return url;
+    }
+
     /* ------------------------------------------------------------ */
     public static Class loadClass(Class loadClass,String name)
         throws ClassNotFoundException
     {
-        ClassLoader loader=Thread.currentThread().getContextClassLoader();
-        if (loader==null)
-            loader=loadClass.getClassLoader();
-        if (loader==null)
-            return Class.forName(name);
-        return loader.loadClass(name);
+        return loadClass(loadClass,name,false);
     }
-
+    
     /* ------------------------------------------------------------ */
-    public static Class findAndLoadClass(Class loadClass,String name)
+    /** Load a class.
+     * 
+     * @param loadClass
+     * @param name
+     * @param checkParents If true, try loading directly from parent classloaders.
+     * @return Class
+     * @throws ClassNotFoundException
+     */
+    public static Class loadClass(Class loadClass,String name,boolean checkParents)
         throws ClassNotFoundException
     {
         ClassNotFoundException ex=null;
         Class c =null;
         ClassLoader loader=Thread.currentThread().getContextClassLoader();
-        if (loader!=null)
+        while (c==null && loader!=null )
         {
-            try { c=loadClass(loader,name); }
-            catch (ClassNotFoundException e) {ex=e;}
-        }
-        
-        if (c==null && loadClass!=null && loadClass.getClassLoader()!=null)
-        {
-            try { c=loadClass(loader,name); }
+            try { c=loader.loadClass(name); }
             catch (ClassNotFoundException e) {if(ex==null)ex=e;}
+            loader=(c==null&&checkParents)?loader.getParent():null;
+        }      
+        
+        loader=loadClass==null?null:loadClass.getClassLoader();
+        while (c==null && loader!=null )
+        {
+            try { c=loader.loadClass(name); }
+            catch (ClassNotFoundException e) {if(ex==null)ex=e;}
+            loader=(c==null&&checkParents)?loader.getParent():null;
         }       
 
+        if (c==null)
         {
             try { c=Class.forName(name); }
             catch (ClassNotFoundException e) {if(ex==null)ex=e;}
@@ -72,28 +112,39 @@ public class Loader
             return c;
         throw ex;
     }
-    
 
-    /* ------------------------------------------------------------ */
-    public static Class loadClass(ClassLoader loader,String name)
-        throws ClassNotFoundException
+    public static ResourceBundle getResourceBundle(Class loadClass,String name,boolean checkParents, Locale locale)
+        throws MissingResourceException
     {
-        ClassNotFoundException ex=null;
-        Class c =null;
-        
-        try { c=loader.loadClass(name); }
-        catch (ClassNotFoundException e) {ex=e;}
-        
-        if (c==null && loader.getParent()!=null)
+        MissingResourceException ex=null;
+        ResourceBundle bundle =null;
+        ClassLoader loader=Thread.currentThread().getContextClassLoader();
+        while (bundle==null && loader!=null )
         {
-            try {loadClass(loader.getParent(),name);}
-            catch (ClassNotFoundException e) {if (ex==null) ex=e;}   
-        }
+            try { bundle=ResourceBundle.getBundle(name, locale, loader); }
+            catch (MissingResourceException e) {if(ex==null)ex=e;}
+            loader=(bundle==null&&checkParents)?loader.getParent():null;
+        }      
+        
+        loader=loadClass==null?null:loadClass.getClassLoader();
+        while (bundle==null && loader!=null )
+        {
+            try { bundle=ResourceBundle.getBundle(name, locale, loader); }
+            catch (MissingResourceException e) {if(ex==null)ex=e;}
+            loader=(bundle==null&&checkParents)?loader.getParent():null;
+        }       
 
-        if (c!=null)
-            return c;
+        if (bundle==null)
+        {
+            try { bundle=ResourceBundle.getBundle(name, locale); }
+            catch (MissingResourceException e) {if(ex==null)ex=e;}
+        }   
+
+        if (bundle!=null)
+            return bundle;
         throw ex;
     }
     
+
 }
 

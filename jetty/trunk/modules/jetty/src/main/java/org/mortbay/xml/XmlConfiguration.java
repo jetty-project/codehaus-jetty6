@@ -185,7 +185,7 @@ public class XmlConfiguration
         String className = node.getAttribute("class");
         if (className == null) return null;
 
-        return Loader.findAndLoadClass(XmlConfiguration.class, className);
+        return Loader.loadClass(XmlConfiguration.class, className,true);
     }
 
     /* ------------------------------------------------------------ */
@@ -631,7 +631,7 @@ public class XmlConfiguration
                 else if ("InetAddress".equals(type))
                     aClass = java.net.InetAddress.class;
                 else
-                    aClass = Loader.findAndLoadClass(XmlConfiguration.class, type);
+                    aClass = Loader.loadClass(XmlConfiguration.class, type,true);
             }
         }
 

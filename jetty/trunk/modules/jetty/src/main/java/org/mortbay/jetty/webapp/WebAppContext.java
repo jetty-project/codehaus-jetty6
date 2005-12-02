@@ -64,7 +64,7 @@ public class WebAppContext extends ContextHandler
     private ServletHandler _servletHandler;
     private SessionHandler _sessionHandler;
     private String[] _systemClasses = new String[]{"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
-    private String[] _serverClasses = new String[]{"-org.mortbay.servlet.","-org.mortbay.jetty.servlet.DefaultServlet","-org.mortbay.util.","org.mortbay."};
+    private String[] _serverClasses = new String[]{"-org.mortbay.servlet.","-org.mortbay.jetty.servlet.DefaultServlet","-org.mortbay.util.","-org.mortbay.log.","org.mortbay."};
     private File _tmpDir;
     private String _war;
 
@@ -162,14 +162,13 @@ public class WebAppContext extends ContextHandler
     /* ------------------------------------------------------------ */
     public WebAppContext()
     {
+        _securityHandler = new SecurityHandler();
+        _sessionHandler = new SessionHandler();
         _servletHandler = new ServletHandler();
         
-        _sessionHandler = new SessionHandler();
-        _sessionHandler.setHandler(_servletHandler);
-        
-        _securityHandler = new SecurityHandler();
-        _securityHandler.setHandler(_sessionHandler);
         setHandler(_securityHandler);
+        _securityHandler.setHandler(_sessionHandler);
+        _sessionHandler.setHandler(_servletHandler);
         
         setErrorHandler(new WebAppErrorHandler());
     }

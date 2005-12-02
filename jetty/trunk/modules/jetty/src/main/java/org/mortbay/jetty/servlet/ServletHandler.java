@@ -38,6 +38,7 @@ import org.mortbay.component.Container;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
+import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.log.Log;
@@ -63,7 +64,7 @@ import org.mortbay.util.URIUtil;
  * @see org.mortbay.jetty.servlet.WebAppContext
  * @author Greg Wilkins
  */
-public class ServletHandler extends WrappedHandler
+public class ServletHandler extends AbstractHandler
 {
     private static String __AllowString="GET, HEAD, POST, OPTIONS, TRACE";
 
@@ -76,12 +77,7 @@ public class ServletHandler extends WrappedHandler
     public static final String __J_S_ERROR_REQUEST_URI="javax.servlet.error.request_uri";
     public static final String __J_S_ERROR_SERVLET_NAME="javax.servlet.error.servlet_name";
     public static final String __J_S_ERROR_STATUS_CODE="javax.servlet.error.status_code";
-    
-    /* ------------------------------------------------------------ */
-    private static final boolean __Slosh2Slash=File.separatorChar=='\\';
-
-    
-    
+        
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
     private ContextHandler.Context _servletContext;

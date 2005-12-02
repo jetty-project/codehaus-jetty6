@@ -68,11 +68,113 @@
   <modules>
     <module>modules/servlet-api-2.5</module>
     <module>modules/jetty</module>
+    <module>modules/management</module>
     <module>modules/jsp</module>
     <module>modules/test-webapp</module>
     <module>modules/start</module>
     <module>modules/maven-plugin</module>
   </modules>
+
+  <dependencyManagement>
+    <dependencies>
+
+      <dependency>
+	<groupId>org.mortbay.jetty</groupId>
+	<artifactId>servlet-api-2.5</artifactId>
+	<version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+	<groupId>org.mortbay.jetty</groupId>
+	<artifactId>jetty</artifactId>
+	<version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+	<groupId>org.mortbay.jetty</groupId>
+	<artifactId>jetty-management</artifactId>
+	<version>${project.version}</version>
+      </dependency>
+
+      <!-- dependencies below are for the plugin -->
+      <dependency>
+	<groupId>org.apache.maven</groupId>
+	<artifactId>maven-plugin-tools-api</artifactId>
+	<version>2.0</version>
+      </dependency>
+
+      <!-- all dependencies below are optional -->
+      <dependency>
+	<groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>3.8.1</version>
+      </dependency>
+
+      <dependency>
+	<groupId>org.slf4j</groupId>
+	<artifactId>jcl104-over-slf4j</artifactId>
+	<version>1.0-rc1</version>
+      </dependency>
+
+      <dependency>
+	<groupId>org.slf4j</groupId>
+	<artifactId>slf4j-simple</artifactId>
+	<version>1.0-rc1</version>
+      </dependency>
+
+      <dependency>
+	<groupId>mx4j</groupId>
+	<artifactId>mx4j</artifactId>
+	<version>3.0.1</version>
+      </dependency>
+
+
+      <!-- all dependencies below are optional for JSPs -->
+
+      <dependency>
+	<groupId>tomcat</groupId>
+	<artifactId>jasper-compiler</artifactId>
+	<version>5.5.12</version>
+      </dependency>
+
+      <dependency>
+	<groupId>tomcat</groupId>
+	<artifactId>jasper-compiler-jdt</artifactId>
+	<version>5.5.12</version>
+      </dependency>
+
+      <dependency>
+	<groupId>tomcat</groupId>
+	<artifactId>jasper-runtime</artifactId>
+	<version>5.5.12</version>
+      </dependency>
+
+      <dependency>
+	<groupId>xerces</groupId>
+	<artifactId>xmlParserAPIs</artifactId>
+	<version>2.6.2</version>
+      </dependency>
+
+      <dependency>
+	<groupId>xerces</groupId>
+	<artifactId>xercesImpl</artifactId>
+	<version>2.6.2</version>
+      </dependency>
+
+      <dependency>
+	<groupId>commons-el</groupId>
+	<artifactId>commons-el</artifactId>
+	<version>1.0</version>
+      </dependency>
+
+      <dependency>
+	<groupId>ant</groupId>
+	<artifactId>ant</artifactId>
+	<version>1.6.4</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <distributionManagement>
     <repository>
       <id>MortBayRelease</id>
