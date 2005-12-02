@@ -186,6 +186,11 @@ public class Container
         {
             return _relationship;
         }
+        
+        public String toString()
+        {
+            return _parent+"---"+_relationship+"-->"+_child;
+        }
     }
     
     /* ------------------------------------------------------------ */

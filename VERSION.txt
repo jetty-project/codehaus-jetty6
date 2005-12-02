@@ -1,6 +1,8 @@
 
+Jetty-6.0.0Beta5
     + Moved to SVN
     + Fixed writer char[] creations
+    + Added management module for mbeans
 
 Jetty-6.0.0Beta4
     + System property support in plugin

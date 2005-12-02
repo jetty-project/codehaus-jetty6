@@ -6,8 +6,18 @@
 <!-- Configure the Jetty Server                                      -->
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.Server">
-    <Call class="org.mortbay.component.ContainmentMap" name="enable"/>
+
+    <!-- =========================================================== -->
+    <!-- Initialize management framework                             -->
+    <!-- =========================================================== -->
+    <Call class="org.mortbay.management.MBeanContainer" name="enable">
+      <Arg>org.mortbay.jetty</Arg>
+      <Arg type="int">8082</Arg>
+    </Call>
  
+    <!-- =========================================================== -->
+    <!-- Server Thread Pool                                          -->
+    <!-- =========================================================== -->
     <Set name="ThreadPool">
       <New class="org.mortbay.thread.BoundedThreadPool">
         <Set name="minThreads">10</Set>
@@ -160,7 +170,6 @@
     <!-- Start the server                                            -->
     <!-- =========================================================== -->
     <Set name="stopAtShutdown">true</Set>
-    <Call class="org.mortbay.component.ContainmentMap" name="dump"/>
     <Call name="start"/>
 
 </Configure>
