@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Servlet Server</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta5</version>
   <url>http://jetty.mortbay.org</url>
   <mailingLists>
     <mailingList>
@@ -77,13 +77,6 @@
   <reporting>
     <plugins>
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-release-plugin</artifactId>
-	<configuration>
-	  <tagBase>svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags</tagBase>
-	</configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <reportSets>
           <reportSet>
@@ -95,6 +88,12 @@
             </reports>
           </reportSet>
         </reportSets>
+      </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <tagBase>svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags</tagBase>
+        </configuration>
       </plugin>
     </plugins>
   </reporting>
@@ -190,4 +189,3 @@
     </snapshotRepository>
   </distributionManagement>
 </project>
-
