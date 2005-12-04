@@ -47,7 +47,7 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:http://snv.codehaus.org/jetty</connection>
+    <connection>scm:svn:http://svn.codehaus.org/jetty</connection>
     <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty</developerConnection>
     <url>http://svn.jetty.codehaus.org/jetty/</url>
   </scm>

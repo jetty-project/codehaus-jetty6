@@ -11,11 +11,11 @@
     <!-- Initialize management framework                             -->
     <!-- =========================================================== -->
     <!--
-    -->
     <Call class="org.mortbay.management.MBeanContainer" name="enable">
       <Arg>org.mortbay.jetty</Arg>
       <Arg type="int">8082</Arg>
     </Call>
+    -->
  
 
     <!-- =========================================================== -->
