@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+
+<project name="Maven Jetty6 Plugin">
+  <bannerLeft>
+    <name>Maven Jetty6 Plugin</name>
+    <src>http://jetty.mortbay.org/jetty/images/jetty_banner_still.gif</src>
+    <href>http://jetty.mortbay.org/jetty6</href>
+  </bannerLeft>
+  <bannerRight>
+    <src>http://maven.apache.org/images/maven-small.gif</src>
+  </bannerRight>
+  <body>
+    <links>
+      <item name="Maven2" href="http://maven.apache.org/maven2/"/>
+      <item name="Jetty6" href="http://jetty.mortbay.org/jetty6"/>
+    </links>
+
+    <menu name="Overview">
+      <item name="Installation Guide" href="install.html"/>
+      <item name="Configuration Guide" href="howto.html"/>
+      <item name="Parameter Reference" href="run-mojo.html"/>
+    </menu>
+    ${reports}
+  </body>
+</project>
