@@ -68,6 +68,8 @@ public class HttpConnection
 
     int _include;
     
+    private Object _associatedObject; // associated object
+    
     private transient Buffer _content;
     private transient int _connection = UNKNOWN;
     private transient int _expect = UNKNOWN;
@@ -95,13 +97,24 @@ public class HttpConnection
         _generator = new HttpGenerator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
         _server = server;
     }
+    
 
-    /*
-     * @see org.mortbay.jetty.HttpParser.EventHandler#foundContent(int, org.mortbay.io.Buffer)
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the associatedObject.
      */
-    public void content(int index, Buffer ref)
+    public Object getAssociatedObject()
     {
-        _content = ref;
+        return _associatedObject;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param associatedObject The associatedObject to set.
+     */
+    public void setAssociatedObject(Object associatedObject)
+    {
+        _associatedObject = associatedObject;
     }
 
     /* ------------------------------------------------------------ */
@@ -898,7 +911,5 @@ public class HttpConnection
 
     }
 
-    
-    
 
 }
