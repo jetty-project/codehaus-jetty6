@@ -17,6 +17,7 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,6 +36,20 @@ public interface Handler extends LifeCycle
     public static final int ALL=15;
     
     
+    /* ------------------------------------------------------------ */
+    /** Generic Jetty request handler.
+     * @param target The target of the request - either a URI or a name.
+     * @param request The request either as the {@link Request}
+     * object or a wrapper of that request. The {@link HttpConnection#getCurrentConnection()} 
+     * method can be used access the Request object if required.
+     * @param response The response as the {@link Response}
+     * object or a wrapper of that request. The {@link HttpConnection#getCurrentConnection()} 
+     * method can be used access the Response object if required.
+     * @param dispatch The dispatch mode: {@link #REQUEST}, {@link #FORWARD}, {@link #INCLUDE}, {@link #ERROR}
+     * @return True if the request has been handled
+     * @throws IOException
+     * @throws ServletException
+     */
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException, ServletException;
     
