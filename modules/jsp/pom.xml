@@ -43,7 +43,7 @@
                     <include name="**/*.jar"></include>
                   </fileset>
                   <fileset dir="${user.home}/.m2/repository/tomcat">
-                    <include name="**/5.5.9/*.jar"></include>
+                    <include name="**/5.5.12/jasper-*.jar"></include>
                   </fileset>
                 </copy>
               </tasks>
