@@ -49,7 +49,7 @@ public class HttpConnection
 
     private Connector _connector;
     private EndPoint _endp;
-    private Handler _handler;
+    private Server _server;
     private boolean _expectingContinues;
 
     private URI _uri;
@@ -83,7 +83,7 @@ public class HttpConnection
     /**
      * 
      */
-    public HttpConnection(Connector connector, EndPoint endpoint, Handler handler)
+    public HttpConnection(Connector connector, EndPoint endpoint, Server server)
     {
         _connector = connector;
         _endp = endpoint;
@@ -93,7 +93,7 @@ public class HttpConnection
         _request = new Request(this);
         _response = new Response(this);
         _generator = new HttpGenerator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
-        _handler = handler;
+        _server = server;
     }
 
     /*
@@ -119,7 +119,7 @@ public class HttpConnection
      */
     public Handler getHandler()
     {
-        return _handler;
+        return _server;
     }
 
     /* ------------------------------------------------------------ */
@@ -297,20 +297,20 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     private void doHandler() throws IOException
     {
-        if (_handler != null)
+        if (_server != null)
         {
             boolean retry = false;
             try
             {
                 _request.setRequestURI(_uri.getRawPath());
                 _request.setQueryString(_uri.getQuery());
-                String target = URIUtil.canonicalPath(_uri.getPath());
+                _request.setPathInfo(URIUtil.canonicalPath(_uri.getPath()));
                 if (_out!=null)
                     _out.reopen();
                 
                 _connector.customize(_endp, _request);
                 
-                _handler.handle(target, _request, _response, Handler.REQUEST);
+                _server.handle(this);
             }
             catch (RetryRequest r)
             {

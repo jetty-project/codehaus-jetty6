@@ -206,7 +206,7 @@ public class SelectBlockingChannelConnector extends AbstractConnector
         HttpEndPoint(SocketChannel channel) 
         {
             super(channel);
-            _connection = new HttpConnection(SelectBlockingChannelConnector.this,this, getHandler());
+            _connection = new HttpConnection(SelectBlockingChannelConnector.this,this, getServer());
         }
 
         /* ------------------------------------------------------------ */

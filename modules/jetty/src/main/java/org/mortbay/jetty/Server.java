@@ -45,7 +45,7 @@ import org.mortbay.util.MultiException;
  * @author gregw
  *
  */
-public class Server extends HandlerCollection implements Handler
+public class Server extends HandlerCollection 
 {
     private static ShutdownHookThread hookThread = new ShutdownHookThread();
     
@@ -172,6 +172,14 @@ public class Server extends HandlerCollection implements Handler
         mex.ifExceptionThrow();
     }
 
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public void handle(HttpConnection connection) throws IOException, ServletException
+    {
+        handle(connection.getRequest().getPathInfo(), connection.getRequest(), connection.getResponse(), Handler.REQUEST);
+        // TODO log the return
+    }
 
     /* ------------------------------------------------------------ */
     /* 

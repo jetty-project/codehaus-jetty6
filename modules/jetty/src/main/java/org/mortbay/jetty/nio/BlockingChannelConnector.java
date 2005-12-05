@@ -99,7 +99,7 @@ public class BlockingChannelConnector extends AbstractConnector
         Connection(ByteChannel channel) throws IOException
         {
             super(channel);
-            _connection = new HttpConnection(BlockingChannelConnector.this,this,getHandler());
+            _connection = new HttpConnection(BlockingChannelConnector.this,this,getServer());
         }
         
         void dispatch() throws InterruptedException

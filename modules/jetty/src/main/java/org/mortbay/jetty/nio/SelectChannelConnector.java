@@ -415,7 +415,7 @@ public class SelectChannelConnector extends AbstractConnector
         {
             super(channel);
             _selectSet=selectSet;
-            _connection = new HttpConnection(SelectChannelConnector.this, this, getHandler());
+            _connection = new HttpConnection(SelectChannelConnector.this, this, getServer());
             _selectSet.scheduleIdle(_timeoutTask);
       
         }
