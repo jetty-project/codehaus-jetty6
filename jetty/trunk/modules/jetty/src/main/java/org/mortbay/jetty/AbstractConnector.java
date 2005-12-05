@@ -50,7 +50,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
 
     private Server _server;
     private ThreadPool _threadPool;
-    private Handler _handler;
     private String _host;
     private int _port=8080;
     private String _integralScheme=HttpSchemes.HTTPS;
@@ -149,24 +148,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             _address=(_host==null)?new InetSocketAddress(_port):new InetSocketAddress(_host,_port);
        
         return _address;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the httpHandler.
-     */
-    public Handler getHandler()
-    {
-        return _handler;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param httpHandler The httpHandler to set.
-     */
-    public void setHandler(Handler handler)
-    {
-        _handler = handler;
     }
     
     /* ------------------------------------------------------------ */
@@ -307,13 +288,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         
         if (_threadPool==null)
             _threadPool=_server.getThreadPool();
-        if (_handler==null)
-            _handler=_server;
-        
         if (_threadPool!=_server.getThreadPool())
             _threadPool.start();
-        if (_handler!=_server)
-            _handler.start();
         
         // Start selector thread
         _acceptorThread=new Thread[getAcceptors()];
@@ -326,8 +302,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     {
         if (_threadPool!=_server.getThreadPool())
             _threadPool.stop();
-        if (_handler!=_server)
-            _handler.stop();
         
         if (_acceptorThread != null)
             for (int i=0;i<_acceptorThread.length;i++)

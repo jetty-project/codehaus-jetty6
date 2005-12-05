@@ -112,7 +112,7 @@ public class SocketConnector extends AbstractConnector
         public Connection(Socket socket) throws IOException
         {
             super(socket);
-            _connection = new HttpConnection(SocketConnector.this,this,getHandler());
+            _connection = new HttpConnection(SocketConnector.this,this,getServer());
         }
         
         public void dispatch() throws InterruptedException
