@@ -437,6 +437,7 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized (this)
             {
+                
                 _timeoutTask.reschedule();
 
                 // If threads are blocked on this
@@ -444,9 +445,10 @@ public class SelectChannelConnector extends AbstractConnector
                 {
                     // wake them up is as good as a dispatched.
                     this.notifyAll();
-
+                    
                     // we are not interested in further selecting
-                    _key.interestOps(0);
+                    if (_key!=null)
+                        _key.interestOps(0);
                     return;
                 }
 
@@ -454,11 +456,14 @@ public class SelectChannelConnector extends AbstractConnector
                 if (_dispatched)
                 {
                     // we are not interested in further selecting
-                    _key.interestOps(0);
+                    if (_key!=null)
+                        _key.interestOps(0);
                     return;
                 }
 
                 // Remove writeable op
+                if (_key==null)
+                    return;
                 if ((_key.readyOps() | SelectionKey.OP_WRITE) != 0 && (_key.interestOps() | SelectionKey.OP_WRITE) != 0)
                     // Remove writeable op
                     _key.interestOps(_interestOps = _key.interestOps() & (-1 ^ SelectionKey.OP_WRITE));
@@ -732,7 +737,6 @@ public class SelectChannelConnector extends AbstractConnector
     /* ------------------------------------------------------------ */
     private class RetryContinuation extends Timeout.Task implements Continuation
     {
-        Object _event;
         Object _object;
         HttpEndPoint _endPoint;
         long _timeout;
@@ -746,7 +750,7 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 _endPoint = ep;
 
-                if (_event != null)
+                if (_resumed)
                     redispatch();
             }
         }
