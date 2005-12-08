@@ -80,8 +80,8 @@ public class PathMap extends HashMap implements Externalizable
     StringMap _exactMap=new StringMap();
 
     List _defaultSingletonList=null;
-    Map.Entry _prefixDefault=null;
-    Map.Entry _default=null;
+    Entry _prefixDefault=null;
+    Entry _default=null;
     Set _entrySet;
     boolean _nodefault=false;
     
@@ -167,9 +167,11 @@ public class PathMap extends HashMap implements Externalizable
                     _prefixDefault=entry;
                 else if (spec.endsWith("/*"))
                 {
-                    _prefixMap.put(spec.substring(0,spec.length()-2),entry);
+                    String mapped=spec.substring(0,spec.length()-2);
+                    entry.setMapped(mapped);
+                    _prefixMap.put(mapped,entry);
+                    _exactMap.put(mapped,entry);
                     _exactMap.put(spec.substring(0,spec.length()-1),entry);
-                    _exactMap.put(spec.substring(0,spec.length()-2),entry);
                 }
                 else if (spec.startsWith("*."))
                     _suffixMap.put(spec.substring(2),entry);
@@ -185,7 +187,10 @@ public class PathMap extends HashMap implements Externalizable
                     }
                 }
                 else
+                {
+                    entry.setMapped(spec);
                     _exactMap.put(spec,entry);
+                }
             }
         }
             
@@ -211,7 +216,7 @@ public class PathMap extends HashMap implements Externalizable
      * @param path the path.
      * @return Map.Entry of the best matched  or null.
      */
-    public Map.Entry getMatch(String path)
+    public Entry getMatch(String path)
     {
         Map.Entry entry;
 
@@ -229,7 +234,7 @@ public class PathMap extends HashMap implements Externalizable
         // try exact match
         entry=_exactMap.getEntry(path,0,l);
         if (entry!=null)
-            return (Map.Entry) entry.getValue();
+            return (Entry) entry.getValue();
         
         // prefix search
         int i=l;
@@ -237,7 +242,7 @@ public class PathMap extends HashMap implements Externalizable
         {
             entry=_prefixMap.getEntry(path,0,i);
             if (entry!=null)
-                return (Map.Entry) entry.getValue();
+                return (Entry) entry.getValue();
         }
         
         // Prefix Default
@@ -250,7 +255,7 @@ public class PathMap extends HashMap implements Externalizable
         {
             entry=_suffixMap.getEntry(path,i+1,l-i-1);
             if (entry!=null)
-                return (Map.Entry) entry.getValue();
+                return (Entry) entry.getValue();
         }        
         
         // Default
@@ -503,10 +508,11 @@ public class PathMap extends HashMap implements Externalizable
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private static class Entry implements Map.Entry
+    public static class Entry implements Map.Entry
     {
         private Object key;
         private Object value;
+        private String mapped; 
         private transient String string;
 
         Entry(Object key, Object value)
@@ -535,6 +541,16 @@ public class PathMap extends HashMap implements Externalizable
             if (string==null)
                 string=key+"="+value;
             return string;
+        }
+
+        public String getMapped()
+        {
+            return mapped;
+        }
+
+        void setMapped(String mapped)
+        {
+            this.mapped = mapped;
         }
     }
 }
