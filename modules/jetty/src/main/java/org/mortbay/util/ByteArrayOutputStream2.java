@@ -26,4 +26,20 @@ public class ByteArrayOutputStream2 extends ByteArrayOutputStream
     public ByteArrayOutputStream2(int size){super(size);}
     public byte[] getBuf(){return buf;}
     public int getCount(){return count;}
+    public void reset(int minSize)
+    {
+        reset();
+        if (buf.length<minSize)
+        {
+            System.err.println("buf.length="+buf.length+" < minSize="+minSize);
+            buf=new byte[minSize];
+        }
+    }
+    
+    public synchronized void writeUnchecked(int b)
+    {
+        buf[count++]=(byte)b;
+    }
+    
+    
 }

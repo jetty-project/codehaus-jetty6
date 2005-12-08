@@ -81,6 +81,10 @@ public class Constraint implements Cloneable, Serializable
     public void setRoles(String[] roles)
     {
         _roles=roles;
+        _anyRole=false;
+        if (roles!=null)
+        for (int i=roles.length;!_anyRole&& i-->0;)
+            _anyRole=ANY_ROLE.equals(roles[i]);
     }
 
     /* ------------------------------------------------------------ */
@@ -108,6 +112,8 @@ public class Constraint implements Cloneable, Serializable
      */
     public boolean hasRole(String role)
     {
+        if (_anyRole)
+            return true;
         if (_roles!=null)
             for (int i=_roles.length;i-->0;)
                 if (role.equals(_roles[i]))

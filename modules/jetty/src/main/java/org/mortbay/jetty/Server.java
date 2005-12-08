@@ -177,8 +177,10 @@ public class Server extends HandlerCollection
      */
     public void handle(HttpConnection connection) throws IOException, ServletException
     {
-        handle(connection.getRequest().getPathInfo(), connection.getRequest(), connection.getResponse(), Handler.REQUEST);
-        // TODO log the return
+	String target=connection.getRequest().getPathInfo();
+	if (Log.isDebugEnabled())
+	    Log.debug("REQUEST "+target+" on "+connection);
+        handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
     }
 
     /* ------------------------------------------------------------ */

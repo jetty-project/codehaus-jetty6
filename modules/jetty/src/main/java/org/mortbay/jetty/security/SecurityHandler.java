@@ -410,7 +410,7 @@ public class SecurityHandler extends WrappedHandler
 
                 if (!inRole)
                 {
-                    Log.warn("AUTH FAILURE: role for " + user.getName());
+                    Log.warn("AUTH FAILURE: incorrect role for " + user.getName());
                     if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
                          ((BasicAuthenticator)authenticator).sendChallenge(realm, response);
                     else
