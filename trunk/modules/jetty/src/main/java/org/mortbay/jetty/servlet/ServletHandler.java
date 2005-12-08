@@ -193,7 +193,7 @@ public class ServletHandler extends AbstractHandler
      * @param pathInContext Path within _context.
      * @return PathMap Entries pathspec to ServletHolder
      */
-    private Map.Entry getHolderEntry(String pathInContext)
+    private PathMap.Entry getHolderEntry(String pathInContext)
     {
         return _servletPathMap.getMatch(pathInContext);
     }
@@ -285,14 +285,14 @@ public class ServletHandler extends AbstractHandler
             if (target.startsWith("/"))
             {
                 // Look for the servlet by path
-                Map.Entry map=getHolderEntry(target);
-                if (map!=null)
+                PathMap.Entry entry=getHolderEntry(target);
+                if (entry!=null)
                 {
-                    servlet_holder=(ServletHolder)map.getValue();
+                    servlet_holder=(ServletHolder)entry.getValue();
                     if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
                     
-                    String servlet_path_spec=(String)map.getKey(); 
-                    String servlet_path=PathMap.pathMatch(servlet_path_spec,target);
+                    String servlet_path_spec=(String)entry.getKey(); 
+                    String servlet_path=entry.getMapped()!=null?entry.getMapped():PathMap.pathMatch(servlet_path_spec,target);
                     String path_info=PathMap.pathInfo(servlet_path_spec,target);
                     
                     if (type==INCLUDE)

@@ -23,6 +23,7 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.View;
+import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -234,8 +235,9 @@ public class HttpParser implements HttpTokens
                 {
                     filled = _endp.fill(_buffer);
                 }
-                catch(SocketTimeoutException toe)
+                catch(IOException ioe)
                 {
+                    Log.debug(ioe);
                     throw new IOException("EOF");
                 }
             }

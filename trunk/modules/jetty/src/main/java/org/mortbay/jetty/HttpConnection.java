@@ -65,6 +65,7 @@ public class HttpConnection
     private Output _out;
     private OutputWriter _writer;
     private PrintWriter _printWriter;
+    int _writeChunk = 4096; // TODO configure or tune
 
     int _include;
     
@@ -823,9 +824,10 @@ public class HttpConnection
         {
             if (_bytes==null)
             {   
-                _bytes=new ByteArrayOutputStream2(length);
+                _bytes=new ByteArrayOutputStream2(_writeChunk*2);
+                
                 if (_characterEncoding==null)
-                    _maxChar=0; // TODO maybe 0x80 if we know default encoding is 8859
+                    _maxChar=0x80; // TODO maybe 0x0 if we do not know default encoding is 8859
                 else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
                     _maxChar=0x100;
                 else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
@@ -834,32 +836,47 @@ public class HttpConnection
                     _maxChar=0;
             }
             
-            
-            int end=offset+length;
-            for (int i=offset;i<end; i++)
+            synchronized (_bytes)
             {
-                char c=s.charAt(i);
+                int end=offset+length;
                 
-                if (c<_maxChar) 
-                    _bytes.write(c);
-                else
+                for (int i=offset;i<end; )
                 {
-                    if (_converter==null)
-                        _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
+                    int next=i+_writeChunk;
+                    if (next>end)
+                        next=end;
                     
-                    int i0=i++;
-                    if (_maxChar==0)
-                        i=end;
-                    else while(i<end && s.charAt(i)>=_maxChar) 
-                        i++;
-                    _converter.write(s,i0,i-i0);
-                    _converter.flush();
+                    for (;i<next; i++)
+                    {
+                        char c=s.charAt(i);
+                        
+                        if (c<_maxChar) 
+                        {
+                            _bytes.writeUnchecked(c);
+                        }
+                        else
+                        {
+                            if (_converter==null)
+                            {
+                                _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
+                            }
+
+                            // write a chunket
+                            int i0=i++;
+                            i+=_writeChunk/2;
+                            if (i>end)
+                                i=end;
+                            
+                            _converter.write(s,i0,i-i0);
+                            _converter.flush();
+                        }
+                    }
+                    
+                    _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                    _bytes.reset();
                 }
+                
             }
-            
-            byte[] b=_bytes.getBuf();
-            _out.write(_bytes.getBuf(),0,_bytes.getCount());
-            _bytes.reset();
         }
         
 
@@ -867,7 +884,7 @@ public class HttpConnection
         {
             if (_bytes==null)
             {
-                _bytes=new ByteArrayOutputStream2(length);
+                _bytes=new ByteArrayOutputStream2(_writeChunk*2);
                 if (_characterEncoding==null)
                     _maxChar=0; // TODO maybe 0x80 if we know default encoding is 8859
                 else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
@@ -878,35 +895,43 @@ public class HttpConnection
                     _maxChar=0;
             }
             
-            
-            int end=offset+length;
-            for (int i=offset;i<end; i++)
+            synchronized (_bytes)
             {
-                char c=s[i];
-                
-                if (c<_maxChar) 
-                    _bytes.write(c);
-                else
+                int end=offset+length;
+                for (int i=offset;i<end; )
                 {
-                    if (_converter==null)
+                    int next=i+_writeChunk;
+                    if (next>end)
+                        next=end;
+                    
+                    for (;i<next; i++)
                     {
-                        _converter=new OutputStreamWriter(_bytes,_characterEncoding);
-                        System.err.println("writer for "+_characterEncoding);
+                        char c=s[i];
+                        
+                        if (c<_maxChar) 
+                            _bytes.writeUnchecked(c);
+                        else
+                        {
+                            if (_converter==null)
+                            {
+                                _converter=new OutputStreamWriter(_bytes,_characterEncoding);
+                            }
+
+                            // write a chunket
+                            int i0=i++;
+                            i+=_writeChunk/2;
+                            if (i>end)
+                                i=end;
+                            _converter.write(s,i0,i-i0);
+                            _converter.flush();
+                        }
                     }
                     
-                    int i0=i++;
-                    if (_maxChar==0)
-                        i=end;
-                    else while(i<end && s[i]>=_maxChar) 
-                        i++;
-                    _converter.write(s,i0,i-i0);
-                    _converter.flush();
+                    byte[] b=_bytes.getBuf();
+                    _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                    _bytes.reset();
                 }
             }
-            
-            byte[] b=_bytes.getBuf();
-            _out.write(_bytes.getBuf(),0,_bytes.getCount());
-            _bytes.reset();
         }
 
     }
