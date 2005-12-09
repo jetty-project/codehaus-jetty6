@@ -594,13 +594,18 @@ public class HttpConnection
 
                 // Try to get more _content
                 _content = null;
-                _parser.parseNext();
+                boolean filled=_parser.parseNext();
 
                 // If unsuccessful and if we are we are not blocking then block
-                if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0) && (_endp != null && !_endp.isBlocking()))
+                if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0) && _endp != null)
                 {
-                    _endp.blockReadable(60000); // TODO Configure from connector
-                    _parser.parseNext();
+                    if(!_endp.isBlocking())
+                    {
+                        _endp.blockReadable(_connector.getMaxIdleTime()); 
+                        _parser.parseNext();
+                    }
+                    else if (!filled)
+                        continue;
                 }
 
                 // if still no _content - this is a timeout
