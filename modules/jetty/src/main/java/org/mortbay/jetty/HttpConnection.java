@@ -281,7 +281,7 @@ public class HttpConnection
             else
             {
                 // If we are not ended then parse available
-                if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0)) _parser.parseAvailable();
+                if (!_parser.isState(HttpParser.STATE_END)) _parser.parseAvailable();
 
                 // Do we have more writting to do?
                 if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT)) _generator.flushBuffers();
