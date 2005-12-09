@@ -533,7 +533,7 @@ public class HttpFields
             // new value;
             field = new Field(name, value, numValue, _revision);
             _fields.add(field);
-            _bufferMap.put(name, field);
+            _bufferMap.put(field.getNameBuffer(), field);
         }
     }
 
@@ -644,11 +644,10 @@ public class HttpFields
                 last._next = field;
             }
             else
-                _bufferMap.put(name, field);
+                _bufferMap.put(field.getNameBuffer(), field);
 
             _fields.add(field);
         }
-        
     }
 
     /* ------------------------------------------------------------ */
@@ -1362,7 +1361,7 @@ public class HttpFields
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            return ("[" + (_prev == null ? "" : "<-") + getName() + "=" + _value + (_next == null ? "" : "->") + "]");
+            return ("[" + (_prev == null ? "" : "<-") + getName() + "="+_revision+"=" + _value + (_next == null ? "" : "->") + "]");
         }
     }
 
