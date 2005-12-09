@@ -1,4 +1,9 @@
 
+Jetty-6.0.0Beta6
+    + Fixed issue with blocking reads
+    + Fixed issue with unknown headers
+    + optimizations
+
 Jetty-6.0.0Beta5
     + Moved to SVN
     + Fixed writer char[] creations
