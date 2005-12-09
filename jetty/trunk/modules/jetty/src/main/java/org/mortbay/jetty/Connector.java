@@ -100,7 +100,7 @@ public interface Connector extends LifeCycle, Buffers
     boolean isConfidential(Request request);
 
     /* ------------------------------------------------------------ */
-    void customize(EndPoint endpoint, Request request);
+    void customize(EndPoint endpoint, Request request) throws IOException;
     
     Continuation newContinuation();
     

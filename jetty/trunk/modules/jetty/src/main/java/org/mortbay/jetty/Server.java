@@ -173,14 +173,19 @@ public class Server extends HandlerCollection
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /* Handle a request from a connection.
      */
     public void handle(HttpConnection connection) throws IOException, ServletException
     {
-	String target=connection.getRequest().getPathInfo();
-	if (Log.isDebugEnabled())
-	    Log.debug("REQUEST "+target+" on "+connection);
-        handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
+        String target=connection.getRequest().getPathInfo();
+        if (Log.isDebugEnabled())
+        {
+            Log.debug("REQUEST "+target+" on "+connection);
+            handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
+            Log.debug("RESPONSE "+target+"  "+connection.getResponse().getStatus());
+        }
+        else
+            handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
     }
 
     /* ------------------------------------------------------------ */
