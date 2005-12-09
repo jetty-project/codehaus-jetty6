@@ -279,12 +279,23 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
+        super.doStart();
+        
         // open listener port
         open();
         
-        _headerBuffers=new ArrayList();
-        _requestBuffers=new ArrayList();
-        _responseBuffers=new ArrayList();
+        if (_headerBuffers!=null)
+            _headerBuffers.clear();
+        else
+            _headerBuffers=new ArrayList();
+        if (_requestBuffers!=null)
+            _requestBuffers.clear();
+        else
+            _requestBuffers=new ArrayList();
+        if (_responseBuffers!=null)
+            _responseBuffers.clear();
+        else
+            _responseBuffers=new ArrayList(); 
         
         if (_threadPool==null)
             _threadPool=_server.getThreadPool();
@@ -310,17 +321,9 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         _acceptorThread=null;
         _address=null;
         
-        if (_headerBuffers!=null)
-            _headerBuffers.clear();
-        _headerBuffers=null;
-        if (_requestBuffers!=null)
-            _requestBuffers.clear();
-        _requestBuffers=null;
-        if (_responseBuffers!=null)
-            _responseBuffers.clear();
-        _responseBuffers=null;
-        
         try{close();} catch(IOException e) {Log.warn(e);}
+
+        super.doStop();
     }
 
     /* ------------------------------------------------------------ */
@@ -335,7 +338,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
 
     /* ------------------------------------------------------------ */
     protected void configure(Socket socket)
-    	throws IOException
+        throws IOException
     {   
         try
         {
@@ -356,6 +359,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
 
     /* ------------------------------------------------------------ */
     public void customize(EndPoint endpoint, Request request)
+        throws IOException
     {      
     }
     
@@ -366,8 +370,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     public Buffer getBuffer(int size)
     {
-        // TODO - try a thread local based buffer "pool"
-        
         if (size==_headerBufferSize)
         {
             synchronized(_headerBuffers)

@@ -10,13 +10,10 @@
     <!-- =========================================================== -->
     <!-- Initialize management framework                             -->
     <!-- =========================================================== -->
-    <!--
     <Call class="org.mortbay.management.MBeanContainer" name="enable">
       <Arg>org.mortbay.jetty</Arg>
       <Arg type="int">8082</Arg>
     </Call>
-    -->
- 
 
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
@@ -40,6 +37,7 @@
         <Item>
           <New class="org.mortbay.jetty.bio.SocketConnector">
             <Set name="port">8080</Set>
+            <Set name="maxIdleTime">50000</Set>
           </New>
         </Item>
         -->

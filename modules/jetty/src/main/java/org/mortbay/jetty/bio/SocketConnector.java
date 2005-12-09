@@ -95,10 +95,12 @@ public class SocketConnector extends AbstractConnector
         return new ByteArrayBuffer(size);
     }
 
-    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------- */
     public void customize(EndPoint endpoint, Request request)
+        throws IOException
     {
         super.customize(endpoint, request);
+        configure((Socket)endpoint.getConnection());
     }
     
     /* ------------------------------------------------------------------------------- */

@@ -323,6 +323,7 @@ public class SslSocketConnector extends SocketConnector
      * @param request HttpRequest to be customised.
      */
     public void customize(EndPoint endpoint, Request request)
+        throws IOException
     {
         super.customize(endpoint, request);
         request.setScheme(HttpSchemes.HTTPS);
