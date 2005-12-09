@@ -74,6 +74,7 @@ public class ObjectMBean implements DynamicMBean
     private Map _setters=new HashMap();
     private Map _methods=new HashMap();
     private Set _convert=new HashSet();
+    private ClassLoader _loader;
     
     private static String OBJECT_NAME_CLASS = ObjectName.class.getName();
     private static String OBJECT_NAME_ARRAY = new ObjectName[0].getClass().getName();
@@ -169,6 +170,7 @@ public class ObjectMBean implements DynamicMBean
     public ObjectMBean(Object managedObject)
     {
         _managed = managedObject;
+        _loader = Thread.currentThread().getContextClassLoader();
     }
 
     public MBeanInfo getMBeanInfo()
@@ -411,8 +413,10 @@ public class ObjectMBean implements DynamicMBean
                 methodKey += (i > 0 ? "," : "") + signature[i];
         methodKey += ")";
 
+        ClassLoader old_loader=Thread.currentThread().getContextClassLoader();
         try
         {
+            Thread.currentThread().setContextClassLoader(_loader);
             Method method = (Method) _methods.get(methodKey);
             if (method == null)
                 throw new NoSuchMethodException(methodKey);
@@ -436,6 +440,10 @@ public class ObjectMBean implements DynamicMBean
         {
             Log.warn(Log.EXCEPTION, e);
             throw new ReflectionException((Exception) e.getTargetException());
+        }
+        finally
+        {
+            Thread.currentThread().setContextClassLoader(old_loader);
         }
     }
 
