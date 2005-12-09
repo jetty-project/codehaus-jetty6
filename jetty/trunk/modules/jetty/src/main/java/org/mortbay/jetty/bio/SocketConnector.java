@@ -84,7 +84,7 @@ public class SocketConnector extends AbstractConnector
     {   
         Socket socket = _serverSocket.accept();
         configure(socket);
-
+        
         Connection connection=new Connection(socket);
         connection.dispatch();
     }
