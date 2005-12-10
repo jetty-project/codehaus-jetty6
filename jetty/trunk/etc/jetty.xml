@@ -1,4 +1,4 @@
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
 
 
@@ -10,12 +10,14 @@
     <!-- =========================================================== -->
     <!-- Initialize management framework                             -->
     <!-- =========================================================== -->
-    <!--  
-    -->
-    <Call class="org.mortbay.management.MBeanContainer" name="enable">
-      <Arg>org.mortbay.jetty</Arg>
-      <Arg type="int">8082</Arg>
+    <Call id="mbeanServer" class="javax.management.MBeanServerFactory" name="createMBeanServer">
+       <Arg>org.mortbay.jetty</Arg>
     </Call>
+    <New class="org.mortbay.management.MBeanContainer">
+      <Arg><Ref id="mbeanServer" /></Arg>
+      <Set name="managementPort">8082</Set>
+      <Call name="start" />
+    </New>
 
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
@@ -51,8 +53,8 @@
           </New>
         </Item>
         -->
-        
-        <!-- Use this connector for many frequently idle connections 
+
+        <!-- Use this connector for many frequently idle connections
              and for threadless continuations.
         <Item>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
@@ -66,7 +68,7 @@
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
         <!-- Add a HTTPS SSL listener on port 8443                           -->
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-        <!--  
+        <!--
         <Item>
           <New class="org.mortbay.jetty.security.SslSocketConnector">
             <Set name="Port">8443</Set>
@@ -84,8 +86,8 @@
     <!-- Set handlers                                                -->
     <!-- =========================================================== -->
     <Set name="handlers">
-      <Array type="org.mortbay.jetty.Handler"> 
-      
+      <Array type="org.mortbay.jetty.Handler">
+
         <!-- ======================================================= -->
         <!-- Configure a test web application with web.xml           -->
         <!-- ======================================================= -->
@@ -100,7 +102,7 @@
             </Get>
           </New>
         </Item>
-        
+
         <!-- ======================================================= -->
         <!-- Configure a context directly - no XML parser required   -->
         <!-- ======================================================= -->
@@ -118,10 +120,10 @@
 			       <Set name="name">Default</Set>
 			       <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
 			   </New>
-			</Item>                
+			</Item>
 		     </Array>
 		 </Set>
-		 
+
 		<Set name="servletMappings">
 		    <Array type="org.mortbay.jetty.servlet.ServletMapping">
 			<Item>
@@ -136,7 +138,7 @@
             </Set>
           </New>
         </Item>
-        
+
       </Array>
     </Set>
 
