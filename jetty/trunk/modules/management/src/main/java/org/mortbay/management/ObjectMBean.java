@@ -489,12 +489,12 @@ public class ObjectMBean implements DynamicMBean
         boolean onMBean= i==0 && "MBean".equalsIgnoreCase(tokens[0]);
         boolean convert= i==0 && "MObject".equalsIgnoreCase(tokens[0]);
 
-        if (Log.isDebugEnabled())
-            Log.debug("defineAttribute "+name+" "+onMBean+":"+writable+":"+description);
-
         String uName = name.substring(0, 1).toUpperCase() + name.substring(1);
         Class oClass = onMBean ? this.getClass() : _managed.getClass();
 
+        if (Log.isDebugEnabled())
+            Log.debug("defineAttribute "+name+" "+onMBean+":"+writable+":"+oClass+":"+description);
+        
         Class type = null;
         Method getter = null;
         Method setter = null;
@@ -537,7 +537,7 @@ public class ObjectMBean implements DynamicMBean
                 type = methods[m].getParameterTypes()[0];
             }
         }
-
+        
         if (convert && type.isPrimitive() && !type.isArray())
             throw new IllegalArgumentException("Cannot convert primative " + name);
 
@@ -550,6 +550,9 @@ public class ObjectMBean implements DynamicMBean
             // Remember the methods
             _getters.put(name, getter);
             _setters.put(name, setter);
+            
+
+            
             MBeanAttributeInfo info=null;
             if (convert)
             {

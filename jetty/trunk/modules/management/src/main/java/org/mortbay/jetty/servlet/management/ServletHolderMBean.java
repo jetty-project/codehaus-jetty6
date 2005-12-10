@@ -23,9 +23,10 @@ public class ServletHolderMBean extends ObjectMBean
     public ServletHolderMBean(Object managedObject)
     {
         super(managedObject);
+        System.err.println("SHMB="+this);
     }
     
-    public ObjectName getJSR77MBean()
+    public ObjectName getJSR77()
     {
         return null;
     }
