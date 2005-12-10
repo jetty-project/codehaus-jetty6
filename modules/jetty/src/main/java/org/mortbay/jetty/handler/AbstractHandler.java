@@ -17,6 +17,7 @@ package org.mortbay.jetty.handler;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
 import org.mortbay.log.Log;
 
 
@@ -28,6 +29,7 @@ import org.mortbay.log.Log;
 public abstract class AbstractHandler extends AbstractLifeCycle implements Handler
 {
     protected String _string;
+    private Server _server;
     
     /* ------------------------------------------------------------ */
     /**
@@ -64,5 +66,19 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
             _string=_string.substring(_string.lastIndexOf('.')+1);
         }
         return _string;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setServer(Server server)
+    {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+        _server=server;
+    }
+
+    /* ------------------------------------------------------------ */
+    public Server getServer()
+    {
+        return _server;
     }
 }

@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
 import org.mortbay.util.MultiException;
 
 /* ------------------------------------------------------------ */
@@ -35,9 +36,6 @@ public class HandlerCollection extends AbstractHandler implements Handler
     private Handler[] _handlers;
 
     /* ------------------------------------------------------------ */
-    /**
-     * 
-     */
     public HandlerCollection()
     {
         super();
@@ -58,8 +56,12 @@ public class HandlerCollection extends AbstractHandler implements Handler
      */
     public void setHandlers(Handler[] handlers)
     {
+        for (int i=0;_handlers!=null && i<_handlers.length;i++)
+            _handlers[i].setServer(null);
         Container.update(this, _handlers, handlers, "handler");
         _handlers = handlers;
+        for (int i=0;_handlers!=null && i<_handlers.length;i++)
+            _handlers[i].setServer(getServer());
     }
 
     /* ------------------------------------------------------------ */
@@ -134,5 +136,16 @@ public class HandlerCollection extends AbstractHandler implements Handler
     public void setHandler(Handler handler)
     {
         _handlers = new Handler[]{handler};
+    }    
+
+    /* ------------------------------------------------------------ */
+    public void setServer(Server server)
+    {
+        super.setServer(server);
+        Handler[] h=getHandlers();
+        for (int i=0;h!=null && i<h.length;i++)
+            h[i].setServer(server);
     }
+
+    
 }
