@@ -57,6 +57,7 @@ public class Server extends HandlerCollection
     /* ------------------------------------------------------------ */
     public Server()
     {
+        setServer(this);
     }
 
     /* ------------------------------------------------------------ */

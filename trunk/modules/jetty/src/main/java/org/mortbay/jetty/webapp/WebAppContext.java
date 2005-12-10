@@ -172,6 +172,15 @@ public class WebAppContext extends ContextHandler
         
         setErrorHandler(new WebAppErrorHandler());
     }
+
+    /* ------------------------------------------------------------ */
+    public void setServer(Server server)
+    {
+        super.setServer(server);
+        _securityHandler.setServer(server);
+        _sessionHandler.setServer(server);
+        _servletHandler.setServer(server);
+    }
     
     /* ------------------------------------------------------------ */
     /* 
