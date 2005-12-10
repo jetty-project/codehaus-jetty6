@@ -53,5 +53,7 @@ public interface Handler extends LifeCycle
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException, ServletException;
     
+    public void setServer(Server server);
+    public Server getServer();
 }
 

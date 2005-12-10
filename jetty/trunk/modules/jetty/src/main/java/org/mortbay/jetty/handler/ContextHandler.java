@@ -43,6 +43,7 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.component.Container;
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
@@ -88,7 +89,6 @@ public class ContextHandler extends WrappedHandler implements Attributes
         return context;
     }
     
-    private Server _server;
     private Attributes _attributes;
     private Attributes _contextAttributes;
     private ClassLoader _classLoader;
@@ -124,25 +124,14 @@ public class ContextHandler extends WrappedHandler implements Attributes
         _attributes=new AttributesMap();
         _initParams=new HashMap();
     }
+    
 
     /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the server.
-     */
-    public Server getServer()
-    {
-        return _server;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param server The server to set.
-     */
     public void setServer(Server server)
     {
-        if (isStarted())
-            throw new IllegalStateException("Started");
-        _server = server;
+        super.setServer(server);
+        if (_errorHandler!=null)
+            _errorHandler.setServer(server);
     }
 
     /* ------------------------------------------------------------ */
@@ -784,7 +773,12 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public void setErrorHandler(ErrorHandler errorHandler)
     {
+        if (_errorHandler!=null)
+            _errorHandler.setServer(null);
+        Container.update(this, _errorHandler, errorHandler, "errorHandler");
         _errorHandler = errorHandler;
+        if (_errorHandler!=null)
+            _errorHandler.setServer(getServer());
     }
 
     /* ------------------------------------------------------------ */
@@ -864,7 +858,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         {
             // TODO this is a very poor implementation!
             ContextHandler context=null;
-            Handler[] handlers = _server.getAllHandlers();
+            Handler[] handlers = getServer().getAllHandlers();
             for (int i=0;i<handlers.length;i++)
             {
                 if (handlers[i]==null || !handlers[i].isStarted() || !(handlers[i] instanceof ContextHandler))

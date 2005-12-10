@@ -94,16 +94,6 @@ public class Holder extends AbstractLifeCycle implements Serializable
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the initParams.
-     */
-    public Map getInitParams()
-    {
-        return _initParams;
-    }
-   
-    
-    /* ------------------------------------------------------------ */
     public String getName()
     {
         return _name;
@@ -155,15 +145,6 @@ public class Holder extends AbstractLifeCycle implements Serializable
     public void setInitParameters(Map map)
     {
         _initParams=map;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param initParams The initParams to set.
-     */
-    public void setInitParams(Map initParams)
-    {
-        _initParams = initParams;
     }
     
     /* ------------------------------------------------------------ */

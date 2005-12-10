@@ -163,7 +163,7 @@ public class MBeanContainer implements Container.Listener
         }
         catch(Exception e)
         {
-            Log.warn(e);
+            Log.warn(""+bean,e);
         }
     }
 

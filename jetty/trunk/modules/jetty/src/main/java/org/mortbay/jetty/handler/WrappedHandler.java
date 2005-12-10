@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.
@@ -57,8 +58,12 @@ public class WrappedHandler extends AbstractHandler
      */
     public void setHandler(Handler handler)
     {
+        if (_handler!=null)
+            _handler.setServer(null);
         Container.update(this, _handler, handler, "handler");
         _handler = handler;
+        if (_handler!=null)
+            _handler.setServer(getServer());
     }
 
     /* ------------------------------------------------------------ */
@@ -92,5 +97,15 @@ public class WrappedHandler extends AbstractHandler
         if (_handler==null || !isStarted())
             return false;
         return _handler.handle(target,request, response, dispatch);
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    public void setServer(Server server)
+    {
+        super.setServer(server);
+        Handler h=getHandler();
+        if (h!=null)
+            h.setServer(server);
     }
 }
