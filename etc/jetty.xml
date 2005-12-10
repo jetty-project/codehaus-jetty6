@@ -93,7 +93,6 @@
         <!-- ======================================================= -->
         <Item>
           <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppContext">
-            <Set name="Server"><Ref id="Server"/></Set>
             <Set name="contextPath">/test</Set>
             <Set name="war">./webapps/test</Set>
             <Set name="VirtualHosts"><Array type="java.lang.String"></Array></Set>
@@ -108,7 +107,6 @@
         <!-- ======================================================= -->
         <Item>
           <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
-            <Set name="Server"><Ref id="Server"/></Set>
             <Set name="contextPath">/javadoc</Set>
             <Set name="resourceBase">./javadoc</Set>
             <Set name="handler">
