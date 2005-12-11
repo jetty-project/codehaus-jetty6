@@ -293,11 +293,17 @@ public class Dispatcher implements RequestDispatcher
             
             if (_named==null)
             {
-                set.add(__FORWARD_PATH_INFO);
+                if (_pathInfo!=null)
+                    set.add(__FORWARD_PATH_INFO);
+                else
+                    set.remove(__FORWARD_PATH_INFO);
                 set.add(__FORWARD_REQUEST_URI);
                 set.add(__FORWARD_SERVLET_PATH);
                 set.add(__FORWARD_CONTEXT_PATH);
-                set.add(__FORWARD_QUERY_STRING);
+                if (_query!=null)
+                    set.add(__FORWARD_QUERY_STRING);
+                else
+                    set.remove(__FORWARD_QUERY_STRING);
             }
             
             return Collections.enumeration(set);
@@ -395,11 +401,17 @@ public class Dispatcher implements RequestDispatcher
             
             if (_named==null)
             {
-                set.add(__INCLUDE_PATH_INFO);
+                if (_pathInfo!=null)
+                    set.add(__INCLUDE_PATH_INFO);
+                else
+                    set.remove(__INCLUDE_PATH_INFO);
                 set.add(__INCLUDE_REQUEST_URI);
                 set.add(__INCLUDE_SERVLET_PATH);
                 set.add(__INCLUDE_CONTEXT_PATH);
-                set.add(__INCLUDE_QUERY_STRING);
+                if (_query!=null)
+                    set.add(__INCLUDE_QUERY_STRING);
+                else
+                    set.remove(__INCLUDE_QUERY_STRING);
             }
             else
             {
