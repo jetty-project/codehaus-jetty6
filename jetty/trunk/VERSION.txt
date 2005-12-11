@@ -1,4 +1,6 @@
 
+    + null dispatch attributes not in names
+
 Jetty-6.0.0Beta6
     + Fixed issue with blocking reads
     + Fixed issue with unknown headers
