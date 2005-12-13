@@ -47,8 +47,8 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/jetty/tags/Jetty_6_0_0beta5</connection>
-    <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags/Jetty_6_0_0beta5</developerConnection>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/trunk</developerConnection>
     <url>http://svn.jetty.codehaus.org/jetty/</url>
   </scm>
   <organization>
