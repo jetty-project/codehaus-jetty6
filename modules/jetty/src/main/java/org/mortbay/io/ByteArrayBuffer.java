@@ -76,6 +76,11 @@ public class ByteArrayBuffer extends AbstractBuffer
         return _bytes.length;
     }
 
+    public byte get()
+    {
+        return _bytes[_get++];
+    }
+    
     public byte peek(int index)
     {
         return _bytes[index];
@@ -83,7 +88,6 @@ public class ByteArrayBuffer extends AbstractBuffer
 
     public int peek(int index, byte[] b, int offset, int length)
     {
-        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
         int l = length;
         if (index + l > capacity()) l = capacity() - index;
         if (l <= 0) return -1;
@@ -99,7 +103,6 @@ public class ByteArrayBuffer extends AbstractBuffer
                 throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
         _bytes[index] = b;
     }
-    
     
     public static class CaseInsensitive extends ByteArrayBuffer implements Buffer.CaseInsensitve
     {

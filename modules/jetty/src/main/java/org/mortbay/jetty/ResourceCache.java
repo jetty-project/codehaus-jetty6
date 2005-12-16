@@ -59,7 +59,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     public void setMaxCachedFileSize(int maxCachedFileSize)
     {
         _maxCachedFileSize = maxCachedFileSize;
-        _cache.clear();
+        flushCache();
     }
 
     /* ------------------------------------------------------------ */
@@ -72,7 +72,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     public void setMaxCacheSize(int maxCacheSize)
     {
         _maxCacheSize = maxCacheSize;
-        _cache.clear();
+        flushCache();
     }
 
     /* ------------------------------------------------------------ */
@@ -96,7 +96,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     public void flushCache()
     {
-        _cache.clear();
+        if (_cache!=null)
+            _cache.clear();
         System.gc();
     }
 
@@ -191,8 +192,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     public void doStop()
         throws InterruptedException
     {
-        if (_cache!=null)
-            _cache.clear();
+        flushCache();
         _cache=null;
     }
     

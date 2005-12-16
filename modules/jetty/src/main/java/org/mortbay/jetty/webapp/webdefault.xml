@@ -92,6 +92,18 @@
       <param-name>redirectWelcome</param-name>
       <param-value>false</param-value>
     </init-param>
+    <init-param>
+      <param-name>maxCacheSize</param-name>
+      <param-value>4000000</param-value>
+    </init-param>
+    <init-param>
+      <param-name>maxCachedFileSize</param-name>
+      <param-value>260000</param-value>
+    </init-param>
+    <init-param>
+      <param-name>maxCachedFiles</param-name>
+      <param-value>100</param-value>
+    </init-param>
     <load-on-startup>0</load-on-startup>
   </servlet> 
 

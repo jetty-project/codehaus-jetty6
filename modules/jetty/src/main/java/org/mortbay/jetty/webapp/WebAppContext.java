@@ -776,13 +776,17 @@ public class WebAppContext extends ContextHandler
             _configurations[i].configureDefaults();
         
         // Is there a WEB-INF work directory
-        Resource work= getWebInf().addPath("work");
-        if (work.exists()
-            && work.isDirectory()
-            && work.getFile() != null
-            && work.getFile().canWrite()
-            && getAttribute("javax.servlet.context.tempdir") == null)
-            setAttribute("javax.servlet.context.tempdir", work.getFile());
+        Resource web_inf=getWebInf();
+        if (web_inf!=null)
+        {
+            Resource work= getWebInf().addPath("work");
+            if (work.exists()
+                            && work.isDirectory()
+                            && work.getFile() != null
+                            && work.getFile().canWrite()
+                            && getAttribute("javax.servlet.context.tempdir") == null)
+                setAttribute("javax.servlet.context.tempdir", work.getFile());
+        }
         
         // Configure webapp
         for (int i=0;i<_configurations.length;i++)

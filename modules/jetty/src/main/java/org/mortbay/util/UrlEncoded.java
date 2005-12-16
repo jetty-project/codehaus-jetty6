@@ -336,54 +336,65 @@ public class UrlEncoded extends MultiMap
             int digit=0;
             int digits=0;
             
-            while ((c=in.read())>=0)
+            // TODO cache of parameter names ???
+            
+            // TODO - more efficient??? 
+            
+            byte[] bytes=new byte[256]; // TODO Configure ?? size??? tune??? // reuse???
+            int l=-1;
+            
+            while ((l=in.read(bytes))>=0)
             {
-                switch ((char) c)
+                for (int i=0;i<l;i++)
                 {
-                    case '&':
-                        value = buf.size()==0?null:new String(buf.getBuf(), 0, buf.size(), charset);
-                        buf.reset();
-                        if (key != null)
-                        {
-                            map.add(key,value);
-                            key = null;
-                            value=null;
-                        }
-                        else if (value!=null)
-                        {
-                            map.add(value,null);
-                            value=null;
-                        }
-                        break;
-                    case '=':
-                        if (key!=null)
-                        {
-                            buf.write(c);
+                    c=bytes[i];
+                    switch ((char) c)
+                    {
+                        case '&':
+                            value = buf.size()==0?null:new String(buf.getBuf(), 0, buf.size(), charset);
+                            buf.reset();
+                            if (key != null)
+                            {
+                                map.add(key,value);
+                                key = null;
+                                value=null;
+                            }
+                            else if (value!=null)
+                            {
+                                map.add(value,null);
+                                value=null;
+                            }
                             break;
-                        }
-                        key = new String(buf.getBuf(), 0, buf.size(), charset);
-                        buf.reset();
+                        case '=':
+                            if (key!=null)
+                            {
+                                buf.write(c);
+                                break;
+                            }
+                            key = new String(buf.getBuf(), 0, buf.size(), charset);
+                            buf.reset();
+                            break;
+                        case '+':
+                            buf.write(' ');
+                            break;
+                        case '%':
+                            digits=2;
+                            break;
+                        default:
+                            if (digits==2)
+                            {
+                                digit=TypeUtil.convertHexDigit((byte)c);
+                                digits=1;
+                            }
+                            else if (digits==1)
+                            {
+                                buf.write((digit<<4) + TypeUtil.convertHexDigit((byte)c));
+                                digits=0;
+                            }
+                            else
+                                buf.write(c);
                         break;
-                    case '+':
-                        buf.write(' ');
-                        break;
-                    case '%':
-                        digits=2;
-                        break;
-                    default:
-                        if (digits==2)
-                        {
-                            digit=TypeUtil.convertHexDigit((byte)c);
-                            digits=1;
-                        }
-                        else if (digits==1)
-                        {
-                            buf.write((digit<<4) + TypeUtil.convertHexDigit((byte)c));
-                            digits=0;
-                        }
-                        else
-                            buf.write(c);
-                    break;
+                    }
                 }
             }
             if (key != null)

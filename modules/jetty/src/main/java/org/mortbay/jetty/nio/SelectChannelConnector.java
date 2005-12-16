@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
@@ -67,6 +68,8 @@ public class SelectChannelConnector extends AbstractConnector
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;
     private transient SelectSet[] _selectSets;
+    private boolean _assumeShortDispatch=false;
+
 
     /* ------------------------------------------------------------------------------- */
     /**
@@ -75,6 +78,27 @@ public class SelectChannelConnector extends AbstractConnector
      */
     public SelectChannelConnector()
     {
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Assume Short Dispatch
+     * If true, the select set is not updated when a endpoint is dispatched for
+     * reading. The assumption is that the task will be short and thus will probably
+     * be complete before the select is tried again.
+     * @return Returns the assumeShortDispatch.
+     */
+    public boolean getAssumeShortDispatch()
+    {
+        return _assumeShortDispatch;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param assumeShortDispatch The assumeShortDispatch to set.
+     */
+    public void setAssumeShortDispatch(boolean assumeShortDispatch)
+    {
+        _assumeShortDispatch = assumeShortDispatch;
     }
 
     /* ------------------------------------------------------------ */
@@ -150,6 +174,9 @@ public class SelectChannelConnector extends AbstractConnector
     /* ------------------------------------------------------------------------------- */
     protected Buffer newBuffer(int size)
     {
+        // Header buffers always byte array buffers (efficiency of random access)
+        if (size==getHeaderBufferSize())
+            return new NIOBuffer(size,false);
         return new NIOBuffer(size, true);
     }
 
@@ -437,6 +464,11 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized (this)
             {
+                if (_key==null)
+                {
+                    _timeoutTask.cancel();
+                    return;
+                }
                 
                 _timeoutTask.reschedule();
 
@@ -447,17 +479,17 @@ public class SelectChannelConnector extends AbstractConnector
                     this.notifyAll();
                     
                     // we are not interested in further selecting
-                    if (_key!=null)
-                        _key.interestOps(0);
+                    _key.interestOps(0);
                     return;
                 }
-
+                else if (!_assumeShortDispatch)
+                    _key.interestOps(0);
+                    
                 // Otherwise if we are still dispatched
                 if (_dispatched)
                 {
                     // we are not interested in further selecting
-                    if (_key!=null)
-                        _key.interestOps(0);
+                    _key.interestOps(0);
                     return;
                 }
 
@@ -467,7 +499,7 @@ public class SelectChannelConnector extends AbstractConnector
                 if ((_key.readyOps() | SelectionKey.OP_WRITE) != 0 && (_key.interestOps() | SelectionKey.OP_WRITE) != 0)
                     // Remove writeable op
                     _key.interestOps(_interestOps = _key.interestOps() & (-1 ^ SelectionKey.OP_WRITE));
-
+                
                 _dispatched = true;
             }
 

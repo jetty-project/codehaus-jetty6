@@ -209,11 +209,14 @@ public class HttpGeneratorTest extends TestCase
     
     class Handler extends HttpParser.EventHandler
     {   
-        public void content(int index, Buffer ref)
+        int index=0;
+        
+        public void content(Buffer ref)
         {
             if (index == 0)
                 content= "";
             content= content.substring(0, index) + ref;
+            index+=ref.length();
         }
 
 
@@ -228,7 +231,7 @@ public class HttpGeneratorTest extends TestCase
                 f2= tok2.toString();
             else
                 f2=null;
-            
+            index=0;
             // System.out.println(f0+" "+f1+" "+f2);
         }
 
@@ -247,6 +250,7 @@ public class HttpGeneratorTest extends TestCase
                 f2= reason.toString();
             else
                 f2=null;
+            index=0;
         }
 
         public void parsedHeader(Buffer name,Buffer value)
