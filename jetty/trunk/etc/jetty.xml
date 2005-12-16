@@ -10,6 +10,7 @@
     <!-- =========================================================== -->
     <!-- Initialize management framework                             -->
     <!-- =========================================================== -->
+    <!--
     <Call id="mbeanServer" class="javax.management.MBeanServerFactory" name="createMBeanServer">
        <Arg>org.mortbay.jetty</Arg>
     </Call>
@@ -18,6 +19,7 @@
       <Set name="managementPort">8082</Set>
       <Call name="start" />
     </New>
+    -->
 
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
