@@ -529,8 +529,11 @@ public class HttpGenerator implements HttpTokens
             }
 
             // Handle connection if need be
-            if (_close)
+            if (_close || _contentLength==EOF_CONTENT)
+            {
                 _header.put(CONNECTION_CLOSE);
+                _close=true;
+            }
             else if (keep_alive && _version == HttpVersions.HTTP_1_0_ORDINAL)
                 _header.put(CONNECTION_KEEP_ALIVE);
             else if (connection != null) connection.put(_header);
