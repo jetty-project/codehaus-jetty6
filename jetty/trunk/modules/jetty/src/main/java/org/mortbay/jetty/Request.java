@@ -1129,7 +1129,9 @@ public class Request implements HttpServletRequest
                     try
                     {
                         // TODO limit size
+                        // TODO directly access byte array?
                         InputStream in = getInputStream();
+                       
                         // Add form params to query params
                         UrlEncoded.decodeTo(in, _parameters, encoding);
                     }

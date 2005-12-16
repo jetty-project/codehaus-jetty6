@@ -65,7 +65,7 @@ public class HttpConnection
     private Output _out;
     private OutputWriter _writer;
     private PrintWriter _printWriter;
-    int _writeChunk = 4096; // TODO configure or tune
+    int _writeChunk = 1500; // TODO configure or tune
 
     int _include;
     
@@ -234,7 +234,6 @@ public class HttpConnection
             _writer=new OutputWriter();
             _printWriter=new PrintWriter(_writer)
             {
-
                 /* ------------------------------------------------------------ */
                 /* 
                  * @see java.io.PrintWriter#close()
@@ -426,7 +425,8 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     private class RequestHandler extends HttpParser.EventHandler
     {
-
+        boolean _delayedHandling=false;
+        
         /*
          * 
          * @see org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,
@@ -437,6 +437,7 @@ public class HttpConnection
             _host = false;
             _expect = UNKNOWN;
             _connection = UNKNOWN;
+            _delayedHandling=false;
 
             _request.setTimeStamp(System.currentTimeMillis());
             _request.setMethod(method.toString());
@@ -496,7 +497,6 @@ public class HttpConnection
                         _responseFields.put(HttpHeaders.CONNECTION_BUFFER,value);
                     }
                         
-                    // TODO something with this???
             }
 
             _requestFields.add(name, value);
@@ -546,17 +546,27 @@ public class HttpConnection
                 default:
             }
 
-            doHandler();
+            // Either handle now or wait for first content
+            if (_parser.getContentLength()<=0 && !_parser.isChunking())
+                doHandler();
+            else
+                _delayedHandling=true;
         }
 
         /* ------------------------------------------------------------ */
         /*
          * @see org.mortbay.jetty.HttpParser.EventHandler#content(int, org.mortbay.io.Buffer)
          */
-        public void content(int index, Buffer ref) throws IOException
+        public void content(Buffer ref) throws IOException
         {
             if (_content != null) throw new IllegalStateException("content not read");
             _content = ref;
+            
+            if (_delayedHandling)
+            {
+                _delayedHandling=false;
+                doHandler();
+            }
         }
 
         /*
@@ -806,6 +816,7 @@ public class HttpConnection
         String _characterEncoding;
         Writer _converter;
         ByteArrayOutputStream2 _bytes;
+        char[] _chars;
 
 
         public void setCharacterEncoding(String encoding)
@@ -829,6 +840,7 @@ public class HttpConnection
         {
             if (_bytes==null)
             {   
+                _chars=new char[_writeChunk];
                 _bytes=new ByteArrayOutputStream2(_writeChunk*2);
                 
                 if (_characterEncoding==null)
@@ -840,20 +852,29 @@ public class HttpConnection
                 else
                     _maxChar=0;
             }
+            if (_converter==null)
+            {
+                _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
+            }
             
-            synchronized (_bytes)
+            if (length>16) // TODO - tune or perhaps remove
             {
                 int end=offset+length;
                 
                 for (int i=offset;i<end; )
                 {
-                    int next=i+_writeChunk;
+                    int chunk=_writeChunk;
+                    int next=i+chunk;
                     if (next>end)
-                        next=end;
-                    
-                    for (;i<next; i++)
                     {
-                        char c=s.charAt(i);
+                        next=end;
+                        chunk=next-i;
+                    }
+                    s.getChars(i, next, _chars, 0);
+                    i+=chunk;
+                    for (int n=0;n<chunk; n++)
+                    {
+                        char c=_chars[n];
                         
                         if (c<_maxChar) 
                         {
@@ -861,18 +882,12 @@ public class HttpConnection
                         }
                         else
                         {
-                            if (_converter==null)
-                            {
-                                _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
-                            }
-
                             // write a chunket
-                            int i0=i++;
-                            i+=_writeChunk/2;
-                            if (i>end)
-                                i=end;
-                            
-                            _converter.write(s,i0,i-i0);
+                            int i0=n++;
+                            n+=_writeChunk/2;
+                            if (n>chunk)
+                                n=chunk;
+                            _converter.write(_chars,i0,i-i0);
                             _converter.flush();
                         }
                     }
@@ -880,7 +895,44 @@ public class HttpConnection
                     _out.write(_bytes.getBuf(),0,_bytes.getCount());
                     _bytes.reset();
                 }
-                
+            }
+            else
+            {
+                synchronized (_bytes)
+                {
+                    int end=offset+length;
+                    
+                    for (int i=offset;i<end; )
+                    {
+                        int next=i+_writeChunk;
+                        if (next>end)
+                            next=end;
+                        
+                        for (;i<next; i++)
+                        {
+                            char c=s.charAt(i);
+                            
+                            if (c<_maxChar) 
+                            {
+                                _bytes.writeUnchecked(c);
+                            }
+                            else
+                            {   
+                                // write a chunket
+                                int i0=i++;
+                                i+=_writeChunk/2;
+                                if (i>next)
+                                    i=next;
+                                
+                                _converter.write(s,i0,i-i0);
+                                _converter.flush();
+                            }
+                        }
+                        
+                        _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                        _bytes.reset();
+                    }
+                } 
             }
         }
         

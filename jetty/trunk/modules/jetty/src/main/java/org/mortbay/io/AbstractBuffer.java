@@ -33,10 +33,11 @@ public abstract class AbstractBuffer implements Buffer
     protected int _access;
     protected boolean _volatile;
 
-    private int _get;
-    private int _put;
-    private int _length=-1;
-    private int _hash;
+    protected int _get;
+    protected int _put;
+    protected int _hash;
+    private int _hashGet;
+    private int _hashPut;
     private int _mark;
     protected String _string;
     private View _view;
@@ -146,7 +147,6 @@ public abstract class AbstractBuffer implements Buffer
         }
     }
 
-
     public boolean equals(Object obj)
     {
         if (obj==this)
@@ -211,10 +211,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public byte get()
     {
-        byte b = peek(_get++);
-        _hash=0;
-        _length=-1;
-        return b;
+        return peek(_get++);
     }
 
     public int get(byte[] b, int offset, int length)
@@ -248,7 +245,7 @@ public abstract class AbstractBuffer implements Buffer
     
     public int hashCode()
     {
-        if (_hash == 0) 
+        if (_hash == 0 || _hashGet!=_get || _hashPut!=_put) 
         {
             for (int i = putIndex(); i-- > getIndex();)
             {
@@ -257,6 +254,8 @@ public abstract class AbstractBuffer implements Buffer
                 _hash = 31 * _hash + b;
             }
             if (_hash == 0) _hash = -1;
+            _hashGet=_get;
+            _hashPut=_put;
         }
         return _hash;
     }
@@ -278,9 +277,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public int length()
     {
-        if (_length<0)
-            _length=_put - _get;
-        return _length;
+        return _put - _get;
     }
 
     public void mark()
@@ -444,7 +441,6 @@ public abstract class AbstractBuffer implements Buffer
          */
         _get = getIndex;
         _hash=0;
-        _length=-1;
     }
 
     public void setMarkIndex(int index)
@@ -464,7 +460,6 @@ public abstract class AbstractBuffer implements Buffer
          */
         _put = putIndex;
         _hash=0;
-        _length=-1;
     }
 
     public int skip(int n)
