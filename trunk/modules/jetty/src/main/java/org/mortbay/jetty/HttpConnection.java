@@ -667,12 +667,13 @@ public class HttpConnection
             if (_closed)
                 return;
             
-            flushResponse();
-            
-            // TODO sometimes can do a last here!
-            // commitResponse(HttpGenerator.LAST);
-            
-            // TODO need IOExceptions for any further writes.
+            if (!_generator.isCommitted())
+            {
+                commitResponse(HttpGenerator.LAST);
+                _generator.flushBuffers();
+            }
+            else
+                flushResponse();
             
             _closed=true;
         }
