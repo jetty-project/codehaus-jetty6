@@ -141,6 +141,7 @@ public class Dispatcher implements RequestDispatcher
         // TODO - allow stream or writer????
         
         Attributes old_attr=base_request.getAttributes();
+        MultiMap old_params=base_request.getParameters();
         try
         {
             base_request.getConnection().include();
@@ -149,6 +150,27 @@ public class Dispatcher implements RequestDispatcher
             else 
             {
                 String query=_dQuery;
+                
+
+                MultiMap parameters=new MultiMap();
+                UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
+                
+                if (old_params!=null && old_params.size()>0)
+                {
+                    // Merge parameters.
+                    Iterator iter = old_params.entrySet().iterator();
+                    while (iter.hasNext())
+                    {
+                        Map.Entry entry = (Map.Entry)iter.next();
+                        String name=(String)entry.getKey();
+                        Object values=entry.getValue();
+                        for (int i=0;i<LazyList.size(values);i++)
+                            parameters.add(name, LazyList.get(values, i));
+                    }
+                    
+                }
+                base_request.setParameters(parameters);
+                
                 
                 IncludeAttributes attr = new IncludeAttributes(old_attr); 
                 
@@ -165,6 +187,7 @@ public class Dispatcher implements RequestDispatcher
         {
             base_request.setAttributes(old_attr);
             base_request.getConnection().included();
+            base_request.setParameters(old_params);
         }
     }
 
