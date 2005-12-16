@@ -54,10 +54,10 @@ public class HttpGenerator implements HttpTokens
     private static byte[] LAST_CHUNK =
     { (byte) '0', (byte) '\015', (byte) '\012', (byte) '\015', (byte) '\012'};
     private static byte[] CONTENT_LENGTH_0 = Portable.getBytes("Content-Length: 0\015\012");
-    private static byte[] CONNECTION_KEEP_ALIVE = Portable.getBytes("HttpConnection: keep-alive\015\012");
-    private static byte[] CONNECTION_CLOSE = Portable.getBytes("HttpConnection: close\015\012");
+    private static byte[] CONNECTION_KEEP_ALIVE = Portable.getBytes("Connection: keep-alive\015\012");
+    private static byte[] CONNECTION_CLOSE = Portable.getBytes("Connection: close\015\012");
     private static byte[] TRANSFER_ENCODING_CHUNKED = Portable.getBytes("Transfer-Encoding: chunked\015\012");
-    private static byte[] SERVER = Portable.getBytes("Server: Jetty(experimental)\015\012");
+    private static byte[] SERVER = Portable.getBytes("Server: Jetty(6.0.x)\015\012");
 
     // other statics
     private static int CHUNK_SPACE = 12;

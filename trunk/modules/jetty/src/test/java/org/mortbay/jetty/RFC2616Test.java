@@ -129,7 +129,7 @@ public class RFC2616Test extends TestCase
                                            
                                            "GET /R3 HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             offset = checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
             offset = checkContains(response,offset,"12345","3.6.1 Chunking");
@@ -164,7 +164,7 @@ public class RFC2616Test extends TestCase
                                            
                                            "GET /R3 HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             checkNotContained(response, "HTTP/1.1 100", "3.6.1 Chunking");
             offset = checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
@@ -179,7 +179,7 @@ public class RFC2616Test extends TestCase
                                            "Host: localhost\n"+
                                            "Transfer-Encoding: chunked\n"+
                                            "Content-Type: text/plain\n"+
-                                           "HttpConnection: keep-alive\n"+
+                                           "Connection: keep-alive\n"+
                                            "\n"+
                                            "3;\n"+
                                            "123\n"+
@@ -189,7 +189,7 @@ public class RFC2616Test extends TestCase
                                            
                                            "GET /R2 HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             offset = checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking")+10;
             offset = checkContains(response,offset,"123456","3.6.1 Chunking");
@@ -252,7 +252,7 @@ public class RFC2616Test extends TestCase
                                            
                                            "GET /R2 HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             offset=checkContains(response,offset,
                                    "HTTP/1.1 200 OK","2. identity")+10;
@@ -282,7 +282,7 @@ public class RFC2616Test extends TestCase
                                            
                                            "GET /R2 HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "Content-Type: text/plain\n"+
                                            "Content-Length: 6\n"+
                                            "\n"+
@@ -306,7 +306,7 @@ public class RFC2616Test extends TestCase
 //              response=listener.getResponses("GET /R2 HTTP/1.1\n"+
 //                                             "Host: localhost\n"+
 //                                             "Content-Type: text/plain\n"+
-//                                             "HttpConnection: close\n"+
+//                                             "Connection: close\n"+
 //                                             "\n"+
 //                                             "123456");
 //              offset=checkContains(response,offset,
@@ -444,12 +444,12 @@ public class RFC2616Test extends TestCase
                                            
                                            "GET /R2 HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n"+
 
                                            "GET /R3 HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             offset=checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","8.1.2 default")+1;
@@ -461,7 +461,7 @@ public class RFC2616Test extends TestCase
             offset=checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","8.1.2.2 pipeline")+11;
             offset=checkContains(response,offset,
-                                   "HttpConnection: close","8.1.2.2 pipeline")+1;
+                                   "Connection: close","8.1.2.2 pipeline")+1;
             offset=checkContains(response,offset,
                                    "/R2","8.1.2.1 close")+3;
         }
@@ -514,7 +514,7 @@ public class RFC2616Test extends TestCase
                                            "Expect: 100-continue\n"+
                                            "Content-Type: text/plain\n"+
                                            "Content-Length: 8\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n"+
                                            "123456\015\012");
             offset=checkContains(response,offset,
@@ -564,7 +564,7 @@ public class RFC2616Test extends TestCase
             // Default Host
             offset=0;
             response=listener.getResponses("OPTIONS * HTTP/1.1\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "Host: localhost\n"+
                                            "\n");
             offset=checkContains(response,offset,
@@ -625,7 +625,7 @@ public class RFC2616Test extends TestCase
             offset=0;
             response=listener.getResponses("TRACE /path HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             offset=checkContains(response,offset,
                                    "HTTP/1.1 200","200")+1;
@@ -665,7 +665,7 @@ public class RFC2616Test extends TestCase
 
             response=listener.getResponses("GET /" + TestRFC2616.testFiles[0].name + " HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
 
             boolean noRangeHasContentLocation = (response.indexOf("\r\nContent-Location: ") != -1);
@@ -675,7 +675,7 @@ public class RFC2616Test extends TestCase
 
             response=listener.getResponses("GET /" + TestRFC2616.testFiles[0].name + " HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "Range: bytes=1-3\n"+
                                            "\n");
 
@@ -737,7 +737,7 @@ public class RFC2616Test extends TestCase
             // HTTP/1.0
             offset=0;
             response=listener.getResponses("GET /redirect HTTP/1.0\n"+
-                                           "HttpConnection: Keep-Alive\n"+
+                                           "Connection: Keep-Alive\n"+
                                            "\n"
                                            );
             offset=checkContains(response,offset,
@@ -746,8 +746,8 @@ public class RFC2616Test extends TestCase
                             "Location: /dump",
                             "redirected");
             checkContains(response,offset,
-                            "HttpConnection: close",
-                            "HttpConnection: close");
+                            "Connection: close",
+                            "Connection: close");
             
             
             // HTTP/1.1
@@ -757,7 +757,7 @@ public class RFC2616Test extends TestCase
                                            "\n"+
                                            "GET /redirect HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n"
                                            );
             offset=checkContains(response,offset,
@@ -775,13 +775,13 @@ public class RFC2616Test extends TestCase
                             "Location: /dump",
                             "redirected");
             checkContains(response,offset,
-                            "HttpConnection: close",
+                            "Connection: close",
                             "closed");
             
             // HTTP/1.0 _content
             offset=0;
             response=listener.getResponses("GET /redirect/_content HTTP/1.0\n"+
-                                           "HttpConnection: Keep-Alive\n"+
+                                           "Connection: Keep-Alive\n"+
                                            "\n"+
                                            "GET /redirect/_content HTTP/1.0\n"+
                                            "\n"
@@ -792,7 +792,7 @@ public class RFC2616Test extends TestCase
                             "Location: /dump",
                             "redirected");
             checkContains(response,offset,
-                            "HttpConnection: close",
+                            "Connection: close",
                             "close no _content length");
             
             // HTTP/1.1 _content
@@ -802,7 +802,7 @@ public class RFC2616Test extends TestCase
                                            "\n"+
                                            "GET /redirect/_content HTTP/1.1\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n"
                                            );
             offset=checkContains(response,offset,
@@ -820,7 +820,7 @@ public class RFC2616Test extends TestCase
                             "Location: /dump",
                             "redirected");
             checkContains(response,offset,
-                            "HttpConnection: close",
+                            "Connection: close",
                             "closed");
             
         }
@@ -856,7 +856,7 @@ public class RFC2616Test extends TestCase
             response=listener.getResponses("GET /" + path + " HTTP/1.1\n"+
                                     "Host: localhost\n"+
                                     byteRangeHeader +
-                                    "HttpConnection: close\n"+
+                                    "Connection: close\n"+
                                     "\n");
 
             
@@ -1165,7 +1165,7 @@ public class RFC2616Test extends TestCase
             response=listener.getResponses("GET /R1?gzip HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "TE: gzip;q=0.5\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             offset=checkContains(response,offset,
                                    "HTTP/1.1 200","TE: coding")+1;
@@ -1177,7 +1177,7 @@ public class RFC2616Test extends TestCase
             response=listener.getResponses("GET /R1?gzip HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "TE: deflate\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             offset=checkContains(response,offset,
                                    "HTTP/1.1 501","TE: coding not accepted")+1;
@@ -1206,27 +1206,27 @@ public class RFC2616Test extends TestCase
             offset=checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","19.6.2 default close")+10;
             checkNotContained(response,offset,
-                                "HttpConnection: close","19.6.2 not assumed");
+                                "Connection: close","19.6.2 not assumed");
             
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.0\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: keep-alive\n"+
+                                           "Connection: keep-alive\n"+
                                            "\n"+
                                            
                                            "GET /R2 HTTP/1.0\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n"+
 
                                            "GET /R3 HTTP/1.0\n"+
                                            "Host: localhost\n"+
-                                           "HttpConnection: close\n"+
+                                           "Connection: close\n"+
                                            "\n");
             offset=checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 1")+1;
             offset=checkContains(response,offset,
-                                   "HttpConnection: keep-alive",
+                                   "Connection: keep-alive",
                                    "19.6.2 Keep-alive 1")+1;
             
             offset=checkContains(response,offset,
@@ -1239,7 +1239,7 @@ public class RFC2616Test extends TestCase
             offset=checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 2")+11;
             offset=checkContains(response,offset,
-                                   "HttpConnection: close","19.6.2 Keep-alive close")+1;
+                                   "Connection: close","19.6.2 Keep-alive close")+1;
             offset=checkContains(response,offset,
                                    "/R2","19.6.2 Keep-alive close")+3;
             
