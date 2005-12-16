@@ -33,6 +33,17 @@
   </filter-mapping>
 
   <servlet>
+    <servlet-name>Hello</servlet-name>
+    <servlet-class>com.acme.HelloWorld</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Hello</servlet-name>
+    <url-pattern>/hello/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
     <servlet-name>Dump</servlet-name>
     <servlet-class>com.acme.Dump</servlet-class>
     <load-on-startup>1</load-on-startup>
