@@ -56,7 +56,11 @@ public class HelloWorld extends HttpServlet
     {
         response.setContentType("text/html");
         ServletOutputStream out = response.getOutputStream();
-        out.println("<tml><h1>Hello World<h1></html>");   
+        out.println("<html>");
+        out.println("<h1>Hello World<h1>");
+        out.println("Blah blah blah.");
+        out.println("</html>");
+        out.close();
     }
 
 }
