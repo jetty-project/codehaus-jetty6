@@ -144,6 +144,12 @@ public class HttpParser implements HttpTokens
     {
         return _contentLength;
     }
+    
+    /* ------------------------------------------------------------------------------- */
+    public boolean isChunking()
+    {
+        return _contentLength==CHUNKED_CONTENT;
+    }
 
     /* ------------------------------------------------------------------------------- */
     public String toString(Buffer buf)
@@ -371,8 +377,7 @@ public class HttpParser implements HttpTokens
                         if (_tok0.length() > 0 || _tok1.length() > 0 || _multiLineValue != null)
                         {
                             Buffer header = HttpHeaders.CACHE.lookup(_tok0);
-                            Buffer value = _multiLineValue == null ? (Buffer) _tok1
-                                    : (Buffer) new ByteArrayBuffer(_multiLineValue);
+                            Buffer value = _multiLineValue == null ? (Buffer) _tok1 : (Buffer) new ByteArrayBuffer(_multiLineValue);
 
                             int ho = HttpHeaders.CACHE.getOrdinal(header);
                             if (ho >= 0)
@@ -509,6 +514,8 @@ public class HttpParser implements HttpTokens
                     }
                     else if (ch != SPACE && ch != TAB)
                     {
+                        // Drag the mark
+                        // TODO - is this the most efficient way?
                         if (_length == -1) _buffer.mark();
                         _length = _buffer.getIndex() - _buffer.markIndex();
                     }
@@ -541,7 +548,6 @@ public class HttpParser implements HttpTokens
                     break;
             }
         } // end of HEADER states loop
-
         
         
         // Handle _content
@@ -560,8 +566,8 @@ public class HttpParser implements HttpTokens
             {
                 case STATE_EOF_CONTENT:
                     chunk = _buffer.get(_buffer.length());
-                    _handler.content(_contentPosition, chunk);
                     _contentPosition += chunk.length();
+                    _handler.content(chunk);
                     return fill_called;
 
                 case STATE_CONTENT: 
@@ -575,8 +581,8 @@ public class HttpParser implements HttpTokens
                     }
                     else if (length > remaining) length = remaining;
                     chunk = _buffer.get(length);
-                    _handler.content(_contentPosition, chunk);
                     _contentPosition += chunk.length();
+                    _handler.content(chunk);
                     return fill_called;
                 }
 
@@ -653,9 +659,9 @@ public class HttpParser implements HttpTokens
                     else if (length > remaining) 
                         length = remaining;
                     chunk = _buffer.get(length);
-                    _handler.content(_contentPosition, chunk);
                     _contentPosition += chunk.length();
                     _chunkPosition += chunk.length();
+                    _handler.content(chunk);
                     return fill_called;
                 }
             }
@@ -743,10 +749,8 @@ public class HttpParser implements HttpTokens
         {
         }
 
-        public void content(int index, Buffer ref) throws IOException
-        {
-        }
-
+        public abstract void content(Buffer ref) throws IOException;
+        
         public void messageComplete(int contextLength) throws IOException
         {
         }

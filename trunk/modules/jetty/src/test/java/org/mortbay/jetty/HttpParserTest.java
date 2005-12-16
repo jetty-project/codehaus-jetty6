@@ -335,11 +335,11 @@ public class HttpParserTest extends TestCase
     {   
         HttpFields fields;
         
-        public void content(int index, Buffer ref)
+        public void content(Buffer ref)
         {
-            if (index == 0)
-                _content= "";
-            _content= _content.substring(0, index) + ref;
+            if (_content==null)
+                _content="";
+            _content= _content + ref;
         }
 
 
@@ -356,7 +356,6 @@ public class HttpParserTest extends TestCase
                 f2=null;
             
             fields=new HttpFields();
-            // System.out.println(f0+" "+f1+" "+f2);
         }
 
         public void parsedHeader(Buffer name, Buffer value)
