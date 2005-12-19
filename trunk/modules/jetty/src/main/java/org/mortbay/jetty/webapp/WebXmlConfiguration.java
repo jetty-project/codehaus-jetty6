@@ -372,7 +372,7 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initFilter(XmlParser.Node node) throws ClassNotFoundException,UnavailableException
     {
-        FilterHolder holder= new FilterHolder();
+        FilterHolder holder= newFilterHolder();
         holder.setName(node.getString("filter-name",false,true));
         holder.setClassName(node.getString("filter-class",false,true));
 
@@ -455,7 +455,7 @@ public class WebXmlConfiguration implements Configuration
             }
         }
 
-        ServletHolder holder = new ServletHolder();
+        ServletHolder holder = newServletHolder();
         holder.setName(servlet_name);
         holder.setClassName(servlet_class);
         holder.setForcedPath(jsp_file);
@@ -803,4 +803,14 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initSecurityRole(XmlParser.Node node)
     {}
+
+    /* ------------------------------------------------------------ */
+    protected ServletHolder newServletHolder() {
+        return new ServletHolder();
+    }
+
+    /* ------------------------------------------------------------ */
+    protected FilterHolder newFilterHolder() {
+        return new FilterHolder();
+    }
 }
