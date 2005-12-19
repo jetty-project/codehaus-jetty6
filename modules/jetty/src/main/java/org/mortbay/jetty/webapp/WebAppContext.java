@@ -162,17 +162,26 @@ public class WebAppContext extends ContextHandler
     /* ------------------------------------------------------------ */
     public WebAppContext()
     {
-        _securityHandler = new SecurityHandler();
-        _sessionHandler = new SessionHandler();
-        _servletHandler = new ServletHandler();
+        this(null,null,null,null);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    {
+        _securityHandler = securityHandler!=null?securityHandler:new SecurityHandler();
+        _sessionHandler = sessionHandler!=null?sessionHandler:new SessionHandler();
+        _servletHandler = servletHandler!=null?servletHandler:new ServletHandler();
         
         setHandler(_securityHandler);
         _securityHandler.setHandler(_sessionHandler);
         _sessionHandler.setHandler(_servletHandler);
         
-        setErrorHandler(new WebAppErrorHandler());
+        setErrorHandler(errorHandler!=null?errorHandler:new WebAppErrorHandler());
     }
 
+    
+    
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
