@@ -193,8 +193,6 @@ public class WebAppClassLoader extends URLClassLoader
         boolean tried_parent= false;
         if (_context.isParentLoaderPriority() || isSystemPath(name))
         {
-            if (Log.isDebugEnabled())
-                Log.debug("try getResource " + name + " from " + _parent);
             tried_parent= true;
             
             if (_parent!=null)
@@ -203,8 +201,6 @@ public class WebAppClassLoader extends URLClassLoader
 
         if (url == null)
         {
-            if (Log.isDebugEnabled())
-                Log.debug("try findResource " + name + " from " + _urlClassPath);
             url= this.findResource(name);
 
             if (url == null && name.startsWith("/"))
@@ -217,15 +213,13 @@ public class WebAppClassLoader extends URLClassLoader
 
         if (url == null && !tried_parent)
         {
-            if (Log.isDebugEnabled())
-                Log.debug("try getResource " + name + " from " + _parent);
             if (_parent!=null)
                 url= _parent.getResource(name);
         }
 
         if (url != null)
             if (Log.isDebugEnabled())
-                Log.debug("found " + url);
+                Log.debug("getResource("+name+")=" + url);
 
         return url;
     }
@@ -319,8 +313,6 @@ public class WebAppClassLoader extends URLClassLoader
         boolean tried_parent= false;
         if (c == null && (_context.isParentLoaderPriority() || isSystemPath(name)) && !isServerPath(name) && _parent!=null)
         {
-            if (Log.isDebugEnabled())
-                Log.debug("try loadClass " + name + " from " + _parent);
             tried_parent= true;
             try
             {
@@ -336,13 +328,9 @@ public class WebAppClassLoader extends URLClassLoader
 
         if (c == null)
         {
-            if (Log.isDebugEnabled())
-                Log.debug("try findClass " + name + " from " + _urlClassPath);
             try
             {
                 c= this.findClass(name);
-                if (Log.isDebugEnabled())
-                    Log.debug("loaded " + c);
             }
             catch (ClassNotFoundException e)
             {
@@ -351,13 +339,7 @@ public class WebAppClassLoader extends URLClassLoader
         }
 
         if (c == null && !tried_parent && !isServerPath(name) && _parent!=null)
-        {
-            if (Log.isDebugEnabled())
-                Log.debug("try loadClass " + name + " from " + _parent);
             c= _parent.loadClass(name);
-            if (Log.isDebugEnabled())
-                Log.debug("loaded " + c);
-        }
 
         if (c == null)
             throw ex;
@@ -365,6 +347,9 @@ public class WebAppClassLoader extends URLClassLoader
         if (resolve)
             resolveClass(c);
 
+        if (Log.isDebugEnabled())
+            Log.debug("loaded " + c+ " from "+c.getClassLoader());
+        
         return c;
     }
 
