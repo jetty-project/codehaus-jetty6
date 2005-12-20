@@ -493,7 +493,10 @@ public class ContextHandler extends WrappedHandler implements Attributes
             base_request.setContext(_context);
             if (dispatch!=INCLUDE && target.startsWith("/"))
             {
-                base_request.setContextPath(_context.getContextPath());
+                if (_contextPath.length()==1)
+                    base_request.setContextPath("");
+                else
+                    base_request.setContextPath(_contextPath);
                 base_request.setServletPath(null);
                 base_request.setPathInfo(target);
             }
