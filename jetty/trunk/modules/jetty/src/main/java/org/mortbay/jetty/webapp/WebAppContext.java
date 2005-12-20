@@ -178,9 +178,7 @@ public class WebAppContext extends ContextHandler
         _sessionHandler.setHandler(_servletHandler);
         
         setErrorHandler(errorHandler!=null?errorHandler:new WebAppErrorHandler());
-    }
-
-    
+    }    
     
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
