@@ -317,7 +317,11 @@ public class HttpConnection
             {
                 _request.setRequestURI(_uri.getRawPath());
                 _request.setQueryString(_uri.getQuery());
-                _request.setPathInfo(URIUtil.canonicalPath(_uri.getPath()));
+                String path_info=URIUtil.canonicalPath(_uri.getPath());
+                int semi = path_info.indexOf(';');
+                if (semi>0)
+                    path_info=path_info.substring(0,semi);
+                _request.setPathInfo(path_info);
                 if (_out!=null)
                     _out.reopen();
                 
