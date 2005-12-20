@@ -109,8 +109,6 @@ public class Log
             log.debug(IGNORED,th);
             unwind(th);
         }
-        else
-            log.debug(IGNORED_FMT,th.toString(),null);
     }
     
     public static void info(String msg)
