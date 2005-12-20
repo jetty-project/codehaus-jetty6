@@ -372,7 +372,37 @@ public class LazyList
             return new ArrayList();
         return new ArrayList(Arrays.asList(array));
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public static Object[] addToArray(Object[] array, Object item)
+    {
+        Class c = array==null?item.getClass():array.getClass().getComponentType();
+        Object[] na = (Object[])Array.newInstance(c, Array.getLength(array)+1);
+        System.arraycopy(array, 0, na, 0, array.length);
+        na[array.length]=item;
+        return na;
+    }
+
+    /* ------------------------------------------------------------ */
+    public static Object[] removeFromArray(Object[] array, Object item)
+    {
+        if (item==null)
+            return array;
+        for (int i=array.length;i-->0;)
+        {
+            if (item.equals(array[i]))
+            {
+                Class c = array==null?item.getClass():array.getClass().getComponentType();
+                Object[] na = (Object[])Array.newInstance(c, Array.getLength(array)-1);
+                if (i>0)
+                    System.arraycopy(array, 0, na, 0, i);
+                if (i+1<array.length)
+                    System.arraycopy(array, i+1, na, i, array.length-(i+1));
+                return na;
+            }
+        }
+        return array;
+    }
     
 }
 
