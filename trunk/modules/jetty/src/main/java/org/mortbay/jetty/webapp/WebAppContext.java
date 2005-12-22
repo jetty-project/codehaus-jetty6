@@ -531,7 +531,7 @@ public class WebAppContext extends ContextHandler
             // Accept aliases for WAR files
             if (web_app.getAlias() != null)
             {
-                Log.info(web_app + " anti-aliased to " + web_app.getAlias());
+                Log.debug(web_app + " anti-aliased to " + web_app.getAlias());
                 web_app= Resource.newResource(web_app.getAlias());
             }
 

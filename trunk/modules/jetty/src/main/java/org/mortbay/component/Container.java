@@ -40,16 +40,16 @@ import org.mortbay.util.LazyList;
  */
 public class Container
 {
-    private static Object __listeners;
+    private Object _listeners;
     
-    public synchronized static void addEventListener(Container.Listener listener)
+    public synchronized void addEventListener(Container.Listener listener)
     {
-        __listeners=LazyList.add(__listeners,listener);
+        _listeners=LazyList.add(_listeners,listener);
     }
     
-    public synchronized static void removeEventListener(Container.Listener listener)
+    public synchronized void removeEventListener(Container.Listener listener)
     {
-        __listeners=LazyList.remove(__listeners,listener);
+        _listeners=LazyList.remove(_listeners,listener);
     }
     
     /* ------------------------------------------------------------ */
@@ -59,7 +59,7 @@ public class Container
      * @param child The current child. If this is non null and differs from <code>oldChild</code>, then an add event is generated.
      * @param relationship The name of the relationship
      */
-    public synchronized static void update(Object parent, Object oldChild, final Object child, String relationship)
+    public synchronized void update(Object parent, Object oldChild, final Object child, String relationship)
     {
         if (oldChild!=null && !oldChild.equals(child))
             remove(parent,oldChild,relationship);
@@ -71,10 +71,11 @@ public class Container
     /** Update multiple parent to child relationship.
      * @param parent The parent of the child.
      * @param oldChildren The previous array of children.  A remove event is generated for any child in this array but not in the  <code>children</code> array.
+     * This array is modified and children that remain in the new children array are nulled out of the old children array.
      * @param children The current array of children. An add event is generated for any child in this array but not in the <code>oldChildren</code> array.
      * @param relationship The name of the relationship
      */
-    public synchronized static void update(Object parent, Object[] oldChildren, final Object[] children, String relationship)
+    public synchronized void update(Object parent, Object[] oldChildren, final Object[] children, String relationship)
     {
         Object[] newChildren = null;
         if (children!=null)
@@ -106,7 +107,6 @@ public class Container
             {
                 if (oldChildren[i]!=null)
                     remove(parent,oldChildren[i],relationship);
-                oldChildren[i]=null;
             }
         }
         
@@ -124,15 +124,15 @@ public class Container
      * @param child
      * @param relationship
      */
-    private static void add(Object parent, Object child, String relationship)
+    private void add(Object parent, Object child, String relationship)
     {
         if (Log.isDebugEnabled())
             Log.debug("Container "+parent+" + "+child+" as "+relationship);
-        if (__listeners!=null)
+        if (_listeners!=null)
         {
             Event event=new Event(parent,child,relationship);
-            for (int i=0; i<LazyList.size(__listeners); i++)
-                ((Listener)LazyList.get(__listeners, i)).add(event);
+            for (int i=0; i<LazyList.size(_listeners); i++)
+                ((Listener)LazyList.get(_listeners, i)).add(event);
         }
     }
     
@@ -142,15 +142,15 @@ public class Container
      * @param child
      * @param relationship
      */
-    private static void remove(Object parent, Object child, String relationship)
+    private void remove(Object parent, Object child, String relationship)
     {
         if (Log.isDebugEnabled())
             Log.debug("Container "+parent+" - "+child+" as "+relationship);
-        if (__listeners!=null)
+        if (_listeners!=null)
         {
             Event event=new Event(parent,child,relationship);
-            for (int i=0; i<LazyList.size(__listeners); i++)
-                ((Listener)LazyList.get(__listeners, i)).remove(event);
+            for (int i=0; i<LazyList.size(_listeners); i++)
+                ((Listener)LazyList.get(_listeners, i)).remove(event);
         }
     }
     

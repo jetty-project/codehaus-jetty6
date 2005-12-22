@@ -32,170 +32,171 @@ import org.mortbay.util.TypeUtil;
 
 public class MBeanContainer implements Container.Listener
 {
-   private final MBeanServer _server;
-   private volatile int _managementPort;
-   private final WeakHashMap _beans = new WeakHashMap();
-   private final HashMap _unique = new HashMap();
-  
-   public synchronized ObjectName findMBean(Object object)
-   {
-      return (ObjectName)_beans.get(object);
-   }
-  
-   public synchronized Object findBean(ObjectName oname)
-   {
-      for (Iterator iter = _beans.entrySet().iterator(); iter.hasNext();)
-      {
-         Map.Entry entry = (Map.Entry)iter.next();
-         if (entry.getValue().equals(oname))
-            return entry.getKey();
-      }
-      return null;
-   }
-  
-   public MBeanContainer(MBeanServer server)
-   {
-      this._server = server;
-      Container.addEventListener(this);
-   }
-  
-   public void setManagementPort(int port)
-   {
-      this._managementPort = port;
-   }
-  
-   public void start()
-   {
-      if (_managementPort > 0)
-      {
-         try
-         {
-            Log.warn("HttpAdaptor for mx4j is not secure");
+    private final MBeanServer _server;
+    private volatile int _managementPort;
+    private final WeakHashMap _beans = new WeakHashMap();
+    private final HashMap _unique = new HashMap();
 
-            PrivateMLet mlet = new PrivateMLet(new URL[0], Thread.currentThread().getContextClassLoader(), false);
-            ObjectName mletName = ObjectName.getInstance("mx4j", "name", "HttpAdaptorLoader");
-            _server.registerMBean(mlet, mletName);
+    public synchronized ObjectName findMBean(Object object)
+    {
+        return (ObjectName) _beans.get(object);
+    }
 
-            ObjectName adaptorName = ObjectName.getInstance("mx4j", "name", "HttpAdaptor");
-            _server.createMBean("mx4j.tools.adaptor.http.HttpAdaptor", adaptorName, mletName);
-            _server.setAttribute(adaptorName, new Attribute("Port", new Integer(_managementPort)));
-            _server.setAttribute(adaptorName, new Attribute("Host", "localhost"));
+    public synchronized Object findBean(ObjectName oname)
+    {
+        for (Iterator iter = _beans.entrySet().iterator(); iter.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+            if (entry.getValue().equals(oname))
+                return entry.getKey();
+        }
+        return null;
+    }
 
-            ObjectName processorName = ObjectName.getInstance("mx4j", "name", "XSLTProcessor");
-            _server.createMBean("mx4j.tools.adaptor.http.XSLTProcessor", processorName, mletName);
-            _server.setAttribute(adaptorName, new Attribute("ProcessorName", processorName));
+    public MBeanContainer(MBeanServer server, Container container)
+    {
+        this._server = server;
+        container.addEventListener(this);
+    }
 
-            _server.invoke(adaptorName, "start", null, null);
+    public void setManagementPort(int port)
+    {
+        this._managementPort = port;
+    }
 
-            Runtime.getRuntime().addShutdownHook(new ShutdownHook(mletName, adaptorName, processorName));
-         }
-         catch (Exception e)
-         {
-              Log.warn(e);
-         }
-      }
-   }
-  
-   public void add(Event event)
-   {
-      addBean(event.getParent());
-      addBean(event.getChild());
-   }
+    public void start()
+    {
+        if (_managementPort > 0)
+        {
+            try
+            {
+                Log.warn("HttpAdaptor for mx4j is not secure");
 
-   public void remove(Event event)
-   {
-      ObjectName oname = findMBean(event.getChild());
-      if (oname != null)
-      {
-         try
-         {
-            _server.unregisterMBean(oname);
-            Log.info("Unregistered " + oname);
-         }
-         catch (Exception e)
-         {
+                PrivateMLet mlet = new PrivateMLet(new URL[0], Thread.currentThread().getContextClassLoader(), false);
+                ObjectName mletName = ObjectName.getInstance("mx4j", "name", "HttpAdaptorLoader");
+                _server.registerMBean(mlet, mletName);
+
+                ObjectName adaptorName = ObjectName.getInstance("mx4j", "name", "HttpAdaptor");
+                _server.createMBean("mx4j.tools.adaptor.http.HttpAdaptor", adaptorName, mletName);
+                _server.setAttribute(adaptorName, new Attribute("Port", new Integer(_managementPort)));
+                _server.setAttribute(adaptorName, new Attribute("Host", "localhost"));
+
+                ObjectName processorName = ObjectName.getInstance("mx4j", "name", "XSLTProcessor");
+                _server.createMBean("mx4j.tools.adaptor.http.XSLTProcessor", processorName, mletName);
+                _server.setAttribute(adaptorName, new Attribute("ProcessorName", processorName));
+
+                _server.invoke(adaptorName, "start", null, null);
+
+                Runtime.getRuntime().addShutdownHook(new ShutdownHook(mletName, adaptorName, processorName));
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+            }
+        }
+    }
+
+    public void add(Event event)
+    {
+        addBean(event.getParent());
+        addBean(event.getChild());
+    }
+
+    public void remove(Event event)
+    {
+        ObjectName oname = findMBean(event.getChild());
+        if (oname != null)
+        {
+            try
+            {
+                _server.unregisterMBean(oname);
+                Log.debug("Unregistered {}", oname);
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+            }
+        }
+    }
+
+    private synchronized void addBean(Object bean)
+    {
+        try
+        {
+            if (bean == null || _beans.containsKey(bean))
+                return;
+            Object mbean = ObjectMBean.mbeanFor(bean);
+            if (mbean == null)
+                return;
+
+            if (mbean instanceof ObjectMBean)
+                ((ObjectMBean) mbean).setMBeanContainer(this);
+
+            String name = bean.getClass().getName().toLowerCase();
+            int dot = name.lastIndexOf('.');
+            if (dot >= 0)
+                name = name.substring(dot + 1);
+            Integer count = (Integer) _unique.get(name);
+            count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
+            _unique.put(name, count);
+
+            ObjectName oname = ObjectName.getInstance("", name, String.valueOf(count));
+
+            ObjectInstance oinstance = _server.registerMBean(mbean, oname);
+            Log.debug("Registered {}" , oinstance.getObjectName());
+            _beans.put(bean, oinstance.getObjectName());
+
+        }
+        catch (Exception e)
+        {
             Log.warn(e);
-         }
-      }
-   }
+        }
+    }
 
-   private synchronized void addBean(Object bean)
-   {
-      try
-      {
-         if (bean == null || _beans.containsKey(bean))
-            return;
-         Object mbean = ObjectMBean.mbeanFor(bean);
-         if (mbean == null)
-            return;
+    private class ShutdownHook extends Thread
+    {
+        private final ObjectName mletName;
+        private final ObjectName adaptorName;
+        private final ObjectName processorName;
 
-         if (mbean instanceof ObjectMBean) ((ObjectMBean)mbean).setMBeanContainer(this);
+        public ShutdownHook(ObjectName mletName, ObjectName adaptorName, ObjectName processorName)
+        {
+            this.mletName = mletName;
+            this.adaptorName = adaptorName;
+            this.processorName = processorName;
+        }
 
-         String name = bean.getClass().getName().toLowerCase();
-         int dot = name.lastIndexOf('.');
-         if (dot >= 0)
-            name = name.substring(dot + 1);
-         Integer count = (Integer)_unique.get(name);
-         count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
-         _unique.put(name, count);
+        public void run()
+        {
+            halt();
+            unregister(processorName);
+            unregister(adaptorName);
+            unregister(mletName);
+        }
 
-         ObjectName oname = ObjectName.getInstance("", name, String.valueOf(count));
+        private void halt()
+        {
+            try
+            {
+                _server.invoke(adaptorName, "stop", null, null);
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+            }
+        }
 
-         ObjectInstance oinstance = _server.registerMBean(mbean, oname);
-         Log.info("Registered " + oinstance.getObjectName());
-         _beans.put(bean, oinstance.getObjectName());
-
-      }
-      catch (Exception e)
-      {
-         Log.warn(e);
-      }
-   }
-
-   private class ShutdownHook extends Thread
-   {
-      private final ObjectName mletName;
-      private final ObjectName adaptorName;
-      private final ObjectName processorName;
-
-      public ShutdownHook(ObjectName mletName, ObjectName adaptorName, ObjectName processorName)
-      {
-         this.mletName = mletName;
-         this.adaptorName = adaptorName;
-         this.processorName = processorName;
-      }
-
-      public void run()
-      {
-         halt();
-         unregister(processorName);
-         unregister(adaptorName);
-         unregister(mletName);
-      }
-
-      private void halt()
-      {
-         try
-         {
-            _server.invoke(adaptorName, "stop", null, null);
-         }
-         catch (Exception e)
-         {
-            Log.warn(e);
-         }
-      }
-
-      private void unregister(ObjectName objectName)
-      {
-         try
-         {
-            _server.unregisterMBean(objectName);
-            Log.debug("Unregistered " + objectName);
-         }
-         catch (Exception e)
-         {
-            Log.warn(e);
-         }
-      }
-   }
+        private void unregister(ObjectName objectName)
+        {
+            try
+            {
+                _server.unregisterMBean(objectName);
+                Log.debug("Unregistered " + objectName);
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+            }
+        }
+    }
 }

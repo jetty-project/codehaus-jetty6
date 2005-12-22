@@ -58,7 +58,6 @@ public class SocketConnector extends AbstractConnector
     {
         // Create a new server socket and set to non blocking mode
         _serverSocket= newServerSocket(getAddress(),getAcceptQueueSize());
-        Log.info("Opened {}",_serverSocket);
     }
 
     /* ------------------------------------------------------------ */

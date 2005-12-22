@@ -56,11 +56,6 @@ public class ContainmentMap implements Container.Listener
         }
     }
 
-    public static void enable()
-    {
-        Container.addEventListener(instance=new ContainmentMap());
-    }
-    
     public static void dump()
     {
         Log.debug(instance._map.toString());

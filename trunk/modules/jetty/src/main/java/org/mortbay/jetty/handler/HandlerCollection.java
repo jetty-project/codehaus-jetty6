@@ -56,10 +56,15 @@ public class HandlerCollection extends AbstractHandler implements Handler
      */
     public void setHandlers(Handler[] handlers)
     {
+        if (getServer()!=null)
+            getServer().getContainer().update(this, _handlers, handlers, "handler");
+        
         for (int i=0;_handlers!=null && i<_handlers.length;i++)
-            _handlers[i].setServer(null);
-        Container.update(this, _handlers, handlers, "handler");
+            if (_handlers[i]!=null)
+                _handlers[i].setServer(null);
+        
         _handlers = handlers;
+        
         for (int i=0;_handlers!=null && i<_handlers.length;i++)
             _handlers[i].setServer(getServer());
     }
@@ -141,10 +146,16 @@ public class HandlerCollection extends AbstractHandler implements Handler
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
+        if (getServer()!=null && getServer()!=server)
+            getServer().getContainer().update(this, _handlers, null, "handler");
+        if (server!=null && getServer()!=server)
+            server.getContainer().update(this, null,_handlers, "handler");
+            
         super.setServer(server);
         Handler[] h=getHandlers();
         for (int i=0;h!=null && i<h.length;i++)
             h[i].setServer(server);
+
     }
 
     
