@@ -539,7 +539,10 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        String name = this.getClass().getSimpleName();
+        String name = this.getClass().getName();
+        int dot = name.lastIndexOf('.');
+        if (dot>0)
+            name=name.substring(dot+1);
         
         return name+" @ "+(getHost()==null?"0.0.0.0":getHost())+":"+getPort();
     }
