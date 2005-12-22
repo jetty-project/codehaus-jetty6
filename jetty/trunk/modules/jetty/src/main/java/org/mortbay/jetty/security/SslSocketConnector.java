@@ -279,7 +279,6 @@ public class SslSocketConnector extends SocketConnector
                 }            
             }
             
-            Log.info("JsseListener.needClientAuth=" + _needClientAuth);
         }
         catch (IOException e)
         {

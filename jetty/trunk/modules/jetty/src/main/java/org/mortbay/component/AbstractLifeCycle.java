@@ -35,18 +35,18 @@ public abstract class AbstractLifeCycle implements LifeCycle
                 return;
             _state=STARTING;
             doStart();
-            Log.info("started {}",this);
+            Log.debug("started {}",this);
             _state=STARTED;
         }
         catch (Exception e)
         {
-            Log.info("failed {}",this);
+            Log.warn("failed {}",this);
             _state=FAILED;
             throw e;
         }
         catch(Error e)
         {
-            Log.info("failed {}",this);
+            Log.warn("failed {}",this);
             _state=FAILED;
             throw e;
         }
@@ -60,18 +60,18 @@ public abstract class AbstractLifeCycle implements LifeCycle
                 return;
             _state=STOPPING;
             doStop();
-            Log.info("stopped {}",this);
+            Log.debug("stopped {}",this);
             _state=STOPPED;
         }
         catch (Exception e)
         {
-            Log.info("failed {}",this);
+            Log.debug("failed {}",this);
             _state=FAILED;
             throw e;
         }
         catch(Error e)
         {
-            Log.info("failed {}",this);
+            Log.debug("failed {}",this);
             _state=FAILED;
             throw e;
         }

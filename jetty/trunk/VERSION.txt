@@ -1,4 +1,6 @@
 
+    + removed singleton Container
+    + reduced info verbosity
     + null dispatch attributes not in names
 
 Jetty-6.0.0Beta6

@@ -129,9 +129,15 @@ public class ContextHandler extends WrappedHandler implements Attributes
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
+        if (getServer()!=null && getServer()!=server)
+            getServer().getContainer().update(this, _errorHandler, null, "error");
+        
+        if (server!=null && getServer()!=server)
+            server.getContainer().update(this, null, _errorHandler, "error");
+        
         super.setServer(server);
         if (_errorHandler!=null)
-            _errorHandler.setServer(server);
+            _errorHandler.setServer(server);  
     }
 
     /* ------------------------------------------------------------ */
@@ -778,7 +784,8 @@ public class ContextHandler extends WrappedHandler implements Attributes
     {
         if (_errorHandler!=null)
             _errorHandler.setServer(null);
-        Container.update(this, _errorHandler, errorHandler, "errorHandler");
+        if (getServer()!=null)
+            getServer().getContainer().update(this, _errorHandler, errorHandler, "errorHandler");
         _errorHandler = errorHandler;
         if (_errorHandler!=null)
             _errorHandler.setServer(getServer());

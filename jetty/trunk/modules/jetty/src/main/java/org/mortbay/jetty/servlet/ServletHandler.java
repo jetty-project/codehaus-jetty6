@@ -38,6 +38,7 @@ import org.mortbay.component.Container;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
@@ -81,7 +82,7 @@ public class ServletHandler extends AbstractHandler
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
     private ContextHandler.Context _servletContext;
-    private FilterHolder[] _filterHolders;
+    private FilterHolder[] _filters;
     private FilterMapping[] _filterMappings;
     private boolean _filterChainsCached=true;
     
@@ -108,6 +109,30 @@ public class ServletHandler extends AbstractHandler
     {
     }
 
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.handler.AbstractHandler#setServer(org.mortbay.jetty.Server)
+     */
+    public void setServer(Server server)
+    {
+        if (getServer()!=null && getServer()!=server)
+        {
+            getServer().getContainer().update(this, _filters, null, "filter");
+            getServer().getContainer().update(this, _filterMappings, null, "filterMapping");
+            getServer().getContainer().update(this, _servlets, null, "servlet");
+            getServer().getContainer().update(this, _servletMappings, null, "servletMapping");
+        }
+        if (server!=null && getServer()!=server)
+        {
+            server.getContainer().update(this, null, _filters, "filter");
+            server.getContainer().update(this, null, _filterMappings, "filterMapping");
+            server.getContainer().update(this, null, _servlets, "servlet");
+            server.getContainer().update(this, null, _servletMappings, "servletMapping");
+        }
+        super.setServer(server);
+        
+    }
+
     /* ----------------------------------------------------------------- */
     protected synchronized void doStart()
         throws Exception
@@ -120,7 +145,7 @@ public class ServletHandler extends AbstractHandler
         if (isInitializeAtStart())
             initialize();
 
-        if(_filterChainsCached && _filterHolders!=null && _filterHolders.length>0)
+        if(_filterChainsCached && _filters!=null && _filters.length>0)
         {
             _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
             _namedChainCache=new HashMap[]{null,null,new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
@@ -135,11 +160,11 @@ public class ServletHandler extends AbstractHandler
         super.doStop();
         
         // Stop filters
-        if (_filterHolders!=null)
+        if (_filters!=null)
         {
-            for (int i=_filterHolders.length; i-->0;)
+            for (int i=_filters.length; i-->0;)
             {
-                try { _filterHolders[i].stop(); }catch(Exception e){Log.warn(Log.EXCEPTION,e);}
+                try { _filters[i].stop(); }catch(Exception e){Log.warn(Log.EXCEPTION,e);}
             }
         }
         
@@ -185,7 +210,7 @@ public class ServletHandler extends AbstractHandler
      */
     public FilterHolder[] getFilters()
     {
-        return _filterHolders;
+        return _filters;
     }
     
     /* ------------------------------------------------------------ */
@@ -510,10 +535,10 @@ public class ServletHandler extends AbstractHandler
         MultiException mx = new MultiException();
 
         // Start filters
-        if (_filterHolders!=null)
+        if (_filters!=null)
         {
-            for (int i=_filterHolders.length; i-->0;)
-                _filterHolders[i].start();
+            for (int i=_filters.length; i-->0;)
+                _filters[i].start();
         }
         
         if (_servlets!=null)
@@ -608,17 +633,17 @@ public class ServletHandler extends AbstractHandler
         
         
         // update filter name map
-        if (_filterHolders==null)
+        if (_filters==null)
         {
             _filterNameMap=null;
         }
         else
         {   
             HashMap nm = new HashMap();
-            for (int i=0;i<_filterHolders.length;i++)
+            for (int i=0;i<_filters.length;i++)
             {
-                nm.put(_filterHolders[i].getName(),_filterHolders[i]);
-                _filterHolders[i].setServletHandler(this);
+                nm.put(_filters[i].getName(),_filters[i]);
+                _filters[i].setServletHandler(this);
             }
             _filterNameMap=nm;
         }
@@ -709,7 +734,8 @@ public class ServletHandler extends AbstractHandler
      */
     public void setFilterMappings(FilterMapping[] filterMappings)
     {
-        Container.update(this,_filterMappings,filterMappings,"filterMapping");
+        if (getServer()!=null)
+            getServer().getContainer().update(this,_filterMappings,filterMappings,"filterMapping");
         _filterMappings = filterMappings;
         if (isStarted())
             updateMappings();
@@ -721,8 +747,9 @@ public class ServletHandler extends AbstractHandler
      */
     public synchronized void setFilters(FilterHolder[] holders)
     {
-        Container.update(this,_filterHolders,holders,"filter");
-        _filterHolders=holders;
+        if (getServer()!=null)
+            getServer().getContainer().update(this,_filters,holders,"filter");
+        _filters=holders;
     }
     
     /* ------------------------------------------------------------ */
@@ -731,7 +758,8 @@ public class ServletHandler extends AbstractHandler
      */
     public void setServletMappings(ServletMapping[] servletMappings)
     {
-        Container.update(this,_servletMappings,servletMappings,"servletMapping");
+        if (getServer()!=null)
+            getServer().getContainer().update(this,_servletMappings,servletMappings,"servletMapping");
         _servletMappings = servletMappings;
         if (isStarted())
             updateMappings();
@@ -743,7 +771,8 @@ public class ServletHandler extends AbstractHandler
      */
     public synchronized void setServlets(ServletHolder[] holders)
     {
-        Container.update(this,_servlets,holders,"servlet");
+        if (getServer()!=null)
+            getServer().getContainer().update(this,_servlets,holders,"servlet");
         _servlets=holders;
         updateMappings();
     }
