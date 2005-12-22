@@ -262,6 +262,9 @@ public class HttpParser implements HttpTokens
 
         // EventHandler header
         byte ch;
+        byte[] array = _buffer.array();
+        Buffer cached = null;
+        
         while (_state < STATE_END && length-->0)
         {
             ch = _buffer.get();
@@ -374,9 +377,10 @@ public class HttpParser implements HttpTokens
                     else
                     {
                         // handler last header if any
-                        if (_tok0.length() > 0 || _tok1.length() > 0 || _multiLineValue != null)
+                        if (cached!=null || _tok0.length() > 0 || _tok1.length() > 0 || _multiLineValue != null)
                         {
-                            Buffer header = HttpHeaders.CACHE.lookup(_tok0);
+                            Buffer header = cached!=null?cached:HttpHeaders.CACHE.lookup(_tok0);
+                            cached=null;
                             Buffer value = _multiLineValue == null ? (Buffer) _tok1 : (Buffer) new ByteArrayBuffer(_multiLineValue);
 
                             int ho = HttpHeaders.CACHE.getOrdinal(header);
@@ -493,6 +497,14 @@ public class HttpParser implements HttpTokens
                             _length = 1;
                             _buffer.mark();
                             _state = STATE_HEADER_NAME;
+                            
+                            // try cached name!
+                            cached = HttpHeaders.CACHE.getBest(array, _buffer.markIndex(), length+1);
+                            if (cached!=null)
+                            {
+                                _length=cached.length();
+                                _buffer.setGetIndex(_buffer.markIndex()+_length);
+                            }
                         }
                     }
                     break;
@@ -507,7 +519,7 @@ public class HttpParser implements HttpTokens
                     }
                     else if (ch == COLON)
                     {
-                        if (_length > 0)
+                        if (_length > 0 && cached==null)
                                 _tok0.update(_buffer.markIndex(), _buffer.markIndex() + _length);
                         _length = -1;
                         _state = STATE_HEADER_VALUE;
@@ -515,7 +527,6 @@ public class HttpParser implements HttpTokens
                     else if (ch != SPACE && ch != TAB)
                     {
                         // Drag the mark
-                        // TODO - is this the most efficient way?
                         if (_length == -1) _buffer.mark();
                         _length = _buffer.getIndex() - _buffer.markIndex();
                     }
