@@ -60,7 +60,8 @@ public class WrappedHandler extends AbstractHandler
     {
         if (_handler!=null)
             _handler.setServer(null);
-        Container.update(this, _handler, handler, "handler");
+        if (getServer()!=null)
+            getServer().getContainer().update(this, _handler, handler, "handler");
         _handler = handler;
         if (_handler!=null)
             _handler.setServer(getServer());
@@ -103,9 +104,16 @@ public class WrappedHandler extends AbstractHandler
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
+        if (getServer()!=null && getServer()!=server)
+            getServer().getContainer().update(this, _handler, null, "handler");
+        if (server!=null && getServer()!=server)
+            server.getContainer().update(this, null,_handler, "handler");
+            
         super.setServer(server);
         Handler h=getHandler();
         if (h!=null)
             h.setServer(server);
+        
+            
     }
 }

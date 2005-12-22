@@ -9,5 +9,5 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
 -->
 
 <Configure class="org.mortbay.jetty.webapp.WebAppContext">
-  <Call class="org.mortbay.log.Log" name="info"><Arg>Jetty Web XML</Arg></Call>
+  <Call class="org.mortbay.log.Log" name="debug"><Arg>executing jetty-web.xml</Arg></Call>
 </Configure>

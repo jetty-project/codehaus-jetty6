@@ -11,11 +11,13 @@
     <!-- Initialize management framework                             -->
     <!-- =========================================================== -->
     <!--
-    <Call id="mbeanServer" class="javax.management.MBeanServerFactory" name="createMBeanServer">
+    <Call id="MBeanServer" class="javax.management.MBeanServerFactory" name="createMBeanServer">
        <Arg>org.mortbay.jetty</Arg>
     </Call>
+    <Get id="Container" name="container"/>
     <New class="org.mortbay.management.MBeanContainer">
-      <Arg><Ref id="mbeanServer" /></Arg>
+      <Arg><Ref id="MBeanServer" /></Arg>
+      <Arg><Ref id="Container"/></Arg>
       <Set name="managementPort">8082</Set>
       <Call name="start" />
     </New>
@@ -37,9 +39,9 @@
     <!-- One of each type!                                           -->
     <!-- =========================================================== -->
     <Set name="connectors">
-      <Array type="org.mortbay.jetty.Connector"> 
-      
-        <!-- Use this connector if NIO is not available. 
+      <Array type="org.mortbay.jetty.Connector">
+
+        <!-- Use this connector if NIO is not available.
         <Item>
           <New class="org.mortbay.jetty.bio.SocketConnector">
             <Set name="port">8080</Set>
@@ -47,7 +49,7 @@
           </New>
         </Item>
         -->
-        
+
         <!-- Use this connector for few very active connections.
         <Item>
           <New class="org.mortbay.jetty.nio.BlockingChannelConnector">
@@ -113,28 +115,28 @@
             <Set name="resourceBase">./javadoc</Set>
             <Set name="handler">
               <New id="javadocServletHandler" class="org.mortbay.jetty.servlet.ServletHandler">
-		<Set name="servlets">
-		    <Array type="org.mortbay.jetty.servlet.ServletHolder">
-			<Item>
-			   <New class="org.mortbay.jetty.servlet.ServletHolder">
-			       <Set name="name">Default</Set>
-			       <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
-			   </New>
-			</Item>
-		     </Array>
-		 </Set>
+                <Set name="servlets">
+                    <Array type="org.mortbay.jetty.servlet.ServletHolder">
+                        <Item>
+                           <New class="org.mortbay.jetty.servlet.ServletHolder">
+                               <Set name="name">Default</Set>
+                               <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
+                           </New>
+                        </Item>
+                     </Array>
+                 </Set>
 
-		<Set name="servletMappings">
-		    <Array type="org.mortbay.jetty.servlet.ServletMapping">
-			<Item>
-			   <New class="org.mortbay.jetty.servlet.ServletMapping">
-			     <Set name="pathSpec">/</Set>
-			     <Set name="servletName">Default</Set>
-			   </New>
-			</Item>
-		    </Array>
-		</Set>
-	      </New>
+                <Set name="servletMappings">
+                    <Array type="org.mortbay.jetty.servlet.ServletMapping">
+                        <Item>
+                           <New class="org.mortbay.jetty.servlet.ServletMapping">
+                             <Set name="pathSpec">/</Set>
+                             <Set name="servletName">Default</Set>
+                           </New>
+                        </Item>
+                    </Array>
+                </Set>
+              </New>
             </Set>
           </New>
         </Item>

@@ -306,6 +306,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         _acceptorThread=new Thread[getAcceptors()];
         for (int i=0;i<_acceptorThread.length;i++)
             _threadPool.dispatch(new Acceptor(i));
+        
+        Log.info("Started {}",this);
     }
     
     /* ------------------------------------------------------------ */
@@ -537,7 +539,9 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "Connector "+getHost()+":"+getPort();
+        String name = this.getClass().getSimpleName();
+        
+        return name+" @ "+(getHost()==null?"0.0.0.0":getHost())+":"+getPort();
     }
     
     
@@ -559,7 +563,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             _acceptorThread[_acceptor]=Thread.currentThread();
             String name =_acceptorThread[_acceptor].getName();
             _acceptorThread[_acceptor].setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
-            Log.info("Starting " + this);
+            Log.debug("Starting " + this);
             try
             {
                 while (isRunning() && getThreadPool().isRunning())
@@ -580,11 +584,12 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             }
             finally
             {   
-                Log.info("Stopping " + this);
+                Log.debug("Stopping " + this);
                 Thread.currentThread().setName(name);
                 try
                 {
-                    close();
+                    if (_acceptor==0)
+                        close();
                 }
                 catch (IOException e)
                 {

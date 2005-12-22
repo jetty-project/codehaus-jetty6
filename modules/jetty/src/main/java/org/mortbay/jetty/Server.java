@@ -53,11 +53,21 @@ public class Server extends HandlerCollection
     private Connector[] _connectors;
     private UserRealm[] _realms;
     private Handler _notFoundHandler;
+    private Container _container=new Container();
     
     /* ------------------------------------------------------------ */
     public Server()
     {
         setServer(this);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the container.
+     */
+    public Container getContainer()
+    {
+        return _container;
     }
 
     /* ------------------------------------------------------------ */
@@ -91,18 +101,21 @@ public class Server extends HandlerCollection
      */
     public void setConnectors(Connector[] connectors)
     {
+        _container.update(this, _connectors, connectors, "connector");
         if (_connectors!=null)
         {
             for (int i=0;i<_connectors.length;i++)
-                _connectors[i].setServer(null);
+                if (_connectors[i]!=null)
+                    _connectors[i].setServer(null);
         }
+
+        _connectors = connectors;
+        
         if (connectors!=null)
         {
             for (int i=0;i<connectors.length;i++)
                 connectors[i].setServer(this);
         }
-        Container.update(this, _connectors, connectors, "connector");
-        _connectors = connectors;
     }
     
     /* ------------------------------------------------------------ */
@@ -120,7 +133,7 @@ public class Server extends HandlerCollection
      */
     public void setThreadPool(ThreadPool threadPool)
     {
-        Container.update(this,_threadPool,threadPool, "threadpool");
+        _container.update(this,_threadPool,threadPool, "threadpool");
         _threadPool = threadPool;
     }
     
@@ -279,7 +292,7 @@ public class Server extends HandlerCollection
      */
     public void setUserRealms(UserRealm[] realms)
     {
-        Container.update(this,_realms,realms, "realm");
+        _container.update(this,_realms,realms, "realm");
         _realms=realms;
     }
     
@@ -298,9 +311,10 @@ public class Server extends HandlerCollection
      */
     public void setNotFoundHandler(Handler notFoundHandler)
     {
-        Container.update(this, _notFoundHandler, notFoundHandler, "notFoundHandler");
+        _container.update(this, _notFoundHandler, notFoundHandler, "notFoundHandler");
         _notFoundHandler = notFoundHandler;
     }
+    
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
