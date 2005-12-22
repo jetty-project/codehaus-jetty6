@@ -29,6 +29,7 @@ public class HttpHeaders extends BufferCache
      */
     public final static String 
         CONNECTION= "Connection",
+        CACHE_CONTROL= "Cache-Control",
         DATE= "Date",
         PRAGMA= "Pragma",
         TRAILER= "Trailer",
@@ -68,7 +69,7 @@ public class HttpHeaders extends BufferCache
         IF_NONE_MATCH= "If-None-Match",
         IF_RANGE= "If-Range",
         IF_UNMODIFIED_SINCE= "If-Unmodified-Since",
-        KEEP_ALIVE= "keep-alive",
+        KEEP_ALIVE= "Keep-Alive",
         MAX_FORWARDS= "Max-Forwards",
         PROXY_AUTHORIZATION= "Proxy-Authorization",
         RANGE= "Range",
@@ -156,13 +157,13 @@ public class HttpHeaders extends BufferCache
         SET_COOKIE_ORDINAL= 53,
         SET_COOKIE2_ORDINAL= 54,
         MIME_VERSION_ORDINAL= 55,
-        IDENTITY_ORDINAL= 56;
+        IDENTITY_ORDINAL= 56,
+        CACHE_CONTROL_ORDINAL=57;
 
     public final static HttpHeaders CACHE= new HttpHeaders();
-
+    
     public final static Buffer
         HOST_BUFFER=CACHE.add(HOST,HOST_ORDINAL),
-
         ACCEPT_BUFFER=CACHE.add(ACCEPT,ACCEPT_ORDINAL),
         ACCEPT_CHARSET_BUFFER=CACHE.add(ACCEPT_CHARSET,ACCEPT_CHARSET_ORDINAL),
         ACCEPT_ENCODING_BUFFER=CACHE.add(ACCEPT_ENCODING,ACCEPT_ENCODING_ORDINAL),
@@ -170,6 +171,7 @@ public class HttpHeaders extends BufferCache
         
         CONTENT_LENGTH_BUFFER=CACHE.add(CONTENT_LENGTH,CONTENT_LENGTH_ORDINAL),
         CONNECTION_BUFFER=CACHE.add(CONNECTION,CONNECTION_ORDINAL),
+        CACHE_CONTROL_BUFFER=CACHE.add(CACHE_CONTROL,CACHE_CONTROL_ORDINAL),
         DATE_BUFFER=CACHE.add(DATE,DATE_ORDINAL),
         PRAGMA_BUFFER=CACHE.add(PRAGMA,PRAGMA_ORDINAL),
         TRAILER_BUFFER=CACHE.add(TRAILER,TRAILER_ORDINAL),

@@ -39,7 +39,7 @@ import java.util.Set;
 public class StringMap extends AbstractMap implements Externalizable
 {
     public static final boolean CASE_INSENSTIVE=true;
-    protected static final int __HASH_WIDTH=9;
+    protected static final int __HASH_WIDTH=17;
     
     /* ------------------------------------------------------------ */
     protected int _width=__HASH_WIDTH;
@@ -364,17 +364,19 @@ public class StringMap extends AbstractMap implements Externalizable
             return null;
         return node;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Get a map entry by byte array key.
-     * @param buffer byte buffer containing the key. A simple ASCII byte
-     * to char mapping is used.
+    /** Get a map entry by byte array key, using as much of the passed key as needed for a match.
+     * A simple 8859-1 byte to char mapping is assumed.
+     * @param key char array containing the key
+     * @param offset Offset of the key within the array.
+     * @param maxLength The length of the key 
      * @return The Map.Entry for the key or null if the key is not in
      * the map.
      */
- /*   public Map.Entry getEntry(Buffer buffer)
+    public Map.Entry getBestEntry(byte[] key,int offset, int maxLength)
     {
-        if (buffer==null)
+        if (key==null)
             return _nullEntry;
         
         Node node = _root;
@@ -382,20 +384,25 @@ public class StringMap extends AbstractMap implements Externalizable
 
         // look for best match
     charLoop:
-        for (int i=buffer.getIndex();i<buffer.putIndex();i++)
+        for (int i=0;i<maxLength;i++)
         {
-            char c=(char)buffer.peek(i);
+            char c=(char)key[offset+i];
 
             // Advance node
             if (ni==-1)
             {
                 ni=0;
-                node=(node._children==null)?null:node._children[c%_width];
+                
+                Node child = (node._children==null)?null:node._children[c%_width];
+                
+                if (child==null && i>0)
+                    return node; // This is the best match
+                node=child;           
             }
             
             // While we have a node to try
             while (node!=null) 
-            {  
+            {
                 // If it is a matching node, goto next char
                 if (node._char[ni]==c || _ignoreCase&&node._ochar[ni]==c)
                 {
@@ -409,7 +416,7 @@ public class StringMap extends AbstractMap implements Externalizable
                 if (ni>0) return null;
 
                 // try next in chain
-                node=node._next;                      
+                node=node._next;                
             }
             return null;
         }
@@ -419,7 +426,7 @@ public class StringMap extends AbstractMap implements Externalizable
             return null;
         return node;
     }
-    */
+    
     
     /* ------------------------------------------------------------ */
     public Object remove(Object key)

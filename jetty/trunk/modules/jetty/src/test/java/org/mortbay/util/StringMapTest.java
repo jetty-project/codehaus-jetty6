@@ -159,6 +159,11 @@ public class StringMapTest extends TestCase
         assertEquals("abc",entry.getKey());
         assertEquals("2",entry.getValue());
         
+        entry=m5.getBestEntry("xabcyz".getBytes(),1,5);
+        assertTrue(entry!=null);
+        assertEquals("abc",entry.getKey());
+        assertEquals("2",entry.getValue());
+        
         entry=m5.getEntry("xaBcyz",1,3);
         assertTrue(entry==null);
         
@@ -200,39 +205,6 @@ public class StringMapTest extends TestCase
         assertEquals("abc",entry.getKey());
         assertEquals("2",entry.getValue());
     }
-
-    /*
-     * Test for Map.Entry getEntry(Buffer)
-     */
-    /*
-    public void testGetEntryBuffer()
-    {
-        Buffer xabcyz = new ByteArrayBuffer("xabcyz");
-        xabcyz=xabcyz.asMutableBuffer();
-        xabcyz.setGetIndex(1);
-        xabcyz.setPutIndex(4);
-        
-        Buffer xaBcyz = new ByteArrayBuffer("xaBcyz");
-        xaBcyz=xaBcyz.asMutableBuffer();
-        xaBcyz.setGetIndex(1);
-        xaBcyz.setPutIndex(4);
-        
-        Map.Entry entry;
-        
-        entry=m5.getEntry(xabcyz);
-        assertTrue(entry!=null);
-        assertEquals("abc",entry.getKey());
-        assertEquals("2",entry.getValue());
-        
-        entry=m5.getEntry(xaBcyz);
-        assertTrue(entry==null);
-        
-        entry=m5i.getEntry(xaBcyz);
-        assertTrue(entry!=null);
-        assertEquals("abc",entry.getKey());
-        assertEquals("2",entry.getValue());
-    }
-    */
 
     /*
      * Test for Object remove(Object)

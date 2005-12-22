@@ -16,6 +16,7 @@ package org.mortbay.io;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.mortbay.util.StringMap;
 
@@ -72,6 +73,14 @@ public class BufferCache
         }
 
         return b;
+    }
+    
+    public CachedBuffer getBest(byte[] value, int offset, int maxLength)
+    {
+        Entry entry = _stringMap.getBestEntry(value, offset, maxLength);
+        if (entry!=null)
+            return (CachedBuffer)entry.getValue();
+        return null;
     }
 
     public Buffer lookup(String value)
