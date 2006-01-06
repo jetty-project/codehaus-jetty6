@@ -41,7 +41,7 @@ public class Log
     public final static String IGNORED_FMT= "IGNORED: {}";
     public final static String NOT_IMPLEMENTED= "NOT IMPLEMENTED ";
     
-    private static String logClass=System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4JLog");
+    private static String logClass=System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog");
     private static boolean verbose = System.getProperty("VERBOSE",null)!=null;
     private static Logger log;
    
