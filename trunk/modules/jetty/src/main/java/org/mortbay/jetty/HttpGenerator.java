@@ -596,7 +596,7 @@ public class HttpGenerator implements HttpTokens
         Flushing: while (true)
         {
             int len = -1;
-            int to_flush = ((_header != null && _header.length() > 0) ? 4 : 0) | ((_buffer != null && _buffer.length() > 0) ? 2 : 0) | ((_direct && _content != null && _content.length() > 0) ? 1 : 0);
+            int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) | ((_direct && _content != null && _content.length() > 0)?1:0);
 
             switch (to_flush)
             {
@@ -667,9 +667,8 @@ public class HttpGenerator implements HttpTokens
             // If we failed to flush anything twice in a row break
             if (len <= 0)
             {
-                if (last_len <= 0) break Flushing;
-                // TODO ?? else
-                // Thread.yield(); // Give other threads a chance and hopefully we unblock.
+                if (last_len <= 0) 
+                    break Flushing;
                 break;
             }
             last_len = len;

@@ -116,7 +116,7 @@ public interface EndPoint
     public void blockWritable(long millisecs);
 
     /* ------------------------------------------------------------ */
-    public boolean isClosed();
+    public boolean isOpen();
 
     /* ------------------------------------------------------------ */
     public Object getConnection();

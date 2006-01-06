@@ -745,7 +745,7 @@ public class HttpConnection
                 throw new IOException("Closed");
             
             // Block until we can add _content.
-            while (_generator.isBufferFull() && !_endp.isClosed() && !_endp.isBlocking())
+            while (_generator.isBufferFull() && _endp.isOpen() && !_endp.isBlocking())
             {
                 _endp.blockWritable(60000); // TODO Configure timeout
                 _generator.flushBuffers();
@@ -763,10 +763,9 @@ public class HttpConnection
             }
 
             // Block until our buffer is free
-            while (buffer.length() > 0 && !_endp.isClosed() && !_endp.isBlocking())
+            while (buffer.length() > 0 && _endp.isOpen() && !_endp.isBlocking())
             {
-                
-                _endp.blockWritable(_connector.getMaxIdleTime()); // TODO Configure timeout
+                _endp.blockWritable(_connector.getMaxIdleTime()); 
                 _generator.flushBuffers();
             }
         }

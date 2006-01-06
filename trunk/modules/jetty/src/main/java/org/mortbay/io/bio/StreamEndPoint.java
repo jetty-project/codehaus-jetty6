@@ -57,15 +57,15 @@ public class StreamEndPoint implements EndPoint
     {
     }
 
-    /* (non-Javadoc)
-     * @see org.mortbay.io.BufferIO#isClosed()
+    /* 
+     * @see org.mortbay.io.BufferIO#isOpen()
      */
-    public boolean isClosed()
+    public boolean isOpen()
     {
-        return _in==null || _out==null;
+        return _in!=null && _out!=null;
     }
 
-    /* (non-Javadoc)
+    /* 
      * @see org.mortbay.io.BufferIO#close()
      */
     public void close() throws IOException
