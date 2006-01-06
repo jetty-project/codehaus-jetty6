@@ -139,10 +139,11 @@ public class FileResource extends URLResource
             path = org.mortbay.util.URIUtil.canonicalPath(path);
             
             // treat all paths being added as relative
+            String rel=path;
             if (path.startsWith("/"))
-                path = path.substring(1);
+                rel = path.substring(1);
             
-            File newFile = new File(_file,path.replace('/', File.separatorChar));
+            File newFile = new File(_file,rel.replace('/', File.separatorChar));
             r=new FileResource(newFile.toURI().toURL(),null,newFile);
         }
 

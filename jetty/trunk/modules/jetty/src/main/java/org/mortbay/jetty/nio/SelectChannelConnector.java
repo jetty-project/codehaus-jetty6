@@ -572,6 +572,12 @@ public class SelectChannelConnector extends AbstractConnector
         }
 
         /* ------------------------------------------------------------ */
+        public boolean isOpen()
+        {
+            return super.isOpen() && _key.isValid();
+        }
+        
+        /* ------------------------------------------------------------ */
         /*
          * Allows thread to block waiting for further events.
          */
@@ -579,7 +585,7 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized (this)
             {
-                if (getChannel().isOpen() && _key.isValid())
+                if (isOpen())
                 {
                     try
                     {
@@ -607,7 +613,7 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized (this)
             {
-                if (getChannel().isOpen() && _key.isValid())
+                if (isOpen())
                 {
                     try
                     {
