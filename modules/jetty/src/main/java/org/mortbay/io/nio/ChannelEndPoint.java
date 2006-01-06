@@ -70,12 +70,12 @@ public class ChannelEndPoint implements EndPoint
     {
     }
 
-    /* (non-Javadoc)
-     * @see org.mortbay.io.EndPoint#isClosed()
+    /* 
+     * @see org.mortbay.io.EndPoint#isOpen()
      */
-    public boolean isClosed()
+    public boolean isOpen()
     {
-        return !_channel.isOpen();
+        return _channel.isOpen();
     }
 
     /* (non-Javadoc)

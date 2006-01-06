@@ -83,11 +83,11 @@ public class ByteArrayEndPoint implements EndPoint
     }
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.io.EndPoint#isClosed()
+     * @see org.mortbay.io.EndPoint#isOpen()
      */
-    public boolean isClosed()
+    public boolean isOpen()
     {
-        return _closed;
+        return !_closed;
     }
 
     /* ------------------------------------------------------------ */
