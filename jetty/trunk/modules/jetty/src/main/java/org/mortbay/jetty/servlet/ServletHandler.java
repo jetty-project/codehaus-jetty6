@@ -15,7 +15,6 @@
 package org.mortbay.jetty.servlet;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,14 +33,12 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.component.Container;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
@@ -67,7 +64,7 @@ import org.mortbay.util.URIUtil;
  */
 public class ServletHandler extends AbstractHandler
 {
-    private static String __AllowString="GET, HEAD, POST, OPTIONS, TRACE";
+    private static String __AllowString="GET, HEAD, POST, OPTIONS, TRACE";  // TODO Allow handling
 
     /* ------------------------------------------------------------ */
     public static final String __DEFAULT_SERVLET="default";
@@ -841,13 +838,13 @@ public class ServletHandler extends AbstractHandler
     private class Chain implements FilterChain
     {
         int _filter= 0;
-        Object _filters;
+        Object _chain;
         ServletHolder _servletHolder;
 
         /* ------------------------------------------------------------ */
         Chain(Object filters, ServletHolder servletHolder)
         {
-            _filters= filters;
+            _chain= filters;
             _servletHolder= servletHolder;
         }
 
@@ -858,9 +855,9 @@ public class ServletHandler extends AbstractHandler
             if (Log.isDebugEnabled()) Log.debug("doFilter " + _filter);
 
             // pass to next filter
-            if (_filter < LazyList.size(_filters))
+            if (_filter < LazyList.size(_chain))
             {
-                FilterHolder holder= (FilterHolder)LazyList.get(_filters, _filter++);
+                FilterHolder holder= (FilterHolder)LazyList.get(_chain, _filter++);
                 if (Log.isDebugEnabled()) Log.debug("call filter " + holder);
                 Filter filter= holder.getFilter();
                 filter.doFilter(request, response, this);
@@ -876,19 +873,18 @@ public class ServletHandler extends AbstractHandler
             else // Not found
                 notFound((HttpServletRequest)request, (HttpServletResponse)response);
         }
-        
+
+        /* ------------------------------------------------------------ */
         public String toString()
         {
             StringBuffer b = new StringBuffer();
-            for (int i=0; i<LazyList.size(_filters);i++)
+            for (int i=0; i<LazyList.size(_chain);i++)
             {
-                b.append(LazyList.get(_filters, i).toString());
+                b.append(LazyList.get(_chain, i).toString());
                 b.append("->");
             }
             b.append(_servletHolder);
             return b.toString();
         }
     }
-
-
 }

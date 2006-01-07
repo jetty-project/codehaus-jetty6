@@ -989,7 +989,7 @@ public class HttpConnection
                     }
                     
                     byte[] b=_bytes.getBuf();
-                    _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                    _out.write(b,0,_bytes.getCount());
                     _bytes.reset();
                 }
             }

@@ -16,14 +16,12 @@ package org.mortbay.resource;
 
 import java.io.File;
 import java.io.FilePermission;
-import java.io.FileWriter;
 import java.io.InputStream;
-import java.io.Writer;
 import java.net.URL;
 
-import org.mortbay.io.IO;
-
 import junit.framework.TestSuite;
+
+import org.mortbay.io.IO;
 
 public class ResourceTest extends junit.framework.TestCase
 {

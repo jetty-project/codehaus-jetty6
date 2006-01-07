@@ -15,7 +15,6 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
