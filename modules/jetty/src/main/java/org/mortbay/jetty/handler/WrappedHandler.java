@@ -21,7 +21,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.component.Container;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 

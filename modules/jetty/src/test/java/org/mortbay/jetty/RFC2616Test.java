@@ -15,8 +15,6 @@ import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.InBuffer;
-import org.mortbay.io.OutBuffer;
 
 /**
  * @author gregw
@@ -1265,11 +1263,6 @@ public class RFC2616Test extends TestCase
         }
 	    return o;
     }
-    
-    private int checkContains(String s,String c,String test)
-    {
-       return checkContains(s, 0, c,test);
-    }
 
     private void checkNotContained(String s,int offset,String c,String test)
     {
@@ -1328,7 +1321,7 @@ public class RFC2616Test extends TestCase
         }
     }
     
-    static class InBuf extends ByteArrayBuffer implements InBuffer
+    static class InBuf extends ByteArrayBuffer implements Buffer
     {
         String fill;
         boolean closed;
@@ -1364,7 +1357,7 @@ public class RFC2616Test extends TestCase
         }
     }
     
-    static class OutBuf extends ByteArrayBuffer implements OutBuffer
+    static class OutBuf extends ByteArrayBuffer implements Buffer
     {
         StringBuffer flush= new StringBuffer();
         boolean closed;
