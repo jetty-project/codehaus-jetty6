@@ -119,7 +119,7 @@ public class BlockingChannelConnector extends AbstractConnector
         {
             try
             {
-                while (!isClosed())
+                while (isOpen())
                     _connection.handle();
             }
             catch(IOException e)
