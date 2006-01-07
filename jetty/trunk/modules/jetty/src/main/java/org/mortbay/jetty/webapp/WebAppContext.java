@@ -94,7 +94,12 @@ public class WebAppContext extends ContextHandler
                                           boolean java2CompliantClassLoader)
         throws IOException
     {
-        ArrayList wacs = new ArrayList(Arrays.asList(server.getHandlers()));
+        ArrayList wacs = new ArrayList();
+        if(server.getHandlers() != null) {
+            java.util.List installedWacs = Arrays.asList(server.getHandlers());
+            wacs.addAll(installedWacs);
+        } 
+        
         Resource r=Resource.newResource(webapps);
         if (!r.exists())
             throw new IllegalArgumentException("No such webapps resource "+r);
