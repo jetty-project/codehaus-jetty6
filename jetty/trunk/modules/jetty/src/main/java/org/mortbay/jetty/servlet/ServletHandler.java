@@ -428,8 +428,10 @@ public class ServletHandler extends AbstractHandler
         finally
         {
             if (type!=INCLUDE)
-            base_request.setServletPath(old_servlet_path);
-            base_request.setPathInfo(old_path_info); 
+            {
+                base_request.setServletPath(old_servlet_path);
+                base_request.setPathInfo(old_path_info); 
+            }
         }
         return true;
     }
