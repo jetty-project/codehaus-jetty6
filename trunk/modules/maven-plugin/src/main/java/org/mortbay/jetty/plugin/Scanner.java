@@ -146,7 +146,7 @@ public class Scanner extends Thread
 			try
 			{
 				//wake up and scan the files
-				Thread.currentThread().sleep(sleepMillis);
+				Thread.sleep(sleepMillis);
 				Map latestScanInfo = scan();
 				
 				List filesWithDifferences = getDifferences(latestScanInfo, scanInfo);

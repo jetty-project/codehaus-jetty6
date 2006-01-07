@@ -44,13 +44,10 @@ public class URITest extends junit.framework.TestCase
     /* ------------------------------------------------------------ */
     public void testURI()
     {
-        URIUtil uri;
-
         // test basic encode/decode
         StringBuffer buf = new StringBuffer();
         URIUtil.encodeString(buf,"foo%23;,:=bar",";,=");
         assertEquals("foo%23;,:=bar",URIUtil.decodePath(buf.toString()));
-
 
         assertEquals("null+null", URIUtil.addPaths(null,null),null);
         assertEquals("null+", URIUtil.addPaths(null,""),null);
