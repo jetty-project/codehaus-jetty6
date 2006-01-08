@@ -59,7 +59,50 @@ public class Dump extends HttpServlet
         request.setAttribute("Dump", this);
         getServletContext().setAttribute("Dump",this);
         getServletContext().log("dump "+request.getRequestURI());
+
+        // Force a content length response
+        String length= request.getParameter("length");
+        if (length != null && length.length() > 0)
+        {
+            response.setContentLength(Integer.parseInt(length));
+        }
+
+        // Handle a dump of data
+        String data= request.getParameter("data");
+        String block= request.getParameter("block");
+        if (data != null && data.length() > 0)
+        {
+            int d=Integer.parseInt(data);
+            int b=(block!=null&&block.length()>0)?Integer.parseInt(block):50;
+            byte[] buf=new byte[b];
+            for (int i=0;i<b;i++)
+            {
+                
+                buf[i]=(byte)('0'+(i%10));
+                if (i%10==9)
+                    buf[i]=(byte)'\n';
+            }
+            buf[0]='o';
+            OutputStream out=response.getOutputStream();
+            response.setContentType("text/plain");
+            while (d > 0)
+            {
+                if (d>=b)
+                {
+                    out.write(buf);
+                    d=d-b;
+                }
+                else
+                {
+                    out.write(buf,0,d);
+                    d=0;
+                }
+            }
+            
+            return;
+        }
         
+        // handle an exception
         String info= request.getPathInfo();
         if (info != null && info.endsWith("Exception"))
         {
@@ -73,46 +116,7 @@ public class Dump extends HttpServlet
             }
         }
         
-        if ("text/xml".equals(request.getContentType()))
-        {
-//            InputStream in =request.getInputStream();
-//            int ch=0;
-//            int i=0;
-//            while((ch=in.read())>=0)
-//            {
-//                if (i++>40)
-//                    throw new IllegalStateException();
-//                if (Character.isLetterOrDigit((char)ch))
-//                    System.err.println("ch="+(char)ch);
-//                else
-//                    System.err.println("ch=["+ch+"]");
-//            }
-            
-//            BufferedReader in =request.getReader();
-//            int ch=0;
-//            int i=0;
-//            while((ch=in.read())>=0)
-//            {
-//                if (i++>40)
-//                    throw new IllegalStateException();
-//                if (Character.isLetterOrDigit((char)ch))
-//                    System.err.println("ch="+(char)ch);
-//                else
-//                    System.err.println("ch=["+ch+"]");
-//            }
-            
-//            BufferedReader reader = request.getReader();
-//            String line=null;
-//            int i=0;
-//            while((line=reader.readLine())!=null)
-//            {
-//                if (i++>4)
-//                    throw new IllegalStateException();
-//                System.err.println("length="+line.length());
-//                System.err.println("line='"+line+"'");
-//            }
-        }
-
+        // handle an redirect
         String redirect= request.getParameter("redirect");
         if (redirect != null && redirect.length() > 0)
         {
@@ -122,6 +126,7 @@ public class Dump extends HttpServlet
             return;
         }
 
+        // handle an error
         String error= request.getParameter("error");
         if (error != null && error.length() > 0)
         {
@@ -131,11 +136,6 @@ public class Dump extends HttpServlet
             return;
         }
 
-        String length= request.getParameter("length");
-        if (length != null && length.length() > 0)
-        {
-            response.setContentLength(Integer.parseInt(length));
-        }
 
         String buffer= request.getParameter("buffer");
         if (buffer != null && buffer.length() > 0)
@@ -478,17 +478,6 @@ public class Dump extends HttpServlet
             getServletContext().log("dump", e);
         }
 
-        String data= request.getParameter("data");
-        if (data != null && data.length() > 0)
-        {
-            int d= Integer.parseInt(data);
-            while (d > 0)
-            {
-                pout.println("1234567890123456789012345678901234567890123456789\n");
-                d= d - 50;
-
-            }
-        }
 
         pout.close();
 
