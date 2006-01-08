@@ -1,6 +1,6 @@
 //========================================================================
 //$Id: JettyMojo.java,v 1.12 2005/11/25 20:58:59 janb Exp $
-//Copyright 2000-2005 Mort Bay Consulting Pty. Ltd.
+//Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -118,7 +119,7 @@ public class JettyMojo extends AbstractMojo
     
     
     /**
-     * The context path for the webapp. Defaults to thes
+     * The context path for the webapp. Defaults to the
      * name of the webapp's artifact.
      * 
      * @parameter expression="/${project.artifactId}"
@@ -127,6 +128,14 @@ public class JettyMojo extends AbstractMojo
     private String contextPath;
     
     
+    /**
+     * The temporary directory to use for the webapp.
+     * Defaults to target/jetty-tmp
+     * 
+     * @parameter expression="${basedir}/target/jetty-tmp"
+     * @required
+     */
+    private File tmpDirectory;
     
     /**
      * The interval in seconds to scan the webapp for changes 
@@ -196,6 +205,15 @@ public class JettyMojo extends AbstractMojo
         this.webAppSourceDirectory = webAppSourceDir;
     }
 
+    public File getTmpDirectory ()
+    {
+    	return this.tmpDirectory;
+    }
+    
+    public void setTmpDirectory (File tmpDir)
+    {
+    	this.tmpDirectory = tmpDir;
+    }
 
     /**
 	 * @return Returns the connectors.
@@ -351,15 +369,28 @@ public class JettyMojo extends AbstractMojo
             if (getClassesDirectory() == null)
                 throw new MojoExecutionException ("Location of classesDirectory is not set");
             if (!getClassesDirectory().exists())
-                throw new MojoExecutionException("Location "+getClassesDirectory().getCanonicalPath()+" classesDirectory does not exist");
-            
-            getLog().info("Classes located at: "+getClassesDirectory().getCanonicalPath());
+                getLog().info("Classes directory "+getClassesDirectory().getCanonicalPath()+" does not exist");
+            else
+            	getLog().info("Classes located at: "+getClassesDirectory().getCanonicalPath());
         }
         catch (IOException e)
         {
             throw new MojoExecutionException("Location of classesDirectory does not exist");
         }
-  
+        
+        //check the tmp directory   
+        if (getTmpDirectory() != null) 
+        {
+            if (!getTmpDirectory().exists())
+            {
+                if (! getTmpDirectory().mkdirs())
+                    throw new MojoExecutionException("Unable to create tmp directory at "+getTmpDirectory());
+            }
+            getLog().info("tmp dir for webapp will be "+getTmpDirectory().toString());
+        }
+        else
+            getLog().info("tmp dir will be Jetty default");
+       
         //get the system properties set up
         for (int i=0; (getSystemProperties() != null) && i < getSystemProperties().length;i++)
         {
@@ -382,7 +413,6 @@ public class JettyMojo extends AbstractMojo
     public void startJetty (final File webXmlFile)
     throws MojoExecutionException
     {
-        
         try
         {
             getLog().info("Starting Jetty Server ...");
@@ -404,7 +434,7 @@ public class JettyMojo extends AbstractMojo
             List classPathFiles = setUpClassPath();          
             WebAppContext webapp = (WebAppContext)configureWebApplication(webXmlFile, classPathFiles);
             webapp.setServer(server);
-            
+            webapp.setTempDirectory(getTmpDirectory());
             
             //include any other ContextHandlers that the user has configured in their project's pom
             Handler[] handlers = new Handler[(getContextHandlers()!=null?getContextHandlers().length:0)+2];   
