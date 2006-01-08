@@ -624,6 +624,8 @@ public class HttpGenerator implements HttpTokens
                     // Nothing more we can write now.
                     if (_header != null) _header.clear();
 
+                    _direct = false;
+                    
                     if (_buffer != null)
                     {
                         _buffer.clear();
@@ -639,13 +641,12 @@ public class HttpGenerator implements HttpTokens
                             if (_content != null && _content.length() < _buffer.space() && _state != STATE_FLUSHING)
                             {
                                 _buffer.put(_content);
+                                _content.clear();
                                 _content = null;
                                 break Flushing;
                             }
                         }
                     }
-
-                    _direct = false;
 
                     // Are we completely finished for now?
                     if (!_needCRLF && !_needEOC && (_content == null || _content.length() == 0))
@@ -687,7 +688,8 @@ public class HttpGenerator implements HttpTokens
             {
                 int len = _buffer.put(_content);
                 _content.skip(len);
-                if (_content.length() == 0) _content = null;
+                if (_content.length() == 0) 
+                    _content = null;
             }
 
             // Chunk buffer if need be
@@ -768,7 +770,8 @@ public class HttpGenerator implements HttpTokens
             }
         }
 
-        if (_content != null && _content.length() == 0) _content = null;
+        if (_content != null && _content.length() == 0) 
+            _content = null;
 
     }
 

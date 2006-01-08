@@ -622,7 +622,7 @@ public class SelectChannelConnector extends AbstractConnector
                     }
                     catch (InterruptedException e)
                     {
-                        e.printStackTrace();
+                        Log.ignore(e);
                     }
                     finally
                     {

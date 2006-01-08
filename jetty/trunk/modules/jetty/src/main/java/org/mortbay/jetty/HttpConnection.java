@@ -747,7 +747,7 @@ public class HttpConnection
             // Block until we can add _content.
             while (_generator.isBufferFull() && _endp.isOpen() && !_endp.isBlocking())
             {
-                _endp.blockWritable(60000); // TODO Configure timeout
+                _endp.blockWritable(_connector.getMaxIdleTime());
                 _generator.flushBuffers();
             }
 
