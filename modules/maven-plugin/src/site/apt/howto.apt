@@ -41,6 +41,7 @@ Simple Configuration Example
           <webAppSourceDirectory>src/some/other/location</webAppSourceDirectory> 
           <webXmlFile>src/over/here/web.xml</webXmlFile>
           <classesDirectory>target/never/do/this</classesDirectory>
+          <tmpDir>target/not/necessary</tmpDir>
         </configuration>
       </plugin>
   </plugins>
@@ -56,6 +57,8 @@ Simple Configuration Example
   * <<webXmlFile>> By default, this is set to either the variable <<<${maven.war.webxml}>>> or <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>, whichever is not null. Otherwise, set this parameter to override these defaults.
 
   * <<classesDirectory>> You should never need to set this parameter. Instead, you should set <<<\<build\>\<outputDirectory\>>>> in your <<<pom.xml>>>.
+
+  * <<tmpDir>>This is set to <<<${basedir}/target>>> by default and is the location for the webapp's temporary directory.
 
 
 
