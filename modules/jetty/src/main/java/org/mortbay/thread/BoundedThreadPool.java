@@ -356,6 +356,9 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
             while (iter.hasNext())
                 ((Thread)iter.next()).interrupt();
         }
+        
+        // TODO perhaps force stops
+        
         synchronized (_joinLock)
         {
             _joinLock.notifyAll();
@@ -374,8 +377,6 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     {
         thread.interrupt();
     }
-    
-
     
 
     /* ------------------------------------------------------------ */

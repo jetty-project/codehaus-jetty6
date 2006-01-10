@@ -1,4 +1,5 @@
 
+Jetty-6.0.0Beta7
     + Fixed infinite loop with chunk handling
     + Faster header name lookup
     + removed singleton Container
