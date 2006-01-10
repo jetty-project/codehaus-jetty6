@@ -284,7 +284,7 @@ public class Dump extends HttpServlet
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getLocale:&nbsp;</th>");
             pout.write("<td>"+request.getLocale()+"</td>");
-
+            
             Enumeration locales= request.getLocales();
             while (locales.hasMoreElements())
             {
@@ -292,7 +292,6 @@ public class Dump extends HttpServlet
                 pout.write("<th align=\"right\">getLocales:&nbsp;</th>");
                 pout.write("<td>"+locales.nextElement()+"</td>");
             }
-
             pout.write("</tr><tr>\n");
             
             pout.write("<th align=\"left\" colspan=\"2\"><big><br/>Other HTTP Headers:</big></th>");
