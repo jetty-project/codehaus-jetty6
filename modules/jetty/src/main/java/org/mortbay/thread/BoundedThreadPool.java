@@ -16,6 +16,7 @@ package org.mortbay.thread;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +54,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     private transient int _id;
     private transient int _idle;
 
-    private final String _jobLock = "JOB";
+    private final String _lock = "LOCK";
     private transient List _jobs;
     private final String _joinLock = "JOIN";
     private int _maxIdleTimeMs=10000;
@@ -179,7 +180,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     protected void newThread()
     {
-        synchronized(_jobLock)
+        synchronized(_lock)
         {
             Thread thread =new PoolThread();
             _threads.add(thread);
@@ -207,7 +208,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     private boolean run(Runnable job, boolean queue) 
     {
         boolean queued=false;
-        synchronized(_jobLock)
+        synchronized(_lock)
         {	
             if (!isRunning())
                 return false;
@@ -237,7 +238,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                 try
                 {
                     _blocked.add(Thread.currentThread());
-                    _jobLock.wait(blockMs);
+                    _lock.wait(blockMs);
                     blockMs=-1;
                 }
                 catch (InterruptedException ie)
@@ -246,7 +247,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
 
             _jobs.add(job);
             queued=true;
-            _jobLock.notify();
+            _lock.notify();
         }
         
         return queued;
@@ -349,8 +350,12 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     protected void doStop() throws Exception
     {   
-        // TODO STOP!
-        
+        synchronized (_lock)
+        {
+            Iterator iter = _threads.iterator();
+            while (iter.hasNext())
+                ((Thread)iter.next()).interrupt();
+        }
         synchronized (_joinLock)
         {
             _joinLock.notifyAll();
@@ -402,10 +407,10 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                     
                     try
                     {
-                        synchronized (_jobLock)
+                        synchronized (_lock)
                         {
                             while(_jobs.size()==0 && isRunning())
-                                _jobLock.wait();
+                                _lock.wait();
                             if (_jobs.size()>0 && isRunning())
                                 _job=(Runnable)_jobs.remove(0);
                             if (_job!=null)
@@ -418,7 +423,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                     catch (InterruptedException e) {}
                     finally
                     {
-                        synchronized (_jobLock)
+                        synchronized (_lock)
                         {
                             if (_job!=null)
                                 _idle++;
@@ -431,7 +436,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
             }
             finally
             {
-                synchronized (_jobLock)
+                synchronized (_lock)
                 {
                     _threads.remove(this);
                 }
