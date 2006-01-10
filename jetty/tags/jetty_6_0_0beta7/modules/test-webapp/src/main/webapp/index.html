@@ -1,0 +1,43 @@
+<HTML>
+  <HEAD>
+    <TITLE>Powered By Jetty</TITLE>
+    <META http-equiv="Pragma" content="no-cache">
+    <META http-equiv="Cache-Control" content="no-cache,no-store">
+  </HEAD>
+<BODY>
+<A HREF="http://jetty.mortbay.org"><IMG SRC="jetty_banner.gif"></A>
+<P>
+<h1>Welcome to Jetty 6.0.x</h1>
+This is the beta release of Jetty 6.  This is a test context that serves:
+<ul>
+<li>static content (
+<a href="d.txt">tiny</a>,
+<a href="da.txt">small</a>,
+<a href="dat.txt">medium</a>,
+<a href="data.txt">large</a>)</li>
+<li>a <a href="dump/info">Request Dump Servlet</a></li>
+<li>a <a href="session/">Session Dump Servlet</a></li>
+<li>a <a href="snoop.jsp">Request Dump JSP</a></li>
+<li>a <a href="chat/chat.html">AJAX Chat with continuations</a></li>
+</ul>
+The <a href="/javadoc/">javadoc</a> is served from another context.
+</p>
+
+The features of Jetty 6.0.x are:
+<ul>
+<li>Totally rearchitected and rebuild, so 10 years of cruft could be removed!</li>
+<li>Improved "dependancy injection" and "inversion of control" design of components</li>
+<li>Improved "interceptor" design of handlers</li>
+<li>Smart split buffer design allows large buffers to only be allocated to active connections.
+The resulting memory savings allow very large buffers to be used, which increases the chance of 
+efficient asynchronous flushing and of avoiding chunking.</li>
+<li>Optional use of NIO Buffering so that efficient direct buffers and memory mapped files can be used.</li> 
+<li>Optional use of NIO non-blocking scheduling so that threads are not allocated per connection.</li> 
+<li>Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be
+sent as sent is a single operation.</li> 
+<li>Continuations for efficient AJAX polling</li>
+</ul>
+
+
+</BODY>
+</HTML>
