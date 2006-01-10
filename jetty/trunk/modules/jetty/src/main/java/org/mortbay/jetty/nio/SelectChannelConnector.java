@@ -495,9 +495,12 @@ public class SelectChannelConnector extends AbstractConnector
                 // Remove writeable op
                 if (_key==null)
                     return;
-                if ((_key.readyOps() | SelectionKey.OP_WRITE) != 0 && (_key.interestOps() | SelectionKey.OP_WRITE) != 0)
+                if ((_key.readyOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE && (_key.interestOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE)
+                {
                     // Remove writeable op
-                    _key.interestOps(_interestOps = _key.interestOps() & (-1 ^ SelectionKey.OP_WRITE));
+                    _interestOps = _key.interestOps() & ~SelectionKey.OP_WRITE;
+                    _key.interestOps(_interestOps);
+                }
                 
                 _dispatched = true;
             }
