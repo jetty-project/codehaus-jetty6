@@ -21,6 +21,7 @@ class Slf4jLog implements Logger
 {
     private static final String LOGGER="org.slf4j.Logger";
     private static final String LOGGERFACTORY="org.slf4j.LoggerFactory";
+    private static final Object[] NO_ARGS=new Object[]{};
     private Method infoSOO;
     private Method debugSOO;
     private Method debugST;
@@ -28,6 +29,7 @@ class Slf4jLog implements Logger
     private Method warnSOO;
     private Method warnST;
     private Object logger;
+    
 
     Slf4jLog() throws Exception
     {
@@ -75,7 +77,7 @@ class Slf4jLog implements Logger
      */
     public boolean isDebugEnabled()
     {
-        try{return ((Boolean)debugEnabled.invoke(logger, new Object[]{})).booleanValue();}
+        try{return ((Boolean)debugEnabled.invoke(logger, NO_ARGS)).booleanValue();}
         catch (Exception e) {e.printStackTrace();return true;}
     }
 
