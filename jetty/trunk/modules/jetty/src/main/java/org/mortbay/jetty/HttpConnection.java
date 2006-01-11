@@ -844,7 +844,6 @@ public class HttpConnection
         {
             if (_bytes==null)
             {   
-                _chars=new char[_writeChunk];
                 _bytes=new ByteArrayOutputStream2(_writeChunk*2);
                 
                 if (_characterEncoding==null)
@@ -856,6 +855,7 @@ public class HttpConnection
                 else
                     _maxChar=0;
             }
+            
             if (_converter==null)
             {
                 _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
@@ -863,6 +863,9 @@ public class HttpConnection
             
             if (length>16) // TODO - tune or perhaps remove
             {
+                if (_chars==null)
+                    _chars=new char[_writeChunk];
+                    
                 int end=offset+length;
                 
                 for (int i=offset;i<end; )
