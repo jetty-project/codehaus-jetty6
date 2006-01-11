@@ -45,6 +45,9 @@
                   <fileset dir="${user.home}/.m2/repository/mx4j/mx4j/3.0.1">
                     <include name="**/*.jar"></include>
                   </fileset>
+                  <fileset dir="${user.home}/.m2/repository/mx4j/mx4j-tools/2.1.1">
+                    <include name="**/*.jar"></include>
+                  </fileset>
                 </copy>
               </tasks>
             </configuration>
@@ -72,6 +75,10 @@
     <dependency>
       <groupId>mx4j</groupId>
       <artifactId>mx4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>mx4j</groupId>
+      <artifactId>mx4j-tools</artifactId>
     </dependency>
   </dependencies>
 </project>
