@@ -84,7 +84,7 @@ public class RFC2616Test extends TestCase
         String response=null;
         try
         {
-            TestListener listener = new TestListener();
+            LocalConnector listener = new LocalConnector();
             int offset=0;
             
             // Chunk last
@@ -232,7 +232,7 @@ public class RFC2616Test extends TestCase
     {        
         try
         {
-            TestListener listener = new TestListener();
+            LocalConnector listener = new LocalConnector();
             String response;
             int offset=0;
 
@@ -421,7 +421,7 @@ public class RFC2616Test extends TestCase
     {        
         try
         {
-            TestListener listener = new TestListener();
+            LocalConnector listener = new LocalConnector();
             String response;
             int offset=0;
 
@@ -475,7 +475,7 @@ public class RFC2616Test extends TestCase
     {        
         try
         {
-            TestListener listener = new TestListener();
+            LocalConnector listener = new LocalConnector();
             String response;
             int offset=0;
 
@@ -584,7 +584,7 @@ public class RFC2616Test extends TestCase
     {        
         try
         {
-            TestListener listener = new TestListener();
+            LocalConnector listener = new LocalConnector();
             String get=listener.getResponses("GET /R1 HTTP/1.0\n"+
                                       "Host: localhost\n"+
                                       "\n");
@@ -834,7 +834,7 @@ public class RFC2616Test extends TestCase
 
     /* --------------------------------------------------------------- */
     public void checkContentRange( 
-                     TestListener listener,
+                     LocalConnector listener,
                      String tname,
                      String path, 
                      String reqRanges,
@@ -1026,7 +1026,7 @@ public class RFC2616Test extends TestCase
     {        
         try
         {
-            TestListener listener = new TestListener();
+            LocalConnector listener = new LocalConnector();
             String response;
             int offset=0;
 
@@ -1194,7 +1194,7 @@ public class RFC2616Test extends TestCase
     {        
         try
         {
-            TestListener listener = new TestListener();
+            LocalConnector listener = new LocalConnector();
             String response;
             int offset=0;
 
@@ -1275,52 +1275,6 @@ public class RFC2616Test extends TestCase
         checkNotContained(s,0,c,test);
     }
 
-    static class TestListener 
-    {
-        InBuf in;
-        OutBuf out;
-        HttpConnection connection;
-        
-        TestListener()
-        {
-            in=new InBuf();
-            out=new OutBuf(in);
-            
-            // TODO connection=new HttpConnection(in,out);
-        }
-        
-        String getResponses(String requests)
-            throws IOException
-        {
-            System.out.println("IN :"+requests);
-            in.fill=requests;
-            in.closed=false;
-            out.closed=false;
-
-            /* TODO
-            try
-            {
-                int loop=0;        
-                while((in.fill!=null || in.length()>0) && !out.isClosed() && connection.runNext())
-                {
-                    if (loop++>10)
-                        break;
-                }
-            }
-            catch(IOException e)
-            {
-                if (!"EOF".equals(e.getMessage()))
-                    throw e;
-            }
-            */
-            
-            String r = out.flush.toString();
-            out.flush.setLength(0);
-            System.out.println("OUT:"+r);
-            return r;
-        }
-    }
-    
     static class InBuf extends ByteArrayBuffer implements Buffer
     {
         String fill;
