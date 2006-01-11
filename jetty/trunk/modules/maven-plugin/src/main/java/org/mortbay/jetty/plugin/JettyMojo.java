@@ -621,6 +621,10 @@ public class JettyMojo extends AbstractMojo
     	classPathFiles.addAll(getLibFiles());
     	classPathFiles.addAll(getTldFiles());
     	classPathFiles.add(getClassesDirectory());
+      for (int i=0; i< classPathFiles.size(); i++)
+      {
+        getLog().debug("classpath element: "+((File)classPathFiles.get(i)).getName());
+      }
     	return classPathFiles;
     }
     
