@@ -563,12 +563,14 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         /* ------------------------------------------------------------ */
         public void run()
         {   
-            _acceptorThread[_acceptor]=Thread.currentThread();
+            Thread current = Thread.currentThread();
+            _acceptorThread[_acceptor]=current;
             String name =_acceptorThread[_acceptor].getName();
-            _acceptorThread[_acceptor].setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
+            current.setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
             Log.debug("Starting " + this);
             try
             {
+                current.setPriority(current.getPriority()-1);
                 while (isRunning() && getThreadPool().isRunning())
                 {
                     try
@@ -588,7 +590,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             finally
             {   
                 Log.debug("Stopping " + this);
-                Thread.currentThread().setName(name);
+                current.setPriority(current.getPriority()+1);
+                current.setName(name);
                 try
                 {
                     if (_acceptor==0)
