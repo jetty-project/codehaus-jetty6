@@ -1,4 +1,6 @@
 
+    + Handle pipeline requests without hangs
+
 Jetty-6.0.0Beta7
     + Fixed infinite loop with chunk handling
     + Faster header name lookup

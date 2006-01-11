@@ -734,6 +734,11 @@ public class HttpParser implements HttpTokens
         }
     }
 
+    Buffer getHeaderBuffer()
+    {
+        return _header;
+    }
+    
     public static abstract class EventHandler
     {
         /**

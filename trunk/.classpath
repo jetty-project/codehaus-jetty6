@@ -14,15 +14,6 @@
 	<classpathentry kind="src" path="modules/management/src/test/resources"/>
 	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j-tools/mx4j-tools-3.0.1.jar"/>
 	<classpathentry kind="src" path="modules/management/src/main/resources"/>
-	<classpathentry kind="lib" path="lib/jsp/ant-1.6.4.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/commons-el-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/jasper-compiler-5.5.12.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/jasper-compiler-jdt-5.5.12.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/jasper-runtime-5.5.12.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/jcl104-over-slf4j-1.0-rc1.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/slf4j-simple-1.0-rc1.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/xercesImpl-2.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/xmlParserAPIs-2.6.2.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.1.jar"/>

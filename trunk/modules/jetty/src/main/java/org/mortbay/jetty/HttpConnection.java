@@ -266,45 +266,53 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     public void handle() throws IOException
     {
-        try
+        while (true)
         {
-            __currentConnection.set(this);
-
-            Continuation continuation = _request.getContinuation();
-            if (continuation != null && continuation.isPending())
+            try
             {
-                Log.debug("resume continuation {}",continuation);
-                doHandler();
+                __currentConnection.set(this);
                 
+                Continuation continuation = _request.getContinuation();
+                if (continuation != null && continuation.isPending())
+                {
+                    Log.debug("resume continuation {}",continuation);
+                    doHandler();
+                }
+                else
+                {
+                    // If we are not ended then parse available
+                    if (!_parser.isState(HttpParser.STATE_END)) _parser.parseAvailable();
+                    
+                    // Do we have more writting to do?
+                    if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT)) _generator.flushBuffers();
+                }
             }
-            else
+            finally
             {
-                // If we are not ended then parse available
-                if (!_parser.isState(HttpParser.STATE_END)) _parser.parseAvailable();
-
-                // Do we have more writting to do?
-                if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT)) _generator.flushBuffers();
-            }
-        }
-        finally
-        {
-            __currentConnection.set(null);
-
-            // TODO - maybe do this at start of handle aswell or instead?
-            if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
-            {
-                _expectingContinues = false; // TODO do something with this!
-                _parser.reset(true); // TODO maybe only release when low on resources
-                _requestFields.clear();
-                _request.recycle();
-
-                _generator.reset(true); // TODO maybe only release when low on resources
-                _responseFields.clear();
-                _response.recycle();
+                __currentConnection.set(null);
                 
-                // TODO low resources handling?
+                // TODO - maybe do this at start of handle aswell or instead?
+                if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
+                {
+                    _expectingContinues = false; // TODO do something with this!
+                    _parser.reset(true); // TODO maybe only release when low on resources
+                    _requestFields.clear();
+                    _request.recycle();
+                    
+                    _generator.reset(true); // TODO maybe only release when low on resources
+                    _responseFields.clear();
+                    _response.recycle();
+                    
+                    // TODO low resources handling?
+                }
             }
+            
+            // handle pipelined requests
+            Buffer header = _parser.getHeaderBuffer();
+            if (header==null || header.length()==0 )
+                break;
         }
+        
     }
 
     /* ------------------------------------------------------------ */
