@@ -1120,7 +1120,6 @@ public class HttpFields
         if (qe++ < 0 || qe == value.length()) return __one;
 
         if (value.charAt(qe++) == 'q')
-        ;
         {
             qe++;
             Map.Entry entry = __qualities.getEntry(value, qe, value.length() - qe);
