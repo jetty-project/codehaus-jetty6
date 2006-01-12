@@ -302,6 +302,7 @@ public class SelectChannelConnector extends AbstractConnector
             else
                 _selector.select();
             
+            long now=-1;
             synchronized (_changes)
             {   
                 // have we been destroyed while sleeping
@@ -309,7 +310,7 @@ public class SelectChannelConnector extends AbstractConnector
                     return;
                 
                 // update the timers for task schedule in this loop
-                long now = System.currentTimeMillis();
+                now = System.currentTimeMillis();
                 _idleTimeout.setNow(now);
                 _retryTimeout.setNow(now);
             }
