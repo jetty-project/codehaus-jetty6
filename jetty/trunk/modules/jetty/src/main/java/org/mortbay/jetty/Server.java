@@ -145,7 +145,6 @@ public class Server extends HandlerCollection
         if (_threadPool==null)
         {
             BoundedThreadPool btp=new BoundedThreadPool();
-            btp.setQueue(true);
             setThreadPool(btp);
         }
         

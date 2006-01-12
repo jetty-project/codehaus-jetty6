@@ -1,5 +1,6 @@
 
     + Handle pipeline requests without hangs
+    + Removed queue from thread pool.
 
 Jetty-6.0.0Beta7
     + Fixed infinite loop with chunk handling
