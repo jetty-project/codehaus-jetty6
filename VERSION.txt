@@ -7,6 +7,7 @@
     + maven-jetty6-plugin stopped transitive inclusion of log4j and
       commons-logging from commons-el for jasper
     + patch to remove spurious ; in HttpFields
+    + improve buffer return mechanism.
 
 Jetty-6.0.0Beta7
     + Fixed infinite loop with chunk handling

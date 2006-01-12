@@ -230,7 +230,6 @@ public class HttpParser implements HttpTokens
             int filled = -1;
             if (_endp != null)
             {
-
                 // Compress buffer if handling _content buffer
                 // TODO check this is not moving data too much
                 if (_buffer == _content) _buffer.compact();
@@ -245,6 +244,7 @@ public class HttpParser implements HttpTokens
                 catch(IOException ioe)
                 {
                     Log.debug(ioe);
+                    reset(true);
                     throw new IOException("EOF");
                 }
             }
@@ -255,7 +255,11 @@ public class HttpParser implements HttpTokens
                 _handler.messageComplete(_contentPosition);
                 return fill_called;
             }
-            if (filled < 0) throw new IOException("EOF");
+            if (filled < 0) 
+            {
+                reset(true);
+                throw new IOException("EOF");
+            }
             length=_buffer.length();
         }
 
@@ -693,7 +697,6 @@ public class HttpParser implements HttpTokens
         
         if (_buffer!=null)
         {
-            
             if ( _buffer==_content && _content.length()<=_header.space())
             {
                 _buffer=_header;
@@ -708,13 +711,12 @@ public class HttpParser implements HttpTokens
                 }
                 if (_buffers!=null && returnBuffers)
                     _buffers.returnBuffer(_content);
-                _content=null;
+                _content=null; 
             }
             else if (_buffer.length()>0 && _eol == CARRIAGE_RETURN && _buffer.peek() == LINE_FEED)
             {
                 _buffer.skip(1);
                 _eol = LINE_FEED;
-                
             }
             
             if (!_header.hasContent() && _buffers!=null && returnBuffers)

@@ -31,8 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 
 /* ------------------------------------------------------------ */
@@ -41,15 +39,9 @@ import org.apache.commons.logging.Log;
  */
 public class Dump extends HttpServlet
 {
-  private Log log = LogFactory.getLog(Dump.class);
-
-    /* ------------------------------------------------------------ */
-    String pageType;
-
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config) throws ServletException
     {
-      log.error("Starting Dump servlet");
     	super.init(config);
     }
 

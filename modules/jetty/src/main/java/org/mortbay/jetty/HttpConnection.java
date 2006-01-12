@@ -83,6 +83,7 @@ public class HttpConnection
         return (HttpConnection) __currentConnection.get();
     }
 
+    /* ------------------------------------------------------------ */
     /**
      * 
      */
@@ -98,7 +99,16 @@ public class HttpConnection
         _generator = new HttpGenerator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
         _server = server;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public void close() throws IOException
+    {
+        // _endp.close();  // TODO fix loop
+        if (_parser!=null)
+            _parser.reset(true);
+        if (_generator!=null)
+            _generator.reset(true);
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -266,7 +276,9 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     public void handle() throws IOException
     {
-        while (true)
+        // Loop while more in buffer
+        boolean more_in_buffer =true; // assume true until proven otherwise
+        while (more_in_buffer)
         {
             try
             {
@@ -291,26 +303,24 @@ public class HttpConnection
             {
                 __currentConnection.set(null);
                 
+                Buffer header = _parser.getHeaderBuffer();
+                more_in_buffer = header!=null && header.length()>0;
+                
                 // TODO - maybe do this at start of handle aswell or instead?
                 if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
                 {
                     _expectingContinues = false; // TODO do something with this!
-                    _parser.reset(true); // TODO maybe only release when low on resources
+                    _parser.reset(!more_in_buffer); // TODO maybe only release when low on resources
                     _requestFields.clear();
                     _request.recycle();
                     
-                    _generator.reset(true); // TODO maybe only release when low on resources
+                    _generator.reset(!more_in_buffer); // TODO maybe only release when low on resources
                     _responseFields.clear();
                     _response.recycle();
                     
                     // TODO low resources handling?
                 }
             }
-            
-            // handle pipelined requests
-            Buffer header = _parser.getHeaderBuffer();
-            if (header==null || header.length()==0 )
-                break;
         }
         
     }
