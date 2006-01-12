@@ -217,22 +217,25 @@ public class SelectChannelConnector extends AbstractConnector
  
         void destroy() throws Exception
         {
-            _idleTimeout.cancelAll();
-            _idleTimeout = null;
-            _retryTimeout.cancelAll();
-            _retryTimeout = null;
-
-            try
+            synchronized(_changes)
             {
-                if (_selector != null)
-                    _selector.close();
+                _idleTimeout.cancelAll();
+                _idleTimeout = null;
+                _retryTimeout.cancelAll();
+                _retryTimeout = null;
+                
+                try
+                {
+                    if (_selector != null)
+                        _selector.close();
+                }
+                catch (IOException e)
+                {
+                    Log.ignore(e);
+                }
+                
+                _selector = null;
             }
-            catch (IOException e)
-            {
-                Log.ignore(e);
-            }
-
-            _selector = null;
 
         }
 
@@ -337,10 +340,8 @@ public class SelectChannelConnector extends AbstractConnector
                             Socket socket = channel.socket();
                             configure(socket);
                             
-
                             // TODO make it reluctant to leave 0
                             _nextSet=++_nextSet%_selectSets.length;
-                            
                             
                             // Is this for this selectset
                             if (_nextSet!=_setID)
@@ -384,13 +385,19 @@ public class SelectChannelConnector extends AbstractConnector
                         key.interestOps(0);
                 }
             }
-
+            
             // tick over the timer
-            now = System.currentTimeMillis();
-            _retryTimeout.setNow(now);
-            _retryTimeout.tick();
-            _idleTimeout.setNow(now);
-            _idleTimeout.tick();
+            synchronized (_changes)
+            {
+                if (_selector!=null)
+                {
+                    now = System.currentTimeMillis();
+                    _retryTimeout.setNow(now);
+                    _retryTimeout.tick();
+                    _idleTimeout.setNow(now);
+                    _idleTimeout.tick();
+                }
+            }
 
         }
 
@@ -758,9 +765,7 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 return "TimeoutTask:" + HttpEndPoint.this.toString();
             }
-
         }
-
     }
 
     /* ------------------------------------------------------------ */
