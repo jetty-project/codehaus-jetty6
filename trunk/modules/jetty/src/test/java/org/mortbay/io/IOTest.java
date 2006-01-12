@@ -55,7 +55,8 @@ public class IOTest extends junit.framework.TestCase
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         IO.copyThread(in,out);
-        Thread.sleep(500);
+        Thread.sleep(1500);
+        System.err.println(out);
 
         assertEquals( "copyThread",
                       out.toString(),
@@ -81,7 +82,6 @@ public class IOTest extends junit.framework.TestCase
         long end=System.currentTimeMillis();
         System.err.println("charAt   "+(end-start)+" "+result);
         
-
         start=System.currentTimeMillis();
         result=0;
         for (int loop=0;loop<loops;loop++)
@@ -92,10 +92,6 @@ public class IOTest extends junit.framework.TestCase
         }
         end=System.currentTimeMillis();
         System.err.println("getChars "+(end-start)+" "+result);
-        
-        
-        
-        
         
     }
 }
