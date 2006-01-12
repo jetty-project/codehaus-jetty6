@@ -283,8 +283,8 @@ public class SelectChannelConnector extends AbstractConnector
                     }
                 }
                 _changes.clear();
+                
             }
-
             // workout how low to wait in select
             long wait = getMaxIdleTime();
             long to_next = _idleTimeout.getTimeToNext();
@@ -302,15 +302,17 @@ public class SelectChannelConnector extends AbstractConnector
             else
                 _selector.select();
             
-            // have we been destroyed while sleeping
-            if (_selector==null)
-                return;
-
-            // update the timers for task schedule in this loop
-            long now = System.currentTimeMillis();
-            _idleTimeout.setNow(now);
-            _retryTimeout.setNow(now);
-
+            synchronized (_changes)
+            {   
+                // have we been destroyed while sleeping
+                if (_selector==null)
+                    return;
+                
+                // update the timers for task schedule in this loop
+                long now = System.currentTimeMillis();
+                _idleTimeout.setNow(now);
+                _retryTimeout.setNow(now);
+            }
             
             // Look for things to do
             Iterator iter = _selector.selectedKeys().iterator();
