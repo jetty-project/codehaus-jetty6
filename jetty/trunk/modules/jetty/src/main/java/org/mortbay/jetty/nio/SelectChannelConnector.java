@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
@@ -175,7 +176,7 @@ public class SelectChannelConnector extends AbstractConnector
     {
         // Header buffers always byte array buffers (efficiency of random access)
         if (size==getHeaderBufferSize())
-            return new NIOBuffer(size,false);
+            return new NIOBuffer(size, false);
         return new NIOBuffer(size, true);
     }
 
@@ -285,6 +286,7 @@ public class SelectChannelConnector extends AbstractConnector
                 _changes.clear();
                 
             }
+            
             // workout how low to wait in select
             long wait = getMaxIdleTime();
             long to_next = _idleTimeout.getTimeToNext();
@@ -329,7 +331,7 @@ public class SelectChannelConnector extends AbstractConnector
                         key.cancel();
                         HttpEndPoint connection = (HttpEndPoint) key.attachment();
                         if (connection != null)
-                            connection._key = null;
+                            connection.close();
                         continue;
                     }
 
@@ -426,8 +428,6 @@ public class SelectChannelConnector extends AbstractConnector
         {
             _selector.wakeup();
         }
-
-
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -737,7 +737,22 @@ public class SelectChannelConnector extends AbstractConnector
                 }
             }
         }
+        
 
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.io.nio.ChannelEndPoint#close()
+         */
+        public void close() throws IOException
+        {
+            _key=null;
+            super.close();
+            if (_connection!=null)
+                _connection.close();
+        }
+
+        /* ------------------------------------------------------------ */
         public String toString()
         {
             return "HEP[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
