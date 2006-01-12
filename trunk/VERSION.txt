@@ -1,6 +1,7 @@
 
     + Handle pipeline requests without hangs
     + Removed queue from thread pool.
+    + improved caching of content types
     + fixed bug in overloaded write method on HttpConnection (reported against Tapestry4.0)
     + hid org.apache.commons.logging and org.slf4j packages from webapp
     + maven-jetty6-plugin stopped transitive inclusion of log4j and
