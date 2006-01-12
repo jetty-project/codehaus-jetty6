@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
+import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.util.StringUtil;
 
 
@@ -37,7 +38,13 @@ public class MimeTypes
       MULTIPART_BYTERANGES="multipart/byteranges",
       TEXT_HTML="text/html",
       TEXT_PLAIN="text/plain",
-      TEXT_XML="text/xml";
+      TEXT_XML="text/xml",
+      TEXT_HTML_8859_1="text/html;charset=ISO-8859-1",
+      TEXT_PLAIN_8859_1="text/plain;charset=ISO-8859-1",
+      TEXT_XML_8859_1="text/xml;charset=ISO-8859-1",
+      TEXT_HTML_UTF_8="text/html;charset=UTF-8",
+      TEXT_PLAIN_UTF_8="text/plain;charset=UTF-8",
+      TEXT_XML_UTF_8="text/xml;charset=UTF-8";
     
 
     private static int index=1;
@@ -48,17 +55,31 @@ public class MimeTypes
     	MULTIPART_BYTERANGES_ORDINAL=index++,
     	TEXT_HTML_ORDINAL=index++,
 	    TEXT_PLAIN_ORDINAL=index++,
-	    TEXT_XML_ORDINAL=index++;
+	    TEXT_XML_ORDINAL=index++,
+        TEXT_HTML_8859_1_ORDINAL=index++,
+        TEXT_PLAIN_8859_1_ORDINAL=index++,
+        TEXT_XML_8859_1_ORDINAL=index++,
+        TEXT_HTML_UTF_8_ORDINAL=index++,
+        TEXT_PLAIN_UTF_8_ORDINAL=index++,
+        TEXT_XML_UTF_8_ORDINAL=index++;
     
     public final static BufferCache CACHE = new BufferCache(); 
 
-    public final static Buffer
+    public final static CachedBuffer
     	FORM_ENCODED_BUFFER=CACHE.add(FORM_ENCODED,FORM_ENCODED_ORDINAL),
     	MESSAGE_HTTP_BUFFER=CACHE.add(MESSAGE_HTTP, MESSAGE_HTTP_ORDINAL),
     	MULTIPART_BYTERANGES_BUFFER=CACHE.add(MULTIPART_BYTERANGES,MULTIPART_BYTERANGES_ORDINAL),
-    	TEXT_HTML_BUFFER=CACHE.add(TEXT_HTML,TEXT_HTML_ORDINAL),
-    	TEXT_PLAIN_BUFFER=CACHE.add(TEXT_PLAIN,TEXT_PLAIN_ORDINAL),
-    	TEXT_XML_BUFFER=CACHE.add(TEXT_XML,TEXT_XML_ORDINAL);
+        
+        TEXT_HTML_BUFFER=CACHE.add(TEXT_HTML,TEXT_HTML_ORDINAL),
+        TEXT_PLAIN_BUFFER=CACHE.add(TEXT_PLAIN,TEXT_PLAIN_ORDINAL),
+        TEXT_XML_BUFFER=CACHE.add(TEXT_XML,TEXT_XML_ORDINAL),
+        
+    	TEXT_HTML_8859_1_BUFFER=new CachedBuffer(TEXT_HTML_8859_1,TEXT_HTML_8859_1_ORDINAL),
+    	TEXT_PLAIN_8859_1_BUFFER=new CachedBuffer(TEXT_PLAIN_8859_1,TEXT_PLAIN_8859_1_ORDINAL),
+    	TEXT_XML_8859_1_BUFFER=new CachedBuffer(TEXT_XML_8859_1,TEXT_XML_8859_1_ORDINAL),
+        TEXT_HTML_UTF_8_BUFFER=new CachedBuffer(TEXT_HTML_UTF_8,TEXT_HTML_UTF_8_ORDINAL),
+        TEXT_PLAIN_UTF_8_BUFFER=new CachedBuffer(TEXT_PLAIN_UTF_8,TEXT_PLAIN_UTF_8_ORDINAL),
+        TEXT_XML_UTF_8_BUFFER=new CachedBuffer(TEXT_XML_UTF_8,TEXT_XML_UTF_8_ORDINAL);
     
     
     /* ------------------------------------------------------------ */
@@ -84,7 +105,25 @@ public class MimeTypes
             __encodings.put(type,encoding.getString(type.toString()));
         }
         
-        // TODO add common mime type and encoding combinations.
+        TEXT_HTML_BUFFER.setAssociate("ISO-8859-1",TEXT_HTML_8859_1_BUFFER);
+        TEXT_HTML_BUFFER.setAssociate("ISO_8859_1",TEXT_HTML_8859_1_BUFFER);
+        TEXT_HTML_BUFFER.setAssociate("iso-8859-1",TEXT_HTML_8859_1_BUFFER);
+        TEXT_PLAIN_BUFFER.setAssociate("ISO-8859-1",TEXT_PLAIN_8859_1_BUFFER);
+        TEXT_PLAIN_BUFFER.setAssociate("ISO_8859_1",TEXT_PLAIN_8859_1_BUFFER);
+        TEXT_PLAIN_BUFFER.setAssociate("iso-8859-1",TEXT_PLAIN_8859_1_BUFFER);
+        TEXT_XML_BUFFER.setAssociate("ISO-8859-1",TEXT_XML_8859_1_BUFFER);
+        TEXT_XML_BUFFER.setAssociate("ISO_8859_1",TEXT_XML_8859_1_BUFFER);
+        TEXT_XML_BUFFER.setAssociate("iso-8859-1",TEXT_XML_8859_1_BUFFER);
+
+        TEXT_HTML_BUFFER.setAssociate("UTF-8",TEXT_HTML_UTF_8_BUFFER);
+        TEXT_HTML_BUFFER.setAssociate("UTF8",TEXT_HTML_UTF_8_BUFFER);
+        TEXT_HTML_BUFFER.setAssociate("utf-8",TEXT_HTML_UTF_8_BUFFER);
+        TEXT_PLAIN_BUFFER.setAssociate("UTF-8",TEXT_PLAIN_UTF_8_BUFFER);
+        TEXT_PLAIN_BUFFER.setAssociate("UTF8",TEXT_PLAIN_UTF_8_BUFFER);
+        TEXT_PLAIN_BUFFER.setAssociate("utf-8",TEXT_PLAIN_UTF_8_BUFFER);
+        TEXT_XML_BUFFER.setAssociate("UTF-8",TEXT_XML_UTF_8_BUFFER);
+        TEXT_XML_BUFFER.setAssociate("UTF8",TEXT_XML_UTF_8_BUFFER);
+        TEXT_XML_BUFFER.setAssociate("utf-8",TEXT_XML_UTF_8_BUFFER);
     }
 
 

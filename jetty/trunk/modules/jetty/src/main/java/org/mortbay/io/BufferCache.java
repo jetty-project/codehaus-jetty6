@@ -108,9 +108,11 @@ public class BufferCache
         return -1;
     }
     
-    public class CachedBuffer extends ByteArrayBuffer.CaseInsensitive
+    public static class CachedBuffer extends ByteArrayBuffer.CaseInsensitive
     {
         private int _ordinal;
+        private HashMap _associateMap=null;
+        
         public CachedBuffer(String value, int ordinal)
         {
             super(value);
@@ -121,7 +123,23 @@ public class BufferCache
         {
             return _ordinal;
         }
+
+        public CachedBuffer getAssociate(Object key)
+        {
+            if (_associateMap==null)
+                return null;
+            return (CachedBuffer)_associateMap.get(key);
+        }
+        
+        public void setAssociate(Object key, CachedBuffer associate)
+        {
+            // TODO should be synchronized - but lets try without
+            if (_associateMap==null)
+                _associateMap=new HashMap();
+            _associateMap.put(key,associate);
+        }
     }
+    
     
     public String toString()
     {
