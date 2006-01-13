@@ -507,6 +507,7 @@ public class HttpParser implements HttpTokens
                             {
                                 _length=cached.length();
                                 _buffer.setGetIndex(_buffer.markIndex()+_length);
+                                length=_buffer.length();
                             }
                         }
                     }
