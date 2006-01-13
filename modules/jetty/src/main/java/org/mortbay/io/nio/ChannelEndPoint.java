@@ -83,14 +83,17 @@ public class ChannelEndPoint implements EndPoint
      */
     public void close() throws IOException
     {
-        if (_channel instanceof SocketChannel)
+        if (_channel.isOpen())
         {
-            // TODO - is this really required?
-            Socket socket= ((SocketChannel)_channel).socket();
-            socket.shutdownOutput();
-            socket.close();
+            if (_channel instanceof SocketChannel)
+            {
+                // TODO - is this really required?
+                Socket socket= ((SocketChannel)_channel).socket();
+                socket.shutdownOutput();
+                socket.close();
+            }
+            _channel.close();
         }
-        _channel.close();
     }
 
     /* (non-Javadoc)
