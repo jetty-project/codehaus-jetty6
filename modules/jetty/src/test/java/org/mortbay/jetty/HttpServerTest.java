@@ -47,7 +47,7 @@ public class HttpServerTest
     // Useful constants
     private static final long   ONE_SECOND = 1000L;
     private static final long   TEN_SECONDS = 10000L;
-    private static final int    PORT       = 8080;
+    private static final int    PORT       = 8123;
     private static final String HOST       = "localhost";
 
     //~ Methods ----------------------------------------------------------------
@@ -61,7 +61,7 @@ public class HttpServerTest
     public void testRequest()
                      throws Exception, InterruptedException
     {
-        // TODO doesn't work in maven?
+        // TODO does not work in maven
         /*
         Server       server = startServer();
         Socket       client = new Socket(HOST, PORT);
@@ -135,7 +135,7 @@ public class HttpServerTest
             br = new BufferedReader(new InputStreamReader(client
                                                               .getInputStream()));
 
-            StringBuilder sb   = new StringBuilder();
+            StringBuffer sb   = new StringBuffer();
             String        line;
 
             while ((line = br.readLine()) != null) {
