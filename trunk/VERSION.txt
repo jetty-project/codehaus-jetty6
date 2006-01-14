@@ -1,4 +1,5 @@
 
+    + started improving test harnesses
     + Handle pipeline requests without hangs
     + Removed queue from thread pool.
     + improved caching of content types

@@ -255,7 +255,7 @@ public interface Buffer extends Cloneable
     
     /**
      * Write the bytes from the source buffer to the current getIndex.
-     * @param src The source <code>Buffer</code>. If the source buffer is immutable, it is not modified, otherwise it's getIndex is updated.
+     * @param src The source <code>Buffer</code> it is not modified.
      * @return The number of bytes actually poked
      */
     int put(Buffer src);

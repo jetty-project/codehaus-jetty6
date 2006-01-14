@@ -22,7 +22,9 @@ import org.mortbay.io.ByteArrayBuffer;
  */
 public class RFC2616Test extends TestCase
 {
-
+    Server server = new Server();
+    LocalConnector connector = new LocalConnector();
+    
     /**
      * Constructor for RFC2616Test.
      * @param arg0
@@ -30,6 +32,8 @@ public class RFC2616Test extends TestCase
     public RFC2616Test(String arg0)
     {
         super(arg0);
+        server.setConnectors(new Connector[]{connector});
+        server.setHandler(new DumpHandler());
     }
 
     /*
@@ -38,6 +42,8 @@ public class RFC2616Test extends TestCase
     protected void setUp() throws Exception
     {
         super.setUp();
+        
+        server.start();
     }
 
     /*
@@ -46,6 +52,7 @@ public class RFC2616Test extends TestCase
     protected void tearDown() throws Exception
     {
         super.tearDown();
+        server.stop();
     }
     
     
@@ -78,19 +85,19 @@ public class RFC2616Test extends TestCase
     }
 
     /* --------------------------------------------------------------- */
-    public void t_e_s_t_3_6()
+    public void test3_6()
     {        
         
         String response=null;
         try
         {
-            LocalConnector listener = new LocalConnector();
             int offset=0;
             
             // Chunk last
             /*
             offset=0;
-            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
+            connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Transfer-Encoding: chunked,identity\n"+
                                            "Content-Type: text/plain\n"+
@@ -98,12 +105,13 @@ public class RFC2616Test extends TestCase
                                            "5;\015\012"+
                                            "123\015\012\015\012"+
                                            "0;\015\012\015\012");
-            checkContains(response,"HTTP/1.1 400 Bad","Chunked last");
+            checkContains(response,offset,"HTTP/1.1 400 Bad","Chunked last");
             */
             
             // Chunked
             offset=0;
-            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
+            connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Transfer-Encoding: chunked\n"+
                                            "Content-Type: text/plain\n"+
@@ -134,19 +142,19 @@ public class RFC2616Test extends TestCase
             offset = checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
             offset = checkContains(response,offset,"6789abcde","3.6.1 Chunking");
             offset = checkContains(response,offset,"/R3","3.6.1 Chunking");
-
             
             // Chunked
             offset=0;
-            response=listener.getResponses("POST /R1 HTTP/1.1\n"+
+            connector.reopen();
+            response=connector.getResponses("POST /R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Transfer-Encoding: chunked\n"+
                                            "Content-Type: text/plain\n"+
                                            "\n"+
-                                           "2;\n"+
-                                           "12\n"+
                                            "3;\n"+
-                                           "345\n"+
+                                           "fgh\n"+
+                                           "3;\n"+
+                                           "Ijk\n"+
                                            "0;\n\n"+
 
                                            "POST /R2 HTTP/1.1\n"+
@@ -155,9 +163,9 @@ public class RFC2616Test extends TestCase
                                            "Content-Type: text/plain\n"+
                                            "\n"+
                                            "4;\n"+
-                                           "6789\n"+
+                                           "lmno\n"+
                                            "5;\n"+
-                                           "abcde\n"+
+                                           "Pqrst\n"+
                                            "0;\n\n"+
                                            
                                            "GET /R3 HTTP/1.1\n"+
@@ -166,14 +174,15 @@ public class RFC2616Test extends TestCase
                                            "\n");
             checkNotContained(response, "HTTP/1.1 100", "3.6.1 Chunking");
             offset = checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
-            offset = checkContains(response,offset,"12345","3.6.1 Chunking");
+            offset = checkContains(response,offset,"fghIjk","3.6.1 Chunking");
             offset = checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
-            offset = checkContains(response,offset,"6789abcde","3.6.1 Chunking");
+            offset = checkContains(response,offset,"lmnoPqrst","3.6.1 Chunking");
             offset = checkContains(response,offset,"/R3","3.6.1 Chunking");
 
             // Chunked and keep alive
             offset=0;
-            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
+            connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Transfer-Encoding: chunked\n"+
                                            "Content-Type: text/plain\n"+
@@ -1258,7 +1267,9 @@ public class RFC2616Test extends TestCase
             System.err.println("FAILED: "+test);
             System.err.println("'"+c+"' not in:");
             System.err.println(s.substring(offset));
-            System.err.println("--\nskipped:"+s.substring(0,offset));
+            System.err.flush();
+            System.out.println("--\n"+s);
+            System.out.flush();
             assertTrue(test,false);
         }
 	    return o;
@@ -1275,112 +1286,6 @@ public class RFC2616Test extends TestCase
         checkNotContained(s,0,c,test);
     }
 
-    static class InBuf extends ByteArrayBuffer implements Buffer
-    {
-        String fill;
-        boolean closed;
-
-        InBuf()
-        {
-            super(8192);
-        }
-
-        public boolean isClosed()
-        {
-            return closed;
-        }
-
-        public void close() throws IOException
-        {
-            closed=true;
-        }
-
-        public int fill() throws IOException
-        {
-            if (closed)
-                throw new IOException("EOF");
-                
-            if (fill!=null)
-            {
-                byte[] b=fill.getBytes();
-                put(b,0,b.length);
-                fill=null;
-                return b.length;
-            }
-            return 0;
-        }
-    }
-    
-    static class OutBuf extends ByteArrayBuffer implements Buffer
-    {
-        StringBuffer flush= new StringBuffer();
-        boolean closed;
-        InBuf in;
-        
-        OutBuf(InBuf in)
-        {
-            super(8192);
-            this.in=in;
-        }
-
-        /* 
-         */
-        public boolean isClosed()
-        {
-            return closed;
-        }
-
-        /* 
-         */
-        public void close() throws IOException
-        {
-          closed=true;
-          in.close();
-        }
-
-        /* 
-         */
-        public int flush() throws IOException
-        {
-            if (closed)
-                throw new IOException("EOF");
-                
-            int l=flush.length();
-            if (length()>0)
-            {
-                flush.append(toString());
-                clear();
-                return flush.length()-l;
-            }
-            return 0;
-        }
-
-        /* 
-         */
-        public int flush(Buffer header, Buffer trailer) throws IOException
-        {
-            if (closed)
-                throw new IOException("EOF");
-            int l=0;
-            if (header!=null && header.length()>0)
-            {
-                l+=header.length();
-                flush.append(header.toString());
-                header.clear();
-            }
-            
-            l+=flush();
-
-            if (trailer!=null && trailer.length()>0)
-            {
-                l+=trailer.length();
-                flush.append(trailer.toString());
-                trailer.clear();
-            }
-            
-            return l;
-        }
-    }
 }
 
 
