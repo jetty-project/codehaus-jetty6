@@ -62,7 +62,7 @@ public class HttpParser implements HttpTokens
     private Buffers _buffers; // source of buffers
     private EndPoint _endp;
     private Buffer _header; // Buffer for header data (and small _content)
-    private Buffer _content; // Buffer for large _content
+    private Buffer _content; // Buffer for large content
     private Buffer _buffer; // The current buffer in use (either _header or _content)
     private int _headerBufferSize;
     private int _contentBufferSize;
@@ -221,20 +221,30 @@ public class HttpParser implements HttpTokens
         
         int length=_buffer.length();
         boolean fill_called=false;
-
+        
         // Fill buffer if we can
         if (length == 0)
         {
+            int filled = -1;
+            if (_content!=null && _buffer!=_content)
+            {
+                _buffer=_content;
+                filled=_buffer.length();
+            }
+                
             if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
                     throw new IOException("FULL");
-            int filled = -1;
-            if (_endp != null)
+            if (_endp != null && filled<=0)
             {
                 // Compress buffer if handling _content buffer
                 // TODO check this is not moving data too much
-                if (_buffer == _content) _buffer.compact();
+                if (_buffer == _content) 
+                    _buffer.compact();
 
-                if (_buffer.space() == 0) throw new IOException("FULL");
+                if (_buffer.space() == 0) 
+                {   
+                    throw new IOException("FULL");
+                }
                 
                 try
                 {
@@ -262,7 +272,7 @@ public class HttpParser implements HttpTokens
             }
             length=_buffer.length();
         }
-
+        
         // EventHandler header
         byte ch;
         byte[] array = _buffer.array();
@@ -456,39 +466,30 @@ public class HttpParser implements HttpTokens
                             {
                                 case HttpParser.EOF_CONTENT:
                                     _state = STATE_EOF_CONTENT;
-                                    if(_buffers!=null && _buffer==_header)
-                                    {
-                                        _buffer=_buffers.getBuffer(_contentBufferSize);
-                                        _buffer.put(_header); 
-                                        _header.clear();
-                                        
-                                    }
+                                    if(_content==null && _buffers!=null)
+                                        _content=_buffers.getBuffer(_contentBufferSize);
+                                    
                                     _handler.headerComplete(); // May recurse here !
                                     break;
+                                    
                                 case HttpParser.CHUNKED_CONTENT:
                                     _state = STATE_CHUNKED_CONTENT;
-                                	if(_buffers!=null && _buffer==_header)
-                                	{
-                                	    _buffer=_buffers.getBuffer(_contentBufferSize);
-                                	    _buffer.put(_header); 
-                                        _header.clear();
-                                	}
+                                    if (_content==null && _buffers!=null)
+                                        _content=_buffers.getBuffer(_contentBufferSize);
                                     _handler.headerComplete(); // May recurse here !
                                     break;
+                                    
                                 case HttpParser.NO_CONTENT:
                                     _state = STATE_END;
                                     _handler.headerComplete(); // May recurse here !
                                     _handler.messageComplete(_contentPosition);
                                     break;
+                                    
                                 default:
                                     _state = STATE_CONTENT;
 
-                                	if(_buffers!=null && _buffer==_header && _contentLength>_buffer.capacity()-_buffer.getIndex())
-                                    {
-                                	    _buffer=_buffers.getBuffer(_contentBufferSize);
-                                	    _buffer.put(_header); 
-                                        _header.clear();
-                                    }
+                                	if(_buffers!=null && _content==null && _buffer==_header && _contentLength>(_header.capacity()-_header.getIndex()))
+                                	    _content=_buffers.getBuffer(_contentBufferSize);
                                     _handler.headerComplete(); // May recurse here !
                                     break;
                             }
@@ -688,7 +689,7 @@ public class HttpParser implements HttpTokens
 
     /* ------------------------------------------------------------------------------- */
     public void reset(boolean returnBuffers)
-    {
+    {   
         _state = STATE_START;
         _contentLength = UNKNOWN_CONTENT;
         _contentPosition = 0;
@@ -696,30 +697,40 @@ public class HttpParser implements HttpTokens
         _hasContent = false;
         _response = false;
         
-        if (_buffer!=null)
+        if (_buffer!=null && _buffer.length()>0 && _eol == CARRIAGE_RETURN && _buffer.peek() == LINE_FEED)
         {
-            if ( _buffer==_content && _content.length()<=_header.space())
+            _buffer.skip(1);
+            _eol = LINE_FEED;
+        }
+        
+        if (_content!=null)
+        {   
+            if (_content.hasContent())
             {
-                _buffer=_header;
-                if (_content.length()>0)
-                {
-                    if (_eol == CARRIAGE_RETURN && _content.peek() == LINE_FEED)
-                    {
-                        _content.skip(1);
-                        _eol = LINE_FEED;
-                    }
-                    _header.put(_content);
-                }
+                _header.setMarkIndex(-1);
+                _header.compact();
+                // TODO if pipelined requests received after big input - maybe this is not good?.
+                _content.skip(_header.put(_content));
+
+            }
+            
+            if (_content.length()==0)
+            {
                 if (_buffers!=null && returnBuffers)
                     _buffers.returnBuffer(_content);
                 _content=null; 
             }
-            else if (_buffer.length()>0 && _eol == CARRIAGE_RETURN && _buffer.peek() == LINE_FEED)
+            else
             {
-                _buffer.skip(1);
-                _eol = LINE_FEED;
+                _content.setMarkIndex(-1);
+                _content.compact();
             }
+        }
             
+            
+        if (_header!=null)
+        {
+            _header.setMarkIndex(-1);
             if (!_header.hasContent() && _buffers!=null && returnBuffers)
             {
                 _buffers.returnBuffer(_header);
@@ -728,13 +739,15 @@ public class HttpParser implements HttpTokens
             }   
             else
             {
-                _buffer.compact();
-                _tok0.update(_buffer);
+                _header.compact();
+                _tok0.update(_header);
                 _tok0.update(0,0);
-                _tok1.update(_buffer);
+                _tok1.update(_header);
                 _tok1.update(0,0);
             }
         }
+        
+        _buffer=_header;
     }
 
     Buffer getHeaderBuffer()
