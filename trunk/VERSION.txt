@@ -1,5 +1,5 @@
 
-    + started improving test harnesses
+    + reinstated rfc2616 test harness
     + Handle pipeline requests without hangs
     + Removed queue from thread pool.
     + improved caching of content types

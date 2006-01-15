@@ -301,6 +301,12 @@ public class HttpConnection
                         _generator.flushBuffers();
                 }
             }
+            catch (HttpException e)
+            {
+                Log.debug(e);
+                _generator.sendError(e.getStatus(), e.getReason(), null, true);
+                throw e;
+            }
             finally
             {
                 __currentConnection.set(null);
@@ -545,6 +551,7 @@ public class HttpConnection
                     {
                         _generator.setResponse(400, null);
                         _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
+                        _generator.completeHeader(_responseFields, true);
                         _generator.complete();
                         return;
                     }
@@ -556,9 +563,13 @@ public class HttpConnection
                             _expectingContinues = true;
                             
                             // TODO delay sending 100 response until a read is attempted.
-                            _generator.setResponse(100, null);
-                            _generator.complete();
-                            _generator.reset(false);
+                            if (_parser.getHeaderBuffer()==null || _parser.getHeaderBuffer().length()<2)
+                            {
+                                _generator.setResponse(100, null);
+                                _generator.completeHeader(null, true);
+                                _generator.complete();
+                                _generator.reset(false);
+                            }
                         }
                         else
                         {

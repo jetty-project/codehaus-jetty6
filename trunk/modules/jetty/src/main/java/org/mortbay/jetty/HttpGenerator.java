@@ -371,7 +371,7 @@ public class HttpGenerator implements HttpTokens
                 _header.put((byte) ('0' + (_status % 100) / 10));
                 _header.put((byte) ('0' + (_status % 10)));
                 _header.put((byte) ' ');
-                byte[] r = Portable.getBytes(_reason == null ? "Uknown" : _reason);
+                byte[] r = Portable.getBytes(_reason == null ? "Unknown" : _reason);
                 _header.put(r, 0, r.length);
                 _header.put(CRLF);
             }
@@ -529,16 +529,17 @@ public class HttpGenerator implements HttpTokens
             }
 
             // Handle connection if need be
-            if (_close || _contentLength==EOF_CONTENT)
+            if ((_close || _contentLength==EOF_CONTENT))
             {
-                _header.put(CONNECTION_CLOSE);
+                if (_version>HttpVersions.HTTP_1_0_ORDINAL || connection!=null)
+                    _header.put(CONNECTION_CLOSE);
                 _close=true;
             }
             else if (keep_alive && _version == HttpVersions.HTTP_1_0_ORDINAL)
                 _header.put(CONNECTION_KEEP_ALIVE);
             else if (connection != null) connection.put(_header);
 
-            if (!has_server)
+            if (!has_server && _status>100)
                 _header.put(SERVER);
 
             // end the header.
@@ -792,6 +793,7 @@ public class HttpGenerator implements HttpTokens
         {
             setResponse(code, reason);
             _close = close;
+            completeHeader(null, false);
             if (content != null) addContent(new ByteArrayBuffer(content), HttpGenerator.LAST);
             complete();
         }

@@ -188,7 +188,7 @@ public class HttpParser implements HttpTokens
     {
         parseNext();
         // continue parsing
-        while (_state != STATE_END && _buffer.length() > 0)
+        while (_state != STATE_END && _buffer!=null && _buffer.length() > 0)
         {
             parseNext();
         }
@@ -429,7 +429,7 @@ public class HttpParser implements HttpTokens
                                             if (c.endsWith(HttpHeaderValues.CHUNKED))
                                                 _contentLength = CHUNKED_CONTENT;
                                             else if (c.indexOf(HttpHeaderValues.CHUNKED) >= 0)
-                                                    throw new IOException("BAD");
+                                                throw new HttpException(400,null);
                                         }
                                         break;
 
