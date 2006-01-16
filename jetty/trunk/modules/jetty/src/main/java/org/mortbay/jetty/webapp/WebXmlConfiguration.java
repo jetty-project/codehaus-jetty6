@@ -765,7 +765,7 @@ public class WebXmlConfiguration implements Configuration
             String realm_name=name.toString(false,true);
 
             UserRealm[] realms=WebAppContext.getCurrentContext().getContextHandler().getServer().getUserRealms();
-            UserRealm realm=null;
+            UserRealm realm=getWebAppContext().getSecurityHandler().getUserRealm();
             for (int i=0;realm==null && realms!=null && i<realms.length; i++)
             {
                 if (realms[i]!=null && realm_name.equals(realms[i].getName()))
