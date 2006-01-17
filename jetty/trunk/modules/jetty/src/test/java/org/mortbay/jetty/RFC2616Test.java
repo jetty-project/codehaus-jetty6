@@ -103,7 +103,7 @@ public class RFC2616Test extends TestCase
                                            "5;\015\012"+
                                            "123\015\012\015\012"+
                                            "0;\015\012\015\012");
-            checkContains(response,offset,"HTTP/1.1 400 BAD","Chunked last");
+            checkContains(response,offset,"HTTP/1.1 400 Bad","Chunked last");
             
             
             // Chunked

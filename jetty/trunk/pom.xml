@@ -132,7 +132,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>1.0-rc1</version>
+        <version>1.0-rc5</version>
       </dependency>
       <dependency>
         <groupId>mx4j</groupId>
@@ -159,6 +159,7 @@
         <artifactId>jasper-runtime</artifactId>
         <version>5.5.12</version>
       </dependency>
+      <!-- tomcat does not have transitive dependencies for these -->
       <dependency>
         <groupId>xerces</groupId>
         <artifactId>xmlParserAPIs</artifactId>

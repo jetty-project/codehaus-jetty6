@@ -382,8 +382,8 @@ public class HttpHeaderTest extends TestCase
         header.put(new ByteArrayBuffer("name1"), new View(new ByteArrayBuffer("value1".getBytes())));
         String s1=header.toString();
         String s2=header.toString();
-        System.err.println(s1);
-        System.err.println(s2);
+        //System.err.println(s1);
+        //System.err.println(s2);
         assertEquals(s1,s2);
     }
 }

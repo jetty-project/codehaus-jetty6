@@ -69,8 +69,8 @@ public class LocalConnector extends AbstractConnector
     String getResponses(String requests)
         throws Exception
     {
-        System.out.println("\nREQUESTS :\n"+requests);
-        System.out.flush();
+        // System.out.println("\nREQUESTS :\n"+requests);
+        // System.out.flush();
         
         in.put(new ByteArrayBuffer(requests));
 
@@ -83,7 +83,7 @@ public class LocalConnector extends AbstractConnector
                 this.wait();
         }
         
-        System.err.println("\nRESPONSES:\n"+out);
+        // System.err.println("\nRESPONSES:\n"+out);
         return out.toString();
     }
 
