@@ -52,7 +52,6 @@ public class Log
         {
             log_class=Loader.loadClass(Log.class, logClass);
             log=(Logger) log_class.newInstance();
-            log.info("Logging to slf4j",null,null);
         }
         catch(Exception e)
         {
