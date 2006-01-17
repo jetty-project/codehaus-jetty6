@@ -151,26 +151,27 @@ public class Dispatcher implements RequestDispatcher
             {
                 String query=_dQuery;
                 
-
-                MultiMap parameters=new MultiMap();
-                UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
-                
-                if (old_params!=null && old_params.size()>0)
+                if (query!=null)
                 {
-                    // Merge parameters.
-                    Iterator iter = old_params.entrySet().iterator();
-                    while (iter.hasNext())
-                    {
-                        Map.Entry entry = (Map.Entry)iter.next();
-                        String name=(String)entry.getKey();
-                        Object values=entry.getValue();
-                        for (int i=0;i<LazyList.size(values);i++)
-                            parameters.add(name, LazyList.get(values, i));
-                    }
+                    MultiMap parameters=new MultiMap();
+                    UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
                     
+                    if (old_params!=null && old_params.size()>0)
+                    {
+                        // Merge parameters.
+                        Iterator iter = old_params.entrySet().iterator();
+                        while (iter.hasNext())
+                        {
+                            Map.Entry entry = (Map.Entry)iter.next();
+                            String name=(String)entry.getKey();
+                            Object values=entry.getValue();
+                            for (int i=0;i<LazyList.size(values);i++)
+                                parameters.add(name, LazyList.get(values, i));
+                        }
+                        
+                    }
+                    base_request.setParameters(parameters);
                 }
-                base_request.setParameters(parameters);
-                
                 
                 IncludeAttributes attr = new IncludeAttributes(old_attr); 
                 

@@ -150,9 +150,14 @@ public class SessionHandler extends WrappedHandler
             old_session_manager = base_request.getSessionManager();
             old_session = base_request.getSession(false);
             
-            base_request.setSessionManager(_sessionManager);
-            base_request.setSession(null);
+            if (old_session_manager != _sessionManager)
+            {
+                // new session context
+                base_request.setSessionManager(_sessionManager);
+                base_request.setSession(null);
+            }
             
+            // access any existing session
             HttpSession session=request.getSession(false);
             if (session!=null)
                 ((SessionManager.Session)session).access();
