@@ -386,7 +386,7 @@ public class LazyList
     /* ------------------------------------------------------------ */
     public static Object[] removeFromArray(Object[] array, Object item)
     {
-        if (item==null)
+        if (item==null || array==null)
             return array;
         for (int i=array.length;i-->0;)
         {
