@@ -480,9 +480,9 @@ public class HttpConnection
 
                 _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE.getOrdinal(version);
                 if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
-                _request.setProtocol(HttpVersions.CACHE.get(_version).toString());
+                _request.setProtocol(version.toString());
 
-                _head = HttpMethods.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;
+                _head = method == HttpMethods.HEAD_BUFFER; // depends on method being decahced.
             }
             catch (URISyntaxException e)
             {

@@ -353,38 +353,44 @@ public class HttpGenerator implements HttpTokens
             // add response line
             Buffer line = HttpStatus.getResponseLine(_status);
 
-            // check reason
-            if (_reason!=null)
+            if (line!=null && _reason==null)
             {
-                if (_reason.length()>_header.capacity()/2)
-                    _reason=_reason.substring(0,_header.capacity()/2);
-            }
-            
-            if (_reason==null)
-                _reason=getReason(_status);
-            
-            if (line == null)
-            {
-                _header.put(HttpVersions.HTTP_1_1_BUFFER);
-                _header.put((byte) ' ');
-                _header.put((byte) ('0' + _status / 100));
-                _header.put((byte) ('0' + (_status % 100) / 10));
-                _header.put((byte) ('0' + (_status % 10)));
-                _header.put((byte) ' ');
-                byte[] r = Portable.getBytes(_reason == null ? "Unknown" : _reason);
-                _header.put(r, 0, r.length);
-                _header.put(CRLF);
-            }
-            else if (_reason != null)
-            {
-                _header.put(line.array(), 0, HttpVersions.HTTP_1_1_BUFFER.length() + 5);
-                byte[] r = Portable.getBytes(_reason);
-                _header.put(r, 0, r.length);
-                _header.put(CRLF);
+                _header.put(line);
             }
             else
-                _header.put(line);
-
+            {
+                // check reason
+                if (_reason!=null)
+                {
+                    if (_reason.length()>_header.capacity()/2)
+                        _reason=_reason.substring(0,_header.capacity()/2);
+                } 
+                else
+                    _reason=getReason(_status);
+                
+                if (line == null)
+                {
+                    _header.put(HttpVersions.HTTP_1_1_BUFFER);
+                    _header.put((byte) ' ');
+                    _header.put((byte) ('0' + _status / 100));
+                    _header.put((byte) ('0' + (_status % 100) / 10));
+                    _header.put((byte) ('0' + (_status % 10)));
+                    _header.put((byte) ' ');
+                    byte[] r = Portable.getBytes(_reason == null ? "Unknown" : _reason);
+                    _header.put(r, 0, r.length);
+                    _header.put(CRLF);
+                }
+                else if (_reason != null)
+                {
+                    _header.put(line.array(), 0, HttpVersions.HTTP_1_1_BUFFER.length() + 5);
+                    byte[] r = Portable.getBytes(_reason);
+                    _header.put(r, 0, r.length);
+                    _header.put(CRLF);
+                }
+                else
+                    _reason=getReason(_status);
+            }
+            
             // Add headers
 
             // key field values

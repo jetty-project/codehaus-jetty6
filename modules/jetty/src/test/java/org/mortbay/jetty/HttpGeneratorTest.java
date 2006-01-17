@@ -79,7 +79,7 @@ public class HttpGeneratorTest extends TestCase
                         
                         tr[r].build(v,hb,null,connect[c],null,chunks, fields);
                         String response=endp.getOut().toString();
-                        System.out.println("RESPONSE: "+t+"\n"+response+(hb.isPersistent()?"...\n":"---\n"));
+                        // System.out.println("RESPONSE: "+t+"\n"+response+(hb.isPersistent()?"...\n":"---\n"));
                         
                         if (v==9)
                         {
