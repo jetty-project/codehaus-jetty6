@@ -1,4 +1,5 @@
 
+    + fixed dispatch of new session problem. sf:1407090
     + reinstated rfc2616 test harness
     + Handle pipeline requests without hangs
     + Removed queue from thread pool.

@@ -833,6 +833,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             if (value!=null && value instanceof HttpSessionBindingListener)
                 ((HttpSessionBindingListener)value).valueUnbound(new HttpSessionBindingEvent(this,name));
         }
+
+        /* ------------------------------------------------------------- */
+        public String toString()
+        {
+            return this.getClass().getName()+":"+getId();
+        }
     }
     
     
