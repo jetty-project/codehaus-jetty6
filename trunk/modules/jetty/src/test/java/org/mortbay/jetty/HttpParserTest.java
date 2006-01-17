@@ -373,8 +373,8 @@ public class HttpParserTest extends TestCase
             String s1=fields.toString();
             if (!s0.equals(s1))
             {
-                System.err.println(s0);
-                System.err.println(s1);
+                //System.err.println(s0);
+                //System.err.println(s1);
                 throw new IllegalStateException();
             }
         }

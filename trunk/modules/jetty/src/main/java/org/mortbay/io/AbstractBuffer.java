@@ -551,7 +551,8 @@ public abstract class AbstractBuffer implements Buffer
     {
         if (isImmutable())
         {
-            if (_string == null) _string = new String(asArray(), 0, length());
+            if (_string == null) 
+                _string = new String(asArray(), 0, length());
             return _string;
         }
         return new String(asArray(), 0, length());
