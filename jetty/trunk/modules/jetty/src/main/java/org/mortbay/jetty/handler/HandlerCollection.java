@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 
 /* ------------------------------------------------------------ */
@@ -157,5 +158,24 @@ public class HandlerCollection extends AbstractHandler implements Handler
 
     }
 
+    /* ------------------------------------------------------------ */
+    public void addHandler(Handler handler)
+    {
+        Handler[] handlers = getHandlers();
+        
+        if (handlers==null || handlers.length==0 )
+            setHandler(handler);
+        else
+            setHandlers((Handler[])LazyList.addToArray(handlers, handler));
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void removeHandler(Handler handler)
+    {
+        Handler[] handlers = getHandlers();
+        
+        if (handlers!=null && handlers.length>0 )
+            setHandlers((Handler[])LazyList.removeFromArray(handlers, handler));
+    }
     
 }
