@@ -30,16 +30,19 @@ public class HttpServerTest
     //~ Static fields/initializers ---------------------------------------------
 
     /** The request. */
-    private static final String REQUEST1 = "POST / HTTP/1.0\n"
+    private static final String REQUEST1_HEADER= 
+          "POST / HTTP/1.0\n"
         + "Host: localhost\n"
         + "Content-Type: text/xml\n"
-        + "Content-Length: 181\n"
         + "Connection: close\n"
-        + "\n"
-        + "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
+        + "Content-Length: ";
+        private static final String REQUEST1_CONTENT= 
+          "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
         + "<nimbus xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
         + "        xsi:noNamespaceSchemaLocation=\"nimbus.xsd\" version=\"1.0\">\n"
         + "</nimbus>";
+        private static final String REQUEST1= 
+            REQUEST1_HEADER+REQUEST1_CONTENT.getBytes().length+"\n\n"+REQUEST1_CONTENT;
 
     /** The expected response. */
     private static final String RESPONSE1 = "HTTP/1.1 200 OK\n"
@@ -80,12 +83,8 @@ public class HttpServerTest
         private static final String REQUEST2 =
             REQUEST2_HEADER+REQUEST2_CONTENT.getBytes().length+"\n\n"+REQUEST2_CONTENT;
     
-    
-    private static final String RESPONSE2 = "HTTP/1.1 200 OK\n"
-        + "Content-Length: 455\n"
-        + "Server: Jetty(6.0.x)\n"
-        + "\n"
-        + "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
+    private static final String RESPONSE2_CONTENT = 
+          "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
         + "<nimbus xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
         + "        xsi:noNamespaceSchemaLocation=\"nimbus.xsd\" version=\"1.0\">\n"
         + "    <request requestId=\"1\">\n"
@@ -100,12 +99,24 @@ public class HttpServerTest
         + "        </getProperties>\n"
         + "    </request>\n"
         + "</nimbus>\n";
+    private static final String RESPONSE2 = 
+          "HTTP/1.1 200 OK\n"
+        + "Content-Length: "+RESPONSE2_CONTENT.getBytes().length+"\n"
+        + "Server: Jetty(6.0.x)\n"
+        + "\n" +
+        RESPONSE2_CONTENT;
 
     // Useful constants
     private static final long   PAUSE = 10L;
     private static final int    PORT  = 8080;
     private static final String HOST  = "localhost";
 
+    protected void tearDown() throws Exception
+    {
+        super.tearDown();
+        Thread.sleep(1000);
+    }
+    
     //~ Methods ----------------------------------------------------------------
 
     /**
