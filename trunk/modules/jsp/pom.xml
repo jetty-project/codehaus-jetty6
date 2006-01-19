@@ -36,10 +36,10 @@
                   <fileset dir="${user.home}/.m2/repository/commons-el/commons-el/1.0">
                     <include name="**/*.jar"></include>
                   </fileset>
-                  <fileset dir="${user.home}/.m2/repository/org/slf4j/jcl104-over-slf4j/1.0-rc1">
+                  <fileset dir="${user.home}/.m2/repository/org/slf4j/jcl104-over-slf4j/1.0-rc5">
                     <include name="**/*.jar"></include>
                   </fileset>
-                  <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-simple/1.0-rc1">
+                  <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-simple/1.0-rc5">
                     <include name="**/*.jar"></include>
                   </fileset>
                   <fileset dir="${user.home}/.m2/repository/tomcat">
