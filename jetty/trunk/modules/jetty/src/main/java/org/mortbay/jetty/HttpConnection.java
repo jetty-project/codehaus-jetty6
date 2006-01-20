@@ -594,7 +594,6 @@ public class HttpConnection
          */
         public void content(Buffer ref) throws IOException
         {
-            if (_content != null) throw new IllegalStateException("content not read");
             _content = ref;
             
             if (_delayedHandling)

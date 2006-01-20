@@ -1242,6 +1242,50 @@ public class RFC2616Test extends TestCase
                                    "/R2","19.6.2 Keep-alive close")+3;
             
             assertEquals("19.6.2 closed",-1,response.indexOf("/R3"));
+            
+
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.0\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: keep-alive\n"+
+                                           "Content-Length: 10\n"+
+                                           "\n"+
+                                           "1234567890\n"+
+                                           
+                                           "GET /RA HTTP/1.0\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: keep-alive\n"+
+                                           "Content-Length: 10\n"+
+                                           "\n"+
+                                           "ABCDEFGHIJ\n"+
+                                           
+                                           "GET /R2 HTTP/1.0\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: close\n"+
+                                           "\n"+
+
+                                           "GET /R3 HTTP/1.0\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: close\n"+
+                                           "\n");
+            offset=checkContains(response,offset,"HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 1")+1;
+            offset=checkContains(response,offset,"Connection: keep-alive","19.6.2 Keep-alive 1")+1;
+            offset=checkContains(response,offset,"<html>","19.6.2 Keep-alive 1")+1;
+            offset=checkContains(response,offset,"1234567890","19.6.2 Keep-alive 1")+1;
+            
+            offset=checkContains(response,offset,"HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 1")+1;
+            offset=checkContains(response,offset,"Connection: keep-alive","19.6.2 Keep-alive 1")+1;
+            offset=checkContains(response,offset,"<html>","19.6.2 Keep-alive 1")+1;
+            offset=checkContains(response,offset,"ABCDEFGHIJ","19.6.2 Keep-alive 1")+1;
+            
+            offset=checkContains(response,offset,"HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 2")+11;
+            offset=checkContains(response,offset,"Connection: close","19.6.2 Keep-alive close")+1;
+            offset=checkContains(response,offset,"/R2","19.6.2 Keep-alive close")+3;
+            
+            assertEquals("19.6.2 closed",-1,response.indexOf("/R3"));
+            
+            
+            
         }
         catch(Exception e)
         {
