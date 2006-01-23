@@ -79,6 +79,9 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     }
 
     /* ------------------------------------------------------------------------------- */
+    public abstract void open() throws IOException;
+
+    /* ------------------------------------------------------------------------------- */
     /*
      */
     public Server getServer()

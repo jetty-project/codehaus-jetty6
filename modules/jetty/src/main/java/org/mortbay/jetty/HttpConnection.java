@@ -328,6 +328,12 @@ public class HttpConnection
                     
                     // TODO low resources handling?
                 }
+                
+                Continuation continuation = _request.getContinuation();
+                if (continuation != null && continuation.isPending())
+                {
+                    break;
+                }
             }
         }
         
