@@ -22,7 +22,7 @@ import org.mortbay.io.BufferCache;
  * 
  * @author gregw
  */
-public class HttpMethods 
+public class HttpMethods
 {
     public final static String GET= "GET",
         POST= "POST",
@@ -56,4 +56,5 @@ public class HttpMethods
         TRACE_BUFFER= CACHE.add(TRACE, TRACE_ORDINAL),
         CONNECT_BUFFER= CACHE.add(CONNECT, CONNECT_ORDINAL),
         MOVE_BUFFER= CACHE.add(MOVE, MOVE_ORDINAL);
+
 }

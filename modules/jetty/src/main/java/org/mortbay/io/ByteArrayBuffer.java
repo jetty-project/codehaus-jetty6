@@ -65,16 +65,6 @@ public class ByteArrayBuffer extends AbstractBuffer
         _access=IMMUTABLE;
         _string = value;
     }
-    
-    public ByteArrayBuffer(String value, byte[] bytes)
-    {
-        super(READWRITE,NON_VOLATILE);
-        _bytes = bytes;
-        setGetIndex(0);
-        setPutIndex(_bytes.length);
-        _access=IMMUTABLE;
-        _string = value;
-    }
 
     public byte[] array()
     {
@@ -119,11 +109,6 @@ public class ByteArrayBuffer extends AbstractBuffer
         public CaseInsensitive(String s)
         {
             super(s);
-        }
-        
-        public CaseInsensitive(String s,byte[] bytes)
-        {
-            super(s,bytes);
         }
 
         public CaseInsensitive(byte[] b, int o, int l, int rw)
