@@ -160,9 +160,11 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         {
             while (isRunning())
                 _joinLock.wait(getMaxIdleTimeMs());
-            while (isStopping())
-                _joinLock.wait(100);
         }
+        
+        // TODO remove this semi busy loop!
+        while (isStopping())
+            _joinLock.wait(10);
     }
 
     /* ------------------------------------------------------------ */
