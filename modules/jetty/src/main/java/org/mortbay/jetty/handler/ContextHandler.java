@@ -866,6 +866,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         public ServletContext getContext(String uripath)
         {
             // TODO this is a very poor implementation!
+            // TODO move this to Server
             ContextHandler context=null;
             Handler[] handlers = getServer().getAllHandlers();
             for (int i=0;i<handlers.length;i++)
