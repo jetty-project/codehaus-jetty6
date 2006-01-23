@@ -223,4 +223,14 @@ public class HttpHeaders extends BufferCache
         IDENTITY_BUFFER=CACHE.add(IDENTITY,IDENTITY_ORDINAL);
 
 
+    public static void main(String[] args)
+    {
+        System.err.println(CACHE._stringMap.degenerate());
+    }
+    
+    
+    public static void testTime()
+    {
+        
+    }
 }
