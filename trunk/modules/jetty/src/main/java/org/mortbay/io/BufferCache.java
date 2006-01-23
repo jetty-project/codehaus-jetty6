@@ -28,7 +28,7 @@ import org.mortbay.util.StringMap;
 public class BufferCache
 {
     private HashMap _bufferMap=new HashMap();
-    public StringMap _stringMap=new StringMap(StringMap.CASE_INSENSTIVE);
+    private StringMap _stringMap=new StringMap(StringMap.CASE_INSENSTIVE);
     private ArrayList _index= new ArrayList();
 
     /* ------------------------------------------------------------------------------- */
@@ -112,16 +112,10 @@ public class BufferCache
     {
         private int _ordinal;
         private HashMap _associateMap=null;
-
+        
         public CachedBuffer(String value, int ordinal)
         {
             super(value);
-            _ordinal= ordinal;
-        }
-        
-        public CachedBuffer(String value, byte[] bytes, int ordinal)
-        {
-            super(value,bytes);
             _ordinal= ordinal;
         }
 
@@ -143,24 +137,6 @@ public class BufferCache
             if (_associateMap==null)
                 _associateMap=new HashMap();
             _associateMap.put(key,associate);
-        }
-        
-        public String degenerate()
-        {
-            StringBuffer buf = new StringBuffer();
-            buf.append("new BufferCache.CachedBuffer(\"");
-            buf.append(toString());
-            buf.append("\",new byte[]{");
-            for (int i=0;i<length();i++)
-            {
-                if (i>0)
-                    buf.append(",");
-                buf.append("(byte)"+(int)peek(i));
-            }
-            buf.append("},");
-            buf.append(_ordinal);
-            buf.append(")");
-            return buf.toString();
         }
     }
     

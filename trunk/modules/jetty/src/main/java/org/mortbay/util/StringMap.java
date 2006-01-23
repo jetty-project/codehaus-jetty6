@@ -22,8 +22,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.mortbay.io.BufferCache.CachedBuffer;
-
 /* ------------------------------------------------------------ */
 /** Map implementation Optimized for Strings keys..
  * This String Map has been optimized for mapping small sets of
@@ -538,17 +536,11 @@ public class StringMap extends AbstractMap implements Externalizable
         _entrySet.clear();
     }
 
-    /* ------------------------------------------------------------ */
-    public String degenerate()
-    {
-        return _root.degenerate();
-    }
-
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public static class Node implements Map.Entry
+    private static class Node implements Map.Entry
     {
         char[] _char;
         char[] _ochar;
@@ -558,16 +550,6 @@ public class StringMap extends AbstractMap implements Externalizable
         Object _value;
         
         Node(){}
-        
-        public Node(char[] chars, char[] ochar, Node next, Node[] children, String key, Object value)
-        {
-            _char=chars;
-            _ochar=ochar;
-            _next=next;
-            _children=children;
-            _key=key;
-            _value=value;
-        }
         
         Node(boolean ignoreCase,String s, int offset)
         {
@@ -629,100 +611,46 @@ public class StringMap extends AbstractMap implements Externalizable
         public Object getKey(){return _key;}
         public Object getValue(){return _value;}
         public Object setValue(Object o){Object old=_value;_value=o;return old;}
-        public String degenerate()
+        public String toString()
         {
             StringBuffer buf=new StringBuffer();
             synchronized(buf)
             {
-                degenerate(buf);
+                toString(buf);
             }
             return buf.toString();
         }
 
-        private void degenerate(StringBuffer buf)
+        private void toString(StringBuffer buf)
         {
-            buf.append("new StringMap.Node(");
-            
+            buf.append("{[");
             if (_char==null)
-                buf.append("null");
+                buf.append('-');
             else
-            {
-                buf.append("new char[]{");
                 for (int i=0;i<_char.length;i++)
-                {
-                    if (i>0)
-                        buf.append(",");
-                    buf.append('\'');
                     buf.append(_char[i]);
-                    buf.append("'");
-                }
-                buf.append('}');
-            }
-
-            buf.append(",\n");
-
-            if (_ochar==null)
-                buf.append("null");
-            else
+            buf.append(':');
+            buf.append(_key);
+            buf.append('=');
+            buf.append(_value);
+            buf.append(']');
+            if (_children!=null)
             {
-                buf.append("new char[]{");
-                for (int i=0;i<_ochar.length;i++)
-                {
-                    if (i>0)
-                        buf.append(",");
-                    buf.append('\'');
-                    buf.append(_ochar[i]);
-                    buf.append("'");
-                }
-                buf.append('}');
-            }
-
-            buf.append(",\n");
-
-            if (_next==null)
-                buf.append("null");
-            else
-                _next.degenerate(buf);
-
-            buf.append(",\n");
-            
-            if (_children==null)
-                buf.append("null");
-            else
-            {
-                buf.append("new StringMap.Node[]{");
                 for (int i=0;i<_children.length;i++)
                 {
-                    if (i>0)
-                        buf.append(",");
-                    if (_children[i]==null)
-                        buf.append("null");
+                    buf.append('|');
+                    if (_children[i]!=null)
+                        _children[i].toString(buf);
                     else
-                        _children[i].degenerate(buf);
+                        buf.append("-");
                 }
-                buf.append('}');
             }
-
-            buf.append(",\n");
-
-            if (_key==null)
-                buf.append("null");
-            else
+            buf.append('}');
+            if (_next!=null)
             {
-                buf.append('"');
-                buf.append(_key);
-                buf.append('"');
+                buf.append(",\n");
+                _next.toString(buf);
             }
-            
-            buf.append(",\n");
-
-            if (_value==null)
-                buf.append("null");
-            else
-                buf.append(((CachedBuffer)_value).degenerate());
-
-            buf.append(")\n");
-            
         }
     }
 
