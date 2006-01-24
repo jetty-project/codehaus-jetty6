@@ -1,4 +1,7 @@
 
+    + maven-jetty6-plugin: ensure compile is done before invoking jetty
+    + maven-jetty6-plugin: support all types of artifact dependencies
+
 Jetty-6.0.0Beta8
     + fixed dispatch of new session problem. sf:1407090
     + reinstated rfc2616 test harness
