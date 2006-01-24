@@ -18,10 +18,17 @@ package org.mortbay.jetty.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -38,10 +45,16 @@ import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.management.MBeanContainer;
 
 /**
  *  This plugin runs the <a href="http://jetty.mortbay.org/jetty6">Jetty6</a> web container in-situ on a Maven project without 
  *  first requiring that the project is assembled into a war or exploded web application, saving time during the development cycle.
+ *  <p>
+ *  The plugin forks a parallel lifecycle to ensure that the "compile" phase has been completed before invoking Jetty. This means
+ *  that you do not need to explicity execute a "mvn compile" first. It also means that a "mvn clean jetty6:run" will ensure that
+ *  a full fresh compile is done before invoking Jetty.
+ *  </p>
  *  <p>
  *  Furthermore, once invoked, the plugin can be configured to run continuously, scanning for changes in the project and automatically performing a 
  *  hot redeploy when necessary. This allows the developer to concentrate on coding changes to the project using their IDE of choice and have those changes
@@ -53,6 +66,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
  *  
  * @goal run
  * @requiresDependencyResolution runtime
+ * @execute phase="compile"
  * @description Runs jetty6 directly from a maven project
  *
  */
@@ -68,6 +82,15 @@ public class JettyMojo extends AbstractMojo
      * @readonly
      */
     private MavenProject project;
+    
+    /**
+     * The plugin dependencies.
+     *
+     * @parameter expression="${plugin.artifacts}"
+     * @required
+     * @readonly
+     */
+    private List pluginArtifacts;
     
     /**
      * The location of the web.xml file. If not
@@ -154,6 +177,7 @@ public class JettyMojo extends AbstractMojo
     private SystemProperty[] systemProperties;
     
     
+
     /**
      * The webapp
      */
@@ -302,11 +326,14 @@ public class JettyMojo extends AbstractMojo
 	{
 		this.systemProperties = systemProperties;
 	}
+    
 	
 	public SystemProperty[] getSystemProperties ()
 	{
 		return this.systemProperties;
 	}
+    
+
 	
 	public Handler getWebApplication ()
 	{
@@ -325,8 +352,6 @@ public class JettyMojo extends AbstractMojo
         throws MojoExecutionException, MojoFailureException
     {
         getLog().info("Configuring Jetty for project: " + getProject().getName());
-        
-      
         
         //check the location of the static content/jsps etc
         try
@@ -416,8 +441,10 @@ public class JettyMojo extends AbstractMojo
         try
         {
             getLog().info("Starting Jetty Server ...");
+ 
             Server server = new Server();
             server.setStopAtShutdown(true);
+            
             
             //if the user hasn't configured their project's pom to use a different set of connectors,
             //use the default
@@ -513,7 +540,6 @@ public class JettyMojo extends AbstractMojo
     }
 
 
-
     
     /**
      * Run a scanner thread on the given list of files and directories,
@@ -572,17 +598,16 @@ public class JettyMojo extends AbstractMojo
     		Artifact artifact = (Artifact) iter.next();
     		
     		// Include runtime and compile time libraries
-    		if ( !Artifact.SCOPE_PROVIDED.equals( artifact.getScope() ) &&
-    				!Artifact.SCOPE_TEST.equals( artifact.getScope() ) )
+    		if (!Artifact.SCOPE_TEST.equals( artifact.getScope()) )
     		{
-    			String type = artifact.getType();
-    			if ( "jar".equals( type ) )
+                File artifactFile = artifact.getFile();
+                if (artifactFile.getName().endsWith("jar"))
     			{
-    				libFiles.add(artifact.getFile());
+    				libFiles.add(artifactFile);
     			}
     			else
     			{
-    				getLog().debug( "Looking for jar files, skipping artifact of type " + type + " for WEB-INF" );
+    				getLog().debug( "Looking for jar files, skipping artifact " + artifactFile.getName() + " for WEB-INF" );
     			}
     		}
     	}
@@ -598,17 +623,16 @@ public class JettyMojo extends AbstractMojo
     		Artifact artifact = (Artifact) iter.next();
     		
     		// Include runtime and compile time libraries
-    		if ( !Artifact.SCOPE_PROVIDED.equals( artifact.getScope() ) &&
-    				!Artifact.SCOPE_TEST.equals( artifact.getScope() ) )
+    		if ( !Artifact.SCOPE_TEST.equals( artifact.getScope() ) )
     		{
-    			String type = artifact.getType();
-    			if ( "tld".equals( type ) )
+    			File artifactFile = artifact.getFile();
+    			if ( artifactFile.getName().endsWith("tld") )
     			{
-    				tldFiles.add(artifact.getFile());
+    				tldFiles.add(artifactFile);
     			}
     			else
     			{
-    				getLog().debug( "Looking for tld files, kipping artifact of type " + type + " for WEB-INF" );
+    				getLog().debug( "Looking for tld files, skipping artifact " + artifactFile.getName() + " for WEB-INF" );
     			}
     		}
     	}
@@ -627,5 +651,6 @@ public class JettyMojo extends AbstractMojo
       }
     	return classPathFiles;
     }
+
     
 }
