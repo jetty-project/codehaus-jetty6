@@ -30,7 +30,7 @@ Jetty uses maven 2 as it's build system.  Maven will fetch
 the dependancies, build the server and assemble a runnable
 version:
 
-  m2 install
+  mvn install
 
 The only real dependancy is slf4j logging.  To run the server 
 with JSP support, you will also need the jasper jars, commons 
@@ -40,6 +40,6 @@ the ant build.xml file exist in the top level to assist
 with cleaning the project:
 
  ant clean
- m2 clean:clean
+ mvn clean:clean
 
 
