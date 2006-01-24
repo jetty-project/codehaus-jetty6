@@ -1,6 +1,4 @@
 
-    + maven-jetty6-plugin: ensure compile is done before invoking jetty
-    + maven-jetty6-plugin: support all types of artifact dependencies
 
 Jetty-6.0.0Beta8
     + fixed dispatch of new session problem. sf:1407090
@@ -15,6 +13,8 @@ Jetty-6.0.0Beta8
     + patch to remove spurious ; in HttpFields
     + improve buffer return mechanism.
     + conveniance addHandler removeHandler methods
+    + maven-jetty6-plugin: ensure compile is done before invoking jetty
+    + maven-jetty6-plugin: support all types of artifact dependencies
 
 Jetty-6.0.0Beta7
     + Fixed infinite loop with chunk handling
