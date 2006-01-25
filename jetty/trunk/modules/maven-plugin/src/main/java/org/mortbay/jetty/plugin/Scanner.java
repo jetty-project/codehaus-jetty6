@@ -224,6 +224,12 @@ public class Scanner extends Thread
 	 */
 	private void scan (File f, Map scanInfoMap)
 	{
+        if (f == null)
+            return;
+        
+        if (!f.exists())
+            return;
+        
 		try
 		{
 			if (f.isFile())
@@ -232,12 +238,14 @@ public class Scanner extends Thread
 				long lastModified = f.lastModified();
 				scanInfoMap.put(name, new Long(lastModified));
 			}
-			else
+			else if (f.isDirectory())
 			{
 				File[] files = f.listFiles();
 				for (int i=0;i<files.length;i++)
 					scan(files[i], scanInfoMap);
 			}
+            else
+                getLog().error ("Skipping file of unacceptable type: "+f.getName());
 		}
 		catch (IOException e)
 		{
