@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0.0beta8</version>
+    <version>6.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -10,7 +10,7 @@
   <artifactId>maven-jetty6-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Maven Jetty6 Plugin</name>
-  <version>6.0.0beta8</version>
+  <version>6.0-SNAPSHOT</version>
   <build>
     <plugins>
       <plugin>
@@ -37,7 +37,7 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <version>6.0.0beta8</version>
+      <version>6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-el</groupId>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-management</artifactId>
-      <version>6.0.0beta8</version>
+      <version>6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>tomcat</groupId>
