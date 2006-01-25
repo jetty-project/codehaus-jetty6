@@ -2,13 +2,13 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0.0beta8</version>
+    <version>6.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jsp</artifactId>
   <packaging>pom</packaging>
   <name>Jasper JSP dependancies</name>
-  <version>6.0.0beta8</version>
+  <version>6.0-SNAPSHOT</version>
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
@@ -22,7 +22,7 @@
             </goals>
             <configuration>
               <tasks>
-                <delete quiet="true" dir="../../lib/jsp"></delete>
+                <delete dir="../../lib/jsp" quiet="true"/>
                 <copy todir="../../lib/jsp" flatten="true">
                   <fileset dir="${user.home}/.m2/repository/xerces/xercesImpl/${xerces-version}">
                     <include name="**/*.jar"></include>
@@ -60,14 +60,23 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>tomcat</groupId>
-      <artifactId>jasper-compiler-jdt</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl104-over-slf4j</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jasper-compiler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jasper-runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jasper-compiler-jdt</artifactId>
+    </dependency>
+    <!-- Tomcat does not have transitive dependencies for these -->
     <dependency>
       <groupId>commons-el</groupId>
       <artifactId>commons-el</artifactId>
@@ -79,17 +88,9 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>tomcat</groupId>
-      <artifactId>jasper-compiler</artifactId>
-    </dependency>
-    <dependency>
       <groupId>ant</groupId>
       <artifactId>ant</artifactId>
       <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>tomcat</groupId>
-      <artifactId>jasper-runtime</artifactId>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
