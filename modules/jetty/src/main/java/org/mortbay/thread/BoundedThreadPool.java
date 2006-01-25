@@ -164,7 +164,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         
         // TODO remove this semi busy loop!
         while (isStopping())
-            _joinLock.wait(10);
+            Thread.sleep(10);
     }
 
     /* ------------------------------------------------------------ */
