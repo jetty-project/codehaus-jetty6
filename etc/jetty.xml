@@ -172,6 +172,21 @@
         </Item>
       </Array>
     </Set>
+    
+    <!-- =========================================================== -->
+    <!-- Configure Request Log                                       -->
+    <!-- =========================================================== -->
+    <!--  uncomment for a request log (and create logs directory) 
+    <Set name="requestLog">
+       <New id="requestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
+          <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
+          <Set name="retainDays">90</Set>
+          <Set name="append">true</Set>
+          <Set name="extended">false</Set>
+          <Set name="LogTimeZone">GMT</Set>
+       </New>
+    </Set>
+    -->
 
     <!-- =========================================================== -->
     <!-- Start the server                                            -->
