@@ -97,7 +97,7 @@ public class HttpGenerator implements HttpTokens
     private int _status = HttpStatus.ORDINAL_200_OK;
     private String _reason;
 
-    private long _contentAdded = 0;
+    private long _contentWritten = 0;
     private long _contentLength = UNKNOWN_CONTENT;
     private boolean _last = false;
     private boolean _head = false;
@@ -142,7 +142,7 @@ public class HttpGenerator implements HttpTokens
         _last = false;
         _head = false;
         _close = false;
-        _contentAdded = 0;
+        _contentWritten = 0;
         _contentLength = UNKNOWN_CONTENT;
 
         if (returnBuffers)
@@ -176,7 +176,7 @@ public class HttpGenerator implements HttpTokens
         
         _last = false;
         _close = false;
-        _contentAdded = 0;
+        _contentWritten = 0;
         _contentLength = UNKNOWN_CONTENT;
         _direct=false;
         _content=null;
@@ -238,7 +238,7 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------ */
     public long getContentAdded()
     {
-        return _contentAdded;
+        return _contentWritten;
     }
 
     /* ------------------------------------------------------------ */
@@ -297,7 +297,7 @@ public class HttpGenerator implements HttpTokens
         }
 
         _content = content;
-        _contentAdded += content.length();
+        _contentWritten += content.length();
 
         // Handle the _content
         if (_head)
@@ -415,7 +415,7 @@ public class HttpGenerator implements HttpTokens
                             content_length = field;
                             _contentLength = field.getLongValue();
 
-                            if (_contentLength < _contentAdded || _last && _contentLength != _contentAdded)
+                            if (_contentLength < _contentWritten || _last && _contentLength != _contentWritten)
                             {
                                 // TODO - warn of incorrect _content length
                                 content_length = null;
@@ -481,12 +481,12 @@ public class HttpGenerator implements HttpTokens
                     // written yet?
 
                     // Response known not to have a body
-                    if (_contentAdded == 0 && (_status < 200 || _status == 204 || _status == 304))
+                    if (_contentWritten == 0 && (_status < 200 || _status == 204 || _status == 304))
                         _contentLength = NO_CONTENT;
                     else if (_last)
                     {
                         // we have seen all the _content there is
-                        _contentLength = _contentAdded;
+                        _contentLength = _contentWritten;
                         if (content_length == null)
                         {
                             // known length but not actually set.
@@ -572,7 +572,7 @@ public class HttpGenerator implements HttpTokens
         if (_state == STATE_HEADER)
             throw new IllegalStateException("State==HEADER");
 
-        else if (_contentLength >= 0 && _contentLength != _contentAdded)
+        else if (_contentLength >= 0 && _contentLength != _contentWritten)
         {
             // TODO warning.
             _close = true;
@@ -835,5 +835,14 @@ public class HttpGenerator implements HttpTokens
                 _buffer = nb;
             }
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the contentWritten.
+     */
+    public long getContentWritten()
+    {
+        return _contentWritten;
     }
 }
