@@ -451,7 +451,8 @@ public class HttpServerTest
             String         line;
 
             while ((line = reader.readLine()) != null) {
-                writer.println(line);
+                writer.print(line);
+                writer.print('\n');
                 count += line.length();
             }
 
