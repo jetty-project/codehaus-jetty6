@@ -54,6 +54,7 @@ public class Server extends HandlerCollection
     private UserRealm[] _realms;
     private Handler _notFoundHandler;
     private Container _container=new Container();
+    private RequestLog _requestLog;
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -136,6 +137,25 @@ public class Server extends HandlerCollection
         _container.update(this,_threadPool,threadPool, "threadpool");
         _threadPool = threadPool;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param requestLog
+     */
+    public void setRequestLog(RequestLog requestLog)
+    {
+        _container.update(this,_requestLog,requestLog, "requestLog");
+        _requestLog = requestLog;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public RequestLog getRequestLog() 
+    {    
+        return _requestLog;
+    }
     
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
@@ -147,6 +167,8 @@ public class Server extends HandlerCollection
             BoundedThreadPool btp=new BoundedThreadPool();
             setThreadPool(btp);
         }
+        
+        try{if (_requestLog!=null)_requestLog.start();} catch(Throwable e) { mex.add(e);}
         
         try{_threadPool.start();} catch(Throwable e) { mex.add(e);}
         
@@ -181,6 +203,8 @@ public class Server extends HandlerCollection
         try { super.doStop(); } catch(Throwable e) { mex.add(e);}
         
         try{_threadPool.stop();}catch(Throwable e){mex.add(e);}
+
+        try{if (_requestLog!=null)_requestLog.stop();} catch(Throwable e) { mex.add(e);}
         
         mex.ifExceptionThrow();
     }
@@ -199,6 +223,9 @@ public class Server extends HandlerCollection
         }
         else
             handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
+        
+        if (_requestLog!=null)
+            _requestLog.log(connection.getRequest(), connection.getResponse());
     }
 
     /* ------------------------------------------------------------ */

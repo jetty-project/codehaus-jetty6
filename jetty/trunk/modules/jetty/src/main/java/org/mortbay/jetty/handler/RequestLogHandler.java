@@ -23,10 +23,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.RequestLog;
+import org.mortbay.log.Log;
 
 
 /** 
- * RequestLogHandler
+ * RequestLogHandler.
+ * This handler can be used to wrap an individual context for context logging.
+ * 
  * @author Nigel Canonizado
  * 
  */
@@ -35,12 +38,16 @@ public class RequestLogHandler extends WrappedHandler
 
     private RequestLog _requestLog;
     
-    /** * TODO * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int) */
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     */
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
         boolean result = super.handle(target, request, response, dispatch);
         _requestLog.log((Request)request, (Response)response);
+        
         return result;
     }
     
