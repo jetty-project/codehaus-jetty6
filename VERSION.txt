@@ -1,6 +1,6 @@
+    + Fixed double flush of short content.
 
-
-Jetty-6.0.0Beta8  - 25 January 2005
+jetty-6.0.0beta8 24/1/2004
     + fixed dispatch of new session problem. sf:1407090
     + reinstated rfc2616 test harness
     + Handle pipeline requests without hangs
