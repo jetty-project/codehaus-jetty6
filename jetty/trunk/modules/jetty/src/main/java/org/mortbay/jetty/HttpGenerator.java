@@ -345,10 +345,12 @@ public class HttpGenerator implements HttpTokens
         {
             boolean has_server = false;
             
-            if (_version == HttpVersions.HTTP_1_0_ORDINAL) _close = true;
+            if (_version == HttpVersions.HTTP_1_0_ORDINAL) 
+                _close = true;
 
             // get a header buffer
-            if (_header == null) _header = _buffers.getBuffer(_headerBufferSize);
+            if (_header == null) 
+                _header = _buffers.getBuffer(_headerBufferSize);
 
             // add response line
             Buffer line = HttpStatus.getResponseLine(_status);
@@ -629,7 +631,8 @@ public class HttpGenerator implements HttpTokens
                 case 0:
                 {
                     // Nothing more we can write now.
-                    if (_header != null) _header.clear();
+                    if (_header != null) 
+                        _header.clear();
 
                     _direct = false;
                     
@@ -661,7 +664,8 @@ public class HttpGenerator implements HttpTokens
                         if (_state == STATE_FLUSHING)
                         {
                             _state = STATE_END;
-                            if (_close) _endp.close();
+                            if (_close) 
+                                _endp.close();
                         }
 
                         break Flushing;

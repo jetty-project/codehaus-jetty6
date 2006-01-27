@@ -202,6 +202,7 @@ public class Dump extends HttpServlet
         
         try
         {
+            pout.write("<html>\n<body>\n");
             pout.write("<h1>Dump Servlet</h1>\n");
             pout.write("<table>");
             pout.write("<tr>\n");
@@ -467,7 +468,9 @@ public class Dump extends HttpServlet
             pout.write("<form method=\"POST\" action=\""+response.encodeURL(getURI(request))+"\">");
             pout.write("resource: <input type=\"text\" name=\"resource\" /><br/>\n");
             pout.write("<input type=\"submit\" name=\"Action\" value=\"getResource\">");
-            pout.write("</form>");
+            pout.write("</form>\n");
+            
+            pout.write("</body>\n</html>\n");
 
         }
         catch (Exception e)

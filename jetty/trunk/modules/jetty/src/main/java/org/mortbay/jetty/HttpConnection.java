@@ -401,7 +401,8 @@ public class HttpConnection
             _generator.setResponse(_response.getStatus(), _response.getReason());
             _generator.completeHeader(_responseFields, last);
         }
-        if (last) _generator.complete();
+        if (last) 
+            _generator.complete();
     }
 
     /* ------------------------------------------------------------ */
@@ -708,10 +709,7 @@ public class HttpConnection
                 return;
             
             if (!_generator.isCommitted())
-            {
                 commitResponse(HttpGenerator.LAST);
-                _generator.flushBuffers();
-            }
             else
                 flushResponse();
             
