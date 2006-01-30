@@ -43,6 +43,7 @@ public class IO extends BoundedThreadPool
     public static int bufferSize = 8192;
     
     /* ------------------------------------------------------------------- */
+    // TODO get rid of this singleton!
     private static class Singleton {
         static final IO __instance=new IO();
         static
@@ -116,7 +117,9 @@ public class IO extends BoundedThreadPool
     public static void copyThread(InputStream in, OutputStream out)
     {
         try{
-            instance().dispatch(new Job(in,out));
+            Job job=new Job(in,out);
+            if (!instance().dispatch(job))
+                job.run();
         }
         catch(Exception e)
         {
@@ -141,7 +144,9 @@ public class IO extends BoundedThreadPool
     {
         try
         {
-            instance().dispatch(new Job(in,out));
+            Job job=new Job(in,out);
+            if (!instance().dispatch(job))
+                job.run();
         }
         catch(Exception e)
         {
