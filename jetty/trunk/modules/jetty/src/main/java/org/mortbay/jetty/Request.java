@@ -69,7 +69,7 @@ import org.mortbay.util.ajax.Continuation;
 public class Request implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
-    private static final int NONE=0, STREAM=1, READER=2;
+    private static final int __NONE=0, _STREAM=1, __READER=2;
     private static Cookie[] __noCookies = new Cookie[0];
     
     private HttpConnection _connection;
@@ -94,7 +94,7 @@ public class Request implements HttpServletRequest
     private Principal _userPrincipal;
     private MultiMap _parameters;
     private boolean _paramsExtracted;
-    private int _inputState;
+    private int _inputState=__NONE;
     private BufferedReader _reader;
     private boolean _dns=false;
     private ContextHandler.Context _context;
@@ -144,7 +144,7 @@ public class Request implements HttpServletRequest
         if (_parameters!=null)
             _parameters.clear();
         _paramsExtracted=false;;
-        _inputState=NONE;
+        _inputState=__NONE;
         _reader=null; 
         _cookiesExtracted=false;
         _continuation=null;
@@ -426,9 +426,9 @@ public class Request implements HttpServletRequest
      */
     public ServletInputStream getInputStream() throws IOException
     {
-        if (_inputState!=NONE && _inputState!=STREAM)
+        if (_inputState!=__NONE && _inputState!=_STREAM)
             throw new IllegalStateException("READER");
-        _inputState=STREAM;
+        _inputState=_STREAM;
         return _connection.getInputStream();
     }
 
@@ -639,7 +639,7 @@ public class Request implements HttpServletRequest
      */
     public BufferedReader getReader() throws IOException
     {
-        if (_inputState!=NONE && _inputState!=READER)
+        if (_inputState!=__NONE && _inputState!=__READER)
             throw new IllegalStateException("STREAMED");
         if (_reader==null)
         {
@@ -649,7 +649,7 @@ public class Request implements HttpServletRequest
             _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
             
         }
-        _inputState=READER;
+        _inputState=__READER;
         return _reader;
     }
 
@@ -1082,7 +1082,7 @@ public class Request implements HttpServletRequest
      */
     public void setCharacterEncoding(String encoding) throws UnsupportedEncodingException
     {
-        if (_inputState!=NONE) 
+        if (_inputState!=__NONE) 
             return;
         _characterEncoding=encoding;
     }
