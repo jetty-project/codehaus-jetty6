@@ -55,10 +55,6 @@ import org.mortbay.util.URIUtil;
  * be used when a full web application is not required.  Specifically filters
  * and request wrapping are not supported.
  * <P>
- * If a SessionManager is not added to the handler before it is
- * initialized, then a HashSessionManager with a standard
- * java.util.Random generator is created.
- * <P>
  * @see org.mortbay.jetty.servlet.WebAppContext
  * @author Greg Wilkins
  */
