@@ -165,14 +165,27 @@ public class HttpFields
 
     /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =
-    { "EEE, dd MMM yyyy HH:mm:ss zzz", "EEE, dd MMM yyyy HH:mm:ss", "EEE dd MMM yyyy HH:mm:ss zzz", "EEE dd MMM yyyy HH:mm:ss", "EEE MMM dd yyyy HH:mm:ss zzz", "EEE MMM dd yyyy HH:mm:ss", "EEE MMM-dd-yyyy HH:mm:ss zzz", "EEE MMM-dd-yyyy HH:mm:ss", "dd MMM yyyy HH:mm:ss zzz", "dd MMM yyyy HH:mm:ss", "dd-MMM-yy HH:mm:ss zzz", "dd-MMM-yy HH:mm:ss", "MMM dd HH:mm:ss yyyy zzz", "MMM dd HH:mm:ss yyyy", "EEE MMM dd HH:mm:ss yyyy zzz", "EEE MMM dd HH:mm:ss yyyy", "EEE, MMM dd HH:mm:ss yyyy zzz", "EEE, MMM dd HH:mm:ss yyyy", "EEE, dd-MMM-yy HH:mm:ss zzz", "EEE, dd-MMM-yy HH:mm:ss", "EEE dd-MMM-yy HH:mm:ss zzz", "EEE dd-MMM-yy HH:mm:ss",};
-    public static SimpleDateFormat __dateReceive[];
+    {   "EEE, dd MMM yyyy HH:mm:ss zzz", 
+        "EEE, dd-MMM-yy HH:mm:ss",
+        "EEE MMM dd HH:mm:ss yyyy",
+        
+        "EEE, dd MMM yyyy HH:mm:ss", "EEE dd MMM yyyy HH:mm:ss zzz", 
+        "EEE dd MMM yyyy HH:mm:ss", "EEE MMM dd yyyy HH:mm:ss zzz", "EEE MMM dd yyyy HH:mm:ss", 
+        "EEE MMM-dd-yyyy HH:mm:ss zzz", "EEE MMM-dd-yyyy HH:mm:ss", "dd MMM yyyy HH:mm:ss zzz", 
+        "dd MMM yyyy HH:mm:ss", "dd-MMM-yy HH:mm:ss zzz", "dd-MMM-yy HH:mm:ss", "MMM dd HH:mm:ss yyyy zzz", 
+        "MMM dd HH:mm:ss yyyy", "EEE MMM dd HH:mm:ss yyyy zzz",  
+        "EEE, MMM dd HH:mm:ss yyyy zzz", "EEE, MMM dd HH:mm:ss yyyy", "EEE, dd-MMM-yy HH:mm:ss zzz", 
+        "EEE dd-MMM-yy HH:mm:ss zzz", "EEE dd-MMM-yy HH:mm:ss",
+      };
+    private  static int __dateReceiveInit=3;
+    private  static SimpleDateFormat __dateReceive[];
     static
     {
         __GMT.setID("GMT");
         __dateCache.setTimeZone(__GMT);
         __dateReceive = new SimpleDateFormat[__dateReceiveFmt.length];
-        for (int i = 0; i < __dateReceive.length; i++)
+        // Initialize only the standard formats here.
+        for (int i = 0; i < __dateReceiveInit; i++)
         {
             __dateReceive[i] = new SimpleDateFormat(__dateReceiveFmt[i], Locale.US);
             __dateReceive[i].setTimeZone(__GMT);
@@ -729,7 +742,9 @@ public class HttpFields
         String val = valueParameters(field._value.toString(), null);
         if (val == null) return -1;
 
-        for (int i = 0; i < _dateReceive.length; i++)
+        
+        
+        for (int i = 0; i < __dateReceiveInit; i++)
         {
             if (_dateReceive[i] == null) _dateReceive[i] = (SimpleDateFormat) __dateReceive[i].clone();
 
@@ -745,7 +760,7 @@ public class HttpFields
         if (val.endsWith(" GMT"))
         {
             val = val.substring(0, val.length() - 4);
-            for (int i = 0; i < _dateReceive.length; i++)
+            for (int i = 0; i < __dateReceiveInit; i++)
             {
                 try
                 {
@@ -757,6 +772,49 @@ public class HttpFields
                 }
             }
         }
+        
+        // The standard formats did not work.  So we will lock the common format array
+        // and look at lazily creating the non-standard formats
+        synchronized (__dateReceive)
+        {
+            for (int i = __dateReceiveInit; i < _dateReceive.length; i++)
+            {
+                if (_dateReceive[i] == null) 
+                {
+                    if (__dateReceive[i]==null)
+                    {
+                        __dateReceive[i] = new SimpleDateFormat(__dateReceiveFmt[i], Locale.US);
+                        __dateReceive[i].setTimeZone(__GMT);
+                    }
+                    _dateReceive[i] = (SimpleDateFormat) __dateReceive[i].clone();
+                }
+                
+                try
+                {
+                    Date date = (Date) _dateReceive[i].parseObject(val);
+                    return field._numValue = date.getTime();
+                }
+                catch (java.lang.Exception e)
+                {
+                }
+            }
+            if (val.endsWith(" GMT"))
+            {
+                val = val.substring(0, val.length() - 4);
+                for (int i = 0; i < _dateReceive.length; i++)
+                {
+                    try
+                    {
+                        Date date = (Date) _dateReceive[i].parseObject(val);
+                        return field._numValue = date.getTime();
+                    }
+                    catch (java.lang.Exception e)
+                    {
+                    }
+                }
+            }
+        }
+        
 
         throw new IllegalArgumentException("Cannot convert date: " + val);
     }

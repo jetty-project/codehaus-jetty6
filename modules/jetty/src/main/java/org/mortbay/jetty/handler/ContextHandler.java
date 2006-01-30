@@ -573,46 +573,19 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public void removeAttribute(String name)
     {
-        Object old_value=_attributes==null?null:_attributes.getAttribute(name);
         _attributes.removeAttribute(name);
-        if (old_value!=null)
-        {
-            if (_contextAttributeListeners!=null)
-            {
-                ServletContextAttributeEvent event =
-                    new ServletContextAttributeEvent(_context,name, old_value);
-
-                for(int i=0;i<LazyList.size(_contextAttributeListeners);i++)
-                    ((ServletContextAttributeListener)LazyList.get(_contextAttributeListeners,i)).attributeRemoved(event);
-            }
-        }
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /* Set a context attribute.
+     * Attributes set via this API cannot be overriden by the ServletContext.setAttribute API.
+     * Their lifecycle spans the stop/start of a context.  No attribute listener events are 
+     * triggered by this API.
      * @see javax.servlet.ServletContext#setAttribute(java.lang.String, java.lang.Object)
      */
     public void setAttribute(String name, Object value)
     {
-        Object old_value=_attributes==null?null:_attributes.getAttribute(name);
         _attributes.setAttribute(name,value);
-        if (_contextAttributeListeners!=null)
-        {
-            ServletContextAttributeEvent event =
-                new ServletContextAttributeEvent(_context,name, old_value==null?value:old_value);
-
-            for(int i=0;i<LazyList.size(_contextAttributeListeners);i++)
-            {
-                ServletContextAttributeListener l = (ServletContextAttributeListener)LazyList.get(_contextAttributeListeners,i);
-                
-                if (old_value==null)
-                    l.attributeAdded(event);
-                else if (value==null)
-                    l.attributeRemoved(event);
-                else
-                    l.attributeReplaced(event);
-            }
-        }
     }
     
     /* ------------------------------------------------------------ */
@@ -846,7 +819,6 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public class Context implements ServletContext
     {
-        
         /* ------------------------------------------------------------ */
         private Context()
         {
@@ -1148,11 +1120,11 @@ public class ContextHandler extends WrappedHandler implements Attributes
         /* 
          * @see javax.servlet.ServletContext#getAttribute(java.lang.String)
          */
-        public Object getAttribute(String name)
+        public synchronized Object getAttribute(String name)
         {
-            Object o = _contextAttributes.getAttribute(name);
+            Object o = ContextHandler.this.getAttribute(name);
             if (o==null)
-                o=ContextHandler.this.getAttribute(name);
+                o=_contextAttributes.getAttribute(name);
             return o;
         }
 
@@ -1160,7 +1132,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         /* 
          * @see javax.servlet.ServletContext#getAttributeNames()
          */
-        public Enumeration getAttributeNames()
+        public synchronized Enumeration getAttributeNames()
         {
             HashSet set = new HashSet();
             Enumeration e = _contextAttributes.getAttributeNames();
@@ -1177,21 +1149,53 @@ public class ContextHandler extends WrappedHandler implements Attributes
         /* 
          * @see javax.servlet.ServletContext#setAttribute(java.lang.String, java.lang.Object)
          */
-        public void setAttribute(String name, Object object)
+        public synchronized void setAttribute(String name, Object value)
         {
-            _contextAttributes.setAttribute(name,object);
-            if (object==null)
-                ContextHandler.this.setAttribute(name,object);
+            Object old_value=_contextAttributes==null?null:_contextAttributes.getAttribute(name);
+            
+            if (value==null)
+                _contextAttributes.removeAttribute(name);
+            else
+                _contextAttributes.setAttribute(name,value);
+            
+            if (_contextAttributeListeners!=null)
+            {
+                ServletContextAttributeEvent event =
+                    new ServletContextAttributeEvent(_context,name, old_value==null?value:old_value);
+
+                for(int i=0;i<LazyList.size(_contextAttributeListeners);i++)
+                {
+                    ServletContextAttributeListener l = (ServletContextAttributeListener)LazyList.get(_contextAttributeListeners,i);
+                    
+                    if (old_value==null)
+                        l.attributeAdded(event);
+                    else if (value==null)
+                        l.attributeRemoved(event);
+                    else
+                        l.attributeReplaced(event);
+                }
+            }
         }
 
         /* ------------------------------------------------------------ */
         /* 
          * @see javax.servlet.ServletContext#removeAttribute(java.lang.String)
          */
-        public void removeAttribute(String name)
+        public synchronized void removeAttribute(String name)
         {
+            Object old_value=_contextAttributes.getAttribute(name);
             _contextAttributes.removeAttribute(name);
-            ContextHandler.this.removeAttribute(name);
+            if (old_value!=null)
+            {
+                if (_contextAttributeListeners!=null)
+                {
+                    ServletContextAttributeEvent event =
+                        new ServletContextAttributeEvent(_context,name, old_value);
+
+                    for(int i=0;i<LazyList.size(_contextAttributeListeners);i++)
+                        ((ServletContextAttributeListener)LazyList.get(_contextAttributeListeners,i)).attributeRemoved(event);
+                }
+            }
         }
 
         /* ------------------------------------------------------------ */
