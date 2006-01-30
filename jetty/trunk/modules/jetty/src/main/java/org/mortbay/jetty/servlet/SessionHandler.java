@@ -33,16 +33,34 @@ import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
 /** SessionHandler.
+ * 
  * @author gregw
  *
  */
 public class SessionHandler extends WrappedHandler
 {
-
     /* -------------------------------------------------------------- */
     SessionManager _sessionManager=new HashSessionManager();
-    
 
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * Construct a SessionHandler witha a HashSessionManager with a standard
+     * java.util.Random generator is created.
+     */
+    public SessionHandler()
+    {   
+        this(new HashSessionManager());
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param manager The session manager
+     */
+    public SessionHandler(SessionManager manager)
+    {
+        _sessionManager=manager;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the sessionManager.
