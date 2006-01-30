@@ -206,7 +206,6 @@ public class WebAppContext extends ContextHandler
         for (int i=0;i<_configurations.length;i++)
             _configurations[i].setWebAppContext(this);
         
-        
         // Configure classloader
         _ownClassLoader=false;
         if (getClassLoader()==null)
@@ -222,10 +221,11 @@ public class WebAppContext extends ContextHandler
             _ownClassLoader=true;
         }
         
-        
         for (int i=0;i<_configurations.length;i++)
             _configurations[i].configureClassLoader();
 
+        getTempDirectory();
+        
         super.doStart();
 
     }
@@ -343,7 +343,7 @@ public class WebAppContext extends ContextHandler
         //
         // I'm afraid that this is very much black magic.
         // but if you can think of better....
-        Object t = getAttribute("javax.servlet.context.tempdir");
+        Object t = getAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR);
 
         if (t!=null && (t instanceof File))
         {
@@ -361,7 +361,7 @@ public class WebAppContext extends ContextHandler
                 if (_tmpDir.isDirectory() && _tmpDir.canWrite())
                 {
                     if(Log.isDebugEnabled())Log.debug("Converted to File "+_tmpDir+" for "+this);
-                    setAttribute("javax.servlet.context.tempdir",_tmpDir);
+                    setAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR,_tmpDir);
                     return _tmpDir;
                 }
             }
@@ -447,7 +447,7 @@ public class WebAppContext extends ContextHandler
             }
         }
 
-        setAttribute("javax.servlet.context.tempdir",_tmpDir);
+        setAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR,_tmpDir);
         return _tmpDir;
     }
     
@@ -767,7 +767,7 @@ public class WebAppContext extends ContextHandler
             throw new IllegalArgumentException("Bad temp directory: "+dir);
 
         _tmpDir=dir;
-        setAttribute("javax.servlet.context.tempdir",_tmpDir);
+        setAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR,_tmpDir);
     }
     
     /* ------------------------------------------------------------ */
@@ -781,7 +781,7 @@ public class WebAppContext extends ContextHandler
     
     /* ------------------------------------------------------------ */
     protected void startContext()
-    throws Exception
+        throws Exception
     {
         // Configure defaults
         for (int i=0;i<_configurations.length;i++)
@@ -796,8 +796,8 @@ public class WebAppContext extends ContextHandler
                             && work.isDirectory()
                             && work.getFile() != null
                             && work.getFile().canWrite()
-                            && getAttribute("javax.servlet.context.tempdir") == null)
-                setAttribute("javax.servlet.context.tempdir", work.getFile());
+                            && getAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR) == null)
+                setAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR, work.getFile());
         }
         
         // Configure webapp

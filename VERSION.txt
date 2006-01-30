@@ -1,6 +1,8 @@
     + Fixed double flush of short content.
     + Added request log.
     + Added CGI servlet.
+    + Force a tempdir to be set.
+    + Force jasper scratch dir.
 
 jetty-6.0.0beta8 24/1/2004
     + fixed dispatch of new session problem. sf:1407090
