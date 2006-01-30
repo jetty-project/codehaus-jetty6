@@ -54,7 +54,7 @@ import org.mortbay.util.URIUtil;
  * This handler does not implement the full J2EE features and is intended to
  * be used when a full web application is not required.  Specifically filters
  * and request wrapping are not supported.
- * <P>
+ * 
  * @see org.mortbay.jetty.servlet.WebAppContext
  * @author Greg Wilkins
  */
