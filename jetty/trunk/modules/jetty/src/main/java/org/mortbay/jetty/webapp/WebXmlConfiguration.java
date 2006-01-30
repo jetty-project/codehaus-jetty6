@@ -13,6 +13,7 @@
 // ========================================================================
 package org.mortbay.jetty.webapp;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -436,10 +437,23 @@ public class WebXmlConfiguration implements Configuration
     {
         String id=node.getAttribute("id");
 
+        // initialize holder
         String servlet_name=node.getString("servlet-name",false,true);
         String servlet_class=node.getString("servlet-class",false,true);
-        String jsp_file=node.getString("jsp-file",false,true);
+        ServletHolder holder = newServletHolder();
+        holder.setName(servlet_name);
 
+        // init params
+        Iterator iParamsIter=node.iterator("init-param");
+        while(iParamsIter.hasNext())
+        {
+            XmlParser.Node paramNode=(XmlParser.Node)iParamsIter.next();
+            String pname=paramNode.getString("param-name",false,true);
+            String pvalue=paramNode.getString("param-value",false,true);
+            holder.setInitParameter(pname,pvalue);
+        }
+        
+        // Handle JSP
         if (id!=null && id.equals("jsp"))
         {
             try
@@ -453,22 +467,22 @@ public class WebXmlConfiguration implements Configuration
                 _hasJSP=false;
                 servlet_class="org.mortbay.servlet.NoJspServlet";
             }
+            if (holder.getInitParameter("scratchdir")==null)
+            {
+                File tmp=getWebAppContext().getTempDirectory();
+                File scratch=new File(tmp,"jsp");
+                if (!scratch.exists())
+                    scratch.mkdir();
+                holder.setInitParameter("scratchdir",scratch.getAbsolutePath());
+            }
         }
-
-        ServletHolder holder = newServletHolder();
-        holder.setName(servlet_name);
         holder.setClassName(servlet_class);
+        
+        // Handler JSP file
+        String jsp_file=node.getString("jsp-file",false,true);
         holder.setForcedPath(jsp_file);
 
-        // handle JSP classpath
-        Iterator iParamsIter=node.iterator("init-param");
-        while(iParamsIter.hasNext())
-        {
-            XmlParser.Node paramNode=(XmlParser.Node)iParamsIter.next();
-            String pname=paramNode.getString("param-name",false,true);
-            String pvalue=paramNode.getString("param-value",false,true);
-            holder.setInitParameter(pname,pvalue);
-        }
+        // handle startup
         XmlParser.Node startup=node.get("load-on-startup");
         if(startup!=null)
         {
