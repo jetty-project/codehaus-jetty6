@@ -199,10 +199,12 @@ public class HttpParser implements HttpTokens
     /* ------------------------------------------------------------------------------- */
     /**
      * Parse until next Event.
-     * @returns true if filled
+     * @returns number of bytes filled from endpoint or -1 if fill never called.
      */
-    public boolean parseNext() throws IOException
+    public long parseNext() throws IOException
     {
+        long total_filled=-1;
+        
         if (_buffer==null)
         {
             _header=_buffers.getBuffer(_headerBufferSize);
@@ -218,11 +220,10 @@ public class HttpParser implements HttpTokens
         {
             _state=STATE_END;
             _handler.messageComplete(_contentPosition);
-            return false;
+            return total_filled;
         }
         
         int length=_buffer.length();
-        boolean fill_called=false;
         
         // Fill buffer if we can
         if (length == 0)
@@ -250,8 +251,11 @@ public class HttpParser implements HttpTokens
                 
                 try
                 {
+                    if (total_filled<0)
+                        total_filled=0;
                     filled=_endp.fill(_buffer);
-                    fill_called=true;
+                    if (filled>0)
+                        total_filled+=filled;
                 }
                 catch(IOException ioe)
                 {
@@ -265,7 +269,7 @@ public class HttpParser implements HttpTokens
             {
                 _state=STATE_END;
                 _handler.messageComplete(_contentPosition);
-                return fill_called;
+                return total_filled;
             }
             if (filled < 0) 
             {
@@ -342,7 +346,7 @@ public class HttpParser implements HttpTokens
                         _state=STATE_END;
                         _handler.headerComplete();
                         _handler.messageComplete(_contentPosition);
-                        return  fill_called;
+                        return total_filled;
                     }
                     break;
 
@@ -359,7 +363,7 @@ public class HttpParser implements HttpTokens
                         _state=STATE_END;
                         _handler.headerComplete();
                         _handler.messageComplete(_contentPosition);
-                        return fill_called;
+                        return total_filled;
                     }
                     break;
 
@@ -377,7 +381,7 @@ public class HttpParser implements HttpTokens
                         _tok0.setPutIndex(_tok0.getIndex());
                         _tok1.setPutIndex(_tok1.getIndex());
                         _multiLineValue=null;
-                        return fill_called;
+                        return total_filled;
                     }
                     break;
 
@@ -495,7 +499,7 @@ public class HttpParser implements HttpTokens
                                     _handler.headerComplete(); // May recurse here !
                                     break;
                             }
-                            return fill_called;
+                            return total_filled;
                         }
                         else
                         {
@@ -587,7 +591,7 @@ public class HttpParser implements HttpTokens
                     chunk=_buffer.get(_buffer.length());
                     _contentPosition += chunk.length();
                     _handler.content(chunk);
-                    return fill_called;
+                    return total_filled;
 
                 case STATE_CONTENT: 
                 {
@@ -596,7 +600,7 @@ public class HttpParser implements HttpTokens
                     {
                         _state=STATE_END;
                         _handler.messageComplete(_contentPosition);
-                        return fill_called;
+                        return total_filled;
                     }
                     else if (length >= remaining) 
                     {
@@ -607,7 +611,7 @@ public class HttpParser implements HttpTokens
                     _contentPosition += chunk.length();
                     
                     _handler.content(chunk);
-                    return fill_called;
+                    return total_filled;
                 }
 
                 case STATE_CHUNKED_CONTENT:
@@ -636,7 +640,7 @@ public class HttpParser implements HttpTokens
                         {
                             _state=STATE_END;
                             _handler.messageComplete(_contentPosition);
-                            return fill_called;
+                            return total_filled;
                         }
                         else
                             _state=STATE_CHUNK;
@@ -664,7 +668,7 @@ public class HttpParser implements HttpTokens
                         {
                             _state=STATE_END;
                             _handler.messageComplete(_contentPosition);
-                            return fill_called;
+                            return total_filled;
                         }
                         else
                             _state=STATE_CHUNK;
@@ -686,13 +690,13 @@ public class HttpParser implements HttpTokens
                     _contentPosition += chunk.length();
                     _chunkPosition += chunk.length();
                     _handler.content(chunk);
-                    return fill_called;
+                    return total_filled;
                 }
             }
 
             length=_buffer.length();
         }
-        return fill_called;
+        return total_filled;
     }
 
     /* ------------------------------------------------------------------------------- */

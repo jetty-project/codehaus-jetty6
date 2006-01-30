@@ -146,6 +146,49 @@ public class HttpServerTest
         assertEquals("response", RESPONSE1, response);
     }
 
+    
+
+    /* --------------------------------------------------------------- */
+    public void testFragmentedChunk()
+        throws Exception
+    {        
+
+        Server       server = startServer(new EchoHandler());
+        Socket       client = new Socket(HOST, PORT);
+        OutputStream os     = client.getOutputStream();
+
+        os.write(("GET /R2 HTTP/1.1\015\012"+
+                  "Host: localhost\015\012"+
+                  "Transfer-Encoding: chunked\015\012"+
+                  "Content-Type: text/plain\015\012"+
+                  "Connection: close\015\012"+
+                  "\015\012").getBytes());
+        os.flush();
+        Thread.sleep(PAUSE);
+        os.write((
+                  "5\015\012").getBytes());
+        os.flush();
+        Thread.sleep(PAUSE);
+        os.write((
+                  "ABCDE\015\012"+
+                  "0;\015\012\015\012").getBytes());
+        os.flush();
+
+        // Read the response.
+        String response = readResponse(client);
+
+        System.err.println(response);
+        
+        // Shut down
+        client.close();
+        server.stop();
+
+        assertTrue(true); // nothing checked yet.
+           
+    }
+    
+    
+    
     /**
      * Feed the server fragmentary headers and see how it copes with it.
      *
