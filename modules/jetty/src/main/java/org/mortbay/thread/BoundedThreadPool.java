@@ -59,6 +59,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     int _priority= Thread.NORM_PRIORITY;
     private Set _threads;
     private List _idle;
+    private boolean _warned=false;
 
     /* ------------------------------------------------------------------- */
     /* Construct
@@ -207,6 +208,11 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                     newThread();
                     break;
                 }
+                else if (!_warned)
+                {
+                    _warned=true;
+                    Log.debug("Out of threads for {}",this);
+                }
                 
                 // pool is full
                 if (blockMs<0)
@@ -221,6 +227,10 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                 }
                 catch (InterruptedException ie)
                 {}
+                finally
+                {
+                    _blocked.remove(Thread.currentThread());
+                }
             }
 
             // System.err.println("Threads="+_threads.size()+" idle="+_idle.size());
@@ -407,10 +417,14 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                             synchronized (_lock)
                             {
                                 if (_job!=null)
+                                {
                                     _idle.add(this);
+                                    if (_idle.size()>=_minThreads)
+                                        _warned=false;
+                                }
                                 _job=null;
                                 if (_blocked.size()>0)
-                                    ((Thread)_blocked.remove(0)).interrupt();
+                                    ((Thread)_blocked.get(0)).interrupt();
                             }
                         }
                     }

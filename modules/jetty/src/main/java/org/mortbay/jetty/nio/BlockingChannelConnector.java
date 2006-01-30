@@ -102,9 +102,13 @@ public class BlockingChannelConnector extends AbstractConnector
             _connection = new HttpConnection(BlockingChannelConnector.this,this,getServer());
         }
         
-        void dispatch() throws InterruptedException
+        void dispatch() throws InterruptedException, IOException
         {
-            getThreadPool().dispatch(this);
+            if (!getThreadPool().dispatch(this))
+            {
+                Log.warn("dispatch failed for  {}",_connection);
+                close();
+            }
         }
         
         public int fill(Buffer buffer) throws IOException

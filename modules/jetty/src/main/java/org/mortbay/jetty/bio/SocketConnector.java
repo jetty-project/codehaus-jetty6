@@ -116,9 +116,13 @@ public class SocketConnector extends AbstractConnector
             _connection = new HttpConnection(SocketConnector.this,this,getServer());
         }
         
-        public void dispatch() throws InterruptedException
+        public void dispatch() throws InterruptedException, IOException
         {
-            getThreadPool().dispatch(this);
+            if (!getThreadPool().dispatch(this))
+            {
+                Log.warn("dispatch failed for {}",_connection);
+                close();
+            }
         }
         
         public int fill(Buffer buffer) throws IOException
