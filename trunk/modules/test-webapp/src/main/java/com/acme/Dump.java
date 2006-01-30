@@ -14,6 +14,7 @@
 
 package com.acme;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
@@ -348,6 +349,28 @@ public class Dump extends HttpServlet
                 pout.write("</tr><tr>\n");
                 pout.write("<th align=\"right\">"+cookie.getName()+":&nbsp;</th>");
                 pout.write("<td>"+cookie.getValue()+"</td>");
+            }
+            
+
+            if (!"application/x-www-form-urlencoded".equals(request.getContentType()))
+            {
+                pout.write("</tr><tr>\n");
+                pout.write("<th align=\"left\" colspan=\"2\"><big><br/>Content:</big></th>");
+                pout.write("</tr><tr>\n");
+                pout.write("<td><pre>");
+                byte[] content= new byte[4096];
+                int len;
+                try{
+                    InputStream in=request.getInputStream();
+                    while((len=in.read(content))>=0)
+                        pout.write(new String(content,0,len));
+                }
+                catch(IOException e)
+                {
+                    pout.write(e.toString());
+                }
+                
+                pout.write("</pre></td>");
             }
             
             

@@ -639,30 +639,56 @@ public class HttpConnection
     {
         private boolean blockForContent() throws IOException
         {
-            while (_content == null || _content.length() == 0)
+            if (_content!=null && _content.length()>0)
+                return true;
+            if (_parser.isState(HttpParser.STATE_END)) 
+                return false;
+
+            _content = null;
+            
+            // Handle simple end points.
+            if (_endp==null)
             {
-                if (_parser.isState(HttpParser.STATE_END)) return false;
-
-                // Try to get more _content
-                _content = null;
-                boolean filled=_parser.parseNext();
-
-                // If unsuccessful and if we are we are not blocking then block
-                if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0) && _endp != null)
-                {
-                    if(!_endp.isBlocking())
-                    {
-                        _endp.blockReadable(_connector.getMaxIdleTime()); 
-                        _parser.parseNext();
-                    }
-                    else if (!filled)
-                        continue;
-                }
-
-                // if still no _content - this is a timeout
-                if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0)) throw new InterruptedIOException("timeout");
+                _parser.parseNext();
             }
-            return true;
+            // Handle blocking end points
+            else if (_endp.isBlocking())
+            {
+                long filled=_parser.parseNext();
+                
+                // parse until some progress is made (or IOException thrown for timeout)
+                while((_content == null || _content.length() == 0) && filled==0 && !_parser.isState(HttpParser.STATE_END))
+                {
+                    // Try to get more _content
+                    filled=_parser.parseNext();
+                }
+                
+            }
+            // Handle non-blocking end point
+            else
+            {
+                long filled=_parser.parseNext();
+                boolean blocked=false;
+                
+                // parse until some progress is made (or IOException thrown for timeout)
+                while((_content == null || _content.length() == 0) && !_parser.isState(HttpParser.STATE_END))
+                {
+                    if (blocked)
+                        throw new InterruptedIOException("timeout");
+                        
+                    // if fill called, but no bytes read, then block
+                    if (filled==0)
+                    {
+                        blocked=true;
+                        _endp.blockReadable(_connector.getMaxIdleTime()); 
+                    }
+                    
+                    // Try to get more _content
+                    filled=_parser.parseNext();
+                }
+            }
+
+            return _content!=null && _content.length()>0; 
         }
         
         /* ------------------------------------------------------------ */
