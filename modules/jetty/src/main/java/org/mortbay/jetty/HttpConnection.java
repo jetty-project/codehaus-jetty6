@@ -657,7 +657,7 @@ public class HttpConnection
                 long filled=_parser.parseNext();
                 
                 // parse until some progress is made (or IOException thrown for timeout)
-                while((_content == null || _content.length() == 0) && filled==0 && !_parser.isState(HttpParser.STATE_END))
+                while((_content == null || _content.length() == 0) && filled!=0 && !_parser.isState(HttpParser.STATE_END))
                 {
                     // Try to get more _content
                     filled=_parser.parseNext();
@@ -673,12 +673,14 @@ public class HttpConnection
                 // parse until some progress is made (or IOException thrown for timeout)
                 while((_content == null || _content.length() == 0) && !_parser.isState(HttpParser.STATE_END))
                 {
-                    if (blocked)
-                        throw new InterruptedIOException("timeout");
-                        
                     // if fill called, but no bytes read, then block
-                    if (filled==0)
+                    if (filled>0)
+                        blocked=false;
+                    else if (filled==0)
                     {
+                        if (blocked)
+                            throw new InterruptedIOException("timeout");
+                        
                         blocked=true;
                         _endp.blockReadable(_connector.getMaxIdleTime()); 
                     }
