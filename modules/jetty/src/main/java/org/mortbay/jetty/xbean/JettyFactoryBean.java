@@ -68,15 +68,17 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
             server.setConnectors(new Connector[] { connector });
         }
 
+        String description = "";
         if (webAppDirectory != null) {
             WebAppContext context = new WebAppContext();
             context.setResourceBase(webAppDirectory);
             context.setContextPath(webAppContext);
             context.setServer(server);
             server.setHandlers(new Handler[] { context });
+            description = " using webAppDirectory: " + webAppDirectory;
         }
 
-        log.info("Starting Jetty Web Server at: http://localhost:" + port + "/");
+        log.info("Starting Jetty Web Server at: http://localhost:" + port + "/" + description);
         server.start();
     }
 
