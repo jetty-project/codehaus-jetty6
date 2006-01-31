@@ -71,7 +71,7 @@
                 <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/src/main/java" destFile="target/jmx.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
                 -->
                 <mkdir dir="${basedir}/target/generated/"/>
-                <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/src/main/java/org/mortbay/jetty/xbean" destFile="target/jmx.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
+                <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/src/main/java/org/mortbay/jetty/xbean" destFile="target/jetty.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
                 <copy todir="${basedir}/target/classes">
                   <fileset dir="${basedir}/target/generated"></fileset>
                 </copy>
