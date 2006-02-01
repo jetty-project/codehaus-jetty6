@@ -16,13 +16,13 @@
  */
 package org.mortbay.jetty.xbean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.log.Log;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -39,7 +39,6 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class JettyFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
-    private static final Log log = LogFactory.getLog(JettyFactoryBean.class);
 
     private int port = 8080;
     private String webAppDirectory;
@@ -78,7 +77,7 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
             description = " using webAppDirectory: " + webAppDirectory;
         }
 
-        log.info("Starting Jetty Web Server at: http://localhost:" + port + "/" + description);
+        Log.info("Starting Jetty Web Server at: http://localhost:" + port + "/" + description);
         server.start();
     }
 
