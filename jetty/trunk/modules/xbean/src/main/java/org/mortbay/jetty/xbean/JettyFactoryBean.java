@@ -39,13 +39,10 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class JettyFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
-
-    private int port = 8080;
-    private String webAppDirectory;
-    private String webAppContext = "/";
-
     private Server server;
-
+    private Handler[] handlers = {};
+    private Connector[] connectors = {};
+    
     public Object getObject() throws Exception {
         return getServer();
     }
@@ -60,24 +57,22 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
 
     public void afterPropertiesSet() throws Exception {
         Server server = getServer();
-        if (port >= 0) {
-            SelectChannelConnector connector = new SelectChannelConnector();
-            connector.setPort(port);
+        Log.info("Starting Jetty Web Server");
+        for (int i = 0; i < connectors.length; i++) {
+            Connector connector = connectors[i];
+            // TODO do we need this?
             connector.setServer(server);
-            server.setConnectors(new Connector[] { connector });
+            Log.info("Using Jetty Connector: " + connector);
         }
+        server.setConnectors(connectors);
 
-        String description = "";
-        if (webAppDirectory != null) {
-            WebAppContext context = new WebAppContext();
-            context.setResourceBase(webAppDirectory);
-            context.setContextPath(webAppContext);
-            context.setServer(server);
-            server.setHandlers(new Handler[] { context });
-            description = " using webAppDirectory: " + webAppDirectory;
+        for (int i = 0; i < handlers.length; i++) {
+            Handler handler = handlers[i];
+            // TODO do we need this?
+            handler.setServer(server);
+            Log.info("Using Jetty Handler: " + handler);
         }
-
-        Log.info("Starting Jetty Web Server at: http://localhost:" + port + "/" + description);
+        server.setHandlers(handlers);
         server.start();
     }
 
@@ -89,17 +84,6 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
 
     // Properties
     // -------------------------------------------------------------------------
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * Sets the port that the web server will listen on
-     */
-    public void setPort(int port) {
-        this.port = port;
-    }
-
     public Server getServer() throws Exception {
         if (server == null) {
             server = createServer();
@@ -114,26 +98,26 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
         this.server = server;
     }
 
-    public String getWebAppContext() {
-        return webAppContext;
+    public Connector[] getConnectors() {
+        return connectors;
     }
 
     /**
-     * Sets the web application context. Defaults to /
+     * Sets the connectors used to listen for requests
      */
-    public void setWebAppContext(String webAppContext) {
-        this.webAppContext = webAppContext;
+    public void setConnectors(Connector[] connectors) {
+        this.connectors = connectors;
     }
 
-    public String getWebAppDirectory() {
-        return webAppDirectory;
+    public Handler[] getHandlers() {
+        return handlers;
     }
 
     /**
-     * Sets the web application directory
+     * Sets the handlers of content such as web application contexts
      */
-    public void setWebAppDirectory(String webAppDirectory) {
-        this.webAppDirectory = webAppDirectory;
+    public void setHandlers(Handler[] handlers) {
+        this.handlers = handlers;
     }
 
     // Implementation methods

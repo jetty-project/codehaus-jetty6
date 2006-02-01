@@ -64,11 +64,22 @@
                     <path refid="maven.runtime.classpath"></path>
                   </classpath>
                 </taskdef>
-                <!--  for some reason MultiPartResponse breaks qdox so excluding all but essential files 
-                <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/src/main/java" destFile="target/jmx.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
-                -->
+
+                <!--  we currently have source code spread across the xbean and jetty modules -->  
+                <mkdir dir="${basedir}/target/xbean-src-to-parse"/>
+                <copy todir="${basedir}/target/xbean-src-to-parse">
+                  <fileset dir="${basedir}/src/main/java/org/mortbay/jetty/xbean"></fileset>
+                  <!--  for some reason MultiPartResponse breaks qdox so excluding all but essential files -->
+                  <fileset dir="${basedir}/../jetty/src/main/java/org/mortbay/jetty">
+                    <include name="bio/**/*.java"/>
+                    <include name="nio/**/*.java"/>
+                    <include name="handler/**/*.java"/>
+                    <include name="webapp/**/*.java"/>
+                  </fileset>
+                </copy>
+                
                 <mkdir dir="${basedir}/target/generated/"/>
-                <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/src/main/java/org/mortbay/jetty/xbean" destFile="target/jetty.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
+                <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/target/xbean-src-to-parse" destFile="target/jetty.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
                 <copy todir="${basedir}/target/classes">
                   <fileset dir="${basedir}/target/generated"></fileset>
                 </copy>

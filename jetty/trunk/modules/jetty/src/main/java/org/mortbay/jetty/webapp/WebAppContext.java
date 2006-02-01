@@ -55,7 +55,9 @@ import org.mortbay.util.TypeUtil;
  * The handlers are configured by pluggable configuration classes, with
  * the default being  {@link org.mortbay.jetty.webapp.WebXmlConfiguration} and 
  * {@link org.mortbay.jetty.webapp.JettyWebXmlConfiguration}.
-        
+ *      
+ * @org.apache.xbean.XBean description="Creates a servlet web application at a given context from a resource base"
+ * 
  * @author gregw
  *
  */

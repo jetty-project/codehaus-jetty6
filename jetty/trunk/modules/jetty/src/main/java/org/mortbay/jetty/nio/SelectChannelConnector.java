@@ -61,6 +61,8 @@ import org.mortbay.util.ajax.Continuation;
  * associated object of the Continuation instance.
  * </p>
  * 
+ * @org.apache.xbean.XBean element="nioConnector" description="Creates an NIO based socket connector"
+ * 
  * @author gregw
  */
 public class SelectChannelConnector extends AbstractConnector

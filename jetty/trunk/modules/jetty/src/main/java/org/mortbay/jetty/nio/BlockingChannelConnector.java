@@ -35,6 +35,8 @@ import org.mortbay.log.Log;
  * 
  * This connector is best used when there are a few very active connections.
  * 
+ * @org.apache.xbean.XBean element="blockingNioConnector" description="Creates a blocking NIO based socket connector"
+ * 
  * @author gregw
  */
 public class BlockingChannelConnector extends AbstractConnector
