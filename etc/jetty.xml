@@ -64,7 +64,7 @@
         <Item>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
             <Set name="port">8080</Set>
-            <Set name="maxIdleTime">50000</Set>
+            <Set name="maxIdleTime">30000</Set>
             <Set name="Acceptors">10</Set>
           </New>
         </Item>
