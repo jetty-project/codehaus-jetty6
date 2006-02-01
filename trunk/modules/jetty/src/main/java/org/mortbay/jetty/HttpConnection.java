@@ -941,13 +941,14 @@ public class HttpConnection
                     }
                     s.getChars(i, next, _chars, 0);
                     i+=chunk;
-                    for (int n=0;n<chunk; n++)
+                    for (int n=0;n<chunk;)
                     {
                         char c=_chars[n];
                         
                         if (c<_maxChar) 
                         {
-                            _bytes.writeUnchecked(c);
+                            _bytes.writeUnchecked(c); 
+                            n++;
                         }
                         else
                         {
@@ -977,18 +978,19 @@ public class HttpConnection
                         if (next>end)
                             next=end;
                         
-                        for (;i<next; i++)
+                        while (i<next)
                         {
                             char c=s.charAt(i);
                             
                             if (c<_maxChar) 
                             {
                                 _bytes.writeUnchecked(c);
+                                i++;
                             }
                             else
                             {   
                                 // write a chunket
-                                int i0=i++;
+                                int i0=i;
                                 i+=_writeChunk/2;
                                 if (i>next)
                                     i=next;
@@ -1030,24 +1032,25 @@ public class HttpConnection
                     if (next>end)
                         next=end;
                     
-                    for (;i<next; i++)
+                    while (i<next)
                     {
                         char c=s[i];
                         
                         if (c<_maxChar) 
+                        {
+                            i++;
                             _bytes.writeUnchecked(c);
+                        }
                         else
                         {
                             if (_converter==null)
-                            {
                                 _converter=new OutputStreamWriter(_bytes,_characterEncoding);
-                            }
 
                             // write a chunket
-                            int i0=i++;
+                            int i0=i;
                             i+=_writeChunk/2;
-                            if (i>end)
-                                i=end;
+                            if (i>next)
+                                i=next;
                             _converter.write(s,i0,i-i0);
                             _converter.flush();
                         }
@@ -1059,8 +1062,5 @@ public class HttpConnection
                 }
             }
         }
-
     }
-
-
 }
