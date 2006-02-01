@@ -42,6 +42,8 @@ import org.mortbay.log.Log;
  * This connector is best used when there are a very many low activity connections. Even then
  * the SelectChannelConnector may give better performance.
  * 
+ * @org.apache.xbean.XBean element="selectBlockingNioConnector" description="Creates a select blocking NIO based socket connector"
+ * 
  * @author gregw
  */
 public class SelectBlockingChannelConnector extends AbstractConnector

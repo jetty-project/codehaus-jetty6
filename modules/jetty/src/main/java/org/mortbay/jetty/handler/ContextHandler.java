@@ -66,6 +66,8 @@ import org.mortbay.util.URIUtil;
  * This handler wraps a call to handle by setting the context and
  * servlet path, plus setting the context classloader.
  * 
+ * @org.apache.xbean.XBean description="Creates a basic HTTP context"
+ *
  * @author gregw
  *
  */
