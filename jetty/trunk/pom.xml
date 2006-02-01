@@ -73,6 +73,7 @@
     <module>modules/test-webapp</module>
     <module>modules/start</module>
     <module>modules/maven-plugin</module>
+    <module>modules/xbean</module>
   </modules>
   <reporting>
     <plugins>
