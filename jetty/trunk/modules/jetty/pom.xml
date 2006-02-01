@@ -39,6 +39,7 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
+            <id>copyjar</id>
             <phase>install</phase>
             <goals>
               <goal>run</goal>
@@ -49,12 +50,8 @@
               </tasks>
             </configuration>
           </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
           <execution>
+            <id>genxsd</id>
             <phase>process-classes</phase>
             <goals>
               <goal>run</goal>
@@ -103,9 +100,6 @@
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-spring</artifactId>
       <version>2.2-SNAPSHOT</version>
-      <!-- 
-      <scope>test</scope>
-       -->
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
