@@ -38,6 +38,8 @@ import org.mortbay.log.Log;
  * 
  * This Connector should only be used if NIO is not available.
  * 
+ * @org.apache.xbean.XBean element="bioConnector" description="Creates a BIO based socket connector"
+ * 
  * @author gregw
  */
 public class SocketConnector extends AbstractConnector

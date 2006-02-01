@@ -1,3 +1,11 @@
 <beans xmlns="http://mortbay.com/schemas/jetty/1.0">
-  <jetty port="8081" webAppContext="/" webAppDirectory="/tmp/webapp" />  
+  <jetty>
+    <connectors>
+      <nioConnector port="8181" />
+    </connectors>
+    
+    <handlers>
+      <webAppContext contextPath="/" resourceBase="/tmp/webapp" parentLoaderPriority="false" />
+    </handlers>
+  </jetty>
 </beans>
