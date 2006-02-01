@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>project</artifactId>
+    <groupId>org.mortbay.jetty</groupId>
+    <version>6.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty</groupId>
+  <artifactId>jetty-xbean</artifactId>
+  <name>Jetty XBean</name>
+  <version>6.0-SNAPSHOT</version>
+  <url>http://jetty.mortbay.org</url>
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>org/mortbay/**/*.properties</include>
+          <include>org/mortbay/**/*.dtd</include>
+          <include>org/mortbay/**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+        <includes>
+          <include>**/*Test.java</include>
+          <include>org/mortbay/**/*.xml</include>
+        </includes>
+        <excludes>
+          <exclude>**/Abstract*.java</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copyjar</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}.${project.packaging}" failonerror="false"></copy>
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
+            <id>genxsd</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <taskdef classname="org.apache.xbean.spring.generator.MappingGeneratorTask" name="mapping">
+                  <classpath>
+                    <pathelement path="${basedir}/target/classes"></pathelement>
+                    <path refid="maven.runtime.classpath"></path>
+                  </classpath>
+                </taskdef>
+                <!--  for some reason MultiPartResponse breaks qdox so excluding all but essential files 
+                <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/src/main/java" destFile="target/jmx.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
+                -->
+                <mkdir dir="${basedir}/target/generated/"/>
+                <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/src/main/java/org/mortbay/jetty/xbean" destFile="target/jetty.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
+                <copy todir="${basedir}/target/classes">
+                  <fileset dir="${basedir}/target/generated"></fileset>
+                </copy>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <stylesheetfile>${basedir}/../../src/resources/javadoc.css</stylesheetfile>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xbean</groupId>
+      <artifactId>xbean-spring</artifactId>
+      <version>2.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring</artifactId>
+      <version>1.2.6</version>
+    </dependency>
+  </dependencies>
+</project>
