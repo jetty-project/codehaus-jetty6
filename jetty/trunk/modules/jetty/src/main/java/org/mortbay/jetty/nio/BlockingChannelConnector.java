@@ -24,7 +24,9 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.log.Log;
 
 
@@ -128,18 +130,15 @@ public class BlockingChannelConnector extends AbstractConnector
                 while (isOpen())
                     _connection.handle();
             }
-            catch(IOException e)
+            catch (EofException e)
             {
-                // TODO - better than this
-                if ("BAD".equals(e.getMessage()))
-                {
-                    Log.warn("BAD Request");
-                    Log.debug("BAD",e);
-                }
-                else if ("EOF".equals(e.getMessage()))
-                    Log.debug("EOF",e);
-                else
-                    Log.warn("IO",e);
+                Log.debug("EOF", e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
+            }
+            catch (HttpException e)
+            {
+                Log.debug("BAD", e);
                 try{close();}
                 catch(IOException e2){Log.ignore(e2);}
             }

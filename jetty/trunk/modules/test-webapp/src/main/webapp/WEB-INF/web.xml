@@ -20,7 +20,7 @@
     <filter-name>TestFilter</filter-name>
     <url-pattern>/dump/*</url-pattern>
     <url-pattern>*.dump</url-pattern>
-    <servlet-name>*</servlet-name>
+    <!-- <servlet-name>*</servlet-name> -->
   </filter-mapping>
   
   <filter>

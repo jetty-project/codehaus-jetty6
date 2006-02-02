@@ -30,7 +30,9 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------------------------- */
@@ -306,21 +308,15 @@ public class SelectBlockingChannelConnector extends AbstractConnector
             {
                 Log.ignore(e);
             }
-            catch(IOException e)
+            catch (EofException e)
             {
-                // TODO - better than this
-                if ("BAD".equals(e.getMessage()))
-                {
-                    Log.warn("BAD Request");
-                    Log.debug("BAD",e);
-                }
-                else if ("EOF".equals(e.getMessage()))
-                    Log.debug("EOF",e);
-                else
-                    Log.warn("IO",e);
-                if (_key!=null)
-                    _key.cancel();
-                _key=null;
+                Log.debug("EOF", e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
+            }
+            catch (HttpException e)
+            {
+                Log.debug("BAD", e);
                 try{close();}
                 catch(IOException e2){Log.ignore(e2);}
             }
@@ -339,6 +335,26 @@ public class SelectBlockingChannelConnector extends AbstractConnector
                 {
                     try{undispatch();}catch(Exception e){ Log.warn(e); }
                 }
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.io.nio.ChannelEndPoint#close()
+         */
+        public void close() throws IOException
+        {
+            if (_key!=null)
+                _key.cancel();
+            _key=null;
+            try{
+                super.close();
+                if (_connection!=null)
+                    _connection.close();
+            }
+            catch (IOException e)
+            {
+                throw new EofException(e);
             }
         }
         
