@@ -1,17 +1,75 @@
+Index: patches/ServletContext.getContextPath.patch
+===================================================================
+--- patches/ServletContext.getContextPath.patch	(revision 189)
++++ patches/ServletContext.getContextPath.patch	(working copy)
+@@ -1,53 +0,0 @@
+-Index: modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServletRequest.java
+-===================================================================
+---- modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServletRequest.java	(revision 183)
+-+++ modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServletRequest.java	(working copy)
+-@@ -384,7 +384,16 @@
+-      * character.  For servlets in the default (root) context, this method
+-      * returns "". The container does not decode this string.
+-      *
+-+     * <p>It is possible that a servlet container may match a context by 
+-+     * more than one context path. In such cases this methd will return the actual context path used 
+-+     * by the request and it may differ from the path returned by the
+-+     * {@link ServletContext#getContextPath()} method.
+-+     * The context path returned by {@link ServletContext#getContextPath()}
+-+     * should be considered the as the prime or preferred context path of the 
+-+     * application.</p>
+-      *
+-+     * @see ServletContext#getContextPath()
+-+     * 
+-      * @return		a <code>String</code> specifying the
+-      *			portion of the request URI that indicates the context
+-      *			of the request
+-Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletContext.java
+-===================================================================
+---- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletContext.java	(revision 183)
+-+++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletContext.java	(working copy)
+-@@ -104,6 +104,27 @@
+- 
+- public interface ServletContext {
+- 
+-+    /**
+-+     * Returns the context path of the web application. The context
+-+     * path is the portion of the request URI that is used to select the context
+-+     * of the request.  The context path always comes first in a request
+-+     * URI.  The path starts with a "/" character but does not end with a "/"
+-+     * character.  For servlets in the default (root) context, this method
+-+     * returns "".
+-+     * 
+-+     * <p>It is possible that a servlet container may match a context by 
+-+     * more than one context path. In such cases the 
+-+     * {@link javax.servlet.http.HttpServletRequest#getContextPath()}
+-+     * will return the actual context path used by the request and it may differ 
+-+     * from the path returned by this method.
+-+     * The context path returned by this method should be considered as the 
+-+     * prime or preferred context path of the application.</p>
+-+     *
+-+     * @see  javax.servlet.http.HttpServletRequest#getContextPath()
+-+     *
+-+     */
+-+    public String getContextPath();
+-+    
+- 
+-     /**
+-      * Returns a <code>ServletContext</code> object that 
 Index: modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServletRequest.java
 ===================================================================
---- modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServletRequest.java	(revision 183)
+--- modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServletRequest.java	(revision 189)
 +++ modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServletRequest.java	(working copy)
 @@ -384,7 +384,16 @@
       * character.  For servlets in the default (root) context, this method
       * returns "". The container does not decode this string.
       *
 +     * <p>It is possible that a servlet container may match a context by 
-+     * more than one context path. In such cases this methd will return the actual context path used 
-+     * by the request and it may differ from the path returned by the
-+     * {@link ServletContext#getContextPath()} method.
++     * more than one context path. In such cases this method will return the 
++     * actual context path used  by the request and it may differ from the 
++     * path returned by the {@link ServletContext#getContextPath()} method.
 +     * The context path returned by {@link ServletContext#getContextPath()}
-+     * should be considered the as the prime or preferred context path of the 
++     * should be considered as the prime or preferred context path of the 
 +     * application.</p>
       *
 +     * @see ServletContext#getContextPath()
@@ -21,7 +79,7 @@ Index: modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServletReque
       *			of the request
 Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletContext.java
 ===================================================================
---- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletContext.java	(revision 183)
+--- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletContext.java	(revision 189)
 +++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletContext.java	(working copy)
 @@ -104,6 +104,27 @@
  
