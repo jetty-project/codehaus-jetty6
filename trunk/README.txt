@@ -36,10 +36,4 @@ The only real dependancy is slf4j logging.  To run the server
 with JSP support, you will also need the jasper jars, commons 
 logging, commons el and xerces.   
 
-the ant build.xml file exist in the top level to assist
-with cleaning the project:
-
- ant clean
- mvn clean:clean
-
 
