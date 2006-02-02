@@ -11,12 +11,27 @@
   <packaging>maven-plugin</packaging>
   <name>Maven Jetty6 Plugin</name>
   <version>6.0-SNAPSHOT</version>
+  <developers>
+    <developer>
+      <id>janb</id>
+      <name>Jan Bartel</name>
+      <email>janb@apache.org</email>
+      <organization>Mort Bay Consulting</organization>
+      <organizationUrl>http://www.mortbay.com</organizationUrl>
+    </developer>
+  </developers>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-site-plugin</artifactId>
+        <configuration>
+          <outputDirectory>${basedir}/../../project-site/target/site/maven-plugin</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
@@ -87,4 +102,20 @@
       <artifactId>xmlParserAPIs</artifactId>
     </dependency>
   </dependencies>
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>project-team</report>
+              <report>mailing-list</report>
+              <report>issue-tracking</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
