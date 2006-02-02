@@ -25,19 +25,30 @@
       <id>gregw</id>
       <name>Greg Wilkins</name>
       <email>gregw@apache.org</email>
-      <organization></organization>
+      <url>http://www.mortbay.com/mortbay/people/gregw</url>
+      <organization>Mort Bay Consulting</organization>
+      <organizationUrl>http://www.mortbay.com</organizationUrl>
     </developer>
     <developer>
       <id>janb</id>
       <name>Jan Bartel</name>
       <email>janb@apache.org</email>
-      <organization></organization>
+      <url>http://www.mortbay.com/people/janb</url>
+      <organization>Mort Bay Consulting</organization>
+      <organizationUrl>http://www.mortbay.com</organizationUrl>
     </developer>
     <developer>
       <id>jules</id>
       <name>Jules Gosnell</name>
       <email>jules@apache.org</email>
       <organization></organization>
+    </developer>
+    <developer>
+      <id>jstrachan</id>
+      <name>James Strachan</name>
+      <email>jstrachan@apache.org</email>
+      <organization>Logic Blaze</organization>
+      <organizationUrl>http://www.logicblaze.com</organizationUrl>
     </developer>
   </developers>
   <licenses>
@@ -46,6 +57,10 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/Jetty</url>
+  </issueManagement>
   <scm>
     <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
     <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/trunk</developerConnection>
@@ -64,6 +79,31 @@
       </extension>
     </extensions>
     <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <tagBase>svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags</tagBase>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-one-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>install-maven-one-repository</goal>
+              <goal>deploy-maven-one-repository</goal>
+            </goals>
+            <configuration>
+              <remoteRepositoryId>mortbay-maven1</remoteRepositoryId>
+              <remoteRepositoryUrl>scpexe://jetty.mortbay.org/home/ftp/pub/maven</remoteRepositoryUrl>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
   <modules>
     <module>modules/servlet-api-2.5</module>
@@ -75,29 +115,13 @@
     <module>modules/maven-plugin</module>
     <module>modules/xbean</module>
   </modules>
-  <reporting>
-    <plugins>
-      <plugin>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>project-team</report>
-              <report>mailing-list</report>
-              <report>issue-tracking</report>
-              <report>scm</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <tagBase>svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags</tagBase>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>snapshots</id>
+      <name>Maven Central Plugins Development Repository</name>
+      <url>http://snapshots.maven.codehaus.org/maven2</url>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencyManagement>
     <dependencies>
       <dependency>

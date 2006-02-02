@@ -26,16 +26,33 @@
   </bannerLeft>
   <body>
     <menu name="About jetty6">
+      <item name="Home" href="index.html"/>
       <item name="License" href="http://jetty.mortbay.org/jetty/LICENSE.TXT"/>
+      <item name="Versions" href="VERSION.txt"/>
+      <item name="Readme" href="README.txt"/>
     </menu>
     <menu name="Tools">
       <item name="Maven2 Jetty Plugin" href="http://jetty.mortbay.org/jetty6/maven-plugin/index.html"/>
     </menu>
-    <menu name="Resources">
-      <item name="Readme" href="README.txt"/>
-      <item name="API Docs" href="javadoc.html"/>
-      <item name="Wiki" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
+    <menu name="Download">
+      <item name="Main Archive" href="http://sourceforge.net/project/showfiles.php?group_id=7322&#x26;package_id=106252"/>
     </menu>
-    ${reports}
+    <menu name="Source">
+      <item name="Javadoc for org.mortbay.jetty" href="jetty/apidocs/index.html"/>
+      <item name="Javadoc for javax.servlet" href="servlet-api-2.5/apidocs/index.html"/>
+      <item name="Browse online" href="http://fisheye.codehaus.org/viewrep/jetty"/>
+      <item name="SVN" href="source-repository.html"/>
+    </menu>
+    <menu name="Resources">
+      <item name="Wiki" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
+      <item name="XBean jetty.xsd" href="http://jetty.mortbay.org/jetty6/jetty.xsd"/>
+      <item name="XBean doc for jetty.xsd" href="http://jetty.mortbay.org/jetty6/jetty.xsd.html"/>
+    </menu>
+    <menu name="Community">
+      <item name="Developers" href="team-list.html"/>
+      <item name="Issue Tracking" href="issue-tracking.html"/>
+      <item name="Mailing Lists" href="mail-lists.html"/>
+      <item name="IRC" href="irc.html"/>
+    </menu>
   </body>
 </project>
