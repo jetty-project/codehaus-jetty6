@@ -31,7 +31,9 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
@@ -681,44 +683,23 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 Log.ignore(e);
             }
-            catch (IOException e)
+            catch (EofException e)
             {
-                // TODO - better than this
-                if ("BAD".equals(e.getMessage()))
-                {
-                    Log.warn("BAD Request");
-                    Log.debug("BAD", e);
-                }
-                else if ("EOF".equals(e.getMessage()))
-                    Log.debug("EOF", e);
-                else
-                    Log.warn("IO", e);
-                if (_key != null)
-                    _key.cancel();
-                _key = null;
-                try
-                {
-                    close();
-                }
-                catch (IOException e2)
-                {
-                    Log.ignore(e2);
-                }
+                Log.debug("EOF", e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
+            }
+            catch (HttpException e)
+            {
+                Log.debug("BAD", e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
             }
             catch (Throwable e)
             {
                 Log.warn("handle failed", e);
-                if (_key != null)
-                    _key.cancel();
-                _key = null;
-                try
-                {
-                    close();
-                }
-                catch (IOException e2)
-                {
-                    Log.ignore(e2);
-                }
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
             }
             finally
             {
@@ -748,16 +729,24 @@ public class SelectChannelConnector extends AbstractConnector
          */
         public void close() throws IOException
         {
+            if (_key!=null)
+                _key.cancel();
             _key=null;
-            super.close();
-            if (_connection!=null)
-                _connection.close();
+            try{
+                super.close();
+                if (_connection!=null)
+                    _connection.close();
+            }
+            catch (IOException e)
+            {
+                throw new EofException(e);
+            }
         }
 
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            return "HEP[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
+            return "HEP@"+hashCode()+"[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
         }
 
         /* ------------------------------------------------------------ */

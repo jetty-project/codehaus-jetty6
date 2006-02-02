@@ -261,7 +261,7 @@ public class HttpParser implements HttpTokens
                 {
                     Log.debug(ioe);
                     reset(true);
-                    throw new IOException("EOF");
+                    throw new EofException(ioe);
                 }
             }
             
@@ -274,7 +274,7 @@ public class HttpParser implements HttpTokens
             if (filled < 0) 
             {
                 reset(true);
-                throw new IOException("EOF");
+                throw new EofException();
             }
             length=_buffer.length();
         }
