@@ -221,6 +221,13 @@ public class WebAppContext extends ContextHandler
         if (getClassLoader()==null)
         {
             ClassLoader parent = Thread.currentThread().getContextClassLoader();
+            if (Log.isDebugEnabled()) 
+            {
+                Log.debug("Thread Context class loader is: " + parent);
+                for (ClassLoader loader = parent.getParent(); loader != null; loader = loader.getParent()) {
+                    Log.debug("Parent class loader is: " + loader); 
+                }
+            }
             if (parent==null)
                 parent=this.getClass().getClassLoader();
             if (parent==null)
@@ -311,7 +318,7 @@ public class WebAppContext extends ContextHandler
     /**
      * @return Returns the serverClasses.
      */
-    String[] getServerClasses()
+    public String[] getServerClasses()
     {
         return _serverClasses;
     }
@@ -338,7 +345,7 @@ public class WebAppContext extends ContextHandler
     /**
      * @return Returns the systemClasses.
      */
-    String[] getSystemClasses()
+    public String[] getSystemClasses()
     {
         return _systemClasses;
     }
@@ -718,7 +725,7 @@ public class WebAppContext extends ContextHandler
     /**
      * @param serverClasses The serverClasses to set.
      */
-    void setServerClasses(String[] serverClasses) 
+    public void setServerClasses(String[] serverClasses) 
     {
         _serverClasses = serverClasses==null?null:(String[])serverClasses.clone();
     }
@@ -745,7 +752,7 @@ public class WebAppContext extends ContextHandler
     /**
      * @param systemClasses The systemClasses to set.
      */
-    void setSystemClasses(String[] systemClasses)
+    public void setSystemClasses(String[] systemClasses)
     {
         _systemClasses = systemClasses==null?null:(String[])systemClasses.clone();
     }
