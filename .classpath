@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry output="modules/servlet-api-2.5/target/classes" kind="src" path="modules/servlet-api-2.5/src/main/java"/>
+	<classpathentry output="modules/xbean/target/classes" kind="src" path="modules/xbean/src/main/java"/>
+	<classpathentry output="modules/xbean/target/test-classes" kind="src" path="modules/xbean/src/test/java"/>
 	<classpathentry output="modules/management/target/classes" kind="src" path="modules/management/src/main/java"/>
 	<classpathentry output="modules/test-webapp/target/classes" kind="src" path="modules/test-webapp/src/main/java"/>
 	<classpathentry output="modules/start/target/classes" kind="src" path="modules/start/src/main/java"/>
@@ -17,5 +19,7 @@
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.1.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/spring/1.2.6/spring-1.2.6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/2.2-SNAPSHOT/xbean-spring-2.2-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
