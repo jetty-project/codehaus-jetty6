@@ -83,16 +83,16 @@
                 <copy todir="${basedir}/target/classes">
                   <fileset dir="${basedir}/target/generated"></fileset>
                 </copy>
+                <copy todir="${basedir}/../../project-site/src/site/resources">
+                  <fileset dir="target">
+                    <include name="jetty.xsd"/>
+                    <include name="jetty.xsd.html"/>
+                  </fileset>
+                </copy>
               </tasks>
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <stylesheetfile>${basedir}/../../src/resources/javadoc.css</stylesheetfile>
-        </configuration>
       </plugin>
     </plugins>
   </build>

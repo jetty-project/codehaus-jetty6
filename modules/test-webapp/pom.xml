@@ -33,7 +33,7 @@
       </plugin>
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty6-plugin</artifactId>
+        <artifactId>maven-test-jetty6-plugin</artifactId>
         <version>6.0-SNAPSHOT</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
@@ -55,6 +55,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl104-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>nlog4j</artifactId>
+      <version>1.2.19</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
