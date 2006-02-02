@@ -24,6 +24,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 /* ------------------------------------------------------------ */
 /** TestFilter.
@@ -55,8 +57,10 @@ public class TestFilter implements Filter
         {
             old_value=(Integer)request.getAttribute("testFilter");
             Integer value=(old_value==null)?new Integer(1):new Integer(old_value.intValue()+1);
-            
+                        
             request.setAttribute("testFilter", value);
+            if (((HttpServletRequest)request).getParameter("wrap")!=null)
+                request=new HttpServletRequestWrapper((HttpServletRequest)request);
             _context.setAttribute("request"+request.hashCode(),value);
             chain.doFilter(request, response);
         }
