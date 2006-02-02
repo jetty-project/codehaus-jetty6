@@ -36,13 +36,13 @@ connector types as standard Jetty, but also now includes connectors based on Sun
 Scalability is a particlarly important concern with the advent of <a href="http://en.wikipedia.org/wiki/AJAX">AJAX</a>. In the AJAX model, clients
 continuously poll the server, which often delays processing the request until there is data to 
 send or a timeout happens. This means that server threads are being held open leading to scalability
-problems for heavily loaded sites. jetty6's response is to offer a feature called <a href="/jetty6/jetty-util/javadoc/apidocs/index.html">Continuations</a>
+problems for heavily loaded sites. jetty6's response is to offer a feature called <a href="/jetty6/jetty/apidocs/org/mortbay/util/ajax/package-summary.html">Continuations</a>
 allowing a request to be suspended (and therefore the thread freed) and resumed later.
 </P>
 Here's a summary of the new features of jetty6:
 <div class="feature">
 <div class="featureitem">Codebase completely rearchitected and slimlined</div>
-<div class="featureitem"><a href="/jetty6/jetty-util/javadoc/apidocs/index.html">Continuations API</a> for efficient AJAX polling</div>
+<div class="featureitem"><a href="/jetty6/jetty/apidocs/org/mortbay/util/ajax/package-summary.html">Continuations API</a> for efficient AJAX polling</div>
 <div class="featureitem">Improved dependancy injection and inversion of control design of components</div>
 <div class="featureitem">Improved interceptor design of handlers</div>
 <div class="featureitem">Smart split buffer design for efficient asynchronous flushing and avoiding chunking.</div>
