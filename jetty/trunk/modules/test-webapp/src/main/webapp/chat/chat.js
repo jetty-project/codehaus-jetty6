@@ -1,149 +1,153 @@
 
 
-
-
-var MembershipHandler = 
-{ 
+var room = 
+{
+  _last: "",
+  _username: null,
+  
   join: function()
   {
     var name = $('username').value;
     if (name == null || name.length==0 )
     {
-      alert("Please enter a username!");
+      alert('Please enter a username!');
     }
     else
     {
-      ajaxEngine.sendRequest('join',"name=" + name);
+       this._username=name;
+       $('join').className='hidden';
+       $('joined').className='';
+       $('phrase').focus();
+       Behaviour.apply();
+       ajax.sendMessage('join', room._username);
     }
   },
   
-  ajaxUpdate: function(ajaxResponse) 
+  leave: function()
   {
-     if ("left" == ajaxResponse.getAttribute('id'))
-     {
        // switch the input form
        $('join').className='';
        $('joined').className='hidden';
        $('username').focus();
-     }
-     else
-     {
-       // switch the input form
-       $('join').className='hidden';
-       $('joined').className='';
-       $('phrase').focus();
-     }
-     
-     Behaviour.apply();
-     
-  }
-};
-
-var EventHandler = 
-{
-  last: "",
+       Behaviour.apply();
+       ajax.sendMessage('leave',room._username);
+       room._username=null;
+  },
   
   chat: function()
   {
-    var text = $('phrase').value;
+    var text = $F('phrase');
+    $('phrase').value='';
     if (text != null && text.length>0 )
     {
-        text=text.replace('%','%25');
-        text=text.replace('&','%26');
-	ajaxEngine.sendRequest('chat',"text=" + text); // TODO encode ??
-	$('phrase').value="";
+        ajax.sendMessage('chat',text);
     }
   },
   
-  ajaxUpdate: function(ajaxResponse) 
+  _chat: function(message)
   {
-     var event=ajaxResponse.childNodes[0];
-     document.myevent=event;
-     
-     var chat=$('chat')
-     var from=event.attributes['from'].value;
-     var alert=event.attributes['alert'].value;
-     var text=event.childNodes[0].data;
-     
-     if ( alert!="true" && from == this.last )
-        from="...";
+     var chat=$('chat');
+     var from=message.getAttribute('from');
+     var special=message.getAttribute('alert');
+     var text=message.childNodes[0].data;
+     if ( special!='true' && from == room._last )
+         from="...";
      else
      {
-        this.last=from;
-        from+=":";
+         room._last=from;
+         from+=":";
      }
      
-     if (alert!="true")
-       chat.innerHTML += "<span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span><br/>";
-     else
+     if (special=='true')
        chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span></span><br/>";
-     
-     chat.scrollTop = chat.scrollHeight - chat.clientHeight;
-     
-  }
-};
-
-var PollHandler = 
-{
-  ajaxUpdate: function(ajaxResponse) 
+     else
+       chat.innerHTML += "<span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span><br/>";
+     chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
+  },
+   
+  _members: function(message)
+  {   
+    $('members').innerHTML=ajax.getContentAsString(message);
+  },
+      
+  _joined: function(message)
+  {    
+     var from=message.getAttribute('from');
+     var chat=$('chat');
+     chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">has joined the room!</span></span><br/>";
+     chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
+  },
+  
+  _left: function(message)
+  {    
+     var from=message.getAttribute('from');
+     var chat=$('chat');
+     chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">has left the room!</span></span><br/>";
+     chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
+  },
+  
+  _poll: function(first)
   {
-     // Poll again for events
-     ajaxEngine.sendRequest('getEvents');
+     if (first ||  $('join').className=='hidden' && $('joined').className=='hidden')
+     {
+       ajax.addListener('chat',room._chat);
+       ajax.addListener('joined',room._joined);
+       ajax.addListener('left',room._left);
+       ajax.addListener('members',room._members);
+       $('join').className='';
+       $('joined').className='hidden';
+       $('username').focus();
+      Behaviour.apply();
+     }
   }
 };
 
+ajax.addPollHandler(room._poll);
 
-function initPage()
-{
-  ajaxEngine.registerRequest('join', "?ajax=join");
-  ajaxEngine.registerRequest('leave', "?ajax=leave");
-  ajaxEngine.registerRequest('chat', "?ajax=chat"); 
-  ajaxEngine.registerRequest('getEvents', "?ajax=getEvents&id=event");
-  
-  ajaxEngine.registerAjaxElement('members');
-  
-  ajaxEngine.registerAjaxObject('joined', MembershipHandler);
-  ajaxEngine.registerAjaxObject('left', MembershipHandler);
-  ajaxEngine.registerAjaxObject('event', EventHandler);
-  ajaxEngine.registerAjaxObject('poll', PollHandler);
-  
-  // start polling for events
-  ajaxEngine.sendRequest('getEvents');
-  
-}
-
-
-var behaviours = 
+var chatBehaviours = 
 { 
-
   '#username' : function(element)
   {
     element.setAttribute("autocomplete","OFF"); 
-    element.onkeypress = function(event)
-    {
-        if (event && (event.keyCode==13 || event.keyCode==10))
+    element.onkeyup = function(ev)
+    {  
+        var keyc;
+        if (window.event)
+           keyc=window.event.keyCode;
+        else
+           keyc=ev.keyCode;
+        if (keyc==13 || keyc==10)
         {
-      	  MembershipHandler.join();
+      	  room.join();
+	  return false;
 	}
+	return true;
     } 
   },
   
   '#joinB' : function(element)
   {
-    element.onclick = function()
+    element.onclick = function(event)
     {
-      MembershipHandler.join();
+      room.join();
+      return true;
     }
   },
   
   '#phrase' : function(element)
   {
     element.setAttribute("autocomplete","OFF");
-    element.onkeypress = function(event)
-    {
-        if (event && (event.keyCode==13 || event.keyCode==10))
+    element.onkeyup = function(ev)
+    {   
+        var keyc;
+        if (window.event)
+           keyc=window.event.keyCode;
+        else
+           keyc=ev.keyCode;
+           
+        if (keyc==13 || keyc==10)
         {
-          EventHandler.chat();
+          room.chat();
 	  return false;
 	}
 	return true;
@@ -152,9 +156,9 @@ var behaviours =
   
   '#sendB' : function(element)
   {
-    element.onclick = function()
+    element.onclick = function(event)
     {
-    	EventHandler.chat();
+      room.chat();
     }
   },
   
@@ -163,11 +167,12 @@ var behaviours =
   {
     element.onclick = function()
     {
-      ajaxEngine.sendRequest('leave');
+      room.leave();
+      return false;
     }
-  },
+  }
 };
 
-Behaviour.register(behaviours);
-Behaviour.addLoadEvent(initPage);  
+Behaviour.register(chatBehaviours); 
+
 

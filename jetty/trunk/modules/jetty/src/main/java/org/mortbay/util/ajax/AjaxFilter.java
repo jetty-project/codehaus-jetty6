@@ -18,6 +18,7 @@ package org.mortbay.util.ajax;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -51,6 +52,7 @@ public class AjaxFilter implements Filter
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
     {
         String[] method=request.getParameterValues("ajax");
+        String[] message=request.getParameterValues("message");
         
         if (method!=null && method.length>0)
         {
@@ -64,7 +66,9 @@ public class AjaxFilter implements Filter
             AjaxResponse aResponse =new AjaxResponse(srequest,out);
             
             for (int i=0;i<method.length;i++)
-                handle(method[i],srequest,aResponse);
+            {
+                handle(method[i],message[i],srequest,aResponse);
+            }
 
             out.println("</ajax-response>");
             byte[] ajax = sout.toString().getBytes("UTF-8");
@@ -78,7 +82,7 @@ public class AjaxFilter implements Filter
             chain.doFilter(request, response);
     }
 
-    public void handle(String method,HttpServletRequest request,AjaxResponse response)
+    public void handle(String method, String message, HttpServletRequest request,AjaxResponse response)
     {    
         response.elementResponse(null, "<span class=\"error\">No implementation for "+method+" "+request.getParameter("member")+"</span>");
     }
