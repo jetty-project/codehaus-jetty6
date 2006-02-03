@@ -60,7 +60,9 @@ public class TestFilter implements Filter
                         
             request.setAttribute("testFilter", value);
             if (((HttpServletRequest)request).getParameter("wrap")!=null)
+            {
                 request=new HttpServletRequestWrapper((HttpServletRequest)request);
+            }
             _context.setAttribute("request"+request.hashCode(),value);
             chain.doFilter(request, response);
         }

@@ -20,8 +20,13 @@ package org.mortbay.util.ajax;
 /** Continuation.
  * 
  * A continuation is a mechanism by which a HTTP Request can be 
- * suspended and retried after a timeout or an asynchronous event
+ * suspended and restarted after a timeout or an asynchronous event
  * has occured.
+ * Blocking continuations will block the process of the request during a
+ * call to {@link #suspend(long)}.
+ * Non-blocking continuation can abort the current request and arrange for it 
+ * to be retried when {@link #resume()} is called or the timeout expires.
+ * 
  * With the appropriate HTTP Connector, this allows threadless waiting
  * for events (see {@link org.mortbay.jetty.nio.SelectChannelConnector}).
  * 
@@ -57,8 +62,11 @@ public interface Continuation
     public boolean isNew();
     
     /* ------------------------------------------------------------ */
-    /** Is the continuation pending an event or timeout?
-     * @return True if neither resume has been called or the continuation has timed out.
+    /** Get the pending status?
+     * A continuation is pending while the handling of a call to suspend has not completed.
+     * For blocking continuations, pending is true only during the call to {@link #suspend(long)}.
+     * For non-blocking continuations, pending is true until a second call to {@link #suspend(long)}.
+     * @return True if the continuation is handling a call to suspend.
      */
     public boolean isPending();
     

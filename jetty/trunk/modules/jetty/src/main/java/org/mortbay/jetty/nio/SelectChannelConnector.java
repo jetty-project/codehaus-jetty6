@@ -803,8 +803,7 @@ public class SelectChannelConnector extends AbstractConnector
             synchronized (this)
             {
                 _endPoint = ep;
-
-                if (_resumed)
+                if (_resumed && _endPoint!=null)
                     redispatch();
             }
         }
@@ -845,17 +844,15 @@ public class SelectChannelConnector extends AbstractConnector
                     return _resumed;
                 }
                 
-                _pending=true;
-                _resumed=false;
-                
-                if (!isExpired() && timeout > 0)
+                if (timeout > 0)
                 {
-                    if (_endPoint != null) { throw new IllegalStateException(); }
+                    _pending=true;
+                    _resumed=false;
                     _timeout = timeout;
                     throw new RetryRequest();
                 }
             }
-
+   
             return _resumed;
         }
 
@@ -863,14 +860,12 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized (this)
             {
+                _resumed = true;
                 if (isExpired())
                     return;
-
-                boolean wakeup=_pending && !_resumed;
-                _resumed = true;
                 
                 this.cancel();
-                if (wakeup && _endPoint != null)
+                if (_endPoint != null)
                     redispatch();
             }
         }

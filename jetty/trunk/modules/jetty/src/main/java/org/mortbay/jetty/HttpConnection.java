@@ -348,7 +348,7 @@ public class HttpConnection
             try
             {
                 _request.setRequestURI(_uri.getRawPath());
-                _request.setQueryString(_uri.getQuery());
+                _request.setQueryString(_uri.getRawQuery());
                 String path_info=URIUtil.canonicalPath(_uri.getPath());
                 int semi = path_info.indexOf(';');
                 if (semi>0)
@@ -366,6 +366,11 @@ public class HttpConnection
                 Log.ignore(r);
                 retry = true;
             }
+            catch (EofException e)
+            {
+                Log.ignore(e);
+                _response=null;
+            }
             catch (ServletException e)
             {
                 Log.warn(e);
@@ -381,12 +386,15 @@ public class HttpConnection
                         _request.getContinuation().suspend(0);
                     }
                     
-                    if (_response != null) _response.complete();
-
-                    if (!_generator.isComplete())
+                    if (_response != null) 
                     {
-                        _generator.completeHeader(_responseFields, HttpGenerator.LAST);
-                        _generator.complete();
+                        _response.complete();
+                        
+                        if (!_generator.isComplete())
+                        {
+                            _generator.completeHeader(_responseFields, HttpGenerator.LAST);
+                            _generator.complete();
+                        }
                     }
                 }
             }
@@ -423,8 +431,15 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     public void flushResponse() throws IOException
     {
-        commitResponse(HttpGenerator.MORE);
-        _generator.flushBuffers();
+        try
+        {
+            commitResponse(HttpGenerator.MORE);
+            _generator.flushBuffers();
+        }
+        catch(IOException e)
+        {
+            throw new EofException(e); // TODO review this?
+        }
     }
 
     /* ------------------------------------------------------------ */
