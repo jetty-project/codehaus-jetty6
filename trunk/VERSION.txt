@@ -1,3 +1,5 @@
+    + Continuation cleanup
+    + Fixed unraw decoding of query string
     + Fixed dispatch of wrapped requests.
     + Fixed double flush of short content.
     + Added request log.

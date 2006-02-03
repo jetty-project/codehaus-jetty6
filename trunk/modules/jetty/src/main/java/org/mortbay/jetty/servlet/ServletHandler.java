@@ -33,6 +33,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
@@ -351,6 +352,10 @@ public class ServletHandler extends AbstractHandler
                 notFound(request, response);
         }
         catch(RetryRequest e)
+        {
+            throw e;
+        }
+        catch(EofException e)
         {
             throw e;
         }

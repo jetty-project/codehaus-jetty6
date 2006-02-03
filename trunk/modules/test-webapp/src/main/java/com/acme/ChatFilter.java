@@ -17,15 +17,19 @@ package com.acme;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.tagext.IterationTag;
 
+import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.AjaxFilter;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -71,7 +75,7 @@ public class ChatFilter extends AjaxFilter
         else if ("leave".equals(method))
             doLeaveChat(request,response);
         else
-            super.handle(method, request, response);                
+            super.handle(method, request, response);   
     }
 
     /* ------------------------------------------------------------ */
@@ -161,7 +165,6 @@ public class ChatFilter extends AjaxFilter
         {
             member = (Member)chatroom.get(id);
         }
-
         boolean alerts=false;
         if (member!=null)
         {
@@ -169,11 +172,11 @@ public class ChatFilter extends AjaxFilter
             if (!member.hasEvents())
             {
                 Continuation continuation = ContinuationSupport.getContinuation(request, mutex);
-                member.setContinuation(continuation);
+                if (continuation.isNew())
+                    member.addContinuation(continuation);
                 continuation.suspend(timeoutMS);
             }
             
-            member.setContinuation(null);
             alerts=member.sendEvents(response);
             
             if (alerts)
@@ -182,6 +185,7 @@ public class ChatFilter extends AjaxFilter
             // Signal for a new poll
             response.objectResponse("poll", "<ok/>");
         }
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -271,7 +275,7 @@ public class ChatFilter extends AjaxFilter
         private HttpSession _session;
         private String _name;
         private List _events = new ArrayList();
-        private Continuation _continuation;
+        private Set _continuations=new HashSet();
         
         Member(HttpSession session, String name)
         {
@@ -306,22 +310,14 @@ public class ChatFilter extends AjaxFilter
             return _session;
         }
 
-        /* ------------------------------------------------------------ */
-        /**
-         * @return Returns the continuation.
-         */
-        public Continuation getContinuation()
-        {
-            return _continuation;
-        }
 
         /* ------------------------------------------------------------ */
         /**
          * @param continuation The continuation to set.
          */
-        public void setContinuation(Continuation continuation)
+        public void addContinuation(Continuation continuation)
         {
-            _continuation = continuation;
+            _continuations.add(continuation);
         }
         
         /* ------------------------------------------------------------ */
@@ -330,8 +326,13 @@ public class ChatFilter extends AjaxFilter
             synchronized (this)
             {
                 _events.add(event);
-                if (_continuation!=null)
-                    _continuation.resume();
+                Iterator iter = _continuations.iterator();
+                while (iter.hasNext())
+                {
+                    Continuation continuation = (Continuation)iter.next();
+                    continuation.resume();
+                }
+                // _continuations.clear();
             }
         }
 

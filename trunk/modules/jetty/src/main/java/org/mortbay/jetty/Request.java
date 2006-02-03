@@ -147,7 +147,6 @@ public class Request implements HttpServletRequest
         _inputState=__NONE;
         _reader=null; 
         _cookiesExtracted=false;
-        _continuation=null;
         if (_savedNewSessions!=null)
             _savedNewSessions.clear();
         _savedNewSessions=null;
@@ -1107,7 +1106,7 @@ public class Request implements HttpServletRequest
             // TODO - UTF-8 is correct ????
             encoding = StringUtil.__UTF8;
             if (_uri!=null && _uri.getQuery()!=null)
-                UrlEncoded.decodeTo(_uri.getQuery(), _parameters,encoding);
+                UrlEncoded.decodeTo(_uri.getRawQuery(), _parameters,encoding);
         }
         else if (_uri!=null && _uri.getRawQuery()!=null)
         {
@@ -1416,7 +1415,6 @@ public class Request implements HttpServletRequest
         if (_continuation==null && create)
             _continuation=getConnection().getConnector().newContinuation();
         return _continuation;
-        
     }
     
     /* ------------------------------------------------------------ */

@@ -115,7 +115,7 @@ public class Timeout
             task.unlink();
             task._timestamp=0;
         }
-        
+        task._expired=false;
         task._delay=delay;
         task._timestamp = _now+delay;
         
@@ -272,8 +272,11 @@ public class Timeout
         
         private void doExpire()
         {
-            _expired=true;
-            expire();
+            synchronized (this)
+            {
+                _expired=true;
+                expire();
+            }
         }
     }
 

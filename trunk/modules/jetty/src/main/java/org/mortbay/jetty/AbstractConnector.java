@@ -27,6 +27,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.ajax.Continuation;
+import org.mortbay.util.ajax.WaitingContinuation;
 
 
 /** Abstract Connector implementation.
@@ -539,7 +540,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     public Continuation newContinuation()
     {
-        return null;
+        return new WaitingContinuation();
     }
     
     /* ------------------------------------------------------------ */
