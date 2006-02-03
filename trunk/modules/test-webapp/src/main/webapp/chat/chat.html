@@ -10,8 +10,7 @@
 Three really important things about this chat room demo:<ul>
 <li>It has really HORRID Styling.  Please feel free to donate a pretty css :-)</li>
 <li>It is written using AJAX techniques provided by
-<a href="http://bennolan.com/behaviour/">Behaviour</a>,
-<a href="http://openrico.org/rico/home.page">Rico</a> and
+<a href="http://bennolan.com/behaviour/">Behaviour</a> and
 <a href="http://prototype.conio.net/">Prototype</a>.</li>
 <li>It uses Jetty6 <a href="/javadoc/org/mortbay/jetty/util/Continuation.html">Continuations</a>. No are used when waiting for async
 events (see below).
@@ -49,8 +48,7 @@ events (see below).
 
  <li><p>The chat.html file includes the default.js file, which simply includes
  javascript libraries of
-<a href="http://bennolan.com/behaviour/">Behaviour</a>,
-<a href="http://openrico.org/rico/home.page">Rico</a> and
+<a href="http://bennolan.com/behaviour/">Behaviour</a> and
 <a href="http://prototype.conio.net/">Prototype</a>.</p></li>
 
  <li><p>The chat.html file includes the chat.js script which is the client side smarts of the chat room:</p>
@@ -58,13 +56,10 @@ events (see below).
          <li><p>Using Behaviour, the DOM model of chat.html is enhanced with onclick and onkeypress functions
          to trigger the dynamic interations.</p>
          </li>
-         <li><p>Using Rico, the URLs for the AJAX requests for <code>join</code>,
+         <li><p>Using Prototype, the URLs for the AJAX requests for <code>join</code>,
          <code>leave</code>, <code>chat</code> and <code>getEvents</code> are defined.
          </p></li>
-         <li><p>Using Rico, the members div is identified as an element that can be directely
-         updated from xhtml returned in an element response from the server.
-         </p></li>
-         <li><p>Using Rico, event handling objects are created to handle membership, events and polling for events.</p></li>
+         <li><p>Using Prototype, event handling objects are created to handle membership, events and polling for events.</p></li>
  </ul>
  </li>
 

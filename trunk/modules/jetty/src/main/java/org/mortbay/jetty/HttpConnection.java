@@ -345,6 +345,7 @@ public class HttpConnection
         if (_server != null)
         {
             boolean retry = false;
+            boolean error = false;
             try
             {
                 _request.setRequestURI(_uri.getRawPath());
@@ -369,7 +370,7 @@ public class HttpConnection
             catch (EofException e)
             {
                 Log.ignore(e);
-                _response=null;
+                error=true;
             }
             catch (ServletException e)
             {
@@ -386,7 +387,7 @@ public class HttpConnection
                         _request.getContinuation().suspend(0);
                     }
                     
-                    if (_response != null) 
+                    if (!error) 
                     {
                         _response.complete();
                         
