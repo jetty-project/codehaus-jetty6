@@ -192,7 +192,7 @@ public class SessionHandler extends WrappedHandler
                 Log.debug("session="+session);
             }
         
-            result=getHandler().handle(target, base_request, response, dispatch);
+            result=getHandler().handle(target, request, response, dispatch);
         }
         catch (RetryRequest r)
         {
