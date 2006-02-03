@@ -32,9 +32,6 @@ var MembershipHandler =
        $('join').className='hidden';
        $('joined').className='';
        $('phrase').focus();
-       
-       // start polling for events
-       ajaxEngine.sendRequest('getEvents');
      }
      
      Behaviour.apply();
@@ -109,6 +106,9 @@ function initPage()
   ajaxEngine.registerAjaxObject('left', MembershipHandler);
   ajaxEngine.registerAjaxObject('event', EventHandler);
   ajaxEngine.registerAjaxObject('poll', PollHandler);
+  
+  // start polling for events
+  ajaxEngine.sendRequest('getEvents');
   
 }
 

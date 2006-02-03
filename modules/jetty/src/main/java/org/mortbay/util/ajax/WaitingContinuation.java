@@ -19,11 +19,16 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
 {
     Object _mutex;
     Object _object;
-    boolean _waited;
     boolean _new=true;
-    boolean _pending=true;
+    boolean _resumed=false;
+    boolean _pending=false;
+
+    public WaitingContinuation()
+    {
+        _mutex=this;
+    }
     
-    WaitingContinuation(Object mutex)
+    public WaitingContinuation(Object mutex)
     {
         _mutex=mutex==null?this:mutex;
     }
@@ -32,7 +37,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
     {
         synchronized (_mutex)
         {
-            _pending=false;
+            _resumed=true;
             _mutex.notify();
         }
     }
@@ -50,11 +55,12 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
         synchronized (_mutex)
         {
             _new=false;
+            _pending=true;
+            boolean result;
             try
             {
-                if (!_waited && _pending && timeout>0)
+                if (!_resumed && timeout>0)
                 {
-                    _waited=true;
                     _mutex.wait(timeout);
                 }
             }
@@ -62,9 +68,14 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             {
                 e.printStackTrace();
             }
-            boolean timed_out=_pending;
-            _pending=false;
-            return timed_out;
+            finally
+            {
+                result=_resumed;
+                _resumed=false;
+                _pending=false;
+            }
+            
+            return result;
         }
     }
     
@@ -81,6 +92,18 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
     public void setObject(Object object)
     {
         _object = object;
+    }
+
+    public Object getMutex()
+    {
+        return _mutex;
+    }
+
+    public void setMutex(Object mutex)
+    {
+        if (!_new && _mutex!=this)
+            throw new IllegalStateException();
+        _mutex = mutex;
     }
 
 }

@@ -24,7 +24,9 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.jetty.AbstractConnector;
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.log.Log;
@@ -143,22 +145,15 @@ public class SocketConnector extends AbstractConnector
                 while (!isClosed())
                     _connection.handle();
             }
-            catch(RetryRequest e)
+            catch (EofException e)
             {
-                throw e;
+                Log.debug("EOF", e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
             }
-            catch(IOException e)
+            catch (HttpException e)
             {
-                // TODO - better than this
-                if ("BAD".equals(e.getMessage()))
-                {
-                    Log.warn("BAD Request");
-                    Log.debug("BAD",e);
-                }
-                else if ("EOF".equals(e.getMessage()))
-                    Log.debug("EOF",e);
-                else
-                    Log.warn("IO",e);
+                Log.debug("BAD", e);
                 try{close();}
                 catch(IOException e2){Log.ignore(e2);}
             }

@@ -75,6 +75,12 @@ public class URLEncodedTest extends junit.framework.TestCase
         assertEquals("encoded param size",1, url_encoded.size());
         assertEquals("encoded encode","Name4=Value+4%21", url_encoded.encode());
         assertEquals("encoded get","Value 4!", url_encoded.getString("Name4"));
+
+        url_encoded.clear();
+        url_encoded.decode("Name4=Value%2B4%21");
+        assertEquals("encoded param size",1, url_encoded.size());
+        assertEquals("encoded encode","Name4=Value%2B4%21", url_encoded.encode());
+        assertEquals("encoded get","Value+4!", url_encoded.getString("Name4"));
         
         url_encoded.clear();
         url_encoded.decode("Name4=Value+4%21%20%214");
