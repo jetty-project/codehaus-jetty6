@@ -1,3 +1,4 @@
+    + Fixed dispatch of wrapped requests.
     + Fixed double flush of short content.
     + Added request log.
     + Added CGI servlet.
