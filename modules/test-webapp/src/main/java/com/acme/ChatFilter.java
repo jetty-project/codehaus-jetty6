@@ -27,9 +27,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.tagext.IterationTag;
 
-import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.AjaxFilter;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -64,54 +62,51 @@ public class ChatFilter extends AjaxFilter
     /* 
      * @see org.mortbay.ajax.AjaxFilter#handle(java.lang.String, javax.servlet.http.HttpServletRequest, org.mortbay.ajax.AjaxFilter.AjaxResponse)
      */
-    public void handle(String method, HttpServletRequest request, AjaxResponse response)
+    public void handle(String method, String message, HttpServletRequest request, AjaxResponse response)
     {
         if ("join".equals(method))
-            doJoinChat(request,response);
+            doJoinChat(message,request, response);
         else if ("chat".equals(method))
-            doChat(request,response);
-        else if ("getEvents".equals(method))
-            doGetEvents(request,response);
+            doChat(message,request,response);
+        else if ("poll".equals(method))
+            doPoll(request,response);
         else if ("leave".equals(method))
-            doLeaveChat(request,response);
+            doLeaveChat(message,request,response);
         else
-            super.handle(method, request, response);   
+            super.handle(method, message,request, response);   
     }
 
     /* ------------------------------------------------------------ */
-    private void doJoinChat(HttpServletRequest request, AjaxResponse response)
+    private void doJoinChat(String name, HttpServletRequest request, AjaxResponse response)
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
-        String name=request.getParameter("name");
         if (name==null || name.length()==0)
             name="Newbie";
         Member member=null;
         
         synchronized (mutex)
         {
-            if (chatroom.containsKey(id))
-            {
-                // exists already, so just update name
-                member=(Member)chatroom.get(id);
-                if (!name.equals(member.getName()))
-                    member.rename(name);
-            }
-            else
+            member=(Member)chatroom.get(id);
+            if (member==null)
             {
                 member = new Member(session,name);
                 chatroom.put(session.getId(),member);
-                sendEvent(member,"has joined the chat",true);
             }
+            else
+                member.setName(name);
             
+            // exists already, so just update name
+            sendEvent(member,"has joined the chat",true);
+            
+            //response.objectResponse("joined", "<joined from=\""+name+"\"/>");
             sendMembers(response);
-            response.objectResponse("joined", "<ok/>");
         }
     }
     
 
     /* ------------------------------------------------------------ */
-    private void doLeaveChat(HttpServletRequest request, AjaxResponse response)
+    private void doLeaveChat(String name, HttpServletRequest request, AjaxResponse response)
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
@@ -127,63 +122,60 @@ public class ChatFilter extends AjaxFilter
             else
                 sendEvent(member,"has left the chat",true);
             chatroom.remove(id);
+            member.setName(null);
         }
+        //response.objectResponse("left", "<left from=\""+member.getName()+"\"/>");
         sendMembers(response);
-        response.objectResponse("left", "<ok/>");
     }
 
 
     /* ------------------------------------------------------------ */
-    private void doChat(HttpServletRequest request, AjaxResponse response)
+    private void doChat(String text, HttpServletRequest request, AjaxResponse response)
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
-        String text = request.getParameter("text");
         
         Member member=null;
         synchronized (mutex)
         {
             member = (Member)chatroom.get(id);
+            
+            if (member==null)
+                return;
+            sendEvent(member, text, false);
         }
-        
-        if (member==null)
-            return;
-        sendEvent(member, text, false);
-        
     }
 
 
     /* ------------------------------------------------------------ */
-    private void doGetEvents(HttpServletRequest request, AjaxResponse response)
+    private void doPoll(HttpServletRequest request, AjaxResponse response)
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
-        long timeoutMS = 10000L; // TODO configure.
+        long timeoutMS = 10000L; 
+        if (request.getParameter("timeout")!=null)
+            timeoutMS=Long.parseLong(request.getParameter("timeout"));
         
         Member member=null;
         synchronized (mutex)
         {
             member = (Member)chatroom.get(id);
-        }
-        boolean alerts=false;
-        if (member!=null)
-        {
+            if (member==null)
+            {
+                member = new Member(session,null);
+                chatroom.put(session.getId(),member);
+            }
             // Get an existing Continuation or create a new one if there are no events.
             if (!member.hasEvents())
             {
                 Continuation continuation = ContinuationSupport.getContinuation(request, mutex);
-                if (continuation.isNew())
-                    member.addContinuation(continuation);
+                member.setContinuation(continuation);
                 continuation.suspend(timeoutMS);
             }
+            member.setContinuation(null);
             
-            alerts=member.sendEvents(response);
-            
-            if (alerts)
+            if (member.sendEvents(response))
                 sendMembers(response);
-            
-            // Signal for a new poll
-            response.objectResponse("poll", "<ok/>");
         }
         
     }
@@ -233,6 +225,8 @@ public class ChatFilter extends AjaxFilter
             while (iter.hasNext())
             {
                 Member m = (Member)iter.next();
+                if (m.getName()==null)
+                    continue;
                 buf.append("<li>");
                 buf.append(encodeText(m.getName()));
                 buf.append("</li>\n");
@@ -263,7 +257,7 @@ public class ChatFilter extends AjaxFilter
         
         public String toString()
         {
-            return "<event from=\""+_from+"\" alert=\""+_alert+"\">"+encodeText(_text)+"</event>";
+            return "<chat from=\""+_from+"\" alert=\""+_alert+"\">"+encodeText(_text)+"</chat>";
         }
         
         
@@ -275,7 +269,7 @@ public class ChatFilter extends AjaxFilter
         private HttpSession _session;
         private String _name;
         private List _events = new ArrayList();
-        private Set _continuations=new HashSet();
+        private Continuation _continuation;
         
         Member(HttpSession session, String name)
         {
@@ -315,9 +309,11 @@ public class ChatFilter extends AjaxFilter
         /**
          * @param continuation The continuation to set.
          */
-        public void addContinuation(Continuation continuation)
+        public void setContinuation(Continuation continuation)
         {
-            _continuations.add(continuation);
+            if (continuation!=null && _continuation!=null && _continuation!=continuation)
+                _continuation.resume();
+            _continuation=continuation;
         }
         
         /* ------------------------------------------------------------ */
@@ -325,14 +321,11 @@ public class ChatFilter extends AjaxFilter
         {
             synchronized (this)
             {
+                if (_name==null)
+                    return;
                 _events.add(event);
-                Iterator iter = _continuations.iterator();
-                while (iter.hasNext())
-                {
-                    Continuation continuation = (Continuation)iter.next();
-                    continuation.resume();
-                }
-                // _continuations.clear();
+                if (_continuation!=null)
+                    _continuation.resume();
             }
         }
 
@@ -347,7 +340,8 @@ public class ChatFilter extends AjaxFilter
         {
             String oldName = getName();
             setName(name);
-            ChatFilter.this.sendEvent(this,oldName+" has been renamed to "+name,true);
+            if (oldName!=null)
+                ChatFilter.this.sendEvent(this,oldName+" has been renamed to "+name,true);
         }
 
         /* ------------------------------------------------------------ */
@@ -359,7 +353,7 @@ public class ChatFilter extends AjaxFilter
                 for (int i=0;i<_events.size();i++)
                 {
                     Event event = (Event)_events.get(i);
-                    response.objectResponse("event", event.toString());
+                    response.objectResponse("chat", event.toString());
                     alerts |= event.isAlert();
                 }
                 _events.clear();
