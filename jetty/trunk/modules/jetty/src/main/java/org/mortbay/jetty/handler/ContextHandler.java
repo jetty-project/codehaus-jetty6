@@ -533,7 +533,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
             // Handle the request
             try
             {
-                handled = getHandler().handle(target, base_request, response, dispatch);
+                handled = getHandler().handle(target, request, response, dispatch);
             }
             finally
             {
