@@ -715,7 +715,7 @@ public class SelectChannelConnector extends AbstractConnector
                         _selectSet.scheduleTimeout(continuation,timeout);
                         _selectSet.wakeup();
                     }
-                    else
+                    else 
                         undispatch();
                 }
             }

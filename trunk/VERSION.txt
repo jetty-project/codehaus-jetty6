@@ -1,5 +1,6 @@
 
 jetty-6.0.0beta9 8/2/2006
+    + PathMap for direct context mapping.
     + Refactored chat demo and upgraded prototype.js
     + Continuation cleanup
     + Fixed unraw decoding of query string

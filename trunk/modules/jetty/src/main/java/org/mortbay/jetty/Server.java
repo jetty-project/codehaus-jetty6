@@ -20,19 +20,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 
 /* ------------------------------------------------------------ */
@@ -55,6 +59,7 @@ public class Server extends HandlerCollection
     private Handler _notFoundHandler;
     private Container _container=new Container();
     private RequestLog _requestLog;
+    private PathMap _contextMap;
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -119,6 +124,62 @@ public class Server extends HandlerCollection
         }
     }
     
+    
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.handler.HandlerCollection#setHandlers(org.mortbay.jetty.Handler[])
+     */
+    public void setHandlers(Handler[] handlers)
+    {
+        _contextMap=null;
+        super.setHandlers(handlers);
+        
+        if (handlers!=null && handlers.length>0)
+        {
+            PathMap contextMap = new PathMap();
+            List list = new ArrayList();
+            for (int i=0;i<handlers.length;i++)
+            {
+                list.clear();
+                expandHandler(handlers[i], list);
+                
+                Iterator iter = list.iterator();
+                while(iter.hasNext())
+                {
+                    Handler handler = (Handler)iter.next();
+                    
+                    if (handler instanceof ContextHandler)
+                    {
+                        String contextPath=((ContextHandler)handler).getContextPath();
+                        
+                        if (contextPath==null ||
+                            contextPath.indexOf(',')>=0 ||
+                            contextPath.startsWith("*"))
+                            throw new IllegalArgumentException ("Illegal context spec:"+contextPath);
+
+                        if(!contextPath.startsWith("/"))
+                            contextPath='/'+contextPath;
+
+                        if (contextPath.length()>1)
+                        {
+                            if (contextPath.endsWith("/"))
+                                contextPath+="*";
+                            else if (!contextPath.endsWith("/*"))
+                                contextPath+="/*";
+                        }
+                        
+                        Object contexts=contextMap.get(contextPath);
+                        contexts = LazyList.add(contexts, handlers[i]);
+                        contextMap.put(contextPath, contexts);
+                    }
+                }
+            }
+            _contextMap=contextMap;
+            System.err.println(_contextMap);
+        }
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the threadPool.
@@ -242,11 +303,20 @@ public class Server extends HandlerCollection
         }
         else
         {
+            if (_contextMap!=null && target!=null && target.startsWith("/"))
+            {
+                Object contexts = _contextMap.getLazyMatches(target);
+                for (int i=0; i<LazyList.size(contexts); i++)
+                    if (((Handler)((Map.Entry)LazyList.get(contexts, i)).getValue()).handle(target,request, response, dispatch))
+                        return true;
+            }
+            
             for (int i=0;i<handlers.length;i++)
             {
                 if (handlers[i].handle(target,request, response, dispatch))
                     return true;
             }
+            
         }    
         
         synchronized(this)
