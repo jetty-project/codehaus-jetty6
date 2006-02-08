@@ -142,7 +142,7 @@ public class HandlerCollection extends AbstractHandler implements Handler
      */
     public void setHandler(Handler handler)
     {
-        _handlers = new Handler[]{handler};
+        setHandlers(new Handler[]{handler});
     }    
 
     /* ------------------------------------------------------------ */
