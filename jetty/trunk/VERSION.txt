@@ -1,5 +1,5 @@
 
-jetty-6.0.0beta8 4/2/2006
+jetty-6.0.0beta9 8/2/2006
     + Refactored chat demo and upgraded prototype.js
     + Continuation cleanup
     + Fixed unraw decoding of query string
