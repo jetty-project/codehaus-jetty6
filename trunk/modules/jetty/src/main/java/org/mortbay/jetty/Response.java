@@ -700,7 +700,7 @@ public class Response implements HttpServletResponse
             return;
 
         _locale = locale;
-        _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,locale.toString().replace('_','-'));
+        _connection.getResponseFields().put(HttpHeaders.CONTENT_LANGUAGE_BUFFER,locale.toString().replace('_','-'));
 
         if (this._outputState!=0 )
             return;
