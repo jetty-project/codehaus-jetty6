@@ -266,9 +266,9 @@ public class PathMap extends HashMap implements Externalizable
     /** Get all entries matched by the path.
      * Best match first.
      * @param path Path to match
-     * @return List of Map.Entry instances key=pathSpec
+     * @return LazyList of Map.Entry instances key=pathSpec
      */
-    public List getMatches(String path)
+    public Object getLazyMatches(String path)
     {        
         Map.Entry entry;
         Object entries=null;
@@ -321,9 +321,19 @@ public class PathMap extends HashMap implements Externalizable
             entries=LazyList.add(entries,_default);
         }
         
-        return LazyList.getList(entries);
+        return entries;
     }
-
+    
+    /* --------------------------------------------------------------- */
+    /** Get all entries matched by the path.
+     * Best match first.
+     * @param path Path to match
+     * @return List of Map.Entry instances key=pathSpec
+     */
+    public List getMatches(String path)
+    {       
+        return LazyList.getList(getLazyMatches(path));
+    }
 
     /* --------------------------------------------------------------- */  
     public synchronized Object remove(Object pathSpec)
