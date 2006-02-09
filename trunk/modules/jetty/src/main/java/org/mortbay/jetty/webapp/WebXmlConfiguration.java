@@ -652,7 +652,7 @@ public class WebXmlConfiguration implements Configuration
         String uri=node.getString("taglib-uri",false,true);
         String location=node.getString("taglib-location",false,true);
 
-        // TODO getWebAppHandler().setResourceAlias(uri,location);
+        getWebAppContext().setResourceAlias(uri,location);
     }
 
     /* ------------------------------------------------------------ */
