@@ -836,26 +836,21 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized (this)
             {
+                boolean resumed=_resumed;
+                _resumed=false;
                 _new = false;
-                
-                if (_pending)
-                { 
-                    _pending=false;
-                    return _resumed;
-                }
-                
-                if (timeout > 0)
+                if (!_pending && !resumed && timeout > 0)
                 {
                     _pending=true;
-                    _resumed=false;
                     _timeout = timeout;
                     throw new RetryRequest();
                 }
+                _pending=false;
+                
+                return resumed;
             }
-   
-            return _resumed;
-        }
-
+        } 
+        
         public void resume()
         {
             synchronized (this)
