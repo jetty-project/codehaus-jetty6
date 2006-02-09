@@ -813,6 +813,61 @@ public class ContextHandler extends WrappedHandler implements Attributes
         return encoding;
     }
     
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public Resource getResource(String path) throws MalformedURLException
+    {
+        if (path==null || !path.startsWith("/"))
+            throw new MalformedURLException(path);
+        
+        if (_baseResource==null)
+            return null;
+
+        try
+        {
+            path=URIUtil.canonicalPath(path);
+            Resource resource=_baseResource.addPath(path);
+            return resource;
+        }
+        catch(Exception e)
+        {
+            Log.ignore(e);
+        }
+                    
+        return null;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public Set getResourcePaths(String path)
+    {           
+        try
+        {
+            path=URIUtil.canonicalPath(path);
+            Resource resource=getResource(path);
+            
+            if (resource!=null && resource.exists())
+            {
+                String[] l=resource.list();
+                if (l!=null)
+                {
+                    HashSet set = new HashSet();
+                    for(int i=0;i<l.length;i++)
+                        set.add(path+"/"+l[i]);
+                    return set;
+                }   
+            }
+        }
+        catch(Exception e)
+        {
+            Log.ignore(e);
+        }
+        return Collections.EMPTY_SET;
+    }
+
     
     /* ------------------------------------------------------------ */
     /** Context.
@@ -960,29 +1015,15 @@ public class ContextHandler extends WrappedHandler implements Attributes
 
         /* ------------------------------------------------------------ */
         /* 
-         * @see javax.servlet.ServletContext#getResource(java.lang.String)
          */
         public URL getResource(String path) throws MalformedURLException
         {
-            if (path==null || !path.startsWith("/"))
-                throw new MalformedURLException(path);
-            
-            if (_baseResource==null)
-                return null;
-            
-            try
-            {
-                Resource resource=_baseResource.addPath(URIUtil.canonicalPath(path));
-                if (resource.exists())
-                    return resource.getURL();
-            }
-            catch(Exception e)
-            {
-                Log.ignore(e);
-            }
+            Resource resource=ContextHandler.this.getResource(path);
+            if (resource!=null && resource.exists())
+                return resource.getURL();
             return null;
         }
-
+        
         /* ------------------------------------------------------------ */
         /* 
          * @see javax.servlet.ServletContext#getResourceAsStream(java.lang.String)
@@ -1009,32 +1050,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public Set getResourcePaths(String path)
         {            
-            if (path==null || !path.startsWith("/"))
-                return Collections.EMPTY_SET;
-            
-            if (_baseResource==null)
-                return null;
-            
-            try
-            {
-                Resource resource=_baseResource.addPath(URIUtil.canonicalPath(path));
-                if (resource.exists())
-                {
-                    String[] l=resource.list();
-                    if (l!=null)
-                    {
-                        HashSet set = new HashSet();
-                        for(int i=0;i<l.length;i++)
-                            set.add(path+"/"+l[i]);
-                        return set;
-                    }   
-                }
-            }
-            catch(Exception e)
-            {
-                Log.ignore(e);
-            }
-            return Collections.EMPTY_SET;
+            return ContextHandler.this.getResourcePaths(path);
         }
 
         /* ------------------------------------------------------------ */
