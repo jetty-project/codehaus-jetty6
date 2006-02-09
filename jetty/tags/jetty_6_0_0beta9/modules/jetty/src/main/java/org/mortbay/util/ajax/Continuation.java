@@ -27,6 +27,12 @@ package org.mortbay.util.ajax;
  * Non-blocking continuation can abort the current request and arrange for it 
  * to be retried when {@link #resume()} is called or the timeout expires.
  * 
+ * In order to supprt non-blocking continuations, it is important that
+ * all actions taken by a filter or servlet before a call to 
+ * {@link #suspend(long)} are either idempotent (can be retried) or
+ * are made conditional on {@link #isPending} so they are not performed on 
+ * retried requests.
+ * 
  * With the appropriate HTTP Connector, this allows threadless waiting
  * for events (see {@link org.mortbay.jetty.nio.SelectChannelConnector}).
  * 
@@ -65,7 +71,8 @@ public interface Continuation
     /** Get the pending status?
      * A continuation is pending while the handling of a call to suspend has not completed.
      * For blocking continuations, pending is true only during the call to {@link #suspend(long)}.
-     * For non-blocking continuations, pending is true until a second call to {@link #suspend(long)}.
+     * For non-blocking continuations, pending is true until a second call to {@link #suspend(long)}, 
+     * thus this method can be used to determine if a request is being retried.
      * @return True if the continuation is handling a call to suspend.
      */
     public boolean isPending();
