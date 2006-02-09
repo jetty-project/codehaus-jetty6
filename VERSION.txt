@@ -1,5 +1,5 @@
 
-jetty-6.0.0beta9 8/2/2006
+jetty-6.0.0beta9 9/2/2006
     + PathMap for direct context mapping.
     + Refactored chat demo and upgraded prototype.js
     + Continuation cleanup
@@ -11,6 +11,7 @@ jetty-6.0.0beta9 8/2/2006
     + Force a tempdir to be set.
     + Force jasper scratch dir.
     + fixed setLocale bug sf1426940 
+    + Added TLD tag listener handling.
 
 jetty-6.0.0beta8 24/1/2006
     + fixed dispatch of new session problem. sf:1407090

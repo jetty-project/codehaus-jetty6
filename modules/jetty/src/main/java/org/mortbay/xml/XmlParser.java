@@ -25,11 +25,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
+import java.util.StringTokenizer;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.mortbay.log.Log;
+import org.mortbay.util.LazyList;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -43,7 +45,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * XML Parser wrapper. This class wraps any standard JAXP1.1 parser with convieniant error and
  * entity handlers and a mini dom-like document tree.
  * <P>
- * By default, the parser is created as a validating parser only if xercers is present. This can be 
+ * By default, the parser is created as a validating parser only if xercers is present. This can be
  * configured by setting the "org.mortbay.xml.XmlParser.Validating" system property.
  * 
  * @author Greg Wilkins (gregw)
@@ -55,6 +57,8 @@ public class XmlParser
     private SAXParser _parser;
     private Map _observerMap;
     private Stack _observers = new Stack();
+    private String _xpath;
+    private Object _xpaths;
 
     /* ------------------------------------------------------------ */
     /**
@@ -65,10 +69,10 @@ public class XmlParser
         try
         {
             SAXParserFactory factory = SAXParserFactory.newInstance();
-            
-            boolean validating_dft=factory.getClass().toString().startsWith("org.apache.xerces.");
-            String validating_prop = System.getProperty("org.mortbay.xml.XmlParser.Validating", validating_dft?"true":"false");
-            boolean notValidating=Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating"); // deprecated!
+
+            boolean validating_dft = factory.getClass().toString().startsWith("org.apache.xerces.");
+            String validating_prop = System.getProperty("org.mortbay.xml.XmlParser.Validating", validating_dft ? "true" : "false");
+            boolean notValidating = Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating"); // deprecated!
             boolean validating = !notValidating && Boolean.valueOf(validating_prop).booleanValue();
             factory.setValidating(validating);
             _parser = factory.newSAXParser();
@@ -83,9 +87,9 @@ public class XmlParser
                 Log.ignore(e);
             }
 
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation",validating);
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces",validating);
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes",validating);
+            _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation", validating);
+            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces", validating);
+            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", validating);
         }
         catch (Exception e)
         {
@@ -108,8 +112,7 @@ public class XmlParser
             try
             {
                 if (validating)
-                        _parser.getXMLReader().setFeature(
-                                "http://apache.org/xml/features/validation/schema", validating);
+                    _parser.getXMLReader().setFeature("http://apache.org/xml/features/validation/schema", validating);
             }
             catch (Exception e)
             {
@@ -121,8 +124,7 @@ public class XmlParser
 
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation", validating);
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces", validating);
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes",
-                    validating);
+            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", validating);
         }
         catch (Exception e)
         {
@@ -139,7 +141,33 @@ public class XmlParser
      */
     public synchronized void redirectEntity(String name, URL entity)
     {
-        if (entity != null) _redirectMap.put(name, entity);
+        if (entity != null)
+            _redirectMap.put(name, entity);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * 
+     * @return Returns the xpath.
+     */
+    public String getXpath()
+    {
+        return _xpath;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set an XPath A very simple subset of xpath is supported to select a partial tree. Currently
+     * only path like "/node1/nodeA | /node1/nodeB" are supported.
+     * 
+     * @param xpath The xpath to set.
+     */
+    public void setXpath(String xpath)
+    {
+        _xpath = xpath;
+        StringTokenizer tok = new StringTokenizer(xpath, "| ");
+        while (tok.hasMoreTokens())
+            _xpaths = LazyList.add(_xpaths, tok.nextToken());
     }
 
     /* ------------------------------------------------------------ */
@@ -153,7 +181,8 @@ public class XmlParser
      */
     public synchronized void addContentHandler(String trigger, ContentHandler observer)
     {
-        if (_observerMap == null) _observerMap = new HashMap();
+        if (_observerMap == null)
+            _observerMap = new HashMap();
         _observerMap.put(trigger, observer);
     }
 
@@ -166,9 +195,10 @@ public class XmlParser
         reader.setErrorHandler(handler);
         reader.setEntityResolver(handler);
         if (Log.isDebugEnabled())
-                Log.debug("parsing: sid=" + source.getSystemId() + ",pid=" + source.getPublicId());
+            Log.debug("parsing: sid=" + source.getSystemId() + ",pid=" + source.getPublicId());
         _parser.parse(source, handler);
-        if (handler._error != null) throw handler._error;
+        if (handler._error != null)
+            throw handler._error;
         Node doc = (Node) handler._top.get(0);
         handler.clear();
         return doc;
@@ -180,7 +210,8 @@ public class XmlParser
      */
     public synchronized Node parse(String url) throws IOException, SAXException
     {
-        if (Log.isDebugEnabled()) Log.debug("parse: " + url);
+        if (Log.isDebugEnabled())
+            Log.debug("parse: " + url);
         return parse(new InputSource(url));
     }
 
@@ -190,7 +221,8 @@ public class XmlParser
      */
     public synchronized Node parse(File file) throws IOException, SAXException
     {
-        if (Log.isDebugEnabled()) Log.debug("parse: " + file);
+        if (Log.isDebugEnabled())
+            Log.debug("parse: " + file);
         return parse(new InputSource(file.toURL().toString()));
     }
 
@@ -206,7 +238,8 @@ public class XmlParser
         reader.setErrorHandler(handler);
         reader.setEntityResolver(handler);
         _parser.parse(new InputSource(in), handler);
-        if (handler._error != null) throw handler._error;
+        if (handler._error != null)
+            throw handler._error;
         Node doc = (Node) handler._top.get(0);
         handler.clear();
         return doc;
@@ -214,11 +247,45 @@ public class XmlParser
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    private class NoopHandler extends DefaultHandler
+    {
+        Handler _next;
+        int _depth;
+
+        NoopHandler(Handler next)
+        {
+            this._next = next;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException
+        {
+            _depth++;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void endElement(String uri, String localName, String qName) throws SAXException
+        {
+            if (_depth == 0)
+                _parser.getXMLReader().setContentHandler(_next);
+            else
+                _depth--;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private class Handler extends DefaultHandler
     {
         Node _top = new Node(null, null, null);
         SAXParseException _error;
         private Node _context = _top;
+        private NoopHandler _noop;
+
+        Handler()
+        {
+            _noop = new NoopHandler(this);
+        }
 
         /* ------------------------------------------------------------ */
         void clear()
@@ -229,22 +296,48 @@ public class XmlParser
         }
 
         /* ------------------------------------------------------------ */
-        public void startElement(String uri, String localName, String qName, Attributes attrs)
-                throws SAXException
+        public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException
         {
             String name = (uri == null || uri.equals("")) ? qName : localName;
             Node node = new Node(_context, name, attrs);
-            _context.add(node);
-            _context = node;
+            
+
+            // check if the node matches any xpaths set?
+            if (_xpaths != null)
+            {
+                String path = node.getPath();
+                boolean match = false;
+                for (int i = LazyList.size(_xpaths); !match && i-- > 0;)
+                {
+                    String xpath = (String) LazyList.get(_xpaths, i);
+
+                    match = path.equals(xpath) || xpath.startsWith(path) && xpath.length() > path.length() && xpath.charAt(path.length()) == '/';
+                }
+
+                if (match)
+                {
+                    _context.add(node);
+                    _context = node;
+                }
+                else
+                {
+                    _parser.getXMLReader().setContentHandler(_noop);
+                }
+            }
+            else
+            {
+                _context.add(node);
+                _context = node;
+            }
 
             ContentHandler observer = null;
-            if (_observerMap != null) observer = (ContentHandler) _observerMap.get(name);
+            if (_observerMap != null)
+                observer = (ContentHandler) _observerMap.get(name);
             _observers.push(observer);
 
             for (int i = 0; i < _observers.size(); i++)
                 if (_observers.get(i) != null)
-                        ((ContentHandler) _observers.get(i)).startElement(uri, localName, qName,
-                                attrs);
+                    ((ContentHandler) _observers.get(i)).startElement(uri, localName, qName, attrs);
         }
 
         /* ------------------------------------------------------------ */
@@ -253,7 +346,7 @@ public class XmlParser
             _context = _context._parent;
             for (int i = 0; i < _observers.size(); i++)
                 if (_observers.get(i) != null)
-                        ((ContentHandler) _observers.get(i)).endElement(uri, localName, qName);
+                    ((ContentHandler) _observers.get(i)).endElement(uri, localName, qName);
             _observers.pop();
         }
 
@@ -262,7 +355,7 @@ public class XmlParser
         {
             for (int i = 0; i < _observers.size(); i++)
                 if (_observers.get(i) != null)
-                        ((ContentHandler) _observers.get(i)).ignorableWhitespace(buf, offset, len);
+                    ((ContentHandler) _observers.get(i)).ignorableWhitespace(buf, offset, len);
         }
 
         /* ------------------------------------------------------------ */
@@ -271,7 +364,7 @@ public class XmlParser
             _context.add(new String(buf, offset, len));
             for (int i = 0; i < _observers.size(); i++)
                 if (_observers.get(i) != null)
-                        ((ContentHandler) _observers.get(i)).characters(buf, offset, len);
+                    ((ContentHandler) _observers.get(i)).characters(buf, offset, len);
         }
 
         /* ------------------------------------------------------------ */
@@ -285,7 +378,8 @@ public class XmlParser
         public void error(SAXParseException ex) throws SAXException
         {
             // Save error and continue to report other errors
-            if (_error == null) _error = ex;
+            if (_error == null)
+                _error = ex;
             Log.debug(Log.EXCEPTION, ex);
             Log.warn("ERROR@" + getLocationString(ex) + " : " + ex.toString());
         }
@@ -302,26 +396,29 @@ public class XmlParser
         /* ------------------------------------------------------------ */
         private String getLocationString(SAXParseException ex)
         {
-            return ex.getSystemId() + " line:" + ex.getLineNumber() + " col:"
-                    + ex.getColumnNumber();
+            return ex.getSystemId() + " line:" + ex.getLineNumber() + " col:" + ex.getColumnNumber();
         }
 
         /* ------------------------------------------------------------ */
         public InputSource resolveEntity(String pid, String sid)
         {
 
-            if (Log.isDebugEnabled()) Log.debug("resolveEntity(" + pid + ", " + sid + ")");
+            if (Log.isDebugEnabled())
+                Log.debug("resolveEntity(" + pid + ", " + sid + ")");
 
             URL entity = null;
-            if (pid != null) entity = (URL) _redirectMap.get(pid);
-            if (entity == null) entity = (URL) _redirectMap.get(sid);
+            if (pid != null)
+                entity = (URL) _redirectMap.get(pid);
+            if (entity == null)
+                entity = (URL) _redirectMap.get(sid);
             if (entity == null)
             {
                 String dtd = sid;
-                if (dtd.lastIndexOf('/') >= 0) dtd = dtd.substring(dtd.lastIndexOf('/') + 1);
+                if (dtd.lastIndexOf('/') >= 0)
+                    dtd = dtd.substring(dtd.lastIndexOf('/') + 1);
 
                 if (Log.isDebugEnabled())
-                        Log.debug("Can't exact match entity in redirect map, trying " + dtd);
+                    Log.debug("Can't exact match entity in redirect map, trying " + dtd);
                 entity = (URL) _redirectMap.get(dtd);
             }
 
@@ -331,7 +428,7 @@ public class XmlParser
                 {
                     InputStream in = entity.openStream();
                     if (Log.isDebugEnabled())
-                            Log.debug("Redirected entity " + sid + " --> " + entity);
+                        Log.debug("Redirected entity " + sid + " --> " + entity);
                     InputSource is = new InputSource(in);
                     is.setSystemId(sid);
                     return is;
@@ -375,7 +472,7 @@ public class XmlParser
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /**
-     * XML Node. Represents an XML element with optional attributes and ordered _content.
+     * XML Node. Represents an XML element with optional attributes and ordered content.
      */
     public static class Node extends AbstractList
     {
@@ -384,6 +481,7 @@ public class XmlParser
         private String _tag;
         private Attribute[] _attrs;
         private boolean _lastString = false;
+        private String _path;
 
         /* ------------------------------------------------------------ */
         Node(Node parent, String tag, Attributes attrs)
@@ -397,7 +495,8 @@ public class XmlParser
                 for (int i = 0; i < attrs.getLength(); i++)
                 {
                     String name = attrs.getLocalName(i);
-                    if (name == null || name.equals("")) name = attrs.getQName(i);
+                    if (name == null || name.equals(""))
+                        name = attrs.getQName(i);
                     _attrs[i] = new Attribute(name, attrs.getValue(i));
                 }
             }
@@ -413,6 +512,19 @@ public class XmlParser
         public String getTag()
         {
             return _tag;
+        }
+
+        /* ------------------------------------------------------------ */
+        public String getPath()
+        {
+            if (_path == null)
+            {
+                if (getParent() != null && getParent().getTag() != null)
+                    _path = getParent().getPath() + "/" + _tag;
+                else
+                    _path = "/" + _tag;
+            }
+            return _path;
         }
 
         /* ------------------------------------------------------------ */
@@ -443,9 +555,11 @@ public class XmlParser
          */
         public String getAttribute(String name, String dft)
         {
-            if (_attrs == null || name == null) return dft;
+            if (_attrs == null || name == null)
+                return dft;
             for (int i = 0; i < _attrs.length; i++)
-                if (name.equals(_attrs[i].getName())) return _attrs[i].getValue();
+                if (name.equals(_attrs[i].getName()))
+                    return _attrs[i].getValue();
             return dft;
         }
 
@@ -455,19 +569,21 @@ public class XmlParser
          */
         public int size()
         {
-            if (_list != null) return _list.size();
+            if (_list != null)
+                return _list.size();
             return 0;
         }
 
         /* ------------------------------------------------------------ */
         /**
-         * Get the ith child node or _content.
+         * Get the ith child node or content.
          * 
          * @return Node or String.
          */
         public Object get(int i)
         {
-            if (_list != null) return _list.get(i);
+            if (_list != null)
+                return _list.get(i);
             return null;
         }
 
@@ -488,7 +604,8 @@ public class XmlParser
                     if (o instanceof Node)
                     {
                         Node n = (Node) o;
-                        if (tag.equals(n._tag)) return n;
+                        if (tag.equals(n._tag))
+                            return n;
                     }
                 }
             }
@@ -498,7 +615,8 @@ public class XmlParser
         /* ------------------------------------------------------------ */
         public void add(int i, Object o)
         {
-            if (_list == null) _list = new ArrayList();
+            if (_list == null)
+                _list = new ArrayList();
             if (o instanceof String)
             {
                 if (_lastString)
@@ -520,7 +638,8 @@ public class XmlParser
         /* ------------------------------------------------------------ */
         public void clear()
         {
-            if (_list != null) _list.clear();
+            if (_list != null)
+                _list.clear();
             _list = null;
         }
 
@@ -536,9 +655,11 @@ public class XmlParser
         public String getString(String tag, boolean tags, boolean trim)
         {
             Node node = get(tag);
-            if (node == null) return null;
+            if (node == null)
+                return null;
             String s = node.toString(tags);
-            if (s != null && trim) s = s.trim();
+            if (s != null && trim)
+                s = s.trim();
             return s;
         }
 
@@ -573,7 +694,8 @@ public class XmlParser
         public synchronized String toString(boolean tag, boolean trim)
         {
             String s = toString(tag);
-            if (s != null && trim) s = s.trim();
+            if (s != null && trim)
+                s = s.trim();
             return s;
         }
 
@@ -600,18 +722,18 @@ public class XmlParser
 
             if (_list != null)
             {
-                if (tag) buf.append(">");
-
+                if (tag)
+                    buf.append(">");
                 for (int i = 0; i < _list.size(); i++)
                 {
                     Object o = _list.get(i);
-                    if (o == null) continue;
+                    if (o == null)
+                        continue;
                     if (o instanceof Node)
                         ((Node) o).toString(buf, tag);
                     else
                         buf.append(o.toString());
                 }
-
                 if (tag)
                 {
                     buf.append("</");
@@ -619,7 +741,8 @@ public class XmlParser
                     buf.append(">");
                 }
             }
-            else if (tag) buf.append("/>");
+            else if (tag)
+                buf.append("/>");
         }
 
         /* ------------------------------------------------------------ */
@@ -639,14 +762,14 @@ public class XmlParser
                 /* -------------------------------------------------- */
                 public boolean hasNext()
                 {
-                    if (_node != null) return true;
+                    if (_node != null)
+                        return true;
                     while (_list != null && c < _list.size())
                     {
                         Object o = _list.get(c);
                         if (o instanceof Node)
                         {
                             Node n = (Node) o;
-
                             if (tag.equals(n._tag))
                             {
                                 _node = n;
@@ -663,7 +786,8 @@ public class XmlParser
                 {
                     try
                     {
-                        if (hasNext()) return _node;
+                        if (hasNext())
+                            return _node;
                         throw new NoSuchElementException();
                     }
                     finally
@@ -678,7 +802,6 @@ public class XmlParser
                 {
                     throw new UnsupportedOperationException("Not supported");
                 }
-
             };
         }
     }

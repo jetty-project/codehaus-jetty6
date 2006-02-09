@@ -17,10 +17,12 @@ package org.mortbay.jetty.webapp;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.security.PermissionCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -43,6 +45,7 @@ import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.Log;
 import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.TypeUtil;
 
@@ -63,7 +66,13 @@ import org.mortbay.util.TypeUtil;
  */
 public class WebAppContext extends ContextHandler
 {    
-    private String[] _configurationClasses;
+    private static String[] __dftConfigurationClasses =  
+    { 
+        "org.mortbay.jetty.webapp.WebXmlConfiguration", 
+        "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
+        "org.mortbay.jetty.webapp.TagLibConfiguration" 
+    } ;
+    private String[] _configurationClasses=__dftConfigurationClasses;
     private Configuration[] _configurations;
     private String _defaultsDescriptor="org/mortbay/jetty/webapp/webdefault.xml";
     private boolean _distributable=false;
@@ -77,8 +86,8 @@ public class WebAppContext extends ContextHandler
     private String[] _serverClasses = new String[]{"-org.mortbay.servlet.","-org.mortbay.jetty.servlet.DefaultServlet","-org.mortbay.util.","-org.mortbay.log.","org.mortbay.", "org.slf4j."};
     private File _tmpDir;
     private String _war;
-
-
+    
+    private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
     
     /* ------------------------------------------------------------ */
@@ -202,6 +211,81 @@ public class WebAppContext extends ContextHandler
         _securityHandler.setServer(server);
         _sessionHandler.setServer(server);
         _servletHandler.setServer(server);
+    }
+    /* ------------------------------------------------------------ */
+    /** Set Resource Alias.
+     * Resource aliases map resource uri's within a context.
+     * They may optionally be used by a handler when looking for
+     * a resource.  
+     * @param alias 
+     * @param uri 
+     */
+    public void setResourceAlias(String alias, String uri)
+    {
+        if (_resourceAliases == null)
+            _resourceAliases= new HashMap(5);
+        _resourceAliases.put(alias, uri);
+    }
+
+    /* ------------------------------------------------------------ */
+    public Map getResourceAliases()
+    {
+        if (_resourceAliases == null)
+            return null;
+        return _resourceAliases;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setResourceAliases(Map map)
+    {
+        _resourceAliases = map;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getResourceAlias(String alias)
+    {
+        if (_resourceAliases == null)
+            return null;
+        return (String)_resourceAliases.get(alias);
+    }
+
+    /* ------------------------------------------------------------ */
+    public String removeResourceAlias(String alias)
+    {
+        if (_resourceAliases == null)
+            return null;
+        return (String)_resourceAliases.remove(alias);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public Resource getResource(String uriInContext) throws MalformedURLException
+    {
+        IOException ioe= null;
+        Resource resource= null;
+        int loop=0;
+        while (uriInContext!=null && loop++<100)
+        {
+            try
+            {
+                resource= super.getResource(uriInContext);
+                if (resource != null && resource.exists())
+                    return resource;
+                
+                uriInContext = getResourceAlias(uriInContext);
+            }
+            catch (IOException e)
+            {
+                Log.ignore(e);
+                if (ioe!=null)
+                    ioe= e;
+            }
+        }
+
+        if (ioe != null && ioe instanceof MalformedURLException)
+            throw (MalformedURLException)ioe;
+
+        return resource;
     }
     
     /* ------------------------------------------------------------ */
@@ -526,7 +610,7 @@ public class WebAppContext extends ContextHandler
         if (_configurations!=null)
             return;
         if (_configurationClasses==null)
-            _configurationClasses=new String[] { "org.mortbay.jetty.webapp.WebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration" } ;
+            _configurationClasses=__dftConfigurationClasses;
         
         _configurations = new Configuration[_configurationClasses.length];
         for (int i=0;i<_configurations.length;i++)
@@ -683,7 +767,17 @@ public class WebAppContext extends ContextHandler
             
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** Add EventListener
+     * Conveniance method that calls {@link #setEventListeners(EventListener[])}
+     * @param listener
+     */
+    public void addEventListener(EventListener listener)
+    {
+        setEventListeners((EventListener[])LazyList.add(getEventListeners(), listener));   
+    }
+
     
     /* ------------------------------------------------------------ */
     /**
