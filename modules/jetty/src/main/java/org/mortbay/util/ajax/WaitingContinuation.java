@@ -103,7 +103,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
     {
         if (!_new && _mutex!=this)
             throw new IllegalStateException();
-        _mutex = mutex;
+        _mutex = mutex==null ? this : mutex; 
     }
 
 }

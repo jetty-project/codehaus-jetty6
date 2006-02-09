@@ -27,11 +27,10 @@ public class ContinuationSupport
 {
     public static Continuation getContinuation(HttpServletRequest request, Object lock)
     {
-        Object c=request.getAttribute("org.mortbay.jetty.ajax.Continuation");
-        Continuation continuation = (Continuation) c;
+        Continuation continuation = (Continuation) request.getAttribute("org.mortbay.jetty.ajax.Continuation");
         if (continuation==null)
             continuation=new WaitingContinuation(lock);
-        else if (continuation instanceof WaitingContinuation && continuation.isNew())
+        else if (continuation instanceof WaitingContinuation && continuation.isNew() && lock!=null)
             ((WaitingContinuation)continuation).setMutex(lock);
         return continuation;
     }
