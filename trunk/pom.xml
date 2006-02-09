@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Servlet Server</name>
-  <version>6.0.0beta9</version>
+  <version>6.0-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -62,8 +62,8 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty_6_0_0beta9</connection>
-    <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags/jetty_6_0_0beta9</developerConnection>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/trunk</developerConnection>
     <url>http://svn.jetty.codehaus.org/jetty/</url>
   </scm>
   <organization>
