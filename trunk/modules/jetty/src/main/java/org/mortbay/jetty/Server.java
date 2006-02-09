@@ -176,7 +176,6 @@ public class Server extends HandlerCollection
                 }
             }
             _contextMap=contextMap;
-            System.err.println(_contextMap);
         }
     }
 
