@@ -46,6 +46,7 @@ public class Dispatcher implements RequestDispatcher
 {
     
     /** Dispatch include attribute names */
+    public final static String __INCLUDE_PREFIX="javax.servlet.include.";
     public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";
     public final static String __INCLUDE_CONTEXT_PATH= "javax.servlet.include.context_path";
     public final static String __INCLUDE_SERVLET_PATH= "javax.servlet.include.servlet_path";
@@ -53,6 +54,7 @@ public class Dispatcher implements RequestDispatcher
     public final static String __INCLUDE_QUERY_STRING= "javax.servlet.include.query_string";
 
     /** Dispatch include attribute names */
+    public final static String __FORWARD_PREFIX="javax.servlet.forward.";
     public final static String __FORWARD_REQUEST_URI= "javax.servlet.forward.request_uri";
     public final static String __FORWARD_CONTEXT_PATH= "javax.servlet.forward.context_path";
     public final static String __FORWARD_SERVLET_PATH= "javax.servlet.forward.servlet_path";
@@ -177,6 +179,8 @@ public class Dispatcher implements RequestDispatcher
                 
                 attr._requestURI=_uri;
                 attr._contextPath=_contextHandler.getContextPath();
+                attr._servletPath=null; // set by ServletHandler
+                attr._pathInfo=_path;
                 attr._query=query;
                 
                 base_request.setAttributes(attr);
@@ -303,6 +307,9 @@ public class Dispatcher implements RequestDispatcher
                 if (key.equals(__FORWARD_CONTEXT_PATH)) return _contextPath;
                 if (key.equals(__FORWARD_QUERY_STRING)) return _query;
             }
+
+            if (key.startsWith(__INCLUDE_PREFIX)) 
+                return null;
             
             return _attr.getAttribute(key);
         }
@@ -313,7 +320,12 @@ public class Dispatcher implements RequestDispatcher
             HashSet set=new HashSet();
             Enumeration e=_attr.getAttributeNames();
             while(e.hasMoreElements())
-                set.add(e.nextElement());
+            {
+                String name=(String)e.nextElement();
+                if (!name.startsWith(__INCLUDE_PREFIX) &&
+                    !name.startsWith(__FORWARD_PREFIX))
+                    set.add(name);
+            }
             
             if (_named==null)
             {
@@ -405,13 +417,13 @@ public class Dispatcher implements RequestDispatcher
             }
             else
             {
-                if (key.equals(__INCLUDE_PATH_INFO))    return null;
-                if (key.equals(__INCLUDE_REQUEST_URI))  return null;
-                if (key.equals(__INCLUDE_SERVLET_PATH)) return null;
-                if (key.equals(__INCLUDE_CONTEXT_PATH)) return null;
-                if (key.equals(__INCLUDE_QUERY_STRING)) return null;
+                if (key.startsWith(__INCLUDE_PREFIX)) 
+                    return null;
             }
 
+            if (key.startsWith(__FORWARD_PREFIX)) 
+                return null;
+            
             return _attr.getAttribute(key);
         }
         
@@ -421,7 +433,12 @@ public class Dispatcher implements RequestDispatcher
             HashSet set=new HashSet();
             Enumeration e=_attr.getAttributeNames();
             while(e.hasMoreElements())
-                set.add(e.nextElement());
+            {
+                String name=(String)e.nextElement();
+                if (!name.startsWith(__INCLUDE_PREFIX) &&
+                    !name.startsWith(__FORWARD_PREFIX))
+                    set.add(name);
+            }
             
             if (_named==null)
             {
@@ -436,14 +453,6 @@ public class Dispatcher implements RequestDispatcher
                     set.add(__INCLUDE_QUERY_STRING);
                 else
                     set.remove(__INCLUDE_QUERY_STRING);
-            }
-            else
-            {
-                set.remove(__INCLUDE_PATH_INFO);
-                set.remove(__INCLUDE_REQUEST_URI);
-                set.remove(__INCLUDE_SERVLET_PATH);
-                set.remove(__INCLUDE_CONTEXT_PATH);
-                set.remove(__INCLUDE_QUERY_STRING);
             }
             
             return Collections.enumeration(set);
