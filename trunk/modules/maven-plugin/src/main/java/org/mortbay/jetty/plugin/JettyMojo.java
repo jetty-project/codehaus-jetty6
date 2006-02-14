@@ -44,6 +44,7 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
+import org.mortbay.jetty.webapp.TagLibConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.management.MBeanContainer;
 
@@ -188,6 +189,7 @@ public class JettyMojo extends AbstractMojo
     public static SelectChannelConnector DEFAULT_CONNECTOR = new SelectChannelConnector();
     public static int DEFAULT_PORT = 8080;
     public static long DEFAULT_MAX_IDLE_TIME = 30000L;
+    public Configuration[] configurations = {null, new JettyWebXmlConfiguration(), new TagLibConfiguration()};
    
 
     
@@ -464,6 +466,7 @@ public class JettyMojo extends AbstractMojo
             webapp.setTempDirectory(getTmpDirectory());
             
             //include any other ContextHandlers that the user has configured in their project's pom
+            //TODO remove this as unnecessary?
             Handler[] handlers = new Handler[(getContextHandlers()!=null?getContextHandlers().length:0)+2];   
             handlers[0] = webapp;
             for (int i=0; (getContextHandlers()!=null && i < getContextHandlers().length); i++)
@@ -584,73 +587,42 @@ public class JettyMojo extends AbstractMojo
         JettyMavenConfiguration mavenConfig = new JettyMavenConfiguration();
         mavenConfig.setClassPathConfiguration (getWebAppSourceDirectory(), classPathFiles);
         mavenConfig.setWebXml (webXmlFile);
-        mavenConfig.setLog (getLog());           
-        webapp.setConfigurations(new Configuration[]{mavenConfig, new JettyWebXmlConfiguration()});
+        mavenConfig.setLog (getLog());       
+        configurations[0] = mavenConfig;       
+        webapp.setConfigurations(configurations);
         return webapp;
     }
     
     
-    private List getLibFiles ()
+    private List getDependencyFiles()
     {
-    	List libFiles = new ArrayList();
-    	for ( Iterator iter = project.getArtifacts().iterator(); iter.hasNext(); )
-    	{
-    		Artifact artifact = (Artifact) iter.next();
-    		
-    		// Include runtime and compile time libraries
-    		if (!Artifact.SCOPE_TEST.equals( artifact.getScope()) )
-    		{
-                File artifactFile = artifact.getFile();
-                if (artifactFile.getName().endsWith("jar"))
-    			{
-    				libFiles.add(artifactFile);
-    			}
-    			else
-    			{
-    				getLog().debug( "Looking for jar files, skipping artifact " + artifactFile.getName() + " for WEB-INF" );
-    			}
-    		}
-    	}
-    	
-    	return libFiles;	
+        List dependencyFiles = new ArrayList();
+        for ( Iterator iter = project.getArtifacts().iterator(); iter.hasNext(); )
+        {
+            Artifact artifact = (Artifact) iter.next();
+            
+            // Include runtime and compile time libraries
+            if (!Artifact.SCOPE_TEST.equals( artifact.getScope()) )
+            {
+                dependencyFiles.add(artifact.getFile());
+                getLog().debug( "Adding artifact " + artifact.getFile().getName() + " for WEB-INF/lib " );   
+            }
+        }
+        return dependencyFiles;  
     }
     
-    private List getTldFiles ()
-    {
-    	List tldFiles = new ArrayList();
-    	for ( Iterator iter = getProject().getArtifacts().iterator(); iter.hasNext(); )
-    	{
-    		Artifact artifact = (Artifact) iter.next();
-    		
-    		// Include runtime and compile time libraries
-    		if ( !Artifact.SCOPE_TEST.equals( artifact.getScope() ) )
-    		{
-    			File artifactFile = artifact.getFile();
-    			if ( artifactFile.getName().endsWith("tld") )
-    			{
-    				tldFiles.add(artifactFile);
-    			}
-    			else
-    			{
-    				getLog().debug( "Looking for tld files, skipping artifact " + artifactFile.getName() + " for WEB-INF" );
-    			}
-    		}
-    	}
-    	return tldFiles;
-    }
-
+    
     private List setUpClassPath()
     {
-    	List classPathFiles = new ArrayList();
-    	classPathFiles.addAll(getLibFiles());
-    	classPathFiles.addAll(getTldFiles());
-    	classPathFiles.add(getClassesDirectory());
-      for (int i=0; i< classPathFiles.size(); i++)
-      {
-        getLog().debug("classpath element: "+((File)classPathFiles.get(i)).getName());
-      }
-    	return classPathFiles;
+        List classPathFiles = new ArrayList();
+        classPathFiles.addAll(getDependencyFiles());
+        classPathFiles.add(getClassesDirectory());
+        for (int i=0; i< classPathFiles.size(); i++)
+        {
+            getLog().debug("classpath element: "+((File)classPathFiles.get(i)).getName());
+        }
+        return classPathFiles;
     }
-
+    
     
 }
