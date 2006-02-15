@@ -46,6 +46,7 @@ public class Dispatcher implements RequestDispatcher
 {
     
     /** Dispatch include attribute names */
+    public final static String __INCLUDE_JETTY="org.mortbay.jetty.included";
     public final static String __INCLUDE_PREFIX="javax.servlet.include.";
     public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";
     public final static String __INCLUDE_CONTEXT_PATH= "javax.servlet.include.context_path";
@@ -54,6 +55,7 @@ public class Dispatcher implements RequestDispatcher
     public final static String __INCLUDE_QUERY_STRING= "javax.servlet.include.query_string";
 
     /** Dispatch include attribute names */
+    public final static String __FORWARD_JETTY="org.mortbay.jetty.included";
     public final static String __FORWARD_PREFIX="javax.servlet.forward.";
     public final static String __FORWARD_REQUEST_URI= "javax.servlet.forward.request_uri";
     public final static String __FORWARD_CONTEXT_PATH= "javax.servlet.forward.context_path";
@@ -310,6 +312,9 @@ public class Dispatcher implements RequestDispatcher
 
             if (key.startsWith(__INCLUDE_PREFIX)) 
                 return null;
+
+            if (key.equals(__FORWARD_JETTY)) 
+                return Boolean.TRUE;
             
             return _attr.getAttribute(key);
         }
@@ -341,7 +346,7 @@ public class Dispatcher implements RequestDispatcher
                 else
                     set.remove(__FORWARD_QUERY_STRING);
             }
-            
+
             return Collections.enumeration(set);
         }
         
@@ -423,6 +428,9 @@ public class Dispatcher implements RequestDispatcher
 
             if (key.startsWith(__FORWARD_PREFIX)) 
                 return null;
+            
+            if (key.equals(__INCLUDE_JETTY)) 
+                return Boolean.TRUE;
             
             return _attr.getAttribute(key);
         }
