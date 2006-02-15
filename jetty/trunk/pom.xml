@@ -95,6 +95,7 @@
     <module>modules/jsp</module>
     <module>modules/test-webapp</module>
     <module>modules/start</module>
+    <module>modules/maven-plugin-utils</module>
     <module>modules/maven-plugin</module>
   </modules>
   <repositories>

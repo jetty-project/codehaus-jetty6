@@ -1,5 +1,5 @@
 //========================================================================
-//$Id: JettyMojo.java,v 1.12 2005/11/25 20:58:59 janb Exp $
+//$Id$
 //Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +13,17 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.plugin;
+package org.mortbay.jetty.plugin.util;
 
 /**
- * @author janb
+ * SystemProperty
+ * 
+ * Provides the ability to set System properties
+ * for the mojo execution. A value will only 
+ * be set if it is not set already. That is, if
+ * it was set on the command line or by the system,
+ * it won't be overridden by settings in the 
+ * plugin's configuration.
  *
  */
 public class SystemProperty
@@ -62,7 +69,7 @@ public class SystemProperty
 	{
     	if (System.getProperty(getName()) == null)
     	{
-    		System.setProperty(getName(), getValue());
+    		System.setProperty(getName(), (getValue()==null?"":getValue()));
     		return true;
     	}
     	
