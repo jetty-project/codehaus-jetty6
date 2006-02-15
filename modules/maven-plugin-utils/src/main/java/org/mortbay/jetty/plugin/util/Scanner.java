@@ -1,5 +1,5 @@
 //========================================================================
-//$Id: JettyMojo.java,v 1.12 2005/11/25 20:58:59 janb Exp $
+//$Id$
 //Copyright 2000-2004 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +13,13 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.plugin;
+package org.mortbay.jetty.plugin.util;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,9 +53,6 @@ public class Scanner extends Thread
 	private Map scanInfo = Collections.EMPTY_MAP;
 	
 	private List listeners;
-	
-	private Log log;
-	
 	
 	public interface Listener
 	{
@@ -126,19 +124,6 @@ public class Scanner extends Thread
 		this.listeners = listeners;
 	}
 	
-    /**
-     * Log file to use for debug/info/error messages.
-     * @param log The Maven plugin Log implementation.
-     */
-    public void setLog (Log log)
-    {
-        this.log = log;       
-    }
-    
-    public Log getLog ()
-    {
-        return this.log;
-    }
     
 	
 	/**
@@ -169,16 +154,16 @@ public class Scanner extends Thread
 					{
 						try
 						{
-							getLog().info("Calling scanner listeners ...");
+							PluginLog.getLog().info("Calling scanner listeners ...");
 							
 							for (int i=0; i<getListeners().size();i++)
 								((Scanner.Listener)getListeners().get(i)).changesDetected(this, filesWithDifferences);
 							
-							getLog().info("Listeners completed.");
+							PluginLog.getLog().info("Listeners completed.");
 						}
 						catch (Exception e)
 						{
-							log.warn("Error doing stop/start", e);
+							PluginLog.getLog().warn("Error doing stop/start", e);
 						}
 					}
 				}				
@@ -201,7 +186,7 @@ public class Scanner extends Thread
 	 */
 	private Map scan ()
 	{
-		getLog().debug("Recursively scanning roots ...");
+		PluginLog.getLog().info("Scanning ...");
 		List roots = getRoots();
 		if ((roots == null) || (roots.isEmpty()))
 			return Collections.EMPTY_MAP;
@@ -214,17 +199,17 @@ public class Scanner extends Thread
 			scan (f, scanInfoMap);
 		}
 		
-		if  (getLog().isDebugEnabled())
+		if  (PluginLog.getLog().isDebugEnabled())
 		{
 			itor = scanInfo.entrySet().iterator();
 			while (itor.hasNext())
 			{
 				Map.Entry e = (Map.Entry)itor.next();
-				getLog().debug("Scanned "+e.getKey()+" : "+e.getValue());
+				PluginLog.getLog().debug("Scanned "+e.getKey()+" : "+e.getValue());
 			}
 		}
 		
-		getLog().debug("Scan complete.");
+		PluginLog.getLog().info("Scan complete at "+new Date().toString());
 		return scanInfoMap;
 	}
 	
@@ -236,12 +221,6 @@ public class Scanner extends Thread
 	 */
 	private void scan (File f, Map scanInfoMap)
 	{
-        if (f == null)
-            return;
-        
-        if (!f.exists())
-            return;
-        
 		try
 		{
 			if (f.isFile())
@@ -257,11 +236,11 @@ public class Scanner extends Thread
 					scan(files[i], scanInfoMap);
 			}
             else
-                getLog().error ("Skipping file of unacceptable type: "+f.getName());
+                PluginLog.getLog().error ("Skipping file of unacceptable type: "+f.getName());
 		}
 		catch (IOException e)
 		{
-			getLog().error("Error scanning watched files", e);
+			PluginLog.getLog().error("Error scanning watched files", e);
 		}
 	}
 

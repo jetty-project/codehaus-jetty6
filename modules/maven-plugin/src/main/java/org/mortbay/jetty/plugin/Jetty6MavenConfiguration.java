@@ -1,5 +1,5 @@
 //========================================================================
-//$Id: JettyMavenConfiguration.java,v 1.7 2005/11/25 20:58:59 janb Exp $
+//$Id$
 //Copyright 2000-2005 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,19 +20,19 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
+import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.xml.XmlParser;
 
-public class JettyMavenConfiguration extends WebXmlConfiguration 
+public class Jetty6MavenConfiguration extends WebXmlConfiguration 
 {
-    private Log log;
     private List classPathFiles;
     private File webXmlFile;
     private File webAppDir;
     
    
-    public JettyMavenConfiguration()
+    public Jetty6MavenConfiguration()
     {
         super();
     }
@@ -48,29 +48,20 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
         this.webXmlFile = webXmlFile;
     }
     
-    public void setLog (Log log)
-    {
-        this.log = log;       
-    }
-    
-    public Log getLog ()
-    {
-        return this.log;
-    }
     
     /** Set up the classloader for the webapp, using the various parts of the Maven project
      * @see org.mortbay.jetty.webapp.Configuration#configureClassLoader()
      */
     public void configureClassLoader() throws Exception 
     {
-        getLog().info("Setting up classpath ...");
+        PluginLog.getLog().info("Setting up classpath ...");
       
         //put the classes dir and all dependencies into the classpath
         Iterator itor = classPathFiles.iterator();
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
         
-        getLog().info("Finished setting up classpath");
+        PluginLog.getLog().info("Finished setting up classpath");
     }
 
     
@@ -91,16 +82,16 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
         //cannot configure if the context is already started
         if (getWebAppContext().isStarted())
         {
-            getLog().info("Cannot configure webapp after it is started");
+            PluginLog.getLog().info("Cannot configure webapp after it is started");
             return;
         }
         
-        getLog().info("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
+        PluginLog.getLog().info("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
         getWebAppContext().setResourceBase(webAppDir.getCanonicalPath());
         XmlParser.Node config = null;               
         config=_xmlParser.parse(webXmlFile.getCanonicalPath());          
         initialize(config);
-        getLog().info("Finished configuring web.xml");
+        PluginLog.getLog().info("Finished configuring web.xml");
     }
 
     
@@ -113,35 +104,4 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
        super.deconfigureWebApp();
     }
     
-    
-    private File findToolsJar()
-    throws Exception
-    {
-    	 String javaHomeStr = System.getProperty("java.home");
-         if ((javaHomeStr==null) || (javaHomeStr.equals("")))
-         {
-         		getLog().info("Environment variable JAVA_HOME not set, JSP compilation not available");
-         		return null;
-         }
-         
-    	getLog().info("java.home="+javaHomeStr);
-    	File jdkHomeDir = new File (javaHomeStr);
-    	File jdkLibDir = new File(jdkHomeDir, "lib");
-    	File toolsJar = new File (jdkLibDir, "tools.jar");
-    	
-    	if (!toolsJar.exists())
-    	{
-    		jdkLibDir = new File (jdkHomeDir.getParentFile(), "lib");
-    		toolsJar = new File(jdkLibDir, "tools.jar");
-    		
-    		if (!toolsJar.exists())
-    		{
-    			getLog().info("tools.jar does not exist, JSP compilation not available");
-    			return null;
-    		}
-    	}
-    	return toolsJar;
-    }
-   
-
 }
