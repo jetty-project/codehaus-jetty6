@@ -1,6 +1,7 @@
 
     + Forward masks include attributes and vice versa
     + Fixed default servlet handling of includes
+    + Additional accessors for request logging
    
 jetty-6.0.0beta9 9/2/2006
     + PathMap for direct context mapping.
