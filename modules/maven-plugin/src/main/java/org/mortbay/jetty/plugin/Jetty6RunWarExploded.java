@@ -27,8 +27,22 @@ import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.xml.XmlConfiguration;
 
 /**
- * Jetty6RunWarExploded
- *
+ * 
+ *  <p>
+ *  This goal is used to assemble your webapp into an exploded war and automatically deploy it to Jetty6.
+ *  </p>
+ *  <p>
+ *  Once invoked, the plugin can be configured to run continuously, scanning for changes in the pom.xml and 
+ *  to WEB-INF/web.xml, WEB-INF/classes or WEB-INF/lib and hot redeploy when a change is detected. 
+ *  </p>
+ *  <p>
+ *  You may also specify the location of a jetty.xml file whose contents will be applied before any plugin configuration.
+ *  This can be used, for example, to deploy a static webapp that is not part of your maven build. 
+ *  </p>
+ *  <p>
+ *  There is a <a href="run-mojo.html">reference guide</a> to the configuration parameters for this plugin, and more detailed information
+ *  with examples in the <a href="howto.html">Configuration How-To</a>.
+ *  </p>
  *
  *@goal run-exploded
  *@execute phase=package

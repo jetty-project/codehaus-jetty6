@@ -29,27 +29,23 @@ import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.xml.XmlConfiguration;
 
 /**
- *  This plugin runs the <a href="http://jetty.mortbay.org/jetty6">Jetty6</a> web container.
  *  <p>
- *  The plugin can be used in-situ on a Maven project without first requiring that the project 
+ *  This goal is used in-situ on a Maven project without first requiring that the project 
  *  is assembled into a war, saving time during the development cycle.
  *  The plugin forks a parallel lifecycle to ensure that the "compile" phase has been completed before invoking Jetty. This means
  *  that you do not need to explicity execute a "mvn compile" first. It also means that a "mvn clean jetty6:run" will ensure that
  *  a full fresh compile is done before invoking Jetty.
  *  </p>
  *  <p>
- *  Alternatively, you can also use this plugin on assembled (jetty6:run-war) and exploded webapps (jetty6:run-exploded). 
- *  The plugin automatically ensures that the packaging phase is run before invoking Jetty.
- *  </p>
- *  <p>
- *  With either of the 3 goals, once invoked, the plugin can be configured to run continuously, scanning for changes in the project and automatically performing a 
+ *  Once invoked, the plugin can be configured to run continuously, scanning for changes in the project and automatically performing a 
  *  hot redeploy when necessary. This allows the developer to concentrate on coding changes to the project using their IDE of choice and have those changes
  *  immediately and transparently reflected in the running web container, eliminating development time that is wasted on rebuilding, reassembling and redeploying.
  *  </p>
  *  <p>
- *  All 3 goals allow you to configure the Jetty runtime by specifying the location of a jetty.xml file. You can override selected parts
- *  of the jetty.xml file in the plugin configuration section.
+ *  You may also specify the location of a jetty.xml file whose contents will be applied before any plugin configuration.
+ *  This can be used, for example, to deploy a static webapp that is not part of your maven build. 
  *  </p>
+ *  <p>
  *  There is a <a href="run-mojo.html">reference guide</a> to the configuration parameters for this plugin, and more detailed information
  *  with examples in the <a href="howto.html">Configuration How-To</a>.
  *  </p>

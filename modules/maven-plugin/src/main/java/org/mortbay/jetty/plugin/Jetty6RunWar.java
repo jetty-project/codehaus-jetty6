@@ -25,8 +25,22 @@ import org.mortbay.jetty.plugin.util.Scanner;
 import org.mortbay.xml.XmlConfiguration;
 
 /**
- * Jetty6RunWar
- * 
+ * <p>
+ *  This goal is used to assemble your webapp into a war and automatically deploy it to Jetty6.
+ *  </p>
+ *  <p>
+ *  Once invoked, the plugin can be configured to run continuously, scanning for changes in the project and to the
+ *  war file and automatically performing a 
+ *  hot redeploy when necessary. 
+ *  </p>
+ *  <p>
+ *  You may also specify the location of a jetty.xml file whose contents will be applied before any plugin configuration.
+ *  This can be used, for example, to deploy a static webapp that is not part of your maven build. 
+ *  </p>
+ *  <p>
+ *  There is a <a href="run-mojo.html">reference guide</a> to the configuration parameters for this plugin, and more detailed information
+ *  with examples in the <a href="howto.html">Configuration How-To</a>.
+ *  </p>
  * 
  * @goal run-war
  * @requiresDependencyResolution runtime

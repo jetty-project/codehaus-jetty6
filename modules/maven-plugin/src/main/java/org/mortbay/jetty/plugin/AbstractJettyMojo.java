@@ -92,7 +92,9 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     
     
     /**
-     * System properties to set before execution.Optional.
+     * System properties to set before execution. 
+     * Note that these properties will NOT override System properties 
+     * that have been set on the command line or by the JVM. Optional.
      * @parameter 
      */
     private SystemProperty[] systemProperties;
@@ -100,7 +102,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     
     
     /**
-     * An optional jetty xml configuration file.
+     * Location of a jetty xml configuration file whose contents 
+     * will be applied before any plugin configuraiton. Optional.
      * @parameter
      */
     private String jettyConfig;
