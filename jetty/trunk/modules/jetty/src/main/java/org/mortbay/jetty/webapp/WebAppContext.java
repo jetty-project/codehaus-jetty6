@@ -137,7 +137,7 @@ public class WebAppContext extends ContextHandler
                     context.startsWith("."))
                 continue;
             
-            Resource app = r.addPath(r.encode(files[f]));
+            Resource app = r.addPath(r.encode(context));
             
             if (context.toLowerCase().endsWith(".war") ||
                     context.toLowerCase().endsWith(".jar"))
@@ -147,6 +147,8 @@ public class WebAppContext extends ContextHandler
                 if (unpacked!=null && unpacked.exists() && unpacked.isDirectory())
                     continue;
             }
+            else if (!app.isDirectory())
+                continue;
             
             if (context.equalsIgnoreCase("root")||context.equalsIgnoreCase("root/"))
                 context="/";
