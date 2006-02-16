@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.SingleThreadModel;
 import javax.servlet.UnavailableException;
 
 import org.mortbay.log.Log;
@@ -62,10 +63,23 @@ public class ServletHolder extends Holder
 
     
     /* ---------------------------------------------------------------- */
-    /** Constructor for Serialization.
+    /** Constructor .
      */
     public ServletHolder()
     {}
+    
+    /* ---------------------------------------------------------------- */
+    /** Constructor for existing servlet.
+     */
+    public ServletHolder(Servlet servlet)
+    {
+        // TODO test
+        _servlet=servlet;
+        if (_servlet instanceof SingleThreadModel)
+            throw new IllegalArgumentException();
+        setName(servlet.getClass().getName());
+        setClassName(servlet.getClass().getName());
+    }
     
     /* ------------------------------------------------------------ */
     public int getInitOrder()
@@ -213,7 +227,8 @@ public class ServletHolder extends Holder
 
         if (_initOnStartup)
         {
-            _servlet=(Servlet)newInstance();
+            if (_servlet==null)
+                _servlet=(Servlet)newInstance();
             try
             {
                 initServlet(_servlet,_config);
