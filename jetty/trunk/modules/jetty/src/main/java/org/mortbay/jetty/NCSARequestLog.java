@@ -224,7 +224,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             buf.append((char)('0'+(status%10)));
             
             
-            long responseLength=request.getConnection().getGenerator().getContentWritten();
+            long responseLength=response.getContentCount();
             if (responseLength >=0)
             {
                 buf.append(' ');

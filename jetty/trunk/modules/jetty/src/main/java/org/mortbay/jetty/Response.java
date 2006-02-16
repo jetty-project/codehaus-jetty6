@@ -17,6 +17,8 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
@@ -329,6 +331,25 @@ public class Response implements HttpServletResponse
     {
         if (!_connection.isIncluding())
             _connection.getResponseFields().put(name, value);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /*
+     */
+    public String getHeader(String name)
+    {
+        return _connection.getResponseFields().getStringField(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public Enumeration getHeaders(String name)
+    {
+        Enumeration e = _connection.getResponseFields().getValues(name);
+        if (e==null)
+            return Collections.enumeration(Collections.EMPTY_LIST);
+        return e;
     }
 
     /* ------------------------------------------------------------ */
@@ -782,5 +803,15 @@ public class Response implements HttpServletResponse
     }
 
 
+    /* --------------- --------------------------------------------- */
+    /**
+     * @return the number of bytes actually written in response body
+     */
+    public long getContentCount()
+    {
+        if (_connection==null || _connection.getGenerator()==null)
+            return -1;
+        return _connection.getGenerator().getContentWritten();
+    }
 
 }
