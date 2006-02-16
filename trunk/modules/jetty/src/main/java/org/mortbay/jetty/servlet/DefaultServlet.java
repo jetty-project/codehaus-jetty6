@@ -250,29 +250,36 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     	throws ServletException, IOException
     {
-        boolean included=false;
-        String servletPath=(String)request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH);
+        String servletPath=null;
         String pathInfo=null;
-        if (servletPath==null)
+        Enumeration reqRanges = null;
+        Boolean included =(Boolean)request.getAttribute(Dispatcher.__INCLUDE_JETTY);
+        if (included!=null && included.booleanValue())
         {
-            servletPath=request.getServletPath();
-            pathInfo=request.getPathInfo();
+            servletPath=(String)request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH);
+            pathInfo=(String)request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO);
+            if (servletPath==null)
+            {
+                servletPath=request.getServletPath();
+                pathInfo=request.getPathInfo();
+            }
         }
         else
         {
-            included=true;
-            pathInfo=(String)request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO);
+            included=Boolean.FALSE;
+            servletPath=request.getServletPath();
+            pathInfo=request.getPathInfo();
+            
+            // Is this a range request?
+            reqRanges = request.getHeaders(HttpHeaders.RANGE);
+            if (reqRanges!=null && !reqRanges.hasMoreElements())
+                reqRanges=null;
         }
         
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
         boolean endsWithSlash=pathInContext.endsWith("/");
         
 
-        // Is this a range request?
-        Enumeration reqRanges = included?null:request.getHeaders(HttpHeaders.RANGE);
-        if (reqRanges!=null && !reqRanges.hasMoreElements())
-            reqRanges=null;
-        
         // Can we gzip this request?
         String pathInContextGz=null;
         boolean gzip=false;
@@ -362,8 +369,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                         cache.setValue(content);
                 }
                 
-                if (included || passConditionalHeaders(request,response, resource,content))  
-                    sendData(request,response,included,resource,content,reqRanges);   
+                if (included.booleanValue() || passConditionalHeaders(request,response, resource,content))  
+                    sendData(request,response,included.booleanValue(),resource,content,reqRanges);   
             }
             else
             {
@@ -396,13 +403,18 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                         // Forward to the index
                         RequestDispatcher dispatcher=request.getRequestDispatcher(ipath);
                         if (dispatcher!=null)
-                            dispatcher.forward(request,response);
+                        {
+                            if (included.booleanValue())
+                                dispatcher.include(request,response);
+                            else
+                                dispatcher.forward(request,response);
+                        }
                     }
                 }
                 else 
                 {
                     content=getContent(pathInContext,resource);
-                    if (included || passConditionalHeaders(request,response, resource,content))
+                    if (included.booleanValue() || passConditionalHeaders(request,response, resource,content))
                         sendDirectory(request,response,resource,pathInContext.length()>1);
                 }
             }

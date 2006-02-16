@@ -752,6 +752,8 @@ public class HttpConnection
             if (_closed)
                 return;
             
+            // TODO protect against close during include.
+            
             if (!_generator.isCommitted())
                 commitResponse(HttpGenerator.LAST);
             else
