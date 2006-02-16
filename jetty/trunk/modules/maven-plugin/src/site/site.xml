@@ -18,9 +18,9 @@
  */
 -->
 
-<project name="Maven Jetty6 Plugin">
+<project name="Maven2 Jetty6 Plugin">
   <bannerLeft>
-    <name>Maven Jetty6 Plugin</name>
+    <name>Maven2 Jetty6 Plugin</name>
     <src>http://jetty.mortbay.org/jetty/images/jetty_banner_still.gif</src>
     <href>http://jetty.mortbay.org/jetty6</href>
   </bannerLeft>
@@ -33,10 +33,15 @@
       <item name="Jetty6" href="http://jetty.mortbay.org/jetty6"/>
     </links>
 
-    <menu name="Overview">
-      <item name="Installation Guide" href="install.html"/>
-      <item name="Configuration Guide" href="howto.html"/>
-      <item name="Parameter Reference" href="run-mojo.html"/>
+    <item name="Home" href="index.html"/>
+    <menu name="General Guides">
+      <item name="Installation" href="install.html"/>
+      <item name="Configuration" href="howto.html"/>
+    </menu>
+    <menu name="Parameter Guides">
+      <item name="jetty6:run" href="run-mojo.html"/>
+      <item name="jetty6:run-war" href="run-war-mojo.html"/>
+      <item name="jetty6:run-exploded" href="run-exploded-mojo.html"/>
     </menu>
     ${reports}
   </body>
