@@ -581,6 +581,40 @@ public class ServletHandler extends AbstractHandler
     {
         return _filterChainsCached;
     }
+
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a servlet.
+     * @param name
+     * @param className
+     * @param pathSpec
+     * @return The servlet holder.
+     */
+    public ServletHolder addServlet(String className,String pathSpec)
+    {
+        return addServlet(className,className,pathSpec);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a servlet.
+     * @param name
+     * @param className
+     * @param pathSpec
+     * @return The servlet holder.
+     */
+    public ServletHolder addServlet(String name,String className,String pathSpec)
+    {
+        ServletHolder holder = new ServletHolder();
+        holder.setName(name);
+        holder.setClassName(className);
+        setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder));
+        
+        ServletMapping mapping = new ServletMapping();
+        mapping.setServletName(name);
+        mapping.setPathSpec(pathSpec);
+        setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping));
+        
+        return holder;
+    }
     
     /* ------------------------------------------------------------ */
     protected synchronized void updateMappings()
