@@ -16,6 +16,7 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -62,8 +63,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     
     protected long _maxIdleTime=30000; 
     protected long _soLingerTime=1000; 
-    
-    private transient SocketAddress _address;
     
     private transient ArrayList _headerBuffers;
     private transient ArrayList _requestBuffers;
@@ -145,15 +144,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         return _port;
     }
 
-    /* ------------------------------------------------------------------------------- */
-    public SocketAddress getAddress()
-    {
-        if (_address==null)
-            _address=(_host==null)?new InetSocketAddress(_port):new InetSocketAddress(_host,_port);
-       
-        return _address;
-    }
-    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the headerBufferSize.
@@ -331,7 +321,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                 if (_acceptorThread[i]!=null)
                     _acceptorThread[i].interrupt();
         _acceptorThread=null;
-        _address=null;
         
         try{close();} catch(IOException e) {Log.warn(e);}
 
@@ -554,7 +543,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         if (dot>0)
             name=name.substring(dot+1);
         
-        return name+" @ "+(getHost()==null?"0.0.0.0":getHost())+":"+getPort();
+        return name+" @ "+(getHost()==null?"0.0.0.0":getHost())+":"+(getLocalPort()<=0?getPort():getLocalPort());
     }
     
     

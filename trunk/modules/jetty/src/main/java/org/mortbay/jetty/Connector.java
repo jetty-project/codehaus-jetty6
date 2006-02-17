@@ -106,8 +106,28 @@ public interface Connector extends LifeCycle, Buffers
     
     String getHost();
     void setHost(String hostname);
-    int getPort();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param port The port fto listen of for connections or 0 if any available
+     * port may be used.
+     */
     void setPort(int port);
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The configured port for the connector or 0 if any available
+     * port may be used.
+     */
+    int getPort();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The actual port the connector is listening on or -1 if there 
+     * is no port or the connector is not open.
+     */
+    int getLocalPort();
+    
     long getMaxIdleTime();
     void setMaxIdleTime(long ms);
 }
