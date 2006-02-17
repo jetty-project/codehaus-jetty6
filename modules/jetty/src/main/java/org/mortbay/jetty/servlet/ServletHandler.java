@@ -591,27 +591,39 @@ public class ServletHandler extends AbstractHandler
      */
     public ServletHolder addServlet(String className,String pathSpec)
     {
-        return addServlet(className,className,pathSpec);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** conveniance method to add a servlet.
-     * @param name
-     * @param className
-     * @param pathSpec
-     * @return The servlet holder.
-     */
-    public ServletHolder addServlet(String name,String className,String pathSpec)
-    {
         ServletHolder holder = new ServletHolder();
-        holder.setName(name);
+        holder.setName(className);
         holder.setClassName(className);
         setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder));
         
         ServletMapping mapping = new ServletMapping();
-        mapping.setServletName(name);
+        mapping.setServletName(className);
         mapping.setPathSpec(pathSpec);
         setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping));
+        
+        return holder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a filter.
+     * @param name
+     * @param className
+     * @param pathSpec
+     * @param dispatches see {@link FilterMapping#setDispatches(int)}
+     * @return The servlet holder.
+     */
+    public FilterHolder addFilter(String className,String pathSpec,int dispatches)
+    {
+        FilterHolder holder = new FilterHolder();
+        holder.setName(className);
+        holder.setClassName(className);
+        setFilters((FilterHolder[])LazyList.addToArray(getFilters(), holder));
+        
+        FilterMapping mapping = new FilterMapping();
+        mapping.setFilterName(className);
+        mapping.setPathSpec(pathSpec);
+        mapping.setDispatches(dispatches);
+        setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping));
         
         return holder;
     }

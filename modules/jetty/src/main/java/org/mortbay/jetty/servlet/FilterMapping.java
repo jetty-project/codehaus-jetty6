@@ -102,6 +102,11 @@ public class FilterMapping
     /* ------------------------------------------------------------ */
     /**
      * @param dispatches The dispatches to set.
+     * @see {@link Handler#DEFAULT}
+     * @see {@link Handler#REQUEST}
+     * @see {@link Handler#ERROR}
+     * @see {@link Handler#FORWARD}
+     * @see {@link Handler#INCLUDE}
      */
     public void setDispatches(int dispatches)
     {
