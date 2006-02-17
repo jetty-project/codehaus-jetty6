@@ -17,6 +17,7 @@ package org.mortbay.jetty.security;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -258,7 +259,9 @@ public class SslSocketConnector extends SocketConnector
      * @return
      * @exception IOException
      */
-    protected ServerSocket newServerSocket(SocketAddress addr, int backlog) throws IOException
+
+    /* ------------------------------------------------------------ */
+    protected ServerSocket newServerSocket(String host, int port,int backlog) throws IOException
     {
         SSLServerSocketFactory factory = null;
         SSLServerSocket socket = null;
@@ -267,8 +270,9 @@ public class SslSocketConnector extends SocketConnector
         {
             factory = createFactory();
 
-            socket = (SSLServerSocket) factory.createServerSocket();
-            socket.bind(addr,backlog);
+            socket = (SSLServerSocket) (host==null?
+                            factory.createServerSocket(port,backlog):
+                            factory.createServerSocket(port,backlog,InetAddress.getByName(host)));
             socket.setNeedClientAuth(_needClientAuth);
             socket.setWantClientAuth(_wantClientAuth);
 

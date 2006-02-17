@@ -15,6 +15,7 @@
 package org.mortbay.jetty.nio;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
@@ -150,7 +151,10 @@ public class SelectChannelConnector extends AbstractConnector
             _acceptChannel.configureBlocking(false);
 
             // Bind the server socket to the local host and port
-            _acceptChannel.socket().bind(getAddress());
+            InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
+            // TODO configure backlog
+            _acceptChannel.socket().bind(addr,getAcceptQueueSize());
+            
 
             // Register accepts on the server socket with the selector.
             _acceptKey = _acceptChannel.register(_selectSets[0].getSelector(), SelectionKey.OP_ACCEPT);
@@ -184,6 +188,14 @@ public class SelectChannelConnector extends AbstractConnector
         return new NIOBuffer(size, true);
     }
 
+    /* ------------------------------------------------------------------------------- */
+    public int getLocalPort()
+    {
+        if (_acceptChannel==null || !_acceptChannel.isOpen())
+            return -1;
+        return _acceptChannel.socket().getLocalPort();
+    }
+    
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
