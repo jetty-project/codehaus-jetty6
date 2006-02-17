@@ -133,66 +133,13 @@ public class LocalConnector extends AbstractConnector
     public void close() throws IOException
     {
     }
-
     
-    public static void main(String[] arg)
-        throws Exception
+
+    /* ------------------------------------------------------------------------------- */
+    public int getLocalPort()
     {
-        Server server = new Server();
-        LocalConnector connector = new LocalConnector();
-        server.setConnectors(new Connector[]{connector});
-        server.setHandler(new DumpHandler());
-        
-        server.start();
-        
-        connector.getResponses("GET /R1 HTTP/1.1\n"+
-                        "Host: localhost\n"+
-                        "Transfer-Encoding: chunked\n"+
-                        "Content-Type: text/plain\n"+
-                        "\n"+
-                        "2;\n"+
-                        "12\n"+
-                        "3;\n"+
-                        "345\n"+
-                        "0;\n\n"+
-
-                        "GET /R2 HTTP/1.1\n"+
-                        "Host: localhost\n"+
-                        "Transfer-Encoding: chunked\n"+
-                        "Content-Type: text/plain\n"+
-                        "\n"+
-                        "4;\n"+
-                        "6789\n"+
-                        "5;\n"+
-                        "abcde\n"+
-                        "0;\n\n"+
-                        "GET /R3 HTTP/1.1\n"+
-                        "Host: localhost\n"+
-                        "Connection: close\n"+
-                        "\n"
-                        );
-        
-        connector.reopen();
-        connector.getResponses("GET /R2 HTTP/1.1\n"+
-                        "Host: localhost\n"+
-                        "Transfer-Encoding: chunked\n"+
-                        "Content-Type: text/plain\n"+
-                        "\n"+
-                        "4;\n"+
-                        "PQRS\n"+
-                        "5;\n"+
-                        "98765\n"+
-                        "0;\n\n"+
-                        "GET /R3 HTTP/1.1\n"+
-                        "Host: localhost\n"+
-                        "Connection: close\n"+
-                        "\n"
-                        );
-        
-        server.stop();
-        
+        return -1;
     }
-    
-    
+
     
 }

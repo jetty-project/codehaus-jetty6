@@ -15,6 +15,7 @@
 package org.mortbay.jetty.nio;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.ServerSocketChannel;
@@ -61,7 +62,8 @@ public class BlockingChannelConnector extends AbstractConnector
         _acceptChannel.configureBlocking(true);
 
         // Bind the server socket to the local host and port
-        _acceptChannel.socket().bind(getAddress());
+        InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
+        _acceptChannel.socket().bind(addr,getAcceptQueueSize());
         
     }
 
@@ -92,6 +94,15 @@ public class BlockingChannelConnector extends AbstractConnector
         return new NIOBuffer(size,NIOBuffer.DIRECT);
     }
 
+
+    /* ------------------------------------------------------------------------------- */
+    public int getLocalPort()
+    {
+        if (_acceptChannel==null || !_acceptChannel.isOpen())
+            return -1;
+        return _acceptChannel.socket().getLocalPort();
+    }
+    
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */

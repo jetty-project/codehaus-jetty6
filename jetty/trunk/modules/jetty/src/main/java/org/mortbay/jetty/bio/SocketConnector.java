@@ -15,6 +15,7 @@
 package org.mortbay.jetty.bio;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -61,15 +62,16 @@ public class SocketConnector extends AbstractConnector
     public void open() throws IOException
     {
         // Create a new server socket and set to non blocking mode
-        _serverSocket= newServerSocket(getAddress(),getAcceptQueueSize());
+        _serverSocket= newServerSocket(getHost(),getPort(),getAcceptQueueSize());
     }
 
     /* ------------------------------------------------------------ */
-    protected ServerSocket newServerSocket(SocketAddress addr,int backlog) throws IOException
+    protected ServerSocket newServerSocket(String host, int port,int backlog) throws IOException
     {
-        ServerSocket ss= new ServerSocket();
-        ss.bind(addr,backlog);
-        
+        ServerSocket ss= host==null?
+            new ServerSocket(port,backlog):
+            new ServerSocket(port,backlog,InetAddress.getByName(host));
+       
         return ss;
     }
     
@@ -167,6 +169,13 @@ public class SocketConnector extends AbstractConnector
             {
             }
         }
+    }
+
+    public int getLocalPort()
+    {
+        if (_serverSocket==null || _serverSocket.isClosed())
+            return -1;
+        return _serverSocket.getLocalPort();
     }
 
 }
