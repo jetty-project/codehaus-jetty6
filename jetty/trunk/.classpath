@@ -13,13 +13,14 @@
 	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j/3.0.1/mx4j-3.0.1.jar"/>
 	<classpathentry output="modules/management/target/test-classes" kind="src" path="modules/management/src/test/java"/>
 	<classpathentry output="modules/jetty/target/test-classes" kind="src" path="modules/jetty/src/test/java"/>
-	<classpathentry kind="src" path="modules/management/src/test/resources"/>
+	<classpathentry output="modules/management/target/test-classes" kind="src" path="modules/management/src/test/resources"/>
 	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j-tools/mx4j-tools-3.0.1.jar"/>
-	<classpathentry kind="src" path="modules/management/src/main/resources"/>
+	<classpathentry output="modules/management/target/classes" kind="src" path="modules/management/src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring/1.2.6/spring-1.2.6.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/2.2-SNAPSHOT/xbean-spring-2.2-SNAPSHOT.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.2.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.2.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.2.jar"/>
+	<classpathentry output="modules/maven-plugin-utils/target/classes" kind="src" path="modules/maven-plugin-utils/src/main/java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
