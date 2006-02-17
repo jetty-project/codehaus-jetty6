@@ -376,11 +376,21 @@ public class LazyList
     /* ------------------------------------------------------------ */
     public static Object[] addToArray(Object[] array, Object item)
     {
-        Class c = array==null?item.getClass():array.getClass().getComponentType();
-        Object[] na = (Object[])Array.newInstance(c, Array.getLength(array)+1);
-        System.arraycopy(array, 0, na, 0, array.length);
-        na[array.length]=item;
-        return na;
+        if (array==null)
+        {
+            Class c = item.getClass();
+            Object[] na = (Object[])Array.newInstance(c, 1);
+            na[0]=item;
+            return na;
+        }
+        else
+        {
+            Class c = array.getClass().getComponentType();
+            Object[] na = (Object[])Array.newInstance(c, Array.getLength(array)+1);
+            System.arraycopy(array, 0, na, 0, array.length);
+            na[array.length]=item;
+            return na;
+        }
     }
 
     /* ------------------------------------------------------------ */
