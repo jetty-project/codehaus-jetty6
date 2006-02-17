@@ -15,6 +15,8 @@
 
 package org.mortbay.jetty.webapp;
 
+import java.net.URL;
+
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.xml.XmlConfiguration;
@@ -92,16 +94,16 @@ public class JettyWebXmlConfiguration implements Configuration
 
             if(jetty.exists())
             {
-                // Give permission to see Jetty classes
+                // Give permission to see Jetty classes for the duration
                 String[] old_server_classes = _context.getServerClasses();
-                String[] server_classes = new String[2+(old_server_classes==null?0:old_server_classes.length)];
-                server_classes[0]="-org.mortbay.jetty.";
-                server_classes[1]="-org.mortbay.util.";
-                if (server_classes!=null)
-                    System.arraycopy(old_server_classes, 0, server_classes, 2, old_server_classes.length);
-                
                 try
                 {
+                    String[] server_classes = new String[2+(old_server_classes==null?0:old_server_classes.length)];
+                    server_classes[0]="-org.mortbay.jetty.";
+                    server_classes[1]="-org.mortbay.util.";
+                    if (server_classes!=null)
+                        System.arraycopy(old_server_classes, 0, server_classes, 2, old_server_classes.length);
+                    
                     _context.setServerClasses(server_classes);
                     if(Log.isDebugEnabled())
                         Log.debug("Configure: "+jetty);
@@ -110,8 +112,7 @@ public class JettyWebXmlConfiguration implements Configuration
                 }
                 finally
                 {
-                    if (_context.getServerClasses()==server_classes)
-                        _context.setServerClasses(old_server_classes);
+                    _context.setServerClasses(old_server_classes);
                 }
             }
         }
@@ -126,4 +127,5 @@ public class JettyWebXmlConfiguration implements Configuration
     {
     
     }
+    
 }
