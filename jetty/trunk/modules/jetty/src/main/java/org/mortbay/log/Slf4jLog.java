@@ -17,6 +17,8 @@ package org.mortbay.log;
 
 import java.lang.reflect.Method;
 
+import org.mortbay.util.Loader;
+
 class Slf4jLog implements Logger
 {
     private static final String LOGGER="org.slf4j.Logger";
@@ -38,7 +40,19 @@ class Slf4jLog implements Logger
     
     Slf4jLog(String name) throws Exception
     {
-        Class slf4j = Thread.currentThread().getContextClassLoader()==null?Class.forName(LOGGER):Thread.currentThread().getContextClassLoader().loadClass(LOGGER);
+        Class slf4j = null;
+        Class slf4jf = null;
+        try
+        {
+            slf4j=this.getClass().getClassLoader().loadClass(LOGGER);
+            slf4jf=this.getClass().getClassLoader().loadClass(LOGGERFACTORY);
+        }
+        catch(Exception e)
+        {
+            slf4j=Thread.currentThread().getContextClassLoader()==null?Class.forName(LOGGER):Thread.currentThread().getContextClassLoader().loadClass(LOGGER);
+            slf4jf = Thread.currentThread().getContextClassLoader()==null?Class.forName(LOGGERFACTORY):Thread.currentThread().getContextClassLoader().loadClass(LOGGERFACTORY);
+        }
+        
         infoSOO = slf4j.getMethod("info", new Class[]{String.class,Object.class,Object.class});
         debugSOO = slf4j.getMethod("debug", new Class[]{String.class,Object.class,Object.class});
         debugST = slf4j.getMethod("debug", new Class[]{String.class,Throwable.class});
@@ -46,7 +60,6 @@ class Slf4jLog implements Logger
         warnSOO = slf4j.getMethod("warn", new Class[]{String.class,Object.class,Object.class});
         warnST = slf4j.getMethod("warn", new Class[]{String.class,Throwable.class});
         
-        Class slf4jf = Thread.currentThread().getContextClassLoader()==null?Class.forName(LOGGERFACTORY):Thread.currentThread().getContextClassLoader().loadClass(LOGGERFACTORY);
         Method getLogger = slf4jf.getMethod("getLogger", new Class[]{String.class});
         logger=getLogger.invoke(null, new Object[]{name});
     }

@@ -311,7 +311,8 @@ public class WebAppClassLoader extends URLClassLoader
         Class c= findLoadedClass(name);
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
-        if (c == null && (_context.isParentLoaderPriority() || isSystemPath(name)) && !isServerPath(name) && _parent!=null)
+        
+        if (c == null && _parent!=null && (_context.isParentLoaderPriority() || isSystemPath(name)) )
         {
             tried_parent= true;
             try
@@ -338,7 +339,7 @@ public class WebAppClassLoader extends URLClassLoader
             }
         }
 
-        if (c == null && !tried_parent && !isServerPath(name) && _parent!=null)
+        if (c == null && _parent!=null && !tried_parent && !isServerPath(name) )
             c= _parent.loadClass(name);
 
         if (c == null)
