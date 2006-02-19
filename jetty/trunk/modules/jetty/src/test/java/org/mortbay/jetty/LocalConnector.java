@@ -34,6 +34,12 @@ public class LocalConnector extends AbstractConnector
     public LocalConnector()
     {
     }
+
+    /* ------------------------------------------------------------ */
+    public Object getConnection()
+    {
+        return endp;
+    }
     
     public void clear()
     {

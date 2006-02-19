@@ -55,6 +55,12 @@ public class BlockingChannelConnector extends AbstractConnector
     }
 
     /* ------------------------------------------------------------ */
+    public Object getConnection()
+    {
+        return _acceptChannel;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void open() throws IOException
     {
         // Create a new server socket and set to non blocking mode
