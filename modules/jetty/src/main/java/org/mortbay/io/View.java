@@ -53,6 +53,11 @@ public class View extends AbstractBuffer
         setMarkIndex(buffer.markIndex());
         _access=buffer.isReadOnly()?READONLY:READWRITE;
     }
+
+    public View()
+    {
+        super(READWRITE,true);
+    }
     
     /**
      * Update view to buffer
