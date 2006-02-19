@@ -30,6 +30,7 @@ import javax.servlet.ServletOutputStream;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.View;
 import org.mortbay.log.Log;
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
@@ -479,6 +480,7 @@ public class HttpConnection
     private class RequestHandler extends HttpParser.EventHandler
     {
         boolean _delayedHandling=false;
+        View _contentView=new View();
         
         /*
          * 
@@ -617,7 +619,8 @@ public class HttpConnection
          */
         public void content(Buffer ref) throws IOException
         {
-            _content = ref;
+            _contentView.update(ref);
+            _content = _contentView;
             
             if (_delayedHandling)
             {
@@ -667,6 +670,7 @@ public class HttpConnection
             {
                 _parser.parseNext();
             }
+            
             // Handle blocking end points
             else if (_endp.isBlocking())
             {
@@ -705,7 +709,7 @@ public class HttpConnection
                     filled=_parser.parseNext();
                 }
             }
-
+            
             return _content!=null && _content.length()>0; 
         }
         
