@@ -98,6 +98,8 @@
     <module>modules/maven-plugin-utils</module>
     <module>modules/maven-plugin</module>
     <module>modules/xbean</module>
+    <module>modules/naming</module>
+    <module>modules/plus</module>
   </modules>
   <repositories>
     <repository>
