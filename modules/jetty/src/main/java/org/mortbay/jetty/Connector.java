@@ -37,7 +37,13 @@ import org.mortbay.util.ajax.Continuation;
  */
 public interface Connector extends LifeCycle, Buffers
 { 
+    /* ------------------------------------------------------------ */
+    /**
+     * Opens the connector 
+     * @throws IOException
+     */
     public void open() throws IOException;
+    
     public void close() throws IOException;
 
     public void setServer(Server server);
@@ -130,4 +136,10 @@ public interface Connector extends LifeCycle, Buffers
     
     long getMaxIdleTime();
     void setMaxIdleTime(long ms);
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    Object getConnection();
 }
