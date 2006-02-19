@@ -86,6 +86,12 @@ public class SelectChannelConnector extends AbstractConnector
     }
 
     /* ------------------------------------------------------------ */
+    public Object getConnection()
+    {
+        return _acceptChannel;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Assume Short Dispatch
      * If true, the select set is not updated when a endpoint is dispatched for
      * reading. The assumption is that the task will be short and thus will probably

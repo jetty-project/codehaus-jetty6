@@ -57,6 +57,11 @@ public class SocketConnector extends AbstractConnector
     {
     }
 
+    /* ------------------------------------------------------------ */
+    public Object getConnection()
+    {
+        return _serverSocket;
+    }
     
     /* ------------------------------------------------------------ */
     public void open() throws IOException

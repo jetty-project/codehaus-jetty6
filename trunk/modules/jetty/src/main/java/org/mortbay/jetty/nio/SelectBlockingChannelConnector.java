@@ -66,6 +66,11 @@ public class SelectBlockingChannelConnector extends AbstractConnector
     {
     }
 
+    /* ------------------------------------------------------------ */
+    public Object getConnection()
+    {
+        return _acceptChannel;
+    }
 
     /* ------------------------------------------------------------ */
     public void open() throws IOException
