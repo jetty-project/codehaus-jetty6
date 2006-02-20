@@ -589,103 +589,110 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------ */
     public void flushBuffers() throws IOException
     {
-        if (_state == STATE_HEADER) throw new IllegalStateException("State==HEADER");
-
-        prepareBuffers();
-
-        if (_endp == null)
+        try
         {
-            if (_needCRLF && _buffer != null) _buffer.put(CRLF);
-            if (_needEOC && _buffer != null) _buffer.put(LAST_CHUNK);
-            return;
-        }
-
-        // Keep flushing while there is something to flush (except break below)
-        int last_len = -1;
-        Flushing: while (true)
-        {
-            int len = -1;
-            int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) | ((_direct && _content != null && _content.length() > 0)?1:0);
-
-            switch (to_flush)
+            if (_state == STATE_HEADER) throw new IllegalStateException("State==HEADER");
+            
+            prepareBuffers();
+            
+            if (_endp == null)
             {
-                case 7:
-                    throw new IllegalStateException(); // should never happen!
-                case 6:
-                    len = _endp.flush(_header, _buffer, null);
-                    break;
-                case 5:
-                    len = _endp.flush(_header, _content, null);
-                    break;
-                case 4:
-                    len = _endp.flush(_header);
-                    break;
-                case 3:
-                    throw new IllegalStateException(); // should never happen!
-                case 2:
-                    len = _endp.flush(_buffer);
-                    break;
-                case 1:
-                    len = _endp.flush(_content);
-                    break;
-                case 0:
+                if (_needCRLF && _buffer != null) _buffer.put(CRLF);
+                if (_needEOC && _buffer != null) _buffer.put(LAST_CHUNK);
+                return;
+            }
+            
+            // Keep flushing while there is something to flush (except break below)
+            int last_len = -1;
+            Flushing: while (true)
+            {
+                int len = -1;
+                int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) | ((_direct && _content != null && _content.length() > 0)?1:0);
+                
+                switch (to_flush)
                 {
-                    // Nothing more we can write now.
-                    if (_header != null) 
-                        _header.clear();
-
-                    _direct = false;
-                    
-                    if (_buffer != null)
+                    case 7:
+                        throw new IllegalStateException(); // should never happen!
+                    case 6:
+                        len = _endp.flush(_header, _buffer, null);
+                        break;
+                    case 5:
+                        len = _endp.flush(_header, _content, null);
+                        break;
+                    case 4:
+                        len = _endp.flush(_header);
+                        break;
+                    case 3:
+                        throw new IllegalStateException(); // should never happen!
+                    case 2:
+                        len = _endp.flush(_buffer);
+                        break;
+                    case 1:
+                        len = _endp.flush(_content);
+                        break;
+                    case 0:
                     {
-                        _buffer.clear();
-                        if (_contentLength == CHUNKED_CONTENT)
+                        // Nothing more we can write now.
+                        if (_header != null) 
+                            _header.clear();
+                        
+                        _direct = false;
+                        
+                        if (_buffer != null)
                         {
-                            // reserve some space for the chunk header
-                            _buffer.setPutIndex(CHUNK_SPACE);
-                            _buffer.setGetIndex(CHUNK_SPACE);
-                            _bufferChunked = false;
-
-                            // Special case handling for small left over buffer from
-                            // an addContent that caused a buffer flush.
-                            if (_content != null && _content.length() < _buffer.space() && _state != STATE_FLUSHING)
+                            _buffer.clear();
+                            if (_contentLength == CHUNKED_CONTENT)
                             {
-                                _buffer.put(_content);
-                                _content.clear();
-                                _content = null;
-                                break Flushing;
+                                // reserve some space for the chunk header
+                                _buffer.setPutIndex(CHUNK_SPACE);
+                                _buffer.setGetIndex(CHUNK_SPACE);
+                                _bufferChunked = false;
+                                
+                                // Special case handling for small left over buffer from
+                                // an addContent that caused a buffer flush.
+                                if (_content != null && _content.length() < _buffer.space() && _state != STATE_FLUSHING)
+                                {
+                                    _buffer.put(_content);
+                                    _content.clear();
+                                    _content = null;
+                                    break Flushing;
+                                }
                             }
                         }
-                    }
-
-                    // Are we completely finished for now?
-                    if (!_needCRLF && !_needEOC && (_content == null || _content.length() == 0))
-                    {
-                        if (_state == STATE_FLUSHING)
+                        
+                        // Are we completely finished for now?
+                        if (!_needCRLF && !_needEOC && (_content == null || _content.length() == 0))
                         {
-                            _state = STATE_END;
-                            if (_close) 
-                                _endp.close();
+                            if (_state == STATE_FLUSHING)
+                            {
+                                _state = STATE_END;
+                                if (_close) 
+                                    _endp.close();
+                            }
+                            
+                            break Flushing;
                         }
-
-                        break Flushing;
+                        
+                        // Try to prepare more to write.
+                        prepareBuffers();
                     }
-
-                    // Try to prepare more to write.
-                    prepareBuffers();
                 }
+                
+                // If we failed to flush anything twice in a row break
+                if (len <= 0)
+                {
+                    if (last_len <= 0) 
+                        break Flushing;
+                    break;
+                }
+                last_len = len;
             }
-
-            // If we failed to flush anything twice in a row break
-            if (len <= 0)
-            {
-                if (last_len <= 0) 
-                    break Flushing;
-                break;
-            }
-            last_len = len;
+            
         }
-
+        catch (IOException e)
+        {
+            throw new EofException(e);
+        }
     }
 
     /* ------------------------------------------------------------ */
