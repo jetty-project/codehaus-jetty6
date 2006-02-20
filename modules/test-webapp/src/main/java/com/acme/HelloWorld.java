@@ -15,12 +15,19 @@
 package com.acme;
 import java.io.IOException;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.NotSupportedException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 
 
 /* ------------------------------------------------------------ */
@@ -44,13 +51,70 @@ public class HelloWorld extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+       
+        
         response.setContentType("text/html");
         ServletOutputStream out = response.getOutputStream();
         out.println("<html>");
-        out.println("<h1>Hello World<h1>");
-        out.println("Blah blah blah.");
+        out.println("<h1>Hello World</h1>");
+        doJNDI(out);
         out.println("</html>");
         out.flush();
     }
 
+    
+    public void doJNDI(ServletOutputStream out)
+    throws IOException
+    {
+        try
+        {
+            InitialContext ic = new InitialContext();
+            Context envContext = (Context) ic.lookup("java:comp/env");
+            
+            Double wiggle = (Double)envContext.lookup("wiggle");
+            
+            out.println("<p><code>java:comp/env/wiggle = "+wiggle+"</code></p>");
+            
+            Integer woggle = (Integer)envContext.lookup("woggle");
+            out.println("<p><code>java:comp/env/woggle = "+woggle+"</code></p>");
+        }
+        catch (NameNotFoundException e)
+        {
+            out.println("Couldn't find java:comp/env values, ensure you have uncommented the org.mortbay.jetty.plus.naming.EnvEntry setup in jetty.xml");
+        }
+        catch (NamingException e)
+        {
+            out.println("Couldn't find java:comp/env values, ensure you have uncommented the org.mortbay.jetty.plus.naming.EnvEntry setup in jetty.xml"+
+                        " and the naming.jar and plus.jar are in $JETTY_HOME/lib");
+        }
+      
+        
+        /* TODO separate into a different test webapp
+        try
+        {
+            InitialContext ic = new InitialContext();
+            UserTransaction utx = (UserTransaction)ic.lookup("java:comp/UserTransaction");
+            utx.begin();
+            //nothing
+            utx.commit();
+        }
+        catch (NameNotFoundException e)
+        {
+            out.println("Problem looking up UserTransaction, ensure you have uncommented the Transaction section of jetty.xml");
+        }
+        catch (NamingException e)
+        {
+            out.println("Problem looking up UserTransaction, ensure you have uncommented the Transaction section of jetty.xml");
+        }
+        catch (NotSupportedException e)
+        {
+            out.println("UserTransaction not supported, ensure you have commented out the Transaction section of jetty.xml");
+        }
+        catch (Exception e)
+        {
+            out.println(e.getMessage());
+        }
+        */
+    }
+    
 }

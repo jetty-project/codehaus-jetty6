@@ -222,5 +222,8 @@
     <xerces-version>2.6.2</xerces-version>
     <spring-version>1.2.6</spring-version>
     <xbean-version>2.2</xbean-version>
+    <jta-spec-groupId>geronimo-spec</jta-spec-groupId>
+    <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
+    <jta-spec-version>1.0.1B-rc4</jta-spec-version>
   </properties>
 </project>

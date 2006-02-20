@@ -23,6 +23,86 @@
     </New>
     -->
 
+
+    <!-- =========================================================== -->
+    <!-- JNDI java:comp/env                                          -->
+    <!-- To use JNDI with Jetty, you will need to tell your          -->
+    <!-- WebAppContext to process the naming related items in        -->
+    <!-- web.xml. For an example of how to do that, see the test     -->
+    <!-- webapp below. More information can be found at              -->
+    <!-- http://docs.codehaus.org/display/JETTY/Jetty+Wiki           -->
+    <!-- =========================================================== -->
+
+    <!--Configuring <env-entry>s                                     -->
+    <!--                                                             -->
+    <!-- The following are 2 examples of setting up <env-entry>'s    -->
+    <!-- outside of a web.xml. EnvEntry's configured here will be    -->
+    <!-- set as java:comp/env entries for every webapp. The boolean  -->
+    <!-- parameter controls whether the value overrides an           -->
+    <!-- <env-entry> of the same name in a web.xml file.             -->
+    <!--
+    <New id="woggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
+      <Arg>woggle</Arg>
+      <Arg type="java.lang.Integer">4000</Arg>
+    </New>
+
+    <New id="wiggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
+      <Arg>wiggle</Arg>
+      <Arg type="java.lang.Double">100</Arg>
+      <Arg type="boolean">true</Arg>
+    </New>
+    -->
+
+    <!-- Configuring <resource-ref> and <resource-env-ref>s          -->
+    <!--                                                             -->
+    <!-- The following is an example of setting up a resource that   -->
+    <!-- can be referenced in a web.xml file as a <resource-ref> or  -->
+    <!-- a <resource-env-ref>. The first argument is the name of the -->
+    <!-- resource relative to java:comp/env and must be the SAME as  -->
+    <!-- the <res-ref-name> or <resource-env-ref-name> in web.xml.   -->
+    <!-- The second argument is the construction of the resource     -->
+    <!-- object. This example sets up a javax.sql.DataSource as      -->
+    <!-- provided by the Atomikos transaction product. If you        -->
+    <!-- uncomment it, you will need to download and follow the      -->
+    <!-- installation instructions at http://www.atomikos.com. You   -->
+    <!-- can configure any type of object as a Resource.             -->
+    <!--
+    <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
+      <Arg>jdbc/mydatasource</Arg>
+      <Arg>
+        <New class="com.atomikos.jdbc.nonxa.NonXADataSourceBean">
+          <Set name="DriverClassName">org.hsqldb.jdbcDriver</Set>
+          <Set name="Url">jdbc:hsqldb:mem:test</Set>
+          <Set name="UniqueResourceName">mydatasource</Set>
+          <Set name="User">sa</Set>
+          <Set name="Password"></Set>
+          <Set name="PoolSize">10</Set>
+          <Set name="ConnectionTimeout">20</Set>
+        </New>
+      </Arg>
+     </New>
+     -->
+
+
+    <!-- Configuring Transactions                                    -->
+    <!--                                                             -->
+    <!-- The following is a example of a setting up a JTA            -->
+    <!-- transaction manager that can be referenced by looking up    -->
+    <!-- java:comp/UserTransaction. Note that this is just an        -->
+    <!-- example and if you uncomment it, you will need to download  -->
+    <!-- the atomikos jar (see http://www.atomikos.com/download.html)-->
+    <!-- You can configure any transaction manager that implements   -->
+    <!-- javax.transaction.UserTransaction.                          -->
+    <!--
+    <New id="tx" class="org.mortbay.jetty.plus.naming.Transaction">
+     <Arg>
+       <New class="com.atomikos.icatch.jta.J2eeUserTransaction"/>
+     </Arg>
+    </New>
+    -->
+
+
+
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
     <!-- =========================================================== -->
@@ -100,11 +180,20 @@
             <Set name="contextPath">/test</Set>
             <Set name="war">./webapps/test</Set>
             <Set name="VirtualHosts"><Array type="java.lang.String"></Array></Set>
+            <!-- Uncomment to enable java:comp/env for this webapp
+            <Set name="ConfigurationClasses">
+             <Array type="java.lang.String">
+               <Item>org.mortbay.jetty.plus.webapp.Configuration</Item>
+               <Item>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</Item>
+             </Array>
+            </Set>
+            -->
             <Get name="SessionHandler">
               <Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
             </Get>
           </New>
         </Item>
+
 
         <!-- ======================================================= -->
         <!-- Configure a context directly - no XML parser required   -->

@@ -41,6 +41,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     
     public abstract void bindResourceEnvRef (String name) throws Exception;
     
+    public abstract void bindUserTransaction () throws Exception;
     
   
     protected void createEnvContext ()
@@ -48,7 +49,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     {
         Context context = new InitialContext();
         Context compCtx =  (Context)context.lookup ("java:comp");
-        compCtx.createSubcontext("env");
+        Context envCtx = compCtx.createSubcontext("env");
         if (Log.isDebugEnabled())
             Log.debug("Created java:comp/env for webapp "+getWebAppContext().getContextPath());
     }
@@ -64,6 +65,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     throws Exception
     {
         super.configureWebApp();
+        bindUserTransaction();
     }
     
     protected void initWebXmlElement(String element,XmlParser.Node node) throws Exception
