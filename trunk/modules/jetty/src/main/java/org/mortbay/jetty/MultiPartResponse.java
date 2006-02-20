@@ -49,7 +49,7 @@ public class MultiPartResponse
     {
         try
         {
-            boundary = "org.mortbay.http.MultiPartResponse.boundary."+
+            boundary = "jetty"+System.identityHashCode(this)+
                 Long.toString(System.currentTimeMillis(),36);
             boundaryBytes=boundary.getBytes(StringUtil.__ISO_8859_1);
         }
