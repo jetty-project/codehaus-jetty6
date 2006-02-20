@@ -19,9 +19,11 @@ import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
 
 import org.mortbay.jetty.plus.naming.EnvEntry;
 import org.mortbay.jetty.plus.naming.Resource;
+import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.log.Log;
 import org.mortbay.naming.NamingUtil;
 
@@ -61,8 +63,10 @@ public class Configuration extends AbstractConfiguration
     {
         Resource resource = Resource.getResource(name);
         if (resource != null)
+        {
             resource.bindToEnv();
-        Log.info("Bound resourceref java:comp/env/"+name);
+            Log.info("Bound resourceref java:comp/env/"+name);
+        }
     }
 
     /** 
@@ -74,18 +78,26 @@ public class Configuration extends AbstractConfiguration
     {
         Resource resource = Resource.getResource(name);
         if (resource != null)
+        {
             resource.bindToEnv();
-       Log.info("Bound resource-env-ref java:comp/env/"+name);
+            Log.info("Bound resource-env-ref java:comp/env/"+name);
+        }
+    }
+    
+    public void bindUserTransaction () throws Exception
+    {
+        Transaction transaction = Transaction.getTransaction ();
+        if (transaction != null)
+        {
+            transaction.bindToEnv();
+            Log.info("Bound UserTransaction to java:comp/"+transaction.getJndiName());
+        }
     }
     
     public void configureClassLoader ()
     throws Exception
     {      
         super.configureClassLoader();
-        
-        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getWebAppContext().getClassLoader());
-        Thread.currentThread().setContextClassLoader(oldClassLoader);
     }
 
     
@@ -96,11 +108,18 @@ public class Configuration extends AbstractConfiguration
         
         //add java:comp/env entries for all globally defined EnvEntries
         Context context = new InitialContext();
-        NamingEnumeration nenum = context.listBindings(EnvEntry.class.getName());
-        while (nenum.hasMoreElements())
+        try
         {
-            Binding binding = (Binding)nenum.next();
-            ((EnvEntry)binding.getObject()).bindToEnv();
+            NamingEnumeration nenum = context.listBindings(EnvEntry.class.getName());
+            while (nenum.hasMoreElements())
+            {
+                Binding binding = (Binding)nenum.next();
+                ((EnvEntry)binding.getObject()).bindToEnv();
+            }
+        }
+        catch (NamingException e)
+        {
+            Log.debug("Possibly no EnvEntrys set up in jetty.xml", e);
         }
     }
 
@@ -109,7 +128,7 @@ public class Configuration extends AbstractConfiguration
     throws Exception
     {
         super.configureWebApp();
-        //lock this webapp's java:comp namespace as per J2EE spec
+        //lock this webapp's java:comp namespace as per J2EE spec      
         Context context = new InitialContext();
         Context compCtx = (Context)context.lookup("java:comp");
         compCtx.addToEnvironment("org.mortbay.jndi.immutable", "TRUE");

@@ -419,7 +419,12 @@ public class NamingContext implements Context, Cloneable
         throws NamingException
     {
         if (null != _env.get(IMMUTABLE_PROPERTY))
-            throw new NamingException ("This context is immutable");
+        {
+            NamingException ne = new NamingException ("This context is immutable"); 
+            ne.setRemainingName(name);
+            throw ne;
+        }
+           
         
         
         Name cname = toCanonicalName (name);
@@ -558,7 +563,12 @@ public class NamingContext implements Context, Cloneable
         {
             Binding binding = getBinding (cname);
             if (binding == null)
-                throw new NameNotFoundException();
+            {
+                NameNotFoundException nnfe = new NameNotFoundException();
+                nnfe.setRemainingName(cname);
+                throw nnfe;
+            }
+                
 
             Object o = binding.getObject();
 
@@ -609,7 +619,11 @@ public class NamingContext implements Context, Cloneable
             
             Binding binding = getBinding (firstComponent);
             if (binding == null)
-                throw new NameNotFoundException ();
+            {
+                NameNotFoundException nnfe = new NameNotFoundException();
+                nnfe.setRemainingName(cname);
+                throw nnfe;
+            }
             
             //as we have bound a reference to an object factory 
             //for the component specific contexts
