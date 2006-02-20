@@ -560,6 +560,8 @@ public class Response implements HttpServletResponse
         if (isCommitted())
             return;
 
+        String type_params=null;
+        
         if (contentType==null)
         {
             if (_locale==null)
@@ -583,20 +585,26 @@ public class Response implements HttpServletResponse
                 _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
 
                 // Look for charset
-                int i1=contentType.indexOf("charset=",i0);
+                type_params=contentType.substring(i0+1);
+                int i1=type_params.indexOf("charset=");
                 if (i1>=0)
                 {
-                    i1+=8;
-                    int i2 = contentType.indexOf(' ',i1);
+                    int i8=i1+8;
+                    int i2 = type_params.indexOf(' ',i8);
                     _characterEncoding = (0<i2)
-                        ? contentType.substring(i1,i2)
-                        : contentType.substring(i1);
+                        ? type_params.substring(i8,i2)
+                        : type_params.substring(i8);
                     _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
                     _contentType=contentType;
+                    type_params=((0<i2)
+                        ? (type_params.substring(0,i1)+type_params.substring(i2))
+                        : (type_params.substring(0,i1))).trim();
+                    if (type_params.length()==0)
+                        type_params=null;
                 }
                 else // No encoding in the params.
                 {
-                    _contentType=null;
+                    _contentType=contentType;
                 }
             }
             else // No encoding and no other params
@@ -610,10 +618,15 @@ public class Response implements HttpServletResponse
             // combine mime type and encoding
             if (_characterEncoding==null)
             {
-                if (_cachedMimeType!=null)
+                if (_cachedMimeType!=null && type_params==null)
                 {
                     _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_cachedMimeType);
                     _contentType=_cachedMimeType.toString();
+                }
+                else
+                {
+                    _contentType=contentType;
+                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                 }
             }
             else
@@ -621,7 +634,7 @@ public class Response implements HttpServletResponse
                 if(_cachedMimeType!=null)
                 {
                     CachedBuffer content_type = _cachedMimeType.getAssociate(_characterEncoding);
-                    if (content_type!=null)
+                if (content_type!=null && type_params==null)
                     {
                         _contentType=content_type.toString();
                         _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,content_type);
@@ -629,14 +642,22 @@ public class Response implements HttpServletResponse
                     else
                     {
                         if (_contentType==null)
+                        {
                             _contentType = _mimeType+";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                            if (type_params!=null)
+                                _contentType+=" "+type_params;
+                        }
                         _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                     }
                 }
                 else
                 {
                     if (_contentType==null)
+                    {
                         _contentType = _mimeType+";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                        if (type_params!=null)
+                            _contentType+=" "+type_params;
+                    }
                     _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                 }
             }
