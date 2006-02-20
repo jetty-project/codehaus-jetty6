@@ -4,6 +4,7 @@
     + Fixed default servlet handling of includes
     + Additional accessors for request logging
     + added getLocalPort() to connector
+    + Fixed content-type for range requests
    
 jetty-6.0.0beta9 9/2/2006
     + PathMap for direct context mapping.
