@@ -815,6 +815,7 @@ public class SelectChannelConnector extends AbstractConnector
         boolean _new = true;
         boolean _pending = false;
         boolean _resumed = false;
+        RetryRequest _retry;
 
         void setEndPoint(HttpEndPoint ep)
         {
@@ -861,7 +862,9 @@ public class SelectChannelConnector extends AbstractConnector
                 {
                     _pending=true;
                     _timeout = timeout;
-                    throw new RetryRequest();
+                    if (_retry==null)
+                     _retry = new RetryRequest();
+                    throw _retry;
                 }
                 _pending=false;
                 
