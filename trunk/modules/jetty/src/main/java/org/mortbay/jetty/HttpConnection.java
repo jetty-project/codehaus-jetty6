@@ -756,9 +756,7 @@ public class HttpConnection
             if (_closed)
                 return;
             
-            // TODO protect against close during include.
-            
-            if (!_generator.isCommitted())
+            if (!isIncluding() && !_generator.isCommitted())
                 commitResponse(HttpGenerator.LAST);
             else
                 flushResponse();
@@ -770,7 +768,6 @@ public class HttpConnection
         void reopen()
         {
             _closed=false;
-            
         }
         
         /* ------------------------------------------------------------ */
