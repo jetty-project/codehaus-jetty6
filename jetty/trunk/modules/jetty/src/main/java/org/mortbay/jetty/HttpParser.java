@@ -67,7 +67,6 @@ public class HttpParser implements HttpTokens
     private Buffer _buffer; // The current buffer in use (either _header or _content)
     private int _headerBufferSize;
     private int _contentBufferSize;
-    private boolean _hasContent=false;
     private EventHandler _handler;
     private CachedBuffer _cached;
     private View _tok0; // Saved token: header name, request method or response version
@@ -401,12 +400,12 @@ public class HttpParser implements HttpTokens
                             Buffer header=_cached!=null?_cached:HttpHeaders.CACHE.lookup(_tok0);
                             _cached=null;
                             Buffer value=_multiLineValue == null ? (Buffer) _tok1 : (Buffer) new ByteArrayBuffer(_multiLineValue);
-
+                            
                             int ho=HttpHeaders.CACHE.getOrdinal(header);
                             if (ho >= 0)
                             {
                                 int vo=-1; 
-
+                                
                                 switch (ho)
                                 {
                                     case HttpHeaders.CONTENT_LENGTH_ORDINAL:
@@ -414,15 +413,15 @@ public class HttpParser implements HttpTokens
                                         {
                                             _contentLength=BufferUtil.toInt(value);
                                             if (_contentLength <= 0)
-                                                    _contentLength=HttpParser.NO_CONTENT;
+                                                _contentLength=HttpParser.NO_CONTENT;
                                         }
                                         break;
-
+                                        
                                     case HttpHeaders.CONNECTION_ORDINAL:
                                         // TODO comma list of connections !!!
                                         value=HttpHeaderValues.CACHE.lookup(value);
                                         break;
-
+                                        
                                     case HttpHeaders.TRANSFER_ENCODING_ORDINAL:
                                         value=HttpHeaderValues.CACHE.lookup(value);
                                         vo=HttpHeaderValues.CACHE.getOrdinal(value);
@@ -434,23 +433,24 @@ public class HttpParser implements HttpTokens
                                             String c=value.toString();
                                             if (c.endsWith(HttpHeaderValues.CHUNKED))
                                                 _contentLength=CHUNKED_CONTENT;
+                                            
                                             else if (c.indexOf(HttpHeaderValues.CHUNKED) >= 0)
                                                 throw new HttpException(400,null);
                                         }
                                         break;
-
+                                        
                                     case HttpHeaders.CONTENT_TYPE_ORDINAL:
-                                        _hasContent=true;
+                                        // TODO confirm there are no other cases where _hasContent should be true
                                         break;
                                 }
                             }
-
+                            
                             _handler.parsedHeader(header, value);
                             _tok0.setPutIndex(_tok0.getIndex());
                             _tok1.setPutIndex(_tok1.getIndex());
                             _multiLineValue=null;
                         }
-
+                        
                         
                         // now handle ch
                         if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
@@ -459,12 +459,7 @@ public class HttpParser implements HttpTokens
 
                             // work out the _content demarcation
                             if (_contentLength == UNKNOWN_CONTENT)
-                            {
-                                if (_hasContent || _response)
-                                    _contentLength=EOF_CONTENT;
-                                else
-                                    _contentLength=NO_CONTENT;
-                            }
+                                _contentLength=_response?EOF_CONTENT:NO_CONTENT;
 
                             _contentPosition=0;
                             _eol=ch;
@@ -706,7 +701,6 @@ public class HttpParser implements HttpTokens
         _contentLength=UNKNOWN_CONTENT;
         _contentPosition=0;
         _length=0;
-        _hasContent=false;
         _response=false;
         
         if (_buffer!=null && _buffer.length()>0 && _eol == CARRIAGE_RETURN && _buffer.peek() == LINE_FEED)
