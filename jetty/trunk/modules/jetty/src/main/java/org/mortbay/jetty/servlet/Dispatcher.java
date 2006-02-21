@@ -274,8 +274,14 @@ public class Dispatcher implements RequestDispatcher
             base_request.setParameters(old_params);
             base_request.setQueryString(old_query);
             
-            
-            base_request.getConnection().getOutputStream().close();
+            try
+            {
+                response.getWriter().close();
+            }
+            catch(IllegalStateException e)
+            {
+                response.getOutputStream().close();
+            }
             
         }
     }
