@@ -80,11 +80,11 @@ public class HelloWorld extends HttpServlet
         }
         catch (NameNotFoundException e)
         {
-            out.println("Couldn't find java:comp/env values, ensure you have uncommented the org.mortbay.jetty.plus.naming.EnvEntry setup in jetty.xml");
+            out.println("java:comp/env values: none. If you were expecting to see some, ensure you have uncommented the org.mortbay.jetty.plus.naming.EnvEntry setup in jetty.xml");
         }
         catch (NamingException e)
         {
-            out.println("Couldn't find java:comp/env values, ensure you have uncommented the org.mortbay.jetty.plus.naming.EnvEntry setup in jetty.xml"+
+            out.println("java:comp/env values: none. If you were expecting to see some, ensure you have uncommented the org.mortbay.jetty.plus.naming.EnvEntry setup in jetty.xml"+
                         " and the naming.jar and plus.jar are in $JETTY_HOME/lib");
         }
       
