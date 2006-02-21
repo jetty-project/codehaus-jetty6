@@ -441,6 +441,12 @@ public class Response implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
+    public boolean isWriting()
+    {
+        return _outputState==WRITER;
+    }
+    
+    /* ------------------------------------------------------------ */
     /*
      * @see javax.servlet.ServletResponse#getWriter()
      */
@@ -834,5 +840,6 @@ public class Response implements HttpServletResponse
             return -1;
         return _connection.getGenerator().getContentWritten();
     }
+
 
 }
