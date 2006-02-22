@@ -362,8 +362,12 @@ public class Dump extends HttpServlet
                 int len;
                 try{
                     InputStream in=request.getInputStream();
+                    
                     while((len=in.read(content))>=0)
                         pout.write(new String(content,0,len));
+                    // int b;
+                    // while ((b=in.read())>=0)
+                    //    pout.write((char)b);
                 }
                 catch(IOException e)
                 {
