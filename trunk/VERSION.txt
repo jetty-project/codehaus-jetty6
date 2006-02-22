@@ -1,5 +1,6 @@
 
     + Added support for java:comp/env
+    + Added support for pluggable transaction manager
     + Forward masks include attributes and vice versa
     + Fixed default servlet handling of includes
     + Additional accessors for request logging

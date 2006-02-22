@@ -100,6 +100,7 @@
     <module>modules/xbean</module>
     <module>modules/naming</module>
     <module>modules/plus</module>
+    <module>modules/test-jndi-webapp</module>
   </modules>
   <repositories>
     <repository>
