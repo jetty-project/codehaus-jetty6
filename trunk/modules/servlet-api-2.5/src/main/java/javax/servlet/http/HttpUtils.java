@@ -66,12 +66,11 @@
 
 package javax.servlet.http;
 
-import java.io.IOException;
+import javax.servlet.ServletInputStream;
 import java.util.Hashtable;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
-
-import javax.servlet.ServletInputStream;
+import java.io.IOException;
 
 /**
  * @deprecated		As of Java(tm) Servlet API 2.3. 

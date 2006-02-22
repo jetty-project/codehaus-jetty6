@@ -67,6 +67,7 @@ package javax.servlet;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.ResourceBundle;
 
 /**
  *
@@ -101,6 +102,9 @@ import java.util.Enumeration;
 public abstract class GenericServlet 
     implements Servlet, ServletConfig, java.io.Serializable
 {
+    private static final String LSTRING_FILE = "javax.servlet.LocalStrings";
+    private static ResourceBundle lStrings =
+        ResourceBundle.getBundle(LSTRING_FILE);
 
     private transient ServletConfig config;
     
@@ -146,7 +150,13 @@ public abstract class GenericServlet
      */ 
 
     public String getInitParameter(String name) {
-	return getServletConfig().getInitParameter(name);
+        ServletConfig sc = getServletConfig();
+        if (sc == null) {
+            throw new IllegalStateException(
+                lStrings.getString("err.servlet_config_not_initialized"));
+        }
+
+        return sc.getInitParameter(name);
     }
     
     
@@ -169,7 +179,13 @@ public abstract class GenericServlet
     */
 
     public Enumeration getInitParameterNames() {
-	return getServletConfig().getInitParameterNames();
+        ServletConfig sc = getServletConfig();
+        if (sc == null) {
+            throw new IllegalStateException(
+                lStrings.getString("err.servlet_config_not_initialized"));
+        }
+
+        return sc.getInitParameterNames();
     }   
     
      
@@ -206,7 +222,13 @@ public abstract class GenericServlet
      */
 
     public ServletContext getServletContext() {
-	return getServletConfig().getServletContext();
+        ServletConfig sc = getServletConfig();
+        if (sc == null) {
+            throw new IllegalStateException(
+                lStrings.getString("err.servlet_config_not_initialized"));
+        }
+
+        return sc.getServletContext();
     }
 
 
@@ -368,6 +390,12 @@ public abstract class GenericServlet
      */
 
     public String getServletName() {
-        return config.getServletName();
+        ServletConfig sc = getServletConfig();
+        if (sc == null) {
+            throw new IllegalStateException(
+                lStrings.getString("err.servlet_config_not_initialized"));
+        }
+
+        return sc.getServletName();
     }
 }
