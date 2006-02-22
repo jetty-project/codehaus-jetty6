@@ -165,15 +165,6 @@
     </form-login-config>
   </login-config>
 -->
-
-  <env-entry>
-    <env-entry-name>wiggle</env-entry-name>
-    <env-entry-value>99.99</env-entry-value>
-    <env-entry-type>java.lang.Double</env-entry-type>
-  </env-entry>
-
-
-
 </web-app>
 
 
