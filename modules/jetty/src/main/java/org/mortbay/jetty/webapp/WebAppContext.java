@@ -89,7 +89,7 @@ public class WebAppContext extends ContextHandler
     
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
-    
+
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
@@ -113,6 +113,37 @@ public class WebAppContext extends ContextHandler
                                           boolean java2CompliantClassLoader)
         throws IOException
     {
+        addWebApplications(server, webapps, defaults, __dftConfigurationClasses, extract, java2CompliantClassLoader);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
+     * @param host Virtual host name or null
+     * @param webapps Directory file name or URL to look for auto
+     * webapplication.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * If null the default defaults file is used. If the empty string, then
+     * no defaults file is used.
+     * @param configurations Array of classnames of {@link Configuration} implementations to apply.
+     * @param extract If true, extract war files
+     * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
+     * @exception IOException 
+     */
+    public static void addWebApplications(Server server,
+                                          String webapps,
+                                          String defaults,
+                                          String[] configurations,
+                                          boolean extract,
+                                          boolean java2CompliantClassLoader)
+        throws IOException
+    {
+        if (configurations==null)
+            configurations=__dftConfigurationClasses;
+        
         ArrayList wacs = new ArrayList();
         if(server.getHandlers() != null) {
             java.util.List installedWacs = Arrays.asList(server.getHandlers());
@@ -171,6 +202,7 @@ public class WebAppContext extends ContextHandler
             
             // add it
             WebAppContext wah = new WebAppContext();
+            wah.setConfigurationClasses(configurations);
             wah.setServer(server);
             wah.setContextPath(context);
             if (defaults!=null)
