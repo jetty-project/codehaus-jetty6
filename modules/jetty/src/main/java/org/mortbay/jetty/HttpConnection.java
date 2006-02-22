@@ -722,7 +722,7 @@ public class HttpConnection
         {
             int c=-1;
             if (blockForContent())
-                c= _content.get();
+                c= 0xff & _content.get();
             return c;
         }
         
