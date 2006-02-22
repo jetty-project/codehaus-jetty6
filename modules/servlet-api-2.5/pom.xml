@@ -20,11 +20,11 @@
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
-        <directory>src/main/java</directory>
+        <directory>src/main/resources</directory>
         <includes>
           <include>**/*.properties</include>
-          <include>**/*.dtd</include>
-          <include>**/*.xsd</include>
+          <include>*.dtd</include>
+          <include>*.xsd</include>
         </includes>
       </resource>
     </resources>

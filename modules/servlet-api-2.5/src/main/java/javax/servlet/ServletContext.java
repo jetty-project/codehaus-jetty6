@@ -104,6 +104,29 @@ import java.util.Set;
 
 public interface ServletContext {
 
+    /**
+     * Returns the context path of the web application.
+     *
+     * <p>The context path is the portion of the request URI that is used
+     * to select the context of the request. The context path always comes
+     * first in a request URI. The path starts with a "/" character but does
+     * not end with a "/" character. For servlets in the default (root)
+     * context, this method returns "".
+     *
+     * <p>It is possible that a servlet container may match a context by
+     * more than one context path. In such cases the
+     * {@link javax.servlet.http.HttpServletRequest#getContextPath()}
+     * will return the actual context path used by the request and it may
+     * differ from the path returned by this method.
+     * The context path returned by this method should be considered as the
+     * prime or preferred context path of the application.
+     *
+     * @see javax.servlet.http.HttpServletRequest#getContextPath()
+     *
+     * @since Servlet 2.5
+     */
+    public String getContextPath();
+
 
     /**
      * Returns a <code>ServletContext</code> object that 
@@ -425,7 +448,7 @@ public interface ServletContext {
     /**
      *
      * Writes the specified message to a servlet log file, usually
-     * an event Log. The name and type of the servlet log file is 
+     * an event log. The name and type of the servlet log file is 
      * specific to the servlet container.
      *
      *
@@ -461,7 +484,7 @@ public interface ServletContext {
      * Writes an explanatory message and a stack trace
      * for a given <code>Throwable</code> exception
      * to the servlet log file. The name and type of the servlet log 
-     * file is specific to the servlet container, usually an event Log.
+     * file is specific to the servlet container, usually an event log.
      *
      *
      * @param message 		a <code>String</code> that 
