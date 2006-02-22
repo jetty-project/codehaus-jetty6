@@ -391,11 +391,15 @@ public class HttpConnection
                     if (!error) 
                     {
                         _response.complete();
-                        
-                        if (!_generator.isComplete())
+
+                        while (!_generator.isComplete() && _endp.isOpen())
                         {
-                            _generator.completeHeader(_responseFields, HttpGenerator.LAST);
                             _generator.complete();
+                            if (!_generator.isComplete() && !_endp.isBlocking())
+                            {
+                                _endp.blockWritable(_connector.getMaxIdleTime());
+                                _generator.complete();
+                            }
                         }
                     }
                 }
@@ -424,10 +428,7 @@ public class HttpConnection
             _generator.completeHeader(_responseFields, HttpGenerator.LAST);
         }
 
-        if (!_generator.isComplete())
-        {
-            _generator.complete();
-        }
+        _generator.complete();
     }
 
     /* ------------------------------------------------------------ */
@@ -869,7 +870,7 @@ public class HttpConnection
             if (_closed)
                 throw new IOException("Closed");
             
-            if (_generator.getContentAdded() > 0) throw new IllegalStateException("!empty");
+            if (_generator.getContentWritten() > 0) throw new IllegalStateException("!empty");
 
             if (content instanceof HttpContent)
             {
@@ -922,7 +923,7 @@ public class HttpConnection
         }
         
         public void write (String s,int offset, int length) throws IOException
-        {
+        {   
             if (_bytes==null)
             {   
                 _bytes=new ByteArrayOutputStream2(_writeChunk*2);
