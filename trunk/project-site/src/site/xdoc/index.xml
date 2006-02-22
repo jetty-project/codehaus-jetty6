@@ -48,7 +48,7 @@ Here's a summary of the new features of jetty6:
 <div class="featureitem">Smart split buffer design for efficient asynchronous flushing and avoiding chunking.</div>
 <div class="featureitem">Optional use of NIO Buffering so that efficient direct buffers and memory mapped files can be used.</div>
 <div class="featureitem">Optional use of NIO non-blocking scheduling so that threads are not allocated per connection.</div>
-<div class="featureitem">Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be sent as sent is a single operation.</div>
+<div class="featureitem">Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be sent as a single operation.</div>
 </div>
 </div>
 
