@@ -66,7 +66,6 @@
 package javax.servlet.http;
 
 import java.util.Enumeration;
-
 import javax.servlet.ServletContext;
 
 /**
@@ -156,10 +155,6 @@ public interface HttpSession {
      * 
      * @return				a string specifying the identifier
      *					assigned to this session
-     *
-     * @exception IllegalStateException	if this method is called on an
-     *					invalidated session
-     *
      */
 
     public String getId();

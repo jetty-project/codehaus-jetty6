@@ -67,7 +67,6 @@ package javax.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
 
@@ -143,9 +142,10 @@ public interface ServletResponse {
      * have been specified using {@link #setContentType}
      * before the response is committed. If no content type
      * has been specified, this method returns null.
-     * If a content type has been specified and a
+     * If a content type has been specified, and a
      * character encoding has been explicitly or implicitly
-     * specified as described in {@link #getCharacterEncoding},
+     * specified as described in {@link #getCharacterEncoding}
+     * or {@link #getWriter} has been called,
      * the charset parameter is included in the string returned.
      * If no character encoding has been specified, the
      * charset parameter is omitted.

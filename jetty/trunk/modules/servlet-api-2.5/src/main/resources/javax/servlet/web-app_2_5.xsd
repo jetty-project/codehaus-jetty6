@@ -105,7 +105,6 @@
 
 <!-- **************************************************** -->
 
-
   <xsd:element name="web-app" type="javaee:web-appType">
     <xsd:annotation>
       <xsd:documentation>
@@ -630,9 +629,9 @@
     </xsd:annotation>
 
      <xsd:restriction base="xsd:token">
-         <xsd:pattern value="[\p{L}-[\p{Cc}\p{Z}]]+"/> 
+         <xsd:pattern value="[\p{L}-[\p{Cc}\p{Z}]]+"/>
      </xsd:restriction>
-     
+
   </xsd:simpleType>
 
 <!-- **************************************************** -->
@@ -1163,25 +1162,29 @@
 		   use="required"/>
     <xsd:attribute name="id" type="xsd:ID"/>
 
-    <xsd:attribute name="full" type="xsd:boolean">
+    <xsd:attribute name="metadata-complete" type="xsd:boolean">
       <xsd:annotation>
-	   <xsd:documentation>
+	<xsd:documentation>
 
-	  The full attribute defines whether this deployment
-	  descriptor is complete, or whether the class files
-	  of the jar file should be examined for annotations
+	  The metadata-complete attribute defines whether this
+	  deployment descriptor and other related deployment
+	  descriptors for this module (e.g., web service
+	  descriptors) are complete, or whether the class
+	  files available to this module and packaged with
+	  this application should be examined for annotations
 	  that specify deployment information.
 
-	  If full is set to "true", the deployment tool
-	  must ignore any Servlet annotations present in the
-	  class files of the application.
+	  If metadata-complete is set to "true", the deployment
+	  tool must ignore any annotations that specify deployment
+	  information, which might be present in the class files
+	  of the application.
 
-	  If full is not specified or is set to "false", the
-	  deployment tool must examine the class files of the
-	  application for annotations, as specified by the Servlet
-	  specifications.
+	  If metadata-complete is not specified or is set to
+	  "false", the deployment tool must examine the class
+	  files of the application for annotations, as
+	  specified by the specifications.
 
-	   </xsd:documentation>
+	</xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
 

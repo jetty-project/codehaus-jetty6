@@ -66,9 +66,8 @@
 
 package javax.servlet.http;
 
-import java.util.Enumeration;
-
 import javax.servlet.ServletRequest;
+import java.util.Enumeration;
 
 /**
  *
@@ -379,17 +378,26 @@ public interface HttpServletRequest extends ServletRequest {
     /**
      *
      * Returns the portion of the request URI that indicates the context
-     * of the request.  The context path always comes first in a request
-     * URI.  The path starts with a "/" character but does not end with a "/"
-     * character.  For servlets in the default (root) context, this method
+     * of the request. The context path always comes first in a request
+     * URI. The path starts with a "/" character but does not end with a "/"
+     * character. For servlets in the default (root) context, this method
      * returns "". The container does not decode this string.
      *
+     * <p>It is possible that a servlet container may match a context by
+     * more than one context path. In such cases this method will return the
+     * actual context path used by the request and it may differ from the
+     * path returned by the
+     * {@link javax.servlet.ServletContext#getContextPath()} method.
+     * The context path returned by
+     * {@link javax.servlet.ServletContext#getContextPath()}
+     * should be considered as the prime or preferred context path of the
+     * application.
      *
      * @return		a <code>String</code> specifying the
      *			portion of the request URI that indicates the context
      *			of the request
      *
-     *
+     * @see javax.servlet.ServletContext#getContextPath()
      */
 
     public String getContextPath();
@@ -535,6 +543,11 @@ public interface HttpServletRequest extends ServletRequest {
      * The returned URL contains a protocol, server name, port
      * number, and server path, but it does not include query
      * string parameters.
+     *
+     * <p>If this request has been forwarded using
+     * {@link javax.servlet.RequestDispatcher#forward}, the server path in the
+     * reconstructed URL must reflect the path used to obtain the
+     * RequestDispatcher, and not the server path specified by the client.
      *
      * <p>Because this method returns a <code>StringBuffer</code>,
      * not a string, you can modify the URL easily, for example,
