@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+
+<!-- =============================================================== -->
+<!-- Configure the Jetty Server                                      -->
+<!--                                                                 -->
+<!-- This is an example of the extra items that can be configured    -->
+<!-- for jetty6 such as JNDI resources, and gives an example of      -->
+<!-- how to plug in a transaction manager.                           -->
+<!-- =============================================================== -->
+<Configure>
+
+  <Ref id="Server">
+
+    <!-- =========================================================== -->
+    <!-- JNDI java:comp/env                                          -->
+    <!-- To use JNDI with Jetty, you will need to tell your          -->
+    <!-- WebAppContext to process the naming related items in        -->
+    <!-- web.xml. For an example of how to do that, see the test     -->
+    <!-- webapp below. More information can be found at              -->
+    <!-- http://docs.codehaus.org/display/JETTY/Jetty+Wiki           -->
+    <!-- =========================================================== -->
+
+    <!--Configuring <env-entry>s                                     -->
+    <!--                                                             -->
+    <!-- The following are 2 examples of setting up <env-entry>'s    -->
+    <!-- outside of a web.xml. EnvEntry's configured here will be    -->
+    <!-- set as java:comp/env entries for every webapp. The boolean  -->
+    <!-- parameter controls whether the value overrides an           -->
+    <!-- <env-entry> of the same name in a web.xml file.             -->
+    <!--
+    -->
+    <New id="woggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
+      <Arg>woggle</Arg>
+      <Arg type="java.lang.Integer">4000</Arg>
+    </New>
+
+    <New id="wiggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
+      <Arg>wiggle</Arg>
+      <Arg type="java.lang.Double">100</Arg>
+      <Arg type="boolean">true</Arg>
+    </New>
+
+    <!-- Configuring <resource-ref> and <resource-env-ref>s          -->
+    <!--                                                             -->
+    <!-- The following are examples of setting up a resource that   -->
+    <!-- can be referenced in a web.xml file as a <resource-ref> or  -->
+    <!-- a <resource-env-ref>. The first argument is the name of the -->
+    <!-- resource relative to java:comp/env and must be the SAME as  -->
+    <!-- the <res-ref-name> or <resource-env-ref-name> in web.xml.   -->
+    <!-- The second argument is the construction of the resource     -->
+    <!-- object. Any object at all can be configured.                -->
+
+    <!-- This example sets up a javax.sql.DataSource around a hsqldb -->
+    <!-- driver. The non-xa DataSource is provided by the Atomikos   -->
+    <!-- transaction product. If you uncomment it, you will need to  -->
+    <!-- download and follow the  installation instructions at       -->
+    <!-- http://www.atomikos.com and at http://www.hsqldb.org.       -->
+    <New id="mynondatasource" class="org.mortbay.jetty.plus.naming.Resource">
+      <Arg>jdbc/mynonxadatasource</Arg>
+      <Arg>
+        <New class="com.atomikos.jdbc.nonxa.NonXADataSourceBean">
+          <Set name="DriverClassName">org.hsqldb.jdbcDriver</Set>
+          <Set name="Url">jdbc:hsqldb:mem:test</Set>
+          <Set name="UniqueResourceName">mynonxadatasource</Set>
+          <Set name="User">sa</Set>
+          <Set name="Password"></Set>
+          <Set name="PoolSize">10</Set>
+          <Set name="ConnectionTimeout">20</Set>
+        </New>
+      </Arg>
+     </New>
+
+    <!-- These examples set up a javax.sql.DataSource around an      -->
+    <!-- XADataSource that is provided by the Derby relational db.   -->
+    <!-- The DataSource wrapper that is registered in JNDI is        -->
+    <!--  provided by Atomikos, and works with the Atomikos          -->
+    <!-- transaction manager configured further below. To use these  -->
+    <!-- examples, download Atomikos http://www.atomikos.com and     -->
+    <!-- Derby http://db.apache.org/derby                            -->
+    <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
+      <Arg>jdbc/mydatasource</Arg>
+      <Arg>
+        <New class="com.atomikos.jdbc.SimpleDataSourceBean">
+          <Set name="xaDataSourceClassName">org.apache.derby.jdbc.EmbeddedXADataSource</Set>
+          <Set name="xaDataSourceProperties">databaseName=testdb;createDatabase=create</Set>
+          <Set name="UniqueResourceName">mydatasource</Set>
+        </New>
+      </Arg>
+     </New>
+
+    <New id="mydatasource2" class="org.mortbay.jetty.plus.naming.Resource">
+      <Arg>jdbc/mydatasource2</Arg>
+      <Arg>
+        <New class="com.atomikos.jdbc.SimpleDataSourceBean">
+          <Set name="xaDataSourceClassName">org.apache.derby.jdbc.EmbeddedXADataSource</Set>
+          <Set name="xaDataSourceProperties">databaseName=testdb2;createDatabase=create</Set>
+          <Set name="UniqueResourceName">mydatasource2</Set>
+        </New>
+      </Arg>
+     </New>
+
+
+    <!-- Configuring Transactions                                    -->
+    <!--                                                             -->
+    <!-- The following is a example of a setting up a JTA            -->
+    <!-- transaction manager that can be referenced by looking up    -->
+    <!-- java:comp/UserTransaction. Note that this is just an        -->
+    <!-- example and if you uncomment it, you will need to download  -->
+    <!-- the atomikos jar (see http://www.atomikos.com/download.html)-->
+    <!-- You can configure any transaction manager that implements   -->
+    <!-- javax.transaction.UserTransaction.                          -->
+    <!--
+    -->
+    <New id="tx" class="org.mortbay.jetty.plus.naming.Transaction">
+     <Arg>
+       <New class="com.atomikos.icatch.jta.J2eeUserTransaction"/>
+     </Arg>
+    </New>
+
+    <!-- =========================================================== -->
+    <!-- Configurations for WebAppContexts                           -->
+    <!-- Sequence of configurations to be applied to a webapp.       -->
+    <!-- =========================================================== -->
+    <Array id="plusConfig" type="java.lang.String">
+      <Item>org.mortbay.jetty.plus.webapp.Configuration</Item>
+      <Item>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</Item>
+      <Item>org.mortbay.jetty.webapp.TagLibConfiguration</Item>
+    </Array>
+
+
+    <!-- ======================================================= -->
+    <!-- Configure the Atomikos console.                         -->
+    <!-- Only uncomment this if you are running the test jndi    -->
+    <!-- webapp.                                                 -->
+    <!-- ======================================================= -->
+    <Call name="addHandler">
+      <Arg>
+        <New id="atomikos"  class="org.mortbay.jetty.webapp.WebAppContext">
+          <Set name="contextPath">/atomikos</Set>
+          <Set name="war">./webapps-plus/atomikos.war</Set>
+          <Set name="VirtualHosts"><Array type="java.lang.String"></Array></Set>
+          <Set name="ConfigurationClasses"><Ref id="plusConfig"/></Set>
+        </New>
+      </Arg>
+    </Call>
+
+    <!-- ======================================================= -->
+    <!-- Configure a test webapplication for JNDI lookups        -->
+    <!-- To use it, also uncomment the setup for the Derby       -->
+    <!-- DataSources an the Atomikos Transaction manager above.  -->
+    <!-- ======================================================= -->
+    <Call name="addHandler">
+      <Arg>
+        <New id="testJNDIWebAppContext"  class="org.mortbay.jetty.webapp.WebAppContext">
+          <Set name="contextPath">/jndi</Set>
+          <Set name="war">./webapps-plus/test-jndi</Set>
+          <Set name="VirtualHosts"><Array type="java.lang.String"></Array></Set>
+          <Get name="SessionHandler">
+            <Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
+          </Get>
+          <Set name="ConfigurationClasses"><Ref id="plusConfig"/></Set>
+        </New>
+      </Arg>
+    </Call>
+  </Ref>
+</Configure>
+
+
+
+
+
+
+
+
+

@@ -54,64 +54,11 @@ public class HelloWorld extends HttpServlet
         ServletOutputStream out = response.getOutputStream();
         out.println("<html>");
         out.println("<h1>Hello World</h1>");
-        doJNDI(out);
         out.println("</html>");
         out.flush();
     }
 
     
-    public void doJNDI(ServletOutputStream out)
-    throws IOException
-    {
-        try
-        {
-            InitialContext ic = new InitialContext();
-            Context envContext = (Context) ic.lookup("java:comp/env");
-            
-            Double wiggle = (Double)envContext.lookup("wiggle");
-            
-            out.println("<p><code>java:comp/env/wiggle = "+wiggle+"</code></p>");
-            
-            Integer woggle = (Integer)envContext.lookup("woggle");
-            out.println("<p><code>java:comp/env/woggle = "+woggle+"</code></p>");
-        }
-        catch (NameNotFoundException e)
-        {
-            out.println("java:comp/env values: none. If you were expecting to see some, ensure you have uncommented the org.mortbay.jetty.plus.naming.EnvEntry setup in jetty.xml");
-        }
-        catch (NamingException e)
-        {
-            out.println("java:comp/env values: none. If you were expecting to see some, ensure you have uncommented the org.mortbay.jetty.plus.naming.EnvEntry setup in jetty.xml"+
-                        " and the naming.jar and plus.jar are in $JETTY_HOME/lib");
-        }
-      
-        
-        /* TODO separate into a different test webapp
-        try
-        {
-            InitialContext ic = new InitialContext();
-            UserTransaction utx = (UserTransaction)ic.lookup("java:comp/UserTransaction");
-            utx.begin();
-            //nothing
-            utx.commit();
-        }
-        catch (NameNotFoundException e)
-        {
-            out.println("Problem looking up UserTransaction, ensure you have uncommented the Transaction section of jetty.xml");
-        }
-        catch (NamingException e)
-        {
-            out.println("Problem looking up UserTransaction, ensure you have uncommented the Transaction section of jetty.xml");
-        }
-        catch (NotSupportedException e)
-        {
-            out.println("UserTransaction not supported, ensure you have commented out the Transaction section of jetty.xml");
-        }
-        catch (Exception e)
-        {
-            out.println(e.getMessage());
-        }
-        */
-    }
+ 
     
 }

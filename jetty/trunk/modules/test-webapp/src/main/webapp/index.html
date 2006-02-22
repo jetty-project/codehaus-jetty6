@@ -19,9 +19,15 @@ This is the beta release of Jetty 6.  This is a test context that serves:
 <li>a <a href="dump/info">Request Dump Servlet</a></li>
 <li>a <a href="session/">Session Dump Servlet</a></li>
 <li>a <a href="snoop.jsp">Request Dump JSP</a></li>
+<li>a <a href="dispatch">Dispatcher Servlet</a></li>
 <li>a <a href="chat/chat.html">AJAX Chat with continuations</a></li>
 </ul>
-The <a href="/javadoc/">javadoc</a> is served from another context.
+
+<p>
+Other contexts:
+<ul>
+<li> the <a href="/javadoc/">javadoc</a> </li>
+<li> a demo of the <a href="/jndi">JNDI features</a> <i>(Note: you must also run etc/jetty-plus.xml in order for this link to work)</i></li>
 </p>
 
 The features of Jetty 6.0.x are:
@@ -37,6 +43,8 @@ efficient asynchronous flushing and of avoiding chunking.</li>
 <li>Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be
 sent as sent is a single operation.</li> 
 <li>Continuations for efficient AJAX polling</li>
+<li>java:comp/env naming lookups</li>
+<li>pluggable JTA transaction managers</li>
 </ul>
 
 
