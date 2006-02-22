@@ -7,6 +7,7 @@
     + Fixed content-type for range requests
     + Fix for sf1435795 30sec delay from c taylor
     + Fix for myfaces and include with close
+    + Fix sf1431936 don't chunk the chunk
    
 jetty-6.0.0beta9 9/2/2006
     + PathMap for direct context mapping.

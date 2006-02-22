@@ -236,12 +236,6 @@ public class HttpGenerator implements HttpTokens
     }
 
     /* ------------------------------------------------------------ */
-    public long getContentAdded()
-    {
-        return _contentWritten;
-    }
-
-    /* ------------------------------------------------------------ */
     /**
      * @param version The version of the client the response is being sent to (NB. Not the version
      *            in the response, which is the version of the server).
@@ -776,11 +770,13 @@ public class HttpGenerator implements HttpTokens
                         if (_buffer == null && _header.space() >= LAST_CHUNK.length)
                         {
                             _header.put(LAST_CHUNK);
+                            _bufferChunked=true;
                             _needEOC = false;
                         }
                         else if (_buffer.space() >= LAST_CHUNK.length)
                         {
                             _buffer.put(LAST_CHUNK);
+                            _bufferChunked=true;
                             _needEOC = false;
                         }
                     }
@@ -852,4 +848,5 @@ public class HttpGenerator implements HttpTokens
     {
         return _contentWritten;
     }
+
 }
