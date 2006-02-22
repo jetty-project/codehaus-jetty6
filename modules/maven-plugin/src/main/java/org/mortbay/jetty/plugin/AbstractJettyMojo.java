@@ -76,7 +76,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * The temporary directory to use for the webapp.
      * Defaults to target/jetty-tmp
      * 
-     * @parameter expression="${basedir}/target/jetty-tmp"
+     * @parameter expression="${project.build.directory}/jetty-tmp"
      * @required
      */
     private File tmpDirectory;
