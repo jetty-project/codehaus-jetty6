@@ -31,17 +31,20 @@
       <item name="Versions" href="VERSION.txt"/>
       <item name="Readme" href="README.txt"/>
     </menu>
+    <menu name="Getting Started">
+      <item name="Downloading" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#download"/>
+      <item name="Installation" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#install"/>
+      <item name="Running" href="http://docs.codehaus.org/display/JETTY/Running"/>
+      <item name="User Guides" href="http://docs.codehaus.org/display/JETTY/User+Guides"/>
+    </menu>
     <menu name="Tools">
       <item name="Maven2 Jetty Plugin" href="http://jetty.mortbay.org/jetty6/maven-plugin/index.html"/>
     </menu>
-    <menu name="Download">
-      <item name="Main Archive" href="http://sourceforge.net/project/showfiles.php?group_id=7322&#x26;package_id=106252"/>
-    </menu>
     <menu name="Source">
-      <item name="Javadoc for org.mortbay.jetty" href="jetty/apidocs/index.html"/>
-      <item name="Javadoc for javax.servlet" href="servlet-api-2.5/apidocs/index.html"/>
+      <item name="Javadoc for Jetty API" href="jetty/index.html"/>
+      <item name="Javadoc for Servlet API" href="servlet-api-2.5/index.html"/>
       <item name="Browse online" href="http://fisheye.codehaus.org/viewrep/jetty"/>
-      <item name="SVN" href="source-repository.html"/>
+      <item name="Repository" href="source-repository.html"/>
     </menu>
     <menu name="Resources">
       <item name="Wiki" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
