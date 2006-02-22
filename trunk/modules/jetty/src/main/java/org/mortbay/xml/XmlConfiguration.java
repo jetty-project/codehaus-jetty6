@@ -147,6 +147,18 @@ public class XmlConfiguration
     }
 
     /* ------------------------------------------------------------ */
+    public Map getIdMap()
+    {
+        return _idMap;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setIdMap(Map map)
+    {
+        _idMap=map;
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * Configure an object. If the object is of the approprate class, the XML configuration script
      * is applied to the object.
@@ -866,10 +878,16 @@ public class XmlConfiguration
     {
         try
         {
-            
-            
+            XmlConfiguration last=null;
             for (int i = 0; i < args.length; i++)
-                new XmlConfiguration(Resource.newResource(args[i]).getURL()).newInstance();
+            {
+                
+                XmlConfiguration configuration = new XmlConfiguration(Resource.newResource(args[i]).getURL());
+                if (last!=null)
+                    configuration.getIdMap().putAll(last.getIdMap());
+                configuration.newInstance();
+                last=configuration;
+            }
         }
         catch (Exception e)
         {
