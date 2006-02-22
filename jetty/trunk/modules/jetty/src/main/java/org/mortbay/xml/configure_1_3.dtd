@@ -19,7 +19,7 @@ my be specified if a match is not achieved.
 $Id: configure_1_3.dtd,v 1.2 2005/10/26 20:48:48 gregwilkins Exp $
 -->
 
-<!ENTITY % CONFIG "Get|Set|Put|Call|New|Ref">
+<!ENTITY % CONFIG "Get|Set|Put|Call|New|Ref|Array">
 <!ENTITY % VALUE "#PCDATA|Call|New|Get|SystemProperty|Array|Ref">
 
 <!ENTITY % TYPEATTR "type CDATA #IMPLIED " > <!-- String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort| #classname -->
