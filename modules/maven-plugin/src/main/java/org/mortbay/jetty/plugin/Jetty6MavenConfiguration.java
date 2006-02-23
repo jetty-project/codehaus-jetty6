@@ -21,11 +21,12 @@ import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
 import org.mortbay.jetty.plugin.util.PluginLog;
+import org.mortbay.jetty.plus.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.xml.XmlParser;
 
-public class Jetty6MavenConfiguration extends WebXmlConfiguration 
+public class Jetty6MavenConfiguration extends Configuration 
 {
     private List classPathFiles;
     private File webXmlFile;
@@ -88,12 +89,8 @@ public class Jetty6MavenConfiguration extends WebXmlConfiguration
         
         PluginLog.getLog().info("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
         getWebAppContext().setResourceBase(webAppDir.getCanonicalPath());
-        XmlParser.Node config = null;    
         if (webXmlFile.exists())
-        {
-            config=_xmlParser.parse(webXmlFile.getCanonicalPath());          
-            initialize(config);
-        }
+            configure(webXmlFile.toURL().toString());
         PluginLog.getLog().info("Finished configuring web.xml");
     }
 
