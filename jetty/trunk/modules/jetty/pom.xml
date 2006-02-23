@@ -10,6 +10,12 @@
   <name>Jetty Server</name>
   <version>6.0-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>snapshots</id>
+      <url>http://snapshots.maven.codehaus.org/maven2</url>
+    </pluginRepository>
+  </pluginRepositories>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
