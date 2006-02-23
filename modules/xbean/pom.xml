@@ -46,7 +46,8 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}.${project.packaging}" failonerror="false"></copy>
+                <delete quiet="true" dir="../../lib/xbean"></delete>
+                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/xbean/${project.artifactId}.${project.packaging}" failonerror="false"></copy>
               </tasks>
             </configuration>
           </execution>
