@@ -223,11 +223,16 @@ public class JNDITest extends HttpServlet {
             s1 = c1.createStatement();
             s2 = c2.createStatement();
             
-            s1.execute("drop table testdata");
+            s1.execute("drop table "+TABLE1);
             c1.commit();
-            s2.execute("drop table testdata2");
+            s2.execute("drop table "+TABLE2);
             c2.commit();
             
+        }
+        catch (IllegalStateException e)
+        {
+            System.err.println("Caught expected IllegalStateException from Atomikos on doTearDown");
+            doTearDown();
         }
         finally
         {
@@ -240,14 +245,18 @@ public class JNDITest extends HttpServlet {
     
     public void destroy ()
     {
-        super.destroy();
+        
         try
         {
-            doTearDown();
+            doTearDown();     
         }
         catch (Exception e)
         {
             throw new RuntimeException(e);
+        }
+        finally
+        {
+            super.destroy();
         }
     }
 }
