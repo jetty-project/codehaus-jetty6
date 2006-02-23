@@ -1,4 +1,5 @@
 
+jetty-6.0.0beta10 25/2/2006
     + Added support for java:comp/env
     + Added support for pluggable transaction manager
     + Forward masks include attributes and vice versa
