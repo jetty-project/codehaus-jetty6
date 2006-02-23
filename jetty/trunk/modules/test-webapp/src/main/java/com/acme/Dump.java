@@ -481,7 +481,7 @@ public class Dump extends HttpServlet
 
             pout.write("<br/>");
             pout.write("<h2>Form to generate POST content</h2>");
-            pout.write("<form method=\"POST\" action=\""+response.encodeURL(getURI(request))+"\">");
+            pout.write("<form method=\"POST\" accept-charset=\"utf-8,iso8859-1\" action=\""+response.encodeURL(getURI(request))+"\">");
             pout.write("TextField: <input type=\"text\" name=\"TextField\" value=\"value\"/><br/>\n");
             pout.write("Select: <select multiple name=\"Select\">\n");
             pout.write("<option>ValueA</option>");
