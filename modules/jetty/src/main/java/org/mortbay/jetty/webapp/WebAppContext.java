@@ -65,7 +65,9 @@ import org.mortbay.util.TypeUtil;
  *
  */
 public class WebAppContext extends ContextHandler
-{    
+{   
+    public final static String WEB_DEFAULTS_XML="org/mortbay/jetty/webapp/webdefault.xml";
+    
     private static String[] __dftConfigurationClasses =  
     { 
         "org.mortbay.jetty.webapp.WebXmlConfiguration", 
@@ -74,7 +76,7 @@ public class WebAppContext extends ContextHandler
     } ;
     private String[] _configurationClasses=__dftConfigurationClasses;
     private Configuration[] _configurations;
-    private String _defaultsDescriptor="org/mortbay/jetty/webapp/webdefault.xml";
+    private String _defaultsDescriptor=WEB_DEFAULTS_XML;
     private boolean _distributable=false;
     private boolean _extractWAR=true;
     private boolean _parentLoaderPriority= true;
