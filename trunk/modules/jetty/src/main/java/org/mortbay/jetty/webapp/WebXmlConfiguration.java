@@ -150,8 +150,7 @@ public class WebXmlConfiguration implements Configuration
             Resource dftResource=Resource.newSystemResource(defaultsDescriptor);
             if(dftResource==null)
                 dftResource=Resource.newResource(defaultsDescriptor);
-            XmlParser.Node defaultConfig=_xmlParser.parse(dftResource.getURL().toString());
-            initialize(defaultConfig);
+            configure(dftResource.getURL().toString());
         }
     }
 
@@ -171,18 +170,21 @@ public class WebXmlConfiguration implements Configuration
         {
             // do web.xml file
             Resource web=webInf.addPath("web.xml");
-            if(!web.exists())
+            if(web.exists())
+                configure(web.getURL().toString());
+            else
             {
                 Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
                         +". Serving files and default/dynamic servlets only");
             }
-            else
-            {
-                XmlParser.Node config=null;
-                config=_xmlParser.parse(web.getURL().toString());
-                initialize(config);
-            }
         }
+    }
+    
+    public void configure(String webXml) throws Exception
+    {
+        XmlParser.Node config=null;
+        config=_xmlParser.parse(webXml);
+        initialize(config);
     }
 
     /* ------------------------------------------------------------------------------- */
