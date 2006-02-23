@@ -27,5 +27,6 @@
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.2.jar"/>
 	<classpathentry output="modules/maven-plugin-utils/target/classes" kind="src" path="modules/maven-plugin-utils/src/main/java"/>
 	<classpathentry kind="var" path="M2_REPO/geronimo-spec/geronimo-spec-jta/1.0.1B-rc4/geronimo-spec-jta-1.0.1B-rc4.jar"/>
+	<classpathentry kind="lib" path="modules/servlet-api-2.5/src/main/resources"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
