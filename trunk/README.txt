@@ -1,12 +1,6 @@
 
 
-This is a release of Jetty 6 (was JettyExperimental)
-
-This is mostly a clean slate implementation with only a little code 
-taken from Jetty 5, so that 8 years of cruft can be removed.
-
-Thus it has been able to be rearchitected to more closely match/use the 
-current servlet API and to closer model concepts such as filters and contexts.
+This is the Jetty 6 HTTP server and servlet container.
 
 RUNNING JETTY
 =============
@@ -32,8 +26,28 @@ version:
 
   mvn install
 
-The only real dependancy is slf4j logging.  To run the server 
-with JSP support, you will also need the jasper jars, commons 
-logging, commons el and xerces.   
+DEPENDENCIES 
+============
+The only real dependancy is the servlet api, so only 
+the jars in the top level of the lib directory are needed
+to run Jetty (and they can be trimmed from many applications).
+
+The jars in the subdirectories of lib are all optional, but
+are included on the classpath by the standard start.jar 
+mechanism
 
 
+ASSEMBLIES
+==========
+The assemblies directory contains alternate bundlings of the jetty
+jars that can be run from the command line without additional dependencies:
+
+eg
+
+  java -jar assemblies/jetty-standalone.jar
+
+  java -jar assemblies/jetty-standalone.jar 8080 -webapp mywebapp.war
+     
+
+
+  
