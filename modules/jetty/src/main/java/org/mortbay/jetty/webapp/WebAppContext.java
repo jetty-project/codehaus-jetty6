@@ -70,6 +70,7 @@ public class WebAppContext extends ContextHandler
     
     private static String[] __dftConfigurationClasses =  
     { 
+        "org.mortbay.jetty.webapp.WebInfConfiguration", 
         "org.mortbay.jetty.webapp.WebXmlConfiguration", 
         "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
         "org.mortbay.jetty.webapp.TagLibConfiguration" 

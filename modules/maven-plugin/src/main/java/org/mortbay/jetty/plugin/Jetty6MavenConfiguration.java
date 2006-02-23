@@ -88,9 +88,12 @@ public class Jetty6MavenConfiguration extends WebXmlConfiguration
         
         PluginLog.getLog().info("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
         getWebAppContext().setResourceBase(webAppDir.getCanonicalPath());
-        XmlParser.Node config = null;               
-        config=_xmlParser.parse(webXmlFile.getCanonicalPath());          
-        initialize(config);
+        XmlParser.Node config = null;    
+        if (webXmlFile.exists())
+        {
+            config=_xmlParser.parse(webXmlFile.getCanonicalPath());          
+            initialize(config);
+        }
         PluginLog.getLog().info("Finished configuring web.xml");
     }
 

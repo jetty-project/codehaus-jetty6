@@ -47,6 +47,8 @@ import org.mortbay.util.Loader;
 import org.mortbay.xml.XmlParser;
 /* ------------------------------------------------------------------------------- */
 /**
+ * Configure by parsing default web.xml and web.xml
+ * 
  * @author gregw
  */
 public class WebXmlConfiguration implements Configuration
@@ -126,38 +128,11 @@ public class WebXmlConfiguration implements Configuration
 
     /* ------------------------------------------------------------------------------- */
     /** Configure ClassPath.
-     * This method is called before the context ClassLoader is created.
-     * Paths and libraries should be added to the context using the setClassPath,
-     * addClassPath and addClassPaths methods.  The default implementation looks
-     * for WEB-INF/classes, WEB-INF/lib/*.zip and WEB-INF/lib/*.jar
-     * @throws Exception
      */
     public  void configureClassLoader()
     throws Exception
     {
-        //cannot configure if the context is already started
-        if (_context.isStarted())
-        {
-            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
-            return;
-        }
-
-        Resource webInf=_context.getWebInf();
-
-        // Add WEB-INF classes and lib classpaths
-        if (webInf != null && webInf.isDirectory() && _context.getClassLoader() instanceof WebAppClassLoader)
-        {
-            // Look for classes directory
-            Resource classes= webInf.addPath("classes/");
-            if (classes.exists())
-                ((WebAppClassLoader)_context.getClassLoader()).addClassPath(classes.toString());
-
-            // Look for jars
-            Resource lib= webInf.addPath("lib/");
-            if (lib.exists() || lib.isDirectory())
-                ((WebAppClassLoader)_context.getClassLoader()).addJars(lib);
-        }
-     }
+    }
 
     /* ------------------------------------------------------------------------------- */
     public void configureDefaults() throws Exception
@@ -198,7 +173,7 @@ public class WebXmlConfiguration implements Configuration
             Resource web=webInf.addPath("web.xml");
             if(!web.exists())
             {
-                Log.info("No WEB-INF/web.xml in "+getWebAppContext().getWar()
+                Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
                         +". Serving files and default/dynamic servlets only");
             }
             else
@@ -206,7 +181,6 @@ public class WebXmlConfiguration implements Configuration
                 XmlParser.Node config=null;
                 config=_xmlParser.parse(web.getURL().toString());
                 initialize(config);
-
             }
         }
     }
