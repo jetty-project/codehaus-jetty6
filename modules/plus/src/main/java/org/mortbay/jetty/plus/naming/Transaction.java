@@ -46,7 +46,6 @@ public class Transaction extends NamingEntry
         }
         catch (NameNotFoundException e)
         {
-            e.printStackTrace();
             return null;
         }
     }
