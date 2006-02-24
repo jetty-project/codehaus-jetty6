@@ -2,20 +2,14 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta10</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty</artifactId>
   <name>Jetty Server</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta10</version>
   <url>http://jetty.mortbay.org</url>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>snapshots</id>
-      <url>http://snapshots.maven.codehaus.org/maven2</url>
-    </pluginRepository>
-  </pluginRepositories>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
@@ -41,32 +35,6 @@
       </testResource>
     </testResources>
     <plugins>
-    
-    
-    <!-- ignore for release 
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.1-SNAPSHOT</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>attached</goal>
-            </goals>
-            <configuration>                   
-              <descriptor>assemble-standalone.xml</descriptor>
-              <archive>
-                <manifest>
-                  <mainClass>org.mortbay.jetty.Main</mainClass>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      -->
-      
-      
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
@@ -78,10 +46,8 @@
             </goals>
             <configuration>
               <tasks>
-                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" 
-		tofile="../../lib/${project.artifactId}.${project.packaging}"></copy>
-                <copy failonerror="false" file="target/${project.artifactId}-${project.version}-standalone.${project.packaging}"
-		tofile="../../assemblies/${project.artifactId}-standalone.${project.packaging}"></copy>
+                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}.${project.packaging}"></copy>
+                <copy failonerror="false" file="target/${project.artifactId}-${project.version}-standalone.${project.packaging}" tofile="../../assemblies/${project.artifactId}-standalone.${project.packaging}"></copy>
               </tasks>
             </configuration>
           </execution>
@@ -96,6 +62,12 @@
       </plugin>
     </plugins>
   </build>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>snapshots</id>
+      <url>http://snapshots.maven.codehaus.org/maven2</url>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -105,7 +77,7 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>servlet-api-2.5</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta10</version>
     </dependency>
   </dependencies>
 </project>
