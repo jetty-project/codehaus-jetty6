@@ -108,9 +108,11 @@ public class HttpServerTest
 
     // Useful constants
     private static final long   PAUSE = 10L;
-    private static final int    PORT  = 8080;
     private static final String HOST  = "localhost";
 
+
+    private int  port  = 0;
+    
     protected void tearDown() throws Exception
     {
         super.tearDown();
@@ -129,7 +131,7 @@ public class HttpServerTest
                             throws Exception, InterruptedException
     {
         Server       server = startServer(new HelloWorldHandler());
-        Socket       client = new Socket(HOST, PORT);
+        Socket       client = new Socket(HOST, port);
         OutputStream os     = client.getOutputStream();
 
         os.write(REQUEST1.getBytes());
@@ -154,7 +156,7 @@ public class HttpServerTest
     {        
 
         Server       server = startServer(new EchoHandler());
-        Socket       client = new Socket(HOST, PORT);
+        Socket       client = new Socket(HOST, port);
         OutputStream os     = client.getOutputStream();
 
         os.write(("GET /R2 HTTP/1.1\015\012"+
@@ -202,7 +204,7 @@ public class HttpServerTest
         String response;
 
         try {
-            Socket       client = new Socket(HOST, PORT);
+            Socket       client = new Socket(HOST, port);
             OutputStream os     = client.getOutputStream();
 
             // Write a fragment, flush, sleep, write the next fragment, etc.
@@ -237,7 +239,7 @@ public class HttpServerTest
 
         try {
             for (int i = 0; i < 100; i++) {
-                Socket       client = client = new Socket(HOST, PORT);
+                Socket       client = client = new Socket(HOST, port);
                 OutputStream os     = client.getOutputStream();
 
                 os.write(bytes);
@@ -285,7 +287,7 @@ public class HttpServerTest
                 // Sort the list
                 Arrays.sort(points);
 
-                Socket       client = client = new Socket(HOST, PORT);
+                Socket       client = client = new Socket(HOST, port);
                 OutputStream os     = client.getOutputStream();
 
                 writeFragments(bytes, points, message, os);
@@ -324,7 +326,7 @@ public class HttpServerTest
                 // Sort the list
                 Arrays.sort(points);
 
-                Socket       client = client = new Socket(HOST, PORT);
+                Socket       client = client = new Socket(HOST, port);
                 OutputStream os     = client.getOutputStream();
 
                 writeFragments(bytes, points, message, os);
@@ -365,7 +367,7 @@ public class HttpServerTest
 
         try {
             for (int i = 0; i < badPoints.length; ++i) {
-                Socket       client  = client = new Socket(HOST, PORT);
+                Socket       client  = client = new Socket(HOST, port);
                 OutputStream os      = client.getOutputStream();
                 StringBuffer message = new StringBuffer();
 
@@ -434,16 +436,17 @@ public class HttpServerTest
      *
      * @throws    Exception
      */
-    private static Server startServer(Handler handler)
+    private Server startServer(Handler handler)
                                throws Exception
     {
         Server                 server    = new Server();
         SelectChannelConnector connector = new SelectChannelConnector();
-
+        
+        connector.setPort(0);
         server.setConnectors(new Connector[] {connector});
         server.setHandler(handler);
         server.start();
-
+        port=connector.getLocalPort();
         return server;
     }
 
