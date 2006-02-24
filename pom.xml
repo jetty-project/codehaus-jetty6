@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Servlet Server</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta10</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -62,8 +62,8 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/trunk</developerConnection>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty_6_0_0beta10</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags/jetty_6_0_0beta10</developerConnection>
     <url>http://svn.jetty.codehaus.org/jetty/</url>
   </scm>
   <organization>
@@ -80,18 +80,6 @@
     </extensions>
     <defaultGoal>install</defaultGoal>
     <plugins>
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.1</version>
-        <inherited>false</inherited>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${basedir}/lib</directory>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
@@ -130,8 +118,8 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-	<groupId>org.mortbay.jetty</groupId>
-	<artifactId>jetty</artifactId>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty</artifactId>
         <version>6.0-SNAPSHOT</version>
       </dependency>
       <dependency>
@@ -200,14 +188,14 @@
         <version>${ant-version}</version>
       </dependency>
       <dependency>
-	<groupId>org.apache.xbean</groupId>
-	<artifactId>xbean-spring</artifactId>
-	<version>${xbean-version}</version>
+        <groupId>org.apache.xbean</groupId>
+        <artifactId>xbean-spring</artifactId>
+        <version>${xbean-version}</version>
       </dependency>
       <dependency>
-	<groupId>org.springframework</groupId>
-	<artifactId>spring</artifactId>
-	<version>${spring-version}</version>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring</artifactId>
+        <version>${spring-version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -225,18 +213,18 @@
   </distributionManagement>
   <properties>
     <mx4j-tools-version>2.1.1</mx4j-tools-version>
+    <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
+    <spring-version>1.2.6</spring-version>
     <tomcat-jasper-version>5.5.12</tomcat-jasper-version>
     <junit-version>3.8.1</junit-version>
     <ant-version>1.6.4</ant-version>
+    <xbean-version>2.2</xbean-version>
     <commons-el-version>1.0</commons-el-version>
+    <jta-spec-groupId>geronimo-spec</jta-spec-groupId>
     <slf4j-version>1.0-rc5</slf4j-version>
     <mx4j-version>3.0.1</mx4j-version>
+    <jta-spec-version>1.0.1B-rc4</jta-spec-version>
     <jcl104-over-slf4j-version>1.0-rc5</jcl104-over-slf4j-version>
     <xerces-version>2.6.2</xerces-version>
-    <spring-version>1.2.6</spring-version>
-    <xbean-version>2.2</xbean-version>
-    <jta-spec-groupId>geronimo-spec</jta-spec-groupId>
-    <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
-    <jta-spec-version>1.0.1B-rc4</jta-spec-version>
   </properties>
 </project>
