@@ -39,7 +39,6 @@
             </goals>
             <configuration>
               <tasks>
-                <delete quiet="true" dir="../../lib/naming"></delete>
                 <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/naming/${project.artifactId}.${project.packaging}"></copy>
               </tasks>
             </configuration>

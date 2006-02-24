@@ -12,41 +12,65 @@
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
+      <!-- This would be better served and simpler by using an assembly:directory in the top level pom -->
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>dependency-maven-plugin</artifactId>
         <executions>
           <execution>
             <phase>install</phase>
             <goals>
-              <goal>run</goal>
+              <goal>copy</goal>
             </goals>
             <configuration>
-              <tasks>
-                <delete quiet="true" dir="../../lib/jsp"></delete>
-                <copy todir="../../lib/jsp" flatten="true">
-                  <fileset dir="${user.home}/.m2/repository/xerces/xercesImpl/${xerces-version}">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                  <fileset dir="${user.home}/.m2/repository/xerces/xmlParserAPIs/${xerces-version}">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                  <fileset dir="${user.home}/.m2/repository/ant/ant/${ant-version}">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                  <fileset dir="${user.home}/.m2/repository/commons-el/commons-el/${commons-el-version}">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                  <fileset dir="${user.home}/.m2/repository/org/slf4j/jcl104-over-slf4j/${jcl104-over-slf4j-version}">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                  <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-simple/${slf4j-version}">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                  <fileset dir="${user.home}/.m2/repository/tomcat">
-                    <include name="**/${tomcat-jasper-version}/jasper-*.jar"></include>
-                  </fileset>
-                </copy>
-              </tasks>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>slf4j-simple</artifactId>
+                  <version>${slf4j-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>tomcat</groupId>
+                  <artifactId>jasper-compiler-jdt</artifactId>
+                  <version>${tomcat-jasper-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>jcl104-over-slf4j</artifactId>
+                  <version>${jcl104-over-slf4j-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>commons-el</groupId>
+                  <artifactId>commons-el</artifactId>
+                  <version>${commons-el-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>xerces</groupId>
+                  <artifactId>xercesImpl</artifactId>
+                  <version>${xerces-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>tomcat</groupId>
+                  <artifactId>jasper-compiler</artifactId>
+                  <version>${tomcat-jasper-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>ant</groupId>
+                  <artifactId>ant</artifactId>
+                  <version>${ant-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>tomcat</groupId>
+                  <artifactId>jasper-runtime</artifactId>
+                  <version>${tomcat-jasper-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>xerces</groupId>
+                  <artifactId>xmlParserAPIs</artifactId>
+                  <version>${xerces-version}</version>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${basedir}/../../lib/jsp</outputDirectory>
             </configuration>
           </execution>
         </executions>

@@ -29,27 +29,36 @@
       </testResource>
     </testResources>
     <plugins>
+      <!-- This would be better served and simpler by using an assembly:directory in the top level pom -->
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>dependency-maven-plugin</artifactId>
         <executions>
           <execution>
             <phase>install</phase>
             <goals>
-              <goal>run</goal>
+              <goal>copy</goal>
             </goals>
             <configuration>
-              <tasks>
-                <delete quiet="true" dir="../../lib/management"></delete>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/management/${project.artifactId}.${project.packaging}"></copy>
-                <copy todir="../../lib/management" flatten="true">
-                  <fileset dir="${user.home}/.m2/repository/mx4j/mx4j/${mx4j-version}">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                  <fileset dir="${user.home}/.m2/repository/mx4j/mx4j-tools/${mx4j-tools-version}">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                </copy>
-              </tasks>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>${project.artifactId}</artifactId>
+                  <version>${project.version}</version>
+                  <destFileName>${project.artifactId}.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>mx4j</groupId>
+                  <artifactId>mx4j</artifactId>
+                  <version>${mx4j-version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>mx4j</groupId>
+                  <artifactId>mx4j-tools</artifactId>
+                  <version>${mx4j-tools-version}</version>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${basedir}/../../lib/management</outputDirectory>
             </configuration>
           </execution>
         </executions>
