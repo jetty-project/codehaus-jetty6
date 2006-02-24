@@ -80,7 +80,7 @@ public class WebAppContext extends ContextHandler
     private String _defaultsDescriptor=WEB_DEFAULTS_XML;
     private boolean _distributable=false;
     private boolean _extractWAR=true;
-    private boolean _parentLoaderPriority= true;
+    private boolean _parentLoaderPriority= false;
     private PermissionCollection _permissions;
     private SecurityHandler _securityHandler;
     private ServletHandler _servletHandler;
@@ -212,7 +212,7 @@ public class WebAppContext extends ContextHandler
                 wah.setDefaultsDescriptor(defaults);
             wah.setExtractWAR(extract);
             wah.setWar(app.toString());
-            // TODO java2 classloader
+            wah.setParentLoaderPriority(java2CompliantClassLoader);
             
             wacs.add(wah);
         }
