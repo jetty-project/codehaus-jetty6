@@ -45,13 +45,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <stylesheetfile>${basedir}/../../project-site/src/resources/javadoc.css</stylesheetfile>
-          <outputDirectory>${basedir}/../../project-site/target/site/${artifactId}</outputDirectory>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 </project>
