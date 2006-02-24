@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta10</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -10,7 +10,7 @@
   <artifactId>maven-jetty6-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Maven Jetty6 Plugin</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta10</version>
   <developers>
     <developer>
       <id>janb</id>
@@ -42,24 +42,6 @@
       <artifactId>jasper-compiler-jdt</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-tools-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-naming</artifactId>
-      <version>6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>commons-el</groupId>
       <artifactId>commons-el</artifactId>
       <exclusions>
@@ -78,6 +60,38 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-plus</artifactId>
+      <version>6.0.0beta10</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-naming</artifactId>
+      <version>6.0.0beta10</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-management</artifactId>
+      <version>6.0.0beta10</version>
+    </dependency>
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jasper-runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-tools-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.0.0beta10</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl104-over-slf4j</artifactId>
     </dependency>
@@ -90,27 +104,13 @@
       <artifactId>jasper-compiler</artifactId>
     </dependency>
     <dependency>
-      <groupId>ant</groupId>
-      <artifactId>ant</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-management</artifactId>
-      <version>6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-plus</artifactId>
-      <version>6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>maven-plugin-utils</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta10</version>
     </dependency>
     <dependency>
-      <groupId>tomcat</groupId>
-      <artifactId>jasper-runtime</artifactId>
+      <groupId>ant</groupId>
+      <artifactId>ant</artifactId>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>

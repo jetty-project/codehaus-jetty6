@@ -2,13 +2,13 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta10</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-plus</artifactId>
   <name>Jetty Plus</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta10</version>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -29,7 +29,6 @@
       </testResource>
     </testResources>
     <plugins>
-      <!-- This would be better served and simpler by using an assembly:directory in the top level pom -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>dependency-maven-plugin</artifactId>
@@ -62,21 +61,21 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>${jta-spec-groupId}</groupId>
+      <artifactId>${jta-spec-artifactId}</artifactId>
+      <version>${jta-spec-version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta10</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-naming</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta10</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>${jta-spec-groupId}</groupId>
-      <artifactId>${jta-spec-artifactId}</artifactId>
-      <version>${jta-spec-version}</version>
     </dependency>
   </dependencies>
 </project>
