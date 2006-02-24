@@ -29,22 +29,26 @@
       </testResource>
     </testResources>
     <plugins>
+      <!-- This would be better served and simpler by using an assembly:directory in the top level pom -->
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>dependency-maven-plugin</artifactId>
         <executions>
           <execution>
             <phase>install</phase>
             <goals>
-              <goal>run</goal>
+              <goal>copy</goal>
             </goals>
             <configuration>
-              <tasks>
-                <delete quiet="true" dir="../../lib/plus"></delete>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/plus/${project.artifactId}.${project.packaging}"></copy>
-               <!-- uncomment to copy a jta jar to lib/plus if needed
-                <copy file="${user.home}/.m2/repository/${jta-spec-groupId}/${jta-spec-artifactId}/${jta-spec-version}/${jta-spec-artifactId}-${jta-spec-version}.jar" todir="../../lib/plus"/>
-               -->
-              </tasks>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>${project.artifactId}</artifactId>
+                  <version>${project.version}</version>
+                  <destFileName>${project.artifactId}.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${basedir}/../../lib/plus</outputDirectory>
             </configuration>
           </execution>
         </executions>
