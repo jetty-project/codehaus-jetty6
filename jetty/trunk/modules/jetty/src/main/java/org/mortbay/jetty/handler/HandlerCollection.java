@@ -67,8 +67,19 @@ public class HandlerCollection extends AbstractHandler implements Handler
         
         Server server = getServer();
         for (int i=0;_handlers!=null && i<_handlers.length;i++)
+        {
             if (_handlers[i].getServer()!=server)
                 _handlers[i].setServer(server);
+            try
+            {
+                if (isStarted())
+                    _handlers[i].start();
+            }catch (Exception e)
+            {
+                //change method signature to include Exception?
+                e.printStackTrace();
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
