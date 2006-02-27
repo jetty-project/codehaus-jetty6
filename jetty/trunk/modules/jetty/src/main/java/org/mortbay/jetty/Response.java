@@ -489,6 +489,8 @@ public class Response implements HttpServletResponse
      */
     public void setCharacterEncoding(String encoding)
     {
+        // TODO throw unsupported encoding exception ???
+        
         if (this._outputState==0 && !isCommitted())
         {
             _explicitEncoding=true;

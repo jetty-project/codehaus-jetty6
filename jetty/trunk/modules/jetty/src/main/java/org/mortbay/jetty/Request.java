@@ -1083,6 +1083,7 @@ public class Request implements HttpServletRequest
     {
         if (_inputState!=__NONE) 
             return;
+        // TODO throw unsupportedEncodingException ?
         _characterEncoding=encoding;
     }
     
