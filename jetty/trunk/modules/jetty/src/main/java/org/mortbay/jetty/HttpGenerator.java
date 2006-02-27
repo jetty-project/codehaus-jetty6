@@ -109,7 +109,7 @@ public class HttpGenerator implements HttpTokens
     private Buffer _header; // Buffer for HTTP header (and maybe small _content)
     private Buffer _buffer; // Buffer for copy of passed _content
     private Buffer _content; // Buffer passed to addContent
-    boolean _direct = false; // True if _content buffer can be written directly to endp
+    boolean _bypass = false; // True if _content buffer can be written directly to endp and bypass the content buffer
     private boolean _needCRLF = false;
     private boolean _needEOC = false;
     private boolean _bufferChunked = false;
@@ -163,7 +163,7 @@ public class HttpGenerator implements HttpTokens
             }
         }
         _content = null;
-        _direct = false;
+        _bypass = false;
         _needCRLF = false;
         _needEOC = false;
     }
@@ -178,7 +178,7 @@ public class HttpGenerator implements HttpTokens
         _close = false;
         _contentWritten = 0;
         _contentLength = UNKNOWN_CONTENT;
-        _direct=false;
+        _bypass=false;
         _content=null;
         if (_buffer!=null)
             _buffer.clear();  
@@ -298,9 +298,9 @@ public class HttpGenerator implements HttpTokens
             content.clear();
         else if (_endp != null && _buffer == null && content.length() > 0 && _last)
         {
-            // TODO - use direct in more cases.
+            // TODO - use bypass in more cases.
             // Make _content a direct buffer
-            _direct = true;
+            _bypass = true;
         }
         else
         {
@@ -318,7 +318,7 @@ public class HttpGenerator implements HttpTokens
     public boolean isBufferFull()
     {
         // Should we flush the buffers?
-        boolean full = (_state == STATE_FLUSHING || _direct || (_buffer != null && _buffer.space() == 0) || (_contentLength == CHUNKED_CONTENT && _buffer != null && _buffer.space() < CHUNK_SPACE));
+        boolean full = (_state == STATE_FLUSHING || _bypass || (_buffer != null && _buffer.space() == 0) || (_contentLength == CHUNKED_CONTENT && _buffer != null && _buffer.space() < CHUNK_SPACE));
         return full;
     }
 
@@ -601,7 +601,7 @@ public class HttpGenerator implements HttpTokens
             Flushing: while (true)
             {
                 int len = -1;
-                int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) | ((_direct && _content != null && _content.length() > 0)?1:0);
+                int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) | ((_bypass && _content != null && _content.length() > 0)?1:0);
                 
                 switch (to_flush)
                 {
@@ -630,7 +630,7 @@ public class HttpGenerator implements HttpTokens
                         if (_header != null) 
                             _header.clear();
                         
-                        _direct = false;
+                        _bypass = false;
                         
                         if (_buffer != null)
                         {
