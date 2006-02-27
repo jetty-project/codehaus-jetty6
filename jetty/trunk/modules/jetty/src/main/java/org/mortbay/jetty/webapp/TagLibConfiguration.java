@@ -144,9 +144,9 @@ public class TagLibConfiguration implements Configuration
         // Create a TLD parser
         XmlParser parser = new XmlParser(false);
         
-        parser.redirectEntity("web-jsptaglibrary_1_1.dtd",WebAppContext.class.getResource("/javax/servlet/jsp/web-jsptaglibrary_1_1.dtd"));
-        parser.redirectEntity("web-jsptaglibrary_1_2.dtd",WebAppContext.class.getResource("/javax/servlet/jsp/web-jsptaglibrary_1_2.dtd"));
-        parser.redirectEntity("web-jsptaglibrary_2_0.xsd",WebAppContext.class.getResource("/javax/servlet/jsp/web-jsptaglibrary_2_0.xsd"));
+        parser.redirectEntity("web-jsptaglibrary_1_1.dtd",WebAppContext.class.getResource("/javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd"));
+        parser.redirectEntity("web-jsptaglibrary_1_2.dtd",WebAppContext.class.getResource("/javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd"));
+        parser.redirectEntity("web-jsptaglibrary_2_0.xsd",WebAppContext.class.getResource("/javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd"));
         parser.setXpath("/taglib/listener/listener-class");
         // Parse all the discovered TLDs
         Iterator iter = tlds.iterator();
