@@ -504,7 +504,8 @@ public class HttpParser implements HttpTokens
                             _state=STATE_HEADER_NAME;
                             
                             // try cached name!
-                            _cached=HttpHeaders.CACHE.getBest(array, _buffer.markIndex(), length+1);
+                            if (array!=null)
+                                _cached=HttpHeaders.CACHE.getBest(array, _buffer.markIndex(), length+1);
                             if (_cached!=null)
                             {
                                 _length=_cached.length();
