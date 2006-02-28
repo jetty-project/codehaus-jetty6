@@ -52,34 +52,55 @@ public class HandlerCollection extends AbstractHandler implements Handler
     
     /* ------------------------------------------------------------ */
     /**
+     * If the server is started, the handlers will be started.
      * @param handlers The handlers to set.
      */
     public void setHandlers(Handler[] handlers)
     {
+        Handler [] old_handlers = _handlers==null?null:(Handler[])_handlers.clone();
+        
         if (getServer()!=null)
-            getServer().getContainer().update(this, _handlers, handlers, "handler");
-        
-        for (int i=0;_handlers!=null && i<_handlers.length;i++)
-            if (_handlers[i]!=null)
-                _handlers[i].setServer(null);
-        
-        _handlers = handlers;
+            getServer().getContainer().update(this, old_handlers, handlers, "handler");
         
         Server server = getServer();
-        for (int i=0;_handlers!=null && i<_handlers.length;i++)
+        MultiException mex = new MultiException();
+        for (int i=0;handlers!=null && i<handlers.length;i++)
         {
-            if (_handlers[i].getServer()!=server)
-                _handlers[i].setServer(server);
+            if (handlers[i].getServer()!=server)
+                handlers[i].setServer(server);
             try
             {
                 if (isStarted())
-                    _handlers[i].start();
-            }catch (Exception e)
+                    handlers[i].start();
+            }
+            catch (Throwable e)
             {
-                //change method signature to include Exception?
-                e.printStackTrace();
+                mex.add(e);
             }
         }
+
+        // quasi atomic.... so don't go doing this under load on a SMP system.
+        _handlers = handlers;
+
+        for (int i=0;old_handlers!=null && i<old_handlers.length;i++)
+        {
+            if (old_handlers[i]!=null)
+            {
+                try
+                {
+                    if (old_handlers[i].isStarted())
+                        old_handlers[i].stop();
+                }
+                catch (Throwable e)
+                {
+                    mex.add(e);
+                }
+                
+                old_handlers[i].setServer(null);
+            }
+        }
+                
+        mex.ifExceptionThrowRuntime();
     }
 
     /* ------------------------------------------------------------ */
