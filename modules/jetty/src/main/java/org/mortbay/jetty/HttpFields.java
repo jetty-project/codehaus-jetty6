@@ -309,13 +309,15 @@ public class HttpFields
     /* ------------------------------------------------------------ */
     public boolean containsKey(Buffer name)
     {
-        return _bufferMap.containsKey(name);
+        Field f = getField(name);
+        return (f != null && f._revision == _revision); 
     }
 
     /* ------------------------------------------------------------ */
     public boolean containsKey(String name)
     {
-        return _bufferMap.containsKey(HttpHeaders.CACHE.lookup(name));
+        Field f = getField(name);
+        return (f != null && f._revision == _revision); 
     }
 
     /* -------------------------------------------------------------- */
