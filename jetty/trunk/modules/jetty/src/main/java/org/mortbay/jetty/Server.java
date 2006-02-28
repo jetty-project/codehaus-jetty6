@@ -306,8 +306,16 @@ public class Server extends HandlerCollection
             {
                 Object contexts = _contextMap.getLazyMatches(target);
                 for (int i=0; i<LazyList.size(contexts); i++)
-                    if (((Handler)((Map.Entry)LazyList.get(contexts, i)).getValue()).handle(target,request, response, dispatch))
-                        return true;
+                {
+                    Map.Entry entry = (Map.Entry)LazyList.get(contexts, i);
+                    Object list = entry.getValue();
+                    for (int j=0; j<LazyList.size(list); j++)
+                    {
+                        Handler handler = (Handler)LazyList.get(list,j);
+                        if (handler.handle(target,request, response, dispatch))
+                            return true;
+                    }
+                }
             }
             
             for (int i=0;i<handlers.length;i++)

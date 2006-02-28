@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import javax.net.ssl.SSLSocket;
+
 import org.mortbay.io.Portable;
 
 /**
@@ -56,6 +58,8 @@ public class SocketEndPoint extends StreamEndPoint
      */
     public void close() throws IOException
     {
+        if (!(_socket instanceof SSLSocket))
+            _socket.shutdownOutput();
         _socket.close();
         _in=null;
         _out=null;

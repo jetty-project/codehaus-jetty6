@@ -441,30 +441,6 @@ public class ContextHandler extends WrappedHandler implements Attributes
         {
             new_context=true;
             
-            // Nope - so check the target.
-            if (dispatch==REQUEST)
-            {
-                if (target.equals(_contextPath))
-                {
-                    target=_contextPath;
-                    if (!target.endsWith("/"))
-                    {
-                        response.sendRedirect(target+"/");
-                        return true;
-                    }
-                }
-                else if (target.startsWith(_contextPath) && (_contextPath.length()==1 || target.charAt(_contextPath.length())=='/'))
-                {
-                    if (_contextPath.length()>1)
-                        target=target.substring(_contextPath.length());
-                }
-                else 
-                {
-                    // Not for this context!
-                    return false;
-                }
-            }
-            
             // Check the vhosts
             if (_vhosts!=null && _vhosts.length>0)
             {
@@ -487,6 +463,30 @@ public class ContextHandler extends WrappedHandler implements Attributes
                     match=_hosts[i]!=null && _hosts[i].equalsIgnoreCase(host);
                 if (!match)
                     return false;
+            }
+            
+            // Nope - so check the target.
+            if (dispatch==REQUEST)
+            {
+                if (target.equals(_contextPath))
+                {
+                    target=_contextPath;
+                    if (!target.endsWith("/"))
+                    {
+                        response.sendRedirect(target+"/");
+                        return true;
+                    }
+                }
+                else if (target.startsWith(_contextPath) && (_contextPath.length()==1 || target.charAt(_contextPath.length())=='/'))
+                {
+                    if (_contextPath.length()>1)
+                        target=target.substring(_contextPath.length());
+                }
+                else 
+                {
+                    // Not for this context!
+                    return false;
+                }
             }
         }
         
