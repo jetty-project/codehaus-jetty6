@@ -185,9 +185,10 @@ public class Constraint implements Cloneable, Serializable
             + ","
             + (_anyRole ? "*" : (_roles == null ? "-" : _roles.toString()))
             + ","
-            + (_dataConstraint == DC_NONE
+            + (_dataConstraint == DC_UNSET ? "DC_UNSET}":
+               (_dataConstraint == DC_NONE
                 ? "NONE}"
-                : (_dataConstraint == DC_INTEGRAL ? "INTEGRAL}" : "CONFIDENTIAL}"));
+                : (_dataConstraint == DC_INTEGRAL ? "INTEGRAL}" : "CONFIDENTIAL}")));
     }
 
     
