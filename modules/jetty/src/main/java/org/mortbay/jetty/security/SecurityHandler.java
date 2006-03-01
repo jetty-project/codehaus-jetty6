@@ -158,8 +158,19 @@ public class SecurityHandler extends WrappedHandler
      */
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException 
     {
-        if (dispatch==REQUEST && !checkSecurityConstraints(target,(Request)request,(Response)response))
+        Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+        Response base_response = (response instanceof Response) ? (Response)response:HttpConnection.getCurrentConnection().getResponse();
+        
+        if (dispatch==REQUEST && !checkSecurityConstraints(target,base_request,base_response))
             return true;
+        
+        if (_authenticator instanceof FormAuthenticator &&
+            FormAuthenticator.__J_SECURITY_CHECK.equals(target))
+        {
+            _authenticator.authenticate(getUserRealm(),target,base_request,base_response);
+            return true;
+        }
+        
         if (getHandler()!=null)
             return getHandler().handle(target, request, response, dispatch);
         return false;
@@ -173,43 +184,37 @@ public class SecurityHandler extends WrappedHandler
         Response response)
         throws IOException
     {
-        List mapping_entries= _constraintMap.getMatches(pathInContext);
+        Object mapping_entries= _constraintMap.getLazyMatches(pathInContext);
         String pattern=null;
-        if (mapping_entries != null && mapping_entries.size() > 0)
+        Object constraints= null;
+        
+        // for each path match
+        // Add only constraints that have the correct method
+        // break if the matching pattern changes.  This allows only
+        // constraints with matching pattern and method to be combined.
+        if (mapping_entries!=null)
         {
-            Object constraints= null;
-
-            // for each path match
-            // Add only constraints that have the correct method
-            // break if the matching pattern changes.  This allows only
-            // constraints with matching pattern and method to be combined.
-            loop:
-            for (int m= 0; m < mapping_entries.size(); m++)
+            loop: for (int m=0;m<LazyList.size(mapping_entries); m++)
             {
-                Map.Entry entry= (Map.Entry)mapping_entries.get(m);
+                Map.Entry entry= (Map.Entry)LazyList.get(mapping_entries,m);
                 Object mappings= entry.getValue();
                 String path_spec=(String)entry.getKey();
                 
                 for (int c=0;c<LazyList.size(mappings);c++)
                 {
-                	ConstraintMapping mapping=(ConstraintMapping)LazyList.get(mappings,c);
-                	if (mapping.getMethod()!=null && !mapping.getMethod().equalsIgnoreCase(request.getMethod()))
-                	    continue;
-						
-					if (pattern!=null && !pattern.equals(path_spec))
-						break loop;
-					
-					pattern=path_spec;	
-	                constraints= LazyList.add(constraints, mapping.getConstraint());
+                    ConstraintMapping mapping=(ConstraintMapping)LazyList.get(mappings,c);
+                    if (mapping.getMethod()!=null && !mapping.getMethod().equalsIgnoreCase(request.getMethod()))
+                        continue;
+                    
+                    if (pattern!=null && !pattern.equals(path_spec))
+                        break loop;
+                    
+                    pattern=path_spec;	
+                    constraints= LazyList.add(constraints, mapping.getConstraint());
                 }
             }
-            
-            return check(constraints,
-                _authenticator,
-                _userRealm,
-                pathInContext,
-                request,
-                response);
+        
+            return check(constraints,_authenticator,_userRealm,pathInContext,request,response);
         }
         
         request.setUserPrincipal(_notChecked);

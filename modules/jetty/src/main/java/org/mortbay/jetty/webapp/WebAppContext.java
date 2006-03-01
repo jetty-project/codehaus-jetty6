@@ -230,13 +230,13 @@ public class WebAppContext extends ContextHandler
     /* ------------------------------------------------------------ */
     public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
-        _securityHandler = securityHandler!=null?securityHandler:new SecurityHandler();
         _sessionHandler = sessionHandler!=null?sessionHandler:new SessionHandler();
+        _securityHandler = securityHandler!=null?securityHandler:new SecurityHandler();
         _servletHandler = servletHandler!=null?servletHandler:new ServletHandler();
         
-        setHandler(_securityHandler);
-        _securityHandler.setHandler(_sessionHandler);
-        _sessionHandler.setHandler(_servletHandler);
+        setHandler(_sessionHandler);
+        _sessionHandler.setHandler(_securityHandler);
+        _securityHandler.setHandler(_servletHandler);
         
         setErrorHandler(errorHandler!=null?errorHandler:new WebAppErrorHandler());
     }    
