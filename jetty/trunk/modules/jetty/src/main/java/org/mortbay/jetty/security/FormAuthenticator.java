@@ -44,7 +44,7 @@ public class FormAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     public final static String __J_URI="org.mortbay.jetty.URI";
     public final static String __J_AUTHENTICATED="org.mortbay.jetty.Auth";
-    public final static String __J_SECURITY_CHECK="j_security_check";
+    public final static String __J_SECURITY_CHECK="/j_security_check";
     public final static String __J_USERNAME="j_username";
     public final static String __J_PASSWORD="j_password";
 
@@ -128,7 +128,8 @@ public class FormAuthenticator implements Authenticator
             return null;
         
         // Handle a request for authentication.
-        if ( uri.substring(uri.lastIndexOf("/")+1).startsWith(__J_SECURITY_CHECK) )
+        // TODO perhaps j_securitycheck can be uri suffix?
+        if ( uri.equals(__J_SECURITY_CHECK) )
         {
             // Check the session object for login info.
             FormCredential form_cred=new FormCredential();
@@ -156,30 +157,23 @@ public class FormAuthenticator implements Authenticator
 
                 // Sign-on to SSO mechanism
                 if (realm instanceof SSORealm)
-                {
                     ((SSORealm)realm).setSingleSignOn(request,response,form_cred._userPrincipal,new Password(form_cred._jPassword));
-                }
 
                 // Redirect to original request
-                if (response!=null)
-                {
-                    response.setContentLength(0);
-                    response.sendRedirect(response.encodeRedirectURL(nuri));
-                }
+                response.setContentLength(0);
+                response.sendRedirect(response.encodeRedirectURL(nuri));
             }   
-            else if (response!=null)
+            else
             {
                 if(Log.isDebugEnabled())Log.debug("Form authentication FAILED for "+form_cred._jUserName);
-                if (_formErrorPage!=null)
+                if (_formErrorPage==null)
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                else
                 {
                     response.setContentLength(0);
                     response.sendRedirect(response.encodeRedirectURL
                                           (URIUtil.addPaths(request.getContextPath(),
                                                         _formErrorPage)));
-                }
-                else
-                {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 }
             }
             

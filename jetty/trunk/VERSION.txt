@@ -1,3 +1,4 @@
+    + fixed FORM authentication
 
 jetty-6.0.0beta10 25/2/2006
     + Added support for java:comp/env
