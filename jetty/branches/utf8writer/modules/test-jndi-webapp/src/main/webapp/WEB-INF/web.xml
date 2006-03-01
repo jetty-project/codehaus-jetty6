@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app 
+   xmlns="http://java.sun.com/xml/ns/j2ee" 
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_5.xsd" 
+   version="2.5"> 
+
+  <display-name>Test JNDI WebApp</display-name>
+  
+
+  <servlet>
+    <servlet-name>JNDITest</servlet-name>
+    <servlet-class>com.acme.JNDITest</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>JNDITest</servlet-name>
+    <url-pattern>/test/*</url-pattern>
+  </servlet-mapping>
+
+  <env-entry>
+    <env-entry-name>wiggle</env-entry-name>
+    <env-entry-value>99.99</env-entry-value>
+    <env-entry-type>java.lang.Double</env-entry-type>
+  </env-entry>
+
+  <resource-ref>
+    <res-ref-name>jdbc/mydatasource</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+  <resource-ref>
+    <res-ref-name>jdbc/mydatasource2</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+
+</web-app>
+
+

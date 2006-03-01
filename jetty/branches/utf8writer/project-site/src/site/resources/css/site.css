@@ -1,0 +1,125 @@
+
+div.summary
+{
+  font-size: 10pt;
+  padding-top: 40px;
+  padding-left: 20px;
+}
+
+div.summary span
+{
+
+}
+/*
+div.feature
+{
+  font-size: 10pt;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 20px;
+  margin-right: 0px;
+}
+
+div.feature span
+{
+  font-size: 12pt;
+  font-weight: bold;
+  font-variant: small-caps;
+  color: #666699;
+  text-align: left;
+  text-decoration:none;
+  float:left;
+  margin-right: 10px;
+}
+*/
+
+div.study
+{
+  border-left: 2px solid #999999;
+  border-bottom: 4px solid #999999;
+  border-top: 2px dotted  #999999;
+  border-right: 2px dotted  #999999;
+  float: right;
+  text-align: left;
+  font-size: 9pt;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        padding-left: 8px;
+        padding-right: 8px;
+  margin: 14px;
+  width: 350px;
+}
+
+div.study img
+{
+  vertical-align: bottom;
+  padding-bottom:6px;
+}
+
+div.study h1
+{
+  font-size: 14pt;
+  font-weight: bold;
+  font-style: normal;
+  font-variant: small-caps;
+  text-decoration: none;
+  color: #000099;
+  margin-top: 2px;
+  margin-bottom: 6px;
+  margin-left: 0px
+  margin-right: 0px
+}
+
+div.study h2
+{
+  font-size: 10pt;
+  font-style: normal;
+  color: #000000;
+  text-decoration: none;
+  margin-top: 0px;
+  margin-bottom: 6px;
+  margin-left: 0px
+  margin-right: 0px
+}
+
+
+div.study div
+{
+  margin-top: 6px;
+  padding: 4px;
+  margin-bottom: 6px;
+  border-top: 1px solid #666666;
+  border-bottom: 1px solid #666666;
+  font-size: 9pt;
+  font-style: oblique;
+  font-family: helvetica, sans-serif;
+  /*background-color: #f0f0f0;*/
+  background-color: #FFFFFF;
+  color: #666666;
+}
+
+div.feature
+{
+  margin-top: 20px;
+  margin-left:20px;
+  margin-bottom: 20px;
+}
+
+div.featureitem
+{
+  background-image:  url(../images/feature2.gif);
+  background-repeat: no-repeat;
+  background-position: -4px -4px;
+  font-style: oblique;
+  padding-left:40px;
+  line-height: 200%;
+}
+
+div.siteheader
+{
+  font-size: 600%;
+  font-weight: bold;
+  font-family: Verdana, sans-serif;
+  color: #fc3b0e; 
+  text-align:center;
+}
