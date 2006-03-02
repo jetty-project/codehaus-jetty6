@@ -164,8 +164,7 @@ public class SecurityHandler extends WrappedHandler
         if (dispatch==REQUEST && !checkSecurityConstraints(target,base_request,base_response))
             return true;
         
-        if (_authenticator instanceof FormAuthenticator &&
-            FormAuthenticator.__J_SECURITY_CHECK.equals(target))
+        if (_authenticator instanceof FormAuthenticator && target.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
         {
             _authenticator.authenticate(getUserRealm(),target,base_request,base_response);
             return true;
