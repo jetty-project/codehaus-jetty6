@@ -101,6 +101,7 @@ public class Dump extends HttpServlet
             return;
         }
         
+        
         // handle an exception
         String info= request.getPathInfo();
         if (info != null && info.endsWith("Exception"))

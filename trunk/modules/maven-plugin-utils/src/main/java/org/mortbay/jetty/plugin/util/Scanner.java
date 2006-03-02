@@ -154,12 +154,12 @@ public class Scanner extends Thread
 					{
 						try
 						{
-							PluginLog.getLog().info("Calling scanner listeners ...");
+							PluginLog.getLog().debug("Calling scanner listeners ...");
 							
 							for (int i=0; i<getListeners().size();i++)
 								((Scanner.Listener)getListeners().get(i)).changesDetected(this, filesWithDifferences);
 							
-							PluginLog.getLog().info("Listeners completed.");
+							PluginLog.getLog().debug("Listeners completed.");
 						}
 						catch (Exception e)
 						{
@@ -186,7 +186,7 @@ public class Scanner extends Thread
 	 */
 	private Map scan ()
 	{
-		PluginLog.getLog().info("Scanning ...");
+		PluginLog.getLog().debug("Scanning ...");
 		List roots = getRoots();
 		if ((roots == null) || (roots.isEmpty()))
 			return Collections.EMPTY_MAP;
@@ -209,7 +209,7 @@ public class Scanner extends Thread
 			}
 		}
 		
-		PluginLog.getLog().info("Scan complete at "+new Date().toString());
+		PluginLog.getLog().debug("Scan complete at "+new Date().toString());
 		return scanInfoMap;
 	}
 	
