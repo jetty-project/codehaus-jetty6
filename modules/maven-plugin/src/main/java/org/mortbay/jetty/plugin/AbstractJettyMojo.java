@@ -247,7 +247,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     {
         try 
         {
-            getLog().info("Starting Jetty Server ...");
+            getLog().debug("Starting Jetty Server ...");
             configureSystemProperties();
             setServer(createServer());
         
@@ -283,6 +283,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             
             // start Jetty
             server.start();
+
+            getLog().info("Started Jetty Server");
             
             // start the scanner thread (if necessary) on the main webapp
             configureScanner ();            

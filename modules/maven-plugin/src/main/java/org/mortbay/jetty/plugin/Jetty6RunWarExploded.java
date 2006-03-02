@@ -126,9 +126,10 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
             {
                 try
                 {
-                    getLog().info("Stopping webapp ...");
+                    getLog().info("Restarting webapp");
+                    getLog().debug("Stopping webapp ...");
                     getWebApplication().stop();
-                    getLog().info("Reconfiguring webapp ...");
+                    getLog().debug("Reconfiguring webapp ...");
 
                     checkPomConfiguration();
                     
@@ -148,7 +149,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
                         scanner.setRoots(scanList);
                     }
 
-                    getLog().info("Restarting webapp ...");
+                    getLog().debug("Restarting webapp ...");
                     getWebApplication().start();
                     getLog().info("Restart completed.");
                 }
