@@ -236,9 +236,10 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
             {
                 try
                 {
-                    getLog().info("Stopping webapp ...");
+                    getLog().info("restarting "+getWebApplication());
+                    getLog().debug("Stopping webapp ...");
                     getWebApplication().stop();
-                    getLog().info("Reconfiguring webapp ...");
+                    getLog().debug("Reconfiguring webapp ...");
 
                     checkPomConfiguration();
                     configureWebApplication();
@@ -255,7 +256,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                         scanner.setRoots(scanList);
                     }
 
-                    getLog().info("Restarting webapp ...");
+                    getLog().debug("Restarting webapp ...");
                     getWebApplication().start();
                     getLog().info("Restart completed at "+new Date().toString());
                 }

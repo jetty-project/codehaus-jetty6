@@ -55,14 +55,14 @@ public class Jetty6MavenConfiguration extends Configuration
      */
     public void configureClassLoader() throws Exception 
     {
-        PluginLog.getLog().info("Setting up classpath ...");
+        PluginLog.getLog().debug("Setting up classpath ...");
       
         //put the classes dir and all dependencies into the classpath
         Iterator itor = classPathFiles.iterator();
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
         
-        PluginLog.getLog().info("Finished setting up classpath");
+        PluginLog.getLog().info("Classpath: "+((WebAppClassLoader)getWebAppContext().getClassLoader()).getUrlClassPath());
     }
 
     
@@ -83,15 +83,15 @@ public class Jetty6MavenConfiguration extends Configuration
         //cannot configure if the context is already started
         if (getWebAppContext().isStarted())
         {
-            PluginLog.getLog().info("Cannot configure webapp after it is started");
+            PluginLog.getLog().error("Cannot configure webapp after it is started");
             return;
         }
         
-        PluginLog.getLog().info("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
+        PluginLog.getLog().debug("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
         getWebAppContext().setResourceBase(webAppDir.getCanonicalPath());
         if (webXmlFile.exists())
             configure(webXmlFile.toURL().toString());
-        PluginLog.getLog().info("Finished configuring web.xml");
+        PluginLog.getLog().debug("Finished configuring web.xml");
     }
 
     
