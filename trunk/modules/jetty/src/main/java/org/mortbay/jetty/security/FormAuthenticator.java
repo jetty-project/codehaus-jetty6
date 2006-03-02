@@ -129,7 +129,7 @@ public class FormAuthenticator implements Authenticator
         
         // Handle a request for authentication.
         // TODO perhaps j_securitycheck can be uri suffix?
-        if ( uri.equals(__J_SECURITY_CHECK) )
+        if ( uri.endsWith(__J_SECURITY_CHECK) )
         {
             // Check the session object for login info.
             FormCredential form_cred=new FormCredential();
