@@ -14,11 +14,11 @@
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
-        <directory>src/main/java</directory>
+        <directory>src/main/resources</directory>
         <includes>
-          <include>org/mortbay/**/*.properties</include>
-          <include>org/mortbay/**/*.dtd</include>
-          <include>org/mortbay/**/*.xml</include>
+          <include>**/*.properties</include>
+          <include>**/*.dtd</include>
+          <include>**/*.xml</include>
         </includes>
       </resource>
     </resources>

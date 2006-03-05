@@ -620,7 +620,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public void setContextPath(String contextPath)
     {
-        if (contextPath!=null && contextPath.length()>0 && contextPath.endsWith("/"))
+        if (contextPath!=null && contextPath.length()>1 && contextPath.endsWith("/"))
             throw new IllegalArgumentException("ends with /");
         _contextPath = contextPath;
     }
