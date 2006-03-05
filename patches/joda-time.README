@@ -19,7 +19,7 @@ of jetty to one that uses joda-time.  The build files are updated, so
 the required jars are fetched from ibiblio.
 
    cd $JETTY_6
-   patch -R -p0 < patches/joda-time.patch
+   patch -p0 < patches/joda-time.patch
    mvn
 
 
