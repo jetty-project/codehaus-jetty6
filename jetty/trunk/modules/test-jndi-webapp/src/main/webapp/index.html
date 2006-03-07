@@ -24,13 +24,13 @@ Ensure that you are using the <code>etc/jetty-plus.xml</code> file on the runlin
 </pre>
 </blockquote>
 <p>
-Download <a href="http://www.atomikos.com">Atomikos</a> and <a href="http://db.apache.org/derby/index.html">Derby</a> and copy their jar files to <code>lib</code>.
+Download <a href="http://www.atomikos.com">Atomikos</a> and <a href="http://db.apache.org/derby/index.html">Derby</a> and copy their jar files to <code>lib</code>. <b>Don't forget to copy the atomikos.war file to <code>webapps-plus/</code>.</b>
 </p>
 
 <p>
 Click <code>Commit</code> to make a distributed update to 2 different databases, or <code>Rollback</code> to prevent the update from happening.
 </p>
-<form action="/jndi/test" method="post">
+<form action="test" method="post">
       <input type="radio" name="completion" value="commit" checked="true"> Commit<BR>
       <input type="radio" name="completion" value="rollback"> Rollback<BR>
       <P>
