@@ -125,6 +125,22 @@
     </New>
 
     <!-- =========================================================== -->
+    <!-- Example JAAS realm setup.                                   -->
+    <!-- The LoginModuleName must be exactly the same as in the      -->
+    <!-- login.conf file, and the realm Name must be the same as in  -->
+    <!-- the web.xml file.                                           -->
+    <!-- =========================================================== -->
+    <Call name="addUserRealm">
+      <Arg>
+          <New class="org.mortbay.jetty.plus.jaas.JAASUserRealm">
+            <Set name="name">xyzrealm</Set>
+            <Set name="LoginModuleName">xyz</Set>
+          </New>
+      </Arg>
+    </Call>
+
+
+    <!-- =========================================================== -->
     <!-- Configurations for WebAppContexts                           -->
     <!-- Sequence of configurations to be applied to a webapp.       -->
     <!-- =========================================================== -->
