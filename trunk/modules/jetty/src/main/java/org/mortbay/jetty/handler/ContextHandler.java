@@ -507,19 +507,19 @@ public class ContextHandler extends WrappedHandler implements Attributes
                 base_request.setServletPath(null);
                 base_request.setPathInfo(target);
             }
-            
-            // Set the classloader
-            if (_classLoader!=null)
-            {
-                current_thread=Thread.currentThread();
-                old_classloader=current_thread.getContextClassLoader();
-                current_thread.setContextClassLoader(_classLoader);
-            }
-            
-            // Handle the REALLY SILLY request events!
+
             ServletRequestEvent event=null;
             if (new_context)
             {
+                // Set the classloader
+                if (_classLoader!=null)
+                {
+                    current_thread=Thread.currentThread();
+                    old_classloader=current_thread.getContextClassLoader();
+                    current_thread.setContextClassLoader(_classLoader);
+                }
+                
+                // Handle the REALLY SILLY request events!
                 if (_requestListeners!=null)
                 {
                     event = new ServletRequestEvent(_context,request);
