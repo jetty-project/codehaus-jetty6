@@ -414,7 +414,7 @@ public class Server extends HandlerCollection
         if (realms==null || realms.length==0 )
             setUserRealms(new UserRealm[]{realm});
         else
-            setHandlers((Handler[])LazyList.addToArray(realms, realm));
+            setUserRealms((UserRealm[])LazyList.addToArray(realms, realm));
     }
     
     /* ------------------------------------------------------------ */
