@@ -458,8 +458,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         if (scavenger!=null)
             scavenger.interrupt();
         
-        // TODO when do we stop the meta manager?
-        
         _loader=null;
     }
 

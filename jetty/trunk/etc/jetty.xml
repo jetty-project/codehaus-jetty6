@@ -1,28 +1,10 @@
 <?xml version="1.0"?>
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
 
-
 <!-- =============================================================== -->
 <!-- Configure the Jetty Server                                      -->
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.Server">
-
-    <!-- =========================================================== -->
-    <!-- Initialize management framework                             -->
-    <!-- =========================================================== -->
-    <!--
-    <Call id="MBeanServer" class="javax.management.MBeanServerFactory" name="createMBeanServer">
-       <Arg>org.mortbay.jetty</Arg>
-    </Call>
-    <Get id="Container" name="container"/>
-    <New class="org.mortbay.management.MBeanContainer">
-      <Arg><Ref id="MBeanServer" /></Arg>
-      <Arg><Ref id="Container"/></Arg>
-      <Set name="managementPort">8082</Set>
-      <Call name="start" />
-    </New>
-    -->
-
 
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
@@ -190,10 +172,9 @@
     -->
 
     <!-- =========================================================== -->
-    <!-- Start the server                                            -->
+    <!-- extra options                                               -->
     <!-- =========================================================== -->
     <Set name="stopAtShutdown">true</Set>
-    <Call name="start"/>
 
 </Configure>
 
