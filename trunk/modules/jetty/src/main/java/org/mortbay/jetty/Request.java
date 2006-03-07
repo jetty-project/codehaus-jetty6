@@ -50,6 +50,7 @@ import org.mortbay.jetty.handler.ContextHandler.Context;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -901,7 +902,7 @@ public class Request implements HttpServletRequest
         
         _session=null;
         
-        String id = getRequestedSessionId();
+        String id=getRequestedSessionId();
         
         if (id != null && _sessionManager!=null)
         {

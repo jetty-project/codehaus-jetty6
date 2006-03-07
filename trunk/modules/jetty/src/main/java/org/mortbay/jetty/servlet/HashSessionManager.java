@@ -33,12 +33,6 @@ public class HashSessionManager extends AbstractSessionManager
     {
         super();
     }
-    
-    /* ------------------------------------------------------------ */
-    public HashSessionManager(Random random)
-    {
-        super(random);
-    }
 
     /* ------------------------------------------------------------ */
     protected AbstractSessionManager.Session newSession(HttpServletRequest request)
