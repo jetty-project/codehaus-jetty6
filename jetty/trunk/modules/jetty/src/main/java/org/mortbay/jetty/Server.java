@@ -60,6 +60,7 @@ public class Server extends HandlerCollection
     private Container _container=new Container();
     private RequestLog _requestLog;
     private PathMap _contextMap;
+    private SessionIdManager _sessionIdManager;
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -228,6 +229,9 @@ public class Server extends HandlerCollection
             setThreadPool(btp);
         }
         
+        if (_sessionIdManager!=null)
+            _sessionIdManager.start();
+        
         try{if (_requestLog!=null)_requestLog.start();} catch(Throwable e) { mex.add(e);}
         
         try{_threadPool.start();} catch(Throwable e) { mex.add(e);}
@@ -261,6 +265,9 @@ public class Server extends HandlerCollection
         }
 
         try { super.doStop(); } catch(Throwable e) { mex.add(e);}
+        
+        if (_sessionIdManager!=null)
+            _sessionIdManager.stop();
         
         try{_threadPool.stop();}catch(Throwable e){mex.add(e);}
 
@@ -400,6 +407,17 @@ public class Server extends HandlerCollection
     }
     
     /* ------------------------------------------------------------ */
+    public void addUserRealm(UserRealm realm)
+    {
+        UserRealm[] realms = getUserRealms();
+        
+        if (realms==null || realms.length==0 )
+            setUserRealms(new UserRealm[]{realm});
+        else
+            setHandlers((Handler[])LazyList.addToArray(realms, realm));
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * @return Returns the notFoundHandler.
      */
@@ -417,7 +435,25 @@ public class Server extends HandlerCollection
         _container.update(this, _notFoundHandler, notFoundHandler, "notFoundHandler");
         _notFoundHandler = notFoundHandler;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the sessionIdManager.
+     */
+    public SessionIdManager getSessionIdManager()
+    {
+        return _sessionIdManager;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param sessionIdManager The sessionIdManager to set.
+     */
+    public void setSessionIdManager(SessionIdManager sessionIdManager)
+    {
+        _container.update(this,_sessionIdManager,sessionIdManager, "sessionIdManager");
+        _sessionIdManager = sessionIdManager;
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -545,5 +581,7 @@ public class Server extends HandlerCollection
             }
         }
     }
+
+
 
 }

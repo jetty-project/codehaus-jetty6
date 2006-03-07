@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.mortbay.component.LifeCycle;
+import org.mortbay.jetty.servlet.SessionHandler;
 
 
     
@@ -57,8 +58,7 @@ public interface SessionManager extends LifeCycle, Serializable
      * used as the domain for session cookies. If it is not set, then
      * no domain is specified for the session cookie.
      */
-    public final static String __SessionDomain=
-        "org.mortbay.jetty.servlet.SessionDomain";
+    public final static String __SessionDomain="org.mortbay.jetty.servlet.SessionDomain";
     
     /* ------------------------------------------------------------ */
     /** Session Path.
@@ -66,8 +66,7 @@ public interface SessionManager extends LifeCycle, Serializable
      * used as the path for the session cookie.  If it is not set, then
      * the context path is used as the path for the cookie.
      */
-    public final static String __SessionPath=
-        "org.mortbay.jetty.servlet.SessionPath";
+    public final static String __SessionPath="org.mortbay.jetty.servlet.SessionPath";
     
     /* ------------------------------------------------------------ */
     /** Session Max Age.
@@ -75,8 +74,7 @@ public interface SessionManager extends LifeCycle, Serializable
      * used as the max age for the session cookie.  If it is not set, then
      * a max age of -1 is used.
      */
-    public final static String __MaxAge=
-        "org.mortbay.jetty.servlet.MaxAge";
+    public final static String __MaxAge="org.mortbay.jetty.servlet.MaxAge";
     
     /* ------------------------------------------------------------ */
     public HttpSession getHttpSession(String id);
@@ -99,6 +97,9 @@ public interface SessionManager extends LifeCycle, Serializable
 
     /* ------------------------------------------------------------ */
     public void setMaxInactiveInterval(int seconds);
+    
+    /* ------------------------------------------------------------ */
+    public void setSessionHandler(SessionHandler handler);
 
     /* ------------------------------------------------------------ */
     /** Add an event listener.
@@ -130,39 +131,18 @@ public interface SessionManager extends LifeCycle, Serializable
     /**
      * @return the cross context session meta manager.
      */
-    public MetaManager getMetaManager();
+    public SessionIdManager getMetaManager();
     
     /* ------------------------------------------------------------ */
     /**
      * @param meta the cross context session meta manager.
      */
-    public void setMetaManager(MetaManager meta);
+    public void setMetaManager(SessionIdManager meta);
     
     /* ------------------------------------------------------------ */
+    public boolean isValid(HttpSession session);
+    
     /* ------------------------------------------------------------ */
-    public interface Session extends HttpSession
-    {
-        /* ------------------------------------------------------------ */
-        public boolean isValid();
-
-        /* ------------------------------------------------------------ */
-        public void access();
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /** MetaManager.
-     * Manage cross context sessions.
-     * @author gregw
-     *
-     */
-    public interface MetaManager extends LifeCycle
-    {
-        public boolean crossContext();
-        public boolean idInUse(String id);
-        public void addSession(HttpSession session);
-        public void invalidateAll(String id);
-    }
+    public void access(HttpSession session);
 
 }
