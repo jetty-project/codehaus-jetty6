@@ -111,6 +111,7 @@ public class SessionHandler extends WrappedHandler
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         SessionManager old_session_manager=null;
         HttpSession old_session=null;
+        String old_requested_session_id=base_request.getRequestedSessionId();
         
         try
         {
@@ -164,6 +165,16 @@ public class SessionHandler extends WrappedHandler
                 base_request.setRequestedSessionId(requested_session_id);
                 base_request.setRequestedSessionIdFromCookie(requested_session_id!=null && requested_session_id_from_cookie);
             }
+            else
+            {
+                // TODO this is a hack
+                // look at old session
+                if (old_session!=null && old_session.isNew())
+                {
+                    requested_session_id=old_session.getId();
+                    base_request.setRequestedSessionId(requested_session_id);
+                }
+            }
             
             old_session_manager = base_request.getSessionManager();
             old_session = base_request.getSession(false);
@@ -205,6 +216,7 @@ public class SessionHandler extends WrappedHandler
         {
             base_request.setSessionManager(old_session_manager);
             base_request.setSession(old_session);
+            base_request.setRequestedSessionId(old_requested_session_id);
         }
         return result;
     }
