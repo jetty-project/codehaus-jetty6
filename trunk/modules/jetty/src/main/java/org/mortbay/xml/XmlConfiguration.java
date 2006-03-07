@@ -30,6 +30,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mortbay.component.LifeCycle;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
@@ -167,16 +168,25 @@ public class XmlConfiguration
 
     /* ------------------------------------------------------------ */
     /**
-     * Create a new object and configure it. A new object is created and configured.
-     *
+     * Configure an object.  If the configuration has an ID, an object is looked up
+     * by ID and it's type check.  Otherwise a new object is created.
+     * 
      * @return The newly created configured object.
      * @exception Exception
      */
-    public Object newInstance() throws Exception
+    public Object configure() throws Exception
     {
         Class oClass = nodeClass(_config);
-        Object obj = null;
-        if (oClass != null) obj = oClass.newInstance();
+        
+        String id = _config.getAttribute("id");
+        Object obj = id==null?null:_idMap.get(id);
+        
+        if (obj==null && oClass !=null)
+            obj = oClass.newInstance();
+        
+        if (oClass!=null && !oClass.isInstance(obj))
+            throw new ClassCastException(oClass.toString());
+        
         configure(obj, _config, 0);
         return obj;
     }
@@ -871,15 +881,26 @@ public class XmlConfiguration
         try
         {
             XmlConfiguration last=null;
+            Object[] obj = new Object[args.length];
             for (int i = 0; i < args.length; i++)
             {
-                
                 XmlConfiguration configuration = new XmlConfiguration(Resource.newResource(args[i]).getURL());
                 if (last!=null)
                     configuration.getIdMap().putAll(last.getIdMap());
-                configuration.newInstance();
+                obj[i] = configuration.configure();
                 last=configuration;
             }
+
+            for (int i = 0; i < args.length; i++)
+            {
+                if (obj[i] instanceof LifeCycle)
+                {
+                    LifeCycle lc = (LifeCycle)obj[i];
+                    if (!lc.isRunning())
+                        lc.start();
+                }
+            }
+            
         }
         catch (Exception e)
         {

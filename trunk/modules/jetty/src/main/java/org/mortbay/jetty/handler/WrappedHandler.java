@@ -134,7 +134,5 @@ public class WrappedHandler extends AbstractHandler
         Handler h=getHandler();
         if (h!=null)
             h.setServer(server);
-        
-            
     }
 }
