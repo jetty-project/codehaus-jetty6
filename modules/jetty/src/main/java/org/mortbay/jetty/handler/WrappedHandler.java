@@ -57,13 +57,35 @@ public class WrappedHandler extends AbstractHandler
      */
     public void setHandler(Handler handler)
     {
-        if (_handler!=null)
-            _handler.setServer(null);
-        if (getServer()!=null)
-            getServer().getContainer().update(this, _handler, handler, "handler");
-        _handler = handler;
-        if (_handler!=null)
-            _handler.setServer(getServer());
+        try
+        {
+            Handler old_handler = _handler;
+            
+            if (getServer()!=null)
+                getServer().getContainer().update(this, old_handler, handler, "handler");
+            
+            if (handler!=null)
+            {
+                handler.setServer(getServer());
+                if (isStarted() && !handler.isStarted())
+                    handler.start();
+            }
+            
+            _handler = handler;
+            
+            if (old_handler!=null)
+            {
+                if (old_handler.isStarted())
+                    old_handler.stop();
+                _handler.setServer(null);
+            }
+        }
+        catch(Exception e)
+        {
+            IllegalStateException ise= new IllegalStateException();
+            ise.initCause(e);
+            throw ise;
+        }
     }
 
     /* ------------------------------------------------------------ */

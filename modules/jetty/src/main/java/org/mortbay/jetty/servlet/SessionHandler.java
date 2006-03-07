@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
@@ -40,7 +41,7 @@ import org.mortbay.log.Log;
 public class SessionHandler extends WrappedHandler
 {
     /* -------------------------------------------------------------- */
-    SessionManager _sessionManager=new HashSessionManager();
+    private SessionManager _sessionManager;
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -58,7 +59,7 @@ public class SessionHandler extends WrappedHandler
      */
     public SessionHandler(SessionManager manager)
     {
-        _sessionManager=manager;
+        setSessionManager(manager);
     }
     
     /* ------------------------------------------------------------ */
@@ -78,7 +79,18 @@ public class SessionHandler extends WrappedHandler
     {
         if (isStarted())
             throw new IllegalStateException();
+        SessionManager old_session_manager = _sessionManager;
+        
+        if (getServer()!=null)
+            getServer().getContainer().update(this, old_session_manager, sessionManager, "handler");
+        
+        if (sessionManager!=null)
+            sessionManager.setSessionHandler(this);
+        
         _sessionManager = sessionManager;
+        
+        if (old_session_manager!=null)
+            old_session_manager.setSessionHandler(null);
     }
 
     /* ------------------------------------------------------------ */
@@ -111,13 +123,12 @@ public class SessionHandler extends WrappedHandler
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         SessionManager old_session_manager=null;
         HttpSession old_session=null;
-        String old_requested_session_id=base_request.getRequestedSessionId();
         
         try
         {
             String requested_session_id=request.getRequestedSessionId();
             
-            if (requested_session_id==null)
+            if (dispatch==REQUEST && requested_session_id==null)
             {
                 boolean requested_session_id_from_cookie=false;
                 
@@ -165,16 +176,6 @@ public class SessionHandler extends WrappedHandler
                 base_request.setRequestedSessionId(requested_session_id);
                 base_request.setRequestedSessionIdFromCookie(requested_session_id!=null && requested_session_id_from_cookie);
             }
-            else
-            {
-                // TODO this is a hack
-                // look at old session
-                if (old_session!=null && old_session.isNew())
-                {
-                    requested_session_id=old_session.getId();
-                    base_request.setRequestedSessionId(requested_session_id);
-                }
-            }
             
             old_session_manager = base_request.getSessionManager();
             old_session = base_request.getSession(false);
@@ -189,7 +190,7 @@ public class SessionHandler extends WrappedHandler
             // access any existing session
             HttpSession session=request.getSession(false);
             if (session!=null)
-                ((SessionManager.Session)session).access();
+                getSessionManager().access(session);
             else if (_sessionManager!=null)
             {
                 session=base_request.recoverNewSession(_sessionManager);
@@ -216,7 +217,6 @@ public class SessionHandler extends WrappedHandler
         {
             base_request.setSessionManager(old_session_manager);
             base_request.setSession(old_session);
-            base_request.setRequestedSessionId(old_requested_session_id);
         }
         return result;
     }

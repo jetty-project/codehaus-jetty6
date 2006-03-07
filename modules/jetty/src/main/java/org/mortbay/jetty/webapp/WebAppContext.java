@@ -80,7 +80,7 @@ public class WebAppContext extends ContextHandler
     private String _defaultsDescriptor=WEB_DEFAULTS_XML;
     private boolean _distributable=false;
     private boolean _extractWAR=true;
-    private boolean _parentLoaderPriority= false;
+    private boolean _parentLoaderPriority= true;
     private PermissionCollection _permissions;
     private SecurityHandler _securityHandler;
     private ServletHandler _servletHandler;

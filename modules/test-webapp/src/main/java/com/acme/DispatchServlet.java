@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.HttpSession;
 
 
 /* ------------------------------------------------------------ */
@@ -59,6 +60,11 @@ public class DispatchServlet extends HttpServlet
         {
             sreq= new HttpServletRequestWrapper(sreq);
             sres= new HttpServletResponseWrapper(sres);
+        }
+        
+        if (sreq.getParameter("session") != null)
+        {
+            HttpSession session= sreq.getSession(true);
         }
 
         String prefix=
@@ -178,33 +184,6 @@ public class DispatchServlet extends HttpServlet
                 pout.flush();
             }
         }
-        else if (info.startsWith("/forwardSC/"))
-        {
-            sreq.getSession(true);
-            info= info.substring(10);
-            if (info.indexOf('?') < 0)
-                info += "?Dispatch=forward";
-            else
-                info += "&Dispatch=forward";
-            
-            String cpath= info.substring(0, info.indexOf('/', 1));
-            info= info.substring(cpath.length());
-            
-            ServletContext context= getServletContext().getContext(cpath);
-            RequestDispatcher dispatch= context.getRequestDispatcher(info);
-            
-            if (dispatch != null)
-            {
-                dispatch.forward(sreq, sres);
-            }
-            else
-            {
-                sres.setContentType("text/html");
-                PrintWriter pout= sres.getWriter();
-                pout.write("<H1>No dispatcher for: " + cpath + "/" + info + "</H1><HR>");
-                pout.flush();
-            }
-        }
         else if (info.startsWith("/includeN/"))
         {
             sres.setContentType("text/html");
@@ -265,9 +244,7 @@ public class DispatchServlet extends HttpServlet
                     + prefix
                     + "/includeN/name\n"
                     + prefix
-                    + "/forwardC/_context/path\n"
-                    + prefix
-                    + "/forwardSC/_context/path</PRE>");
+                    + "/forwardC/_context/path\n</PRE>");
             pout.flush();
         }
     }

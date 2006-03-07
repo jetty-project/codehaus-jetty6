@@ -52,7 +52,7 @@ public class HandlerCollection extends AbstractHandler implements Handler
     
     /* ------------------------------------------------------------ */
     /**
-     * If the server is started, the handlers will be started.
+     * 
      * @param handlers The handlers to set.
      */
     public void setHandlers(Handler[] handlers)
@@ -194,7 +194,6 @@ public class HandlerCollection extends AbstractHandler implements Handler
 
     /* ------------------------------------------------------------ */
     public void addHandler(Handler handler)
-        throws Exception
     {
         Handler[] handlers = getHandlers();
         
@@ -202,9 +201,6 @@ public class HandlerCollection extends AbstractHandler implements Handler
             setHandler(handler);
         else
             setHandlers((Handler[])LazyList.addToArray(handlers, handler));
-        
-        if (isStarted())
-            handler.start();
     }
     
     /* ------------------------------------------------------------ */
@@ -214,11 +210,7 @@ public class HandlerCollection extends AbstractHandler implements Handler
         Handler[] handlers = getHandlers();
         
         if (handlers!=null && handlers.length>0 )
-        {
-            if (handler.isStarted())
-                handler.stop();
             setHandlers((Handler[])LazyList.removeFromArray(handlers, handler));
-        }
     }
     
 }
