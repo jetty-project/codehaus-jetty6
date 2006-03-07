@@ -28,6 +28,7 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.log.Log;
@@ -82,7 +83,7 @@ public class SessionHandler extends WrappedHandler
         SessionManager old_session_manager = _sessionManager;
         
         if (getServer()!=null)
-            getServer().getContainer().update(this, old_session_manager, sessionManager, "handler");
+            getServer().getContainer().update(this, old_session_manager, sessionManager, "sessionManager");
         
         if (sessionManager!=null)
             sessionManager.setSessionHandler(this);
@@ -93,6 +94,18 @@ public class SessionHandler extends WrappedHandler
             old_session_manager.setSessionHandler(null);
     }
 
+
+    /* ------------------------------------------------------------ */
+    public void setServer(Server server)
+    {
+        if (getServer()!=null && getServer()!=server)
+            getServer().getContainer().update(this, _sessionManager, null, "sessionManager");
+        if (server!=null && getServer()!=server)
+            server.getContainer().update(this, null,_sessionManager, "sessionManager");
+        super.setServer(server);
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.thread.AbstractLifeCycle#doStart()
