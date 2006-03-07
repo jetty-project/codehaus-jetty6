@@ -319,7 +319,7 @@ public class ChatFilter extends AjaxFilter
         /* ------------------------------------------------------------ */
         public void addEvent(Event event)
         {
-            synchronized (this)
+            synchronized (mutex)
             {
                 if (_name==null)
                     return;
@@ -347,7 +347,7 @@ public class ChatFilter extends AjaxFilter
         /* ------------------------------------------------------------ */
         public boolean sendEvents(AjaxResponse response)
         {
-            synchronized (this)
+            synchronized (mutex)
             {
                 boolean alerts=false;
                 for (int i=0;i<_events.size();i++)
