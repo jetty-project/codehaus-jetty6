@@ -37,6 +37,8 @@ import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
 /**
  * AbstractLoginModule
  *
+ * Abstract base class for all LoginModules. Subclasses should 
+ * just need to implement getUserInfo method.
  *
  */
 public abstract class AbstractLoginModule implements LoginModule
@@ -251,6 +253,7 @@ public abstract class AbstractLoginModule implements LoginModule
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             throw new LoginException (e.toString());
         }
     }
