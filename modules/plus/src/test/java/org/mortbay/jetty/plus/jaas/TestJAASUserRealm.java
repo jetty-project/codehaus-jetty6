@@ -21,11 +21,19 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Properties;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.mortbay.jetty.Request;
 
 
@@ -52,31 +60,16 @@ public class TestJAASUserRealm extends TestCase
    
     
     public TestJAASUserRealm(String name)
+    throws Exception
     {
         super (name);
-    }
-
-    public static Test suite()
-    {
-        return new TestSuite(TestJAASUserRealm.class);
-    }
-
-
-    public void setUp ()
-	throws Exception
-    {
-        
-    }
-
-    public void testIt ()
-        throws Exception
-    {
-
-       //set up the properties 
+        //set up the properties 
         File propsFile = File.createTempFile("props", null);
         Properties props = new Properties ();
         props.put("user", "user,user,pleb");
         props.store(new FileOutputStream(propsFile), "");
+        
+ 
         
         //set up config
         File configFile = File.createTempFile ("loginConf", null);
@@ -85,6 +78,17 @@ public class TestJAASUserRealm extends TestCase
         writer.println ("org.mortbay.jetty.plus.jaas.spi.PropertyFileLoginModule required");     
         writer.println ("debug=\"true\"");
         writer.println ("file=\""+propsFile.getCanonicalPath() +"\";");
+        writer.println ("};");
+        writer.println ("ds {");
+        writer.println ("org.mortbay.jetty.plus.jaas.spi.DataSourceLoginModule required");
+        writer.println ("debug=\"true\"");
+        writer.println ("dbJNDIName=\"ds\"");
+        writer.println ("userTable=\"myusers\"");
+        writer.println ("userField=\"myuser\"");
+        writer.println ("credentialField=\"mypassword\"");
+        writer.println ("userRoleTable=\"myuserroles\"");
+        writer.println ("userRoleUserField=\"myuser\"");
+        writer.println ("userRoleRoleField=\"myrole\";");
         writer.println ("};");
         writer.flush();
         writer.close();
@@ -96,13 +100,135 @@ public class TestJAASUserRealm extends TestCase
             System.out.println (s);
         }
         
-        
         //create a login module config file
         System.setProperty ("java.security.auth.login.config", configFile.toURL().toExternalForm());
+    }
 
+    public static Test suite()
+    {
+        return new TestSuite(TestJAASUserRealm.class);
+    }
+
+    public void setUp ()
+    throws Exception
+    {
+        
+    }
+
+    
+    public void testItDataSource ()
+    throws Exception
+    {
+        EmbeddedDataSource eds = new EmbeddedDataSource();
+        
+        try
+        {
+            //make the java:comp/env
+            InitialContext ic = new InitialContext();
+            Context comp = (Context)ic.lookup("java:comp");
+            Context env = comp.createSubcontext ("env");
+            
+            //make a DataSource      
+            eds.setDatabaseName("ttt");
+            eds.setCreateDatabase("create");
+            
+            env.createSubcontext("jdbc");
+            env.bind("ds", eds);
+            
+            
+            Connection connection = eds.getConnection();
+          
+            
+            //create tables
+            String sql = "create table myusers (myuser varchar(32) PRIMARY KEY, mypassword varchar(32))";
+            Statement createStatement = connection.createStatement();
+            createStatement.executeUpdate (sql);
+            
+            sql = " create table myuserroles (myuser varchar(32), myrole varchar(32))";
+            createStatement.executeUpdate (sql);
+            createStatement.close();
+            
+            //insert test users and roles
+            sql = "insert into myusers (myuser, mypassword) values (?, ?)";
+            
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString (1, "me");
+            statement.setString (2, "me");
+            
+            statement.executeUpdate();
+            sql = "insert into myuserroles (myuser, myrole) values ( ? , ? )";
+            statement = connection.prepareStatement (sql);
+            statement.setString (1, "me");
+            statement.setString (2, "roleA");
+            statement.executeUpdate();
+            
+            statement.setString(1, "me");
+            statement.setString(2, "roleB");
+            statement.executeUpdate();
+            
+            statement.close();
+            connection.close();
+            
+            
+            //create a JAASUserRealm
+            JAASUserRealm realm = new JAASUserRealm ("testRealm");
+            
+            realm.setLoginModuleName ("ds");
+            
+            
+            JAASUserPrincipal userPrincipal = (JAASUserPrincipal)realm.authenticate ("me", "blah",(Request)null);
+            assertNull (userPrincipal);
+            
+            userPrincipal = (JAASUserPrincipal)realm.authenticate ("me", "me", (Request)null);
+            
+            assertNotNull (userPrincipal);
+            assertNotNull (userPrincipal.getName());
+            assertTrue (userPrincipal.getName().equals("me"));
+            
+            assertTrue (userPrincipal.isUserInRole("roleA"));
+            assertTrue (userPrincipal.isUserInRole("roleB"));
+            assertTrue (!userPrincipal.isUserInRole("roleC"));
+            
+            realm.pushRole (userPrincipal, "roleC");
+            assertTrue (userPrincipal.isUserInRole("roleC"));
+            assertTrue (!userPrincipal.isUserInRole("roleA"));
+            assertTrue (!userPrincipal.isUserInRole("roleB"));
+            
+            realm.pushRole (userPrincipal, "roleD");
+            assertTrue (userPrincipal.isUserInRole("roleD"));
+            assertTrue (!userPrincipal.isUserInRole("roleC"));
+            assertTrue (!userPrincipal.isUserInRole("roleA"));
+            assertTrue (!userPrincipal.isUserInRole("roleB"));
+            
+            realm.popRole(userPrincipal);
+            assertTrue (userPrincipal.isUserInRole("roleC"));
+            assertTrue (!userPrincipal.isUserInRole("roleA"));
+            assertTrue (!userPrincipal.isUserInRole("roleB"));
+            
+            realm.popRole(userPrincipal);
+            assertTrue (!userPrincipal.isUserInRole("roleC"));
+            assertTrue (userPrincipal.isUserInRole("roleA"));
+            
+            realm.disassociate(userPrincipal);
+        }
+        finally
+        {
+            Connection c = eds.getConnection();
+            Statement s = c.createStatement();
+            s.executeUpdate("drop table myusers");
+            s.executeUpdate("drop table myuserroles");
+            s.close();
+            c.close();
+        }
+    }
+
+    
+    
+    public void testItPropertyFile ()
+        throws Exception
+    {
         //create a JAASUserRealm
         JAASUserRealm realm = new JAASUserRealm ("props");
-
         realm.setLoginModuleName ("props");
 
         JAASUserPrincipal userPrincipal = (JAASUserPrincipal)realm.authenticate ("user", "wrong",(Request)null);
@@ -116,10 +242,8 @@ public class TestJAASUserRealm extends TestCase
         assertTrue (userPrincipal.isUserInRole("pleb"));
         assertTrue (userPrincipal.isUserInRole("user"));
         assertTrue (!userPrincipal.isUserInRole("other"));       
-        
-
-        realm.disassociate (userPrincipal);
-        
+       
+        realm.disassociate (userPrincipal);  
     }
 
     public void tearDown ()

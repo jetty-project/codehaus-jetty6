@@ -53,31 +53,40 @@ import org.mortbay.util.Loader;
  * @version 1.0 Tue Apr 15 2003
  * @author Jan Bartel (janb)
  */
-public class JDBCLoginModule extends AbstractLoginModule
+public class JDBCLoginModule extends AbstractDatabaseLoginModule
 {
     private String dbDriver;
     private String dbUrl;
     private String dbUserName;
     private String dbPassword;
-    private String userQuery;
-    private String rolesQuery;
+
     
 
   
 
     
-    /* ------------------------------------------------ */
-    /** Logout authenticated user
-     * @return 
-     * @exception LoginException 
+    /** 
+     * Get a connection from the DriverManager
+     * @see org.mortbay.jetty.plus.jaas.spi.AbstractDatabaseLoginModule#getConnection()
+     * @return
+     * @throws Exception
      */
-    public boolean logout()
-        throws LoginException
+    public Connection getConnection ()
+    throws Exception
     {
-        boolean result = super.logout();
-        return result;
+        if (!((dbDriver != null)
+                &&
+                (dbUrl != null)))
+            throw new IllegalStateException ("Database connection information not configured");
+        
+        if(Log.isDebugEnabled())Log.debug("Connecting using dbDriver="+dbDriver+"+ dbUserName="+dbUserName+", dbPassword="+dbUrl);
+        
+        return DriverManager.getConnection (dbUrl,
+                dbUserName,
+                dbPassword);
     }
-
+   
+   
     
     /* ------------------------------------------------ */
     /** Init LoginModule.
@@ -110,25 +119,6 @@ public class JDBCLoginModule extends AbstractLoginModule
             
             if (dbDriver != null)
                 Loader.loadClass(this.getClass(), dbDriver).newInstance();
-            
-            //get the user credential query out of the options
-            String dbUserTable = (String)options.get("userTable");
-            String dbUserTableUserField = (String)options.get("userField");
-            String dbUserTableCredentialField = (String)options.get("credentialField");
-            
-            userQuery = "select "+dbUserTableCredentialField+" from "+dbUserTable+" where "+dbUserTableUserField+"=?";
-            
-            
-            //get the user roles query out of the options
-            String dbUserRoleTable = (String)options.get("userRoleTable");
-            String dbUserRoleTableUserField = (String)options.get("userRoleUserField");
-            String dbUserRoleTableRoleField = (String)options.get("userRoleRoleField");
-            
-            rolesQuery = "select "+dbUserRoleTableRoleField+" from "+dbUserRoleTable+" where "+dbUserRoleTableUserField+"=?";
-            
-            if(Log.isDebugEnabled())Log.debug("userQuery = "+userQuery);
-            if(Log.isDebugEnabled())Log.debug("rolesQuery = "+rolesQuery);
-            
         }
         catch (ClassNotFoundException e)
         {
@@ -143,68 +133,4 @@ public class JDBCLoginModule extends AbstractLoginModule
             throw new IllegalStateException (e.toString());
         }
     }
-
-
-    
-
-    /* ------------------------------------------------ */
-    /** Load info from database
-     * @param userName user info to load
-     * @exception SQLException 
-     */
-    public UserInfo getUserInfo (String userName)
-        throws SQLException
-    {
-        //connect to database
-        Connection connection = null;
-        
-        try
-        {
-            if (!((dbDriver != null)
-                  &&
-                  (dbUrl != null)))
-                throw new IllegalStateException ("Database connection information not configured");
-
-            if(Log.isDebugEnabled())Log.debug("Connecting using dbDriver="+dbDriver+"+ dbUserName="+dbUserName+", dbPassword="+dbUrl);
-            
-            connection = DriverManager.getConnection (dbUrl,
-                                                      dbUserName,
-                                                      dbPassword);
-            
-            //query for credential
-            PreparedStatement statement = connection.prepareStatement (userQuery);
-            statement.setString (1, userName);
-            ResultSet results = statement.executeQuery();
-            String dbCredential = null;
-            if (results.next())
-            {
-                dbCredential = results.getString(1);
-            }
-            results.close();
-            statement.close();
-            
-            //query for role names
-            statement = connection.prepareStatement (rolesQuery);
-            statement.setString (1, userName);
-            results = statement.executeQuery();
-            List roles = new ArrayList();
-            
-            while (results.next())
-            {
-                String roleName = results.getString (1);
-                roles.add (new JAASRole(roleName));
-            }
-            
-            results.close();
-            statement.close();
-            return new UserInfo (userName, Credential.getCredential(dbCredential), roles);
-        }
-        finally
-        {
-            connection.close();
-        }
-    }
-    
-    
-    
 }
