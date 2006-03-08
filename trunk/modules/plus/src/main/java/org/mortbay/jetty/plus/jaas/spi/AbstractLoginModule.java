@@ -18,8 +18,6 @@ package org.mortbay.jetty.plus.jaas.spi;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +33,6 @@ import javax.security.auth.spi.LoginModule;
 import org.mortbay.jetty.plus.jaas.JAASPrincipal;
 import org.mortbay.jetty.plus.jaas.JAASRole;
 import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
-import org.mortbay.jetty.security.Credential;
 
 /**
  * AbstractLoginModule
