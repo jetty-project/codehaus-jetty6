@@ -1,5 +1,6 @@
 
 jetty-6.0.0beta11 
+    + added JAAS
     + fixed FORM authentication
     + moved dtd and xsd to standard javax location
     + added patch to use joda-time
