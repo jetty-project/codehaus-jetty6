@@ -20,17 +20,18 @@ import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
 /** Container.
- * Static utility for generating containment events from setter methods.
+ * This class allows a containment events to be generated from update methods.
+ * 
  * The style of usage is: <pre>
  *   public void setFoo(Foo foo)
  *   {
- *       Container.update(this,this.foo,foo,"foo");
+ *       getContainer().update(this,this.foo,foo,"foo");
  *       this.foo=foo;
  *   }
  *   
  *   public void setBars(Bar[] bars)
  *   {
- *       Container.update(this,this.bars,bars,"bar");
+ *       getContainer().update(this,this.bars,bars,"bar");
  *       this.bars=bars;
  *   }
  * </pre>
