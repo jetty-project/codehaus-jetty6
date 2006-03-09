@@ -349,13 +349,29 @@ public class HttpConnection
             boolean error = false;
             try
             {
+                String raw_path=_uri.getRawPath();
                 _request.setRequestURI(_uri.getRawPath());
-                _request.setQueryString(_uri.getRawQuery());
-                String path_info=URIUtil.canonicalPath(_uri.getPath());
-                int semi = path_info.indexOf(';');
-                if (semi>0)
-                    path_info=path_info.substring(0,semi);
+                
+                String path=_uri.getPath();
+                String path_info=path;
+
+                int raw_semi = raw_path.lastIndexOf(';');
+                if (raw_semi>=0)
+                {
+                    int semi=path.length()-raw_path.length()+raw_semi;
+                    if (path.charAt(semi)==';')
+                    {
+                        path_info=path.substring(0,semi);
+                    }
+                    else // TODO this and also case where path param has embedded ;
+                        throw new IllegalStateException("Not implemented");
+                }
+                
+                path_info=URIUtil.canonicalPath(path_info);
+                
                 _request.setPathInfo(path_info);
+                _request.setQueryString(_uri.getRawQuery());
+                
                 if (_out!=null)
                     _out.reopen();
                 
