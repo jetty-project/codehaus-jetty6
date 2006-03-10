@@ -28,17 +28,16 @@ Please read this document carefully before signing and keep a copy for
 your records.
 
   Full name: Gregory John Wilkins
-  E-Mail: gregw@mortbay.com 
-  Mailing Address: 62 Church Street Balmain, NSW 2041, Australia
+  E-Mail: gregw@mortbay.com
+  Mailing Address: 62 Church St. Balmain, NSW 2041, Australia
 
 You accept and agree to the following terms and conditions for Your
-present and future Contributions submitted to MortBay. In
-return, MortBay shall not use Your Contributions in a way that
-is contrary to the public benefit or inconsistent with its nonprofit
-status and bylaws in effect at the time of the Contribution. Except
-for the license granted herein to MortBay and recipients of
-software distributed by MortBay, You reserve all right, title,
-and interest in and to Your Contributions.
+present and future Contributions submitted to MortBay. In return, 
+MortBay shall not use Your Contributions in a way that is contrary 
+to the software license in effect at the time of the Contribution. 
+Except for the license granted herein to MortBay and recipients of 
+software distributed by MortBay, You reserve all right, title, and 
+interest in and to Your Contributions.
 
 1. Definitions.
 
@@ -130,13 +129,13 @@ and interest in and to Your Contributions.
    which you become aware that would make these representations
    inaccurate in any respect.
 
-Date: 29 November 2005
-Please sign: GPG
+Date: 
+Please sign: 
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.1 (GNU/Linux)
 
-iD8DBQFDi3QFXR9WPTAwnLARAuwBAKDdSTp+p+hRJhydVswkmRfqgHsGOgCfYqoZ
-JCv4us6NP+Ibga3lBU7KfCE=
-=dxUJ
+iD8DBQFEEaStXR9WPTAwnLARAjsNAJ4jBB6wCEqucFljGge7yrAMSrFv/gCgoMC+
+5hdry6ZjXRcUhQEyNz2F/T4=
+=I4Co
 -----END PGP SIGNATURE-----
