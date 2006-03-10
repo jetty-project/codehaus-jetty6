@@ -25,25 +25,6 @@
   <!-- http://docs.codehaus.org/display/JETTY/Jetty+Wiki           -->
   <!-- =========================================================== -->
 
-  <!--Configuring <env-entry>s                                     -->
-  <!--                                                             -->
-  <!-- The following are 2 examples of setting up <env-entry>'s    -->
-  <!-- outside of a web.xml. EnvEntry's configured here will be    -->
-  <!-- set as java:comp/env entries for every webapp. The boolean  -->
-  <!-- parameter controls whether the value overrides an           -->
-  <!-- <env-entry> of the same name in a web.xml file.             -->
-  <!--
-  -->
-  <New id="woggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
-    <Arg>woggle</Arg>
-    <Arg type="java.lang.Integer">4000</Arg>
-  </New>
-
-  <New id="wiggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
-    <Arg>wiggle</Arg>
-    <Arg type="java.lang.Double">100</Arg>
-    <Arg type="boolean">true</Arg>
-  </New>
 
   <!-- Configuring <resource-ref> and <resource-env-ref>s          -->
   <!--                                                             -->
@@ -55,17 +36,6 @@
   <!-- The second argument is the construction of the resource     -->
   <!-- object. Any object at all can be configured.                -->
 
-  <!-- This example sets up a javax.sql.DataSource around a Derby  -->
-  <!-- driver.                                                     -->
-  <New id="mynondatasource" class="org.mortbay.jetty.plus.naming.Resource">
-    <Arg>jdbc/mynonxadatasource</Arg>
-    <Arg>
-      <New class="org.apache.derby.jdbc.EmbeddedDataSource">
-	<Set name="DatabaseName">test</Set>
-	<Set name="createDatabase">create</Set>
-      </New>
-    </Arg>
-   </New>
 
   <!-- These examples set up a javax.sql.DataSource around an      -->
   <!-- XADataSource that is provided by the Derby relational db.   -->
@@ -74,38 +44,7 @@
   <!-- transaction manager configured further below. To use these  -->
   <!-- examples, download Atomikos http://www.atomikos.com and     -->
   <!-- Derby http://db.apache.org/derby                            -->
-  <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
-    <Arg>jdbc/mydatasource</Arg>
-    <Arg>
-      <New class="com.atomikos.jdbc.SimpleDataSourceBean">
-	<Set name="xaDataSourceClassName">org.apache.derby.jdbc.EmbeddedXADataSource</Set>
-	<Set name="xaDataSourceProperties">databaseName=testdb;createDatabase=create</Set>
-	<Set name="UniqueResourceName">mydatasource</Set>
-      </New>
-    </Arg>
-   </New>
 
-  <New id="mydatasource2" class="org.mortbay.jetty.plus.naming.Resource">
-    <Arg>jdbc/mydatasource2</Arg>
-    <Arg>
-      <New class="com.atomikos.jdbc.SimpleDataSourceBean">
-	<Set name="xaDataSourceClassName">org.apache.derby.jdbc.EmbeddedXADataSource</Set>
-	<Set name="xaDataSourceProperties">databaseName=testdb2;createDatabase=create</Set>
-	<Set name="UniqueResourceName">mydatasource2</Set>
-      </New>
-    </Arg>
-   </New>
-
-   <New id="derby" class="org.mortbay.jetty.plus.naming.Resource">
-     <Arg>jdbc/jetspeed</Arg>
-     <Arg>
-       <New class="org.apache.derby.jdbc.EmbeddedDataSource">
-	 <Set name="DatabaseName">jetspeed</Set>
-	 <Set name="createDatabase">create</Set>
-       </New>
-     </Arg>
-   </New>
-    
 
   <!-- Configuring Transactions                                    -->
   <!--                                                             -->
@@ -116,11 +55,8 @@
   <!-- the atomikos jar (see http://www.atomikos.com/download.html)-->
   <!-- You can configure any transaction manager that implements   -->
   <!-- javax.transaction.UserTransaction.                          -->
-  <New id="tx" class="org.mortbay.jetty.plus.naming.Transaction">
-   <Arg>
-     <New class="com.atomikos.icatch.jta.J2eeUserTransaction"/>
-   </Arg>
-  </New>
+
+
 
   <!-- =========================================================== -->
   <!-- Example JAAS realm setup.                                   -->
@@ -130,10 +66,10 @@
   <!-- =========================================================== -->
   <Call name="addUserRealm">
     <Arg>
-	<New class="org.mortbay.jetty.plus.jaas.JAASUserRealm">
-	  <Set name="name">xyzrealm</Set>
-	  <Set name="LoginModuleName">xyz</Set>
-	</New>
+      <New class="org.mortbay.jetty.plus.jaas.JAASUserRealm">
+	      <Set name="name">xyzrealm</Set>
+	      <Set name="LoginModuleName">xyz</Set>
+	    </New>
     </Arg>
   </Call>
 
@@ -162,11 +98,4 @@
   </Call>
 
 </Configure>
-
-
-
-
-
-
-
 
