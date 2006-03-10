@@ -16,17 +16,20 @@ two different databases.
 
 <h2>Preparation</h2>
 <p>
-Ensure that you are using the <code>etc/jetty-plus.xml</code> file on the runline:
+Make sure you have built this demo. Assuming your jetty src distro is installed at $JETTY_HOME:
 </p>
 <blockquote>
 <pre>
-  java -jar start.jar etc/jetty.xml etc/jetty-plus.xml
+  >  cd $JETTY_HOME/modules/test-jndi-webapp
+  >  mvn -Dtxmgr=xxxx clean install
+  >  cd $JETTY_HOME
+  > java -jar start.jar etc/jetty.xml etc/jetty-plus.xml etc/jetty-test-jndi.xml
 </pre>
 </blockquote>
 <p>
-Download <a href="http://www.atomikos.com">Atomikos</a> and <a href="http://db.apache.org/derby/index.html">Derby</a> and copy their jar files to <code>lib</code>. <b>Don't forget to copy the atomikos.war file to <code>webapps-plus/</code>.</b>
+Where <code>xxxx</code> is the name of a transaction manager to use. There is a list of these that are supported for the demo in <code>$JETTY_HOME/modules/test-jndi-webapp/src/templates</code>. Ensure that you have installed the jars etc for the transaction manager of your choice in jetty6.
 </p>
-
+<h2>The Demo</h2>
 <p>
 Click <code>Commit</code> to make a distributed update to 2 different databases, or <code>Rollback</code> to prevent the update from happening.
 </p>

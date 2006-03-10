@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import javax.sql.XADataSource;
 import javax.transaction.UserTransaction;
 
 /**
@@ -44,7 +45,13 @@ public class JNDITest extends HttpServlet {
             myDS2 = (DataSource)ic.lookup("java:comp/env/jdbc/mydatasource2");
             
             wiggle = (Double)ic.lookup("java:comp/env/wiggle");          
+               
             
+            if (myDS instanceof XADataSource)
+                System.err.println("Got an XADataSource for myDS");
+            
+            if (myDS2 instanceof XADataSource)
+                System.err.println("Got an XADataSource for myDS2");
         }
         catch (Exception e)
         {
