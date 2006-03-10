@@ -7,6 +7,7 @@ jetty-6.0.0beta11
     + refactored session ID management
     + refactored configuration files and start()
     + fixed ; decoding in URIs
+    + Added HttpURI and improved parsing.
 
 jetty-6.0.0beta10 25/2/2006
     + Added support for java:comp/env

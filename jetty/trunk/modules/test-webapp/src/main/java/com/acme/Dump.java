@@ -16,6 +16,7 @@ package com.acme;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
@@ -142,6 +143,7 @@ public class Dump extends HttpServlet
             response.setBufferSize(Integer.parseInt(buffer));
 
         request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html");
 
         if (info != null && info.indexOf("Locale/") >= 0)
@@ -198,7 +200,7 @@ public class Dump extends HttpServlet
         }
         catch(IllegalStateException e)
         {
-            pout=new PrintWriter(response.getOutputStream());
+            pout=new PrintWriter(new OutputStreamWriter(response.getOutputStream(),"UTF-8"));
         }
         
         
@@ -467,12 +469,12 @@ public class Dump extends HttpServlet
             }
             
             pout.write("<br/>");
-            pout.write("<h2>International Characters</h2>");
-            pout.write("Directly encoced:  Dürst<br/>");
-            pout.write("HTML reference: D&uuml;rst<br/>");
-            pout.write("Decimal (252) 8859-1: D&#252;rst<br/>");
-            pout.write("Hex (xFC) 8859-1: D&#xFC;rst<br/>");
-            pout.write("Javascript unicode (00FC) : <script language='javascript'>document.write(\"D\u00FCrst\");</script><br/>");
+            pout.write("<h2>International Characters (utf8)</h2>");
+            pout.write("MODIFIER LETTER CAPITAL AE");
+            pout.write("Directly uni encoded(\\u1d2d): \u1d2d<br/>");
+            pout.write("HTML reference (&amp;AElig;): &AElig;<br/>");
+            pout.write("Decimal (&amp;#7469;): &#7469;<br/>");
+            pout.write("Javascript unicode (\\u1d2d) : <script language='javascript'>document.write(\"\u1d2d\");</script><br/>");
             pout.write("<br/>");
             pout.write("<h2>Form to generate GET content</h2>");
             pout.write("<form method=\"GET\" action=\""+response.encodeURL(getURI(request))+"\">");
@@ -482,7 +484,7 @@ public class Dump extends HttpServlet
 
             pout.write("<br/>");
             pout.write("<h2>Form to generate POST content</h2>");
-            pout.write("<form method=\"POST\" accept-charset=\"utf-8,iso8859-1\" action=\""+response.encodeURL(getURI(request))+"\">");
+            pout.write("<form method=\"POST\" accept-charset=\"utf-8\" action=\""+response.encodeURL(getURI(request))+"\">");
             pout.write("TextField: <input type=\"text\" name=\"TextField\" value=\"value\"/><br/>\n");
             pout.write("Select: <select multiple name=\"Select\">\n");
             pout.write("<option>ValueA</option>");

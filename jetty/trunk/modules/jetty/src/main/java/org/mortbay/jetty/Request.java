@@ -91,7 +91,7 @@ public class Request implements HttpServletRequest
     private String _scheme=URIUtil.HTTP;
     private String _contextPath;
     private String _servletPath;
-    private URI _uri;
+    private HttpURI _uri;
     private Principal _userPrincipal;
     private MultiMap _parameters;
     private boolean _paramsExtracted;
@@ -745,7 +745,7 @@ public class Request implements HttpServletRequest
     public String getRequestURI()
     {
         if (_requestURI==null && _uri!=null)
-            _requestURI=_uri.getRawPath();
+            _requestURI=_uri.getPathAndParam();
         return _requestURI;
     }
 
@@ -855,9 +855,9 @@ public class Request implements HttpServletRequest
         
             if (_port<=0)
             {
-                if (_serverName!=null && _uri!=null && _uri.isAbsolute())
+                if (_serverName!=null && _uri!=null)
                     _port = _uri.getPort();
-                else 
+                if (_port<=0)
                     _port = _endp==null?0:_endp.getLocalPort();
             }
         }
@@ -961,6 +961,8 @@ public class Request implements HttpServletRequest
      */
     public String getQueryString()
     {
+        if (_queryString==null && _uri!=null)
+            _queryString=_uri.getQuery();
         return _queryString;
     }
     
@@ -1102,17 +1104,19 @@ public class Request implements HttpServletRequest
 
         // Handle query string
         String encoding = getCharacterEncoding();
-        if (encoding == null)
+        if (_uri!=null && _uri.getQuery()!=null)
         {
-            // No encoding, so use the existing characters.
-            // TODO - UTF-8 is correct ????
-            encoding = StringUtil.__UTF8;
-            if (_uri!=null && _uri.getQuery()!=null)
-                UrlEncoded.decodeTo(_uri.getRawQuery(), _parameters,encoding);
-        }
-        else if (_uri!=null && _uri.getRawQuery()!=null)
-        {
-            UrlEncoded.decodeTo(_uri.getRawQuery(), _parameters, encoding);
+            try
+            {
+                _uri.decodeQueryTo(_parameters,encoding);
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                if (Log.isDebugEnabled())
+                    Log.warn(e);
+                else
+                    Log.warn(e.toString());
+            }
         }
         
 
@@ -1130,7 +1134,6 @@ public class Request implements HttpServletRequest
                     try
                     {
                         // TODO limit size
-                        // TODO directly access byte array?
                         InputStream in = getInputStream();
                        
                         // Add form params to query params
@@ -1162,7 +1165,7 @@ public class Request implements HttpServletRequest
     /**
      * @return Returns the uri.
      */
-    public URI getUri()
+    public HttpURI getUri()
     {
         return _uri;
     }
@@ -1171,7 +1174,7 @@ public class Request implements HttpServletRequest
     /**
      * @param uri The uri to set.
      */
-    public void setUri(URI uri)
+    public void setUri(HttpURI uri)
     {
         _uri = uri;
     }
