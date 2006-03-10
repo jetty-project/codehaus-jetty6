@@ -16,10 +16,14 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
@@ -28,6 +32,8 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.util.ByteArrayOutputStream2;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.util.UrlEncoded;
 
@@ -269,10 +275,9 @@ public class HttpGenerator implements HttpTokens
 
     /* ------------------------------------------------------------ */
     /**
-     * Add _content.
+     * Add content.
      * 
      * @param _content
-     * @return true if the buffers are full
      * @throws IOException
      */
     public void addContent(Buffer content, boolean last) throws IOException
@@ -287,7 +292,8 @@ public class HttpGenerator implements HttpTokens
         if (_content != null || _bufferChunked)
         {
             flushBuffers();
-            if (_content != null || _bufferChunked) throw new IllegalStateException("FULL");
+            if (_content != null || _bufferChunked) 
+                throw new IllegalStateException("FULL");
         }
 
         _content = content;
@@ -305,15 +311,96 @@ public class HttpGenerator implements HttpTokens
         else
         {
             // Yes - so we better check we have a buffer
-            if (_buffer == null) _buffer = _buffers.getBuffer(_contentBufferSize);
+            if (_buffer == null) 
+                _buffer = _buffers.getBuffer(_contentBufferSize);
 
             // Copy _content to buffer;
             int len=_buffer.put(_content);
             _content.skip(len);
-            if (_content.length() == 0) _content = null;
+            if (_content.length() == 0) 
+                _content = null;
         }
     }
+    /* ------------------------------------------------------------ */
+    /**
+     * Add content.
+     * 
+     * @param b byte
+     * @return true if the buffers are full
+     * @throws IOException
+     */
+    public boolean addContent(byte b) throws IOException
+    {
+        if (_last || _state==STATE_END) 
+            throw new IllegalStateException("Closed");
 
+        // Handle any unfinished business?
+        if (_content != null || _bufferChunked)
+        {
+            flushBuffers();
+            if (_content != null || _bufferChunked) 
+                throw new IllegalStateException("FULL");
+        }
+
+        _contentWritten++;
+
+        // Handle the _content
+        if (_head)
+            return false;
+        
+        // we better check we have a buffer
+        if (_buffer == null) 
+            _buffer = _buffers.getBuffer(_contentBufferSize);
+        
+        // Copy _content to buffer;
+        _buffer.put(b);
+        
+        return _buffer.space()<=(_contentLength == CHUNKED_CONTENT?CHUNK_SPACE:0);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    int prepareUncheckedAddContent() throws IOException
+    {
+        if (_last || _state==STATE_END) 
+            throw new IllegalStateException("Closed");
+
+        // Handle any unfinished business?
+        if (_content != null || _bufferChunked)
+        {
+            flushBuffers();
+            if (_content != null || _bufferChunked) 
+                throw new IllegalStateException("FULL");
+        }
+
+        if (_buffer == null) 
+            _buffer = _buffers.getBuffer(_contentBufferSize);
+        
+        // we better check we have a buffer
+        if (_buffer == null) 
+            _buffer = _buffers.getBuffer(_contentBufferSize);
+        
+        // Handle the _content
+        if (_head)
+            return Integer.MAX_VALUE;
+        
+        _contentWritten-=_buffer.length();
+        
+        return _buffer.space()-(_contentLength == CHUNKED_CONTENT?CHUNK_SPACE:0);
+    }
+
+    /* ------------------------------------------------------------ */
+    void uncheckedAddContent(int b) throws IOException
+    {
+        _buffer.put((byte)b);
+    }
+
+    /* ------------------------------------------------------------ */
+    void completeUncheckedAddContent()
+    {
+        _contentWritten+=_buffer.length();
+    }
+    
     /* ------------------------------------------------------------ */
     public boolean isBufferFull()
     {
@@ -321,7 +408,7 @@ public class HttpGenerator implements HttpTokens
         boolean full = (_state == STATE_FLUSHING || _bypass || (_buffer != null && _buffer.space() == 0) || (_contentLength == CHUNKED_CONTENT && _buffer != null && _buffer.space() < CHUNK_SPACE));
         return full;
     }
-
+    
     /* ------------------------------------------------------------ */
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
@@ -849,4 +936,460 @@ public class HttpGenerator implements HttpTokens
         return _contentWritten;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static class Output extends ServletOutputStream 
+    {
+        protected HttpGenerator _generator;
+        protected long _maxIdleTime;
+        protected ByteArrayBuffer _buf1 = null;
+        protected ByteArrayBuffer _bufn = null;
+        protected boolean _closed;
+        
+        public Output(HttpGenerator generator, long maxIdleTime)
+        {
+            _generator=generator;
+            _maxIdleTime=maxIdleTime;
+        }
+        
+        /* ------------------------------------------------------------ */
+        /*
+         * @see java.io.OutputStream#close()
+         */
+        public void close() throws IOException
+        {
+            _closed=true;
+        }
+
+        /* ------------------------------------------------------------ */
+        void reopen()
+        {
+            _closed=false;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void flush() throws IOException
+        {
+            _generator.flushBuffers();
+        }
+
+        /* ------------------------------------------------------------ */
+        public void write(byte[] b, int off, int len) throws IOException
+        {
+            if (_bufn == null)
+                _bufn = new ByteArrayBuffer(b, off, len);
+            else
+                _bufn.wrap(b, off, len);
+            write(_bufn);
+        }
+
+        /* ------------------------------------------------------------ */
+        /*
+         * @see java.io.OutputStream#write(byte[])
+         */
+        public void write(byte[] b) throws IOException
+        {
+            if (_bufn == null)
+                _bufn = new ByteArrayBuffer(b);
+            else
+                _bufn.wrap(b);
+            write(_bufn);
+        }
+
+        /* ------------------------------------------------------------ */
+        /*
+         * @see java.io.OutputStream#write(int)
+         */
+        public void write(int b) throws IOException
+        {
+            if (_closed)
+                throw new IOException("Closed");
+            
+            // Block until we can add _content.
+            while (_generator.isBufferFull() && _generator._endp.isOpen())
+            {
+                if (!_generator._endp.isBlocking())
+                    _generator._endp.blockWritable(_maxIdleTime);
+                flush();
+            }
+
+            // Add the _content
+            if (_generator.addContent((byte)b))
+            {
+                // Buffers are full so flush.
+                flush();
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        private void write(Buffer buffer) throws IOException
+        {
+            if (_closed)
+                throw new IOException("Closed");
+            
+            // Block until we can add _content.
+            while (_generator.isBufferFull() && _generator._endp.isOpen())
+            {
+                if (!_generator._endp.isBlocking())
+                    _generator._endp.blockWritable(_maxIdleTime);
+                flush();
+            }
+
+            // Add the _content
+            _generator.addContent(buffer, HttpGenerator.MORE);
+
+            // Have to flush and complete headers?
+            if (_generator.isBufferFull())
+                flush();
+
+            // Block until our buffer is free
+            while (buffer.length() > 0 && _generator._endp.isOpen())
+            {
+                if (!_generator._endp.isBlocking())
+                    _generator._endp.blockWritable(_maxIdleTime); 
+                flush();
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see javax.servlet.ServletOutputStream#print(java.lang.String)
+         */
+        public void print(String s) throws IOException
+        {
+            write(s.getBytes());
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static class OutputWriter extends Writer
+    {
+        Output _out;
+        HttpGenerator _generator;
+        EndPoint _endp;
+        int _maxChar;
+        String _characterEncoding;
+        Writer _converter;
+        ByteArrayOutputStream2 _bytes;
+        char[] _chars;
+        private int _space;
+        int _surrogate;
+        int _writeChunk = 1500; // TODO configure or tune
+        
+        public OutputWriter(Output out)
+        {
+            _out=out;
+            _generator=_out._generator;
+            _endp=_generator._endp;
+        }
+
+        public void setCharacterEncoding(String encoding)
+        {
+            if (_characterEncoding==null || !_characterEncoding.equalsIgnoreCase(encoding))
+                _converter=null;
+            _characterEncoding=encoding;
+            if (_characterEncoding==null)
+                _maxChar=0x100;
+            else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
+                _maxChar=0x100;
+            else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
+                _maxChar=0x80;
+            else
+                _maxChar=0;
+        }
+        
+        public void close() throws IOException
+        {
+            _out.close();
+        }
+
+        public void flush() throws IOException
+        {
+            _out.flush();
+        }
+        
+        public void write (String s,int offset, int length) throws IOException
+        {   
+            if (_maxChar==0x80)
+            {
+                writeUtf8(s,offset,length);
+                return;
+            }
+            
+            if (_bytes==null)
+                _bytes=new ByteArrayOutputStream2(_writeChunk*2);
+            
+            if (_converter==null)
+                _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
+            
+            if (length>16) // TODO - tune or perhaps remove
+            {
+                if (_chars==null)
+                    _chars=new char[_writeChunk];
+                    
+                int end=offset+length;
+                
+                for (int i=offset;i<end; )
+                {
+                    int chunk=_writeChunk;
+                    int next=i+chunk;
+                    if (next>end)
+                    {
+                        next=end;
+                        chunk=next-i;
+                    }
+                    s.getChars(i, next, _chars, 0);
+                    i+=chunk;
+                    for (int n=0;n<chunk;)
+                    {
+                        char c=_chars[n];
+                        
+                        if (c<_maxChar) 
+                        {
+                            _bytes.writeUnchecked(c); 
+                            n++;
+                        }
+                        else
+                        {
+                            // write a chunket
+                            int i0=n++;
+                            n+=_writeChunk/2;
+                            if (n>chunk)
+                                n=chunk;
+                            _converter.write(_chars,i0,i-i0);
+                            _converter.flush();
+                        }
+                    }
+                    
+                    _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                    _bytes.reset();
+                }
+            }
+            else
+            {
+                synchronized (_bytes)
+                {
+                    int end=offset+length;
+                    
+                    for (int i=offset;i<end; )
+                    {
+                        int next=i+_writeChunk;
+                        if (next>end)
+                            next=end;
+                        
+                        while (i<next)
+                        {
+                            char c=s.charAt(i);
+                            
+                            if (c<_maxChar) 
+                            {
+                                _bytes.writeUnchecked(c);
+                                i++;
+                            }
+                            else
+                            {   
+                                // write a chunket
+                                int i0=i;
+                                i+=_writeChunk/2;
+                                if (i>next)
+                                    i=next;
+                                
+                                _converter.write(s,i0,i-i0);
+                                _converter.flush();
+                            }
+                        }
+                        
+                        _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                        _bytes.reset();
+                    }
+                } 
+            }
+        }
+        
+
+        public void write (char[] s,int offset, int length) throws IOException
+        {
+            if (_maxChar==0x80)
+                writeUtf8(s,offset,length);
+            else
+            {
+                if (_bytes==null)
+                    _bytes=new ByteArrayOutputStream2(_writeChunk*2);
+                
+                synchronized (_bytes)
+                {
+                    int end=offset+length;
+                    for (int i=offset;i<end; )
+                    {
+                        int next=i+_writeChunk;
+                        if (next>end)
+                            next=end;
+                        
+                        while (i<next)
+                        {
+                            char c=s[i];
+                            
+                            if (c<_maxChar) 
+                            {
+                                i++;
+                                _bytes.writeUnchecked(c);
+                            }
+                            else 
+                            {
+                                if (_converter==null)
+                                    _converter=new OutputStreamWriter(_bytes,_characterEncoding);
+                                
+                                // write a chunket
+                                int i0=i;
+                                i+=_writeChunk/2;
+                                if (i>next)
+                                    i=next;
+                                _converter.write(s,i0,i-i0);
+                                _converter.flush();
+                            }
+                        }
+                        
+                        byte[] b=_bytes.getBuf();
+                        _out.write(b,0,_bytes.getCount());
+                        _bytes.reset();
+                    }
+                }
+            }
+        }
+        
+        public void writeUtf8 (char[] s,int offset, int length) throws IOException
+        {
+            if (_out._closed)
+                throw new IOException("Closed");
+            
+            _space= _generator.prepareUncheckedAddContent();
+    
+            int end=offset+length;
+            for (int i=offset;i<end;i++)
+            {
+                // Block until we can add _content.
+                while (_space<6 && _endp.isOpen())
+                {
+                    _generator.completeUncheckedAddContent();
+                    if (!_endp.isBlocking())
+                        _endp.blockWritable(_out._maxIdleTime);
+                    _out.flush();
+                    _space= _generator.prepareUncheckedAddContent();
+                }
+                
+                int c=s[i];
+                if ((c<0xd800) || (c>0xdfff)) 
+                    writeUtf8(c);
+                else if (c < 0xdc00) 
+                    _surrogate = (c-0xd800)<<10;
+                else 
+                    writeUtf8(_surrogate+c-0xdc00);
+            }
+            _generator.completeUncheckedAddContent();
+            if (_space==0 && _endp.isOpen())
+            {
+                _out.flush();
+            }
+        }
+        
+        
+        public void writeUtf8 (String s,int offset, int length) throws IOException
+        {
+            if (_out._closed)
+                throw new IOException("Closed");
+            
+            _space= _generator.prepareUncheckedAddContent();
+    
+            int end=offset+length;
+            for (int i=offset;i<end;i++)
+            {
+                // Block until we can add _content.
+                while (_space<6 && _endp.isOpen())
+                {
+                    _generator.completeUncheckedAddContent();
+                    if (!_endp.isBlocking())
+                        _endp.blockWritable(_out._maxIdleTime);
+                    _out.flush();
+                    _space= _generator.prepareUncheckedAddContent();
+                }
+                
+                int c=s.charAt(i);
+                if ((c<0xd800) || (c>0xdfff)) 
+                    writeUtf8(c);
+                else if (c < 0xdc00) 
+                    _surrogate = (c-0xd800)<<10;
+                else 
+                    writeUtf8(_surrogate+c-0xdc00);
+            }
+            _generator.completeUncheckedAddContent();
+            if (_space==0 && _endp.isOpen())
+            {
+                _out.flush();
+            }
+        }
+      
+        private void writeUtf8(int code) throws IOException
+        {
+            if ((code & 0xffffff80) == 0) 
+            {
+                // 1b
+                _generator.uncheckedAddContent(code);
+                _space--;
+            }
+            else if((code&0xfffff800)==0)
+            {
+                // 2b
+                _generator.uncheckedAddContent(0xc0|(code>>6));
+                _generator.uncheckedAddContent(0x80|(code&0x3f));
+                _space-=2;
+            }
+            else if((code&0xffff0000)==0)
+            {
+                // 3b
+                _generator.uncheckedAddContent(0xe0|(code>>12));
+                _generator.uncheckedAddContent(0x80|((code>>6)&0x3f));
+                _generator.uncheckedAddContent(0x80|(code&0x3f));
+                _space-=3;
+            }
+            else if((code&0xff200000)==0)
+            {
+                // 4b
+                _generator.uncheckedAddContent(0xf0|(code>>18));
+                _generator.uncheckedAddContent(0x80|((code>>12)&0x3f));
+                _generator.uncheckedAddContent(0x80|((code>>6)&0x3f));
+                _generator.uncheckedAddContent(0x80|(code&0x3f));
+                _space-=4;
+            }
+            else if((code&0xf4000000)==0)
+            {
+                 // 5
+                _generator.uncheckedAddContent(0xf8|(code>>24));
+                _generator.uncheckedAddContent(0x80|((code>>18)&0x3f));
+                _generator.uncheckedAddContent(0x80|((code>>12)&0x3f));
+                _generator.uncheckedAddContent(0x80|((code>>6)&0x3f));
+                _generator.uncheckedAddContent(0x80|(code&0x3f));
+                _space-=5;
+            }
+            else if((code&0x80000000)==0)
+            {
+                // 6b
+                _generator.uncheckedAddContent(0xfc|(code>>30));
+                _generator.uncheckedAddContent(0x80|((code>>24)&0x3f));
+                _generator.uncheckedAddContent(0x80|((code>>18)&0x3f));
+                _generator.uncheckedAddContent(0x80|((code>>12)&0x3f));
+                _generator.uncheckedAddContent(0x80|((code>>6)&0x3f));
+                _generator.uncheckedAddContent(0x80|(code&0x3f));
+                _space-=6;
+            }
+            else
+            {
+                _generator.uncheckedAddContent('?');
+            }
+        }
+    }
+    
 }

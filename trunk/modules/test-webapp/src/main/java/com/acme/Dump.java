@@ -87,7 +87,12 @@ public class Dump extends HttpServlet
             response.setContentType("text/plain");
             while (d > 0)
             {
-                if (d>=b)
+                if (b==1)
+                {
+                    out.write(d%80==0?'\n':'.');
+                    d--;
+                }
+                else if (d>=b)
                 {
                     out.write(buf);
                     d=d-b;
@@ -470,7 +475,7 @@ public class Dump extends HttpServlet
             
             pout.write("<br/>");
             pout.write("<h2>International Characters (utf8)</h2>");
-            pout.write("MODIFIER LETTER CAPITAL AE");
+            pout.write("MODIFIER LETTER CAPITAL AE<br/>\n");
             pout.write("Directly uni encoded(\\u1d2d): \u1d2d<br/>");
             pout.write("HTML reference (&amp;AElig;): &AElig;<br/>");
             pout.write("Decimal (&amp;#7469;): &#7469;<br/>");

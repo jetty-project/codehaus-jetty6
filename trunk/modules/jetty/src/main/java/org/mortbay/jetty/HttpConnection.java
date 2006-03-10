@@ -20,8 +20,6 @@ import java.io.InterruptedIOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -738,11 +736,12 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class Output extends ServletOutputStream 
+    public class Output extends HttpGenerator.Output 
     {
-        ByteArrayBuffer _buf1 = null;
-        ByteArrayBuffer _bufn = null;
-        boolean _closed;
+        Output()
+        {
+            super(HttpConnection.this._generator,_connector.getMaxIdleTime());
+        }
         
         /* ------------------------------------------------------------ */
         /*
@@ -758,14 +757,9 @@ public class HttpConnection
             else
                 flushResponse();
             
-            _closed=true;
+            super.close();
         }
 
-        /* ------------------------------------------------------------ */
-        void reopen()
-        {
-            _closed=false;
-        }
         
         /* ------------------------------------------------------------ */
         /*
@@ -773,79 +767,9 @@ public class HttpConnection
          */
         public void flush() throws IOException
         {
-            flushResponse();
-        }
-
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.OutputStream#write(byte[], int, int)
-         */
-        public void write(byte[] b, int off, int len) throws IOException
-        {
-            if (_bufn == null)
-                _bufn = new ByteArrayBuffer(b, off, len);
-            else
-                _bufn.wrap(b, off, len);
-            write(_bufn);
-        }
-
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.OutputStream#write(byte[])
-         */
-        public void write(byte[] b) throws IOException
-        {
-            if (_bufn == null)
-                _bufn = new ByteArrayBuffer(b);
-            else
-                _bufn.wrap(b);
-            write(_bufn);
-        }
-
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.OutputStream#write(int)
-         */
-        public void write(int b) throws IOException
-        {
-            if (_buf1 == null)
-                _buf1 = new ByteArrayBuffer(1);
-            else
-                _buf1.clear();
-            _buf1.put((byte) b);
-            write(_buf1);
-        }
-
-        /* ------------------------------------------------------------ */
-        private void write(Buffer buffer) throws IOException
-        {
-            if (_closed)
-                throw new IOException("Closed");
-            
-            // Block until we can add _content.
-            while (_generator.isBufferFull() && _endp.isOpen() && !_endp.isBlocking())
-            {
-                _endp.blockWritable(_connector.getMaxIdleTime());
-                _generator.flushBuffers();
-            }
-
-            // Add the _content
-            _generator.addContent(buffer, HttpGenerator.MORE);
-
-            // Have to flush and complete headers?
-            if (_generator.isBufferFull())
-            {
-                // Buffers are full so flush.
+            if (!_generator.isCommitted())
                 commitResponse(HttpGenerator.MORE);
-                _generator.flushBuffers();
-            }
-
-            // Block until our buffer is free
-            while (buffer.length() > 0 && _endp.isOpen() && !_endp.isBlocking())
-            {
-                _endp.blockWritable(_connector.getMaxIdleTime()); 
-                _generator.flushBuffers();
-            }
+            super.flush();
         }
 
         /* ------------------------------------------------------------ */
@@ -892,191 +816,11 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class OutputWriter extends Writer
+    public class OutputWriter extends HttpGenerator.OutputWriter
     {
-        int _maxChar;
-        String _characterEncoding;
-        Writer _converter;
-        ByteArrayOutputStream2 _bytes;
-        char[] _chars;
-
-
-        public void setCharacterEncoding(String encoding)
+        OutputWriter()
         {
-            if (_characterEncoding==null || !_characterEncoding.equalsIgnoreCase(encoding))
-                _converter=null;
-            _characterEncoding=encoding;
-        }
-        
-        public void close() throws IOException
-        {
-            _out.close();
-        }
-
-        public void flush() throws IOException
-        {
-            _out.flush();
-        }
-        
-        public void write (String s,int offset, int length) throws IOException
-        {   
-            if (_bytes==null)
-            {   
-                _bytes=new ByteArrayOutputStream2(_writeChunk*2);
-                
-                if (_characterEncoding==null)
-                    _maxChar=0x80; // TODO maybe 0x0 if we do not know default encoding is 8859
-                else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
-                    _maxChar=0x100;
-                else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
-                    _maxChar=0x80;
-                else
-                    _maxChar=0;
-            }
-            
-            if (_converter==null)
-            {
-                _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
-            }
-            
-            if (length>16) // TODO - tune or perhaps remove
-            {
-                if (_chars==null)
-                    _chars=new char[_writeChunk];
-                    
-                int end=offset+length;
-                
-                for (int i=offset;i<end; )
-                {
-                    int chunk=_writeChunk;
-                    int next=i+chunk;
-                    if (next>end)
-                    {
-                        next=end;
-                        chunk=next-i;
-                    }
-                    s.getChars(i, next, _chars, 0);
-                    i+=chunk;
-                    for (int n=0;n<chunk;)
-                    {
-                        char c=_chars[n];
-                        
-                        if (c<_maxChar) 
-                        {
-                            _bytes.writeUnchecked(c); 
-                            n++;
-                        }
-                        else
-                        {
-                            // write a chunket
-                            int i0=n++;
-                            n+=_writeChunk/2;
-                            if (n>chunk)
-                                n=chunk;
-                            _converter.write(_chars,i0,i-i0);
-                            _converter.flush();
-                        }
-                    }
-                    
-                    _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                    _bytes.reset();
-                }
-            }
-            else
-            {
-                synchronized (_bytes)
-                {
-                    int end=offset+length;
-                    
-                    for (int i=offset;i<end; )
-                    {
-                        int next=i+_writeChunk;
-                        if (next>end)
-                            next=end;
-                        
-                        while (i<next)
-                        {
-                            char c=s.charAt(i);
-                            
-                            if (c<_maxChar) 
-                            {
-                                _bytes.writeUnchecked(c);
-                                i++;
-                            }
-                            else
-                            {   
-                                // write a chunket
-                                int i0=i;
-                                i+=_writeChunk/2;
-                                if (i>next)
-                                    i=next;
-                                
-                                _converter.write(s,i0,i-i0);
-                                _converter.flush();
-                            }
-                        }
-                        
-                        _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                        _bytes.reset();
-                    }
-                } 
-            }
-        }
-        
-
-        public void write (char[] s,int offset, int length) throws IOException
-        {
-            if (_bytes==null)
-            {
-                _bytes=new ByteArrayOutputStream2(_writeChunk*2);
-                if (_characterEncoding==null)
-                    _maxChar=0; // TODO maybe 0x80 if we know default encoding is 8859
-                else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
-                    _maxChar=0x100;
-                else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
-                    _maxChar=0x80;
-                else
-                    _maxChar=0;
-            }
-            
-            synchronized (_bytes)
-            {
-                int end=offset+length;
-                for (int i=offset;i<end; )
-                {
-                    int next=i+_writeChunk;
-                    if (next>end)
-                        next=end;
-                    
-                    while (i<next)
-                    {
-                        char c=s[i];
-                        
-                        if (c<_maxChar) 
-                        {
-                            i++;
-                            _bytes.writeUnchecked(c);
-                        }
-                        else
-                        {
-                            if (_converter==null)
-                                _converter=new OutputStreamWriter(_bytes,_characterEncoding);
-
-                            // write a chunket
-                            int i0=i;
-                            i+=_writeChunk/2;
-                            if (i>next)
-                                i=next;
-                            _converter.write(s,i0,i-i0);
-                            _converter.flush();
-                        }
-                    }
-                    
-                    byte[] b=_bytes.getBuf();
-                    _out.write(b,0,_bytes.getCount());
-                    _bytes.reset();
-                }
-            }
+            super(HttpConnection.this._out);
         }
     }
 }
