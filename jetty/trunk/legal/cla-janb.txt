@@ -1,6 +1,3 @@
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
-
 Jetty Project          
 Contributor License Agreement V1.0
 based on http://www.apache.org/licenses/
@@ -27,18 +24,17 @@ the committed file, otherwise also send a signed Agreement to MortBay.
 Please read this document carefully before signing and keep a copy for
 your records.
 
-  Full name:  Jan Maree Bartel
+  Full name:  Jan Bartel
   E-Mail:  janb@mortbay.com 
   Mailing Address: 62 Church St Balmain NSW 2041 Australia
 
 You accept and agree to the following terms and conditions for Your
-present and future Contributions submitted to MortBay. In
-return, MortBay shall not use Your Contributions in a way that
-is contrary to the public benefit or inconsistent with its nonprofit
-status and bylaws in effect at the time of the Contribution. Except
-for the license granted herein to MortBay and recipients of
-software distributed by MortBay, You reserve all right, title,
-and interest in and to Your Contributions.
+present and future Contributions submitted to MortBay. In return, 
+MortBay shall not use Your Contributions in a way that is contrary 
+to the software license in effect at the time of the Contribution. 
+Except for the license granted herein to MortBay and recipients of 
+software distributed by MortBay, You reserve all right, title, and 
+interest in and to Your Contributions.
 
 1. Definitions.
 
@@ -130,8 +126,8 @@ and interest in and to Your Contributions.
    which you become aware that would make these representations
    inaccurate in any respect.
 
-Date:  30th November 2005
-Please sign: GPG
+Date: 10 March 2006 
+Please sign: PGP 
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.1 (GNU/Linux)
@@ -140,3 +136,4 @@ iD8DBQFDjMI6J97Uv2IW248RAmGNAJ9/krpkiYJRrJTMXVkL3cdnVvfU+QCfYFEh
 pN0h9U/xdFTRMFsXYFHQeN4=
 =24Hd
 -----END PGP SIGNATURE-----
+
