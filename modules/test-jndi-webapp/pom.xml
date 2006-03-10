@@ -18,6 +18,22 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
+            <id>mkconfig</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <fail message="Please set the txmgr property: mvn -Dtxmgr=[atomikos|jotm] ..." unless="txmgr"/>
+                <filter filtersfile="src/templates/${txmgr}.properties"/>
+                <copy file="src/templates/jetty-test-jndi.xml" todir="target/config" filtering="true">
+                </copy>
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install</id>
             <phase>install</phase>
             <goals>
               <goal>run</goal>
@@ -26,6 +42,7 @@
               <tasks>
                 <delete quiet="true" dir="../../webapps-plus/test-jndi/"></delete>
                 <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../webapps-plus/test-jndi/"></unjar>
+                <copy file="target/config/jetty-test-jndi.xml" todir="../../etc" overwrite="true"/>
               </tasks>
             </configuration>
           </execution>
