@@ -308,7 +308,8 @@ public class JAASUserRealm implements UserRealm
         }
         catch (Exception e)
         {
-            Log.warn(e);
+            Log.warn(e.toString());
+            Log.debug(e);
             return null;
         }     
     }
