@@ -57,12 +57,29 @@ import org.mortbay.jetty.Request;
 public class TestJAASUserRealm extends TestCase
 
 {
+    private static boolean setupDone = false;
    
     
     public TestJAASUserRealm(String name)
     throws Exception
     {
         super (name);
+        
+     
+    }
+
+    public static Test suite()
+    {
+        return new TestSuite(TestJAASUserRealm.class);
+    }
+
+    public void setUp ()
+    throws Exception
+    {
+        if (setupDone)
+            return;
+        
+        
         //set up the properties 
         File propsFile = File.createTempFile("props", null);
         Properties props = new Properties ();
@@ -102,17 +119,7 @@ public class TestJAASUserRealm extends TestCase
         
         //create a login module config file
         System.setProperty ("java.security.auth.login.config", configFile.toURL().toExternalForm());
-    }
-
-    public static Test suite()
-    {
-        return new TestSuite(TestJAASUserRealm.class);
-    }
-
-    public void setUp ()
-    throws Exception
-    {
-        
+        setupDone = true;
     }
 
     
