@@ -122,22 +122,6 @@ public class URLEncodedTest extends junit.framework.TestCase
         assertEquals("encoded get", "\u30c6\u30b9\u30c8", url_encoded.getString("Name9"));        
         
         
-        byte[] b = new byte[]
-            {
-                (byte)'s',
-                (byte)'=',
-                (byte)0x83,
-                (byte)'Q',
-                (byte)0x81,
-                (byte)0x5b,
-                (byte)0x83,
-                (byte)0x80
-            };
-        MultiMap m = new MultiMap();
-        UrlEncoded.decodeTo(b,0,b.length,m,"SJIS");
-        String sjis=(String)m.get("s");
-        assertEquals("SJIS len",3, sjis.length());
-        assertEquals("SJIS param","\u30b2\u30fc\u30e0",sjis );
         
         
     }

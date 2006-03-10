@@ -37,14 +37,23 @@ public class Utf8StringBuffer
         if (b>0)
         {
             if (_more>0)
-                throw new IllegalStateException();
-            _buffer.append((char)(0x7f&b));
+            {
+                _buffer.append('?');
+                _more=0;
+                _bits=0;
+            }
+            else
+                _buffer.append((char)(0x7f&b));
         }
         else if (_more==0)
         {
             if ((b&0xc0)!=0xc0)
+            {
                 // 10xxxxxx
-                throw new IllegalStateException();
+                _buffer.append('?');
+                _more=0;
+                _bits=0;
+            }
             else if ((b & 0xe0) == 0xc0)
             {
                 //110xxxxx
@@ -79,8 +88,11 @@ public class Utf8StringBuffer
         else
         {
             if ((b&0xc0)==0xc0)
-                // 11??????
-                throw new IllegalStateException();
+            {    // 11??????
+                _buffer.append('?');
+                _more=0;
+                _bits=0;
+            }
             else
             {
                 // 10xxxxxx
@@ -91,7 +103,12 @@ public class Utf8StringBuffer
         }
     }
     
-    public void clear()
+    public int length()
+    {
+        return _buffer.length();
+    }
+    
+    public void reset()
     {
         _buffer.setLength(0);
         _more=0;

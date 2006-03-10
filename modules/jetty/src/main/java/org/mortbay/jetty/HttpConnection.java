@@ -53,7 +53,7 @@ public class HttpConnection
     private Server _server;
     private boolean _expectingContinues;
 
-    private URI _uri;
+    private HttpURI _uri=new HttpURI();
 
     private HttpParser _parser;
     private HttpFields _requestFields;
@@ -349,28 +349,8 @@ public class HttpConnection
             boolean error = false;
             try
             {
-                String raw_path=_uri.getRawPath();
-                _request.setRequestURI(_uri.getRawPath());
-                
-                String path=_uri.getPath();
-                String path_info=path;
-
-                int raw_semi = raw_path.lastIndexOf(';');
-                if (raw_semi>=0)
-                {
-                    int semi=path.length()-raw_path.length()+raw_semi;
-                    if (path.charAt(semi)==';')
-                    {
-                        path_info=path.substring(0,semi);
-                    }
-                    else // TODO this and also case where path param has embedded ;
-                        throw new IllegalStateException("Not implemented");
-                }
-                
-                path_info=URIUtil.canonicalPath(path_info);
-                
-                _request.setPathInfo(path_info);
-                _request.setQueryString(_uri.getRawQuery());
+                // TODO try to do this lazily or more efficiently
+                _request.setPathInfo(URIUtil.canonicalPath(_uri.getDecodedPath()));
                 
                 if (_out!=null)
                     _out.reopen();
@@ -516,8 +496,8 @@ public class HttpConnection
 
             try
             {
-                _uri = new URI(new String(uri.asArray(),"UTF-8"));  // TODO - reduce object creation
-                _uri = _uri.normalize();
+                byte[] b=uri.asArray(); // TODO avoid this copy?
+                _uri.parse(b,0,b.length);
                 _request.setUri(_uri);
 
                 _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE.getOrdinal(version);
@@ -526,7 +506,7 @@ public class HttpConnection
 
                 _head = method == HttpMethods.HEAD_BUFFER; // depends on method being decahced.
             }
-            catch (URISyntaxException e)
+            catch (Exception e)
             {
                 _parser.reset(true); 
                 // TODO prebuilt response
