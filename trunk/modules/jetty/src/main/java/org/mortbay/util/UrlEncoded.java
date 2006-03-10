@@ -55,7 +55,7 @@ public class UrlEncoded extends MultiMap
     public UrlEncoded(String s)
     {
         super(6);
-        decode(s,StringUtil.__ISO_8859_1);
+        decode(s,StringUtil.__UTF8);
     }
     
     /* ----------------------------------------------------------------- */
@@ -68,7 +68,7 @@ public class UrlEncoded extends MultiMap
     /* ----------------------------------------------------------------- */
     public void decode(String query)
     {
-        decodeTo(query,this,StringUtil.__ISO_8859_1);
+        decodeTo(query,this,StringUtil.__UTF8);
     }
     
     /* ----------------------------------------------------------------- */
@@ -82,7 +82,7 @@ public class UrlEncoded extends MultiMap
      */
     public String encode()
     {
-        return encode(StringUtil.__ISO_8859_1,false);
+        return encode(StringUtil.__UTF8,false);
     }
     
     /* -------------------------------------------------------------- */
@@ -162,17 +162,6 @@ public class UrlEncoded extends MultiMap
         }
     }
 
-    /* -------------------------------------------------------------- */
-    /* Decoded parameters to Map.
-     * @param _content the string containing the encoded parameters
-     * @param url The dictionary to add the parameters to
-     */
-    public static void decodeTo(String content,MultiMap map)
-    {
-        decodeTo(content,map,StringUtil.__ISO_8859_1);
-    }
-    
-
 
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
@@ -181,7 +170,7 @@ public class UrlEncoded extends MultiMap
     public static void decodeTo(String content, MultiMap map, String charset)
     {
         if (charset==null)
-            charset=StringUtil.__ISO_8859_1;
+            charset=StringUtil.__UTF8;
 
         synchronized(map)
         {
@@ -247,35 +236,29 @@ public class UrlEncoded extends MultiMap
             }
         }
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
      * @param data the byte[] containing the encoded parameters
-     * @throws UnsupportedEncodingException 
      */
-    public static void decodeTo(byte[] data, int offset, int length, MultiMap map, String charset) 
-        throws UnsupportedEncodingException
+    public static void decodeUtf8To(byte[] raw,int offset, int length, MultiMap map)
     {
-        if (data == null || length == 0)
-            return;
-
-        if (charset==null)
-            charset=StringUtil.__ISO_8859_1;
-        
         synchronized(map)
         {
-            int    ix = offset;
-            int    end = offset+length;
-            int    ox = offset;
+            Utf8StringBuffer buffer = new Utf8StringBuffer();
             String key = null;
             String value = null;
-            while (ix < end)
+            
+            // TODO cache of parameter names ???
+            int end=offset+length;
+            for (int i=offset;i<end;i++)
             {
-                byte c = data[ix++];
-                switch ((char) c)
+                byte b=raw[i];
+                switch ((char)(0xff&b))
                 {
                     case '&':
-                        value = new String(data, offset, ox, charset);
+                        value = buffer.length()==0?null:buffer.toString();
+                        buffer.reset();
                         if (key != null)
                         {
                             map.add(key,value);
@@ -287,35 +270,113 @@ public class UrlEncoded extends MultiMap
                             map.add(value,null);
                             value=null;
                         }
-                        ox = offset;
                         break;
+                        
                     case '=':
                         if (key!=null)
+                        {
+                            buffer.append(b);
                             break;
-                        key = new String(data, offset, ox, charset);
-                        ox = offset;
+                        }
+                        key = buffer.toString();
+                        buffer.reset();
                         break;
+                        
                     case '+':
-                        data[ox++] = (byte)' ';
+                        buffer.append((byte)' ');
                         break;
+                        
                     case '%':
-                        data[ox++] = (byte)
-                        ((TypeUtil.convertHexDigit(data[ix++]) << 4)+
-                                        TypeUtil.convertHexDigit(data[ix++]));
+                        if (i+2<end)
+                            buffer.append((byte)((TypeUtil.convertHexDigit(raw[++i])<<4) + TypeUtil.convertHexDigit(raw[++i])));
                         break;
                     default:
-                        data[ox++] = c;
+                        buffer.append(b);
+                    break;
                 }
             }
+            
             if (key != null)
             {
-                value = new String(data, offset, ox, charset);
+                value = buffer.toString();
+                buffer.reset();
                 map.add(key,value);
             }
-            
         }
     }
-    
+
+    /* -------------------------------------------------------------- */
+    /** Decoded parameters to Map.
+     * @param data the byte[] containing the encoded parameters
+     */
+    public static void decodeUtf8To(InputStream in, MultiMap map)
+    throws IOException
+    {
+        synchronized(map)
+        {
+            Utf8StringBuffer buffer = new Utf8StringBuffer();
+            String key = null;
+            String value = null;
+            
+            int b;
+            
+            // TODO cache of parameter names ???
+            
+            while ((b=in.read())>=0)
+            {
+                switch ((char) b)
+                {
+                    case '&':
+                        value = buffer.length()==0?null:buffer.toString();
+                        buffer.reset();
+                        if (key != null)
+                        {
+                            map.add(key,value);
+                            key = null;
+                            value=null;
+                        }
+                        else if (value!=null)
+                        {
+                            map.add(value,null);
+                            value=null;
+                        }
+                        break;
+                        
+                    case '=':
+                        if (key!=null)
+                        {
+                            buffer.append((byte)b);
+                            break;
+                        }
+                        key = buffer.toString();
+                        buffer.reset();
+                        break;
+                        
+                    case '+':
+                        buffer.append((byte)' ');
+                        break;
+                        
+                    case '%':
+                        int dh=in.read();
+                        int dl=in.read();
+                        if (dh<0||dl<0)
+                            break;
+                        buffer.append((byte)((TypeUtil.convertHexDigit((byte)dh)<<4) + TypeUtil.convertHexDigit((byte)dl)));
+                        break;
+                    default:
+                        buffer.append((byte)b);
+                    break;
+                }
+            }
+            
+            if (key != null)
+            {
+                value = buffer.toString();
+                buffer.reset();
+                map.add(key,value);
+            }
+        }
+    }
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
      * @param data the byte[] containing the encoded parameters
@@ -323,8 +384,11 @@ public class UrlEncoded extends MultiMap
     public static void decodeTo(InputStream in, MultiMap map, String charset)
     throws IOException
     {
-        if (charset==null)
-            charset=StringUtil.__ISO_8859_1;
+        if (charset==null || StringUtil.__UTF8.equalsIgnoreCase(charset))
+        {
+            decodeUtf8To(in,map);
+            return;
+        }
         
         synchronized(map)
         {
@@ -414,7 +478,7 @@ public class UrlEncoded extends MultiMap
      */
     public static String decodeString(String encoded)
     {
-        return decodeString(encoded,0,encoded.length(),StringUtil.__ISO_8859_1);
+        return decodeString(encoded,0,encoded.length(),StringUtil.__UTF8);
     }
     
     /* -------------------------------------------------------------- */
@@ -436,7 +500,7 @@ public class UrlEncoded extends MultiMap
     public static String decodeString(String encoded,int offset,int length,String charset)
     {
         if (charset==null)
-            charset=StringUtil.__ISO_8859_1;
+            charset=StringUtil.__UTF8;
         byte[] bytes=null;
         int n=0;
         
@@ -513,7 +577,7 @@ public class UrlEncoded extends MultiMap
      */
     public static String encodeString(String string)
     {
-        return encodeString(string,StringUtil.__ISO_8859_1);
+        return encodeString(string,StringUtil.__UTF8);
     }
     
     /* ------------------------------------------------------------ */
@@ -524,7 +588,7 @@ public class UrlEncoded extends MultiMap
     public static String encodeString(String string,String charset)
     {
         if (charset==null)
-            charset=StringUtil.__ISO_8859_1;
+            charset=StringUtil.__UTF8;
         byte[] bytes=null;
         try
         {

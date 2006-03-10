@@ -17,6 +17,7 @@ package org.mortbay.util;
 import java.io.UnsupportedEncodingException;
 
 
+
 /* ------------------------------------------------------------ */
 /** URI Holder.
  * This class assists with the decoding and encoding or HTTP URI's.
@@ -36,8 +37,7 @@ public class URIUtil
     public static final String HTTPS="https";
     public static final String HTTPS_COLON="https:";
 
-    public static final String __CHARSET=
-        System.getProperty("org.mortbay.util.URI.charset",StringUtil.__ISO_8859_1);
+    public static final String __CHARSET=System.getProperty("org.mortbay.util.URI.charset",StringUtil.__UTF8);
     
     private URIUtil()
     {}
@@ -220,6 +220,55 @@ public class URIUtil
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /* Decode a URI path.
+     * @param path The path the encode
+     * @param buf StringBuffer to encode path into
+     */
+    public static String decodePath(byte[] buf, int offset, int length)
+    {
+        byte[] bytes=null;
+        int n=0;
+        
+        for (int i=0;i<length;i++)
+        {
+            byte b = buf[i];
+
+            if (b=='%' && (i+2)<length)
+            {
+                b=(byte)(0xff&TypeUtil.parseInt(buf,i+1,2,16));
+                i+=2;
+            }
+            else if (bytes==null)
+            {
+                n++;
+                continue;
+            }
+            
+            if (bytes==null)
+            {
+                bytes=new byte[length];
+                for (int j=0;j<n;j++)
+                    bytes[j]=buf[j];                
+            }
+            
+            bytes[n++]=b;
+        }
+
+        try
+        {   
+            if (bytes==null)
+                return new String(buf,offset,length,__CHARSET);
+            return new String(bytes,0,n,__CHARSET);
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            if (bytes==null)
+                return new String(buf,offset,length);
+            return new String(bytes,0,n);
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     /** Add two URI path segments.
      * Handles null and empty paths, path and query params (eg ?a=b or
