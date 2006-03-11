@@ -16,24 +16,16 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Writer;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 
-import mx4j.tools.adaptor.http.HttpInputStream;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.View;
 import org.mortbay.log.Log;
-import org.mortbay.util.ByteArrayOutputStream2;
-import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
 
