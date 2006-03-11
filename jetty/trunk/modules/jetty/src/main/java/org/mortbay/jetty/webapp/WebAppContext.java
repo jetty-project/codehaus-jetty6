@@ -85,8 +85,8 @@ public class WebAppContext extends ContextHandler
     private SecurityHandler _securityHandler;
     private ServletHandler _servletHandler;
     private SessionHandler _sessionHandler;
-    private String[] _systemClasses = new String[]{"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
-    private String[] _serverClasses = new String[]{"org.mortbay.", "-org.mortbay.naming.","-org.mortbay.util.", "org.slf4j."};
+    private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
+    private String[] _serverClasses = {"org.mortbay.", "-org.mortbay.naming.","-org.mortbay.util.", "org.slf4j."};
     private File _tmpDir;
     private String _war;
     

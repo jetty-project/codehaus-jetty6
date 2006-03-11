@@ -14,8 +14,19 @@
 
 package org.mortbay.util;
 
-import java.io.IOException;
-
+/* ------------------------------------------------------------ */
+/** UTF-8 StringBuffer.
+ *
+ * This class wraps a standard {@link java.lang.StringBuffer} and provides methods to append 
+ * UTF-8 encoded bytes, that are converted into characters.
+ * 
+ * This class is stateful and up to 6  calls to {@link #append(byte)} may be needed before 
+ * state a character is appended to the string buffer.
+ * 
+ * The UTF-8 decoding is done by this class and no additional buffers or Readers are used.
+ * The UTF-8 code was inspired by http://javolution.org
+ * 
+ */
 public class Utf8StringBuffer 
 {
     StringBuffer _buffer;
@@ -115,10 +126,13 @@ public class Utf8StringBuffer
         _bits=0;
     }
     
+    public StringBuffer getStringBuffer()
+    {
+        return _buffer;
+    }
+    
     public String toString()
     {
-        if (_more>0)
-            throw new IllegalStateException();
         return _buffer.toString();
     }
 }

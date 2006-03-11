@@ -25,6 +25,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 
+import mx4j.tools.adaptor.http.HttpInputStream;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
@@ -56,7 +58,7 @@ public class HttpConnection
     private HttpParser _parser;
     private HttpFields _requestFields;
     private Request _request;
-    private Input _in;
+    private HttpParser.Input _in;
 
     private HttpGenerator _generator;
     private HttpFields _responseFields;
@@ -70,7 +72,6 @@ public class HttpConnection
     
     private Object _associatedObject; // associated object
     
-    private transient Buffer _content;
     private transient int _connection = UNKNOWN;
     private transient int _expect = UNKNOWN;
     private transient int _version = UNKNOWN;
@@ -217,7 +218,7 @@ public class HttpConnection
      */
     public ServletInputStream getInputStream()
     {
-        if (_in == null) _in = new Input();
+        if (_in == null) _in = new HttpParser.Input(_parser,_connector.getMaxIdleTime());
         return _in;
     }
 
@@ -475,7 +476,6 @@ public class HttpConnection
     private class RequestHandler extends HttpParser.EventHandler
     {
         boolean _delayedHandling=false;
-        View _contentView=new View();
         
         /*
          * 
@@ -614,9 +614,6 @@ public class HttpConnection
          */
         public void content(Buffer ref) throws IOException
         {
-            _contentView.update(ref);
-            _content = _contentView;
-            
             if (_delayedHandling)
             {
                 _delayedHandling=false;
@@ -646,93 +643,7 @@ public class HttpConnection
 
     }
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class Input extends ServletInputStream
-    {
-        private boolean blockForContent() throws IOException
-        {
-            if (_content!=null && _content.length()>0)
-                return true;
-            if (_parser.isState(HttpParser.STATE_END)) 
-                return false;
-
-            _content = null;
-            
-            // Handle simple end points.
-            if (_endp==null)
-            {
-                _parser.parseNext();
-            }
-            
-            // Handle blocking end points
-            else if (_endp.isBlocking())
-            {
-                long filled=_parser.parseNext();
-                
-                // parse until some progress is made (or IOException thrown for timeout)
-                while((_content == null || _content.length() == 0) && filled!=0 && !_parser.isState(HttpParser.STATE_END))
-                {
-                    // Try to get more _content
-                    filled=_parser.parseNext();
-                }
-                
-            }
-            // Handle non-blocking end point
-            else
-            {
-                long filled=_parser.parseNext();
-                boolean blocked=false;
-                
-                // parse until some progress is made (or IOException thrown for timeout)
-                while((_content == null || _content.length() == 0) && !_parser.isState(HttpParser.STATE_END))
-                {
-                    // if fill called, but no bytes read, then block
-                    if (filled>0)
-                        blocked=false;
-                    else if (filled==0)
-                    {
-                        if (blocked)
-                            throw new InterruptedIOException("timeout");
-                        
-                        blocked=true;
-                        _endp.blockReadable(_connector.getMaxIdleTime()); 
-                    }
-                    
-                    // Try to get more _content
-                    filled=_parser.parseNext();
-                }
-            }
-            
-            return _content!=null && _content.length()>0; 
-        }
-        
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.InputStream#read()
-         */
-        public int read() throws IOException
-        {
-            int c=-1;
-            if (blockForContent())
-                c= 0xff & _content.get();
-            return c;
-        }
-        
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see java.io.InputStream#read(byte[], int, int)
-         */
-        public int read(byte[] b, int off, int len) throws IOException
-        {
-            int l=-1;
-            if (blockForContent())
-                l= _content.get(b, off, len);
-            return l;
-        }       
-    }
-
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

@@ -503,7 +503,7 @@ public class HttpServerTest
             }
 
             if (count==0)
-                throw new IllegalStateException("received input");
+                throw new IllegalStateException("no input recieved");
 
             return true;
         }
