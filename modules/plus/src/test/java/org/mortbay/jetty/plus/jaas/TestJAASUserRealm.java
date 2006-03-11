@@ -82,14 +82,19 @@ public class TestJAASUserRealm extends TestCase
         
         //set up the properties 
         File propsFile = File.createTempFile("props", null);
+        propsFile.deleteOnExit();
         Properties props = new Properties ();
         props.put("user", "user,user,pleb");
-        props.store(new FileOutputStream(propsFile), "");
+        FileOutputStream fout=new FileOutputStream(propsFile);
+        props.store(fout, "");
+        fout.close();
+
         
  
         
         //set up config
         File configFile = File.createTempFile ("loginConf", null);
+        configFile.deleteOnExit();
         PrintWriter writer = new PrintWriter(new FileWriter(configFile));
         writer.println ("props {");
         writer.println ("org.mortbay.jetty.plus.jaas.spi.PropertyFileLoginModule required");     
