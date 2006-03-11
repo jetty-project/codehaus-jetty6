@@ -940,6 +940,12 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** Output.
+     * A {@link ServletOutputStream} implementation that writes content
+     * to a {@link HttpGenerator}.   The class is designed to be reused
+     * and can be reopened after a close.
+     */
     public static class Output extends ServletOutputStream 
     {
         protected HttpGenerator _generator;
@@ -1062,10 +1068,18 @@ public class HttpGenerator implements HttpTokens
             write(s.getBytes());
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    /** OutputWriter.
+     * A writer that can wrap a {@link Output} stream and provide
+     * character encodings.
+     *
+     * The UTF-8 encoding is done by this class and no additional 
+     * buffers or Writers are used.
+     * The UTF-8 code was inspired by http://javolution.org
+     */
     public static class OutputWriter extends Writer
     {
         Output _out;
