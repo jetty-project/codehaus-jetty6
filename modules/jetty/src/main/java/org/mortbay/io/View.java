@@ -210,4 +210,11 @@ public class View extends AbstractBuffer
     {
         return _buffer.poke(index,b,offset,length);
     }
+    
+    public String toString()
+    {
+        if (_buffer==null)
+            return "INVALID";
+        return super.toString();
+    }
 }

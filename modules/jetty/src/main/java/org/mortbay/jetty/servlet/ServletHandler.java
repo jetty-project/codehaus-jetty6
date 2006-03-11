@@ -583,6 +583,12 @@ public class ServletHandler extends AbstractHandler
     }
 
     /* ------------------------------------------------------------ */
+    protected ServletHolder newServletHolder()
+    {
+        return new ServletHolder();
+    }
+    
+    /* ------------------------------------------------------------ */
     /** conveniance method to add a servlet.
      * @param name
      * @param className
@@ -591,7 +597,7 @@ public class ServletHandler extends AbstractHandler
      */
     public ServletHolder addServlet(String className,String pathSpec)
     {
-        ServletHolder holder = new ServletHolder();
+        ServletHolder holder = newServletHolder();
         holder.setName(className);
         holder.setClassName(className);
         setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder));
@@ -602,6 +608,13 @@ public class ServletHandler extends AbstractHandler
         setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping));
         
         return holder;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    protected FilterHolder newFilterHolder()
+    {
+        return new FilterHolder();
     }
     
     /* ------------------------------------------------------------ */
@@ -614,7 +627,7 @@ public class ServletHandler extends AbstractHandler
      */
     public FilterHolder addFilter(String className,String pathSpec,int dispatches)
     {
-        FilterHolder holder = new FilterHolder();
+        FilterHolder holder = newFilterHolder();
         holder.setName(className);
         holder.setClassName(className);
         setFilters((FilterHolder[])LazyList.addToArray(getFilters(), holder));

@@ -15,6 +15,9 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
+
+import javax.servlet.ServletInputStream;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
@@ -63,8 +66,9 @@ public class HttpParser implements HttpTokens
     private Buffers _buffers; // source of buffers
     private EndPoint _endp;
     private Buffer _header; // Buffer for header data (and small _content)
-    private Buffer _content; // Buffer for large content
+    private Buffer _body; // Buffer for large content
     private Buffer _buffer; // The current buffer in use (either _header or _content)
+    private View _contentView=new View(); // View of the content in the buffer for {@link Input}
     private int _headerBufferSize;
     private int _contentBufferSize;
     private EventHandler _handler;
@@ -73,7 +77,7 @@ public class HttpParser implements HttpTokens
     private View _tok1; // Saved token: header value, request URI or response code
     private String _multiLineValue;
     private boolean _response=false;
-
+    
     /* ------------------------------------------------------------------------------- */
     /**
      * Constructor.
@@ -228,9 +232,9 @@ public class HttpParser implements HttpTokens
         if (length == 0)
         {
             int filled=-1;
-            if (_content!=null && _buffer!=_content)
+            if (_body!=null && _buffer!=_body)
             {
-                _buffer=_content;
+                _buffer=_body;
                 filled=_buffer.length();
             }
                 
@@ -240,7 +244,7 @@ public class HttpParser implements HttpTokens
             {
                 // Compress buffer if handling _content buffer
                 // TODO check this is not moving data too much
-                if (_buffer == _content) 
+                if (_buffer == _body) 
                     _buffer.compact();
 
                 if (_buffer.space() == 0) 
@@ -467,16 +471,16 @@ public class HttpParser implements HttpTokens
                             {
                                 case HttpParser.EOF_CONTENT:
                                     _state=STATE_EOF_CONTENT;
-                                    if(_content==null && _buffers!=null)
-                                        _content=_buffers.getBuffer(_contentBufferSize);
+                                    if(_body==null && _buffers!=null)
+                                        _body=_buffers.getBuffer(_contentBufferSize);
                                     
                                     _handler.headerComplete(); // May recurse here !
                                     break;
                                     
                                 case HttpParser.CHUNKED_CONTENT:
                                     _state=STATE_CHUNKED_CONTENT;
-                                    if (_content==null && _buffers!=null)
-                                        _content=_buffers.getBuffer(_contentBufferSize);
+                                    if (_body==null && _buffers!=null)
+                                        _body=_buffers.getBuffer(_contentBufferSize);
                                     _handler.headerComplete(); // May recurse here !
                                     break;
                                     
@@ -489,8 +493,8 @@ public class HttpParser implements HttpTokens
                                 default:
                                     _state=STATE_CONTENT;
 
-                                	if(_buffers!=null && _content==null && _buffer==_header && _contentLength>(_header.capacity()-_header.getIndex()))
-                                	    _content=_buffers.getBuffer(_contentBufferSize);
+                                	if(_buffers!=null && _body==null && _buffer==_header && _contentLength>(_header.capacity()-_header.getIndex()))
+                                	    _body=_buffers.getBuffer(_contentBufferSize);
                                     _handler.headerComplete(); // May recurse here !
                                     break;
                             }
@@ -570,8 +574,8 @@ public class HttpParser implements HttpTokens
         // ==========================
         
         // Handle _content
-        Buffer chunk;
         length=_buffer.length();
+        Buffer chunk; 
         while (_state > STATE_END && length > 0)
         {
             if (_eol == CARRIAGE_RETURN && _buffer.peek() == LINE_FEED)
@@ -586,6 +590,7 @@ public class HttpParser implements HttpTokens
                 case STATE_EOF_CONTENT:
                     chunk=_buffer.get(_buffer.length());
                     _contentPosition += chunk.length();
+                    _contentView.update(chunk);
                     _handler.content(chunk);
                     return total_filled;
 
@@ -605,7 +610,7 @@ public class HttpParser implements HttpTokens
                     }
                     chunk=_buffer.get(length);
                     _contentPosition += chunk.length();
-                    
+                    _contentView.update(chunk);
                     _handler.content(chunk);
                     return total_filled;
                 }
@@ -685,6 +690,7 @@ public class HttpParser implements HttpTokens
                     chunk=_buffer.get(length);
                     _contentPosition += chunk.length();
                     _chunkPosition += chunk.length();
+                    _contentView.update(chunk);
                     _handler.content(chunk);
                     return total_filled;
                 }
@@ -710,27 +716,27 @@ public class HttpParser implements HttpTokens
             _eol=LINE_FEED;
         }
         
-        if (_content!=null)
+        if (_body!=null)
         {   
-            if (_content.hasContent())
+            if (_body.hasContent())
             {
                 _header.setMarkIndex(-1);
                 _header.compact();
                 // TODO if pipelined requests received after big input - maybe this is not good?.
-                _content.skip(_header.put(_content));
+                _body.skip(_header.put(_body));
 
             }
             
-            if (_content.length()==0)
+            if (_body.length()==0)
             {
                 if (_buffers!=null && returnBuffers)
-                    _buffers.returnBuffer(_content);
-                _content=null; 
+                    _buffers.returnBuffer(_body);
+                _body=null; 
             }
             else
             {
-                _content.setMarkIndex(-1);
-                _content.compact();
+                _body.setMarkIndex(-1);
+                _body.compact();
             }
         }
             
@@ -761,7 +767,10 @@ public class HttpParser implements HttpTokens
     {
         return _header;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     public static abstract class EventHandler
     {
         /**
@@ -793,4 +802,107 @@ public class HttpParser implements HttpTokens
         {
         }
     }
+    
+    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static class Input extends ServletInputStream
+    {
+        protected HttpParser _parser;
+        protected EndPoint _endp;
+        protected long _maxIdleTime;
+        protected View _content;
+        
+        public Input(HttpParser parser, long maxIdleTime)
+        {
+            _parser=parser;
+            _endp=parser._endp;
+            _maxIdleTime=maxIdleTime;
+            _content=_parser._contentView;
+        }
+        
+        private boolean blockForContent() throws IOException
+        {
+            if (_content.length()>0)
+                return true;
+            if (_parser.isState(HttpParser.STATE_END)) 
+                return false;
+            
+            // Handle simple end points.
+            if (_endp==null)
+            {
+                _parser.parseNext();
+            }
+            
+            // Handle blocking end points
+            else if (_endp.isBlocking())
+            {
+                long filled=_parser.parseNext();
+                
+                // parse until some progress is made (or IOException thrown for timeout)
+                while(_content.length() == 0 && filled!=0 && !_parser.isState(HttpParser.STATE_END))
+                {
+                    // Try to get more _parser._content
+                    filled=_parser.parseNext();
+                }
+                
+            }
+            // Handle non-blocking end point
+            else
+            {
+                long filled=_parser.parseNext();
+                boolean blocked=false;
+                
+                // parse until some progress is made (or IOException thrown for timeout)
+                while(_content.length() == 0 && !_parser.isState(HttpParser.STATE_END))
+                {
+                    // if fill called, but no bytes read, then block
+                    if (filled>0)
+                        blocked=false;
+                    else if (filled==0)
+                    {
+                        if (blocked)
+                            throw new InterruptedIOException("timeout");
+                        
+                        blocked=true;
+                        _endp.blockReadable(_maxIdleTime); 
+                    }
+                    
+                    // Try to get more _parser._content
+                    filled=_parser.parseNext();
+                }
+            }
+            
+            return _content.length()>0; 
+        }
+        
+        /* ------------------------------------------------------------ */
+        /*
+         * @see java.io.InputStream#read()
+         */
+        public int read() throws IOException
+        {
+            int c=-1;
+            if (blockForContent())
+                c= 0xff & _content.get();
+            return c;
+        }
+        
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see java.io.InputStream#read(byte[], int, int)
+         */
+        public int read(byte[] b, int off, int len) throws IOException
+        {
+            int l=-1;
+            if (blockForContent())
+                l= _content.get(b, off, len);
+            return l;
+        }       
+    }
+
+    
+    
 }
