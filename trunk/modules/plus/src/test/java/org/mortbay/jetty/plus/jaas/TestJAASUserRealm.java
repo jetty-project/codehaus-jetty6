@@ -99,7 +99,7 @@ public class TestJAASUserRealm extends TestCase
         writer.println ("props {");
         writer.println ("org.mortbay.jetty.plus.jaas.spi.PropertyFileLoginModule required");     
         writer.println ("debug=\"true\"");
-        writer.println ("file=\""+propsFile.getCanonicalPath() +"\";");
+        writer.println ("file=\""+propsFile.getCanonicalPath().replace('\\','/') +"\";");
         writer.println ("};");
         writer.println ("ds {");
         writer.println ("org.mortbay.jetty.plus.jaas.spi.DataSourceLoginModule required");
