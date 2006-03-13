@@ -45,13 +45,8 @@ public class JNDITest extends HttpServlet {
             myDS2 = (DataSource)ic.lookup("java:comp/env/jdbc/mydatasource2");
             
             wiggle = (Double)ic.lookup("java:comp/env/wiggle");          
-               
-            
-            if (myDS instanceof XADataSource)
-                System.err.println("Got an XADataSource for myDS");
-            
-            if (myDS2 instanceof XADataSource)
-                System.err.println("Got an XADataSource for myDS2");
+            System.err.println("wiggle="+wiggle);
+           
         }
         catch (Exception e)
         {
