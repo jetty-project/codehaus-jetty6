@@ -36,7 +36,7 @@ public interface Handler extends LifeCycle
     
     
     /* ------------------------------------------------------------ */
-    /** Generic Jetty request handler.
+    /** Handle a request.
      * @param target The target of the request - either a URI or a name.
      * @param request The request either as the {@link Request}
      * object or a wrapper of that request. The {@link HttpConnection#getCurrentConnection()} 
