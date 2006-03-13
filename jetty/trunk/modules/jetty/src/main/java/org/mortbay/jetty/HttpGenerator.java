@@ -289,10 +289,10 @@ public class HttpGenerator implements HttpTokens
         _last = last;
 
         // Handle any unfinished business?
-        if (_content != null || _bufferChunked)
+        if (_content!=null && _content.length()>0 || _bufferChunked)
         {
             flushBuffers();
-            if (_content != null || _bufferChunked) 
+            if (_content != null && _content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
 
@@ -335,10 +335,10 @@ public class HttpGenerator implements HttpTokens
             throw new IllegalStateException("Closed");
 
         // Handle any unfinished business?
-        if (_content != null || _bufferChunked)
+        if (_content != null && _content.length()>0 || _bufferChunked)
         {
             flushBuffers();
-            if (_content != null || _bufferChunked) 
+            if (_content != null && _content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
 
@@ -366,10 +366,10 @@ public class HttpGenerator implements HttpTokens
             throw new IllegalStateException("Closed");
 
         // Handle any unfinished business?
-        if (_content != null || _bufferChunked)
+        if (_content != null && _content.length()>0 || _bufferChunked)
         {
             flushBuffers();
-            if (_content != null || _bufferChunked) 
+            if (_content != null && _content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
 
@@ -718,6 +718,7 @@ public class HttpGenerator implements HttpTokens
                             _header.clear();
                         
                         _bypass = false;
+                        _bufferChunked = false;
                         
                         if (_buffer != null)
                         {
@@ -727,7 +728,6 @@ public class HttpGenerator implements HttpTokens
                                 // reserve some space for the chunk header
                                 _buffer.setPutIndex(CHUNK_SPACE);
                                 _buffer.setGetIndex(CHUNK_SPACE);
-                                _bufferChunked = false;
                                 
                                 // Special case handling for small left over buffer from
                                 // an addContent that caused a buffer flush.
