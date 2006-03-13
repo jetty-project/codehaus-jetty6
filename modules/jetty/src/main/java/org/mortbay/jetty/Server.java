@@ -278,6 +278,8 @@ public class Server extends HandlerCollection
 
     /* ------------------------------------------------------------ */
     /* Handle a request from a connection.
+     * Called to handle a request on the connection when either the header has been received,
+     * or after the entire request has been received (for short requests of known length).
      */
     public void handle(HttpConnection connection) throws IOException, ServletException
     {
@@ -297,7 +299,7 @@ public class Server extends HandlerCollection
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
