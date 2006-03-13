@@ -106,6 +106,13 @@ public interface Connector extends LifeCycle, Buffers
     boolean isConfidential(Request request);
 
     /* ------------------------------------------------------------ */
+    /** Customize a request for an endpoint.
+     * Called on every request to allow customization of the request for
+     * the particular endpoint (eg security properties from a SSL connection).
+     * @param endpoint
+     * @param request
+     * @throws IOException
+     */
     void customize(EndPoint endpoint, Request request) throws IOException;
     
     Continuation newContinuation();
