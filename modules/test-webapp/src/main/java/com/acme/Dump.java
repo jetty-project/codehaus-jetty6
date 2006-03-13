@@ -56,6 +56,13 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+        if (request.getParameter("empty")!=null)
+        {
+            response.setStatus(200);
+            response.flushBuffer();
+            return;
+        }
+        
         request.setAttribute("Dump", this);
         getServletContext().setAttribute("Dump",this);
         getServletContext().log("dump "+request.getRequestURI());
