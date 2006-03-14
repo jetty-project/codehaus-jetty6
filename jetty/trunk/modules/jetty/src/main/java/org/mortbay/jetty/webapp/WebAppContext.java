@@ -812,7 +812,7 @@ public class WebAppContext extends ContextHandler
      */
     public void addEventListener(EventListener listener)
     {
-        setEventListeners((EventListener[])LazyList.addToArray(getEventListeners(), listener));   
+        setEventListeners((EventListener[])LazyList.addToArray(getEventListeners(), listener, EventListener.class));   
     }
 
     
