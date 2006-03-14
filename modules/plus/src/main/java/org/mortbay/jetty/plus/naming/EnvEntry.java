@@ -17,8 +17,12 @@ package org.mortbay.jetty.plus.naming;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.Name;
 import javax.naming.NameNotFoundException;
+import javax.naming.NameParser;
 import javax.naming.NamingException;
+
+import org.mortbay.log.Log;
 
 
 /**
@@ -35,14 +39,39 @@ public class EnvEntry extends NamingEntry
     {
         try
         {
-            InitialContext ic = new InitialContext();
-            return (EnvEntry)ic.lookup(EnvEntry.class.getName()+"/"+jndiName);
+            //lookup an EnvEntry first in the webapp specific naming
+            //context, but if one doesn't exist, then try the global
+            Context context = getThreadLocalContext();
+            Object o = null;
+            if (context != null)
+            {
+                try
+                {
+                    o = lookupNamingEntry(context, EnvEntry.class, jndiName);
+                }
+                catch (NameNotFoundException e)
+                {
+                    Log.ignore(e);
+                    Log.debug("Didn't find "+jndiName+" in thread context context");
+                }
+            }
+            if (o == null)
+            {
+                o = lookupNamingEntry(new InitialContext(), EnvEntry.class, jndiName);
+                Log.debug("Found env entry "+jndiName+" in global context");
+            }
+            return (EnvEntry)o;
         }
         catch (NameNotFoundException e)
         {
+           Log.debug("Didn't find "+jndiName+" anywhere");
             return null;
         }
     }
+    
+    
+
+    
     
     public EnvEntry (String jndiName, Object objToBind)
     throws NamingException
@@ -63,6 +92,14 @@ public class EnvEntry extends NamingEntry
         return this.overrideWebXml;
     }
     
+    /** Bind the object wrapped in this EnvEntry into java:comp/env.
+     * If, however, it is set to NOT override the web.xml entry,
+     * then don't bind it. This method works in conjunction with
+     * org.mortbay.jetty.plus.webapp.Configuration.bindEnvEntry().
+     * TODO clean this up
+     * @see org.mortbay.jetty.plus.naming.NamingEntry#bindToEnv()
+     * @throws NamingException
+     */
     public void bindToEnv ()
     throws NamingException
     {
@@ -74,8 +111,7 @@ public class EnvEntry extends NamingEntry
         {
             env.lookup(getJndiName());
             if (isOverrideWebXml())
-                doBind = true;
-            
+                doBind = true;       
         }
         catch (NameNotFoundException e)
         {

@@ -15,9 +15,12 @@
 
 package org.mortbay.jetty.plus.naming;
 
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
+
+import org.mortbay.log.Log;
 
 /**
  * Resource
@@ -32,11 +35,32 @@ public class Resource extends NamingEntry
     {
         try
         {
-            InitialContext ic = new InitialContext();
-            return (Resource)ic.lookup(Resource.class.getName()+"/"+jndiName);
+            //lookup an EnvEntry first in the webapp specific naming
+            //context, but if one doesn't exist, then try the global
+            Context context = getThreadLocalContext();
+            Object o = null;
+            if (context != null)
+            {
+                try
+                {
+                    o = lookupNamingEntry(context, Resource.class, jndiName);
+                }
+                catch (NameNotFoundException e)
+                {
+                    Log.ignore(e);
+                    Log.debug("Didn't find Resource "+jndiName +" in thread local context "+context);
+                }
+            }
+            if (o == null)
+            {
+                o = lookupNamingEntry(new InitialContext(), Resource.class, jndiName);
+                Log.debug("Found Resource in global context for "+jndiName);
+            }
+            return (Resource)o;
         }
         catch (NameNotFoundException e)
         {
+            Log.debug("Returning NULL as Resource not found for "+jndiName);
             return null;
         }
     }

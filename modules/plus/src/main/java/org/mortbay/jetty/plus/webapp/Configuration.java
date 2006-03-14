@@ -15,6 +15,9 @@
 
 package org.mortbay.jetty.plus.webapp;
 
+import java.util.Iterator;
+import java.util.List;
+
 import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -22,6 +25,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
 import org.mortbay.jetty.plus.naming.EnvEntry;
+import org.mortbay.jetty.plus.naming.NamingEntry;
 import org.mortbay.jetty.plus.naming.Resource;
 import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.log.Log;
@@ -105,22 +109,6 @@ public class Configuration extends AbstractConfiguration
     throws Exception
     {
         super.configureDefaults();
-        
-        //add java:comp/env entries for all globally defined EnvEntries
-        Context context = new InitialContext();
-        try
-        {
-            NamingEnumeration nenum = context.listBindings(EnvEntry.class.getName());
-            while (nenum.hasMoreElements())
-            {
-                Binding binding = (Binding)nenum.next();
-                ((EnvEntry)binding.getObject()).bindToEnv();
-            }
-        }
-        catch (NamingException e)
-        {
-            Log.debug("Possibly no EnvEntrys set up in jetty.xml", e);
-        }
     }
 
 
