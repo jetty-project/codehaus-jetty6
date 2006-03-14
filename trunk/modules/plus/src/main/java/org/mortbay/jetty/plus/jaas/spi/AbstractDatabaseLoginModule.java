@@ -100,8 +100,6 @@ public abstract class AbstractDatabaseLoginModule extends AbstractLoginModule
             results.close();
             statement.close();
             
-            System.err.println("User from db="+userName);
-            System.err.println("Pwd from db="+dbCredential);
             return new UserInfo (userName, Credential.getCredential(dbCredential), roles);
         }
         finally
