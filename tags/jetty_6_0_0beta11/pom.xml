@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Servlet Server</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta11</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -134,7 +134,7 @@
       <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>
-        <version>6.0-SNAPSHOT</version>
+        <version>6.0.0beta11</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven</groupId>
