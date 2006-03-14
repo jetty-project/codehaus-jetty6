@@ -27,7 +27,7 @@ given to select specific configurations.
 RUNNING WITH JMX
 ================
 
-The server can be run with JMX management with the command
+The server can be run with JMX management with the command:
 
    java -jar start.jar etc/jetty-jmx.xml etc/jetty.xml
    
@@ -37,7 +37,8 @@ configuration.
 RUNNING WITH JETTY PLUS
 =======================
 
-The server can be run with JMX management with the command
+The server can be run as JettyPlus (JNDI, JAAS etc.) with the 
+command:
 
    java -jar start.jar etc/jetty.xml etc/jetty-plus.xml
    
