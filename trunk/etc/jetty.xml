@@ -137,7 +137,7 @@
       <Arg>./webapps</Arg>
       <Arg>org/mortbay/jetty/webapp/webdefault.xml</Arg>
       <Arg type="boolean">True</Arg>
-      <Arg type="boolean">True</Arg>
+      <Arg type="boolean">False</Arg>
     </Call>
 
 
