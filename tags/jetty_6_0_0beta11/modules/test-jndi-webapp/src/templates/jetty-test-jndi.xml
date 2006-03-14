@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+
+<!-- =============================================================== -->
+<!-- Configure the test-jndi webapp                                  -->
+<!-- =============================================================== -->
+<Configure id="Server" class="org.mortbay.jetty.Server">
+
+  <!-- JNDI java:comp/env                                          -->
+  <New id="woggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
+    <Arg>woggle</Arg>
+    <Arg type="java.lang.Integer">4000</Arg>
+  </New>
+
+  <New id="wiggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
+    <Arg>wiggle</Arg>
+    <Arg type="java.lang.Double">100</Arg>
+    <Arg type="boolean">true</Arg>
+  </New>
+
+  <!-- Configuring Transactions                                    -->
+
+  @TRANSACTIONMANAGER@
+
+  <New id="tx" class="org.mortbay.jetty.plus.naming.Transaction">
+   <Arg>
+     @USERTRANSACTION@
+   </Arg>
+  </New>
+
+
+  <!-- Configuring <resource-ref> and <resource-env-ref>s          -->
+  <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg>jdbc/mydatasource</Arg>
+    <Arg>
+     @DATASOURCE1@
+    </Arg>
+   </New>
+
+
+  <New id="mydatasource2" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg>jdbc/mydatasource2</Arg>
+    <Arg>
+       @DATASOURCE2@
+    </Arg>
+   </New>
+
+
+</Configure>
+
+
+
+
+
+
+
+
