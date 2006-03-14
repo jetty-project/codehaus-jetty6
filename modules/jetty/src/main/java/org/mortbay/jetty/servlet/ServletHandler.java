@@ -600,12 +600,12 @@ public class ServletHandler extends AbstractHandler
         ServletHolder holder = newServletHolder();
         holder.setName(className);
         holder.setClassName(className);
-        setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder));
+        setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder, ServletHolder.class));
         
         ServletMapping mapping = new ServletMapping();
         mapping.setServletName(className);
         mapping.setPathSpec(pathSpec);
-        setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping));
+        setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping, ServletMapping.class));
         
         return holder;
     }
@@ -630,13 +630,13 @@ public class ServletHandler extends AbstractHandler
         FilterHolder holder = newFilterHolder();
         holder.setName(className);
         holder.setClassName(className);
-        setFilters((FilterHolder[])LazyList.addToArray(getFilters(), holder));
+        setFilters((FilterHolder[])LazyList.addToArray(getFilters(), holder, FilterHolder.class));
         
         FilterMapping mapping = new FilterMapping();
         mapping.setFilterName(className);
         mapping.setPathSpec(pathSpec);
         mapping.setDispatches(dispatches);
-        setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping));
+        setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping, FilterMapping.class));
         
         return holder;
     }
