@@ -19,10 +19,12 @@ import java.io.File;
 import java.util.List;
 
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
+import org.mortbay.jetty.plus.webapp.EnvConfiguration;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
 import org.mortbay.jetty.webapp.TagLibConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.webapp.WebInfConfiguration;
 
 /**
  * Jetty6PluginWebApplication
@@ -37,7 +39,7 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     private File webAppDir;
     private File webXmlFile;
     private List classpathFiles;
-    private Configuration[] configurations = {null, new JettyWebXmlConfiguration(), new TagLibConfiguration()};
+    private Configuration[] configurations = {new WebInfConfiguration(), new EnvConfiguration(), null, new JettyWebXmlConfiguration(), new TagLibConfiguration()};
     
     protected Jetty6PluginWebApplication()
     {
@@ -72,7 +74,16 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
         Jetty6MavenConfiguration mavenConfig = new Jetty6MavenConfiguration();
         mavenConfig.setClassPathConfiguration (webAppDir, classpathFiles);
         mavenConfig.setWebXml (webXmlFile);
-        configurations[0]=mavenConfig;
+        boolean done=false;
+        for (int i=0;i<configurations.length && !done; i++)
+        {
+            if (configurations[i] == null)
+            {
+                configurations[i] = mavenConfig;
+                done = true;
+            }
+        }
+            
         this.context.setConfigurations(configurations);
     }
 
