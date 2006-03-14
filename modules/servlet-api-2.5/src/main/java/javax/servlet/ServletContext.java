@@ -121,6 +121,9 @@ public interface ServletContext {
      * The context path returned by this method should be considered as the
      * prime or preferred context path of the application.
      *
+     * @return The context path of the web application, or "" for the 
+     * default (root) context 
+     *
      * @see javax.servlet.http.HttpServletRequest#getContextPath()
      *
      * @since Servlet 2.5
@@ -160,7 +163,7 @@ public interface ServletContext {
     /**
      * Returns the major version of the Java Servlet API that this
      * servlet container supports. All implementations that comply
-     * with Version 2.4 must have this method
+     * with Version 2.5 must have this method
      * return the integer 2.
      *
      * @return 		2
@@ -174,10 +177,10 @@ public interface ServletContext {
     /**
      * Returns the minor version of the Servlet API that this
      * servlet container supports. All implementations that comply
-     * with Version 2.4 must have this method
-     * return the integer 4.
+     * with Version 2.5 must have this method
+     * return the integer 5.
      *
-     * @return 		4
+     * @return 		5
      *
      */
 
