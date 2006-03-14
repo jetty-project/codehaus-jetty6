@@ -374,12 +374,19 @@ public class LazyList
     }
 
     /* ------------------------------------------------------------ */
-    public static Object[] addToArray(Object[] array, Object item)
+    /** Add element to an array
+     * @param array The array to add to (or null)
+     * @param item The item to add
+     * @param type The type of the array (in case of null array)
+     * @return new array with contents of array plus item
+     */
+    public static Object[] addToArray(Object[] array, Object item, Class type)
     {
         if (array==null)
         {
-            Class c = item.getClass();
-            Object[] na = (Object[])Array.newInstance(c, 1);
+            if (type==null && item!=null)
+                type= item.getClass();
+            Object[] na = (Object[])Array.newInstance(type, 1);
             na[0]=item;
             return na;
         }

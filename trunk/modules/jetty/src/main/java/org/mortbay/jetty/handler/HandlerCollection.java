@@ -195,12 +195,7 @@ public class HandlerCollection extends AbstractHandler implements Handler
     /* ------------------------------------------------------------ */
     public void addHandler(Handler handler)
     {
-        Handler[] handlers = getHandlers();
-        
-        if (handlers==null || handlers.length==0 )
-            setHandler(handler);
-        else
-            setHandlers((Handler[])LazyList.addToArray(handlers, handler));
+        setHandlers((Handler[])LazyList.addToArray(getHandlers(), handler, Handler.class));
     }
     
     /* ------------------------------------------------------------ */

@@ -101,6 +101,13 @@ public class Server extends HandlerCollection
         return _connectors;
     }
     
+
+    /* ------------------------------------------------------------ */
+    public void addConnector(Connector connector)
+    {
+        setConnectors((Connector[])LazyList.addToArray(getConnectors(), connector, Connector.class));
+    }
+    
     /* ------------------------------------------------------------ */
     /** Set the connectors for this server.
      * Each connector has this server set as it's ThreadPool and its Handler.
@@ -411,12 +418,7 @@ public class Server extends HandlerCollection
     /* ------------------------------------------------------------ */
     public void addUserRealm(UserRealm realm)
     {
-        UserRealm[] realms = getUserRealms();
-        
-        if (realms==null || realms.length==0 )
-            setUserRealms(new UserRealm[]{realm});
-        else
-            setUserRealms((UserRealm[])LazyList.addToArray(realms, realm));
+        setUserRealms((UserRealm[])LazyList.addToArray(getUserRealms(), realm, UserRealm.class));
     }
     
     /* ------------------------------------------------------------ */
