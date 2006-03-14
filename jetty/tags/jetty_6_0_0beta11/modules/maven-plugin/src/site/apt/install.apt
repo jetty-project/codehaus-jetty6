@@ -1,0 +1,43 @@
+ ------
+ Maven2 Jetty6 Plugin: Installation Guide
+ ------
+ Jan Bartel
+ <janb@mortbay.com>
+ ------
+ November 7 2005
+
+Installing
+
+  If you wish to use a released version of the plugin, then all you have to do is reference it in the <<<plugins>>> section of your pom.
+
+  For example:
+
++--------+
+    </plugins>
+       ...
+        <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <version>6.0.0beta4</version>
+        <configuration>
+           ...
+        </configuration>
+      </plugin>
+      ...
+    </plugins>
++--------+
+
+  If instead you want to live on the bleeding edge and use a SNAPSHOT version of the plugin, you will also need to reference MortBay's snapshot repository in the <<<pluginRepositories>>> section of your project's <<<pom.xml>>>:  
+
++--------+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>mortbay-repo</id>
+      <name>mortbay-repo</name>
+      <url>http://www.mortbay.org/maven2/snapshot</url>
+    </pluginRepository>
+  </pluginRepositories>
++--------+
+
+  NB: Don't forget to change the <<<version>>> in the <<<plugin>>> element to the SNAPSHOT version. 
+
