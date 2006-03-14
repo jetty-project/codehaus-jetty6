@@ -27,8 +27,11 @@
               <tasks>
                 <fail message="Please set the txmgr property: mvn -Dtxmgr=[atomikos|jotm] ..." unless="txmgr"/>
                 <filter filtersfile="src/templates/${txmgr}.properties"/>
+                <filter token="JAVA_TMP_DIR" value="${java.io.tmpdir}"/>
                 <copy file="src/templates/jetty-test-jndi.xml" todir="target/config" filtering="true" overwrite="true"/>
                 <copy file="src/templates/jetty-env.xml" todir="target/${project.artifactId}-${project.version}/WEB-INF" filtering="true" overwrite="true"/>
+                
+                <copy file="src/templates/jta.properties" todir="target/${project.artifactId}-${project.version}/WEB-INF/classes" filtering="true" overwrite="true"/>
               </tasks>
             </configuration>
           </execution>
