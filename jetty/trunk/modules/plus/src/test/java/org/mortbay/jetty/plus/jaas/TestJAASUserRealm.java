@@ -131,6 +131,10 @@ public class TestJAASUserRealm extends TestCase
     public void testItDataSource ()
     throws Exception
     {
+        String tmpDir = System.getProperty("java.io.tmpdir")+System.getProperty("file.separator");
+        System.setProperty("derby.system.home", tmpDir);
+        
+        
         EmbeddedDataSource eds = new EmbeddedDataSource();
         
         try
@@ -140,10 +144,10 @@ public class TestJAASUserRealm extends TestCase
             Context comp = (Context)ic.lookup("java:comp");
             Context env = comp.createSubcontext ("env");
             
-            //make a DataSource      
-            eds.setDatabaseName("ttt");
+            //make a DataSource    
+            eds.setDatabaseName("ttt");          
             eds.setCreateDatabase("create");
-            
+                        
             env.createSubcontext("jdbc");
             env.bind("ds", eds);
             
