@@ -7,6 +7,18 @@
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.Server">
 
+<!-- Define a couple of system properties (do it regardless of which jars
+     are being used as they do no harm) -->
+  <Call class="java.lang.System" name="setProperty">
+    <Arg>derby.system.home</Arg>
+    <Arg><SystemProperty name="java.io.tmpdir"/></Arg>
+  </Call>
+
+  <Call class="java.lang.System" name="setProperty">
+    <Arg>com.atomikos.icatch.file</Arg>
+    <Arg>webapps-plus/test-jndi/WEB-INF/classes/jta.properties</Arg>
+  </Call>
+
   <!-- JNDI java:comp/env                                          -->
   <New id="woggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
     <Arg>woggle</Arg>
