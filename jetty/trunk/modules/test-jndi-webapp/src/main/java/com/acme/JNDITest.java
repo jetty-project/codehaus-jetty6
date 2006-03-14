@@ -47,6 +47,10 @@ public class JNDITest extends HttpServlet {
             wiggle = (Double)ic.lookup("java:comp/env/wiggle");          
             System.err.println("wiggle="+wiggle);
            
+            
+            System.err.println("gargle="+(Double)ic.lookup("java:comp/env/gargle"));
+            
+            System.err.println("mydatasource99:"+(ic.lookup("java:comp/env/jdbc/mydatasource99")==null?"NO":"YES"));
         }
         catch (Exception e)
         {
