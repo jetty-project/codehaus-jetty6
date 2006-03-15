@@ -30,6 +30,7 @@ class Slf4jLog implements Logger
     private Method debugEnabled;
     private Method warnSOO;
     private Method warnST;
+    private Method errorST;
     private Object logger;
     
 
@@ -59,6 +60,7 @@ class Slf4jLog implements Logger
         debugEnabled = slf4j.getMethod("isDebugEnabled", new Class[]{});
         warnSOO = slf4j.getMethod("warn", new Class[]{String.class,Object.class,Object.class});
         warnST = slf4j.getMethod("warn", new Class[]{String.class,Throwable.class});
+        errorST = slf4j.getMethod("error", new Class[]{String.class,Throwable.class});
         
         Method getLogger = slf4jf.getMethod("getLogger", new Class[]{String.class});
         logger=getLogger.invoke(null, new Object[]{name});
@@ -120,7 +122,13 @@ class Slf4jLog implements Logger
      */
     public void warn(String msg, Throwable th)
     {
-        try{warnST.invoke(logger, new Object[]{msg,th});}
+        try
+        {
+            if (th instanceof RuntimeException || th instanceof Error)
+                errorST.invoke(logger, new Object[]{msg,th});
+            else
+                warnST.invoke(logger, new Object[]{msg,th});
+        }
         catch (Exception e) {e.printStackTrace();}
     }
 
@@ -137,7 +145,8 @@ class Slf4jLog implements Logger
             return this;
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         return logger.toString();

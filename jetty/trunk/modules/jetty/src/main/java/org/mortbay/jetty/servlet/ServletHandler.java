@@ -364,6 +364,7 @@ public class ServletHandler extends AbstractHandler
             Throwable th=e;
             while (th instanceof ServletException)
             {
+                Log.warn(th);
                 Throwable cause=((ServletException)th).getRootCause();
                 if (cause==th || cause==null)
                     break;
@@ -381,10 +382,7 @@ public class ServletHandler extends AbstractHandler
             {
                 Log.warn(request.getRequestURI()+": ",th);
                 if(Log.isDebugEnabled())
-                {
-                    Log.warn(request.getRequestURI()+": ",th);
-                    Log.debug(request.toString());
-                }
+                    Log.debug(request.toString());   
             }
             // TODO clean up
             Log.warn(request.getRequestURI(), th);
