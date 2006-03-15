@@ -231,7 +231,7 @@
     <mx4j-tools-version>2.1.1</mx4j-tools-version>
     <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
     <spring-version>1.2.6</spring-version>
-    <tomcat-jasper-version>5.5.12</tomcat-jasper-version>
+    <tomcat-jasper-version>5.5.15</tomcat-jasper-version>
     <junit-version>3.8.1</junit-version>
     <ant-version>1.6.4</ant-version>
     <xbean-version>2.2</xbean-version>
