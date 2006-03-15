@@ -84,18 +84,36 @@ public class TagLibConfiguration implements Configuration
     {
         List list = new ArrayList();
 
-        Resource lib=_context.getWebInf().addPath("lib/");
-        if (lib.exists() && lib.isDirectory())
+        Resource web_inf=_context.getWebInf();
+        if (web_inf!=null && web_inf.exists())
         {
-            String[] contents = lib.list();
-            
-            for (int i=0;i<contents.length;i++)
+            Resource lib=web_inf.addPath("lib/");
+            if (lib.exists() && lib.isDirectory())
             {
-                if (contents[i]!=null && contents[i].toLowerCase().endsWith(".jar"))
-                    list.add(lib.addPath(contents[i]));
+                String[] contents = lib.list();
+                for (int i=0;i<contents.length;i++)
+                {
+                    if (contents[i]!=null && contents[i].toLowerCase().endsWith(".jar"))
+                        list.add(lib.addPath(contents[i]));
+                }
             }
         }
         return list;
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    private void findTLDs(Set tlds,Resource dir) throws MalformedURLException, IOException
+    {
+        String[] meta_contents=dir.list();          
+        for (int j=0;j<meta_contents.length;j++)
+        {
+            Resource r=dir.addPath(meta_contents[j]);
+            if (r.isDirectory())
+                findTLDs(tlds,r);
+            else if (meta_contents[j].toLowerCase().endsWith(".tld"))
+                tlds.add(r);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -110,7 +128,9 @@ public class TagLibConfiguration implements Configuration
         // When the XMLConfigurator (or other configurator) parsed the web.xml,
         // It should have created aliases for all TLDs.  So search resources aliases
         // for aliases ending in tld
-        if (_context.getResourceAliases()!=null)
+        if (_context.getResourceAliases()!=null && 
+            _context.getBaseResource()!=null && 
+            _context.getBaseResource().exists())
         {
             Iterator iter=_context.getResourceAliases().values().iterator();
             while(iter.hasNext())
@@ -141,23 +161,14 @@ public class TagLibConfiguration implements Configuration
             }
         }
         
+        // Look for tlds in any jars
         List jars = getJarResourceList();
         for (int i=0;i<jars.size();i++)
         {
             Resource jar=(Resource)jars.get(i);
             Resource meta=Resource.newResource("jar:"+jar.getURL()+"!/META-INF/");
             if (meta.exists())
-            {
-                String[] meta_contents=meta.list();          
-                for (int j=0;j<meta_contents.length;j++)
-                {
-                    if (meta_contents[j]!=null && meta_contents[j].toLowerCase().endsWith(".tld"))
-                    {
-                        Resource t=meta.addPath(meta_contents[j]);
-                        tlds.add(t);
-                    }
-                }
-            }
+                findTLDs(tlds,meta);
         }
         
         // Create a TLD parser
