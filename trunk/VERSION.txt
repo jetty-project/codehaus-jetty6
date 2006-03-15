@@ -1,3 +1,4 @@
+    + Fixed JettyPlus for root contexts
 
 jetty-6.0.0beta11 - 14/3/2006
     + added JAAS
