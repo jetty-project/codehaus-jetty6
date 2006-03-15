@@ -57,8 +57,6 @@ import org.mortbay.resource.Resource;
  */
 public class SslSocketConnector extends SocketConnector
 {
-    
-
     /** Default value for the cipher Suites. */
     private String cipherSuites[] = null;
 
@@ -84,6 +82,7 @@ public class SslSocketConnector extends SocketConnector
     private String _protocol= "TLS";
     private String _algorithm = "SunX509"; // cert algorithm
     private String _keystoreType = "JKS"; // type of the key store
+    private String _provider;
     
     /** Set to true if we require client certificate authentication. */
     private boolean _needClientAuth = false;
@@ -173,7 +172,17 @@ public class SslSocketConnector extends SocketConnector
     {
         _keystoreType = keystoreType;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public String getProvider() {
+	return _provider;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setProvider(String _provider) {
+	this._provider = _provider;
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * Set the value of the needClientAuth property
@@ -240,8 +249,7 @@ public class SslSocketConnector extends SocketConnector
     protected SSLServerSocketFactory createFactory() 
         throws Exception
     {
-        SSLContext context = SSLContext.getInstance(_protocol);
-
+        SSLContext context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_algorithm);        
         KeyStore keyStore = KeyStore.getInstance(_keystoreType);
         keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
