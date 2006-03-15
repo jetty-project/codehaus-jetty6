@@ -518,7 +518,7 @@ public class NamingContext implements Context, Cloneable
     public void destroySubcontext (String name)
         throws NamingException
     {
-        throw new OperationNotSupportedException();
+        removeBinding(_parser.parse(name));
     }
 
 
@@ -533,7 +533,7 @@ public class NamingContext implements Context, Cloneable
     public void destroySubcontext (Name name)
         throws NamingException
     {
-         throw new OperationNotSupportedException();       
+         removeBinding(name);
     }
 
     /*------------------------------------------------*/
@@ -1056,7 +1056,7 @@ public class NamingContext implements Context, Cloneable
     public void unbind (String name)
         throws NamingException
     {
-        throw new OperationNotSupportedException();
+        unbind(_parser.parse(name));
     }
 
     /*------------------------------------------------*/
@@ -1069,7 +1069,74 @@ public class NamingContext implements Context, Cloneable
     public void unbind (Name name)
         throws NamingException
     {
-        throw new OperationNotSupportedException();
+        if (name.size() == 0)
+            return;
+        
+        
+        if (null != _env.get(IMMUTABLE_PROPERTY))
+            throw new NamingException ("This context is immutable");
+
+        Name cname = toCanonicalName(name);
+
+        if (cname == null)
+            throw new NamingException ("Name is null");
+        
+        if (cname.size() == 0)
+            throw new NamingException ("Name is empty");
+
+
+        //if no subcontexts, just unbind it
+        if (cname.size() == 1)
+        {         
+            removeBinding (cname);
+        }
+        else
+        { 
+            //walk down the subcontext hierarchy
+            if(Log.isDebugEnabled())Log.debug("Checking for existing binding for name="+cname+" for first element of name="+cname.get(0));
+                    
+            String firstComponent = cname.get(0);
+            Object ctx = null;
+
+            
+            if (firstComponent.equals(""))
+                ctx = this;
+            else
+            {
+                Binding  binding = getBinding (name.get(0));
+                if (binding == null)
+                    throw new NameNotFoundException (name.get(0)+ " is not bound");
+            
+                ctx = binding.getObject();
+
+
+                if (ctx instanceof Reference)
+                {  
+                    //deference the object
+                    try
+                    {
+                        ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
+                    }
+                    catch (NamingException e)
+                    {
+                        throw e;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.warn("",e);
+                        throw new NamingException (e.getMessage());
+                    }
+                }
+            }
+
+            if (ctx instanceof Context)
+            {
+                ((Context)ctx).unbind (cname.getSuffix(1));
+            }
+            else
+                throw new NotContextException ("Object bound at "+firstComponent +" is not a Context");
+        }
+        
     }
 
     /*------------------------------------------------*/
@@ -1313,6 +1380,12 @@ public class NamingContext implements Context, Cloneable
     }
 
 
+    protected void removeBinding (Name name)
+    {
+        String key = name.toString();
+        if (Log.isDebugEnabled()) Log.debug("Removing binding with key="+key);
+        _bindings.remove(key);
+    }
 
     /*------------------------------------------------*/    
     /**

@@ -10,6 +10,12 @@
     <Arg type="boolean">true</Arg>
   </New>
 
+ <!-- Add an override for a global EnvEntry                           -->
+  <New id="wiggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
+    <Arg>wiggle</Arg>
+    <Arg type="java.lang.Double">55.0</Arg>
+    <Arg type="boolean">true</Arg>
+  </New>
 
   <!-- Add a DataSource only valid for this webapp                     -->
   <New id="mydatasource99" class="org.mortbay.jetty.plus.naming.Resource">

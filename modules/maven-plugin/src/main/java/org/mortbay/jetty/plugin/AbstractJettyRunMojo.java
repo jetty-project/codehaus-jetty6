@@ -41,6 +41,12 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
 
     
     /**
+     * The location of a jetty-env.xml file. Optional.
+     * @parameter
+     */
+    private String jettyEnvXml;
+    
+    /**
      * The location of the web.xml file. If not
      * set then it is assumed it is in ${basedir}/src/main/webapp/WEB-INF
      * 
@@ -70,6 +76,12 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      * web.xml as a File
      */
     private File webXmlFile;
+    
+    
+    /**
+     * jetty-env.xml as a File
+     */
+    private File jettyEnvXmlFile;
 
     /**
      * List of files on the classpath for the webapp
@@ -79,6 +91,11 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     public String getWebXml()
     {
         return this.webXml;
+    }
+    
+    public String getJettyEnvXml ()
+    {
+        return this.jettyEnvXml;
     }
 
     public File getClassesDirectory()
@@ -99,6 +116,16 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     public File getWebXmlFile ()
     {
         return this.webXmlFile;
+    }
+    
+    public File getJettyEnvXmlFile ()
+    {
+        return this.jettyEnvXmlFile;
+    }
+    
+    public void setJettyEnvXmlFile (File f)
+    {
+        this.jettyEnvXmlFile = f;
     }
     
     public void setClassPathFiles (List list)
@@ -168,6 +195,25 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
             throw new MojoExecutionException("web.xml does not exist", e);
         }
         
+        //check if a jetty-env.xml location has been provided, if so, it must exist
+        if  (getJettyEnvXml() != null)
+        {
+            setJettyEnvXmlFile(new File(getJettyEnvXml()));
+            
+            try
+            {
+                if (!getJettyEnvXmlFile().exists())
+                    throw new MojoExecutionException("jetty-env.xml file does not exist at location "+jettyEnvXml);
+                else
+                    getLog().info(" jetty-env.xml file located at: "+getJettyEnvXmlFile().getCanonicalPath());
+            }
+            catch (IOException e)
+            {
+                throw new MojoExecutionException("jetty-env.xml does not exist");
+            }
+        }
+        
+        
         // check the classes to form a classpath with
         try
         {
@@ -214,6 +260,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         JettyPluginWebApplication webapp = getWebApplication();
         setClassPathFiles(setUpClassPath());
         webapp.setWebXmlFile(getWebXmlFile());
+        webapp.setJettyEnvXmlFile(getJettyEnvXmlFile());
         webapp.setClassPathFiles(getClassPathFiles());
         webapp.setWebAppSrcDir(getWebAppSourceDirectory());
         getLog().info("Webapp directory = " + getWebAppSourceDirectory().getCanonicalPath());
@@ -226,6 +273,8 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         // start the scanner thread (if necessary) on the main webapp
         final ArrayList scanList = new ArrayList();
         scanList.add(getWebXmlFile());
+        if (getJettyEnvXmlFile() != null)
+            scanList.add(getJettyEnvXmlFile());
         scanList.add(getProject().getFile());
         scanList.addAll(getClassPathFiles());
         setScanList(scanList);
@@ -251,6 +300,8 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                         getLog().info("Reconfiguring scanner after change to pom.xml ...");
                         scanList.clear();
                         scanList.add(getWebXmlFile());
+                        if (getJettyEnvXmlFile() != null)
+                            scanList.add(getJettyEnvXmlFile());
                         scanList.add(getProject().getFile());
                         scanList.addAll(getClassPathFiles());
                         scanner.setRoots(scanList);
