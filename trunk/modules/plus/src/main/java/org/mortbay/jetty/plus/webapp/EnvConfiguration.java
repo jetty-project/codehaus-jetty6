@@ -137,6 +137,7 @@ public class EnvConfiguration implements Configuration
             XmlConfiguration configuration = new XmlConfiguration(jettyEnvXmlUrl);
             configuration.configure(getWebAppContext());
         }
+      
         
         
         //add entries for all webapp-specific EnvEntries loaded from jetty-env.xml
@@ -199,11 +200,11 @@ public class EnvConfiguration implements Configuration
         List  list = NamingEntry.lookupNamingEntries (context, EnvEntry.class);
         Iterator itor = list.iterator();
         
-        Log.debug("Finding env entries: size="+list.size());
+        Log.info("Finding env entries: size="+list.size());
         while (itor.hasNext())
         {
             EnvEntry ee = (EnvEntry)itor.next();
-            Log.debug("configuring env entry "+ee.getJndiName());
+            Log.info("configuring env entry "+ee.getJndiName());
             ee.bindToEnv();
         }
     }

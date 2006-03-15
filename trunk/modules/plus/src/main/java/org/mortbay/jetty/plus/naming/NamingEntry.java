@@ -179,8 +179,8 @@ public abstract class NamingEntry
         objectNameInNamespace.addAll(objectName);
         
         
-        Log.debug("Bound "+objectNameInNamespace+" using context "+context);
-        Log.debug("Bound "+namingEntryName+" using context "+context);
+        Log.info("Bound "+objectNameInNamespace+" using context "+context);
+        Log.info("Bound "+namingEntryName+" using context "+context);
     }
 
     
