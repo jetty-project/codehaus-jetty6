@@ -2,6 +2,8 @@
     + Fixed error handling in error page
     + Added JSP2.0 demos to test webapp
     + Upgraded jasper to 5.5.15
+    + Added provider support to SslListener
+    + Log ERROR for runtimeExceptions
 
 jetty-6.0.0beta11 - 14/3/2006
     + added JAAS
