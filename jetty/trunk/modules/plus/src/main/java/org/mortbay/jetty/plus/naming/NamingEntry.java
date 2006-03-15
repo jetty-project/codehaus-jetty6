@@ -17,6 +17,8 @@ package org.mortbay.jetty.plus.naming;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import javax.naming.Binding;
 import javax.naming.Context;
@@ -48,11 +50,18 @@ public abstract class NamingEntry
 {
     private String jndiName;
     private Object objectToBind;
-    private String nameInNamespace;
+    private Name objectNameInNamespace;
+    private Name namingEntryName;
+    private Name objectName;
+    private Context context;
     private static ThreadLocal webAppCompContext = new ThreadLocal();
+
     
    
     /**
+     * Set the webapp specific context into which
+     * NamingEntries should be bound.
+     * 
      * @param c A context specific to a webapp
      */
     public static void setThreadLocalContext (Context c)
@@ -66,6 +75,28 @@ public abstract class NamingEntry
     }
     
     
+    /**
+     * Make a new context which is specific to a webapp.
+     * Using to store NamingEntries from a jetty-env.xml
+     * file.
+     * @param webappName
+     * @return
+     * @throws NamingException
+     */
+    public static Context createContext (String webappName)
+    throws NamingException
+    {
+        InitialContext icontext = new InitialContext();
+        return icontext.createSubcontext(webappName);
+    }
+    
+     
+    public static void destroyContext (String webappName)
+    throws NamingException
+    {
+        InitialContext icontext = new InitialContext();
+        icontext.destroySubcontext(webappName);
+    }
     /**
      * Find a NamingEntry.
      * @param context the context to search
@@ -108,12 +139,13 @@ public abstract class NamingEntry
         }
         catch (NameNotFoundException e)
         {
-            Log.info("No entries of type "+clazz.getName());
+            Log.debug("No entries of type "+clazz.getName()+" in context="+context);
         }
         
         return list;
     }
     
+  
     
     /** Constructor
      * @param jndiName the name of the object which will eventually be in java:comp/env
@@ -127,55 +159,97 @@ public abstract class NamingEntry
         this.objectToBind = object;
         InitialContext icontext = new InitialContext();
       
-        Context context = getThreadLocalContext();
+        context = getThreadLocalContext();
         if (context == null)
             context = icontext;
        
         NameParser parser = context.getNameParser("");
-        Name namingEntryName = parser.parse("");
+        namingEntryName = parser.parse("");
         namingEntryName.add(getClass().getName());
         namingEntryName.add(getJndiName());
-        //bind this NameEntry so we can access it later
+        //bind this NameEntry in the given context so we can access it later
         NamingUtil.bind(context, namingEntryName.toString(), this);
-        //bind the object itself so that we can link to it later
-        NamingUtil.bind(context, getJndiName(), getObjectToBind());
-       
-        Name name = parser.parse(context.getNameInNamespace());
-        name.addAll(parser.parse(getJndiName()));
-        //remember the name where we bound it
-        nameInNamespace = name.toString();
         
-        Log.debug("Bound "+nameInNamespace+" using context "+context);
+        //bind the object itself in the given context so that we can link to it later
+        objectName = parser.parse(getJndiName());
+        NamingUtil.bind(context, objectName.toString(), getObjectToBind());
+       
+        //remember the full name of the bound object so we can use it in the link
+        objectNameInNamespace = parser.parse(context.getNameInNamespace());
+        objectNameInNamespace.addAll(objectName);
+        
+        
+        Log.debug("Bound "+objectNameInNamespace+" using context "+context);
         Log.debug("Bound "+namingEntryName+" using context "+context);
     }
 
     
     
+    /**
+     * Add a java:comp/env binding for the object represented by
+     * this NamingEntry
+     * @throws NamingException
+     */
     public void bindToEnv ()
     throws NamingException
     {
         InitialContext ic = new InitialContext();
         Context env = (Context)ic.lookup("java:comp/env");
-        Log.debug("Binding java:comp/env/"+getJndiName()+" to "+nameInNamespace);
-        NamingUtil.bind(env, getJndiName(), new LinkRef(nameInNamespace));
+        Log.info("Binding java:comp/env/"+getJndiName()+" to "+objectNameInNamespace);
+        NamingUtil.bind(env, getJndiName(), new LinkRef(objectNameInNamespace.toString()));
     }
     
     
-   
+    /**
+     * Unbind this NamingEntry from a java:comp/env
+     */
+    public void unbindEnv ()
+    {
+        try
+        {
+            InitialContext ic = new InitialContext();
+            Context env = (Context)ic.lookup("java:comp/env");
+            Log.info("Unbinding java:comp/env/"+getJndiName());
+            env.unbind(getJndiName());
+        }
+        catch (NamingException e)
+        {
+            Log.warn(e);
+        }
+    }
     
+    /**
+     * Unbind this NamingEntry entirely
+     */
+    public void unbind ()
+    {
+        try
+        {
+            context.unbind(objectName);
+            context.unbind(namingEntryName);
+        }
+        catch (NamingException e)
+        {
+            Log.warn(e);
+        }
+    }
+    
+    /**
+     * Get the unique name of the object
+     * @return
+     */
     public String getJndiName ()
     {
         return this.jndiName;
     }
     
+    /**
+     * Get the object that is to be bound
+     * @return
+     */
     public Object getObjectToBind()
     {
         return this.objectToBind;
     }
     
-    protected void bind (Context context)
-    throws NamingException
-    {
-        NamingUtil.bind(context, getJndiName(), getObjectToBind());
-    }
 }
