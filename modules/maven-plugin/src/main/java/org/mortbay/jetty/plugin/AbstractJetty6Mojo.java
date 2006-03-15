@@ -69,6 +69,8 @@ public abstract class AbstractJetty6Mojo extends AbstractJettyMojo
     
     public void applyJettyXml() throws Exception
     {
+        new Throwable().printStackTrace();
+        System.err.println("JETTYXML FILE NAME = "+getJettyXmlFileName());
         if (getJettyXmlFileName() == null)
             return;
         

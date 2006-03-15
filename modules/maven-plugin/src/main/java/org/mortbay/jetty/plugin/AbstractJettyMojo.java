@@ -103,7 +103,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     
     /**
      * Location of a jetty xml configuration file whose contents 
-     * will be applied before any plugin configuraiton. Optional.
+     * will be applied before any plugin configuration. Optional.
      * @parameter
      */
     private String jettyConfig;
