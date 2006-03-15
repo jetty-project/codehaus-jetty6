@@ -168,18 +168,14 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
      */
     public void finishConfigurationBeforeStart() throws Exception
     {
-        if (jettyConfig == null)
-            return;
-        
-        getLog().info( "Configuring Jetty from xml configuration file: " + jettyConfig );
-        XmlConfiguration xmlConfiguration = new XmlConfiguration(jettyConfig);
-        xmlConfiguration.configure(getServer().getProxiedObject());   
+        return;
     }
 
+    
+    
     public void configureWebApplication () throws Exception
     {
-        super.configureWebApplication();
-        
+        super.configureWebApplication();        
         getWebApplication().setWebAppSrcDir(webApp);
     }
     
