@@ -121,4 +121,12 @@ public class Configuration extends AbstractConfiguration
         Context compCtx = (Context)context.lookup("java:comp");
         compCtx.addToEnvironment("org.mortbay.jndi.immutable", "TRUE");
     }
+    
+    public void deconfigureWebApp() throws Exception
+    {
+        InitialContext icontext = new InitialContext();
+        Context compCtx = (Context)icontext.lookup("java:comp");
+        compCtx.removeFromEnvironment("org.mortbay.jndi.immutable");
+    }
+    
 }

@@ -15,6 +15,8 @@
 
 package org.mortbay.jetty.plus.webapp;
 
+import java.io.File;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
@@ -41,6 +43,8 @@ public class EnvConfiguration implements Configuration
     private Context compCtx;
     private Context envCtx;
     private Context localContext;
+    private String localContextName;
+    private URL jettyEnvXmlUrl;
 
     protected void createEnvContext ()
     throws NamingException
@@ -62,6 +66,11 @@ public class EnvConfiguration implements Configuration
         this.webAppContext = context;
     }
 
+    public void setJettyEnvXml (URL url)
+    {
+        this.jettyEnvXmlUrl = url;
+    }
+    
     /** 
      * @see org.mortbay.jetty.webapp.Configuration#getWebAppContext()
      * @return
@@ -97,60 +106,94 @@ public class EnvConfiguration implements Configuration
         createEnvContext();
         
         //add java:comp/env entries for any globally defined EnvEntries
-        addGlobalEnvEntries();
+        bindGlobalEnvEntries();
         
         //create a special context in the global namespace that is
         //a place to bind any webapp specific jndi entries so that
         //they can be found during the parsing of web.xml
-        InitialContext icontext = new InitialContext();
-        localContext = icontext.createSubcontext(Long.toString(getWebAppContext().hashCode(),36)+getWebAppContext().getContextPath().replace('/','_'));
+        localContextName = Long.toString(getWebAppContext().hashCode(),36)+getWebAppContext().getContextPath().replace('/','_');
+        localContext = NamingEntry.createContext(localContextName);
         NamingEntry.setThreadLocalContext(localContext);
         
-        
-        //look for a file called WEB-INF/jetty-env.xml
-        //and process it if it exists
-        Resource webInf = getWebAppContext().getWebInf();
-        if(webInf!=null && webInf.isDirectory())
+        //check to see if an explicit file has been set, if not,
+        //look in WEB-INF/jetty-env.xml
+        if (jettyEnvXmlUrl == null)
         {
-            Resource jettyEnv = webInf.addPath("jetty-env.xml");
-            if(jettyEnv.exists())
+            
+            //look for a file called WEB-INF/jetty-env.xml
+            //and process it if it exists
+            Resource webInf = getWebAppContext().getWebInf();
+            if(webInf!=null && webInf.isDirectory())
             {
-                XmlConfiguration configuration = new XmlConfiguration(jettyEnv.getURL());
-                configuration.configure(getWebAppContext());
+                Resource jettyEnv = webInf.addPath("jetty-env.xml");
+                if(jettyEnv.exists())
+                {
+                    jettyEnvXmlUrl = jettyEnv.getURL();
+                }
             }
         }
+        if (jettyEnvXmlUrl != null)
+        {
+            XmlConfiguration configuration = new XmlConfiguration(jettyEnvXmlUrl);
+            configuration.configure(getWebAppContext());
+        }
         
-        //add java:comp/env entries for all webapp-specific EnvEntries
-        addLocalEnvEntries();
+        
+        //add entries for all webapp-specific EnvEntries loaded from jetty-env.xml
+        bindLocalEnvEntries();
     }
 
     /** 
+     * Remove all jndi setup
      * @see org.mortbay.jetty.webapp.Configuration#deconfigureWebApp()
      * @throws Exception
      */
     public void deconfigureWebApp() throws Exception
     {
+        //get rid of any bindings only defined for the webapp
+        ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(webAppContext.getClassLoader());
+        unbindLocalNamingEntries();
+        compCtx.destroySubcontext("env");
+        NamingEntry.destroyContext(localContextName);
+        NamingEntry.setThreadLocalContext(null);
+        Thread.currentThread().setContextClassLoader(oldLoader);
     }
     
+   
     /**
-     * Add java:comp/env entries for all globally defined EnvEntries
+     * Bind all EnvEntries that have been globally declared.
+     * @throws NamingException
      */
-    public void addGlobalEnvEntries ()
+    public void bindGlobalEnvEntries ()
     throws NamingException
     {
         Log.debug("Finding global env entries");
-        addEnvEntries(new InitialContext());
+        bindAllEnvEntries(new InitialContext());
     }
     
-    public void addLocalEnvEntries()
+    /**
+     * Bind all EnvEntries that have been declared as
+     * specific to a webapp
+     * @throws NamingException
+     */
+    public void bindLocalEnvEntries()
     throws NamingException
     {
         Log.debug("Finding webapp specific env entries");
-        addEnvEntries(localContext);
+        bindAllEnvEntries(localContext);
     }
     
-    
-    public void addEnvEntries (Context context)
+  
+    /**
+     * Bind all EnvEntries listed in a particular context
+     * into a webapp's java:comp/env.
+     * TODO look at only binding those that are referenced
+     * in the web.xml instead
+     * @param context
+     * @throws NamingException
+     */
+    public void bindAllEnvEntries (Context context)
     throws NamingException
     {
         List  list = NamingEntry.lookupNamingEntries (context, EnvEntry.class);
@@ -164,5 +207,23 @@ public class EnvConfiguration implements Configuration
             ee.bindToEnv();
         }
     }
-
+    
+    public void unbindLocalNamingEntries ()
+    throws NamingException
+    {
+        List  list = NamingEntry.lookupNamingEntries (localContext, EnvEntry.class);
+        list.addAll(NamingEntry.lookupNamingEntries(localContext, Resource.class));
+        
+        Iterator itor = list.iterator();
+        
+        Log.debug("Finding all naming entries for webapp local naming context: size="+list.size());
+        while (itor.hasNext())
+        {
+            NamingEntry ne = (NamingEntry)itor.next();
+            Log.info("Unbinding naming entry "+ne.getJndiName());
+            ne.unbindEnv();
+            ne.unbind();
+        }
+    }
+    
 }

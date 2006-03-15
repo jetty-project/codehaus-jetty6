@@ -38,8 +38,9 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     private WebAppContext context;
     private File webAppDir;
     private File webXmlFile;
+    private File jettyEnvXmlFile;
     private List classpathFiles;
-    private Configuration[] configurations = {new WebInfConfiguration(), new EnvConfiguration(), null, new JettyWebXmlConfiguration(), new TagLibConfiguration()};
+    private Configuration[] configurations = {new WebInfConfiguration(), new EnvConfiguration(), new Jetty6MavenConfiguration(), new JettyWebXmlConfiguration(), new TagLibConfiguration()};
     
     protected Jetty6PluginWebApplication()
     {
@@ -71,16 +72,25 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     
     public void configure ()
     {        
-        Jetty6MavenConfiguration mavenConfig = new Jetty6MavenConfiguration();
-        mavenConfig.setClassPathConfiguration (webAppDir, classpathFiles);
-        mavenConfig.setWebXml (webXmlFile);
-        boolean done=false;
-        for (int i=0;i<configurations.length && !done; i++)
+
+        for (int i=0;i<configurations.length; i++)
         {
-            if (configurations[i] == null)
+            if (configurations[i] instanceof Jetty6MavenConfiguration)
             {
-                configurations[i] = mavenConfig;
-                done = true;
+                ((Jetty6MavenConfiguration)configurations[i]).setClassPathConfiguration (webAppDir, classpathFiles);
+                ((Jetty6MavenConfiguration)configurations[i]).setWebXml (webXmlFile);              
+            }
+            else if (configurations[i] instanceof EnvConfiguration)
+            {
+                try
+                {
+                    if (this.jettyEnvXmlFile != null)
+                        ((EnvConfiguration)configurations[i]).setJettyEnvXml(this.jettyEnvXmlFile.toURL());
+                }
+                catch (Exception e)
+                {
+                    throw new RuntimeException(e);
+                }
             }
         }
             
@@ -97,6 +107,11 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     public void setWebXmlFile(File webXmlFile)
     {
         this.webXmlFile = webXmlFile;
+    }
+    
+    public void setJettyEnvXmlFile (File jettyEnvXmlFile)
+    {
+        this.jettyEnvXmlFile = jettyEnvXmlFile;
     }
     
     public void start () throws Exception
