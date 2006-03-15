@@ -40,7 +40,7 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     private File webXmlFile;
     private File jettyEnvXmlFile;
     private List classpathFiles;
-    private Configuration[] configurations = {new WebInfConfiguration(), new EnvConfiguration(), new Jetty6MavenConfiguration(), new JettyWebXmlConfiguration(), new TagLibConfiguration()};
+    private Configuration[] configurations = {new WebInfConfiguration(), new EnvConfiguration(), new Jetty6MavenConfiguration(), new JettyWebXmlConfiguration(), new Jetty6MavenTagLibConfiguration()};
     
     protected Jetty6PluginWebApplication()
     {
@@ -91,6 +91,10 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
                 {
                     throw new RuntimeException(e);
                 }
+            }
+            else if (configurations[i] instanceof Jetty6MavenTagLibConfiguration)
+            {
+                ((Jetty6MavenTagLibConfiguration)configurations[i]).setClassPathFiles(classpathFiles);
             }
         }
             
