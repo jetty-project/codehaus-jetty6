@@ -15,9 +15,13 @@
 
 package org.mortbay.jetty.webapp;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.mortbay.jetty.webapp.Configuration;
@@ -71,6 +75,30 @@ public class TagLibConfiguration implements Configuration
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return List of {@link Resource}s for jar files in which to search for TLDs
+     * @throws IOException 
+     * @throws MalformedURLException 
+     */
+    protected List getJarResourceList() throws MalformedURLException, IOException
+    {
+        List list = new ArrayList();
+
+        Resource lib=_context.getWebInf().addPath("lib/");
+        if (lib.exists() && lib.isDirectory())
+        {
+            String[] contents = lib.list();
+            
+            for (int i=0;i<contents.length;i++)
+            {
+                if (contents[i]!=null && contents[i].toLowerCase().endsWith(".jar"))
+                    list.add(lib.addPath(contents[i]));
+            }
+        }
+        return list;
+    }
+    
+    /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.servlet.WebAppContext.Configuration#configureWebApp()
      */
@@ -111,31 +139,22 @@ public class TagLibConfiguration implements Configuration
                 }
                 
             }
-
-            // Look for any tlds in the META-INF of included jars
-            Resource lib=_context.getWebInf().addPath("lib/");
-            if (lib.exists() && lib.isDirectory())
+        }
+        
+        List jars = getJarResourceList();
+        for (int i=0;i<jars.size();i++)
+        {
+            Resource jar=(Resource)jars.get(i);
+            Resource meta=Resource.newResource("jar:"+jar.getURL()+"!/META-INF/");
+            if (meta.exists())
             {
-                contents = lib.list();
-                for (int i=0;i<contents.length;i++)
+                String[] meta_contents=meta.list();          
+                for (int j=0;j<meta_contents.length;j++)
                 {
-                    if (contents[i]!=null && contents[i].toLowerCase().endsWith(".jar"))
+                    if (meta_contents[j]!=null && meta_contents[j].toLowerCase().endsWith(".tld"))
                     {
-                        Resource l=lib.addPath(contents[i]);
-                        Resource meta=Resource.newResource("jar:"+l+"!/META-INF/");
-                        if (meta.exists())
-                        {
-                            String[] meta_contents=meta.list();
-                            
-                            for (int j=0;j<meta_contents.length;j++)
-                            {
-                                if (meta_contents[j]!=null && meta_contents[j].toLowerCase().endsWith(".tld"))
-                                {
-                                    Resource t=meta.addPath(meta_contents[j]);
-                                    tlds.add(t);
-                                }
-                            }
-                        }
+                        Resource t=meta.addPath(meta_contents[j]);
+                        tlds.add(t);
                     }
                 }
             }
