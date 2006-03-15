@@ -103,7 +103,7 @@ public class EnvConfiguration implements Configuration
         //a place to bind any webapp specific jndi entries so that
         //they can be found during the parsing of web.xml
         InitialContext icontext = new InitialContext();
-        localContext = icontext.createSubcontext(getWebAppContext().getContextPath().substring(1));
+        localContext = icontext.createSubcontext(Long.toString(getWebAppContext().hashCode(),36)+getWebAppContext().getContextPath().replace('/','_'));
         NamingEntry.setThreadLocalContext(localContext);
         
         
