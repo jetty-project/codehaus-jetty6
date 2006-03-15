@@ -89,7 +89,7 @@ Configuration for the jetty6:run Goal
 
   * <<webAppSourceDirectory>> By default, this is set to <<<${basedir}/src/main/webapp>>>. If your static sources are in a different location, set this parameter accordingly.
 
-  * <<webXmlFile>> By default, this is set to either the variable <<<${maven.war.webxml}>>> or <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>, whichever is not null. If neither of these are appropriate, set this parameter.
+  * <<webXml>> By default, this is set to either the variable <<<${maven.war.webxml}>>> or <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>, whichever is not null. If neither of these are appropriate, set this parameter.
 
  Here's an example of setting these parameters:
 
@@ -103,7 +103,7 @@ Configuration for the jetty6:run Goal
         <artifactId>maven-jetty6-plugin</artifactId>
         <configuration>
           <webAppSourceDirectory>${basedir}/src/staticfiles</webAppSourceDirectory> 
-          <webXmlFile>${basedir}/src/over/here/web.xml</webXmlFile>
+          <webXml>${basedir}/src/over/here/web.xml</webXml>
           <classesDirectory>${basedir}/somewhere/else</classesDirectory>
         </configuration>
       </plugin>
