@@ -67,6 +67,7 @@ import org.mortbay.util.TypeUtil;
 public class WebAppContext extends ContextHandler
 {   
     public final static String WEB_DEFAULTS_XML="org/mortbay/jetty/webapp/webdefault.xml";
+    public final static String ERROR_PAGE="org.mortbay.jetty.error_page";
     
     private static String[] __dftConfigurationClasses =  
     { 
@@ -1013,16 +1014,21 @@ public class WebAppContext extends ContextHandler
                 
                 if (error_page!=null)
                 {
-                    Dispatcher dispatcher = (Dispatcher) getServletHandler().getServletContext().getRequestDispatcher(error_page);
-                    try
+                    String old_error_page=(String)request.getAttribute(ERROR_PAGE);
+                    if (old_error_page==null || !old_error_page.equals(error_page))
                     {
-                        dispatcher.error(request, response);
+                        request.setAttribute(ERROR_PAGE, error_page);
+                        Dispatcher dispatcher = (Dispatcher) getServletHandler().getServletContext().getRequestDispatcher(error_page);
+                        try
+                        {
+                            dispatcher.error(request, response);
+                        }
+                        catch (ServletException e)
+                        {
+                            Log.warn(Log.EXCEPTION, e);
+                        }
+                        return true;
                     }
-                    catch (ServletException e)
-                    {
-                        Log.warn(Log.EXCEPTION, e);
-                    }
-                    return true;
                 }
             }
             
