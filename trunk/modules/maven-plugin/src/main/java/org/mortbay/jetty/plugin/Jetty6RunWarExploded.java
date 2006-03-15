@@ -67,11 +67,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
     private File webApp;
 
     
-    /**
-     * An optional jetty xml configuration file.
-     * @parameter
-     */
-    private String jettyConfig;
+   
   
     
     /**
