@@ -2,8 +2,8 @@
 <web-app 
    xmlns="http://java.sun.com/xml/ns/j2ee" 
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_5.xsd" 
-   version="2.5"> 
+   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
+   version="2.4"> 
 
   <display-name>Test WebApp</display-name>
   
@@ -165,6 +165,27 @@
        <form-error-page>/logonError.html?param=test</form-error-page>
     </form-login-config>
   </login-config>
+
+  <jsp-config>
+    <taglib>
+      <taglib-uri>
+        http://www.acme.com/taglib
+      </taglib-uri>
+      <taglib-location>
+        /WEB-INF/acme-taglib.tld
+      </taglib-location>
+    </taglib>
+
+    <taglib>
+      <taglib-uri>
+        http://www.acme.com/taglib2
+      </taglib-uri>
+      <taglib-location>
+        /WEB-INF/acme-taglib2.tld
+      </taglib-location>
+    </taglib>
+  </jsp-config>
+
 </web-app>
 
 

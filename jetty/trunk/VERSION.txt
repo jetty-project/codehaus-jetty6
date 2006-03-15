@@ -1,5 +1,7 @@
     + Fixed JettyPlus for root contexts
     + Fixed error handling in error page
+    + Added JSP2.0 demos to test webapp
+    + Upgraded jasper to 5.5.15
 
 jetty-6.0.0beta11 - 14/3/2006
     + added JAAS
