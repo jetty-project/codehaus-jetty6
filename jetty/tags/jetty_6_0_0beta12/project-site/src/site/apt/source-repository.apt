@@ -1,0 +1,30 @@
+Source 
+
+ This project uses {{{http://subversion.tigris.org}Subversion}} to manage its source code. Instructions on Subversion use can be found at {{http://svnbook.red-bean.com/}}.
+
+
+* Web Access
+
+ The source is browsable online at Codehaus at:
+
++----------------
+http://fisheye.codehaus.org/viewrep/jetty
++----------------
+
+
+* Anonymous Access
+
+ The source can be checked out anonymously from SVN using:
+
++-----------------
+svn checkout https://svn.codehaus.org/jetty/jetty/trunk jetty
++-----------------
+
+
+* Developer Access
+
+  Everyone can access the Subversion repository via HTTPS, but Committers must checkout the Subversion repository via SSH:
+
++---------------------
+  svn checkout svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/trunk jetty
++---------------------
