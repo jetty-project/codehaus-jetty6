@@ -27,6 +27,26 @@
               <tasks>
                 <copy file="${basedir}/../README.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
                 <copy file="${basedir}/../VERSION.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
+                <copy todir="${basedir}/target/site/jetty" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../modules/jetty/target/javadoc">
+                    <include name="**/**"/>
+                  </fileset>
+                </copy>
+                <copy todir="${basedir}/target/site/servlet-api-2.5" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../modules/servlet-api-2.5/target/javadoc">
+                    <include name="**/**"/>
+                  </fileset>
+                </copy>
+                <copy todir="${basedir}/target/site/management" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../modules/management/target/javadoc">
+                    <include name="**/**"/>
+                  </fileset>
+                </copy>
+                <copy todir="${basedir}/target/site/maven-plugin/" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../modules/maven-plugin/target/generated-site">
+                    <include name="**/**"/>
+                  </fileset>
+                </copy>
               </tasks>
             </configuration>
           </execution>
