@@ -1,3 +1,4 @@
+jetty-6.0.0beta12 - 16/3/2006
     + Fixed maven plugin JNDI for redeploys
     + Fixed tld discovery for plugin (search dependencies)
     + Fixed JettyPlus for root contexts
