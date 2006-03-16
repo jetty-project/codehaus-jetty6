@@ -43,7 +43,7 @@
                   </fileset>
                 </copy>
                 <copy todir="${basedir}/target/site/maven-plugin/" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../modules/maven-plugin/target/generated-site">
+                  <fileset dir="${basedir}/../modules/maven-plugin/target/site">
                     <include name="**/**"/>
                   </fileset>
                 </copy>
