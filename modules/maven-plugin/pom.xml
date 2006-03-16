@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta12</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -10,7 +10,7 @@
   <artifactId>maven-jetty6-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Maven Jetty6 Plugin</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta12</version>
   <developers>
     <developer>
       <id>janb</id>
@@ -62,17 +62,17 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-plus</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta12</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-naming</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta12</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-management</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta12</version>
     </dependency>
     <dependency>
       <groupId>tomcat</groupId>
@@ -89,7 +89,7 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta12</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -106,7 +106,7 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>maven-plugin-utils</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.0.0beta12</version>
     </dependency>
     <dependency>
       <groupId>ant</groupId>
