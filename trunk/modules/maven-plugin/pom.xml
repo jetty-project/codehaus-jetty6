@@ -28,12 +28,6 @@
           <skip>true</skip>
         </configuration>
       </plugin>
-      <plugin>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <outputDirectory>${basedir}/../../project-site/target/site/maven-plugin</outputDirectory>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
   <dependencies>

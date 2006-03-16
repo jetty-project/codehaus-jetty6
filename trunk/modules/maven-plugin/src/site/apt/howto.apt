@@ -91,6 +91,8 @@ Configuration for the jetty6:run Goal
 
   * <<webXml>> By default, this is set to either the variable <<<${maven.war.webxml}>>> or <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>, whichever is not null. If neither of these are appropriate, set this parameter.
 
+  * <<jettyEnvXml>> This is an optional parameter. it is the location of a <<<jetty-env.xml>>> file, which allows you to make JNDI bindings that will satisfy \<env-entry\>, \<resource-env-ref\> and \<resource-ref\> linkages in the <<<web.xml>>> that are scoped only to the webapp and not shared with other webapps that you may be deploying at the same time (eg by using a <<<jettyConfig>>> file).
+
  Here's an example of setting these parameters:
 
 +--------+
@@ -104,6 +106,7 @@ Configuration for the jetty6:run Goal
         <configuration>
           <webAppSourceDirectory>${basedir}/src/staticfiles</webAppSourceDirectory> 
           <webXml>${basedir}/src/over/here/web.xml</webXml>
+          <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml>
           <classesDirectory>${basedir}/somewhere/else</classesDirectory>
         </configuration>
       </plugin>
