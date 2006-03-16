@@ -41,8 +41,9 @@
       <item name="Maven2 Jetty Plugin" href="http://jetty.mortbay.org/jetty6/maven-plugin/index.html"/>
     </menu>
     <menu name="Source">
-      <item name="Javadoc for Jetty API" href="jetty/index.html"/>
-      <item name="Javadoc for Servlet API" href="servlet-api-2.5/index.html"/>
+      <item name="Jetty JavaDoc" href="jetty/index.html"/>
+      <item name="Jetty JMX JavaDoc" href="management/index.html"/>
+      <item name="Servlet API JavaDoc" href="servlet-api-2.5/index.html"/>
       <item name="Browse online" href="http://fisheye.codehaus.org/viewrep/jetty"/>
       <item name="Repository" href="source-repository.html"/>
     </menu>
