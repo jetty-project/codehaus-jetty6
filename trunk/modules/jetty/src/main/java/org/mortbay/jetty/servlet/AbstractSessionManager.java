@@ -192,7 +192,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 ?new HttpOnlyCookie(SessionManager.__SessionCookie,session.getId())
                 :new Cookie(SessionManager.__SessionCookie,session.getId());  
          
-            cookie.setPath(contextPath==null?"/":contextPath);
+            cookie.setPath((contextPath==null||contextPath.length()==0)?"/":contextPath);
             cookie.setMaxAge(-1);
             cookie.setSecure(requestIsSecure && getSecureCookies());
             
