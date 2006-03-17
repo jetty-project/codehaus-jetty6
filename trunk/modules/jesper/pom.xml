@@ -37,16 +37,6 @@
                   <version>6.0-SNAPSHOT</version>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>org.slf4j</groupId>
-                  <artifactId>slf4j-simple</artifactId>
-                  <version>${slf4j-version}</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.slf4j</groupId>
-                  <artifactId>jcl104-over-slf4j</artifactId>
-                  <version>${jcl104-over-slf4j-version}</version>
-                </artifactItem>
-                <artifactItem>
                   <groupId>commons-el</groupId>
                   <artifactId>commons-el</artifactId>
                   <version>${commons-el-version}</version>
@@ -89,14 +79,6 @@
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jsp-api-2.1</artifactId>
       <version>6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl104-over-slf4j</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-el</groupId>
