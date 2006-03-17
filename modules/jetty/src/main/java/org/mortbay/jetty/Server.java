@@ -107,7 +107,17 @@ public class Server extends HandlerCollection
     {
         setConnectors((Connector[])LazyList.addToArray(getConnectors(), connector, Connector.class));
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Conveniance method which calls {@link #getConnectors()} and {@link #setConnectors(Connector[])} to 
+     * remove a connector.
+     * @param connector The connector to remove.
+     */
+    public void removeConnector(Connector connector) {
+        setConnectors((Connector[])LazyList.removeFromArray (getConnectors(), connector));
+    }
+
     /* ------------------------------------------------------------ */
     /** Set the connectors for this server.
      * Each connector has this server set as it's ThreadPool and its Handler.
@@ -419,6 +429,12 @@ public class Server extends HandlerCollection
     public void addUserRealm(UserRealm realm)
     {
         setUserRealms((UserRealm[])LazyList.addToArray(getUserRealms(), realm, UserRealm.class));
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void removeUserRealm(UserRealm realm)
+    {
+        setUserRealms((UserRealm[])LazyList.removeFromArray(getUserRealms(), realm));
     }
     
     /* ------------------------------------------------------------ */
