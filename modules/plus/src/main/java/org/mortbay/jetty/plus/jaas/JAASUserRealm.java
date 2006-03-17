@@ -366,7 +366,8 @@ public class JAASUserRealm implements UserRealm
         {
             for (int i=0; i<roleClassNames.length;i++)
             {
-                Set rolesForType = principal.getSubject().getPrincipals (Thread.currentThread().getContextClassLoader().loadClass(roleClassNames[i]));
+                Class load_class=Thread.currentThread().getContextClassLoader().loadClass(roleClassNames[i]);
+                Set rolesForType = principal.getSubject().getPrincipals (load_class);
                 Iterator itor = rolesForType.iterator();
                 while (itor.hasNext())
                     roleGroup.addMember((Principal) itor.next());

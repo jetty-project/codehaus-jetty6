@@ -51,9 +51,6 @@ import org.apache.jasper.servlet.JspServletWrapper;
  */
 public class JspCompilationContext {
 
-    protected org.apache.commons.logging.Log log =
-        org.apache.commons.logging.LogFactory.getLog(JspCompilationContext.class);
-
     private Hashtable tagFileJarUrls;
     private boolean isPackagedTagFile;
 
@@ -232,9 +229,6 @@ public class JspCompilationContext {
         try {
             compiler = (Compiler) Class.forName(className).newInstance();
         } catch (Throwable t) {
-            if (log.isDebugEnabled()) {
-                log.debug(Localizer.getMessage("jsp.error.compiler"), t);
-            }
         }
         return compiler;
     }

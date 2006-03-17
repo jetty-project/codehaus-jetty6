@@ -47,8 +47,6 @@ import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.tagext.BodyContent;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.Constants;
 import org.apache.jasper.compiler.Localizer;
 import org.apache.jasper.el.ELContextImpl;
@@ -72,7 +70,6 @@ import org.apache.jasper.security.SecurityUtil;
 public class PageContextImpl extends PageContext {
 
 	// Logger
-	private static Log log = LogFactory.getLog(PageContextImpl.class);
 
 	private BodyContentImpl[] outs;
 
@@ -206,7 +203,6 @@ public class PageContextImpl extends PageContext {
 				((JspWriterImpl) out).flushBuffer();
 			}
 		} catch (IOException ex) {
-			log.warn("Internal error flushing the buffer in release()");
 		}
 
 		servlet = null;

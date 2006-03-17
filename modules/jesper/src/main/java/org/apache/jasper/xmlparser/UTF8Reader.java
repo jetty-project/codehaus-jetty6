@@ -30,9 +30,6 @@ import org.apache.jasper.compiler.Localizer;
 public class UTF8Reader
     extends Reader {
 
-    private org.apache.commons.logging.Log log=
-        org.apache.commons.logging.LogFactory.getLog( UTF8Reader.class );
-    
     //
     // Constants
     //
@@ -208,8 +205,6 @@ public class UTF8Reader
 
         // return character
         if (DEBUG_READ) {
-            if (log.isDebugEnabled())
-                log.debug("read(): 0x"+Integer.toHexString(c));
         }
         return c;
 
@@ -493,8 +488,6 @@ public class UTF8Reader
 
         // return number of characters converted
         if (DEBUG_READ) {
-            if (log.isDebugEnabled())
-                log.debug("read(char[],"+offset+','+length+"): count="+count);
         }
         return count;
 

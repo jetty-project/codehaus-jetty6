@@ -28,8 +28,6 @@ import javax.servlet.jsp.JspEngineInfo;
 import javax.servlet.jsp.PageContext;
 
 import org.apache.jasper.util.SimplePool;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Implementation of JspFactory.
@@ -39,7 +37,6 @@ import org.apache.commons.logging.LogFactory;
 public class JspFactoryImpl extends JspFactory {
 
     // Logger
-    private Log log = LogFactory.getLog(JspFactoryImpl.class);
 
     private static final String SPEC_VERSION = "2.0";
     private static final boolean USE_POOL = true;
@@ -108,7 +105,6 @@ public class JspFactoryImpl extends JspFactory {
             return pc;
         } catch (Throwable ex) {
             /* FIXME: need to do something reasonable here!! */
-            log.fatal("Exception initializing page context", ex);
             return null;
         }
     }

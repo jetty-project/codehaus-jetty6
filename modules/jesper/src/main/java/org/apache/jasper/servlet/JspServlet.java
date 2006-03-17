@@ -27,9 +27,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.apache.jasper.Constants;
 import org.apache.jasper.EmbeddedServletOptions;
 import org.apache.jasper.Options;
@@ -55,7 +52,6 @@ import org.apache.jasper.compiler.Localizer;
 public class JspServlet extends HttpServlet {
 
     // Logger
-    private Log log = LogFactory.getLog(JspServlet.class);
 
     private ServletContext context;
     private ServletConfig config;
@@ -88,7 +84,6 @@ public class JspServlet extends HttpServlet {
                 options = (Options) ctor.newInstance(args);
             } catch (Throwable e) {
                 // Need to localize this.
-                log.warn("Failed to load engineOptionsClass", e);
                 // Use the default Options implementation
                 options = new EmbeddedServletOptions(config, context);
             }
@@ -98,11 +93,6 @@ public class JspServlet extends HttpServlet {
         }
         rctxt = new JspRuntimeContext(context, options);
         
-        if (log.isDebugEnabled()) {
-            log.debug(Localizer.getMessage("jsp.message.scratch.dir.is",
-                    options.getScratchDir().toString()));
-            log.debug(Localizer.getMessage("jsp.message.dont.modify.servlets"));
-        }
     }
 
 
@@ -243,21 +233,6 @@ public class JspServlet extends HttpServlet {
             }
         }
 
-        if (log.isDebugEnabled()) {	    
-            log.debug("JspEngine --> " + jspUri);
-            log.debug("\t     ServletPath: " + request.getServletPath());
-            log.debug("\t        PathInfo: " + request.getPathInfo());
-            log.debug("\t        RealPath: " + context.getRealPath(jspUri));
-            log.debug("\t      RequestURI: " + request.getRequestURI());
-            log.debug("\t     QueryString: " + request.getQueryString());
-            log.debug("\t  Request Params: ");
-            Enumeration e = request.getParameterNames();
-            while (e.hasMoreElements()) {
-                String name = (String) e.nextElement();
-                log.debug("\t\t " + name + " = " 
-                          + request.getParameter(name));
-            }
-        }
 
         try {
             boolean precompile = preCompile(request);
@@ -275,10 +250,6 @@ public class JspServlet extends HttpServlet {
     }
 
     public void destroy() {
-        if (log.isDebugEnabled()) {
-            log.debug("JspServlet.destroy()");
-        }
-
         rctxt.destroy();
     }
 
