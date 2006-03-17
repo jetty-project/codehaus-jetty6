@@ -23,8 +23,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.compiler.Localizer;
@@ -191,7 +189,6 @@ public class ParserUtils {
 class MyEntityResolver implements EntityResolver {
 
     // Logger
-    private Log log = LogFactory.getLog(MyEntityResolver.class);
 
     public InputSource resolveEntity(String publicId, String systemId)
             throws SAXException {
@@ -209,10 +206,6 @@ class MyEntityResolver implements EntityResolver {
                 return isrc;
             }
         }
-        if (log.isDebugEnabled())
-            log.debug("Resolve entity failed" + publicId + " " + systemId);
-        log.error(Localizer.getMessage("jsp.error.parse.xml.invalidPublicId",
-                publicId));
         return null;
     }
 }
@@ -220,11 +213,7 @@ class MyEntityResolver implements EntityResolver {
 class MyErrorHandler implements ErrorHandler {
 
     // Logger
-    private Log log = LogFactory.getLog(MyErrorHandler.class);
-
     public void warning(SAXParseException ex) throws SAXException {
-        if (log.isDebugEnabled())
-            log.debug("ParserUtils: warning ", ex);
         // We ignore warnings
     }
 

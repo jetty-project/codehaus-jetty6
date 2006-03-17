@@ -23,8 +23,6 @@ import java.net.URL;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.xmlparser.ParserUtils;
 import org.apache.jasper.xmlparser.TreeNode;
@@ -42,7 +40,6 @@ public class JspConfig {
     private static final String WEB_XML = "/WEB-INF/web.xml";
 
     // Logger
-    private Log log = LogFactory.getLog(JspConfig.class);
 
     private Vector jspProperties = null;
     private ServletContext ctxt;
@@ -171,11 +168,6 @@ public class JspConfig {
                         boolean isStar = "*".equals(extension);
                         if ((path == null && (extension == null || isStar))
                                 || (path != null && !isStar)) {
-                            if (log.isWarnEnabled()) {
-			        log.warn(Localizer.getMessage(
-                                    "jsp.warning.bad.urlpattern.propertygroup",
-                                    urlPattern));
-                            }
                             continue;
                         }
                     }

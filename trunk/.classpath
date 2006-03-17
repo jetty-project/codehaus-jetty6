@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry output="modules/servlet-api-2.5/target/classes" kind="src" path="modules/servlet-api-2.5/src/main/java"/>
+	<classpathentry output="modules/jesper/target/classes" kind="src" path="modules/jesper/src/main/java"/>
+	<classpathentry output="modules/jsp-api-2.1/target/classes" kind="src" path="modules/jsp-api-2.1/src/main/java"/>
+	<classpathentry output="modules/jsp-api-2.1/target/classes" kind="src" path="modules/jsp-api-2.1/src/main/resources"/>
 	<classpathentry output="modules/naming/target/classes" kind="src" path="modules/naming/src/main/java"/>
 	<classpathentry output="modules/naming/target/test-classes" kind="src" path="modules/naming/src/test/java"/>
 	<classpathentry output="modules/plus/target/classes" kind="src" path="modules/plus/src/main/java"/>
@@ -29,5 +32,10 @@
 	<classpathentry kind="var" path="M2_REPO/geronimo-spec/geronimo-spec-jta/1.0.1B-rc4/geronimo-spec-jta-1.0.1B-rc4.jar"/>
 	<classpathentry kind="lib" path="modules/servlet-api-2.5/src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/derby/derby/10.1.1.0/derby-10.1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/ant-1.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/commons-el-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/core-3.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/xercesImpl-2.6.2.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/xmlParserAPIs-2.6.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
