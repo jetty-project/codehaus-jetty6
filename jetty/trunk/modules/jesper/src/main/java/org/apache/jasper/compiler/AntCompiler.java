@@ -70,8 +70,6 @@ public class AntCompiler extends Compiler {
         }
         
         if( options.getCompiler() != null ) {
-            if( log.isDebugEnabled() )
-                log.debug("Compiler " + options.getCompiler() );
             project.setProperty("build.compiler", options.getCompiler() );
         }
         project.init();
@@ -109,9 +107,6 @@ public class AntCompiler extends Compiler {
         throws FileNotFoundException, JasperException, Exception {
         
         long t1 = 0;
-        if (log.isDebugEnabled()) {
-            t1 = System.currentTimeMillis();
-        }
 
         String javaEncoding = ctxt.getOptions().getJavaEncoding();
         String javaFileName = ctxt.getServletJavaFileName();
@@ -144,9 +139,6 @@ public class AntCompiler extends Compiler {
             info.append("    cp=" + repository + "\n");
         }
         
-        if( log.isDebugEnabled() )
-            log.debug( "Using classpath: " + System.getProperty("java.class.path") + sep
-                    + classpath);
         
         // Initializing sourcepath
         Path srcPath = new Path(project);
@@ -221,8 +213,6 @@ public class AntCompiler extends Compiler {
             }
         } catch (BuildException e) {
             be = e;
-            log.error( "Javac exception ", e);
-            log.error( "Env: " + info.toString());
         }
         
         errorReport.append(logger.getReport());
@@ -241,8 +231,6 @@ public class AntCompiler extends Compiler {
         
         if (be != null) {
             String errorReportString = errorReport.toString();
-            log.error("Error compiling file: " + javaFileName + " "
-                    + errorReportString);
             JavacErrorDetail[] javacErrors = ErrorDispatcher.parseJavacErrors(
                     errorReportString, javaFileName, pageNodes);
             if (javacErrors != null) {
@@ -252,11 +240,6 @@ public class AntCompiler extends Compiler {
             }
         }
         
-        if( log.isDebugEnabled() ) {
-            long t2=System.currentTimeMillis();
-            log.debug("Compiled " + ctxt.getServletJavaFileName() + " "
-                      + (t2-t1) + "ms");
-        }
         
         logger = null;
         project = null;

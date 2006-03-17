@@ -43,8 +43,6 @@ import org.apache.jasper.servlet.JspServletWrapper;
  * @author Mark Roth
  */
 public abstract class Compiler {
-    protected org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory
-            .getLog(Compiler.class);
 
     // ----------------------------------------------------------------- Static
 
@@ -102,9 +100,6 @@ public abstract class Compiler {
 
         t1 = t2 = t3 = t4 = 0;
 
-        if (log.isDebugEnabled()) {
-            t1 = System.currentTimeMillis();
-        }
 
         // Setup page info area
         pageInfo = new PageInfo(new BeanRepository(ctxt.getClassLoader(),
@@ -171,9 +166,6 @@ public abstract class Compiler {
             // Validate and process attributes
             Validator.validate(this, pageNodes);
 
-            if (log.isDebugEnabled()) {
-                t2 = System.currentTimeMillis();
-            }
 
             // Collect page info
             Collector.collect(this, pageNodes);
@@ -182,10 +174,6 @@ public abstract class Compiler {
             // this compilation unit.
             tfp = new TagFileProcessor();
             tfp.loadTagFiles(this, pageNodes);
-
-            if (log.isDebugEnabled()) {
-                t3 = System.currentTimeMillis();
-            }
 
             // Determine which custom tag needs to declare which scripting vars
             ScriptingVariabler.set(pageNodes, errDispatcher);
@@ -209,12 +197,6 @@ public abstract class Compiler {
             // it in the JspCompilationContext when done to allow it
             // to be GC'd and save memory.
             ctxt.setWriter(null);
-
-            if (log.isDebugEnabled()) {
-                t4 = System.currentTimeMillis();
-                log.debug("Generated " + javaFileName + " total=" + (t4 - t1)
-                        + " generate=" + (t4 - t3) + " validate=" + (t2 - t1));
-            }
 
         } catch (Exception e) {
             if (writer != null) {
@@ -395,10 +377,6 @@ public abstract class Compiler {
             jsw.setServletClassLastModifiedTime(targetLastModified);
         }
         if (targetLastModified < jspRealLastModified) {
-            if (log.isDebugEnabled()) {
-                log.debug("Compiler: outdated: " + targetFile + " "
-                        + targetLastModified);
-            }
             return true;
         }
 
@@ -465,8 +443,6 @@ public abstract class Compiler {
             String classFileName = ctxt.getClassFileName();
             if (classFileName != null) {
                 File classFile = new File(classFileName);
-                if (log.isDebugEnabled())
-                    log.debug("Deleting " + classFile);
                 classFile.delete();
             }
         } catch (Exception e) {
@@ -476,8 +452,6 @@ public abstract class Compiler {
             String javaFileName = ctxt.getServletJavaFileName();
             if (javaFileName != null) {
                 File javaFile = new File(javaFileName);
-                if (log.isDebugEnabled())
-                    log.debug("Deleting " + javaFile);
                 javaFile.delete();
             }
         } catch (Exception e) {
@@ -490,8 +464,6 @@ public abstract class Compiler {
             String classFileName = ctxt.getClassFileName();
             if (classFileName != null) {
                 File classFile = new File(classFileName);
-                if (log.isDebugEnabled())
-                    log.debug("Deleting " + classFile);
                 classFile.delete();
             }
         } catch (Exception e) {

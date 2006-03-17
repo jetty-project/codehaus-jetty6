@@ -26,8 +26,6 @@ import java.util.jar.JarFile;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 
@@ -52,7 +50,6 @@ class JspReader {
     /**
      * Logger.
      */
-    private Log log = LogFactory.getLog(JspReader.class);
 
     /**
      * The current spot in the file.
@@ -577,9 +574,6 @@ class JspReader {
                 try {
                     reader.close();
                 } catch (Exception any) {
-                    if(log.isDebugEnabled()) {
-                        log.debug("Exception closing reader: ", any);
-                    }
                 }
             }
 
@@ -602,7 +596,6 @@ class JspReader {
                                    longName, encoding);
             }
         } catch (Throwable ex) {
-            log.error("Exception parsing file ", ex);
             // Pop state being constructed:
             popFile();
             err.jspError("jsp.error.file.cannot.read", file);
@@ -611,9 +604,7 @@ class JspReader {
                 try {
                     reader.close();
                 } catch (Exception any) {
-                    if(log.isDebugEnabled()) {
-                        log.debug("Exception closing reader: ", any);
-                    }
+                    
                 }
             }
         }

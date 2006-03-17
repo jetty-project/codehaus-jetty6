@@ -59,9 +59,6 @@ public abstract class HttpJspBase
                     factory.getClass().getClassLoader().loadClass( basePackage +
                                                                    "servlet.JspServletWrapper");
                 } catch (ClassNotFoundException ex) {
-                    org.apache.commons.logging.LogFactory.getLog( HttpJspBase.class )
-                        .error("Jasper JspRuntimeContext preload of class failed: " +
-                                       ex.getMessage(), ex);
                 }
             }
             JspFactory.setDefaultFactory(factory);

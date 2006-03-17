@@ -67,9 +67,6 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
         throws FileNotFoundException, JasperException, Exception {
 
         long t1 = 0;
-        if (log.isDebugEnabled()) {
-            t1 = System.currentTimeMillis();
-        }
         
         final String sourceFile = ctxt.getServletJavaFileName();
         final String outputDir = ctxt.getOptions().getScratchDir().getAbsolutePath();
@@ -115,7 +112,6 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
                         buf.getChars(0, result.length, result, 0);
                     }
                 } catch (IOException e) {
-                    log.error("Compilation error", e);
                 }
                 return result;
             }
@@ -201,9 +197,9 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
                                 new NameEnvironmentAnswer(classFileReader, null);
                         }
                     } catch (IOException exc) {
-                        log.error("Compilation error", exc);
+                        
                     } catch (org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException exc) {
-                        log.error("Compilation error", exc);
+                        
                     } finally {
                         if (is != null) {
                             try {
@@ -292,7 +288,6 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
                 settings.put(CompilerOptions.OPTION_Source,
                              CompilerOptions.VERSION_1_5);
             } else {
-                log.warn("Unknown source VM " + opt + " ignored.");
                 settings.put(CompilerOptions.OPTION_Source,
                         CompilerOptions.VERSION_1_5);
             }
@@ -321,7 +316,6 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
                 settings.put(CompilerOptions.OPTION_TargetPlatform,
                              CompilerOptions.VERSION_1_5);
             } else {
-                log.warn("Unknown target VM " + opt + " ignored.");
                 settings.put(CompilerOptions.OPTION_TargetPlatform,
                         CompilerOptions.VERSION_1_5);
             }
@@ -349,7 +343,6 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
                                                 (name, pageNodes, new StringBuffer(problem.getMessage()), 
                                                         problem.getSourceLineNumber()));
                                     } catch (JasperException e) {
-                                        log.error("Error visiting node", e);
                                     }
                                 }
                             }
@@ -380,7 +373,6 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
                             }
                         }
                     } catch (IOException exc) {
-                        log.error("Compilation error", exc);
                     }
                 }
             };
@@ -409,11 +401,6 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
             errDispatcher.javacError(jeds);
         }
         
-        if( log.isDebugEnabled() ) {
-            long t2=System.currentTimeMillis();
-            log.debug("Compiled " + ctxt.getServletJavaFileName() + " "
-                      + (t2-t1) + "ms");
-        }
 
         if (ctxt.isPrototypeMode()) {
             return;

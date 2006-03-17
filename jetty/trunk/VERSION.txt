@@ -1,3 +1,7 @@
+
+    + Added JSP 2.1 APIs from apache
+    + Added Jasper 2.1 as jesper (jasper without JCL)
+ 
 jetty-6.0.0beta12 - 16/3/2006
     + Fixed maven plugin JNDI for redeploys
     + Fixed tld discovery for plugin (search dependencies)

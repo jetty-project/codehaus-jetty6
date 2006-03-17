@@ -81,6 +81,14 @@
     <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.4</source>
+	  <target>1.4</target>
+	</configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <tagBase>svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags</tagBase>
@@ -91,8 +99,9 @@
   <modules>
     <module>modules/servlet-api-2.5</module>
     <module>modules/jetty</module>
+    <module>modules/jsp-api-2.1</module>
+    <module>modules/jesper</module>
     <module>modules/management</module>
-    <module>modules/jsp</module>
     <module>modules/test-webapp</module>
     <module>modules/start</module>
     <module>modules/maven-plugin-utils</module>
@@ -150,21 +159,6 @@
         <groupId>mx4j</groupId>
         <artifactId>mx4j-tools</artifactId>
         <version>${mx4j-tools-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>tomcat</groupId>
-        <artifactId>jasper-compiler</artifactId>
-        <version>${tomcat-jasper-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>tomcat</groupId>
-        <artifactId>jasper-compiler-jdt</artifactId>
-        <version>${tomcat-jasper-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>tomcat</groupId>
-        <artifactId>jasper-runtime</artifactId>
-        <version>${tomcat-jasper-version}</version>
       </dependency>
       <dependency>
         <groupId>xerces</groupId>

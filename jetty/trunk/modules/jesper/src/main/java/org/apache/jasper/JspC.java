@@ -39,8 +39,6 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.compiler.Compiler;
 import org.apache.jasper.compiler.JspConfig;
 import org.apache.jasper.compiler.JspRuntimeContext;
@@ -93,8 +91,6 @@ public class JspC implements Options {
     public static final String DEFAULT_IE_CLASS_ID =
             "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93";
 
-    // Logger
-    private static Log log = LogFactory.getLog(JspC.class);
 
     private static final String SWITCH_VERBOSE = "-v";
     private static final String SWITCH_HELP = "-help";
@@ -988,9 +984,6 @@ public class JspC implements Options {
 
             // Generate mapping
             generateWebMapping( file, clctxt );
-            if ( showSuccess ) {
-                log.info( "Built File: " + file );
-            }
 
         } catch (JasperException je) {
             Throwable rootCause = je;
@@ -998,24 +991,13 @@ public class JspC implements Options {
                     && ((JasperException) rootCause).getRootCause() != null) {
                 rootCause = ((JasperException) rootCause).getRootCause();
             }
-            if (rootCause != je) {
-                log.error(Localizer.getMessage("jspc.error.generalException",
-                                               file),
-                          rootCause);
-            }
 
             // Bugzilla 35114.
             if(getFailOnError()) {
                 throw je;
-            } else {
-                log.error(je.getMessage());
-            }
+            } 
 
         } catch (Exception e) {
-            if ((e instanceof FileNotFoundException) && log.isWarnEnabled()) {
-                log.warn(Localizer.getMessage("jspc.error.fileDoesNotExist",
-                                              e.getMessage()));
-            }
             throw new JasperException(e);
         } finally {
             if(originalClassLoader != null) {
@@ -1068,9 +1050,7 @@ public class JspC implements Options {
      * @throws JasperException If an error occurs
      */
     public void execute() throws JasperException {
-        if(log.isDebugEnabled()) {
-            log.debug("execute() starting for " + pages.size() + " pages.");
-        }
+       
 
         try {
             if (uriRoot == null) {
@@ -1118,11 +1098,6 @@ public class JspC implements Options {
                     fjsp = new File(uriRootF, nextjsp);
                 }
                 if (!fjsp.exists()) {
-                    if (log.isWarnEnabled()) {
-                        log.warn
-                            (Localizer.getMessage
-                             ("jspc.error.fileDoesNotExist", fjsp.toString()));
-                    }
                     continue;
                 }
                 String s = fjsp.getAbsolutePath();
@@ -1155,9 +1130,7 @@ public class JspC implements Options {
             }
             throw je;
         } finally {
-            if (loader != null) {
-                LogFactory.release(loader);
-            }
+            
         }
     }
 
@@ -1295,10 +1268,7 @@ public class JspC implements Options {
                     if( libs[i].length() <5 ) continue;
                     String ext=libs[i].substring( libs[i].length() - 4 );
                     if (! ".jar".equalsIgnoreCase(ext)) {
-                        if (".tld".equalsIgnoreCase(ext)) {
-                            log.warn("TLD files should not be placed in "
-                                     + "/WEB-INF/lib");
-                        }
+                        
                         continue;
                     }
                     try {
@@ -1343,11 +1313,7 @@ public class JspC implements Options {
                     if (g.exists() && g.isDirectory()) {
                         uriRoot = f.getCanonicalPath();
                         uriBase = tUriBase;
-                        if (log.isInfoEnabled()) {
-                            log.info(Localizer.getMessage(
-                                        "jspc.implicit.uriRoot",
-                                        uriRoot));
-                        }
+                       
                         break;
                     }
                     if (f.exists() && f.isDirectory()) {

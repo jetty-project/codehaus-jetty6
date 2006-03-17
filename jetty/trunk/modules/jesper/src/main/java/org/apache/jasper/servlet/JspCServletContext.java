@@ -426,5 +426,9 @@ public class JspCServletContext implements ServletContext {
     }
 
 
+    public String getContextPath()
+    {
+	return null; // TODO XXX really implement this
+    }
 
 }

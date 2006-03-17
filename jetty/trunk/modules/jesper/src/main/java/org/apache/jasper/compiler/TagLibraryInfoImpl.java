@@ -43,8 +43,6 @@ import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.ValidationMessage;
 import javax.servlet.jsp.tagext.VariableInfo;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.xmlparser.ParserUtils;
@@ -62,7 +60,6 @@ import org.apache.jasper.xmlparser.TreeNode;
 class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 
     // Logger
-    private Log log = LogFactory.getLog(TagLibraryInfoImpl.class);
 
     private Hashtable jarEntries;
 
@@ -260,10 +257,6 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             } else if ("taglib-extension".equals(tname)) {
                 // Recognized but ignored
             } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.taglib", tname));
-                }
             }
 
         }
@@ -395,10 +388,6 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             } else if ("tag-extension".equals(tname)) {
                 // Ignored
             } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.tag", tname));
-                }
             }
         }
 
@@ -456,10 +445,6 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             } else if ("tag-extension".equals(tname)) {
                 // Ignore <tag-extension> element: Bugzilla 33538
             } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.tagfile", tname));
-                }
             }
         }
 
@@ -542,12 +527,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             } else if ("description".equals(tname) || // Ignored elements
             false) {
                 ;
-            } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.attribute", tname));
-                }
-            }
+            } 
         }
 
         if (isFragment) {
@@ -608,12 +588,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 }
             } else if ("description".equals(tname) || // Ignored elements
             false) {
-            } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.variable", tname));
-                }
-            }
+            } 
         }
         return new TagVariableInfo(nameGiven, nameFromAttribute, className,
                 declare, scope);
@@ -636,12 +611,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 initParams.put(initParam[0], initParam[1]);
             } else if ("description".equals(tname) || // Ignored elements
             false) {
-            } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.validator", tname));
-                }
-            }
+            } 
         }
 
         TagLibraryValidator tlv = null;
@@ -674,12 +644,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 initParam[1] = element.getBody();
             } else if ("description".equals(tname)) {
                 ; // Do nothing
-            } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.initParam", tname));
-                }
-            }
+            } 
         }
         return initParam;
     }
@@ -704,12 +669,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             } else if ("display-name".equals(tname) || // Ignored elements
                     "small-icon".equals(tname) || "large-icon".equals(tname)
                     || "description".equals(tname) || "example".equals(tname)) {
-            } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.function", tname));
-                }
-            }
+            } 
         }
 
         return new FunctionInfo(name, klass, signature);

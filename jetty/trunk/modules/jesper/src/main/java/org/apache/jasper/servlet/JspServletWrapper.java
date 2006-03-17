@@ -37,8 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.tagext.TagInfo;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.Options;
@@ -69,7 +67,6 @@ import org.apache.jasper.runtime.JspSourceDependent;
 public class JspServletWrapper {
 
     // Logger
-    private Log log = LogFactory.getLog(JspServletWrapper.class);
 
     private Servlet theServlet;
     private String jspUri;
@@ -365,9 +362,6 @@ public class JspServletWrapper {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, 
                                       ex.getMessage());
                 } catch (IllegalStateException ise) {
-                    log.error(Localizer.getMessage("jsp.error.file.not.found",
-						   ex.getMessage()),
-			      ex);
                 }
             }
         } catch (ServletException ex) {
