@@ -127,6 +127,7 @@ public class Configuration extends AbstractConfiguration
         InitialContext icontext = new InitialContext();
         Context compCtx = (Context)icontext.lookup("java:comp");
         compCtx.removeFromEnvironment("org.mortbay.jndi.immutable");
+        super.deconfigureWebApp();
     }
     
 }
