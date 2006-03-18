@@ -68,6 +68,13 @@ version:
 
   mvn install
 
+Jetty itself only needs java 1.4, however to build JSP 2.1 
+support you need to use java5.    If you want to use java1.4,
+then you can use the jsp-api-2.0 module instead of the 
+jsp-api-2.1 and jesper modules.
+
+
+
 DEPENDENCIES 
 ============
 The only real dependancy is the servlet api, so only 
