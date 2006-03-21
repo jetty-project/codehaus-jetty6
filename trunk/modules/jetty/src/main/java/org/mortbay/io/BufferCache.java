@@ -22,7 +22,8 @@ import org.mortbay.util.StringMap;
 
 /* ------------------------------------------------------------------------------- */
 /** 
- * 
+ * Stores a collection of {@link Buffer} objects.
+ * Buffers are stored in an ordered collection and can retreived by index or value
  * @author gregw
  */
 public class BufferCache
@@ -32,9 +33,8 @@ public class BufferCache
     private ArrayList _index= new ArrayList();
 
     /* ------------------------------------------------------------------------------- */
-    /** add.
-     * @param GET
-     * @param GET_METHOD
+    /** Add a buffer to the cache at the specified index.
+     * @param value The content of the buffer.
      */
     public CachedBuffer add(String value, int ordinal)
     {

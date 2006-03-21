@@ -44,13 +44,12 @@ import java.util.StringTokenizer;
  * where SUBJECT:
  * 
  * <PRE>
- * 
- * ends with ".class" is the Main class to run. ends with ".xml" is a configuration file for the
- * command line ends with "/" is a directory from which add all jar and zip files from. ends with
- * "/*" is a directory from which add all unconsidered jar and zip files from. Containing = are
- * used to assign system properties. all other subjects are treated as files to be added to the
- * classpath.
- * 
+ * ends with ".class" is the Main class to run.
+ * ends with ".xml" is a configuration file for the command line
+ * ends with "/" is a directory from which add all jar and zip files from.
+ * ends with "/*" is a directory from which add all unconsidered jar and zip files from.
+ * Containing = are used to assign system properties.
+ * all other subjects are treated as files to be added to the classpath.
  * </PRE>
  * 
  * Subjects may include system properties with $(propertyname) syntax. File subjects starting with
@@ -60,8 +59,12 @@ import java.util.StringTokenizer;
  * 
  * <PRE>
  * 
- * always never available package.class java OPERATOR n.n nargs OPERATOR n OPERATOR := one of "
- * <",">"," <=",">=","==","!="
+ * always
+ * never
+ * available package.class 
+ * java OPERATOR n.n 
+ * nargs OPERATOR n
+ * OPERATOR := one of "<",">"," <=",">=","==","!="
  * 
  * </PRE>
  * 

@@ -664,7 +664,7 @@ public interface HttpServletRequest extends ServletRequest {
      *				<code>false</code> otherwise
      *
      * @see			#getRequestedSessionId
-     * @see			#getSession
+     * @see			#getSession()
      * @see			HttpSessionContext
      *
      */
@@ -683,7 +683,7 @@ public interface HttpServletRequest extends ServletRequest {
      *				cookie; otherwise, <code>false</code>
      *
      *
-     * @see			#getSession
+     * @see			#getSession()
      *
      */ 
 
@@ -702,7 +702,7 @@ public interface HttpServletRequest extends ServletRequest {
      *				<code>false</code>
      *
      *
-     * @see			#getSession
+     * @see			#getSession()
      *
      */
     

@@ -56,7 +56,7 @@ import org.mortbay.util.URIUtil;
  * be used when a full web application is not required.  Specifically filters
  * and request wrapping are not supported.
  * 
- * @see org.mortbay.jetty.servlet.WebAppContext
+ * @see org.mortbay.jetty.webapp.WebAppContext
  * @author Greg Wilkins
  */
 public class ServletHandler extends AbstractHandler
@@ -219,8 +219,8 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /**
-     * @param ipath
-     * @return
+     * @return A {@link RequestDispatcher dispatcher} wrapping the resource at <code>uriInContext</code>,
+     *  or <code>null</code> if the specified uri cannot be dispatched to.
      */
     public RequestDispatcher getRequestDispatcher(String uriInContext)
     {
@@ -799,9 +799,6 @@ public class ServletHandler extends AbstractHandler
     }
     
     /* ------------------------------------------------------------ */
-    /** Get Filters.
-     * @return Array of defined servlets
-     */
     public synchronized void setFilters(FilterHolder[] holders)
     {
         if (getServer()!=null)
@@ -823,8 +820,8 @@ public class ServletHandler extends AbstractHandler
     }
     
     /* ------------------------------------------------------------ */
-    /** Get Servlets.
-     * @return Array of defined servlets
+    /** Set Servlets.
+     * @param holders Array of servletsto define
      */
     public synchronized void setServlets(ServletHolder[] holders)
     {

@@ -108,10 +108,10 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
      * non-null value is set on the entry.  It is the responsibility of the
      * thread that creates an entry to set the value. 
      *
-     * @param pathInContext
-     * @param resource
-     * @param value associated value
-     * @exception IOException
+     * @param pathInContext The key into the cache
+     * @param factory If no matching entry is found, this {@link ResourceFactory} will be used to create the {@link Resource} 
+     *                for the new enry that is created.
+     * @return The entry matching <code>pathInContext</code>, or a new entry if no matching entry was found
      */
     public Entry lookup(String pathInContext, ResourceFactory factory)
     {

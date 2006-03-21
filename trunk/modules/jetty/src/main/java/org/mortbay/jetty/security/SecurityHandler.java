@@ -230,7 +230,6 @@ public class SecurityHandler extends WrappedHandler
      * @param request 
      * @param response 
      * @return false if the request has failed a security constraint or the authenticator has already sent a response.
-     * @exception HttpException 
      * @exception IOException 
      */
     private boolean check(

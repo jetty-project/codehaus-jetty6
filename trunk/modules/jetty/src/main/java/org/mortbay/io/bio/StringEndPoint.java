@@ -79,7 +79,7 @@ public class StringEndPoint extends StreamEndPoint
     }
 
     /**
-     * @return
+     * @return <code>true</code> if there are bytes remaining to be read from the encoded input
      */
     public boolean hasMore()
     {

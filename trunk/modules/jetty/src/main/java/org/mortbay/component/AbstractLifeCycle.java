@@ -24,8 +24,8 @@ public abstract class AbstractLifeCycle implements LifeCycle
 {
     private final int FAILED=-1,STOPPED=0,STARTING=1,STARTED=2,STOPPING=3;
     private transient int _state=0;
-    protected void doStart() throws Exception {};
-    protected void doStop() throws Exception {};
+    protected void doStart() throws Exception {}
+    protected void doStop() throws Exception {}
 
     public final void start() throws Exception
     {
