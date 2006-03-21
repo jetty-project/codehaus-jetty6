@@ -64,6 +64,7 @@ public class WebXmlConfiguration implements Configuration
     protected Object _listeners;
     protected Map _errorPages;
     protected boolean _hasJSP;
+    protected boolean _welcomeFileList;
 
     public WebXmlConfiguration()
     {
@@ -163,7 +164,6 @@ public class WebXmlConfiguration implements Configuration
             if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
-
         Resource webInf=getWebAppContext().getWebInf();
         // handle any WEB-INF descriptors
         if(webInf!=null&&webInf.isDirectory())
@@ -171,7 +171,10 @@ public class WebXmlConfiguration implements Configuration
             // do web.xml file
             Resource web=webInf.addPath("web.xml");
             if(web.exists())
+            {
+                _welcomeFileList=false;
                 configure(web.getURL().toString());
+            }
             else
             {
                 Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
@@ -586,6 +589,9 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initWelcomeFileList(XmlParser.Node node)
     {
+        if (!_welcomeFileList)
+            _welcomeFiles=null; // erase welcome files from default web.xml
+        _welcomeFileList=true;
         Iterator iter=node.iterator("welcome-file");
         while(iter.hasNext())
         {
