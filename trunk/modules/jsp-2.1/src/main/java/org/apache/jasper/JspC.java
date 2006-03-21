@@ -50,6 +50,7 @@ import org.apache.jasper.servlet.JspCServletContext;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.util.FileUtils;
+import org.mortbay.jesper.JesperLog;
 
 /**
  * Shell for the jspc compiler.  Handles all options associated with the
@@ -984,20 +985,33 @@ public class JspC implements Options {
 
             // Generate mapping
             generateWebMapping( file, clctxt );
-
+            if ( showSuccess ) {
+                JesperLog.info( "Built File: " + file );
+            }
+            
         } catch (JasperException je) {
             Throwable rootCause = je;
             while (rootCause instanceof JasperException
                     && ((JasperException) rootCause).getRootCause() != null) {
                 rootCause = ((JasperException) rootCause).getRootCause();
             }
-
+            if (rootCause != je) {
+                JesperLog.error(Localizer.getMessage("jspc.error.generalException",
+                                               file),
+                          rootCause);
+            }
             // Bugzilla 35114.
             if(getFailOnError()) {
                 throw je;
+            } else {
+                JesperLog.error(je.getMessage());
             } 
 
         } catch (Exception e) {
+            if ((e instanceof FileNotFoundException)) {
+                JesperLog.warn(Localizer.getMessage("jspc.error.fileDoesNotExist",
+                                              e.getMessage()));
+            }
             throw new JasperException(e);
         } finally {
             if(originalClassLoader != null) {
@@ -1098,6 +1112,7 @@ public class JspC implements Options {
                     fjsp = new File(uriRootF, nextjsp);
                 }
                 if (!fjsp.exists()) {
+                    JesperLog.warn(Localizer.getMessage("jspc.error.fileDoesNotExist", fjsp.toString()));
                     continue;
                 }
                 String s = fjsp.getAbsolutePath();
@@ -1268,7 +1283,9 @@ public class JspC implements Options {
                     if( libs[i].length() <5 ) continue;
                     String ext=libs[i].substring( libs[i].length() - 4 );
                     if (! ".jar".equalsIgnoreCase(ext)) {
-                        
+                        if (".tld".equalsIgnoreCase(ext)) {
+                            JesperLog.warn("TLD files should not be placed in /WEB-INF/lib");
+                        }
                         continue;
                     }
                     try {
@@ -1313,7 +1330,7 @@ public class JspC implements Options {
                     if (g.exists() && g.isDirectory()) {
                         uriRoot = f.getCanonicalPath();
                         uriBase = tUriBase;
-                       
+                        JesperLog.info(Localizer.getMessage("jspc.implicit.uriRoot", uriRoot));                       
                         break;
                     }
                     if (f.exists() && f.isDirectory()) {
