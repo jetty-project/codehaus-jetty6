@@ -473,7 +473,10 @@ public class ContextHandler extends WrappedHandler implements Attributes
                     target=_contextPath;
                     if (!target.endsWith("/"))
                     {
-                        response.sendRedirect(target+"/");
+                        if (request.getQueryString()!=null)
+                            response.sendRedirect(target+"/?"+request.getQueryString());
+                        else 
+                            response.sendRedirect(target+"/");
                         return true;
                     }
                 }
