@@ -23,6 +23,30 @@ which gives a configuration file on the commandline. An explicit
 configuration file (or multiple configuration files) may be
 given to select specific configurations.
 
+JETTY DEPENDENCIES
+==================
+
+Jetty depends only on a jre 1.4 runtime and the two jars found in
+the top level of the $JETTY_HOME/lib directory:
+
+  servlet-api-2.5.jar
+  jetty.jar
+
+The jars found in the subdirectories are all optional:
+
+  jsp-2.0/*.jar   (depends on java 2 (jre 1.4))
+  jsp-2.1/*.jar   (depends on java 5 (jre 1.5))
+  management/*.jar
+  naming/*.jar
+  plus/*.jar
+  xbean/*.jar
+
+The start.jar includes all these options if they are
+left in the lib subdirectories.
+
+The start.jar will also select the version of JSP to
+use based on the version of the jre available.
+
 
 RUNNING WITH JMX
 ================
@@ -70,7 +94,7 @@ version:
 
 Jetty itself only needs java 1.4, however to build JSP 2.1 
 support you need to use java5.    If you want to use java1.4,
-then you can use the jsp-api-2.0 and jsp-2.0 modules instead of the 
+then you can use the jsp-2.0 modules instead of the 
 jsp-api-2.1 and  jsp-2.1 modules.
 
 
