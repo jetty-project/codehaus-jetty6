@@ -47,7 +47,7 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/jsp/${project.artifactId}.${project.packaging}"></copy>
+                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/jsp-2.1/${project.artifactId}.${project.packaging}"></copy>
               </tasks>
             </configuration>
           </execution>

@@ -70,8 +70,8 @@ version:
 
 Jetty itself only needs java 1.4, however to build JSP 2.1 
 support you need to use java5.    If you want to use java1.4,
-then you can use the jsp-api-2.0 module instead of the 
-jsp-api-2.1 and jesper modules.
+then you can use the jsp-api-2.0 and jsp-2.0 modules instead of the 
+jsp-api-2.1 and  jsp-2.1 modules.
 
 
 
