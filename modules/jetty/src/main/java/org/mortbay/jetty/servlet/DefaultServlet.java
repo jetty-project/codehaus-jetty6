@@ -439,7 +439,14 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         
     }
-
+    
+    /* ------------------------------------------------------------ */
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException
+    {
+        doGet(request,response);
+    }
+    
     /* ------------------------------------------------------------ */
     private Content getContent(String pathInContext, Resource resource)
     	throws IOException	
@@ -578,9 +585,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     /* ------------------------------------------------------------------- */
     protected void sendDirectory(HttpServletRequest request,
-            HttpServletResponse response,
-            Resource resource,
-            boolean parent)
+                                 HttpServletResponse response,
+                                 Resource resource,
+                                 boolean parent)
     throws IOException
     {
         if (!_dirAllowed)
@@ -609,11 +616,11 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     /* ------------------------------------------------------------ */
     protected void sendData(HttpServletRequest request,
-            				HttpServletResponse response,
-            	            boolean include,
-            				Resource resource,
-            				Content content,
-            				Enumeration reqRanges)
+                            HttpServletResponse response,
+                            boolean include,
+                            Resource resource,
+                            Content content,
+                            Enumeration reqRanges)
     throws IOException
     {
         long content_length=resource.length();
