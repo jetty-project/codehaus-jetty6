@@ -378,15 +378,16 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 
                 if (!endsWithSlash && !pathInContext.equals("/"))
                 {
-                    String q=request.getQueryString();
                     StringBuffer buf=request.getRequestURL();
+                    buf.append('/');
+                    String q=request.getQueryString();
                     if (q!=null&&q.length()!=0)
                     {
                         buf.append('?');
                         buf.append(q);
                     }
                     response.setContentLength(0);
-                    response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(buf.toString(),"/")));
+                    response.sendRedirect(response.encodeRedirectURL(buf.toString()));
                 }
                 // else look for a welcome file
                 else if (null!=(welcome=getWelcomeFile(resource)))
@@ -396,7 +397,11 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     {
                         // Redirect to the index
                         response.setContentLength(0);
-                        response.sendRedirect(URIUtil.addPaths( _context.getContextPath(),ipath));
+                        String q=request.getQueryString();
+                        if (q!=null&&q.length()!=0)
+                            response.sendRedirect(URIUtil.addPaths( _context.getContextPath(),ipath)+"?"+q);
+                        else
+                            response.sendRedirect(URIUtil.addPaths( _context.getContextPath(),ipath));
                     }
                     else
                     {
