@@ -163,11 +163,9 @@ public class HttpParser implements HttpTokens
 
     /* ------------------------------------------------------------------------------- */
     /**
-     * Parse until END state.
-     * 
-     * @param handler
-     * @param source
-     * @return parser state
+     * Parse until {@link #STATE_END END} state.
+     * If the parser is already in the END state, then it is {@link #reset reset} and re-parsed.
+     * @throws IllegalStateException If the buffers have already been partially parsed.
      */
     public void parse() throws IOException
     {
@@ -184,10 +182,10 @@ public class HttpParser implements HttpTokens
     /* ------------------------------------------------------------------------------- */
     /**
      * Parse until END state.
-     * 
-     * @param handler
-     * @param source
-     * @return parser state
+     * This method will parse any remaining content in the current buffer. It does not care about the 
+     * {@link #getState current state} of the parser.
+     * @see #parse
+     * @see #parseNext
      */
     public void parseAvailable() throws IOException
     {

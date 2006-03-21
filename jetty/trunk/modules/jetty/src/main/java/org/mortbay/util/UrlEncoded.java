@@ -165,7 +165,7 @@ public class UrlEncoded extends MultiMap
 
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
-     * @param _content the string containing the encoded parameters
+     * @param content the string containing the encoded parameters
      */
     public static void decodeTo(String content, MultiMap map, String charset)
     {
@@ -379,7 +379,7 @@ public class UrlEncoded extends MultiMap
     }
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
-     * @param data the byte[] containing the encoded parameters
+     * @param in the stream containing the encoded parameters
      */
     public static void decodeTo(InputStream in, MultiMap map, String charset)
     throws IOException

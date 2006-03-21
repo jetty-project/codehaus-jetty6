@@ -146,7 +146,7 @@ public class BufferUtil
     /**
      * Add hex integer BEFORE current getIndex.
      * @param buffer
-     * @param size
+     * @param n
      */
     public static void prependHexInt(Buffer buffer, int n)
     {

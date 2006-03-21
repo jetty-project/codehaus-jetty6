@@ -318,7 +318,7 @@ public class FileResource extends URLResource
     /* ------------------------------------------------------------ */
     /** 
      * @param o
-     * @return 
+     * @return <code>true</code> of the object <code>o</code> is a {@link FileResource} pointing to the same file as this resource. 
      */
     public boolean equals( Object o)
     {

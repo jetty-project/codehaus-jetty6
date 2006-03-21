@@ -148,7 +148,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
      * A context with no virtual host names or a null virtual host name is
      * available to all requests that are not served by a context with a
      * matching virtual host name.
-     * @param hosts Array of virtual hosts that this context responds to. A
+     * @param vhosts Array of virtual hosts that this context responds to. A
      * null host name or null/empty array means any hostname is acceptable.
      * Host names may String representation of IP addresses.
      */
@@ -619,7 +619,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
     
     /* ------------------------------------------------------------ */
     /**
-     * @param _contextPath The _contextPath to set.
+     * @param contextPath The _contextPath to set.
      */
     public void setContextPath(String contextPath)
     {
@@ -670,7 +670,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
     
     /* ------------------------------------------------------------ */
     /**
-     * @param resourceBase The resourceBase to set.
+     * @param base The resourceBase to set.
      */
     public void setBaseResource(Resource base) 
     {
@@ -739,7 +739,9 @@ public class ContextHandler extends WrappedHandler implements Attributes
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The names of the files which the server should consider to be welcome files in this context.
+     * @see <a href="http://jcp.org/aboutJava/communityprocess/final/jsr154/index.html">The Servlet Specification</a>
+     * @see #setWelcomeFiles
      */
     public String[] getWelcomeFiles() 
     {

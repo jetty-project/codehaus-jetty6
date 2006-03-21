@@ -158,7 +158,8 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The result of calling {@link #getConnector}.{@link Connector#isConfidential(Request) isCondidential}(request), or false
+     *  if there is no connector.
      */
     public boolean isConfidential(Request request)
     {
@@ -169,7 +170,7 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The {@link EndPoint} for this connection.
      */
     public EndPoint getEndPoint()
     {
@@ -178,7 +179,7 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return <code>false</code> (this method is not yet implemented)
      */
     public boolean useDNS()
     {
@@ -206,7 +207,7 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The input stream for this connection. The stream will be created if it does not already exist.
      */
     public ServletInputStream getInputStream()
     {
@@ -216,7 +217,7 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The output stream for this connection. The stream will be created if it does not already exist.
      */
     public ServletOutputStream getOutputStream()
     {
@@ -226,7 +227,8 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return A {@link PrintWriter} wrapping the {@link #getOutputStream output stream}. The writer is created if it
+     *    does not already exist.
      */
     public PrintWriter getPrintWriter(String encoding)
     {
@@ -433,9 +435,6 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @return
-     */
     HttpGenerator getGenerator()
     {
         return _generator;

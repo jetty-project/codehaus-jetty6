@@ -121,9 +121,13 @@ public interface SessionManager extends LifeCycle, Serializable
 
     /* ------------------------------------------------------------ */
     /** Get a Cookie for a session.
-     * @param session
-     * @param contextPath TODO
-     * @return
+     * @param session The session to which the cookie should refer.
+     * @param contextPath The context to which the cookie should be linked. The client will only send the cookie value
+     *    when requesting resources under this path.
+     * @param requestIsSecure Whether the client is accessing the server over a secure protocol (i.e. HTTPS). 
+     * @return If this <code>SessionManager</code> uses cookies, then this method will return a new 
+     *   {@link Cookie cookie object} that should be set on the client in order to link future HTTP requests
+     *   with the <code>session</code>. If cookies are not in use, this method returns <code>null</code>. 
      */
     public Cookie getSessionCookie(HttpSession session,String contextPath, boolean requestIsSecure);
     

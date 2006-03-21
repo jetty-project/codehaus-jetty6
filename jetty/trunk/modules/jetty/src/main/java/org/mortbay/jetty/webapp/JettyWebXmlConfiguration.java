@@ -37,7 +37,7 @@ public class JettyWebXmlConfiguration implements Configuration
 
     
     /**
-     * @see org.mortbay.jetty.servlet.WebApplicationContext.Configuration#setWebApplicationContext(org.mortbay.jetty.servlet.WebApplicationContext)
+     * @see Configuration#setWebAppContext
      */
     public void setWebAppContext (WebAppContext context)
     {
@@ -51,7 +51,7 @@ public class JettyWebXmlConfiguration implements Configuration
     
     /** configureClassPath
      * Not used.
-     * @see org.mortbay.jetty.servlet.WebApplicationContext.Configuration#configureClassPath()
+     * @see Configuration#configureClassLoader
      */
     public void configureClassLoader () throws Exception
     {
@@ -59,7 +59,7 @@ public class JettyWebXmlConfiguration implements Configuration
 
     /** configureDefaults
      * Not used.
-     * @see org.mortbay.jetty.servlet.WebApplicationContext.Configuration#configureDefaults()
+     * @see Configuration#configureDefaults
      */
     public void configureDefaults () throws Exception
     {
@@ -67,14 +67,14 @@ public class JettyWebXmlConfiguration implements Configuration
 
     /** configureWebApp
      * Apply web-jetty.xml configuration
-     * @see org.mortbay.jetty.servlet.WebApplicationContext.Configuration#configureWebApp()
+     * @see Configuration#configureWebApp()
      */
     public void configureWebApp () throws Exception
     {
         //cannot configure if the _context is already started
         if (_context.isStarted())
         {
-            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
+            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
             return;
         }
         
@@ -119,9 +119,8 @@ public class JettyWebXmlConfiguration implements Configuration
     }
     
     
-    /** configureWebApp
-     * Apply web-jetty.xml configuration
-     * @see org.mortbay.jetty.servlet.WebApplicationContext.Configuration#configureWebApp()
+    /** deconfigureWebApp
+     * @see Configuration#deconfigureWebApp()
      */
     public void deconfigureWebApp () throws Exception
     {

@@ -35,7 +35,6 @@ public interface Configuration extends Serializable
     
     /* ------------------------------------------------------------------------------- */
     /** Get the context on which the configuration is performed.
-     * @return
      */
     public WebAppContext getWebAppContext();
     
