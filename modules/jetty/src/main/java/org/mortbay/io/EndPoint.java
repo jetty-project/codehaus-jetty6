@@ -71,37 +71,43 @@ public interface EndPoint
     
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The local IP address to which this <code>EndPoint</code> is bound, or <code>null</code>
+     * if this <code>EndPoint</code> does not represent a network connection.
      */
     public String getLocalAddr();
     
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The local host name to which this <code>EndPoint</code> is bound, or <code>null</code>
+     * if this <code>EndPoint</code> does not represent a network connection.
      */
     public String getLocalHost();
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The local port number on which this <code>EndPoint</code> is listening, or <code>0</code>
+     * if this <code>EndPoint</code> does not represent a network connection.
      */
     public int getLocalPort();
 
     /* ------------------------------------------------------------ */
     /**
-     * 
+     * @return The remote IP address to which this <code>EndPoint</code> is connected, or <code>null</code>
+     * if this <code>EndPoint</code> does not represent a network connection.
      */
     public String getRemoteAddr();
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The host name of the remote machine to which this <code>EndPoint</code> is connected, or <code>null</code>
+     * if this <code>EndPoint</code> does not represent a network connection.
      */
     public String getRemoteHost();
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The remote port number to which this <code>EndPoint</code> is connected, or <code>0</code>
+     * if this <code>EndPoint</code> does not represent a network connection.
      */
     public int getRemotePort();
 

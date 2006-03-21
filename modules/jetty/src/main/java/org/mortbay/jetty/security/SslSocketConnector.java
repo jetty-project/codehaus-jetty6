@@ -58,7 +58,7 @@ import org.mortbay.resource.Resource;
 public class SslSocketConnector extends SocketConnector
 {
     /** Default value for the cipher Suites. */
-    private String cipherSuites[] = null;
+    private String _cipherSuites[] = null;
 
     /** Default value for the keystore location path. */
     public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator
@@ -102,7 +102,7 @@ public class SslSocketConnector extends SocketConnector
 
     /* ------------------------------------------------------------ */    
     public String[] getCipherSuites() {
-        return cipherSuites;
+        return _cipherSuites;
     }
 
     /* ------------------------------------------------------------ */
@@ -110,7 +110,7 @@ public class SslSocketConnector extends SocketConnector
      * @author Tony Jiang
      */
     public void setCipherSuites(String[] cipherSuites) {
-        this.cipherSuites = cipherSuites;
+        this._cipherSuites = cipherSuites;
     }
 
     /* ------------------------------------------------------------ */
@@ -185,9 +185,11 @@ public class SslSocketConnector extends SocketConnector
 
     /* ------------------------------------------------------------ */
     /**
-     * Set the value of the needClientAuth property
+     * Set the value of the _wantClientAuth property. This property is used when
+     * {@link #newServerSocket(SocketAddress, int) opening server sockets}.
      * 
-     * @param needClientAuth true iff we require client certificate authentication.
+     * @param wantClientAuth true iff we want client certificate authentication.
+     * @see SSLServerSocket#setWantClientAuth
      */
     public void setWantClientAuth(boolean wantClientAuth)
     {
@@ -262,9 +264,13 @@ public class SslSocketConnector extends SocketConnector
     
     /* ------------------------------------------------------------ */
     /**
-     * @param p_address
-     * @param p_acceptQueueSize
-     * @return
+     * @param addr The {@link SocketAddress address} that this server should listen on 
+     * @param backlog See {@link ServerSocket#bind(java.net.SocketAddress, int)}
+     * @return A new {@link ServerSocket socket object} bound to the supplied address with all other
+     * settings as per the current configuration of this connector. 
+     * @see #setWantClientAuth
+     * @see #setNeedClientAuth
+     * @see #setCipherSuites
      * @exception IOException
      */
 
@@ -284,10 +290,10 @@ public class SslSocketConnector extends SocketConnector
             socket.setNeedClientAuth(_needClientAuth);
             socket.setWantClientAuth(_wantClientAuth);
 
-            if(cipherSuites != null && cipherSuites.length >0) {
-                socket.setEnabledCipherSuites(cipherSuites);
-                for ( int i=0; i<cipherSuites.length; i++ ) {
-                    Log.debug("SslListener enabled ciphersuite: " + cipherSuites[i]);
+            if(_cipherSuites != null && _cipherSuites.length >0) {
+                socket.setEnabledCipherSuites(_cipherSuites);
+                for ( int i=0; i<_cipherSuites.length; i++ ) {
+                    Log.debug("SslListener enabled ciphersuite: " + _cipherSuites[i]);
                 }            
             }
             
@@ -330,7 +336,8 @@ public class SslSocketConnector extends SocketConnector
      * authenticate the first, and so on. </li>
      * </ul>
      * 
-     * @param socket The Socket the request arrived on. This should be a javax.net.ssl.SSLSocket.
+     * @param endpoint The Socket the request arrived on. 
+     *        This should be a {@link SocketEndPoint} wrapping a {@link SSLSocket}.
      * @param request HttpRequest to be customised.
      */
     public void customize(EndPoint endpoint, Request request)

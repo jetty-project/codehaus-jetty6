@@ -17,7 +17,6 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -234,7 +233,8 @@ public class HttpGenerator implements HttpTokens
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return <code>false</code> if the connection should be closed after a request has been read,
+     * <code>true</code> if it should be used for additional requests.
      */
     public boolean isPersistent()
     {
@@ -277,8 +277,12 @@ public class HttpGenerator implements HttpTokens
     /**
      * Add content.
      * 
-     * @param _content
-     * @throws IOException
+     * @param content
+     * @param last
+     * @throws IllegalArgumentException if <code>content</code> is {@link Buffer#isImmutable immutable}.
+     * @throws IllegalStateException If the request is not expecting any more content,
+     *   or if the buffers are full and cannot be flushed.
+     * @throws IOException if there is a problem flushing the buffers.
      */
     public void addContent(Buffer content, boolean last) throws IOException
     {
@@ -390,7 +394,7 @@ public class HttpGenerator implements HttpTokens
     }
 
     /* ------------------------------------------------------------ */
-    void uncheckedAddContent(int b) throws IOException
+    void uncheckedAddContent(int b)
     {
         _buffer.put((byte)b);
     }
@@ -777,7 +781,7 @@ public class HttpGenerator implements HttpTokens
     }
 
     /* ------------------------------------------------------------ */
-    private void prepareBuffers() throws IOException
+    private void prepareBuffers()
     {
         // if we are not flushing an existing chunk
         if (!_bufferChunked)
@@ -883,7 +887,7 @@ public class HttpGenerator implements HttpTokens
      * 
      * @param code
      * @param reason
-     * @param _content
+     * @param content
      * @param close
      * @throws IOException
      */
@@ -1346,7 +1350,7 @@ public class HttpGenerator implements HttpTokens
             }
         }
       
-        private void writeUtf8(int code) throws IOException
+        private void writeUtf8(int code)
         {
             if ((code & 0xffffff80) == 0) 
             {

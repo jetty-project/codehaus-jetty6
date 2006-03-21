@@ -791,7 +791,8 @@ public class Response implements HttpServletResponse
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The HTTP status code that has been set for this request. This will be <code>200<code> 
+     *    ({@link HttpServletResponse#SC_OK}), unless explicitly set through one of the <code>setStatus</code> methods.
      */
     public int getStatus()
     {
@@ -800,7 +801,8 @@ public class Response implements HttpServletResponse
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The reason associated with the current {@link #getStatus() status}. This will be <code>null</code>, 
+     *    unless one of the <code>setStatus</code> methods have been called.
      */
     public String getReason()
     {

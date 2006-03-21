@@ -1350,7 +1350,8 @@ public class Request implements HttpServletRequest
 
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return The current {@link Context context} used for this request, or <code>null</code> if {@link #setContext} has not yet
+     * been called. 
      */
     public Context getContext()
     {

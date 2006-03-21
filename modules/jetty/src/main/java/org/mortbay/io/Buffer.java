@@ -241,7 +241,6 @@ public interface Buffer extends Cloneable
      * Put a specific byte to a specific getIndex.
      * @param index an <code>int</code> value
      * @param b a <code>byte</code> value
-     * @return The number of bytes actually poked
      */
     void poke(int index, byte b);
     
@@ -263,7 +262,6 @@ public interface Buffer extends Cloneable
     /**
      * Put a byte to the current getIndex and increment the getIndex.
      * @param b a <code>byte</code> value
-     * @return The number of bytes actually poked
      */
     void put(byte b);
     

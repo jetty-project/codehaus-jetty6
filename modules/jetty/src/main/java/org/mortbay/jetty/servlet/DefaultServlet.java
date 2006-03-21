@@ -503,8 +503,13 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     /* ------------------------------------------------------------ */
     /**
+     * Finds a matching welcome file for the supplied {@link Resource}. This will be the first entry in the list of 
+     * configured {@link #_welcomes welcome files} that existing within the directory referenced by the <code>Resource</code>.
+     * If the resource is not a directory, or no matching file is found, then <code>null</code> is returned.
+     * The list of welcome files is read from the {@link ContextHandler} for this servlet, or
+     * <code>"index.jsp" , "index.html"</code> if that is <code>null</code>.
      * @param resource
-     * @return
+     * @return The name of the matching welcome file.
      * @throws IOException
      * @throws MalformedURLException
      */

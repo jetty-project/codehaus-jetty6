@@ -27,12 +27,11 @@ public class View extends AbstractBuffer
     Buffer _buffer;
 
     /**
-     * @param buffer
-     * @param mark
-     * @param get
-     * @param put
-     * @param readonly
-     * @param b
+     * @param buffer The <code>Buffer</code> on which we are presenting a <code>View</code>.
+     * @param mark The initial value of the {@link Buffer#markIndex mark index}
+     * @param get The initial value of the {@link Buffer#getIndex get index}
+     * @param put The initial value of the {@link Buffer#putIndex put index}
+     * @param access The access level - one of the constants from {@link Buffer}.
      */
     public View(Buffer buffer, int mark, int get, int put,int access)
     {
@@ -85,7 +84,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @return
+     * @return The {@link Buffer#array()} from the underlying buffer.
      */
     public byte[] array()
     {
@@ -93,7 +92,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @return
+     * @return The {@link Buffer#buffer()} from the underlying buffer.
      */
     public Buffer buffer()
     {
@@ -101,7 +100,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @return
+     * @return The {@link Buffer#capacity} of the underlying buffer.
      */
     public int capacity()
     {
@@ -138,7 +137,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @return
+     * @return Whether the underlying buffer is {@link Buffer#isReadOnly read only}
      */
     public boolean isReadOnly()
     {
@@ -146,7 +145,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @return
+     * @return Whether the underlying buffer is {@link Buffer#isVolatile volatile}
      */
     public boolean isVolatile()
     {
@@ -154,8 +153,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @param index
-     * @return
+     * @return The result of calling {@link Buffer#peek(int)} on the underlying buffer
      */
     public byte peek(int index)
     {
@@ -163,9 +161,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @param index
-     * @param length
-     * @return
+     * @return The result of calling {@link Buffer#peek(int, byte[], int, int)} on the underlying buffer
      */
     public int peek(int index, byte[] b, int offset, int length)
     {
@@ -173,9 +169,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @param index
-     * @param length
-     * @return
+     * @return The result of calling {@link Buffer#peek(int, int)} on the underlying buffer
      */
     public Buffer peek(int index, int length)
     {

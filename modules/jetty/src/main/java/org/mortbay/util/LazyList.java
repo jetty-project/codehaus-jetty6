@@ -363,8 +363,8 @@ public class LazyList
 
     /* ------------------------------------------------------------ */
     /**
-     * @param welcomeFiles
-     * @return
+     * @param array Any array of object
+     * @return A new <i>modifiable</i> list initialised with the elements from <code>array</code>.
      */
     public static List array2List(Object[] array)
     {	
