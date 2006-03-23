@@ -83,6 +83,20 @@
     <dependency>
       <groupId>commons-el</groupId>
       <artifactId>commons-el</artifactId>
+      <exclusions>
+         <exclusion>
+           <artifactId>log4j</artifactId>
+           <groupId>log4j</groupId>
+         </exclusion>
+         <exclusion>
+           <artifactId>commons-logging</artifactId>
+           <groupId>commons-logging</groupId>
+         </exclusion>
+         <exclusion>
+           <artifactId>logkit</artifactId>
+           <groupId>logkit</groupId>
+         </exclusion>
+       </exclusions>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
