@@ -66,8 +66,9 @@ public class FilterHolder
         if (!javax.servlet.Filter.class
             .isAssignableFrom(_class))
         {
+            String msg = _class+" is not a javax.servlet.Filter";
             super.stop();
-            throw new IllegalStateException(_class+" is not a javax.servlet.Filter");
+            throw new IllegalStateException(msg);
         }
 
         _filter=(Filter)newInstance();
