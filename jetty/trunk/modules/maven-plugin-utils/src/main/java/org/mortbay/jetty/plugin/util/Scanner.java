@@ -254,9 +254,13 @@ public class Scanner extends Thread
 		{
 			Map.Entry entry = (Map.Entry)itor.next();
 			if (!oldScanKeys.contains(entry.getKey()))
+            {
+                PluginLog.getLog().debug("File added: "+entry.getKey());
 				fileNames.add(entry.getKey());
+            }
 			else if (!oldScan.get(entry.getKey()).equals(entry.getValue()))
 			{
+                PluginLog.getLog().debug("File changed: "+entry.getKey());
 				fileNames.add(entry.getKey());
 				oldScanKeys.remove(entry.getKey());
 			}
@@ -265,7 +269,18 @@ public class Scanner extends Thread
 		}
 		
 		if (!oldScanKeys.isEmpty())
+        {
 			fileNames.addAll(oldScanKeys);
+            if (PluginLog.getLog().isDebugEnabled())
+            {
+                Iterator keyItor = oldScanKeys.iterator();
+                while (keyItor.hasNext())
+                {
+                    PluginLog.getLog().debug("File removed: "+keyItor.next());
+                }
+                
+            }
+        }
 		
 		return fileNames;
 	}
