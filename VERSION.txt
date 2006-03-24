@@ -1,4 +1,7 @@
 
+    + Change tmp dir of plugin to target/work to be in line with jetty convention
+    + Modify plugin to select JSP impl at runtime
+    + Use start.config to select which JSP impl at runtime based on jdk version
     + Added JSP 2.1 APIs from apache
     + Added Jasper 2.1 as jesper (jasper without JCL)
     + Started readding logging to jesper using jdk logging
