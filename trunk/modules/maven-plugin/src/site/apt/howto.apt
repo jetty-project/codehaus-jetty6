@@ -207,3 +207,59 @@ Setting System Properties
   </plugins>
 </project>
 +---------+
+
+
+JDK 1.5 and JSP 2.1
+
+ The plugin will automatically detect at runtime which java version you are using, and select an appropriate set of jars for JSP usage. The 2.1 JSP specification requires you to use JDK1.5. If the plugin detects that you are running 1.5, the 2.1 version of the JSP jars will be selected. If you are running a lower release, then the JSP 2.0 specification compliant jars will be put onto the plugin's classpath instead.
+
+
+Logging
+
+ Jetty itself has no dependencies on a particular logging framework, using a built-in logger which outputs to stderr. However, to allow jetty6 to integrate with other logging mechanisms, if an {{{http://www.slf4j.org}SLF4J}} log implementation is detected in the classpath, it will use it in preference to the built-in logger. 
+
+ The JSP engine used by jetty6 does however have logging dependencies. If you are using JSP 2.0 (ie you are running in a JVM version \< 1.5), the JSP engine depends on commons-logging. A default commons-logging logger will be provided by the plugin using a combination of the {{{http://www.slf4j.org/manual.html#gradual}jcl04-over-slf4j}} and the {{{http://www.slf4j.org/api/org/slf4j/impl/SimpleLogger.html}simple-slf4j}} implementation, which logs all messages INFO level and above.  You can override this and provide your own commons-logging delegated logger by using a plugin \<dependency\>: 
+
++---------+
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <configuration>
+        ...
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.0.4</version>
+          </dependency>
+          <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.13</version>
+          </dependency>
+        </dependencies>
+      </plugin>
++---------+
+
+ Alternatively, you can still bridge commons-logging to slf4j and just select a different SLF4J implementation by using a plugin \<dependency\> and providing a different slf4j implementation jar:
+
++---------+
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <configuration>
+        ...
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>nlog4j</artifactId>
+            <version>1.1.24</version>
+          </dependency>
+        </dependencies>
+      </plugin>
++---------+
+
+ If you are using JSP2.1 (ie you are running in a JVM \>= 1.5), then the JSP engine has no particular logging dependencies.
+

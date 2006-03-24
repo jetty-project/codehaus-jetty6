@@ -67,6 +67,7 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     public void setTempDirectory(File tmpDir)
     {
         context.setTempDirectory(tmpDir);
+        tmpDir.deleteOnExit();
     }
     
     
