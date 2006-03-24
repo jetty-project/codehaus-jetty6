@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -57,8 +58,29 @@ import org.mortbay.start.Version;
 public abstract class AbstractJettyMojo extends AbstractMojo
 {
     
-    public static final String JSP2_0_POM_VERSION = "6.0-SNAPSHOT";
-    public static final String JSP2_1_POM_VERSION = "6.0-SNAPSHOT";
+    public static String POM_VERSION;
+
+    
+    
+    static
+    {
+        try
+        {
+            InputStream stream = AbstractJettyMojo.class.getResourceAsStream("/META-INF/maven/org.mortbay.jetty/maven-jetty6-plugin/pom.properties");
+            if (stream != null)
+            {
+                Properties props = new Properties();
+                props.load(stream);
+                POM_VERSION = props.getProperty("version");
+            }
+        }
+        catch (Exception e)
+        {
+            POM_VERSION = "6.0-SNAPSHOT";
+        }
+        
+        
+    }
     
     /**
      * The "virtual" webapp created by the plugin
@@ -486,7 +508,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
                 getLog().info("Using JSP2.0 for non-jdk1.5 runtime");
                 
                 //get the dependencies
-                dependencies = resolver.transitivelyResolvePomDependencies(projectBuilder, "org.mortbay.jetty", "jsp-2.0", JSP2_0_POM_VERSION, true);
+                dependencies = resolver.transitivelyResolvePomDependencies(projectBuilder, "org.mortbay.jetty", "jsp-2.0", POM_VERSION, true);
                 
                 //check if there is already commons logging on the classpath, and if so, take out the jetty default slf4j commons
                 //logging bridge, and the slf4j impl
@@ -517,7 +539,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             {
                 getLog().info("Using JSP2.1 for jdk1.5 runtime");
                 dependencies = resolver.transitivelyResolvePomDependencies(projectBuilder, 
-                                                                           "org.mortbay.jetty", "jsp-2.1", JSP2_1_POM_VERSION, true);
+                                                                           "org.mortbay.jetty", "jsp-2.1", POM_VERSION, true);
             }
                
             //get rid of any copies of the servlet-api jar that might have been transitively introduced
