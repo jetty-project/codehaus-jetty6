@@ -52,6 +52,14 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-site-plugin</artifactId>
+       <configuration>
+         <templateDirectory>file:///${basedir}/src/site/resources/template/</templateDirectory>
+         <template>org/apache/maven/plugins/site/maven-site.vm</template>
+       </configuration>
+      </plugin>
     </plugins>
   </build>
   <reporting>

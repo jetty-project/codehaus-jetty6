@@ -97,7 +97,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * The temporary directory to use for the webapp.
      * Defaults to target/jetty-tmp
      * 
-     * @parameter expression="${project.build.directory}/jetty-tmp"
+     * @parameter expression="${project.build.directory}/work"
      * @required
      */
     private File tmpDirectory;
@@ -429,6 +429,12 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     }
     
     
+    /**
+     * Insert another classloader into the maven classloader
+     * hierarchy with all runtime-resolved jars on it.
+     * 
+     * @throws Exception
+     */
     private void setupRuntimeClasspath () 
     throws Exception
     {
@@ -450,14 +456,10 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         while (itor.hasNext())
         {
             Artifact a = (Artifact)itor.next();
-            
-            if (!(a.getGroupId().equals("org.mortbay.jetty") && a.getArtifactId().startsWith("servlet-api")))
-            {
-                urls[i] = a.getFile().toURL();
-                getLog().debug("Adding to runtime classpath: "+a);
-                jspRealm.addConstituent(urls[i]);
-                i++;
-            }
+            urls[i] = a.getFile().toURL();
+            getLog().debug("Adding to runtime classpath: "+a);
+            jspRealm.addConstituent(urls[i]);
+            i++; 
         }
         
        Thread.currentThread().setContextClassLoader(jspRealm.getClassLoader());
@@ -465,12 +467,16 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     
     
     
+    /** Sort out which version of JSP libs to use at runtime
+     * based on the jvm version in use.
+     * @return
+     * @throws Exception
+     */
     private Set resolveRuntimeJSP () 
     throws Exception
     {
         try
         {
- 
             Version jdkVersion = new Version(System.getProperty("java.version"));
             Version jdk1_5Version = new Version("1.5");
             
@@ -513,7 +519,10 @@ public abstract class AbstractJettyMojo extends AbstractMojo
                 dependencies = resolver.transitivelyResolvePomDependencies(projectBuilder, 
                                                                            "org.mortbay.jetty", "jsp-2.1", JSP2_1_POM_VERSION, true);
             }
-                
+               
+            //get rid of any copies of the servlet-api jar that might have been transitively introduced
+            //by the jsp project
+            resolver.removeDependency(dependencies, "org.mortbay.jetty", "servlet-api-2.5", null, "jar");
             
             return dependencies;
         }
