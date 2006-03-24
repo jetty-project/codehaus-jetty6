@@ -135,48 +135,46 @@ public class Scanner extends Thread
 	 */
 	public void run ()
 	{	
-		// set the sleep interval
-		long sleepMillis = getScanInterval()*1000L;
-		boolean running = true;
-		while (running)
-		{
-			try
-			{
-				//wake up and scan the files
-				Thread.sleep(sleepMillis);
-				Map latestScanInfo = scan();
-				
-				List filesWithDifferences = getDifferences(latestScanInfo, scanInfo);
-				
-				if (!filesWithDifferences.isEmpty())
-				{
-					if ((getListeners() != null) && (!getListeners().isEmpty()))
-					{
-						try
-						{
-							PluginLog.getLog().debug("Calling scanner listeners ...");
-							
-							for (int i=0; i<getListeners().size();i++)
-								((Scanner.Listener)getListeners().get(i)).changesDetected(this, filesWithDifferences);
-							
-							PluginLog.getLog().debug("Listeners completed.");
-						}
-						catch (Exception e)
-						{
-							PluginLog.getLog().warn("Error doing stop/start", e);
-						}
-					}
-				}				
-				scanInfo = latestScanInfo;
-			}
-			catch (InterruptedException e)
-			{
-				running = false;	
-			}
-		}
+	    // set the sleep interval
+	    long sleepMillis = getScanInterval()*1000L;
+	    boolean running = true;
+	    while (running)
+	    {
+	        try
+	        {
+	            //wake up and scan the files
+	            Thread.sleep(sleepMillis);
+	            Map latestScanInfo = scan();
+	            
+	            List filesWithDifferences = getDifferences(latestScanInfo, scanInfo);
+	            
+	            if (!filesWithDifferences.isEmpty())
+	            {
+	                if ((getListeners() != null) && (!getListeners().isEmpty()))
+	                {
+	                    try
+	                    {
+	                        PluginLog.getLog().debug("Calling scanner listeners ...");
+	                        
+	                        for (int i=0; i<getListeners().size();i++)
+	                            ((Scanner.Listener)getListeners().get(i)).changesDetected(this, filesWithDifferences);
+	                        
+	                        PluginLog.getLog().debug("Listeners completed.");
+	                    }
+	                    catch (Exception e)
+	                    {
+	                        PluginLog.getLog().warn("Error doing stop/start", e);
+	                    }
+	                }
+	            }				
+	            scanInfo = latestScanInfo;
+	        }
+	        catch (InterruptedException e)
+	        {
+	            running = false;	
+	        }
+	    }
 	}
-	
-	
 	
 	
 	/**
@@ -186,31 +184,31 @@ public class Scanner extends Thread
 	 */
 	private Map scan ()
 	{
-		PluginLog.getLog().debug("Scanning ...");
-		List roots = getRoots();
-		if ((roots == null) || (roots.isEmpty()))
-			return Collections.EMPTY_MAP;
-		
-		HashMap scanInfoMap = new HashMap();	
-		Iterator itor = roots.iterator();
-		while (itor.hasNext())
-		{
-			File f = (File)itor.next();
-			scan (f, scanInfoMap);
-		}
-		
-		if  (PluginLog.getLog().isDebugEnabled())
-		{
-			itor = scanInfo.entrySet().iterator();
-			while (itor.hasNext())
-			{
-				Map.Entry e = (Map.Entry)itor.next();
-				PluginLog.getLog().debug("Scanned "+e.getKey()+" : "+e.getValue());
-			}
-		}
-		
-		PluginLog.getLog().debug("Scan complete at "+new Date().toString());
-		return scanInfoMap;
+	    PluginLog.getLog().debug("Scanning ...");
+	    List roots = getRoots();
+	    if ((roots == null) || (roots.isEmpty()))
+	        return Collections.EMPTY_MAP;
+	    
+	    HashMap scanInfoMap = new HashMap();	
+	    Iterator itor = roots.iterator();
+	    while (itor.hasNext())
+	    {
+	        File f = (File)itor.next();
+	        scan (f, scanInfoMap);
+	    }
+	    
+	    if  (PluginLog.getLog().isDebugEnabled())
+	    {
+	        itor = scanInfo.entrySet().iterator();
+	        while (itor.hasNext())
+	        {
+	            Map.Entry e = (Map.Entry)itor.next();
+	            PluginLog.getLog().debug("Scanned "+e.getKey()+" : "+e.getValue());
+	        }
+	    }
+	    
+	    PluginLog.getLog().debug("Scan complete at "+new Date().toString());
+	    return scanInfoMap;
 	}
 	
 	
@@ -221,68 +219,68 @@ public class Scanner extends Thread
 	 */
 	private void scan (File f, Map scanInfoMap)
 	{
-		try
-		{
-			if (f.isFile())
-			{
-				String name = f.getCanonicalPath();
-				long lastModified = f.lastModified();
-				scanInfoMap.put(name, new Long(lastModified));
-			}
-			else if (f.isDirectory())
-			{
-				File[] files = f.listFiles();
-				for (int i=0;i<files.length;i++)
-					scan(files[i], scanInfoMap);
-			}
-            else
-                PluginLog.getLog().error ("Skipping file of unacceptable type: "+f.getName());
-		}
-		catch (IOException e)
-		{
-			PluginLog.getLog().error("Error scanning watched files", e);
-		}
+	    try
+	    {
+	        if (f.isFile())
+	        {
+	            String name = f.getCanonicalPath();
+	            long lastModified = f.lastModified();
+	            scanInfoMap.put(name, new Long(lastModified));
+	        }
+	        else if (f.isDirectory())
+	        {
+	            File[] files = f.listFiles();
+	            for (int i=0;i<files.length;i++)
+	                scan(files[i], scanInfoMap);
+	        }
+	        else
+	            PluginLog.getLog().error ("Skipping file of unacceptable type: "+f.getName());
+	    }
+	    catch (IOException e)
+	    {
+	        PluginLog.getLog().error("Error scanning watched files", e);
+	    }
 	}
-
-
+	
+	
 	private List getDifferences (Map newScan, Map oldScan)
 	{
-		ArrayList fileNames = new ArrayList();
-		Set oldScanKeys = new HashSet(oldScan.keySet());
-		Iterator itor = newScan.entrySet().iterator();
-		while (itor.hasNext())
-		{
-			Map.Entry entry = (Map.Entry)itor.next();
-			if (!oldScanKeys.contains(entry.getKey()))
-            {
-                PluginLog.getLog().debug("File added: "+entry.getKey());
-				fileNames.add(entry.getKey());
-            }
-			else if (!oldScan.get(entry.getKey()).equals(entry.getValue()))
-			{
-                PluginLog.getLog().debug("File changed: "+entry.getKey());
-				fileNames.add(entry.getKey());
-				oldScanKeys.remove(entry.getKey());
-			}
-			else
-				oldScanKeys.remove(entry.getKey());
-		}
-		
-		if (!oldScanKeys.isEmpty())
-        {
-			fileNames.addAll(oldScanKeys);
-            if (PluginLog.getLog().isDebugEnabled())
-            {
-                Iterator keyItor = oldScanKeys.iterator();
-                while (keyItor.hasNext())
-                {
-                    PluginLog.getLog().debug("File removed: "+keyItor.next());
-                }
-                
-            }
-        }
-		
-		return fileNames;
+	    ArrayList fileNames = new ArrayList();
+	    Set oldScanKeys = new HashSet(oldScan.keySet());
+	    Iterator itor = newScan.entrySet().iterator();
+	    while (itor.hasNext())
+	    {
+	        Map.Entry entry = (Map.Entry)itor.next();
+	        if (!oldScanKeys.contains(entry.getKey()))
+	        {
+	            PluginLog.getLog().debug("File added: "+entry.getKey());
+	            fileNames.add(entry.getKey());
+	        }
+	        else if (!oldScan.get(entry.getKey()).equals(entry.getValue()))
+	        {
+	            PluginLog.getLog().debug("File changed: "+entry.getKey());
+	            fileNames.add(entry.getKey());
+	            oldScanKeys.remove(entry.getKey());
+	        }
+	        else
+	            oldScanKeys.remove(entry.getKey());
+	    }
+	    
+	    if (!oldScanKeys.isEmpty())
+	    {
+	        fileNames.addAll(oldScanKeys);
+	        if (PluginLog.getLog().isDebugEnabled())
+	        {
+	            Iterator keyItor = oldScanKeys.iterator();
+	            while (keyItor.hasNext())
+	            {
+	                PluginLog.getLog().debug("File removed: "+keyItor.next());
+	            }
+	            
+	        }
+	    }
+	    
+	    return fileNames;
 	}
 	
 }
