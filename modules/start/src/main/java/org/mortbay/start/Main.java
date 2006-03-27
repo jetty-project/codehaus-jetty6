@@ -141,6 +141,7 @@ public class Main
     public static void invokeMain(ClassLoader classloader,String classname,String[] args)
             throws IllegalAccessException,InvocationTargetException,NoSuchMethodException,ClassNotFoundException
     {
+        System.err.println("Starting jetty "+Main.class.getPackage().getImplementationVersion()+" ...");
         Class invoked_class=null;
         invoked_class=classloader.loadClass(classname);
         Class[] method_param_types=new Class[1];
