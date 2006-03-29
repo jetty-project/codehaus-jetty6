@@ -857,7 +857,7 @@ public class Request implements HttpServletRequest
             {
                 if (_serverName!=null && _uri!=null)
                     _port = _uri.getPort();
-                if (_port<=0)
+                else
                     _port = _endp==null?0:_endp.getLocalPort();
             }
         }
