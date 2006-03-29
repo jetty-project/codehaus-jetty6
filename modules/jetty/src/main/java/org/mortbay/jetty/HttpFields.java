@@ -483,7 +483,9 @@ public class HttpFields
     public void put(String name, String value)
     {
         Buffer n = HttpHeaders.CACHE.lookup(name);
-        Buffer v = HttpHeaderValues.CACHE.lookup(value);
+        Buffer v = null;
+        if (value != null)
+            v = HttpHeaderValues.CACHE.lookup(value);
         put(n, v, -1);
     }
 
