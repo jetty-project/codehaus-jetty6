@@ -207,7 +207,8 @@ public class WebXmlConfiguration implements Configuration
 
         getWebAppContext().setEventListeners(null);
         getWebAppContext().setWelcomeFiles(null);
-        getWebAppContext().getSecurityHandler().setConstraintMappings(null);
+        if (getWebAppContext().getSecurityHandler() != null)
+            getWebAppContext().getSecurityHandler().setConstraintMappings(null);
 
         if (getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler)
             ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(null);
