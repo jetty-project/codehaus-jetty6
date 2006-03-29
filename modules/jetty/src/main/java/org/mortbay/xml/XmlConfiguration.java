@@ -65,7 +65,7 @@ public class XmlConfiguration
         if (__parser != null) return;
 
         __parser = new XmlParser();
-        URL configURL = XmlConfiguration.class.getClassLoader().getResource("org/mortbay/xml/configure.dtd");
+        URL configURL = XmlConfiguration.class.getClassLoader().getResource("org/mortbay/xml/configure_6_0.dtd");
         __parser.redirectEntity("configure.dtd", configURL);
         __parser.redirectEntity("configure_1_3.dtd", configURL);
         __parser.redirectEntity("http://jetty.mortbay.org/configure.dtd", configURL);
