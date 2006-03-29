@@ -266,7 +266,7 @@ public class HashUserRealm implements UserRealm, SSORealm
         if (user instanceof WrappedUser)
             return ((WrappedUser)user).isUserInRole(roleName);
          
-        if (user==null || ((User)user).getUserRealm()!=this)
+        if (user==null || !(user instanceof User) || ((User)user).getUserRealm()!=this)
             return false;
         
         HashSet userSet = (HashSet)_roles.get(roleName);
