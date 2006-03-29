@@ -109,6 +109,7 @@ public class Request implements HttpServletRequest
     private Continuation _continuation;
     private Object _requestAttributeListeners;
     private Map _savedNewSessions;
+    private UserRealm _userRealm;
     
     /* ------------------------------------------------------------ */
     /**
@@ -1018,7 +1019,8 @@ public class Request implements HttpServletRequest
      */
     public boolean isUserInRole(String role)
     {
-        // TODO lookup user role link in context!!!
+        if (_userRealm!=null && _userPrincipal!=null)
+            return _userRealm.isUserInRole(_userPrincipal, role);
         
         return false;
     }
@@ -1496,6 +1498,24 @@ public class Request implements HttpServletRequest
         if (_savedNewSessions==null)
             return null;
         return (HttpSession) _savedNewSessions.get(key);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the userRealm.
+     */
+    public UserRealm getUserRealm()
+    {
+        return _userRealm;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param userRealm The userRealm to set.
+     */
+    public void setUserRealm(UserRealm userRealm)
+    {
+        _userRealm = userRealm;
     }
 }
 
