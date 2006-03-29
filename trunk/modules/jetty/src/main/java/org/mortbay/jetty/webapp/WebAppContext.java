@@ -315,7 +315,7 @@ public class WebAppContext extends ContextHandler
             catch (IOException e)
             {
                 Log.ignore(e);
-                if (ioe!=null)
+                if (ioe==null)
                     ioe= e;
             }
         }
