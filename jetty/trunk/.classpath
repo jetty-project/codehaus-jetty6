@@ -37,5 +37,8 @@
 	<classpathentry kind="lib" path="lib/jsp-2.1/core-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsp-2.1/xercesImpl-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jsp-2.1/xmlParserAPIs-2.6.2.jar"/>
+	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-container-default-1.0-alpha-9.jar"/>
+	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-utils-1.1.jar"/>
+	<classpathentry kind="var" path="MAVEN_HOME/core/boot/classworlds-1.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

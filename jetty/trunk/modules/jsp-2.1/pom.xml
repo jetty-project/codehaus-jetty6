@@ -21,6 +21,23 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copyjar</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/jsp-2.1/${project.artifactId}.${project.packaging}"></copy>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>dependency-maven-plugin</artifactId>
         <executions>
@@ -31,11 +48,6 @@
             </goals>
             <configuration>
               <artifactItems>
-                <artifactItem>
-                  <groupId>org.mortbay.jetty</groupId>
-                  <artifactId>jsp-2.1</artifactId>
-                  <version>6.0-SNAPSHOT</version>
-                </artifactItem>
                 <artifactItem>
                   <groupId>commons-el</groupId>
                   <artifactId>commons-el</artifactId>
