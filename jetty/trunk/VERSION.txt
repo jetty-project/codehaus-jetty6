@@ -6,6 +6,8 @@
     + Added Jasper 2.1 as jesper (jasper without JCL)
     + Started readding logging to jesper using jdk logging
     + fixed priority of port from url over host header
+    + implemented request.isUserInRole
+    + securityHandler removed if not used.
  
 jetty-6.0.0beta12 - 16/3/2006
     + Fixed maven plugin JNDI for redeploys
