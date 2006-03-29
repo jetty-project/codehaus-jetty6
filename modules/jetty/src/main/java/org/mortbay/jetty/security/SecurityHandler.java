@@ -160,19 +160,32 @@ public class SecurityHandler extends WrappedHandler
     {
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         Response base_response = (response instanceof Response) ? (Response)response:HttpConnection.getCurrentConnection().getResponse();
-        
-        if (dispatch==REQUEST && !checkSecurityConstraints(target,base_request,base_response))
-            return true;
-        
-        if (_authenticator instanceof FormAuthenticator && target.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+        UserRealm old_realm = base_request.getUserRealm();
+        try
         {
-            _authenticator.authenticate(getUserRealm(),target,base_request,base_response);
-            return true;
+            base_request.setUserRealm(getUserRealm());
+            if (dispatch==REQUEST && !checkSecurityConstraints(target,base_request,base_response))
+                return true;
+            
+            if (_authenticator instanceof FormAuthenticator && target.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+            {
+                _authenticator.authenticate(getUserRealm(),target,base_request,base_response);
+                return true;
+            }
+            
+            if (getHandler()!=null)
+                return getHandler().handle(target, request, response, dispatch);
+            return false;
         }
-        
-        if (getHandler()!=null)
-            return getHandler().handle(target, request, response, dispatch);
-        return false;
+        finally
+        {
+            if (_userRealm!=null)
+            {
+                if (base_request.getUserPrincipal()!=null)
+                    _userRealm.disassociate(base_request.getUserPrincipal());
+            }   
+            base_request.setUserRealm(old_realm);
+        }
     }
     
 

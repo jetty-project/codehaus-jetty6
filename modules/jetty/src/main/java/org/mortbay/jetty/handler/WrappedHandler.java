@@ -77,7 +77,7 @@ public class WrappedHandler extends AbstractHandler
             {
                 if (old_handler.isStarted())
                     old_handler.stop();
-                _handler.setServer(null);
+                old_handler.setServer(null);
             }
         }
         catch(Exception e)

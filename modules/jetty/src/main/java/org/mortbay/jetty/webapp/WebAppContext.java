@@ -954,6 +954,15 @@ public class WebAppContext extends ContextHandler
             _configurations[i].configureWebApp();
         
         _servletHandler.setInitializeAtStart(false);
+
+        // bypass security handler if not used.
+        if (_securityHandler.getConstraintMappings()==null ||
+            _securityHandler.getConstraintMappings().length==0)
+        {
+            _sessionHandler.setHandler(_servletHandler);
+            _securityHandler.setHandler(null);
+            _securityHandler=null;
+        }
         
         super.startContext();
 
