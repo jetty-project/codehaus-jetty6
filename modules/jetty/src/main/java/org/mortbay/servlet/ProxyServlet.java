@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
@@ -35,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.IO;
-import org.mortbay.util.InetAddrPort;
+
 
 
 /**
@@ -201,8 +203,7 @@ public class ProxyServlet implements Servlet
                 proxy_in = http.getErrorStream();
                 
                 code=http.getResponseCode();
-                //changed from setstatus(code, http.getResponseMessage()) --  this has been deprecated
-                response.sendError(code,http.getResponseMessage());
+                response.setStatus(code, http.getResponseMessage());
                 context.log("response = "+http.getResponseCode());
             }
             
@@ -255,7 +256,22 @@ public class ProxyServlet implements Servlet
         
         context.log("CONNECT: "+uri);
         
-        InetAddrPort addrPort=new InetAddrPort(uri);
+        String port = "";
+        String host = "";
+        
+        int c = uri.indexOf(':');
+        if (c>=0)
+        {
+            port = uri.substring(c+1);
+            host = uri.substring(0,c);
+            if (host.indexOf('/')>0)
+                host = host.substring(host.indexOf('/')+1);
+        }
+
+        
+       
+
+        InetSocketAddress inetAddress = new InetSocketAddress (host, Integer.parseInt(port));
         
         //if (isForbidden(HttpMessage.__SSL_SCHEME,addrPort.getHost(),addrPort.getPort(),false))
         //{
@@ -266,14 +282,14 @@ public class ProxyServlet implements Servlet
             InputStream in=request.getInputStream();
             OutputStream out=response.getOutputStream();
             
-            Socket socket = new Socket(addrPort.getInetAddress(),addrPort.getPort());
+            Socket socket = new Socket(inetAddress.getAddress(),inetAddress.getPort());
             context.log("Socket: "+socket);
             
             response.setStatus(200);
             response.setHeader("Connection","close");
             response.flushBuffer();
             
-            System.err.println(response);
+            
 
             context.log("out<-in");
             IO.copyThread(socket.getInputStream(),out);
