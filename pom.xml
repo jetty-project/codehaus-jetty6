@@ -119,13 +119,13 @@
     <module>modules/jsp-2.0</module>
     <module>modules/jsp-2.1</module>
     <module>modules/management</module>
-    <module>modules/test-webapp</module>
     <module>modules/start</module>
     <module>modules/maven-plugin-utils</module>
     <module>modules/maven-plugin</module>
     <module>modules/xbean</module>
     <module>modules/naming</module>
     <module>modules/plus</module>
+    <module>examples/test-webapp</module>
   </modules>
   <repositories>
     <repository>
