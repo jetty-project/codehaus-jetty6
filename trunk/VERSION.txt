@@ -8,6 +8,7 @@
     + fixed priority of port from url over host header
     + implemented request.isUserInRole
     + securityHandler removed if not used.
+    + moved test webapps to examples directory
  
 jetty-6.0.0beta12 - 16/3/2006
     + Fixed maven plugin JNDI for redeploys
