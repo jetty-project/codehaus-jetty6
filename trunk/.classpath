@@ -11,7 +11,7 @@
 	<classpathentry output="modules/xbean/target/classes" kind="src" path="modules/xbean/src/main/java"/>
 	<classpathentry output="modules/xbean/target/test-classes" kind="src" path="modules/xbean/src/test/java"/>
 	<classpathentry output="modules/management/target/classes" kind="src" path="modules/management/src/main/java"/>
-	<classpathentry output="modules/test-webapp/target/classes" kind="src" path="modules/test-webapp/src/main/java"/>
+	<classpathentry output="examples/test-webapp/target/classes" kind="src" path="examples/test-webapp/src/main/java"/>
 	<classpathentry output="modules/start/target/classes" kind="src" path="modules/start/src/main/java"/>
 	<classpathentry output="modules/maven-plugin/target/classes" kind="src" path="modules/maven-plugin/src/main/java"/>
 	<classpathentry output="modules/jetty/target/classes" kind="src" path="modules/jetty/src/main/java"/>
