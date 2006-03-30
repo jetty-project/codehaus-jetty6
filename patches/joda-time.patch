@@ -1,17 +1,16 @@
 Index: .classpath
 ===================================================================
---- .classpath	(revision 296)
+--- .classpath	(revision 412)
 +++ .classpath	(working copy)
-@@ -28,5 +28,6 @@
- 	<classpathentry output="modules/maven-plugin-utils/target/classes" kind="src" path="modules/maven-plugin-utils/src/main/java"/>
- 	<classpathentry kind="var" path="M2_REPO/geronimo-spec/geronimo-spec-jta/1.0.1B-rc4/geronimo-spec-jta-1.0.1B-rc4.jar"/>
- 	<classpathentry kind="lib" path="modules/servlet-api-2.5/src/main/resources"/>
-+	<classpathentry kind="var" path="M2_REPO/joda-time/joda-time/1.2.1/joda-time-1.2.1.jar"/>
+@@ -41,4 +41,5 @@
+ 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-utils-1.1.jar"/>
+ 	<classpathentry kind="var" path="MAVEN_HOME/core/boot/classworlds-1.1.jar"/>
  	<classpathentry kind="output" path="target/classes"/>
++ 	<classpathentry kind="var" path="M2_REPO/joda-time/joda-time/1.2.1/joda-time-1.2.1.jar"/>
  </classpath>
 Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java	(revision 296)
+--- modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java	(revision 412)
 +++ modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java	(working copy)
 @@ -14,6 +14,7 @@
  
@@ -46,7 +45,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java
          assertEquals(d1,d2);
 Index: modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java	(revision 296)
+--- modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java	(revision 412)
 +++ modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java	(working copy)
 @@ -66,7 +66,7 @@
  
@@ -59,7 +58,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java
              Date d3 = new Date(fields.getDateField("D3"));
 Index: modules/jetty/src/test/java/org/mortbay/util/DateCacheTest.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/util/DateCacheTest.java	(revision 296)
+--- modules/jetty/src/test/java/org/mortbay/util/DateCacheTest.java	(revision 412)
 +++ modules/jetty/src/test/java/org/mortbay/util/DateCacheTest.java	(working copy)
 @@ -17,6 +17,8 @@
  import java.util.Locale;
@@ -81,7 +80,7 @@ Index: modules/jetty/src/test/java/org/mortbay/util/DateCacheTest.java
              for (int i=0;i<15;i++)
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 296)
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 412)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(working copy)
 @@ -18,13 +18,9 @@
  import java.io.UnsupportedEncodingException;
@@ -256,7 +255,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
  
      /* ------------------------------------------------------------ */
      /**
-@@ -746,14 +672,12 @@
+@@ -748,14 +674,12 @@
  
          
          
@@ -274,7 +273,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
              }
              catch (java.lang.Exception e)
              {
-@@ -762,12 +686,12 @@
+@@ -764,12 +688,12 @@
          if (val.endsWith(" GMT"))
          {
              val = val.substring(0, val.length() - 4);
@@ -290,7 +289,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
                  }
                  catch (java.lang.Exception e)
                  {
-@@ -775,49 +699,6 @@
+@@ -777,49 +701,6 @@
              }
          }
          
@@ -340,7 +339,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          throw new IllegalArgumentException("Cannot convert date: " + val);
      }
  
-@@ -871,16 +752,9 @@
+@@ -873,16 +754,9 @@
       */
      public void putDateField(String name, long date)
      {
@@ -359,7 +358,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          put(n, v, date);
      }
  
-@@ -893,16 +767,9 @@
+@@ -895,16 +769,9 @@
       */
      public void addDateField(String name, long date)
      {
@@ -378,7 +377,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          add(n, v, date);
      }
  
-@@ -1081,9 +948,6 @@
+@@ -1083,9 +950,6 @@
              }
          }
          _fields = null;
@@ -390,9 +389,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 296)
+--- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 412)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
-@@ -158,19 +158,6 @@
+@@ -160,19 +160,6 @@
       * 
       * @return The time that the request was received.
       */
@@ -412,9 +411,114 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
      public long getTimeStamp()
      {
          return _timeStamp;
+Index: modules/jetty/src/main/java/org/mortbay/util/RolloverFileOutputStream.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(revision 412)
++++ modules/jetty/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(working copy)
+@@ -20,14 +20,17 @@
+ import java.io.IOException;
+ import java.io.OutputStream;
+ import java.lang.ref.WeakReference;
+-import java.text.SimpleDateFormat;
+ import java.util.ArrayList;
+-import java.util.Calendar;
+ import java.util.Date;
+-import java.util.GregorianCalendar;
+ import java.util.ListIterator;
+ import java.util.StringTokenizer;
+ 
++import org.joda.time.DateMidnight;
++import org.joda.time.DateTime;
++import org.joda.time.DateTimeField;
++import org.joda.time.format.DateTimeFormat;
++import org.joda.time.format.DateTimeFormatter;
++
+ /** 
+  * RolloverFileOutputStream
+  * @author Greg Wilkins 
+@@ -39,10 +42,8 @@
+     final static String YYYY_MM_DD="yyyy_mm_dd";
+     final static ArrayList __rollovers = new ArrayList();
+ 
+-    private SimpleDateFormat _fileBackupFormat =
+-        new SimpleDateFormat(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS"));
+-    private SimpleDateFormat _fileDateFormat = 
+-        new SimpleDateFormat(System.getProperty("ROLLOVERFILE_DATE_FORMAT","yyyy_MM_dd"));
++    private DateTimeFormatter _fileBackupFormat = DateTimeFormat.forPattern(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS"));
++    private DateTimeFormatter _fileDateFormat = DateTimeFormat.forPattern(System.getProperty("ROLLOVERFILE_DATE_FORMAT","yyyy_MM_dd"));
+ 
+     private String _filename;
+     private File _file;
+@@ -130,7 +131,7 @@
+         if (!dir.isDirectory() || !dir.canWrite())
+             throw new IOException("Cannot write log directory "+dir);
+             
+-        Date now=new Date();
++        long now=System.currentTimeMillis();
+         
+         // Is this a rollover file?
+         String filename=file.getName();
+@@ -139,7 +140,7 @@
+         {
+             file=new File(dir,
+                           filename.substring(0,i)+
+-                          _fileDateFormat.format(now)+
++                          _fileDateFormat.print(now)+
+                           filename.substring(i+YYYY_MM_DD.length()));
+         }
+             
+@@ -152,7 +153,7 @@
+             // Yep
+             _file=file;
+             if (!_append && file.exists())
+-                file.renameTo(new File(file.toString()+"."+_fileBackupFormat.format(now)));
++                file.renameTo(new File(file.toString()+"."+_fileBackupFormat.print(now)));
+             OutputStream oldOut=out;
+             out=new FileOutputStream(file.toString(),_append);
+             if (oldOut!=null)
+@@ -166,12 +167,13 @@
+     {
+         if (_retainDays>0)
+         {
+-            Calendar retainDate = Calendar.getInstance();
+-            retainDate.add(Calendar.DATE,-_retainDays);
+-            int borderYear = retainDate.get(java.util.Calendar.YEAR);
+-            int borderMonth = retainDate.get(java.util.Calendar.MONTH) + 1;
+-            int borderDay = retainDate.get(java.util.Calendar.DAY_OF_MONTH);
+-
++            DateTime retainDate = new DateTime();
++            retainDate=retainDate.minusDays(getRetainDays());
++            
++            int borderYear = retainDate.getYear();
++            int borderMonth = retainDate.getMonthOfYear();
++            int borderDay = retainDate.getDayOfMonth();
++            
+             File file= new File(_filename);
+             File dir = new File(file.getParent());
+             String fn=file.getName();
+@@ -280,16 +282,9 @@
+                 try
+                 {
+                     // Sleep until midnight
+-                    Calendar now = Calendar.getInstance();
+-                    GregorianCalendar midnight =
+-                        new GregorianCalendar(now.get(Calendar.YEAR),
+-                                              now.get(Calendar.MONTH),
+-                                              now.get(Calendar.DAY_OF_MONTH),
+-                                              23,0);
+-                    midnight.add(Calendar.HOUR,1);
+-                    long sleeptime=
+-                        midnight.getTime().getTime()-
+-                        now.getTime().getTime();
++                    DateTime now = new DateTime();
++                    DateMidnight midnight = new DateMidnight().plusDays(1);
++                    long sleeptime= midnight.getMillis()-now.getMillis();
+                     //if(log.isDebugEnabled())log.debug("Rollover sleep until "+midnight.getTime());
+                     Thread.sleep(sleeptime);
+                 }
 Index: modules/jetty/src/main/java/org/mortbay/util/DateCache.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/util/DateCache.java	(revision 296)
+--- modules/jetty/src/main/java/org/mortbay/util/DateCache.java	(revision 412)
 +++ modules/jetty/src/main/java/org/mortbay/util/DateCache.java	(working copy)
 @@ -14,12 +14,15 @@
  
@@ -603,117 +707,12 @@ Index: modules/jetty/src/main/java/org/mortbay/util/DateCache.java
      {
          return _minFormat;
      }
-Index: modules/jetty/src/main/java/org/mortbay/util/RolloverFileOutputStream.java
-===================================================================
---- modules/jetty/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(revision 296)
-+++ modules/jetty/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(working copy)
-@@ -20,14 +20,17 @@
- import java.io.IOException;
- import java.io.OutputStream;
- import java.lang.ref.WeakReference;
--import java.text.SimpleDateFormat;
- import java.util.ArrayList;
--import java.util.Calendar;
- import java.util.Date;
--import java.util.GregorianCalendar;
- import java.util.ListIterator;
- import java.util.StringTokenizer;
- 
-+import org.joda.time.DateMidnight;
-+import org.joda.time.DateTime;
-+import org.joda.time.DateTimeField;
-+import org.joda.time.format.DateTimeFormat;
-+import org.joda.time.format.DateTimeFormatter;
-+
- /** 
-  * RolloverFileOutputStream
-  * @author Greg Wilkins 
-@@ -39,10 +42,8 @@
-     final static String YYYY_MM_DD="yyyy_mm_dd";
-     final static ArrayList __rollovers = new ArrayList();
- 
--    private SimpleDateFormat _fileBackupFormat =
--        new SimpleDateFormat(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS"));
--    private SimpleDateFormat _fileDateFormat = 
--        new SimpleDateFormat(System.getProperty("ROLLOVERFILE_DATE_FORMAT","yyyy_MM_dd"));
-+    private DateTimeFormatter _fileBackupFormat = DateTimeFormat.forPattern(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS"));
-+    private DateTimeFormatter _fileDateFormat = DateTimeFormat.forPattern(System.getProperty("ROLLOVERFILE_DATE_FORMAT","yyyy_MM_dd"));
- 
-     private String _filename;
-     private File _file;
-@@ -130,7 +131,7 @@
-         if (!dir.isDirectory() || !dir.canWrite())
-             throw new IOException("Cannot write log directory "+dir);
-             
--        Date now=new Date();
-+        long now=System.currentTimeMillis();
-         
-         // Is this a rollover file?
-         String filename=file.getName();
-@@ -139,7 +140,7 @@
-         {
-             file=new File(dir,
-                           filename.substring(0,i)+
--                          _fileDateFormat.format(now)+
-+                          _fileDateFormat.print(now)+
-                           filename.substring(i+YYYY_MM_DD.length()));
-         }
-             
-@@ -152,7 +153,7 @@
-             // Yep
-             _file=file;
-             if (!_append && file.exists())
--                file.renameTo(new File(file.toString()+"."+_fileBackupFormat.format(now)));
-+                file.renameTo(new File(file.toString()+"."+_fileBackupFormat.print(now)));
-             OutputStream oldOut=out;
-             out=new FileOutputStream(file.toString(),_append);
-             if (oldOut!=null)
-@@ -166,12 +167,13 @@
-     {
-         if (_retainDays>0)
-         {
--            Calendar retainDate = Calendar.getInstance();
--            retainDate.add(Calendar.DATE,-_retainDays);
--            int borderYear = retainDate.get(java.util.Calendar.YEAR);
--            int borderMonth = retainDate.get(java.util.Calendar.MONTH) + 1;
--            int borderDay = retainDate.get(java.util.Calendar.DAY_OF_MONTH);
--
-+            DateTime retainDate = new DateTime();
-+            retainDate=retainDate.minusDays(getRetainDays());
-+            
-+            int borderYear = retainDate.getYear();
-+            int borderMonth = retainDate.getMonthOfYear();
-+            int borderDay = retainDate.getDayOfMonth();
-+            
-             File file= new File(_filename);
-             File dir = new File(file.getParent());
-             String fn=file.getName();
-@@ -280,16 +282,9 @@
-                 try
-                 {
-                     // Sleep until midnight
--                    Calendar now = Calendar.getInstance();
--                    GregorianCalendar midnight =
--                        new GregorianCalendar(now.get(Calendar.YEAR),
--                                              now.get(Calendar.MONTH),
--                                              now.get(Calendar.DAY_OF_MONTH),
--                                              23,0);
--                    midnight.add(Calendar.HOUR,1);
--                    long sleeptime=
--                        midnight.getTime().getTime()-
--                        now.getTime().getTime();
-+                    DateTime now = new DateTime();
-+                    DateMidnight midnight = new DateMidnight().plusDays(1);
-+                    long sleeptime= midnight.getMillis()-now.getMillis();
-                     //if(log.isDebugEnabled())log.debug("Rollover sleep until "+midnight.getTime());
-                     Thread.sleep(sleeptime);
-                 }
 Index: modules/jetty/pom.xml
 ===================================================================
---- modules/jetty/pom.xml	(revision 296)
+--- modules/jetty/pom.xml	(revision 412)
 +++ modules/jetty/pom.xml	(working copy)
-@@ -80,6 +80,28 @@
-           <destDir>${basedir}/../../project-site/target/site/${artifactId}</destDir>
+@@ -59,6 +59,28 @@
+           <stylesheetfile>${basedir}/../../project-site/src/resources/javadoc.css</stylesheetfile>
          </configuration>
        </plugin>
 +      <plugin>
@@ -741,7 +740,7 @@ Index: modules/jetty/pom.xml
      </plugins>
    </build>
    <pluginRepositories>
-@@ -99,5 +121,10 @@
+@@ -78,5 +100,9 @@
        <artifactId>servlet-api-2.5</artifactId>
        <version>6.0-SNAPSHOT</version>
      </dependency>
@@ -750,15 +749,12 @@ Index: modules/jetty/pom.xml
 +      <artifactId>joda-time</artifactId>
 +    </dependency>
    </dependencies>
--</project>
-\ No newline at end of file
-+</project>
-+
+ </project>
 Index: pom.xml
 ===================================================================
---- pom.xml	(revision 296)
+--- pom.xml	(revision 413)
 +++ pom.xml	(working copy)
-@@ -197,6 +197,11 @@
+@@ -207,6 +207,11 @@
          <artifactId>spring</artifactId>
          <version>${spring-version}</version>
        </dependency>
@@ -770,12 +766,10 @@ Index: pom.xml
      </dependencies>
    </dependencyManagement>
    <distributionManagement>
-@@ -226,5 +231,6 @@
+@@ -235,5 +240,6 @@
+     <mx4j-version>3.0.1</mx4j-version>
      <jta-spec-version>1.0.1B-rc4</jta-spec-version>
-     <jcl104-over-slf4j-version>1.0-rc5</jcl104-over-slf4j-version>
      <xerces-version>2.6.2</xerces-version>
 +    <joda-version>1.2.1</joda-version>
    </properties>
--</project>
-\ No newline at end of file
-+</project>
+ </project>
