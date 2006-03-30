@@ -9,5 +9,6 @@ The intent of the patches are:
 
   0) to fix any problems not yet fixed in apache svn 
   1) to remove JCL
+  2) maybe remove xerces dependencies
 
 
