@@ -273,12 +273,7 @@ public final class MethodExpressionImpl extends MethodExpression implements
             ELException {
         EvaluationContext ctx = new EvaluationContext(context, this.fnMapper,
                 this.varMapper);
-        Object v = this.getNode().invoke(ctx, this.paramTypes, params);
-        if (this.expectedType != null) {
-            return ELSupport.coerceToType(v, this.expectedType);
-        } else {
-            return v;
-        }
+	return this.getNode().invoke(ctx, this.paramTypes, params);
     }
 
     /*
