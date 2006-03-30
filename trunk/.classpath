@@ -25,9 +25,6 @@
 	<classpathentry output="modules/management/target/classes" kind="src" path="modules/management/src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring/1.2.6/spring-1.2.6.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/2.2-SNAPSHOT/xbean-spring-2.2-SNAPSHOT.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.2.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.2.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.2.jar"/>
 	<classpathentry output="modules/maven-plugin-utils/target/classes" kind="src" path="modules/maven-plugin-utils/src/main/java"/>
 	<classpathentry kind="var" path="M2_REPO/geronimo-spec/geronimo-spec-jta/1.0.1B-rc4/geronimo-spec-jta-1.0.1B-rc4.jar"/>
 	<classpathentry kind="lib" path="modules/servlet-api-2.5/src/main/resources"/>
@@ -40,5 +37,8 @@
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-container-default-1.0-alpha-9.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-utils-1.1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/boot/classworlds-1.1.jar"/>
+	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.3.jar"/>
+	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.3.jar"/>
+	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
