@@ -54,7 +54,7 @@ public class HttpURITest extends TestCase
         
         for (int t=0;t<tests.length;t++)
         {
-            uri.parse(tests[t][0]);
+            uri.parse(tests[t][0].getBytes(),0,tests[t][0].length());
             assertEquals(t+" "+tests[t][0],tests[t][1],uri.getScheme());
             assertEquals(t+" "+tests[t][0],tests[t][2],uri.getAuthority());
             assertEquals(t+" "+tests[t][0],tests[t][3],uri.getHost());
@@ -63,6 +63,7 @@ public class HttpURITest extends TestCase
             assertEquals(t+" "+tests[t][0],tests[t][6],uri.getParam());
             assertEquals(t+" "+tests[t][0],tests[t][7],uri.getQuery());
             assertEquals(t+" "+tests[t][0],tests[t][8],uri.getFragment());
+            assertEquals(tests[t][0], uri.toString());
         }
         
     }

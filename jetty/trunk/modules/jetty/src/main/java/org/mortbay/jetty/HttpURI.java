@@ -63,17 +63,24 @@ public class HttpURI
     
     public HttpURI(byte[] raw,int offset, int length)
     {
-        parse(raw,offset,length);
+        parse2(raw,offset,length);
     }
     
     public void parse(String raw)
     {
         byte[] b = raw.getBytes();
-        parse(b,0,b.length);
+        parse2(b,0,b.length);
+        _rawString=raw;
     }
 
     
     public void parse(byte[] raw,int offset, int length)
+    {
+        _rawString=null;
+        parse2(raw,offset,length);
+    }
+    
+    private void parse2(byte[] raw,int offset, int length)
     {
         _raw=raw;
         int i=offset;
