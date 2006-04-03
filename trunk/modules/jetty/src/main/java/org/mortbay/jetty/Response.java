@@ -511,21 +511,44 @@ public class Response implements HttpServletResponse
             {
                 // No, so just add this one to the mimetype
                 _characterEncoding=encoding;
-                if (_mimeType!=null)
+                if (_contentType!=null)
                 {
-                    _contentType=null;
-                    if(_cachedMimeType!=null)
-                    {
-                        CachedBuffer content_type = _cachedMimeType.getAssociate(_characterEncoding);
-                        if (content_type!=null)
+                    int i0=_contentType.indexOf(';');
+                    if (i0<0)
+                    {   
+                        _contentType=null;
+                        if(_cachedMimeType!=null)
                         {
-                            _contentType=content_type.toString();
-                            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,content_type);
+                            CachedBuffer content_type = _cachedMimeType.getAssociate(_characterEncoding);
+                            if (content_type!=null)
+                            {
+                                _contentType=content_type.toString();
+                                _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,content_type);
+                            }
+                        }
+                        
+                        if (_contentType==null)
+                        {
+                            _contentType = _mimeType+"; charset="+QuotedStringTokenizer.quote(_characterEncoding,";= "); 
+                            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                         }
                     }
-                    if (_contentType==null)
+                    else
                     {
-                        _contentType = _mimeType+";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                        int i1=_contentType.indexOf("charset=",i0);
+                        if (i1<0)
+                        {
+                            _contentType = _contentType+" charset="+QuotedStringTokenizer.quote(_characterEncoding,";= "); 
+                        }
+                        else
+                        {
+                            int i8=i1+8;
+                            int i2=_contentType.indexOf(" ",i8);
+                            if (i2<0)
+                                _contentType=_contentType.substring(0,i8)+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                            else
+                                _contentType=_contentType.substring(0,i8)+QuotedStringTokenizer.quote(_characterEncoding,";= ")+_contentType.substring(i2);
+                        }
                         _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                     }
                 }
@@ -567,8 +590,10 @@ public class Response implements HttpServletResponse
     {
         if (isCommitted())
             return;
-
-        String type_params=null;
+        
+        // Yes this method is horribly complex.... but there are lots of special cases and
+        // as this method is called on every request, it is worth trying to save string creation.
+        //
         
         if (contentType==null)
         {
@@ -584,91 +609,141 @@ public class Response implements HttpServletResponse
             // Look for encoding in contentType
             int i0=contentType.indexOf(';');
 
-            // TODO lookup combinations in cache
-
             if (i0>0)
             {
-                // Strip params off mimetype
+                // we have content type parameters
+            
+                // Extract params off mimetype
                 _mimeType=contentType.substring(0,i0).trim();
                 _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
 
                 // Look for charset
-                type_params=contentType.substring(i0+1);
-                int i1=type_params.indexOf("charset=");
+                int i1=contentType.indexOf("charset=",i0+1);
                 if (i1>=0)
                 {
                     int i8=i1+8;
-                    int i2 = type_params.indexOf(' ',i8);
-                    _characterEncoding = (0<i2)
-                        ? type_params.substring(i8,i2)
-                        : type_params.substring(i8);
-                    _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
-                    _contentType=contentType;
-                    type_params=((0<i2)
-                        ? (type_params.substring(0,i1)+type_params.substring(i2))
-                        : (type_params.substring(0,i1))).trim();
-                    if (type_params.length()==0)
-                        type_params=null;
-                }
-                else // No encoding in the params.
-                {
-                    _contentType=contentType;
-                }
-            }
-            else // No encoding and no other params
-            {
-                _mimeType=contentType;
-                _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
-                _contentType=null;
-            }
+                    int i2 = contentType.indexOf(' ',i8);
 
-
-            // combine mime type and encoding
-            if (_characterEncoding==null)
-            {
-                if (_cachedMimeType!=null && type_params==null)
-                {
-                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_cachedMimeType);
-                    _contentType=_cachedMimeType.toString();
-                }
-                else
-                {
-                    _contentType=contentType;
-                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
-                }
-            }
-            else
-            {
-                if(_cachedMimeType!=null)
-                {
-                    CachedBuffer content_type = _cachedMimeType.getAssociate(_characterEncoding);
-                if (content_type!=null && type_params==null)
+                    if (_outputState==WRITER)
                     {
-                        _contentType=content_type.toString();
-                        _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,content_type);
+                        // strip the charset and ignore;
+                        if ((i1==i0+1 && i2<0) || (i1==i0+2 && i2<0 && contentType.charAt(i0+1)==' '))
+                        {
+                            if (_cachedMimeType!=null)
+                            {
+                                CachedBuffer content_type = _cachedMimeType.getAssociate(_characterEncoding);
+                                if (content_type!=null)
+                                {
+                                    _contentType=content_type.toString();
+                                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,content_type);
+                                }
+                                else
+                                {
+                                    _contentType=_mimeType+"; charset="+_characterEncoding;
+                                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                                }
+                            }
+                            else
+                            {
+                                _contentType=_mimeType+"; charset="+_characterEncoding;
+                                _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                            }
+                        }
+                        else if (i2<0)
+                        {
+                            _contentType=contentType.substring(0,i1)+" charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                        }
+                        else
+                        {
+                            _contentType=contentType.substring(0,i1)+contentType.substring(i2)+" charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                        }
+                    }
+                    else if ((i1==i0+1 && i2<0) || (i1==i0+2 && i2<0 && contentType.charAt(i0+1)==' '))
+                    {
+                        // The params are just the char encoding
+                        _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
+                        _characterEncoding = QuotedStringTokenizer.unquote(contentType.substring(i8));
+                        
+                        if (_cachedMimeType!=null)
+                        {
+                            CachedBuffer content_type = _cachedMimeType.getAssociate(_characterEncoding);
+                            if (content_type!=null)
+                            {
+                                _contentType=content_type.toString();
+                                _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,content_type);
+                            }
+                            else
+                            {
+                                _contentType=contentType;
+                                _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                            }
+                        }
+                        else
+                        {
+                            _contentType=contentType;
+                            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                        }
+                    }
+                    else if (i2>0)
+                    {
+                        _characterEncoding = QuotedStringTokenizer.unquote(contentType.substring(i8,i2));
+                        _contentType=contentType;
+                        _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                     }
                     else
                     {
-                        if (_contentType==null)
-                        {
-                            _contentType = _mimeType+";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
-                            if (type_params!=null)
-                                _contentType+=" "+type_params;
-                        }
+                        _characterEncoding = QuotedStringTokenizer.unquote(contentType.substring(i8)); 
+                        _contentType=contentType;
                         _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                     }
                 }
-                else
+                else // No encoding in the params.
                 {
-                    if (_contentType==null)
-                    {
-                        _contentType = _mimeType+";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
-                        if (type_params!=null)
-                            _contentType+=" "+type_params;
-                    }
+                    _cachedMimeType=null;
+                    _contentType=_characterEncoding==null?contentType:contentType+" charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
                     _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                 }
             }
+            else // No params at all
+            {
+                _mimeType=contentType;
+                _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
+                
+                if (_characterEncoding!=null)
+                {
+                    if (_cachedMimeType!=null)
+                    {
+                        CachedBuffer content_type = _cachedMimeType.getAssociate(_characterEncoding);
+                        if (content_type!=null)
+                        {
+                            _contentType=content_type.toString();
+                            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,content_type);
+                        }
+                        else
+                        {
+                            _contentType=_mimeType+"; charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                        }
+                    }
+                    else
+                    {
+                        _contentType=contentType+"; charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                        _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                    }
+                }
+                else if (_cachedMimeType!=null)
+                {
+                    _contentType=_cachedMimeType.toString();
+                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_cachedMimeType);
+                }
+                else
+                {
+                    _contentType=contentType;
+                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
+                }
+            }   
         }
     }
 
