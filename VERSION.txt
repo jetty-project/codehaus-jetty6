@@ -9,6 +9,7 @@
     + implemented request.isUserInRole
     + securityHandler removed if not used.
     + moved test webapps to examples directory
+    + improved contentType handling and test harness
  
 jetty-6.0.0beta12 - 16/3/2006
     + Fixed maven plugin JNDI for redeploys
