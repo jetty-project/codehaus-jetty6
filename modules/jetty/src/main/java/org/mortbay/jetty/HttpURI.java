@@ -22,9 +22,23 @@ import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
 
 
+/* ------------------------------------------------------------ */
+/** Http URI.
+ * Parse a HTTP URI from a string or byte array.
+ */
 public class HttpURI
 {
+    private final static int 
+    START=0,
+    AUTH_OR_PATH=1,
+    SCHEME_OR_PATH=2,
+    AUTH=4,
+    PATH=5,
+    PARAM=6,
+    QUERY=7;
+    
     byte[] _raw;
+    String _rawString;
     int _scheme;
     int _authority;
     int _host;
@@ -35,7 +49,6 @@ public class HttpURI
     int _fragment;
     int _end;
     
-    
     public HttpURI()
     {
         
@@ -43,6 +56,7 @@ public class HttpURI
     
     public HttpURI(String raw)
     {
+        _rawString=raw;
         byte[] b = raw.getBytes();
         parse(b,0,b.length);
     }
@@ -58,14 +72,6 @@ public class HttpURI
         parse(b,0,b.length);
     }
 
-    private final static int 
-     START=0,
-     AUTH_OR_PATH=1,
-     SCHEME_OR_PATH=2,
-     AUTH=4,
-     PATH=5,
-     PARAM=6,
-     QUERY=7;
     
     public void parse(byte[] raw,int offset, int length)
     {
@@ -373,6 +379,13 @@ public class HttpURI
             return;
         // TODO need to use bytes directly
         UrlEncoded.decodeUtf8To(_raw,_query+1,_fragment-_query-1,parameters);
+    }
+    
+    public String toString()
+    {
+        if (_rawString==null)
+            _rawString=new String(_raw,_scheme,_end-_scheme);
+        return _rawString;
     }
     
 }
