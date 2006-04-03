@@ -1,5 +1,5 @@
 
-    + Change tmp dir of plugin to target/work to be in line with jetty convention
+    + Change tmp dir of plugin to work to be in line with jetty convention
     + Modify plugin to select JSP impl at runtime
     + Use start.config to select which JSP impl at runtime based on jdk version
     + Added JSP 2.1 APIs from apache
@@ -10,6 +10,7 @@
     + securityHandler removed if not used.
     + moved test webapps to examples directory
     + improved contentType handling and test harness
+    + fixed forward bug (treated as include)
  
 jetty-6.0.0beta12 - 16/3/2006
     + Fixed maven plugin JNDI for redeploys
