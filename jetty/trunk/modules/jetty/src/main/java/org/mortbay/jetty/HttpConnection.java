@@ -485,8 +485,7 @@ public class HttpConnection
 
             try
             {
-                byte[] b=uri.asArray(); // TODO avoid this copy?
-                _uri.parse(b,0,b.length);
+                _uri.parse(uri.array(), uri.getIndex(), uri.length());
                 _request.setUri(_uri);
 
                 _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE.getOrdinal(version);
