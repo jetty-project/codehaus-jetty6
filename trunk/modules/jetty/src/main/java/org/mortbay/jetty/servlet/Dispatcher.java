@@ -55,7 +55,7 @@ public class Dispatcher implements RequestDispatcher
     public final static String __INCLUDE_QUERY_STRING= "javax.servlet.include.query_string";
 
     /** Dispatch include attribute names */
-    public final static String __FORWARD_JETTY="org.mortbay.jetty.included";
+    public final static String __FORWARD_JETTY="org.mortbay.jetty.forwarded";
     public final static String __FORWARD_PREFIX="javax.servlet.forward.";
     public final static String __FORWARD_REQUEST_URI= "javax.servlet.forward.request_uri";
     public final static String __FORWARD_CONTEXT_PATH= "javax.servlet.forward.context_path";
