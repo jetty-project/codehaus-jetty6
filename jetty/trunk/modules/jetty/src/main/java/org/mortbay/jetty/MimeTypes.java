@@ -39,12 +39,12 @@ public class MimeTypes
       TEXT_HTML="text/html",
       TEXT_PLAIN="text/plain",
       TEXT_XML="text/xml",
-      TEXT_HTML_8859_1="text/html;charset=ISO-8859-1",
-      TEXT_PLAIN_8859_1="text/plain;charset=ISO-8859-1",
-      TEXT_XML_8859_1="text/xml;charset=ISO-8859-1",
-      TEXT_HTML_UTF_8="text/html;charset=UTF-8",
-      TEXT_PLAIN_UTF_8="text/plain;charset=UTF-8",
-      TEXT_XML_UTF_8="text/xml;charset=UTF-8";
+      TEXT_HTML_8859_1="text/html; charset=ISO-8859-1",
+      TEXT_PLAIN_8859_1="text/plain; charset=ISO-8859-1",
+      TEXT_XML_8859_1="text/xml; charset=ISO-8859-1",
+      TEXT_HTML_UTF_8="text/html; charset=UTF-8",
+      TEXT_PLAIN_UTF_8="text/plain; charset=UTF-8",
+      TEXT_XML_UTF_8="text/xml; charset=UTF-8";
     
 
     private static int index=1;
@@ -117,11 +117,13 @@ public class MimeTypes
 
         TEXT_HTML_BUFFER.setAssociate("UTF-8",TEXT_HTML_UTF_8_BUFFER);
         TEXT_HTML_BUFFER.setAssociate("UTF8",TEXT_HTML_UTF_8_BUFFER);
+        TEXT_HTML_BUFFER.setAssociate("utf8",TEXT_HTML_UTF_8_BUFFER);
         TEXT_HTML_BUFFER.setAssociate("utf-8",TEXT_HTML_UTF_8_BUFFER);
         TEXT_PLAIN_BUFFER.setAssociate("UTF-8",TEXT_PLAIN_UTF_8_BUFFER);
         TEXT_PLAIN_BUFFER.setAssociate("UTF8",TEXT_PLAIN_UTF_8_BUFFER);
         TEXT_PLAIN_BUFFER.setAssociate("utf-8",TEXT_PLAIN_UTF_8_BUFFER);
         TEXT_XML_BUFFER.setAssociate("UTF-8",TEXT_XML_UTF_8_BUFFER);
+        TEXT_XML_BUFFER.setAssociate("utf8",TEXT_XML_UTF_8_BUFFER);
         TEXT_XML_BUFFER.setAssociate("UTF8",TEXT_XML_UTF_8_BUFFER);
         TEXT_XML_BUFFER.setAssociate("utf-8",TEXT_XML_UTF_8_BUFFER);
     }

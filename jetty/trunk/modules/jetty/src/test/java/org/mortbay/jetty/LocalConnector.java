@@ -33,12 +33,19 @@ public class LocalConnector extends AbstractConnector
     
     public LocalConnector()
     {
+        setPort(1);
     }
 
     /* ------------------------------------------------------------ */
     public Object getConnection()
     {
         return endp;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public HttpConnection getHttpConnection()
+    {
+        return connection;
     }
     
     public void clear()
