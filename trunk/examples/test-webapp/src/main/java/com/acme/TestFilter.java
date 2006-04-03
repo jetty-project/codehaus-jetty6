@@ -65,8 +65,6 @@ public class TestFilter implements Filter
             }
             _context.setAttribute("request"+request.hashCode(),value);
             
-            response.setContentType("wrong/type");
-            
             chain.doFilter(request, response);
         }
         finally
