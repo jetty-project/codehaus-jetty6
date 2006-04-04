@@ -210,33 +210,29 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
                                   Object credentials,
                                   Request request)
     {
-        if (credentials==null)
-            return authenticate(username,null,request);
-        if (credentials instanceof String)
-            return authenticate(username,(String)credentials,request);
-        return authenticate(username,credentials.toString(),request);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public synchronized Principal authenticate(String username,
-                                               String credentials,
-                                               Request request)
-    {
-        long now = System.currentTimeMillis();
-        if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
+        synchronized (this)
         {
-            //super.clear();
-            _roles.clear();
-            _lastHashPurge = now;
-        }
-        Principal user = (Principal)super.getPrincipal(username);
-        if (user == null)
-        {
-            loadUser(username);
-            user = (Principal)super.getPrincipal(username);
+            long now = System.currentTimeMillis();
+            if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
+            {
+                //super.clear();
+                _roles.clear();
+                _lastHashPurge = now;
+            }
+            Principal user = (Principal)super.getPrincipal(username);
+            if (user == null)
+            {
+                loadUser(username);
+                user = (Principal)super.getPrincipal(username);
+            }
         }
         return super.authenticate(username, credentials, request);
     }
+    
+    
+    
+
+
     
     /* ------------------------------------------------------------ */
     private void loadUser(String username)
