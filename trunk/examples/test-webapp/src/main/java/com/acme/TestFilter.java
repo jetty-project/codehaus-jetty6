@@ -24,8 +24,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
 
 /* ------------------------------------------------------------ */
 /** TestFilter.
@@ -59,6 +61,10 @@ public class TestFilter implements Filter
             Integer value=(old_value==null)?new Integer(1):new Integer(old_value.intValue()+1);
                         
             request.setAttribute("testFilter", value);
+            
+            ((HttpServletResponse)response).addCookie(new Cookie("test1","value1"));
+            ((HttpServletResponse)response).addCookie(new Cookie("test2","value2"));
+            
             if (((HttpServletRequest)request).getParameter("wrap")!=null)
             {
                 request=new HttpServletRequestWrapper((HttpServletRequest)request);
