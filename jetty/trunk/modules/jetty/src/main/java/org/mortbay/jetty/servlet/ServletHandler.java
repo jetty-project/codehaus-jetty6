@@ -212,7 +212,7 @@ public class ServletHandler extends AbstractHandler
      * @param pathInContext Path within _context.
      * @return PathMap Entries pathspec to ServletHolder
      */
-    private PathMap.Entry getHolderEntry(String pathInContext)
+    public PathMap.Entry getHolderEntry(String pathInContext)
     {
         return _servletPathMap.getMatch(pathInContext);
     }
@@ -595,17 +595,37 @@ public class ServletHandler extends AbstractHandler
      */
     public ServletHolder addServlet(String className,String pathSpec)
     {
-        ServletHolder holder = newServletHolder();
-        holder.setName(className);
-        holder.setClassName(className);
-        setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder, ServletHolder.class));
-        
-        ServletMapping mapping = new ServletMapping();
-        mapping.setServletName(className);
-        mapping.setPathSpec(pathSpec);
-        setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping, ServletMapping.class));
-        
-        return holder;
+        ServletHolder holder = null;
+        try
+        {
+            holder = newServletHolder();
+            holder.setName(className);
+            holder.setClassName(className);
+            setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder, ServletHolder.class));
+            
+            
+            ServletMapping mapping = new ServletMapping();
+            mapping.setServletName(className);
+            mapping.setPathSpec(pathSpec);
+            setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping, ServletMapping.class));
+            
+            return holder;
+        }
+        catch (Exception e)
+        {
+            //back out the holder addition if it all went wrong
+            ServletHolder[] currentHolders = getServlets();
+            ServletHolder[] holders = new ServletHolder[currentHolders.length-1];
+            int j=0;
+            for (int i=0; i<currentHolders.length; i++)
+            {
+                if (currentHolders[i]!=holder)
+                    holders[j++] = currentHolders[i];
+            }
+            setServlets(holders);
+            
+            throw (RuntimeException)e;
+        }
     }
 
 
