@@ -31,6 +31,7 @@ the top level of the $JETTY_HOME/lib directory:
 
   servlet-api-2.5.jar
   jetty.jar
+  jetty-util.jar
 
 The jars found in the subdirectories are all optional:
 
@@ -69,10 +70,16 @@ command:
 This commands adds the plus configuration file after
 the server configuration file
 
+RUNNING WITH OTHER CONTAINERS
+=============================
+If you wish to use Continuations in other containers, the jetty-util.jar
+can be included in WEB-INF/lib and will provide waiting continuations
 
 ASSEMBLIES
 ==========
 The assemblies directory contains alternate bundlings of the jetty classes:
+
+Currently this is not built due to maven plugin issues.
 
 jetty-standalone.jar can be run from the command line without additional 
 dependencies:
@@ -80,9 +87,6 @@ dependencies:
   java -jar assemblies/jetty-standalone.jar
   java -jar assemblies/jetty-standalone.jar 8080 -webapp mywebapp.war
      
-jetty-util.jar  contains the org.mortbay.util and org.mortbay.log
-classes.
-
 
 BUILDING JETTY
 ==============
@@ -97,7 +101,6 @@ Jetty itself only needs java 1.4, however to build JSP 2.1
 support you need to use java5.    If you want to use java1.4,
 then you can use the jsp-2.0 modules instead of the 
 jsp-api-2.1 and  jsp-2.1 modules.
-
 
 
 DEPENDENCIES 
