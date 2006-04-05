@@ -172,6 +172,7 @@ public class SessionHandler extends WrappedHandler
                 if (requested_session_id==null)
                 {
                     String uri = request.getRequestURI();
+                    
                     int semi = uri.lastIndexOf(';');
                     if (semi>=0)
                     {	

@@ -152,6 +152,8 @@ public class Request implements HttpServletRequest
         if (_savedNewSessions!=null)
             _savedNewSessions.clear();
         _savedNewSessions=null;
+        if (_continuation!=null && _continuation.isPending())
+            _continuation.reset();
     }
 
     /* ------------------------------------------------------------ */

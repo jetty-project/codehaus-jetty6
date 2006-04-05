@@ -282,6 +282,8 @@ public class HttpConnection
                 if (continuation != null && continuation.isPending())
                 {
                     Log.debug("resume continuation {}",continuation);
+                    if (_request.getMethod()==null)
+                        throw new IllegalStateException();
                     doHandler();
                 }
                 else
@@ -374,7 +376,7 @@ public class HttpConnection
                     if (_request.getContinuation()!=null && _request.getContinuation().isPending())
                     {
                         Log.debug("continuation still pending {}");
-                        _request.getContinuation().suspend(0);
+                        _request.getContinuation().reset();
                     }
                     
                     if (!error) 

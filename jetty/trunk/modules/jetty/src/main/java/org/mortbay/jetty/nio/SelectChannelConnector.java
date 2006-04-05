@@ -897,6 +897,17 @@ public class SelectChannelConnector extends AbstractConnector
                     redispatch();
             }
         }
+        
+        public void reset()
+        {
+            synchronized (this)
+            {
+                _resumed = false;
+                if (isExpired())
+                    return;
+                this.cancel();
+            }
+        }
 
         private void redispatch()
         {

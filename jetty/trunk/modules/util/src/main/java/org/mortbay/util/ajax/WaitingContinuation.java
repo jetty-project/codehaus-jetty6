@@ -41,6 +41,16 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             _mutex.notify();
         }
     }
+    
+    public void reset()
+    {
+        synchronized (_mutex)
+        {
+            _resumed=false;
+            _pending=false;
+            _mutex.notify();
+        }
+    }
 
     public boolean isNew()
     {

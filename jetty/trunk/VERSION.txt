@@ -13,7 +13,9 @@
     + improved contentType handling and test harness
     + fixed forward bug (treated as include)
     + fixed HttpField iterator
-    + added jetty-util.jar assembly
+    + added jetty-util.jar module
+    + added reset to Continuation
+  
  
 jetty-6.0.0beta12 - 16/3/2006
     + Fixed maven plugin JNDI for redeploys

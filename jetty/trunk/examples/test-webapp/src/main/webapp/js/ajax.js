@@ -14,8 +14,8 @@ var ajax =
   
   _messageHandler: function(request) 
   {
-    var qm=this._queueMessages;
-    this._queueMessages=true;
+    var qm=ajax._queueMessages;
+    ajax._queueMessages=true;
     try
     {
       if (request.status == 200)
@@ -53,20 +53,20 @@ var ajax =
     {
       alert(e);
     }
-    this._queueMessages=qm;
+    ajax._queueMessages=qm;
     
-    if (!this._queueMessages)
+    if (!ajax._queueMessages && ajax._messages>0)
     {
-      var body = this._messageQueue;
-      this._messageQueue='';
-      this._messages=0;
+      var body = ajax._messageQueue;
+      ajax._messageQueue='';
+      ajax._messages=0;
       new Ajax.Request('.', { method: 'post', onSuccess: ajax._pollHandler, postBody: body }); 
     }
   },
   
   _pollHandler: function(request) 
   {
-    this._queueMessages=true;
+    ajax._queueMessages=true;
     try
     {
       ajax._messageHandler(request);
@@ -78,26 +78,26 @@ var ajax =
         alert(e);
     }
     
-    this._queueMessages=false;
+    ajax._queueMessages=false;
     
-    if (this._messages==0)
+    if (ajax._messages==0)
     {
       if (ajax.poll)
         new Ajax.Request('.', { method: 'get', parameters: 'ajax=poll&message=poll', onSuccess: ajax._pollHandler }); 
     }
     else
     {
-      var body = this._messageQueue+'&ajax=poll&message=poll';
-      this._messageQueue='';
-      this._messages=0;
+      var body = ajax._messageQueue+'&ajax=poll&message=poll';
+      ajax._messageQueue='';
+      ajax._messages=0;
       new Ajax.Request('.', { method: 'post', onSuccess: ajax._pollHandler, postBody: body }); 
     }
   },
   
   addPollHandler : function(func)
   {
-    var old = this._pollEvent;
-    this._pollEvent = function(first) 
+    var old = ajax._pollEvent;
+    ajax._pollEvent = function(first) 
     {
       old(first);
       func(first);
@@ -121,10 +121,10 @@ var ajax =
     message=message.replace('%','%25');
     message=message.replace('&','%26');
     message=message.replace('=','%3D');
-    if (this._queueMessages)
+    if (ajax._queueMessages)
     {
-      this._messageQueue+=(this._messages==0?'ajax=':'&ajax=')+destination+'&message='+message;
-      this._messages++;
+      ajax._messageQueue+=(ajax._messages==0?'ajax=':'&ajax=')+destination+'&message='+message;
+      ajax._messages++;
     }
     else
     {
@@ -140,8 +140,8 @@ var ajax =
   
   getContentAsString: function( parentNode ) {
       return parentNode.xml != undefined ?
-         this._getContentAsStringIE(parentNode) :
-         this._getContentAsStringMozilla(parentNode);
+         ajax._getContentAsStringIE(parentNode) :
+         ajax._getContentAsStringMozilla(parentNode);
   },
 
   _getContentAsStringIE: function(parentNode) {

@@ -49,6 +49,7 @@ public class AjaxFilter implements Filter
         return context;
     }
 
+    /* ------------------------------------------------------------ */
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
     {
         String[] method=request.getParameterValues("ajax");
@@ -76,7 +77,6 @@ public class AjaxFilter implements Filter
             sresponse.setContentLength(ajax.length);
             sresponse.getOutputStream().write(ajax);
             sresponse.flushBuffer();
-            
         }
         else
             chain.doFilter(request, response);
