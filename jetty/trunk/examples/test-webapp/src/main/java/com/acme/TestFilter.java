@@ -62,9 +62,6 @@ public class TestFilter implements Filter
                         
             request.setAttribute("testFilter", value);
             
-            ((HttpServletResponse)response).addCookie(new Cookie("test1","value1"));
-            ((HttpServletResponse)response).addCookie(new Cookie("test2","value2"));
-            
             if (((HttpServletRequest)request).getParameter("wrap")!=null)
             {
                 request=new HttpServletRequestWrapper((HttpServletRequest)request);
