@@ -3,7 +3,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
-  <name>Jetty Servlet Server</name>
+  <name>Jetty Server Project</name>
   <version>6.0-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
@@ -114,10 +114,10 @@
   <modules>
     <module>modules/servlet-api-2.5</module>
     <module>modules/jetty</module>
-    <module>modules/jsp-api-2.0</module>
     <module>modules/jsp-api-2.1</module>
-    <module>modules/jsp-2.0</module>
     <module>modules/jsp-2.1</module>
+    <module>modules/jsp-api-2.0</module>
+    <module>modules/jsp-2.0</module>
     <module>modules/management</module>
     <module>modules/start</module>
     <module>modules/maven-plugin-utils</module>
