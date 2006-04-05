@@ -493,7 +493,7 @@ public class HttpGenerator implements HttpTokens
                 while (iter.hasNext())
                 {
                     HttpFields.Field field = (HttpFields.Field) iter.next();
-
+                    
                     switch (field.getNameOrdinal())
                     {
                         case HttpHeaders.CONTENT_LENGTH_ORDINAL:
