@@ -34,7 +34,41 @@
         </excludes>
       </testResource>
     </testResources>
+
+
     <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+	    <id>standalone</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assembly</goal>
+            </goals>
+            <configuration>                   
+              <descriptor>assemble-standalone.xml</descriptor>
+              <archive>
+                <manifest>
+                  <mainClass>org.mortbay.jetty.Main</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </execution>
+
+          <execution>
+	    <id>util</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assembly</goal>
+            </goals>
+            <configuration>                   
+              <descriptor>assemble-util.xml</descriptor>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
@@ -48,11 +82,13 @@
               <tasks>
                 <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}.${project.packaging}"></copy>
                 <copy failonerror="false" file="target/${project.artifactId}-${project.version}-standalone.${project.packaging}" tofile="../../assemblies/${project.artifactId}-standalone.${project.packaging}"></copy>
+                <copy failonerror="false" file="target/${project.artifactId}-${project.version}-util.${project.packaging}" tofile="../../assemblies/${project.artifactId}-util.${project.packaging}"></copy>
               </tasks>
             </configuration>
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
@@ -61,6 +97,7 @@
       </plugin>
     </plugins>
   </build>
+
   <pluginRepositories>
     <pluginRepository>
       <id>snapshots</id>

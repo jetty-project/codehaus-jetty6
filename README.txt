@@ -72,15 +72,16 @@ the server configuration file
 
 ASSEMBLIES
 ==========
-The assemblies directory contains alternate bundlings of the jetty
-jars that can be run from the command line without additional dependencies:
+The assemblies directory contains alternate bundlings of the jetty classes:
 
-eg
+jetty-standalone.jar can be run from the command line without additional 
+dependencies:
 
   java -jar assemblies/jetty-standalone.jar
-
   java -jar assemblies/jetty-standalone.jar 8080 -webapp mywebapp.war
      
+jetty-util.jar  contains the org.mortbay.util and org.mortbay.log
+classes.
 
 
 BUILDING JETTY
