@@ -886,17 +886,6 @@ public class Response implements HttpServletResponse
 
 
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private static class NullOutput extends ServletOutputStream
-    {
-        public void write(int b) throws IOException
-        {
-        }
-    }
-
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -908,8 +897,7 @@ public class Response implements HttpServletResponse
         _connection.completeResponse();
     }
 
-
-    /* --------------- --------------------------------------------- */
+    /* ------------------------------------------------------------- */
     /**
      * @return the number of bytes actually written in response body
      */
@@ -920,5 +908,21 @@ public class Response implements HttpServletResponse
         return _connection.getGenerator().getContentWritten();
     }
 
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return "HTTP/1.1 "+_status+" "+ _reason +"\n"+
+        _connection.getResponseFields().toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class NullOutput extends ServletOutputStream
+    {
+        public void write(int b) throws IOException
+        {
+        }
+    }
 
 }
