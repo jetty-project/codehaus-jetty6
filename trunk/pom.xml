@@ -113,6 +113,7 @@
   </build>
   <modules>
     <module>modules/servlet-api-2.5</module>
+    <module>modules/util</module>
     <module>modules/jetty</module>
     <module>modules/jsp-api-2.1</module>
     <module>modules/jsp-2.1</module>

@@ -41,14 +41,7 @@ package org.mortbay.util.ajax;
  */
 public interface Continuation
 {
-    
-    /* ------------------------------------------------------------ */
-    /** Resume the request.
-     * Resume a suspended request.  The passed event will be returned in the getObject method.
-     * @param event Event to resume the request with.
-     */
-    public void resume();
-    
+
     /* ------------------------------------------------------------ */
     /** Suspend handling.
      * This method will suspend the request for the timeout or until resume is
@@ -57,6 +50,19 @@ public interface Continuation
      * @return True if resume called or false if timeout.
      */
     public boolean suspend(long timeout);
+    
+    /* ------------------------------------------------------------ */
+    /** Resume the request.
+     * Resume a suspended request.  The passed event will be returned in the getObject method.
+     */
+    public void resume();
+    
+
+    /* ------------------------------------------------------------ */
+    /** Reset the continuation.
+     * Cancel any pending status of the continuation.
+     */
+    public void reset();
     
     /* ------------------------------------------------------------ */
     /** Is this a newly created Continuation.
