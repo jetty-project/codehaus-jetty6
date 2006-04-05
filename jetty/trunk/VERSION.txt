@@ -1,4 +1,5 @@
 
+    + adding InvokerServlet
     + stop JDBCUserRealm coercing all credentials to String
     + Change tmp dir of plugin to work to be in line with jetty convention
     + Modify plugin to select JSP impl at runtime
