@@ -23,6 +23,7 @@ import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.start.Main;
 
 /**
  * Jetty6PluginServer
@@ -111,6 +112,7 @@ public class Jetty6PluginServer implements JettyPluginServer
      */
     public void start() throws Exception
     {
+        PluginLog.getLog().info("Starting jetty "+this.server.getClass().getPackage().getImplementationVersion()+" ...");
         this.server.start();
     }
 
@@ -118,7 +120,7 @@ public class Jetty6PluginServer implements JettyPluginServer
      * @see org.mortbay.jetty.plugin.util.Proxy#getProxiedObject()
      */
     public Object getProxiedObject()
-    {
+    { 
         return this.server;
     }
 

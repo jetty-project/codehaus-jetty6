@@ -124,6 +124,18 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      */
     private File tmpDirectory;
     
+    
+    
+    /**
+     * A webdefault.xml file to use instead
+     * of the default for the webapp. Optional.
+     * 
+     * @parameter 
+     */
+    private File webDefaultXml;
+    
+    
+    
     /**
      * The interval in seconds to scan the webapp for changes 
      * and restart the context if necessary. Disabled by default.
@@ -255,6 +267,12 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         return this.tmpDirectory;
     }
 
+    
+    public File getWebDefaultXml()
+    {
+        return this.webDefaultXml;
+    }
+    
     /**
      * @return Returns the contextPath.
      */
@@ -414,9 +432,13 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         
         JettyPluginWebApplication webapp = getWebApplication();
         webapp.setTempDirectory(getTmpDirectory());
+        webapp.setWebDefaultXmlFile(getWebDefaultXml());
         String contextPath = getContextPath();
         webapp.setContextPath((contextPath.startsWith("/") ? contextPath : "/"+ contextPath));
         getLog().info("Context path = " + webapp.getContextPath());
+        getLog().info("Tmp directory = "+(getTmpDirectory()==null?" jetty default":getTmpDirectory().toString()));
+        getLog().info("Web defaults = "+(getWebDefaultXml()==null?" jetty default":getWebDefaultXml().toString()));
+        
     }
     
     /**

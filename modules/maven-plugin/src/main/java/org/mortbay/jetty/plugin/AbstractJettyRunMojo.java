@@ -165,7 +165,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                         + (getWebAppSourceDirectory() == null ? "null" : getWebAppSourceDirectory().getCanonicalPath())
                         + " does not exist");
             else
-                getLog().info( "Webapp source directory is: "
+                getLog().info( "Webapp source directory = "
                         + getWebAppSourceDirectory().getCanonicalPath());
         }
         catch (IOException e)
@@ -187,7 +187,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                 throw new MojoExecutionException( "web.xml does not exist at location "
                         + webXmlFile.getCanonicalPath());
             else
-                getLog().info( "web.xml file located at: "
+                getLog().info( "web.xml file = "
                         + webXmlFile.getCanonicalPath());
         }
         catch (IOException e)
@@ -205,7 +205,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                 if (!getJettyEnvXmlFile().exists())
                     throw new MojoExecutionException("jetty-env.xml file does not exist at location "+jettyEnvXml);
                 else
-                    getLog().info(" jetty-env.xml file located at: "+getJettyEnvXmlFile().getCanonicalPath());
+                    getLog().info(" jetty-env.xml = "+getJettyEnvXmlFile().getCanonicalPath());
             }
             catch (IOException e)
             {
@@ -223,7 +223,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                 if (!getClassesDirectory().exists())
                     getLog().info( "Classes directory "+ getClassesDirectory().getCanonicalPath()+ " does not exist");
                 else
-                    getLog().info("Classes located at: " + getClassesDirectory().getCanonicalPath());
+                    getLog().info("Classes = " + getClassesDirectory().getCanonicalPath());
             }
             else
                 getLog().info("Classes directory not set");         
@@ -241,12 +241,8 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                 if (!getTmpDirectory().mkdirs())
                     throw new MojoExecutionException("Unable to create tmp directory at " + getTmpDirectory());
             }
-            getLog().info("tmp dir for webapp will be "+ getTmpDirectory().toString());
+            
         }
-        else
-            getLog().info("tmp dir will be Jetty default");
-        
-      
     }
 
    

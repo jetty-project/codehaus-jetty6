@@ -146,7 +146,7 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
         if (getJettyXmlFileName() == null)
             return;
         
-        getLog().info( "Configuring Jetty from xml configuration file: " + getJettyXmlFileName() );
+        getLog().info( "Configuring Jetty from xml configuration file = " + getJettyXmlFileName() );
         File f = new File(getJettyXmlFileName());
         XmlConfiguration xmlConfiguration = new XmlConfiguration(f.toURL());
         xmlConfiguration.configure(getServer().getProxiedObject());   

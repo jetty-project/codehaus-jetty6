@@ -70,6 +70,15 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
         tmpDir.deleteOnExit();
     }
     
+    /**
+     * @see org.mortbay.jetty.plugin.util.JettyPluginWebApplication#setWebDefaultXmlFile(java.io.File)
+     */
+    public void setWebDefaultXmlFile(File webDefaultXml) 
+    throws Exception
+    {
+        context.setDefaultsDescriptor(webDefaultXml==null?null:webDefaultXml.getCanonicalPath());
+    }
+    
     
     public void configure ()
     {        
@@ -136,5 +145,6 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     {
         return this.context;
     }
-    
+
+   
 }
