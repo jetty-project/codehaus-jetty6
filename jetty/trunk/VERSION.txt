@@ -1,4 +1,5 @@
 
+    + added configurability for webdefault.xml in maven plugin
     + adding InvokerServlet
     + added ProxyServlet
     + stop JDBCUserRealm coercing all credentials to String

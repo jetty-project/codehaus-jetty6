@@ -62,7 +62,7 @@ public class Jetty6MavenConfiguration extends Configuration
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
         
-        PluginLog.getLog().info("Classpath: "+((WebAppClassLoader)getWebAppContext().getClassLoader()).getUrlClassPath());
+        PluginLog.getLog().info("Classpath = "+((WebAppClassLoader)getWebAppContext().getClassLoader()).getUrlClassPath());
     }
 
     
