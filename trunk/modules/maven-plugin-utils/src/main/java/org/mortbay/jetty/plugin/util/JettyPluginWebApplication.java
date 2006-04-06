@@ -33,6 +33,7 @@ public interface JettyPluginWebApplication extends Proxy {
     public String getContextPath ();
     public void setWebAppSrcDir (File webAppDir) throws Exception;
     public void setTempDirectory (File tmpDir);
+    public void setWebDefaultXmlFile (File webDefaultXml) throws Exception;
     public void setClassPathFiles (List classpathFiles);
     public void setWebXmlFile (File webxml);
     public void setJettyEnvXmlFile (File jettyEnvXml);

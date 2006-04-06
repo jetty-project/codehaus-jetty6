@@ -43,6 +43,7 @@ Configuration Common to All Goals
 
   * <<tmpDir>> Optional. The temporary directory to use for the webapp. This is set to <<<${basedir}/target>>> by default but can be changed here.
 
+  * <<webDefaultXml>> Optional. A webdefault.xml file to use instead of the supplied jetty default for the webapp.
 
   * <<userRealms>> Optional. A list of <<<UserRealm>>> objects. Note that there is no default realm. If you use a realm in your web.xml you can specify a corresponding realm here.
 
@@ -68,6 +69,7 @@ Configuration Common to All Goals
           <jettyConfig>/my/special/jetty.xml</jettyConfig>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <tmpDir>target/not/necessary</tmpDir>
+          <webDefaultXml>src/main/resources/webdefault.xml</webDefaultXml>
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
               <name>Test Realm</name>
