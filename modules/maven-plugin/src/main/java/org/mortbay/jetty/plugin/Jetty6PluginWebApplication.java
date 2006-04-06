@@ -71,12 +71,17 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     }
     
     /**
+     * Set the location of the defaults descriptor to use.
+     * NOTE: if the user hasn't supplied one, then don't set
+     * a null value as we want jetty to use its own default.
+     * 
      * @see org.mortbay.jetty.plugin.util.JettyPluginWebApplication#setWebDefaultXmlFile(java.io.File)
      */
     public void setWebDefaultXmlFile(File webDefaultXml) 
     throws Exception
     {
-        context.setDefaultsDescriptor(webDefaultXml==null?null:webDefaultXml.getCanonicalPath());
+        if (webDefaultXml != null)
+            context.setDefaultsDescriptor(webDefaultXml.getCanonicalPath());
     }
     
     
