@@ -22,6 +22,7 @@ Introduction
   
   If, for whatever reason, you cannot run on an unassembled webapp, the plugin supports the <<<jetty6:run-war>>> and <<<jetty6:run-exploded>>> goals which are discussed below.
 
+  For more information, see the {{{http://docs.codehaus.org/display/JETTY/Jetty+User+Guides}Jetty User Guides}} and the {{{http://docs.codehaus.org/display/JETTY/FAQ}FAQ}}.
 
 Configuration Common to All Goals
 
