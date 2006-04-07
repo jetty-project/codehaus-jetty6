@@ -20,8 +20,11 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -92,7 +95,18 @@ public class Main
     {
         try
         {
-            new Main().start(args);
+            if (args[0].equalsIgnoreCase("--help"))
+            {
+                System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop] [config ...]");
+                System.exit(1);
+            }
+            else if(args[0].equalsIgnoreCase("--stop")) {
+        		new Main().stop();
+        	}
+        	else 
+            {
+                new Main().start(args);
+        	}
         }
         catch(Exception e)
         {
@@ -401,11 +415,6 @@ public class Main
         {
             if(args[i]==null)
                 continue;
-            if(args[i].startsWith("-"))
-            {
-                System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-Dmain.class=org.MyMain] -jar start.jar [--help] [config ...]");
-                System.exit(1);
-            }
             else
                 al.add(args[i]);
         }
@@ -486,4 +495,39 @@ public class Main
             e.printStackTrace();
         }
     }
+    
+
+        
+        /**
+         * Stop a running jetty instance.
+         */
+        public void stop()
+        {  
+            int _port = Integer.getInteger("STOP.PORT", Monitor.DEFAULT_STOP_PORT).intValue();
+            String _key = System.getProperty("STOP.KEY", Monitor.DEFAULT_STOP_KEY);
+               
+            try
+            {
+                if (_port<=0)
+                    System.err.println("STOP.PORT system property must be specified");
+                if (_key==null)
+                {
+                    _key="";
+                    System.err.println("Using empty key");
+                }
+    
+                Socket s=new Socket(InetAddress.getByName("127.0.0.1"),_port);
+                OutputStream out=s.getOutputStream();
+                out.write((_key+"\r\nstop\r\n").getBytes());
+                out.flush();
+                s.shutdownOutput();
+                s.close();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+    
 }
