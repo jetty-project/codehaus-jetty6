@@ -28,8 +28,10 @@ import java.net.Socket;
  */
 public class Monitor extends Thread
 {
-    private int _port = Integer.getInteger("STOP.PORT",8079).intValue();
-    private String _key = System.getProperty("STOP.KEY","mortbay");
+    public static final int DEFAULT_STOP_PORT = 8079;
+    public static final String DEFAULT_STOP_KEY = "mortbay";
+    private int _port = Integer.getInteger("STOP.PORT", DEFAULT_STOP_PORT).intValue();
+    private String _key = System.getProperty("STOP.KEY", DEFAULT_STOP_KEY);
 
     ServerSocket _socket;
     
