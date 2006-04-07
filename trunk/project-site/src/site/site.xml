@@ -35,7 +35,7 @@
       <item name="Downloading" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#download"/>
       <item name="Installation" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#install"/>
       <item name="Running" href="http://docs.codehaus.org/display/JETTY/Running"/>
-      <item name="User Guides" href="http://docs.codehaus.org/display/JETTY/User+Guides"/>
+      <item name="User Guides" href="http://docs.codehaus.org/display/JETTY/Jetty+User+Guides"/>
     </menu>
     <menu name="Tools">
       <item name="Maven2 Jetty Plugin" href="http://jetty.mortbay.org/jetty6/maven-plugin/index.html"/>
