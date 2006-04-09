@@ -95,18 +95,18 @@ public class Main
     {
         try
         {
-            if (args[0].equalsIgnoreCase("--help"))
+            if (args.length>0 && args[0].equalsIgnoreCase("--help"))
             {
                 System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop] [config ...]");
                 System.exit(1);
             }
-            else if(args[0].equalsIgnoreCase("--stop")) {
-        		new Main().stop();
-        	}
-        	else 
+            else if(args.length>0 && args[0].equalsIgnoreCase("--stop")) {
+                new Main().stop();
+            }
+            else 
             {
                 new Main().start(args);
-        	}
+            }
         }
         catch(Exception e)
         {
