@@ -383,6 +383,10 @@ public class WebAppContext extends ContextHandler
             for (int i=_configurations.length;i-->0;)
                 _configurations[i].deconfigureWebApp();
             _configurations=null;
+            
+            // restore security handler
+            _securityHandler.setHandler(_servletHandler);
+            _sessionHandler.setHandler(_securityHandler);
         }
         finally
         {
@@ -961,7 +965,6 @@ public class WebAppContext extends ContextHandler
         {
             _sessionHandler.setHandler(_servletHandler);
             _securityHandler.setHandler(null);
-            _securityHandler=null;
         }
         
         super.startContext();
