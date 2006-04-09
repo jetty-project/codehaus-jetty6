@@ -221,6 +221,11 @@ public class Scanner extends Thread
 	{
 	    try
 	    {
+            if (!f.exists())
+            {
+                return;
+            }
+            
 	        if (f.isFile())
 	        {
 	            String name = f.getCanonicalPath();
