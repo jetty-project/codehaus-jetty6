@@ -903,6 +903,7 @@ public class SelectChannelConnector extends AbstractConnector
             synchronized (this)
             {
                 _resumed = false;
+                _pending = false;
                 if (isExpired())
                     return;
                 this.cancel();
