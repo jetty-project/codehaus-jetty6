@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Server Project</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta14</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -62,15 +62,20 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/trunk</developerConnection>
-    <url>http://svn.jetty.codehaus.org/jetty/</url>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty_6_0_0beta14</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags/jetty_6_0_0beta14</developerConnection>
+    <url>http://svn.jetty.codehaus.org/jetty</url>
   </scm>
   <organization>
     <name>Mort Bay Consulting</name>
     <url>http://www.mortbay.com</url>
   </organization>
   <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
+    <outputDirectory>target/classes</outputDirectory>
+    <testOutputDirectory>target/test-classes</testOutputDirectory>
     <extensions>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
@@ -79,14 +84,25 @@
       </extension>
     </extensions>
     <defaultGoal>install</defaultGoal>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+    <directory>target</directory>
+    <finalName>${artifactId}-${version}</finalName>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <source>1.4</source>
-	  <target>1.4</target>
-	</configuration>
+          <target>1.4</target>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
@@ -94,21 +110,21 @@
           <tagBase>svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/tags</tagBase>
         </configuration>
       </plugin>
-       <plugin>
-         <artifactId>maven-one-plugin</artifactId>
-         <version>1.0</version>
-         <executions>
-            <execution>
-              <goals>
-                <goal>install-maven-one-repository</goal>
-                <goal>deploy-maven-one-repository</goal>
-              </goals>
-              <configuration>
-                <remoteRepositoryUrl>scpexe://jetty.mortbay.org/home/ftp/pub/maven</remoteRepositoryUrl>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
+      <plugin>
+        <artifactId>maven-one-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>install-maven-one-repository</goal>
+              <goal>deploy-maven-one-repository</goal>
+            </goals>
+            <configuration>
+              <remoteRepositoryUrl>scpexe://jetty.mortbay.org/home/ftp/pub/maven</remoteRepositoryUrl>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <modules>
@@ -128,7 +144,6 @@
     <module>modules/plus</module>
     <module>examples/test-webapp</module>
   </modules>
-
   <repositories>
     <repository>
       <id>codehaus</id>
@@ -142,7 +157,22 @@
       <url>http://repo1.maven.org/maven2</url>
     </repository>
   </repositories>
-
+  <pluginRepositories>
+    <pluginRepository>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>central</id>
+      <name>Maven Plugin Repository</name>
+      <url>http://repo1.maven.org/maven2</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <reporting>
+    <outputDirectory>target/site</outputDirectory>
+  </reporting>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -220,7 +250,6 @@
         <artifactId>test-webapp</artifactId>
         <version>${pom.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-plugin-tools-api</artifactId>
@@ -283,7 +312,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <distributionManagement>
     <repository>
       <id>MortBayRelease</id>
