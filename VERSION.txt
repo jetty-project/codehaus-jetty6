@@ -1,4 +1,5 @@
 
+    + ignore dirs and files that don't exist in plugin scanner
     + added support for stopping jetty using "java -jar start.jar --stop"
     + added configurability for webdefault.xml in maven plugin
     + adding InvokerServlet
