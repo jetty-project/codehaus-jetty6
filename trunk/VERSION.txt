@@ -1,4 +1,8 @@
 
+    + removed SelectBlockingChannelConnector (unmaintained)
+    + Improved HttpException
+    + Moved more resources to resources 
+
 jetty-6.0.0beta14 - 9/4/2006
     + ignore dirs and files that don't exist in plugin scanner
     + added support for stopping jetty using "java -jar start.jar --stop"

@@ -31,6 +31,7 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.io.View;
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
@@ -898,7 +899,9 @@ public class HttpGenerator implements HttpTokens
             setResponse(code, reason);
             _close = close;
             completeHeader(null, false);
-            if (content != null) addContent(new ByteArrayBuffer(content), HttpGenerator.LAST);
+            // TODO something better than this!
+            if (content != null) 
+                addContent(new View(new ByteArrayBuffer(content)), HttpGenerator.LAST);
             complete();
         }
     }

@@ -59,7 +59,7 @@ public class ChannelEndPoint implements EndPoint
     {
         if (_channel instanceof SelectableChannel)
             return ((SelectableChannel)_channel).isBlocking();
-        return false;
+        return true;
     }
     
     public void blockReadable(long millisecs)
