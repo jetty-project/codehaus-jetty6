@@ -28,6 +28,14 @@ public class HttpException extends IOException
     }
 
     /* ------------------------------------------------------------ */
+    HttpException(int status,String reason, Throwable rootCause)
+    {
+        _status=status;
+        _reason=reason;
+        initCause(rootCause);
+    }
+
+    /* ------------------------------------------------------------ */
     /**
      * @return Returns the reason.
      */
@@ -61,6 +69,11 @@ public class HttpException extends IOException
     public void setStatus(int status)
     {
         _status = status;
+    }
+    
+    public String toString()
+    {
+        return ("HttpException("+_status+","+_reason+","+super.getCause()+")");
     }
     
     

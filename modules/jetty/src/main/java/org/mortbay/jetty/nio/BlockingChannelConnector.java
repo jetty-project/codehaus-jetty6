@@ -70,7 +70,6 @@ public class BlockingChannelConnector extends AbstractConnector
         // Bind the server socket to the local host and port
         InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
         _acceptChannel.socket().bind(addr,getAcceptQueueSize());
-        
     }
 
     /* ------------------------------------------------------------ */
@@ -97,6 +96,8 @@ public class BlockingChannelConnector extends AbstractConnector
     /* ------------------------------------------------------------------------------- */
     protected Buffer newBuffer(int size)
     {
+        if (size==getHeaderBufferSize())
+            return new NIOBuffer(size, NIOBuffer.INDIRECT);
         return new NIOBuffer(size,NIOBuffer.DIRECT);
     }
 

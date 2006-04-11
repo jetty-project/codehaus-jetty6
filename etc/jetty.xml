@@ -34,12 +34,12 @@
         </Item>
 
         <!-- Use this connector for few very active connections.
+        -->
         <Item>
           <New class="org.mortbay.jetty.nio.BlockingChannelConnector">
-            <Set name="port">8080</Set>
+            <Set name="port">8082</Set>
           </New>
         </Item>
-        -->
 
         <!-- Use this connector for many frequently idle connections
              and for threadless continuations.
