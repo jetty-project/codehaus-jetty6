@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
@@ -29,7 +28,6 @@ import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.RetryRequest;
 import org.mortbay.log.Log;
 
 
@@ -112,7 +110,15 @@ public class SocketConnector extends AbstractConnector
         super.customize(endpoint, request);
         configure((Socket)endpoint.getConnection());
     }
-    
+
+    /* ------------------------------------------------------------------------------- */
+    public int getLocalPort()
+    {
+        if (_serverSocket==null || _serverSocket.isClosed())
+            return -1;
+        return _serverSocket.getLocalPort();
+    }
+
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
@@ -175,12 +181,4 @@ public class SocketConnector extends AbstractConnector
             }
         }
     }
-
-    public int getLocalPort()
-    {
-        if (_serverSocket==null || _serverSocket.isClosed())
-            return -1;
-        return _serverSocket.getLocalPort();
-    }
-
 }

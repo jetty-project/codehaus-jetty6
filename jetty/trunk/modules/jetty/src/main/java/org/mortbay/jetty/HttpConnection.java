@@ -300,7 +300,7 @@ public class HttpConnection
             catch (HttpException e)
             {
                 Log.debug(e);
-                _generator.sendError(e.getStatus(), e.getReason(), null, true);
+                _generator.sendError(e.getStatus(), e.getReason(), e.toString(), true);
                 throw e;
             }
             finally
@@ -489,21 +489,16 @@ public class HttpConnection
             {
                 _uri.parse(uri.array(), uri.getIndex(), uri.length());
                 _request.setUri(_uri);
-
+                
                 _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE.getOrdinal(version);
                 if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
                 _request.setProtocol(version.toString());
 
-                _head = method == HttpMethods.HEAD_BUFFER; // depends on method being decahced.
+                _head = method == HttpMethods.HEAD_BUFFER; // depends on method being decached.
             }
             catch (Exception e)
             {
-                _parser.reset(true); 
-                // TODO prebuilt response
-                _generator.setResponse(400, null);
-                _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
-                _generator.complete();
-                return;
+                throw new HttpException(400,null,e);
             }
         }
 
