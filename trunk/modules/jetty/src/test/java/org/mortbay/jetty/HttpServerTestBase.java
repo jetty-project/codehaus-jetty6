@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 /**
  * HttpServer Tester.
  */
-public class HttpServerTest
+public class HttpServerTestBase
     extends TestCase
 {
 
@@ -110,13 +110,13 @@ public class HttpServerTest
     private static final long   PAUSE = 10L;
     private static final String HOST  = "localhost";
 
-
+    private Connector _connector;
     private int  port  = 0;
     
     protected void tearDown() throws Exception
     {
         super.tearDown();
-        Thread.sleep(1000);
+        Thread.sleep(500);
     }
     
     //~ Methods ----------------------------------------------------------------
@@ -427,6 +427,11 @@ public class HttpServerTest
         }
     }
 
+    protected HttpServerTestBase(Connector connector)
+    {
+        _connector=connector;
+    }
+    
     /**
      * Create the server.
      *
@@ -440,16 +445,16 @@ public class HttpServerTest
                                throws Exception
     {
         Server                 server    = new Server();
-        SelectChannelConnector connector = new SelectChannelConnector();
         
-        connector.setPort(0);
-        server.setConnectors(new Connector[] {connector});
+        _connector.setPort(0);
+        server.setConnectors(new Connector[] {_connector});
         server.setHandler(handler);
         server.start();
-        port=connector.getLocalPort();
+        port=_connector.getLocalPort();
         return server;
     }
 
+    
     private void writeFragments(byte[] bytes, int[] points,
                                 StringBuffer message, OutputStream os)
                          throws IOException, InterruptedException
@@ -524,4 +529,6 @@ public class HttpServerTest
             return true;
         }
     }
+    
+    
 }
