@@ -62,10 +62,22 @@ public class Dump extends HttpServlet
             response.flushBuffer();
             return;
         }
-        
+
+        if (request.getParameter("sleep")!=null)
+        {
+            try
+            {
+                Thread.sleep(Long.parseLong(request.getParameter("sleep")));
+            }
+            catch (Exception e)
+            {
+                throw new ServletException(e);
+            }
+        }
+            
         request.setAttribute("Dump", this);
         getServletContext().setAttribute("Dump",this);
-        getServletContext().log("dump "+request.getRequestURI());
+        // getServletContext().log("dump "+request.getRequestURI());
 
         // Force a content length response
         String length= request.getParameter("length");
