@@ -25,6 +25,7 @@
           <include>**/*.properties</include>
           <include>**/*.dtd</include>
           <include>**/*.xsd</include>
+          <include>**/*.xml</include>
         </includes>
       </resource>
     </resources>

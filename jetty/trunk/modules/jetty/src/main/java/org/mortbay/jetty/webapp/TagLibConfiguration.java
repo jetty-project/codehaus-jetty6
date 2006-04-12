@@ -28,6 +28,7 @@ import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.Loader;
 import org.mortbay.xml.XmlParser;
 
 /* ------------------------------------------------------------ */
@@ -173,10 +174,12 @@ public class TagLibConfiguration implements Configuration
         
         // Create a TLD parser
         XmlParser parser = new XmlParser(false);
-        
-        parser.redirectEntity("web-jsptaglibrary_1_1.dtd",WebAppContext.class.getResource("/javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd"));
-        parser.redirectEntity("web-jsptaglibrary_1_2.dtd",WebAppContext.class.getResource("/javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd"));
-        parser.redirectEntity("web-jsptaglibrary_2_0.xsd",WebAppContext.class.getResource("/javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd"));
+        parser.redirectEntity("web-jsptaglib_1_1.dtd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd", false));
+        parser.redirectEntity("web-jsptaglib_1_2.dtd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd", false));
+        parser.redirectEntity("web-jsptaglib_2_0.xsd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd", false));
+        parser.redirectEntity("web-jsptaglibrary_1_1.dtd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd", false));
+        parser.redirectEntity("web-jsptaglibrary_1_2.dtd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd", false));
+        parser.redirectEntity("web-jsptaglibrary_2_0.xsd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd", false));
         parser.setXpath("/taglib/listener/listener-class");
         // Parse all the discovered TLDs
         Iterator iter = tlds.iterator();
