@@ -471,6 +471,7 @@ public class SelectChannelConnector extends AbstractConnector
     {
         SelectSet _selectSet;
         boolean _dispatched = false;
+        boolean _pending = false; // continuation in progress
         boolean _writable = true; // TODO - get rid of this bad side effect
         SelectionKey _key;
         HttpConnection _connection;
@@ -741,9 +742,15 @@ public class SelectChannelConnector extends AbstractConnector
                         // We have a continuation
                         Log.debug("continuation {}", continuation);
                         long timeout = continuation.getTimeout();
-                        continuation.setEndPoint(this);
-                        _selectSet.scheduleTimeout(continuation,timeout);
-                        _selectSet.wakeup();
+                        _pending=true;
+                        
+                        if (continuation.isPending() && (continuation.isExpired() || continuation._resumed))
+                            redispatch();
+                        else
+                        {
+                            _selectSet.scheduleTimeout(continuation,timeout);
+                            _selectSet.wakeup();
+                        }
                     }
                     else 
                         undispatch();
@@ -751,6 +758,32 @@ public class SelectChannelConnector extends AbstractConnector
             }
         }
         
+
+        /* ------------------------------------------------------------ */
+        private void redispatch()
+        {
+            synchronized (this)
+            {
+                if (_pending)
+                {
+                    _pending=false;
+                    
+                    boolean dispatch_done = false;
+                    try
+                    {
+                        dispatch_done = getThreadPool().dispatch(this);
+                    }
+                    finally
+                    {
+                        if (!dispatch_done)
+                        {
+                            Log.warn("redispatch failed");
+                            undispatch();
+                        }
+                    }
+                }
+            }
+        }
 
 
         /* ------------------------------------------------------------ */
@@ -822,23 +855,14 @@ public class SelectChannelConnector extends AbstractConnector
     private class RetryContinuation extends Timeout.Task implements Continuation
     {
         Object _object;
-        HttpEndPoint _endPoint;
+        HttpEndPoint _endPoint=(HttpEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
         long _timeout;
         boolean _new = true;
         boolean _pending = false;
         boolean _resumed = false;
         RetryRequest _retry;
 
-        void setEndPoint(HttpEndPoint ep)
-        {
-            synchronized (this)
-            {
-                _endPoint = ep;
-                if (_resumed && _endPoint!=null)
-                    redispatch();
-            }
-        }
-
+        
         long getTimeout()
         {
             return _timeout;
@@ -856,16 +880,16 @@ public class SelectChannelConnector extends AbstractConnector
 
         public void expire()
         {
-            synchronized (this)
+            synchronized (_endPoint)
             {
-                if (_pending)
-                    redispatch();
+                if (_pending && !_resumed)
+                    _endPoint.redispatch();
             }
         }
 
         public boolean suspend(long timeout)
         {
-            synchronized (this)
+            synchronized (_endPoint)
             {
                 boolean resumed=_resumed;
                 _resumed=false;
@@ -886,47 +910,26 @@ public class SelectChannelConnector extends AbstractConnector
         
         public void resume()
         {
-            synchronized (this)
+            synchronized (_endPoint)
             {
-                _resumed = true;
-                if (isExpired())
-                    return;
-                
-                this.cancel();
-                if (_endPoint != null)
-                    redispatch();
+                if (_pending && !isExpired())
+                {
+                    _resumed = true;
+                    this.cancel();
+                    _endPoint.redispatch();
+                }
             }
         }
         
         public void reset()
         {
-            synchronized (this)
+            synchronized (_endPoint)
             {
                 _resumed = false;
                 _pending = false;
-                if (isExpired())
-                    return;
                 this.cancel();
             }
         }
-
-        private void redispatch()
-        {
-            boolean dispatch_done = false;
-            try
-            {
-                dispatch_done = getThreadPool().dispatch(_endPoint);
-            }
-            finally
-            {
-                if (!dispatch_done)
-                {
-                    Log.warn("redispatch failed");
-                    _endPoint.undispatch();
-                }
-            }
-        }
-
         public Object getObject()
         {
             return _object;

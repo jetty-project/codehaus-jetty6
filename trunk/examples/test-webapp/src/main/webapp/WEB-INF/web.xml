@@ -32,6 +32,16 @@
     <filter-name>Chat</filter-name>
     <url-pattern>/chat/*</url-pattern>
   </filter-mapping>
+  
+  <filter>
+    <filter-name>Throttle</filter-name>
+    <filter-class>org.mortbay.servlet.ThrottlingFilter</filter-class>
+  </filter>
+  
+  <filter-mapping>
+    <filter-name>Throttle</filter-name>
+    <url-pattern>/dump/throttle/*</url-pattern>
+  </filter-mapping>
 
   <servlet>
     <servlet-name>Hello</servlet-name>
