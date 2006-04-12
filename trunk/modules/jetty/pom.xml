@@ -14,7 +14,7 @@
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
-        <directory>src/main/java</directory>
+        <directory>src/main/resources</directory>
         <includes>
           <include>org/mortbay/**/*.properties</include>
           <include>org/mortbay/**/*.dtd</include>
