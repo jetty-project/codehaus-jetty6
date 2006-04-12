@@ -125,6 +125,9 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     void recycle()
     {
+        if (_context!=null)
+            throw new IllegalStateException("Request in context!");
+        
         if(_attributes!=null)
             _attributes.clearAttributes();
         _authType=null;
