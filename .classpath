@@ -44,5 +44,6 @@
 	<classpathentry kind="lib" path="modules/management/src/main/resources"/>
 	<classpathentry kind="lib" path="modules/management/src/test/resources"/>
 	<classpathentry kind="lib" path="modules/servlet-api-2.5/src/main/resources"/>
+	<classpathentry kind="lib" path="resources"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
