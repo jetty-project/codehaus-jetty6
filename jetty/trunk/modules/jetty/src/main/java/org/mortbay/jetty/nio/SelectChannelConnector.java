@@ -902,8 +902,8 @@ public class SelectChannelConnector extends AbstractConnector
                      _retry = new RetryRequest();
                     throw _retry;
                 }
-                _pending=false;
                 
+                reset();
                 return resumed;
             }
         } 
@@ -930,6 +930,7 @@ public class SelectChannelConnector extends AbstractConnector
                 this.cancel();
             }
         }
+        
         public Object getObject()
         {
             return _object;

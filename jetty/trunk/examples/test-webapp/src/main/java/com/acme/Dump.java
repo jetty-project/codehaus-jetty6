@@ -33,6 +33,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.util.ajax.Continuation;
+import org.mortbay.util.ajax.ContinuationSupport;
+
 
 
 /* ------------------------------------------------------------ */
@@ -73,6 +76,12 @@ public class Dump extends HttpServlet
             {
                 throw new ServletException(e);
             }
+        }
+        
+        if (request.getParameter("continue")!=null)
+        {
+            Continuation continuation = ContinuationSupport.getContinuation(request, null);
+            continuation.suspend(Long.parseLong(request.getParameter("continue")));
         }
             
         request.setAttribute("Dump", this);
