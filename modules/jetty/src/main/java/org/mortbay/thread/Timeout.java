@@ -189,7 +189,6 @@ public class Timeout
         long _timestamp=0;
         boolean _expired=false;
 
-
         public Task()
         {
             _next=_prev=this;
@@ -201,6 +200,7 @@ public class Timeout
             _prev._next=_next;
             _next=_prev=this;
             _timeout=null;
+            _expired=false;
         }
 
         public void setNext(Task task)
