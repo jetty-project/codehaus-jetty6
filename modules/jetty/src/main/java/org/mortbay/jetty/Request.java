@@ -606,7 +606,7 @@ public class Request implements HttpServletRequest
         if (!_paramsExtracted) extractParameters();
         List vals = _parameters.getValues(name);
         if (vals==null)
-            return new String[0];
+            return null;
         return (String[])vals.toArray(new String[vals.size()]);
     }
 
