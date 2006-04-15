@@ -387,6 +387,10 @@ public class WebAppContext extends ContextHandler
             // restore security handler
             _securityHandler.setHandler(_servletHandler);
             _sessionHandler.setHandler(_securityHandler);
+            
+            // delete temp directory
+            if (_tmpDir!=null && !"work".equals(_tmpDir.getName()))
+                IO.delete(_tmpDir);
         }
         finally
         {
@@ -514,13 +518,17 @@ public class WebAppContext extends ContextHandler
             }
         }
 
-        // No tempdir so look for a WEB-INF/work directory to use as tempDir base
+        // No tempdir so look for a work directory to use as tempDir base
         File work=null;
         try
         {
             work=new File(System.getProperty("jetty.home"),"work");
             if (!work.exists() || !work.canWrite() || !work.isDirectory())
-                work=null;
+            {
+                work=new File(getWebInf().getFile(),"work");
+                if (!work.exists() || !work.canWrite() || !work.isDirectory())
+                    work=null;
+            }
         }
         catch(Exception e)
         {
@@ -563,7 +571,8 @@ public class WebAppContext extends ContextHandler
 
             if (!_tmpDir.exists())
                 _tmpDir.mkdir();
-            if (work==null)
+            
+            if (!"work".equals(_tmpDir.getName()))
                 _tmpDir.deleteOnExit();
             if(Log.isDebugEnabled())Log.debug("Created temp dir "+_tmpDir+" for "+this);
         }
