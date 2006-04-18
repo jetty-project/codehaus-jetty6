@@ -131,7 +131,7 @@ public class Container
             Log.debug("Container "+parent+" + "+child+" as "+relationship);
         if (_listeners!=null)
         {
-            Event event=new Event(parent,child,relationship);
+            Relationship event=new Relationship(parent,child,relationship);
             for (int i=0; i<LazyList.size(_listeners); i++)
                 ((Listener)LazyList.get(_listeners, i)).add(event);
         }
@@ -149,7 +149,7 @@ public class Container
             Log.debug("Container "+parent+" - "+child+" as "+relationship);
         if (_listeners!=null)
         {
-            Event event=new Event(parent,child,relationship);
+            Relationship event=new Relationship(parent,child,relationship);
             for (int i=0; i<LazyList.size(_listeners); i++)
                 ((Listener)LazyList.get(_listeners, i)).remove(event);
         }
@@ -160,13 +160,13 @@ public class Container
      * @see Listener
      *
      */
-    public static class Event
+    public static class Relationship
     {
         private Object _parent;
         private Object _child;
         private String _relationship;
         
-        private Event(Object parent,Object child, String relationship)
+        private Relationship(Object parent,Object child, String relationship)
         {
             _parent=parent;
             _child=child;
@@ -192,6 +192,7 @@ public class Container
         {
             return _parent+"---"+_relationship+"-->"+_child;
         }
+        
     }
     
     /* ------------------------------------------------------------ */
@@ -200,7 +201,7 @@ public class Container
      */
     public interface Listener extends EventListener
     {
-        public void add(Container.Event event);
-        public void remove(Container.Event event);
+        public void add(Container.Relationship event);
+        public void remove(Container.Relationship event);
     }
 }

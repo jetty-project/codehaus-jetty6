@@ -79,6 +79,7 @@
         <!-- ======================================================= -->
         <!-- Configure a test web application with web.xml           -->
         <!-- ======================================================= -->
+	<!--
         <Item>
           <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppContext">
             <Set name="contextPath">/test</Set>
@@ -89,11 +90,13 @@
             </Get>
           </New>
         </Item>
+	-->
 
 
         <!-- ======================================================= -->
         <!-- Configure a context directly - no XML parser required   -->
         <!-- ======================================================= -->
+	<!--
         <Item>
           <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
             <Set name="contextPath">/javadoc</Set>
@@ -125,6 +128,7 @@
             </Set>
           </New>
         </Item>
+	-->
 
       </Array>
     </Set>
