@@ -60,6 +60,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private int _confidentialPort=0;
     private int _acceptQueueSize=0;
     private int _acceptors=1;
+    private boolean _useDNS;
     
     protected long _maxIdleTime=30000; 
     protected long _soLingerTime=1000; 
@@ -535,6 +536,19 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     protected abstract void accept(int acceptorID) throws IOException, InterruptedException;
 
+
+    /* ------------------------------------------------------------ */
+    public boolean getResolveNames()
+    {
+        return _useDNS;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setResolveNames(boolean resolve)
+    {
+        _useDNS=resolve;
+    }
+    
     /* ------------------------------------------------------------ */
     public String toString()
     {

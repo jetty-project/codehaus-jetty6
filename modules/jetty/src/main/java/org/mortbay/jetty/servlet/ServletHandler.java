@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.Server;
@@ -287,16 +288,13 @@ public class ServletHandler extends AbstractHandler
             return false;
 
         // Get the base requests
-        Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
-        String old_servlet_path=null;
-        String old_path_info=null;
-
+        final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+        final String old_servlet_name=base_request.getServletName();
+        final String old_servlet_path=base_request.getServletPath();
+        final String old_path_info=base_request.getPathInfo();
         
         try
         {
-            old_servlet_path=base_request.getServletPath();
-            old_path_info=base_request.getPathInfo();
-
             ServletHolder servlet_holder=null;
             FilterChain chain=null;
             
@@ -308,6 +306,7 @@ public class ServletHandler extends AbstractHandler
                 if (entry!=null)
                 {
                     servlet_holder=(ServletHolder)entry.getValue();
+                    base_request.setServerName(servlet_holder.getName());
                     if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
                     
                     String servlet_path_spec=(String)entry.getKey(); 
@@ -334,7 +333,10 @@ public class ServletHandler extends AbstractHandler
                 // look for a servlet by name!
                 servlet_holder=(ServletHolder)_servletNameMap.get(target);
                 if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+                {
+                    base_request.setServerName(servlet_holder.getName());
                     chain=getFilterChain(type, null,servlet_holder);
+                }
             }
 
             if (Log.isDebugEnabled()) 
@@ -342,7 +344,7 @@ public class ServletHandler extends AbstractHandler
                 Log.debug("chain="+chain);
                 Log.debug("servelet holder="+servlet_holder);
             }
-            
+           
             // Do the filter/handling thang
             if (chain!=null)
                 chain.doFilter(request, response);
@@ -371,14 +373,9 @@ public class ServletHandler extends AbstractHandler
                 th=cause;
             }
             
-            
-            /* TODO
             if (th instanceof HttpException)
                 throw (HttpException)th;
-            if (th instanceof EOFException)
-                throw (IOException)th;
-            else */ 
-            if (Log.isDebugEnabled() || !( th instanceof java.io.IOException))
+            else if (Log.isDebugEnabled() || !( th instanceof java.io.IOException))
             {
                 Log.warn(request.getRequestURI()+": ",th);
                 if(Log.isDebugEnabled())
@@ -423,6 +420,7 @@ public class ServletHandler extends AbstractHandler
         }
         finally
         {
+            base_request.setServletName(old_servlet_name);
             if (type!=INCLUDE)
             {
                 base_request.setServletPath(old_servlet_path);
@@ -708,7 +706,6 @@ public class ServletHandler extends AbstractHandler
         }
         
         
-        
         // update filter name map
         if (_filters==null)
         {
@@ -765,7 +762,6 @@ public class ServletHandler extends AbstractHandler
             Log.debug("servletNameMap="+_servletNameMap);
         }
         
-        
         try
         {
             if (isStarted())
@@ -786,14 +782,6 @@ public class ServletHandler extends AbstractHandler
         if(Log.isDebugEnabled())Log.debug("Not Found "+request.getRequestURI());
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
         
-    }
-    /* ------------------------------------------------------------ */
-    /**
-     * @param contextLog The contextLog to set.
-     */
-    public void setContextLog(Object contextLog)
-    {
-        // TODO
     }
     
     /* ------------------------------------------------------------ */

@@ -227,7 +227,7 @@ public class Response implements HttpServletResponse
             request.setAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE,new Integer(code));
             request.setAttribute(ServletHandler.__J_S_ERROR_MESSAGE, message);
             request.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI, request.getRequestURI());
-            request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,"UNKNOWN"); // TODO!!!
+            request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,request.getServletName()); 
 
             ErrorHandler error_handler = null;
             ContextHandler.Context context = request.getContext();

@@ -43,7 +43,7 @@ public class HttpConnection
     private Connector _connector;
     private EndPoint _endp;
     private Server _server;
-    private boolean _expectingContinues;
+    private boolean _expectingContinues;  // TODO use this!
 
     private HttpURI _uri=new HttpURI();
 
@@ -58,7 +58,6 @@ public class HttpConnection
     private Output _out;
     private OutputWriter _writer;
     private PrintWriter _printWriter;
-    int _writeChunk = 1500; // TODO configure or tune
 
     int _include;
     
@@ -181,10 +180,9 @@ public class HttpConnection
     /**
      * @return <code>false</code> (this method is not yet implemented)
      */
-    public boolean useDNS()
+    public boolean getResolveNames()
     {
-        // TODO configure
-        return false;
+        return _connector.getResolveNames();
     }
 
     /* ------------------------------------------------------------ */
