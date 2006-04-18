@@ -158,7 +158,6 @@ public class SelectChannelConnector extends AbstractConnector
 
             // Bind the server socket to the local host and port
             InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
-            // TODO configure backlog
             _acceptChannel.socket().bind(addr,getAcceptQueueSize());
             
 

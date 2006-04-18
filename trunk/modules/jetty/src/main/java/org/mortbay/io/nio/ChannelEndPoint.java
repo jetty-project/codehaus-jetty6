@@ -278,7 +278,7 @@ public class ChannelEndPoint implements EndPoint
         }
         else
         {
-            // TODO - consider copuing buffers buffer and trailer into header if there is space!
+            // TODO - consider copying buffers buffer and trailer into header if there is space!
             
             
             // flush header

@@ -935,7 +935,6 @@ public class HttpFields
             {
                 if (version == 0)
                 {
-                    // TODO - better than this
                     try
                     {
                         buf.append(URLEncoder.encode(value, StringUtil.__ISO_8859_1));

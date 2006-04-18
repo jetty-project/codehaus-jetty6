@@ -49,7 +49,6 @@ public class TimeoutTest extends TestCase
      */
     protected void tearDown() throws Exception
     {
-        // TODO Auto-generated method stub
         super.tearDown();
     }
     

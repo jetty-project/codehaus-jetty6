@@ -6,15 +6,11 @@
  */
 package org.mortbay.jetty;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
 import junit.framework.TestCase;
-
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
 
 /**
  * @author gregw

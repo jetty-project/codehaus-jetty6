@@ -610,7 +610,6 @@ public class HttpGenerator implements HttpTokens
                 // try to use user supplied encoding as it may have other values.
                 if (transfer_encoding != null && HttpHeaderValues.CHUNKED_ORDINAL != transfer_encoding.getValueOrdinal())
                 {
-                    // TODO avoid string conversion here
                     String c = transfer_encoding.getValue();
                     if (c.endsWith(HttpHeaderValues.CHUNKED))
                         transfer_encoding.put(_header);

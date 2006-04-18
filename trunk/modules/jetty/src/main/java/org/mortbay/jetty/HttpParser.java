@@ -100,8 +100,8 @@ public class HttpParser implements HttpTokens
     /* ------------------------------------------------------------------------------- */
     /**
      * Constructor.
-     * @param headerBufferSize TODO
-     * @param contentBufferSize TODO
+     * @param headerBufferSize size in bytes of header buffer  
+     * @param contentBufferSize size in bytes of content buffer
      */
     public HttpParser(Buffers buffers, EndPoint endp, EventHandler handler, int headerBufferSize, int contentBufferSize)
     {
@@ -431,7 +431,6 @@ public class HttpParser implements HttpTokens
                                             _contentLength=CHUNKED_CONTENT;
                                         else
                                         {
-                                            // TODO avoid string conversion here
                                             String c=value.toString();
                                             if (c.endsWith(HttpHeaderValues.CHUNKED))
                                                 _contentLength=CHUNKED_CONTENT;
@@ -551,7 +550,6 @@ public class HttpParser implements HttpTokens
                             else
                             {
                                 // Continuation line!
-                                // TODO - deal with CR LF and COLON?
                                 if (_multiLineValue == null) _multiLineValue=_tok1.toString();
                                 _tok1.update(_buffer.markIndex(), _buffer.markIndex() + _length);
                                 _multiLineValue += " " + _tok1.toString();
