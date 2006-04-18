@@ -591,7 +591,7 @@ public class ServletHandler extends AbstractHandler
      * @param pathSpec
      * @return The servlet holder.
      */
-    public ServletHolder addServlet(String className,String pathSpec)
+    public ServletHolder addServletWithMapping (String className,String pathSpec)
     {
         ServletHolder holder = null;
         try
@@ -626,7 +626,39 @@ public class ServletHandler extends AbstractHandler
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /**Convenience method to add a servlet with a servlet mapping.
+     * @param className
+     * @param pathSpec
+     * @return
+     * @deprecated
+     */
+    public ServletHolder addServlet (String className, String pathSpec)
+    {
+        return addServletWithMapping (className, pathSpec);
+    }
 
+    
+    /* ------------------------------------------------------------ */    
+    /**Convenience method to add a pre-constructed ServletHolder.
+     * @param holder
+     */
+    public void addServlet(ServletHolder holder)
+    {
+        setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder, ServletHolder.class));
+    }
+    
+    /* ------------------------------------------------------------ */    
+    /** Convenience method to add a pre-constructed ServletMapping.
+     * @param mapping
+     */
+    public void addServletMapping (ServletMapping mapping)
+    {
+        setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping, ServletMapping.class));
+    }
+    
+    
+    
     /* ------------------------------------------------------------ */
     protected FilterHolder newFilterHolder()
     {
@@ -639,9 +671,9 @@ public class ServletHandler extends AbstractHandler
      * @param className
      * @param pathSpec
      * @param dispatches see {@link FilterMapping#setDispatches(int)}
-     * @return The servlet holder.
+     * @return The filter holder.
      */
-    public FilterHolder addFilter(String className,String pathSpec,int dispatches)
+    public FilterHolder addFilterWithMapping (String className,String pathSpec,int dispatches)
     {
         FilterHolder holder = newFilterHolder();
         holder.setName(className);
@@ -655,6 +687,53 @@ public class ServletHandler extends AbstractHandler
         setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping, FilterMapping.class));
         
         return holder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Convenience method to add a filter with a mapping
+     * @param className
+     * @param pathSpec
+     * @param dispatches
+     * @return
+     * @deprecated
+     */
+    public FilterHolder addFilter (String className,String pathSpec,int dispatches)
+    {
+        return addFilterWithMapping(className, pathSpec, dispatches);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * convenience method to add a filter and mapping
+     * @param filter
+     * @param filterMapping
+     */
+    public void addFilter (FilterHolder filter, FilterMapping filterMapping)
+    {
+        if (filter != null)
+            setFilters((FilterHolder[])LazyList.addToArray(getFilters(), filter, FilterHolder.class));
+        if (filterMapping != null)
+            setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), filterMapping, FilterMapping.class));
+    }
+    
+    /* ------------------------------------------------------------ */  
+    /** Convenience method to add a preconstructed FilterHolder
+     * @param filter
+     */
+    public void addFilter (FilterHolder filter)
+    {
+        if (filter != null)
+            setFilters((FilterHolder[])LazyList.addToArray(getFilters(), filter, FilterHolder.class));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Convenience method to add a preconstructed FilterMapping
+     * @param mapping
+     */
+    public void addFilterMapping (FilterMapping mapping)
+    {
+        if (mapping != null)
+            setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping, FilterMapping.class));
     }
     
     /* ------------------------------------------------------------ */
