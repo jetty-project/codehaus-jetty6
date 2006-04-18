@@ -217,7 +217,7 @@ public class PageContextImpl extends PageContext {
 		depth = -1;
 		baseOut.recycle();
 		session = null;
-
+        elContext = null;
 		attributes.clear();
 	}
 
