@@ -166,6 +166,19 @@ public class HttpConnection
             return _connector.isConfidential(request);
         return false;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Find out if the request is INTEGRAL security.
+     * @param request
+     * @return
+     */
+    public boolean isIntegral(Request request)
+    {
+        if (_connector!=null)
+            return _connector.isIntegral(request);
+        return false;
+    }
 
     /* ------------------------------------------------------------ */
     /**

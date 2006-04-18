@@ -634,9 +634,9 @@ public class ContextHandler extends WrappedHandler implements Attributes
     /**
      * @param initParams The initParams to set.
      */
-    public void setInitParams(HashMap initParams)
+    public void setInitParams(Map initParams)
     {
-        _initParams = initParams;
+        _initParams = new HashMap(initParams);
     }
     
     /* ------------------------------------------------------------ */

@@ -190,7 +190,7 @@ public class SecurityHandler extends WrappedHandler
     
 
     /* ------------------------------------------------------------ */
-    private boolean checkSecurityConstraints(
+    public boolean checkSecurityConstraints(
         String pathInContext,
         Request request,
         Response response)
