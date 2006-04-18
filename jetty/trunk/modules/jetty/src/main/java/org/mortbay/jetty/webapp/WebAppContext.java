@@ -972,8 +972,8 @@ public class WebAppContext extends ContextHandler
         if (_securityHandler.getConstraintMappings()==null ||
             _securityHandler.getConstraintMappings().length==0)
         {
-            _sessionHandler.setHandler(_servletHandler);
             _securityHandler.setHandler(null);
+            _sessionHandler.setHandler(_servletHandler);
         }
         
         super.startContext();

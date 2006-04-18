@@ -303,7 +303,7 @@ public class ObjectMBean implements DynamicMBean
                 {
                     ObjectName mbean = _mbeanContainer.findMBean(r);
                     if (mbean==null)
-                        throw new IllegalStateException("cannot convert to ObjectName: "+r);
+                        return null;
                     r=mbean;
                 }
             }

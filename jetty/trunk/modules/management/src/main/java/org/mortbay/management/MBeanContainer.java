@@ -26,7 +26,7 @@ import javax.management.ObjectName;
 import javax.management.loading.PrivateMLet;
 
 import org.mortbay.component.Container;
-import org.mortbay.component.Container.Event;
+import org.mortbay.component.Container.Relationship;
 import org.mortbay.log.Log;
 import org.mortbay.util.TypeUtil;
 
@@ -39,7 +39,8 @@ public class MBeanContainer implements Container.Listener
 
     public synchronized ObjectName findMBean(Object object)
     {
-        return (ObjectName) _beans.get(object);
+        Bean bean = (Bean)_beans.get(object);
+        return bean==null?null:bean._name; 
     }
 
     public synchronized Object findBean(ObjectName oname)
@@ -47,7 +48,8 @@ public class MBeanContainer implements Container.Listener
         for (Iterator iter = _beans.entrySet().iterator(); iter.hasNext();)
         {
             Map.Entry entry = (Map.Entry) iter.next();
-            if (entry.getValue().equals(oname))
+            Bean bean = (Bean)entry.getValue();
+            if (bean._name.equals(oname))
                 return entry.getKey();
         }
         return null;
@@ -96,42 +98,59 @@ public class MBeanContainer implements Container.Listener
         }
     }
 
-    public void add(Event event)
+    public synchronized void add(Relationship event)
     {
-        addBean(event.getParent());
+        if (!_beans.containsKey(event.getParent()))
+        {
+            addBean(event.getParent());
+            ((Bean)_beans.get(event.getParent()))._root=true;
+        }
+
         addBean(event.getChild());
+        Bean bean=(Bean)_beans.get(event.getChild());
+        bean._root=false;
+        bean._refs++;
     }
 
-    public void remove(Event event)
+    public synchronized void remove(Relationship event)
     {
-        ObjectName oname = findMBean(event.getChild());
-        System.err.println("remove "+event.getChild());
-        new Throwable().printStackTrace();
-        if (oname != null)
+        Bean bean = (Bean)_beans.get(event.getChild());
+        if (bean==null)
+            return;
+        
+        if (bean._root)
+            throw new IllegalStateException();
+        bean._refs--;
+        
+        if (bean._refs<=0)
         {
-            try
+            _beans.remove(event.getChild());
+            if (bean._name != null)
             {
-                _server.unregisterMBean(oname);
-                Log.debug("Unregistered {}", oname);
-            }
-            catch (javax.management.InstanceNotFoundException e)
-            {
-                Log.ignore(e);
-            }
-            catch (Exception e)
-            {
-                Log.warn(e);
+                try
+                {
+                    _server.unregisterMBean(bean._name);
+                    Log.debug("Unregistered {}", bean._name);
+                }
+                catch (javax.management.InstanceNotFoundException e)
+                {
+                    Log.ignore(e);
+                }
+                catch (Exception e)
+                {
+                    Log.warn(e);
+                }
             }
         }
     }
 
     private synchronized void addBean(Object bean)
     {
-        System.err.println("add "+bean);
         try
         {
             if (bean == null || _beans.containsKey(bean))
                 return;
+            
             Object mbean = ObjectMBean.mbeanFor(bean);
             if (mbean == null)
                 return;
@@ -152,7 +171,7 @@ public class MBeanContainer implements Container.Listener
             
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
             Log.debug("Registered {}" , oinstance.getObjectName());
-            _beans.put(bean, oinstance.getObjectName());
+            _beans.put(bean, new Bean(oinstance.getObjectName()));
 
         }
         catch (Exception e)
@@ -206,5 +225,14 @@ public class MBeanContainer implements Container.Listener
                 Log.warn(e);
             }
         }
+    }
+    
+    private static class Bean
+    {
+        Bean(ObjectName name) { _name=name ; }
+        ObjectName _name;
+        boolean _root;
+        int _refs;
+        public String toString() { return _name+" refs="+_refs; }
     }
 }
