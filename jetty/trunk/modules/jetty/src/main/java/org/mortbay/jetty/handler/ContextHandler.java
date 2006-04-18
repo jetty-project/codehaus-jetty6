@@ -446,7 +446,8 @@ public class ContextHandler extends WrappedHandler implements Attributes
             {
                 String vhost=request.getServerName();
                 boolean match=false;
-                // TODO consider non-linear lookup
+                
+                // TODO non-linear lookup
                 for (int i=0;!match && i<_vhosts.length;i++)
                     match=_vhosts[i]!=null && _vhosts[i].equalsIgnoreCase(vhost);
                 if (!match)
@@ -458,7 +459,8 @@ public class ContextHandler extends WrappedHandler implements Attributes
             {
                 String host=request.getLocalName();
                 boolean match=false;
-                // TODO consider non-linear lookup
+                
+                // TODO non-linear lookup
                 for (int i=0;!match && i<_hosts.length;i++)
                     match=_hosts[i]!=null && _hosts[i].equalsIgnoreCase(host);
                 if (!match)

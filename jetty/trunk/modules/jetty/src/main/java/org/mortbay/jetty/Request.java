@@ -91,6 +91,7 @@ public class Request implements HttpServletRequest
     private String _scheme=URIUtil.HTTP;
     private String _contextPath;
     private String _servletPath;
+    private String _servletName;
     private HttpURI _uri;
     private Principal _userPrincipal;
     private MultiMap _parameters;
@@ -119,7 +120,7 @@ public class Request implements HttpServletRequest
     {
         _connection=connection;
         _endp=connection.getEndPoint();
-        _dns=_connection.useDNS();
+        _dns=_connection.getResolveNames();
     }
 
     /* ------------------------------------------------------------ */
@@ -887,6 +888,14 @@ public class Request implements HttpServletRequest
             _servletPath="";
         return _servletPath;
     }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public String getServletName()
+    {
+        return _servletName;
+    }
 
     /* ------------------------------------------------------------ */
     /* 
@@ -1335,6 +1344,15 @@ public class Request implements HttpServletRequest
     public void setServletPath(String servletPath)
     {
         _servletPath = servletPath;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name The servletName to set.
+     */
+    public void setServletName(String name)
+    {
+        _servletName = name;
     }
     
     /* ------------------------------------------------------------ */

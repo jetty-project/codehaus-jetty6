@@ -149,4 +149,11 @@ public interface Connector extends LifeCycle, Buffers
      * @return
      */
     Object getConnection();
+    
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return true if names resolution should be done.
+     */
+    boolean getResolveNames();
 }
