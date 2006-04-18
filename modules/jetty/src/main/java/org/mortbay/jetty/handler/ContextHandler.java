@@ -95,7 +95,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
     private ClassLoader _classLoader;
     private Context _context;
     private String _contextPath;
-    private HashMap _initParams;
+    private Map _initParams;
     private String _displayName;
     private String _docRoot;
     private Resource _baseResource;  
@@ -106,7 +106,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
     private String[] _hosts;
     private String[] _vhosts;
     private EventListener[] _eventListeners;
-    Logger logger;
+    private Logger _logger;
 
     private Object _contextListeners;
     private Object _contextAttributeListeners;
@@ -259,7 +259,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
     /**
      * @return Returns the initParams.
      */
-    public HashMap getInitParams()
+    public Map getInitParams()
     {
         return _initParams;
     }
@@ -313,7 +313,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     protected void doStart() throws Exception
     {
-        logger=Log.getLogger(getDisplayName()==null?getContextPath():getDisplayName());
+        _logger=Log.getLogger(getDisplayName()==null?getContextPath():getDisplayName());
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         Object old_context=null;
@@ -1104,7 +1104,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void log(Exception exception, String msg)
         {
-            logger.warn(msg,exception);
+            _logger.warn(msg,exception);
         }
 
         /* ------------------------------------------------------------ */
@@ -1113,7 +1113,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void log(String msg)
         {
-            logger.info(msg, null, null);
+            _logger.info(msg, null, null);
         }
 
         /* ------------------------------------------------------------ */
@@ -1122,7 +1122,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void log(String message, Throwable throwable)
         {
-            logger.warn(message,throwable);
+            _logger.warn(message,throwable);
         }
 
         /* ------------------------------------------------------------ */
