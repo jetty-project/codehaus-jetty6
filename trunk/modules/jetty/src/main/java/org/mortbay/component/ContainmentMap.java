@@ -25,7 +25,7 @@ public class ContainmentMap implements Container.Listener
     static ContainmentMap instance;
     Map _map = new WeakHashMap();
     
-    public void add(Container.Event event)
+    public void add(Container.Relationship event)
     {
         Map p = (Map)_map.get(event.getParent());
         if (p==null)
@@ -40,7 +40,7 @@ public class ContainmentMap implements Container.Listener
 
     }
     
-    public void remove(Container.Event event)
+    public void remove(Container.Relationship event)
     {
         Map p = (Map)_map.get(event.getParent());
         if (p!=null)
