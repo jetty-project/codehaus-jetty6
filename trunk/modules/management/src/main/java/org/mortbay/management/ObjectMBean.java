@@ -179,86 +179,94 @@ public class ObjectMBean implements DynamicMBean
 
     public MBeanInfo getMBeanInfo()
     {
-        if (_info==null)
+        try
         {
-            // Start with blank lazy lists attributes etc.
-            String desc=null;
-            Object attributes=null;
-            Object constructors=null;
-            Object operations=null;
-            Object notifications=null;
-
-            // Find list of classes that can influence the mbean
-            Class o_class=_managed.getClass();
-            Object influences = findInfluences(null, _managed.getClass());
-
-            // Set to record defined items
-            Set defined=new HashSet();
-
-            // For each influence
-            for (int i=0;i<LazyList.size(influences);i++)
+            if (_info==null)
             {
-                Class oClass = (Class)LazyList.get(influences, i);
-
-                // look for a bundle defining methods
-                if (Object.class.equals(oClass))
-                    oClass=ObjectMBean.class;
-                String pName = oClass.getPackage().getName();
-                String cName = oClass.getName().substring(pName.length() + 1);
-                String rName = pName.replace('.', '/') + "/management/" + cName+"-mbean";
-
-                try
+                // Start with blank lazy lists attributes etc.
+                String desc=null;
+                Object attributes=null;
+                Object constructors=null;
+                Object operations=null;
+                Object notifications=null;
+                
+                // Find list of classes that can influence the mbean
+                Class o_class=_managed.getClass();
+                Object influences = findInfluences(null, _managed.getClass());
+                
+                // Set to record defined items
+                Set defined=new HashSet();
+                
+                // For each influence
+                for (int i=0;i<LazyList.size(influences);i++)
                 {
-                    Log.debug(rName);
-                    ResourceBundle bundle = Loader.getResourceBundle(o_class, rName,true,Locale.getDefault());
-
-                    // Extract meta data from bundle
-                    Enumeration e = bundle.getKeys();
-                    while (e.hasMoreElements())
+                    Class oClass = (Class)LazyList.get(influences, i);
+                    
+                    // look for a bundle defining methods
+                    if (Object.class.equals(oClass))
+                        oClass=ObjectMBean.class;
+                    String pName = oClass.getPackage().getName();
+                    String cName = oClass.getName().substring(pName.length() + 1);
+                    String rName = pName.replace('.', '/') + "/management/" + cName+"-mbean";
+                    
+                    try
                     {
-                        String key = (String)e.nextElement();
-                        String value = bundle.getString(key);
-
-                        // Determin if key is for mbean , attribute or for operation
-                        if (key.equals(cName))
+                        Log.debug(rName);
+                        ResourceBundle bundle = Loader.getResourceBundle(o_class, rName,true,Locale.getDefault());
+                        
+                        // Extract meta data from bundle
+                        Enumeration e = bundle.getKeys();
+                        while (e.hasMoreElements())
                         {
-                            // set the mbean description
-                            if (desc==null)
-                                desc=value;
-                        }
-                        else if (key.indexOf('(')>0)
-                        {
-                            // define an operation
-                            if (!defined.contains(key) && key.indexOf('[')<0)
+                            String key = (String)e.nextElement();
+                            String value = bundle.getString(key);
+                            
+                            // Determin if key is for mbean , attribute or for operation
+                            if (key.equals(cName))
                             {
-                                defined.add(key);
-                                operations=LazyList.add(operations,defineOperation(key, value, bundle));
+                                // set the mbean description
+                                if (desc==null)
+                                    desc=value;
+                            }
+                            else if (key.indexOf('(')>0)
+                            {
+                                // define an operation
+                                if (!defined.contains(key) && key.indexOf('[')<0)
+                                {
+                                    defined.add(key);
+                                    operations=LazyList.add(operations,defineOperation(key, value, bundle));
+                                }
+                            }
+                            else
+                            {
+                                // define an attribute
+                                if (!defined.contains(key))
+                                {
+                                    defined.add(key);
+                                    attributes=LazyList.add(attributes,defineAttribute(key, value));
+                                }
                             }
                         }
-                        else
-                        {
-                            // define an attribute
-                            if (!defined.contains(key))
-                            {
-                                defined.add(key);
-                                attributes=LazyList.add(attributes,defineAttribute(key, value));
-                            }
-                        }
+                        
                     }
-
+                    catch(MissingResourceException e)
+                    {
+                        Log.ignore(e);
+                    }
                 }
-                catch(MissingResourceException e)
-                {
-                    Log.ignore(e);
-                }
+                
+                _info = new MBeanInfo(o_class.getName(),
+                                desc,
+                                (MBeanAttributeInfo[])LazyList.toArray(attributes, MBeanAttributeInfo.class),
+                                (MBeanConstructorInfo[])LazyList.toArray(constructors, MBeanConstructorInfo.class),
+                                (MBeanOperationInfo[])LazyList.toArray(operations, MBeanOperationInfo.class),
+                                (MBeanNotificationInfo[])LazyList.toArray(notifications, MBeanNotificationInfo.class));
             }
-
-            _info = new MBeanInfo(o_class.getName(),
-                            desc,
-                            (MBeanAttributeInfo[])LazyList.toArray(attributes, MBeanAttributeInfo.class),
-                            (MBeanConstructorInfo[])LazyList.toArray(constructors, MBeanConstructorInfo.class),
-                            (MBeanOperationInfo[])LazyList.toArray(operations, MBeanOperationInfo.class),
-                            (MBeanNotificationInfo[])LazyList.toArray(notifications, MBeanNotificationInfo.class));
+        }
+        catch(RuntimeException e)
+        {
+            Log.warn(e);
+            throw e;
         }
         return _info;
     }

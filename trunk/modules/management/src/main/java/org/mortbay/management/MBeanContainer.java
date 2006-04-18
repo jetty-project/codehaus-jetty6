@@ -105,12 +105,18 @@ public class MBeanContainer implements Container.Listener
     public void remove(Event event)
     {
         ObjectName oname = findMBean(event.getChild());
+        System.err.println("remove "+event.getChild());
+        new Throwable().printStackTrace();
         if (oname != null)
         {
             try
             {
                 _server.unregisterMBean(oname);
                 Log.debug("Unregistered {}", oname);
+            }
+            catch (javax.management.InstanceNotFoundException e)
+            {
+                Log.ignore(e);
             }
             catch (Exception e)
             {
@@ -121,6 +127,7 @@ public class MBeanContainer implements Container.Listener
 
     private synchronized void addBean(Object bean)
     {
+        System.err.println("add "+bean);
         try
         {
             if (bean == null || _beans.containsKey(bean))
@@ -131,7 +138,7 @@ public class MBeanContainer implements Container.Listener
 
             if (mbean instanceof ObjectMBean)
                 ((ObjectMBean) mbean).setMBeanContainer(this);
-
+            
             String name = bean.getClass().getName().toLowerCase();
             int dot = name.lastIndexOf('.');
             if (dot >= 0)
@@ -142,6 +149,7 @@ public class MBeanContainer implements Container.Listener
 
             ObjectName oname = ObjectName.getInstance("", name, String.valueOf(count));
 
+            
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
             Log.debug("Registered {}" , oinstance.getObjectName());
             _beans.put(bean, oinstance.getObjectName());
@@ -149,7 +157,7 @@ public class MBeanContainer implements Container.Listener
         }
         catch (Exception e)
         {
-            Log.warn(e);
+            Log.warn("bean: "+bean,e);
         }
     }
 
