@@ -359,7 +359,6 @@ public class Server extends HandlerCollection
                 try
                 {
                     NotFoundHandler nfh=new NotFoundHandler();
-                    nfh.setServer(this);
                     nfh.start();
                     setNotFoundHandler(nfh);
                 }
@@ -453,6 +452,7 @@ public class Server extends HandlerCollection
     public void setNotFoundHandler(Handler notFoundHandler)
     {
         _container.update(this, _notFoundHandler, notFoundHandler, "notFoundHandler");
+        notFoundHandler.setServer(this);
         _notFoundHandler = notFoundHandler;
     }
 

@@ -5,6 +5,7 @@
     + Added ThrottlingFilter and fixed race in Continuations
     + Added taglib resources to 2.1 jsp api jar
     + Reset of timer task clears expiry
+    + improved MBeanContainer object removal
 
 jetty-6.0.0beta14 - 9/4/2006
     + ignore dirs and files that don't exist in plugin scanner
