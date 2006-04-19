@@ -243,14 +243,6 @@ public class WebAppContext extends ContextHandler
     }    
     
     /* ------------------------------------------------------------ */
-    public void setServer(Server server)
-    {
-        super.setServer(server);
-        _securityHandler.setServer(server);
-        _sessionHandler.setServer(server);
-        _servletHandler.setServer(server);
-    }
-    /* ------------------------------------------------------------ */
     /** Set Resource Alias.
      * Resource aliases map resource uri's within a context.
      * They may optionally be used by a handler when looking for

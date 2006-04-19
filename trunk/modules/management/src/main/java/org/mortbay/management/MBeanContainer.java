@@ -100,31 +100,59 @@ public class MBeanContainer implements Container.Listener
 
     public synchronized void add(Relationship event)
     {
-        if (!_beans.containsKey(event.getParent()))
+        Bean parent=(Bean)_beans.get(event.getParent());
+        if (parent==null)
         {
             addBean(event.getParent());
-            ((Bean)_beans.get(event.getParent()))._root=true;
+            parent=(Bean)_beans.get(event.getParent());
         }
-
-        addBean(event.getChild());
-        Bean bean=(Bean)_beans.get(event.getChild());
-        bean._root=false;
-        bean._refs++;
+        
+        Bean child=(Bean)_beans.get(event.getChild());
+        if (child==null)
+        {
+            addBean(event.getChild());
+            child=(Bean)_beans.get(event.getChild());
+        }
+        
+        parent._children++;
+        child._parents++;
+        if (child._parents>1)
+            Log.warn("Multiple parents for "+child);
     }
 
     public synchronized void remove(Relationship event)
     {
-        Bean bean = (Bean)_beans.get(event.getChild());
-        if (bean==null)
-            return;
-        
-        if (bean._root)
-            throw new IllegalStateException();
-        bean._refs--;
-        
-        if (bean._refs<=0)
+        Bean parent=(Bean)_beans.get(event.getParent());
+
+        if (parent!=null)
         {
-            _beans.remove(event.getChild());
+            parent._children--;
+            if (parent._children<=0 && parent._parents<=0)
+            {
+                _beans.remove(event.getParent());
+                removeBean(parent);
+            }
+        }
+        
+
+        Bean child=(Bean)_beans.get(event.getChild());
+        if (child!=null)
+        {
+            child._parents--;
+            if (child._children<=0 && child._parents<=0)
+            {
+                _beans.remove(event.getChild());
+                removeBean(child);
+            }
+        }
+        
+    }
+
+
+    private synchronized void removeBean(Bean bean)
+    {
+        if (bean!=null)
+        {
             if (bean._name != null)
             {
                 try
@@ -143,22 +171,22 @@ public class MBeanContainer implements Container.Listener
             }
         }
     }
-
-    private synchronized void addBean(Object bean)
+    
+    private synchronized void addBean(Object obj)
     {
         try
         {
-            if (bean == null || _beans.containsKey(bean))
+            if (obj == null || _beans.containsKey(obj))
                 return;
             
-            Object mbean = ObjectMBean.mbeanFor(bean);
+            Object mbean = ObjectMBean.mbeanFor(obj);
             if (mbean == null)
                 return;
 
             if (mbean instanceof ObjectMBean)
                 ((ObjectMBean) mbean).setMBeanContainer(this);
             
-            String name = bean.getClass().getName().toLowerCase();
+            String name = obj.getClass().getName().toLowerCase();
             int dot = name.lastIndexOf('.');
             if (dot >= 0)
                 name = name.substring(dot + 1);
@@ -167,16 +195,16 @@ public class MBeanContainer implements Container.Listener
             _unique.put(name, count);
 
             ObjectName oname = ObjectName.getInstance("", name, String.valueOf(count));
-
             
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
             Log.debug("Registered {}" , oinstance.getObjectName());
-            _beans.put(bean, new Bean(oinstance.getObjectName()));
+            Bean bean=new Bean(oinstance.getObjectName());
+            _beans.put(obj, bean);
 
         }
         catch (Exception e)
         {
-            Log.warn("bean: "+bean,e);
+            Log.warn("bean: "+obj,e);
         }
     }
 
@@ -231,8 +259,8 @@ public class MBeanContainer implements Container.Listener
     {
         Bean(ObjectName name) { _name=name ; }
         ObjectName _name;
-        boolean _root;
-        int _refs;
-        public String toString() { return _name+" refs="+_refs; }
+        int _parents;
+        int _children;
+        public String toString() { return "{"+_name+" p="+_parents+" c="+_children+"}"; }
     }
 }

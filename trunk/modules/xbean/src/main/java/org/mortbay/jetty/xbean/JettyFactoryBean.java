@@ -68,8 +68,6 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
 
         for (int i = 0; i < handlers.length; i++) {
             Handler handler = handlers[i];
-            // TODO do we need this?
-            handler.setServer(server);
             Log.info("Using Jetty Handler: " + handler);
         }
         server.setHandlers(handlers);
