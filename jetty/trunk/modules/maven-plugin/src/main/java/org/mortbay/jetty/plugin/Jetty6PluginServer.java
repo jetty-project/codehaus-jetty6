@@ -130,7 +130,6 @@ public class Jetty6PluginServer implements JettyPluginServer
     public void addWebApplication(JettyPluginWebApplication webapp) throws Exception
     {
         this.server.addHandler ((Handler)webapp.getProxiedObject());
-        ((Handler)webapp.getProxiedObject()).setServer(this.server);
     }
 
     /* (non-Javadoc)

@@ -134,7 +134,6 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
         for (int i=0; (handlers != null) && (i < handlers.length); i++)
         {
             ((Server)getServer().getProxiedObject()).addHandler(handlers[i]);
-            handlers[i].setServer(((Server)getServer().getProxiedObject()));
         }
     }
 
