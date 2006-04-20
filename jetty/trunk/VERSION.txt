@@ -1,4 +1,5 @@
 
+    + setSendServerVersion method added to Server to control sending of Server: http header
     + removed SelectBlockingChannelConnector (unmaintained)
     + Improved HttpException
     + Moved more resources to resources 
