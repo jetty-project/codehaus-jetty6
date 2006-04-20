@@ -206,7 +206,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     /**
      * Plugin repositories listed for the project.
      * 
-     * @parameter expression="${project.pluginRepositories}"
+     * @parameter expression="${project.pluginArtifactRepositories}"
      */
     private List pluginRepositories;
     
@@ -493,6 +493,14 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         allRemoteRepositories.addAll(remoteRepositories);
         allRemoteRepositories.addAll(pluginRepositories);
         
+        if (getLog().isDebugEnabled())
+        {
+            Iterator itor = allRemoteRepositories.iterator();
+            while (itor.hasNext())
+            {
+                getLog().debug("Remote repository: "+itor.next());
+            }
+        }
         resolver = new RuntimeDependencyResolver(artifactFactory, artifactResolver, 
                 metadataSource, localRepository, allRemoteRepositories);
         
