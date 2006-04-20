@@ -203,6 +203,13 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     private List remoteRepositories;
 
     
+    /**
+     * Plugin repositories listed for the project.
+     * 
+     * @parameter expression="${project.pluginRepositories}"
+     */
+    private List pluginRepositories;
+    
     
     /**
     *
@@ -482,8 +489,12 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     private void setupRuntimeClasspath () 
     throws Exception
     {
+        List allRemoteRepositories = new ArrayList();
+        allRemoteRepositories.addAll(remoteRepositories);
+        allRemoteRepositories.addAll(pluginRepositories);
+        
         resolver = new RuntimeDependencyResolver(artifactFactory, artifactResolver, 
-                metadataSource, localRepository, remoteRepositories);
+                metadataSource, localRepository, allRemoteRepositories);
         
         
         Set runtimeArtifacts = resolveRuntimeJSP();
