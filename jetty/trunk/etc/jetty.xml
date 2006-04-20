@@ -180,6 +180,8 @@
     <!-- extra options                                               -->
     <!-- =========================================================== -->
     <Set name="stopAtShutdown">true</Set>
+    <!-- ensure/prevent Server: header being sent to browsers        -->
+    <Set name="sendServerVersion">true</Set>
 
 </Configure>
 

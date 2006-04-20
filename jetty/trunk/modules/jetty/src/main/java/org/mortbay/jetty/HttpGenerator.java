@@ -121,6 +121,7 @@ public class HttpGenerator implements HttpTokens
     private boolean _bufferChunked = false;
     private int _headerBufferSize;
     private int _contentBufferSize;
+    private boolean _sendServerVersion;
 
     
     /* ------------------------------------------------------------------------------- */
@@ -188,6 +189,18 @@ public class HttpGenerator implements HttpTokens
         _content=null;
         if (_buffer!=null)
             _buffer.clear();  
+    }
+    
+    /* ------------------------------------------------------------ */    
+    public boolean getSendServerVersion ()
+    {
+        return _sendServerVersion;
+    }
+    
+    /* ------------------------------------------------------------ */    
+    public void setSendServerVersion (boolean sendServerVersion)
+    {
+        _sendServerVersion = sendServerVersion;
     }
     
     /* ------------------------------------------------------------ */
@@ -539,8 +552,11 @@ public class HttpGenerator implements HttpTokens
                             break;
 
                         case HttpHeaders.SERVER_ORDINAL:
-                            has_server=true;
-                            field.put(_header);
+                            if (getSendServerVersion()) 
+                            {
+                                has_server=true;
+                                field.put(_header);
+                            }
                             break;
                             
                         default:
@@ -632,7 +648,7 @@ public class HttpGenerator implements HttpTokens
                 _header.put(CONNECTION_KEEP_ALIVE);
             else if (connection != null) connection.put(_header);
 
-            if (!has_server && _status>100)
+            if (!has_server && _status>100 && getSendServerVersion())
                 _header.put(SERVER);
 
             // end the header.

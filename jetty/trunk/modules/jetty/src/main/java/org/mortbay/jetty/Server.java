@@ -61,6 +61,7 @@ public class Server extends HandlerCollection
     private RequestLog _requestLog;
     private PathMap _contextMap;
     private SessionIdManager _sessionIdManager;
+    private boolean _sendServerVersion = true; //send Server: header by default
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -359,7 +360,7 @@ public class Server extends HandlerCollection
                 try
                 {
                     NotFoundHandler nfh=new NotFoundHandler();
-                    nfh.start();
+                    
                     setNotFoundHandler(nfh);
                 }
                 catch(Exception e)
@@ -473,6 +474,18 @@ public class Server extends HandlerCollection
     {
         _container.update(this,_sessionIdManager,sessionIdManager, "sessionIdManager");
         _sessionIdManager = sessionIdManager;
+    }
+    
+    
+    public void setSendServerVersion (boolean sendServerVersion)
+    {
+        _sendServerVersion = sendServerVersion;
+    }
+    
+    public boolean getSendServerVersion()
+    {
+        
+        return _sendServerVersion;
     }
     
     /* ------------------------------------------------------------ */
