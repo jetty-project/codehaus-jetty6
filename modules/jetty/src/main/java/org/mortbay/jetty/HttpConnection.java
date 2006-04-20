@@ -88,6 +88,7 @@ public class HttpConnection
         _request = new Request(this);
         _response = new Response(this);
         _generator = new HttpGenerator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
+        _generator.setSendServerVersion(server.getSendServerVersion());
         _server = server;
     }
 
