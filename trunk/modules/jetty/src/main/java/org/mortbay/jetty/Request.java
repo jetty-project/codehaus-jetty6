@@ -575,6 +575,9 @@ public class Request implements HttpServletRequest
     public String getParameter(String name)
     {
         if (!_paramsExtracted) extractParameters();
+        if (_parameters == null) {
+            return null;
+        }
         return (String) _parameters.getValue(name, 0);
     }
 
