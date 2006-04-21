@@ -628,6 +628,8 @@ public class ContextHandler extends WrappedHandler implements Attributes
         if (contextPath!=null && contextPath.length()>1 && contextPath.endsWith("/"))
             throw new IllegalArgumentException("ends with /");
         _contextPath = contextPath;
+        if (getServer()!=null && getServer().isStarted())
+            getServer().mapContexts();
     }
     
     /* ------------------------------------------------------------ */

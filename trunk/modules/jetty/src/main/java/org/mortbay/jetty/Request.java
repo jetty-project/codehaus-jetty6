@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -95,6 +96,7 @@ public class Request implements HttpServletRequest
     private HttpURI _uri;
     private Principal _userPrincipal;
     private MultiMap _parameters;
+    private MultiMap _baseParameters;
     private boolean _paramsExtracted;
     private int _inputState=__NONE;
     private BufferedReader _reader;
@@ -147,8 +149,9 @@ public class Request implements HttpServletRequest
         _servletPath=null;
         _uri=null;
         _userPrincipal=null;
-        if (_parameters!=null)
-            _parameters.clear();
+        if (_baseParameters!=null)
+            _baseParameters.clear();
+        _parameters=null;
         _paramsExtracted=false;;
         _inputState=__NONE;
         _reader=null; 
@@ -574,10 +577,8 @@ public class Request implements HttpServletRequest
      */
     public String getParameter(String name)
     {
-        if (!_paramsExtracted) extractParameters();
-        if (_parameters == null) {
-            return null;
-        }
+        if (!_paramsExtracted) 
+            extractParameters();
         return (String) _parameters.getValue(name, 0);
     }
 
@@ -587,7 +588,8 @@ public class Request implements HttpServletRequest
      */
     public Map getParameterMap()
     {
-        if (!_paramsExtracted) extractParameters();
+        if (!_paramsExtracted) 
+            extractParameters();
         return _parameters.toStringArrayMap();
     }
 
@@ -597,7 +599,8 @@ public class Request implements HttpServletRequest
      */
     public Enumeration getParameterNames()
     {
-        if (!_paramsExtracted) extractParameters();
+        if (!_paramsExtracted) 
+            extractParameters();
         return Collections.enumeration(_parameters.keySet());
     }
 
@@ -607,7 +610,8 @@ public class Request implements HttpServletRequest
      */
     public String[] getParameterValues(String name)
     {
-        if (!_paramsExtracted) extractParameters();
+        if (!_paramsExtracted) 
+            extractParameters();
         List vals = _parameters.getValues(name);
         if (vals==null)
             return null;
@@ -802,12 +806,14 @@ public class Request implements HttpServletRequest
      */
     public String getServerName()
     {        // Return already determined host
-        if (_serverName != null) return _serverName;
+        if (_serverName != null) 
+            return _serverName;
 
         // Return host from absolute URI
         _serverName = _uri.getHost();
         _port = _uri.getPort();
-        if (_serverName != null) return _serverName;
+        if (_serverName != null) 
+            return _serverName;
 
         // Return host from header field
         Buffer hostPort = _connection.getRequestFields().get(HttpHeaders.HOST_BUFFER);
@@ -1116,10 +1122,11 @@ public class Request implements HttpServletRequest
      */
     private void extractParameters()
     {
-        if (_paramsExtracted) return;
+        if (_paramsExtracted) 
+            return;
         _paramsExtracted = true;
-
-        if (_parameters == null) _parameters = new MultiMap(16);
+        if (_baseParameters == null) 
+            _baseParameters = new MultiMap(16);
 
         // Handle query string
         String encoding = getCharacterEncoding();
@@ -1127,7 +1134,7 @@ public class Request implements HttpServletRequest
         {
             try
             {
-                _uri.decodeQueryTo(_parameters,encoding);
+                _uri.decodeQueryTo(_baseParameters,encoding);
             }
             catch (UnsupportedEncodingException e)
             {
@@ -1137,7 +1144,6 @@ public class Request implements HttpServletRequest
                     Log.warn(e.toString());
             }
         }
-        
 
         // handle any _content.
         String content_type = getContentType();
@@ -1156,7 +1162,7 @@ public class Request implements HttpServletRequest
                         InputStream in = getInputStream();
                        
                         // Add form params to query params
-                        UrlEncoded.decodeTo(in, _parameters, encoding);
+                        UrlEncoded.decodeTo(in, _baseParameters, encoding);
                     }
                     catch (IOException e)
                     {
@@ -1168,8 +1174,23 @@ public class Request implements HttpServletRequest
                 }
             }
         }
+        
+        if (_parameters==null)
+            _parameters=_baseParameters;
+        else if (_parameters!=_baseParameters)
+        {
+            // Merge parameters (needed if parameters extracted after a forward).
+            Iterator iter = _baseParameters.entrySet().iterator();
+            while (iter.hasNext())
+            {
+                Map.Entry entry = (Map.Entry)iter.next();
+                String name=(String)entry.getKey();
+                Object values=entry.getValue();
+                for (int i=0;i<LazyList.size(values);i++)
+                    _parameters.add(name, LazyList.get(values, i));
+            }
+        }   
     }
-    
     
     /* ------------------------------------------------------------ */
     /**
@@ -1472,7 +1493,9 @@ public class Request implements HttpServletRequest
      */
     public void setParameters(MultiMap parameters)
     {
-        _parameters = parameters;
+        _parameters= (parameters==null)?_baseParameters:parameters;
+        if (_paramsExtracted && _parameters==null)
+            throw new IllegalStateException();
     }
     
     /* ------------------------------------------------------------ */

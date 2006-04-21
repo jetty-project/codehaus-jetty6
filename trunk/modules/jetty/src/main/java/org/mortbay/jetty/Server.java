@@ -153,7 +153,19 @@ public class Server extends HandlerCollection
     {
         _contextMap=null;
         super.setHandlers(handlers);
-        
+        if (isStarted())
+            mapContexts();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Remap the context paths.
+     * TODO make this private
+     */
+    public void mapContexts()
+    {
+        _contextMap=null;
+        Handler[] handlers=getHandlers();
         if (handlers!=null && handlers.length>0)
         {
             PathMap contextMap = new PathMap();
@@ -250,9 +262,12 @@ public class Server extends HandlerCollection
         if (_sessionIdManager!=null)
             _sessionIdManager.start();
         
+        mapContexts();
+        
         try{if (_requestLog!=null)_requestLog.start();} catch(Throwable e) { mex.add(e);}
         
         try{_threadPool.start();} catch(Throwable e) { mex.add(e);}
+        
         
         try { super.doStart(); } catch(Throwable e) { mex.add(e);}
         

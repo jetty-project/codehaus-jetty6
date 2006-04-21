@@ -19,7 +19,6 @@
 package org.mortbay.servlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,7 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.log.Log;
-import org.mortbay.log.Logger;
 import org.mortbay.util.ajax.Continuation;
 
 /**
@@ -82,7 +80,6 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class ThrottlingFilter implements Filter
 {
-    private Logger _log;
 
     private int _maximum;
     private int _current;
@@ -101,8 +98,6 @@ public class ThrottlingFilter implements Filter
     public void init(FilterConfig filterConfig) 
         throws ServletException
     {
-        _log = Log.getLogger("ThrottlingFilter[" + filterConfig.getFilterName() + ']');
-
         _maximum = getIntegerParameter(filterConfig, "maximum", 10);
         _queueTimeout = getIntegerParameter(filterConfig, "block", 5000);
         _queueSize = getIntegerParameter(filterConfig, "queue", 500);
@@ -112,7 +107,7 @@ public class ThrottlingFilter implements Filter
             _queueTimeout = Integer.MAX_VALUE;
         }
 
-        _log.info("Config{maximum:" + _maximum + ", block:" + _queueTimeout + ", queue:" + _queueSize + "}", null, null);
+        Log.info("Config{maximum:" + _maximum + ", block:" + _queueTimeout + ", queue:" + _queueSize + "}", null, null);
     }
 
     private int getIntegerParameter(FilterConfig filterConfig, String name, int defaultValue) 
@@ -154,7 +149,7 @@ public class ThrottlingFilter implements Filter
                 // Has the request been tried before?
                 if (continuation.isPending())
                 {
-                    _log.debug("Request {} / {} was already queued, rejecting", request.getRequestURI(), continuation);
+                    Log.debug("Request {} / {} was already queued, rejecting", request.getRequestURI(), continuation);
                     dropFromQueue(continuation);
                     continuation.reset();
                 }
@@ -204,7 +199,7 @@ public class ThrottlingFilter implements Filter
             }
             continuation = (Continuation) _queue.remove(0);
         }
-        _log.debug("Resuming continuation {}", continuation, null);
+        Log.debug("Resuming continuation {}", continuation, null);
         continuation.resume();
     }
 
@@ -236,16 +231,16 @@ public class ThrottlingFilter implements Filter
         {
             if (_queue.size() >= _queueSize)
             {
-                _log.debug("Queue is full, rejecting request {}", request.getRequestURI(), null);
+                Log.debug("Queue is full, rejecting request {}", request.getRequestURI(), null);
                 return false;
             }
             
-            _log.debug("Queuing request {} / {}", request.getRequestURI(), continuation);
+            Log.debug("Queuing request {} / {}", request.getRequestURI(), continuation);
             _queue.add(continuation);
         }
 
         continuation.suspend(_queueTimeout);
-        _log.debug("Resuming blocking continuation for request {}", request.getRequestURI(), null);
+        Log.debug("Resuming blocking continuation for request {}", request.getRequestURI(), null);
         return true;
     }
 
@@ -257,7 +252,6 @@ public class ThrottlingFilter implements Filter
     public void destroy()
     {
         _queue.clear();
-        _log = null;
     }
 
 }

@@ -404,7 +404,8 @@ public class ChannelEndPoint implements EndPoint
         
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-        return _remote.getPort();
+        
+        return _remote==null?-1:_remote.getPort();
     }
 
     /* ------------------------------------------------------------ */
