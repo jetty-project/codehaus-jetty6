@@ -37,7 +37,6 @@ import javax.servlet.http.HttpSession;
  */
 public class DispatchServlet extends HttpServlet
 {
-
     /* ------------------------------------------------------------ */
     String pageType;
 
@@ -63,9 +62,7 @@ public class DispatchServlet extends HttpServlet
         }
         
         if (sreq.getParameter("session") != null)
-        {
-            HttpSession session= sreq.getSession(true);
-        }
+            sreq.getSession(true);
 
         String prefix=
             sreq.getContextPath() != null ? sreq.getContextPath() + sreq.getServletPath() : sreq.getServletPath();
@@ -245,8 +242,8 @@ public class DispatchServlet extends HttpServlet
                     + "/includeN/name\n"
                     + prefix
                     + "/forwardC/_context/path\n</PRE>");
-            pout.flush();
         }
+        
     }
 
     /* ------------------------------------------------------------ */

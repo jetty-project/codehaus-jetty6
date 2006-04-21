@@ -44,7 +44,6 @@ import org.mortbay.util.UrlEncoded;
  */
 public class Dispatcher implements RequestDispatcher
 {
-    
     /** Dispatch include attribute names */
     public final static String __INCLUDE_JETTY="org.mortbay.jetty.included";
     public final static String __INCLUDE_PREFIX="javax.servlet.include.";
@@ -240,7 +239,6 @@ public class Dispatcher implements RequestDispatcher
                             for (int i=0;i<LazyList.size(values);i++)
                                 parameters.add(name, LazyList.get(values, i));
                         }
-                        
                     }
                     
                     if (old_query!=null && old_query.length()>0)

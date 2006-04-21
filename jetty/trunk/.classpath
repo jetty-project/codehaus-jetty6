@@ -13,9 +13,6 @@
 	<classpathentry kind="var" path="MAVEN_HOME/core/boot/classworlds-1.1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-container-default-1.0-alpha-9.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-utils-1.1.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.3.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.3.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.3.jar"/>
 	<classpathentry output="examples/test-webapp/target/classes" kind="src" path="examples/test-webapp/src/main/java"/>
 	<classpathentry output="modules/jetty/target/classes" kind="src" path="modules/jetty/src/main/java"/>
 	<classpathentry output="modules/jetty/target/test-classes" kind="src" path="modules/jetty/src/test/java"/>
@@ -45,5 +42,8 @@
 	<classpathentry kind="lib" path="modules/management/src/test/resources"/>
 	<classpathentry kind="lib" path="modules/servlet-api-2.5/src/main/resources"/>
 	<classpathentry kind="lib" path="resources"/>
+	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.4.jar"/>
+	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.4.jar"/>
+	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.4.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
