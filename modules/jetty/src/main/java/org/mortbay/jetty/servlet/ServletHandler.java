@@ -306,7 +306,7 @@ public class ServletHandler extends AbstractHandler
                 if (entry!=null)
                 {
                     servlet_holder=(ServletHolder)entry.getValue();
-                    base_request.setServerName(servlet_holder.getName());
+                    base_request.setServletName(servlet_holder.getName());
                     if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
                     
                     String servlet_path_spec=(String)entry.getKey(); 
@@ -334,7 +334,7 @@ public class ServletHandler extends AbstractHandler
                 servlet_holder=(ServletHolder)_servletNameMap.get(target);
                 if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
                 {
-                    base_request.setServerName(servlet_holder.getName());
+                    base_request.setServletName(servlet_holder.getName());
                     chain=getFilterChain(type, null,servlet_holder);
                 }
             }
