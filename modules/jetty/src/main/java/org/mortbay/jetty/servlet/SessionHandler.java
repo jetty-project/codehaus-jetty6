@@ -30,7 +30,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionManager;
-import org.mortbay.jetty.handler.WrappedHandler;
+import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
@@ -39,7 +39,7 @@ import org.mortbay.log.Log;
  * @author gregw
  *
  */
-public class SessionHandler extends WrappedHandler
+public class SessionHandler extends HandlerWrapper
 {
     /* -------------------------------------------------------------- */
     private SessionManager _sessionManager;

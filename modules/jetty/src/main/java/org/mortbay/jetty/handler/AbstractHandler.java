@@ -15,10 +15,12 @@
 
 package org.mortbay.jetty.handler;
 
+
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.log.Log;
+import org.mortbay.util.LazyList;
 
 
 /* ------------------------------------------------------------ */
@@ -84,4 +86,57 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
     {
         return _server;
     }
+    
+
+    /* ------------------------------------------------------------ */
+    public Handler[] getChildHandlers()
+    {
+        Object list = expandChildren(null,null);
+        return (Handler[])LazyList.toArray(list, Handler.class);
+    }
+        
+    /* ------------------------------------------------------------ */
+    public Handler[] getChildHandlersByClass(Class byclass)
+    {
+        Object list = expandChildren(null,byclass);
+        return (Handler[])LazyList.toArray(list, Handler.class);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Handler getChildHandlerByClass(Class byclass)
+    {
+        // TODO this can be more efficient?
+        Object list = expandChildren(null,byclass);
+        if (list==null)
+            return null;
+        return (Handler)LazyList.get(list, 0);
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected Object expandChildren(Object list, Class byClass)
+    {
+        return list;
+    }
+
+    /* ------------------------------------------------------------ */
+    protected Object expandHandler(Handler handler, Object list, Class byClass)
+    {
+        if (handler==null)
+            return list;
+        
+        if (handler!=null && (byClass==null || byClass.isAssignableFrom(handler.getClass())))
+            list=LazyList.add(list, handler);
+
+        if (handler instanceof AbstractHandler)
+            list=((AbstractHandler)handler).expandChildren(list, byClass);
+        else
+        {
+            Handler[] handlers=byClass==null?handler.getChildHandlers():handler.getChildHandlersByClass(byClass);
+            list=LazyList.addArray(list, handlers);
+        }
+        
+        return list;
+    }
+    
+    
 }

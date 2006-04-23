@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.WrappedHandler;
+import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.URIUtil;
@@ -75,8 +75,8 @@ public class Invoker extends HttpServlet
         _contextHandler=((ContextHandler.Context)config).getContextHandler();
 
         Handler handler=_contextHandler.getHandler();
-        while (handler!=null && !(handler instanceof ServletHandler) && (handler instanceof WrappedHandler))
-            handler=((WrappedHandler)handler).getHandler();
+        while (handler!=null && !(handler instanceof ServletHandler) && (handler instanceof HandlerWrapper))
+            handler=((HandlerWrapper)handler).getHandler();
         _servletHandler = (ServletHandler)handler;
         Enumeration e = getInitParameterNames();
         while(e.hasMoreElements())

@@ -20,6 +20,8 @@ package org.mortbay.jetty.xbean;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
@@ -70,7 +72,16 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
             Handler handler = handlers[i];
             Log.info("Using Jetty Handler: " + handler);
         }
-        server.setHandlers(handlers);
+
+        HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+        if (contexts==null)
+            contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
+        if (contexts==null)
+        {
+            contexts=new ContextHandlerCollection();
+            server.setHandler(contexts);
+        }
+        contexts.setHandlers(handlers);
         server.start();
     }
 

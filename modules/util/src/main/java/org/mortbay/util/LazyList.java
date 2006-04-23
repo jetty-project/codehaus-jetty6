@@ -135,6 +135,19 @@ public class LazyList
             list=LazyList.add(list,i.next());
         return list;
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Add the contents of an array to a LazyList
+     * @param list The list to add to or null if none yet created.
+     * @param collection The Collection whose contents should be added.
+     * @return The lazylist created or added to.
+     */
+    public static Object addArray(Object list, Object[] array)
+    {
+        for(int i=0;array!=null && i<array.length;i++)
+            list=LazyList.add(list,array[i]);
+        return list;
+    }
 
     /* ------------------------------------------------------------ */
     /** Ensure the capcity of the underlying list.
