@@ -37,7 +37,9 @@ import org.mortbay.io.IO;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.ErrorHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -149,8 +151,17 @@ public class WebAppContext extends ContextHandler
             configurations=__dftConfigurationClasses;
         
         ArrayList wacs = new ArrayList();
-        if(server.getHandlers() != null) {
-            java.util.List installedWacs = Arrays.asList(server.getHandlers());
+        HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+        if (contexts==null)
+            contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
+        
+        if (contexts==null)
+            throw new IllegalStateException("No HandlerCollection configured in "+server);
+        
+        Handler[] installed=contexts.getChildHandlersByClass(ContextHandler.class);
+        if(installed != null) 
+        {
+            java.util.List installedWacs = Arrays.asList(installed);
             wacs.addAll(installedWacs);
         } 
         
@@ -218,7 +229,7 @@ public class WebAppContext extends ContextHandler
             wacs.add(wah);
         }
 
-        server.setHandlers((Handler[])wacs.toArray(new Handler[wacs.size()]));
+        contexts.setHandlers((Handler[])wacs.toArray(new Handler[wacs.size()]));
     }
     
     /* ------------------------------------------------------------ */

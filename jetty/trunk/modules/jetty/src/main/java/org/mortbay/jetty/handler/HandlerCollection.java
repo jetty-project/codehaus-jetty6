@@ -189,7 +189,6 @@ public class HandlerCollection extends AbstractHandler implements Handler
         Handler[] h=getHandlers();
         for (int i=0;h!=null && i<h.length;i++)
             h[i].setServer(server);
-
     }
 
     /* ------------------------------------------------------------ */
@@ -207,5 +206,13 @@ public class HandlerCollection extends AbstractHandler implements Handler
         if (handlers!=null && handlers.length>0 )
             setHandlers((Handler[])LazyList.removeFromArray(handlers, handler));
     }
-    
+
+    /* ------------------------------------------------------------ */
+    protected Object expandChildren(Object list, Class byClass)
+    {
+        Handler[] handlers = getHandlers();
+        for (int i=0;handlers!=null && i<handlers.length;i++)
+            list=expandHandler(handlers[i], list, byClass);
+        return list;
+    }
 }

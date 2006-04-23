@@ -16,6 +16,8 @@
 package org.mortbay.jetty.handler;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -23,13 +25,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.
  * @author gregw
  *
  */
-public class WrappedHandler extends AbstractHandler
+public class HandlerWrapper extends AbstractHandler
 {
     private Handler _handler;
 
@@ -37,7 +40,7 @@ public class WrappedHandler extends AbstractHandler
     /**
      * 
      */
-    public WrappedHandler()
+    public HandlerWrapper()
     {
         super();
     }
@@ -135,4 +138,13 @@ public class WrappedHandler extends AbstractHandler
         if (h!=null)
             h.setServer(server);
     }
+    
+
+    /* ------------------------------------------------------------ */
+    protected Object expandChildren(Object list, Class byClass)
+    {
+        return expandHandler(_handler,list,byClass);
+    }
+
+   
 }

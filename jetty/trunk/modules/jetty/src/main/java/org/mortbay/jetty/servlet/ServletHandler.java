@@ -133,7 +133,7 @@ public class ServletHandler extends AbstractHandler
         throws Exception
     {
         _servletContext=ContextHandler.getCurrentContext();
-        _contextHandler=_servletContext.getContextHandler();
+        _contextHandler=_servletContext==null?null:_servletContext.getContextHandler();
         
         updateMappings();
         
@@ -627,7 +627,7 @@ public class ServletHandler extends AbstractHandler
     }
 
     /* ------------------------------------------------------------ */
-    /**Convenience method to add a servlet with a servlet mapping.
+    /** Convenience method to add a servlet with a servlet mapping.
      * @param className
      * @param pathSpec
      * @return

@@ -41,6 +41,9 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.codehaus.classworlds.ClassRealm;
 import org.codehaus.classworlds.ClassWorld;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
@@ -85,14 +88,14 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     /**
      * The "virtual" webapp created by the plugin
      */
-    private JettyPluginWebApplication webapp;
+    private JettyPluginWebApplication _webapp;
     
     
 
     /**
      * The proxy for the Server object
      */
-    private JettyPluginServer server;
+    private JettyPluginServer _server;
     
     /**
      * The maven project.
@@ -101,7 +104,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * @required
      * @readonly
      */
-    private MavenProject project;
+    private MavenProject _project;
     
 
     
@@ -112,7 +115,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * @parameter expression="/${project.artifactId}"
      * @required
      */
-    private String contextPath;
+    private String _contextPath;
     
     
     /**
@@ -122,7 +125,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * @parameter expression="${project.build.directory}/work"
      * @required
      */
-    private File tmpDirectory;
+    private File _tmpDirectory;
     
     
     
@@ -132,7 +135,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * 
      * @parameter 
      */
-    private File webDefaultXml;
+    private File _webDefaultXml;
     
     
     
@@ -143,7 +146,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * @parameter expression="0"
      * @required
      */
-    private int scanIntervalSeconds;
+    private int _scanIntervalSeconds;
     
     
     /**
@@ -152,7 +155,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * that have been set on the command line or by the JVM. Optional.
      * @parameter 
      */
-    private SystemProperty[] systemProperties;
+    private SystemProperty[] _systemProperties;
     
     
     
@@ -161,20 +164,20 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * will be applied before any plugin configuration. Optional.
      * @parameter
      */
-    private String jettyConfig;
+    private String _jettyConfig;
   
     
     /**
      * @component
      */
-    private ArtifactResolver artifactResolver;
+    private ArtifactResolver _artifactResolver;
     
     /**
      * The component used for creating artifact instances.
      *
      * @component
      */
-    private ArtifactFactory artifactFactory;
+    private ArtifactFactory _artifactFactory;
 
     
     
@@ -184,7 +187,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     *
     * @component
     */
-    private ArtifactMetadataSource metadataSource;
+    private ArtifactMetadataSource _metadataSource;
     
     
     /**
@@ -192,7 +195,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      *
      * @parameter expression="${localRepository}"
      */
-    private ArtifactRepository localRepository;
+    private ArtifactRepository _localRepository;
 
     /**
      * Remote repositories used for the project.
@@ -200,7 +203,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * @todo this is used for site descriptor resolution - it should relate to the actual project but for some reason they are not always filled in
      * @parameter expression="${project.remoteArtifactRepositories}"
      */
-    private List remoteRepositories;
+    private List _remoteRepositories;
 
     
     /**
@@ -208,7 +211,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * 
      * @parameter expression="${project.pluginArtifactRepositories}"
      */
-    private List pluginRepositories;
+    private List _pluginRepositories;
     
     
     /**
@@ -216,20 +219,20 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     *
     * @component 
     */
-    private MavenProjectBuilder projectBuilder;
+    private MavenProjectBuilder _projectBuilder;
     
     /**
      *  List of files and directories to scan
      */
-    private ArrayList scanList;
+    private ArrayList _scanList;
     
     /**
      * List of Listeners for the scanner
      */
-    private ArrayList scannerListeners;
+    private ArrayList _scannerListeners;
     
     
-    private RuntimeDependencyResolver resolver;
+    private RuntimeDependencyResolver _resolver;
     
     
     /**
@@ -266,18 +269,18 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     
     public MavenProject getProject()
     {
-        return this.project;
+        return this._project;
     }
     
     public File getTmpDirectory()
     {
-        return this.tmpDirectory;
+        return this._tmpDirectory;
     }
 
     
     public File getWebDefaultXml()
     {
-        return this.webDefaultXml;
+        return this._webDefaultXml;
     }
     
     /**
@@ -285,7 +288,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      */
     public String getContextPath()
     {
-        return this.contextPath;
+        return this._contextPath;
     }
 
     /**
@@ -293,60 +296,60 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      */
     public int getScanIntervalSeconds()
     {
-        return this.scanIntervalSeconds;
+        return this._scanIntervalSeconds;
     }
     
 
     public SystemProperty[] getSystemProperties()
     {
-        return this.systemProperties;
+        return this._systemProperties;
     }
 
     public String getJettyXmlFileName ()
     {
-        return this.jettyConfig;
+        return this._jettyConfig;
     }
 
     public JettyPluginWebApplication getWebApplication()
     {
-        return this.webapp;
+        return this._webapp;
     }
     
     public void setWebApplication (JettyPluginWebApplication webapp)
     {
-        this.webapp = webapp;
+        this._webapp = webapp;
     }
 
     public JettyPluginServer getServer ()
     {
-        return this.server;
+        return this._server;
     }
     
     public void setServer (JettyPluginServer server)
     {
-        this.server = server;
+        this._server = server;
     }
     
     
     public void setScanList (ArrayList list)
     {
-        this.scanList = new ArrayList(list);
+        this._scanList = new ArrayList(list);
     }
     
     public ArrayList getScanList ()
     {
-        return this.scanList;
+        return this._scanList;
     }
     
     
     public void setScannerListeners (ArrayList listeners)
     {
-        this.scannerListeners = new ArrayList(listeners);
+        this._scannerListeners = new ArrayList(listeners);
     }
     
     public ArrayList getScannerListeners ()
     {
-        return this.scannerListeners;
+        return this._scannerListeners;
     }
     
     
@@ -374,6 +377,16 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             //apply any config from a jetty.xml file first which is able to 
             //be overwritten by config in the pom.xml
             applyJettyXml ();
+
+            JettyPluginServer plugin=getServer();
+            Server server=(Server)plugin.getProxiedObject();
+            HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+            if (contexts==null)
+            {   
+                contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
+                if (contexts==null)
+                    server.setHandler(new ContextHandlerCollection());
+            }
             
             // if the user hasn't configured their project's pom to use a
             // different set of connectors,
@@ -381,10 +394,10 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             Object[] configuredConnectors = getConfiguredConnectors();
             if (configuredConnectors == null|| configuredConnectors.length == 0)
             {
-                configuredConnectors = new Object[] { server.createDefaultConnector() };
+                configuredConnectors = new Object[] { plugin.createDefaultConnector() };
             }
             
-            server.setConnectors(configuredConnectors);           
+            plugin.setConnectors(configuredConnectors);           
             setWebApplication(getServer().createWebApplication());  
             configureWebApplication();
             getServer().addWebApplication(getWebApplication());
@@ -395,7 +408,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             for (int i = 0; (configuredRealms != null) && i < configuredRealms.length; i++)
                 getLog().debug(configuredRealms[i].getClass().getName() + ": "+ configuredRealms[i].toString());
             
-            server.setUserRealms(configuredRealms);
+            plugin.setUserRealms(configuredRealms);
                         
             //do any other configuration required by the
             //particular Jetty version
@@ -490,8 +503,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     throws Exception
     {
         List allRemoteRepositories = new ArrayList();
-        allRemoteRepositories.addAll(remoteRepositories);
-        allRemoteRepositories.addAll(pluginRepositories);
+        allRemoteRepositories.addAll(_remoteRepositories);
+        allRemoteRepositories.addAll(_pluginRepositories);
         
         if (getLog().isDebugEnabled())
         {
@@ -501,8 +514,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
                 getLog().debug("Remote repository: "+itor.next());
             }
         }
-        resolver = new RuntimeDependencyResolver(artifactFactory, artifactResolver, 
-                metadataSource, localRepository, allRemoteRepositories);
+        _resolver = new RuntimeDependencyResolver(_artifactFactory, _artifactResolver, 
+                _metadataSource, _localRepository, allRemoteRepositories);
         
         
         Set runtimeArtifacts = resolveRuntimeJSP();
@@ -549,7 +562,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
                 getLog().info("Using JSP2.0 for non-jdk1.5 runtime");
                 
                 //get the dependencies
-                dependencies = resolver.transitivelyResolvePomDependencies(projectBuilder, "org.mortbay.jetty", "jsp-2.0", POM_VERSION, true);
+                dependencies = _resolver.transitivelyResolvePomDependencies(_projectBuilder, "org.mortbay.jetty", "jsp-2.0", POM_VERSION, true);
                 
                 //check if there is already commons logging on the classpath, and if so, take out the jetty default slf4j commons
                 //logging bridge, and the slf4j impl
@@ -557,8 +570,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
                 {
                     Thread.currentThread().getContextClassLoader().loadClass("org.apache.commons.logging.Log");   
                     //there is already a CommonsLogging jar on the classpath, so we want to remove the default jetty one
-                    resolver.removeDependency (dependencies, "org.slf4j", "jcl104-over-slf4j", null, "jar");
-                    resolver.removeDependency (dependencies, "org.slf4j", "slf4j-simple", null, "jar");
+                    _resolver.removeDependency (dependencies, "org.slf4j", "jcl104-over-slf4j", null, "jar");
+                    _resolver.removeDependency (dependencies, "org.slf4j", "slf4j-simple", null, "jar");
                 }
                 catch (ClassNotFoundException e)
                 {
@@ -569,7 +582,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
                 {
                     Thread.currentThread().getContextClassLoader().loadClass("org.slf4j.Logger");
                     //already an slf4j log impl on the classpath, so take out the default jetty one
-                    resolver.removeDependency (dependencies, "org.slf4j", "slf4j-simple", null, "jar");
+                    _resolver.removeDependency (dependencies, "org.slf4j", "slf4j-simple", null, "jar");
                 }
                 catch (ClassNotFoundException e)
                 {
@@ -579,13 +592,13 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             else
             {
                 getLog().info("Using JSP2.1 for jdk1.5 runtime");
-                dependencies = resolver.transitivelyResolvePomDependencies(projectBuilder, 
+                dependencies = _resolver.transitivelyResolvePomDependencies(_projectBuilder, 
                                                                            "org.mortbay.jetty", "jsp-2.1", POM_VERSION, true);
             }
                
             //get rid of any copies of the servlet-api jar that might have been transitively introduced
             //by the jsp project
-            resolver.removeDependency(dependencies, "org.mortbay.jetty", "servlet-api-2.5", null, "jar");
+            _resolver.removeDependency(dependencies, "org.mortbay.jetty", "servlet-api-2.5", null, "jar");
             
             return dependencies;
         }

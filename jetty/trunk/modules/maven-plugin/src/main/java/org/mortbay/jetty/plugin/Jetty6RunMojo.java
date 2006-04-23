@@ -23,6 +23,8 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.security.UserRealm;
@@ -131,9 +133,16 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
     public void finishConfigurationBeforeStart() throws Exception
     {
         Handler[] handlers = getConfiguredContextHandlers();
+        JettyPluginServer plugin=getServer();
+        Server server=(Server)plugin.getProxiedObject();
+        
+        HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+        if (contexts==null)
+            contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
+        
         for (int i=0; (handlers != null) && (i < handlers.length); i++)
         {
-            ((Server)getServer().getProxiedObject()).addHandler(handlers[i]);
+            contexts.addHandler(handlers[i]);
         }
     }
 

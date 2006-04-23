@@ -143,6 +143,7 @@
     <module>modules/naming</module>
     <module>modules/plus</module>
     <module>examples/test-webapp</module>
+    <module>examples/embedded</module>
   </modules>
   <repositories>
     <repository>
