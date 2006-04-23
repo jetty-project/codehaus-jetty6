@@ -417,10 +417,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
-        boolean handled=false;
         boolean new_context=false;
         Request base_request=null;
         Context old_context=null;
@@ -449,7 +448,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 for (int i=0;!match && i<_vhosts.length;i++)
                     match=_vhosts[i]!=null && _vhosts[i].equalsIgnoreCase(vhost);
                 if (!match)
-                    return false;
+                    return;
             }
             
             // Check the real hosts
@@ -462,7 +461,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 for (int i=0;!match && i<_hosts.length;i++)
                     match=_hosts[i]!=null && _hosts[i].equalsIgnoreCase(host);
                 if (!match)
-                    return false;
+                    return;
             }
             
             // Nope - so check the target.
@@ -477,7 +476,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                             response.sendRedirect(target+"/?"+request.getQueryString());
                         else 
                             response.sendRedirect(target+"/");
-                        return true;
+                        return;
                     }
                 }
                 else if (target.startsWith(_contextPath) && (_contextPath.length()==1 || target.charAt(_contextPath.length())=='/'))
@@ -488,7 +487,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 else 
                 {
                     // Not for this context!
-                    return false;
+                    return;
                 }
             }
         }
@@ -536,7 +535,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             // Handle the request
             try
             {
-                handled = getHandler().handle(target, request, response, dispatch);
+                getHandler().handle(target, request, response, dispatch);
             }
             finally
             {
@@ -568,8 +567,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 base_request.setPathInfo(old_path_info); 
             }
         }
-        
-        return handled;
     }
 
     /* ------------------------------------------------------------ */

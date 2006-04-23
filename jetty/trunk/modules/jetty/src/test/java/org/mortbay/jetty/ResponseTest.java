@@ -16,15 +16,7 @@
 package org.mortbay.jetty;
 
 
-import java.io.IOException;
-
 import junit.framework.TestCase;
-
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.ByteArrayEndPoint;
-import org.mortbay.io.SimpleBuffers;
-import org.mortbay.io.View;
 
 /**
  * @author gregw

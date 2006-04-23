@@ -16,7 +16,6 @@ package org.mortbay.jetty.security;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -156,7 +155,7 @@ public class SecurityHandler extends HandlerWrapper
     /* 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException 
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException 
     {
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         Response base_response = (response instanceof Response) ? (Response)response:HttpConnection.getCurrentConnection().getResponse();
@@ -165,17 +164,16 @@ public class SecurityHandler extends HandlerWrapper
         {
             base_request.setUserRealm(getUserRealm());
             if (dispatch==REQUEST && !checkSecurityConstraints(target,base_request,base_response))
-                return true;
+                return;
             
             if (_authenticator instanceof FormAuthenticator && target.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
             {
                 _authenticator.authenticate(getUserRealm(),target,base_request,base_response);
-                return true;
+                return;
             }
             
             if (getHandler()!=null)
-                return getHandler().handle(target, request, response, dispatch);
-            return false;
+                getHandler().handle(target, request, response, dispatch);
         }
         finally
         {

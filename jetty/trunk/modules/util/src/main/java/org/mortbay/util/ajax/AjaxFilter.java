@@ -18,7 +18,6 @@ package org.mortbay.util.ajax;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

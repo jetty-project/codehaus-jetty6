@@ -21,17 +21,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.plus.jaas.callback.AbstractCallbackHandler;
 import org.mortbay.jetty.plus.jaas.callback.DefaultCallbackHandler;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
 import org.mortbay.util.Loader;
 

@@ -107,7 +107,7 @@ public class ThrottlingFilter implements Filter
             _queueTimeout = Integer.MAX_VALUE;
         }
 
-        Log.info("Config{maximum:" + _maximum + ", block:" + _queueTimeout + ", queue:" + _queueSize + "}", null, null);
+        Log.debug("Config{maximum:" + _maximum + ", block:" + _queueTimeout + ", queue:" + _queueSize + "}", null, null);
     }
 
     private int getIntegerParameter(FilterConfig filterConfig, String name, int defaultValue) 

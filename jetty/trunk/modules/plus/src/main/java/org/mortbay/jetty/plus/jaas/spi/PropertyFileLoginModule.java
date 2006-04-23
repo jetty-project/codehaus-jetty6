@@ -17,28 +17,16 @@ package org.mortbay.jetty.plus.jaas.spi;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.Principal;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
 
-import org.mortbay.jetty.plus.jaas.JAASPrincipal;
-import org.mortbay.jetty.plus.jaas.JAASRole;
-import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
 import org.mortbay.jetty.security.Credential;
 import org.mortbay.log.Log;
 

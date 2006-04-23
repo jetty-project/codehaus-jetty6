@@ -281,11 +281,11 @@ public class ServletHandler extends AbstractHandler
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(String target, HttpServletRequest request,HttpServletResponse response, int type)
+    public void handle(String target, HttpServletRequest request,HttpServletResponse response, int type)
          throws IOException
     {
         if (!isStarted())
-            return false;
+            return;
 
         // Get the base requests
         final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
@@ -344,12 +344,16 @@ public class ServletHandler extends AbstractHandler
                 Log.debug("chain="+chain);
                 Log.debug("servelet holder="+servlet_holder);
             }
-           
+
             // Do the filter/handling thang
-            if (chain!=null)
-                chain.doFilter(request, response);
-            else if (servlet_holder != null)
-                servlet_holder.handle(request,response);
+            if (servlet_holder!=null)
+            {
+                response.setStatus(HttpServletResponse.SC_OK);  // Must be handled.
+                if (chain!=null)
+                    chain.doFilter(request, response);
+                else 
+                    servlet_holder.handle(request,response);
+            }
             else
                 notFound(request, response);
         }
@@ -427,7 +431,7 @@ public class ServletHandler extends AbstractHandler
                 base_request.setPathInfo(old_path_info); 
             }
         }
-        return true;
+        return;
     }
 
     /* ------------------------------------------------------------ */
@@ -860,7 +864,6 @@ public class ServletHandler extends AbstractHandler
     {
         if(Log.isDebugEnabled())Log.debug("Not Found "+request.getRequestURI());
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
-        
     }
     
     /* ------------------------------------------------------------ */

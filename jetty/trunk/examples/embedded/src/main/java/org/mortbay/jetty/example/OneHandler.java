@@ -45,12 +45,11 @@ public class OneHandler
 
     public static class HelloHandler extends AbstractHandler
     {
-        public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             response.setContentType("text/html");
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("<h1>Hello OneHandler</h1>");
-            return true;
         }
     }
 }

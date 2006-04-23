@@ -19,12 +19,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.maven.plugin.logging.Log;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.plus.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.jetty.webapp.WebXmlConfiguration;
-import org.mortbay.xml.XmlParser;
 
 public class Jetty6MavenConfiguration extends Configuration 
 {

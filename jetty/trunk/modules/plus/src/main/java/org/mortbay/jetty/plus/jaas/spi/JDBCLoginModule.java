@@ -17,18 +17,11 @@ package org.mortbay.jetty.plus.jaas.spi;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.login.LoginException;
-import org.mortbay.jetty.plus.jaas.JAASRole;
-import org.mortbay.jetty.security.Credential;
+
 import org.mortbay.log.Log;
 import org.mortbay.util.Loader;
 
