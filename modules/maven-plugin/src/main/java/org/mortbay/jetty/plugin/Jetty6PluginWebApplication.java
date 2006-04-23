@@ -22,7 +22,6 @@ import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plus.webapp.EnvConfiguration;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
-import org.mortbay.jetty.webapp.TagLibConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebInfConfiguration;
 

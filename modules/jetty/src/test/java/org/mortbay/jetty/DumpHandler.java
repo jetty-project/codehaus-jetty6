@@ -21,9 +21,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -48,11 +45,12 @@ public class DumpHandler extends AbstractHandler
     /* 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         if (!isStarted())
-            return false;
+            return;
         
+        response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader(HttpHeaders.CONTENT_TYPE,MimeTypes.TEXT_HTML);
         
         OutputStream out = response.getOutputStream();
@@ -170,6 +168,5 @@ public class DumpHandler extends AbstractHandler
         writer.flush();
         buf.writeTo(out);
         
-        return true;
     }
 }

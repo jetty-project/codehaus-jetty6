@@ -15,10 +15,6 @@
 package com.acme;
 import java.io.IOException;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -48,8 +44,6 @@ public class HelloWorld extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-       
-        
         response.setContentType("text/html");
         ServletOutputStream out = response.getOutputStream();
         out.println("<html>");

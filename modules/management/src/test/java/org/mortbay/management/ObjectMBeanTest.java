@@ -15,11 +15,11 @@
 package org.mortbay.management;
 
 
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.Server;
 
 import com.acme.Derived;
-
-import junit.framework.TestCase;
 
 public class ObjectMBeanTest extends TestCase
 {

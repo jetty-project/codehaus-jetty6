@@ -16,8 +16,6 @@
 package org.mortbay.jetty.handler;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
-import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.
@@ -117,11 +114,10 @@ public class HandlerWrapper extends AbstractHandler
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
-        if (_handler==null || !isStarted())
-            return false;
-        return _handler.handle(target,request, response, dispatch);
+        if (_handler!=null && isStarted())
+            _handler.handle(target,request, response, dispatch);
     }
     
 

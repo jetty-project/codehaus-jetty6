@@ -16,15 +16,20 @@ package org.mortbay.jetty.handler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.io.IO;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Server;
+import org.mortbay.log.Log;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.StringUtil;
 
@@ -37,18 +42,55 @@ import org.mortbay.util.StringUtil;
  */
 public class NotFoundHandler extends AbstractHandler
 {
+    long _faviconModified=(System.currentTimeMillis()/1000)*1000;
+    byte[] _favicon;
+    
+    public NotFoundHandler()
+    {
+        try
+        {
+            URL fav = this.getClass().getClassLoader().getResource("org/mortbay/jetty/favicon.ico");
+            if (fav!=null)
+            _favicon=IO.readBytes(fav.openStream());
+        }
+        catch(Exception e)
+        {
+            Log.warn(e);
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
+        if (response.isCommitted() || HttpConnection.getCurrentConnection().getResponse().getStatus()>0)
+            return;
+        
         String method=request.getMethod();
+
+        // little cheat for common request
+        if (_favicon!=null && method.equals(HttpMethods.GET) && request.getRequestURI().equals("/favicon.ico"))
+        {
+            if (request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE)==_faviconModified)
+                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+            else
+            {
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.setContentType("image/x-icon");
+                response.setContentLength(_favicon.length);
+                response.setDateHeader(HttpHeaders.LAST_MODIFIED, _faviconModified);
+                response.getOutputStream().write(_favicon);
+            }
+            return;
+        }
+        
         
         if (!method.equals(HttpMethods.GET) || !request.getRequestURI().equals("/"))
         {
             response.sendError(404);
-            return true;   
+            return;   
         }
 
         response.setStatus(404);
@@ -105,7 +147,7 @@ public class NotFoundHandler extends AbstractHandler
         writer.writeTo(out);
         out.close();
         
-        return true;
+        return;
     }
 
 

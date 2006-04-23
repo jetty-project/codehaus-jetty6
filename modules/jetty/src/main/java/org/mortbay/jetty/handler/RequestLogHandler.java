@@ -21,9 +21,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
 import org.mortbay.jetty.RequestLog;
-import org.mortbay.log.Log;
+import org.mortbay.jetty.Response;
+import org.mortbay.jetty.Server;
 
 
 /** 
@@ -35,30 +35,72 @@ import org.mortbay.log.Log;
  */
 public class RequestLogHandler extends HandlerWrapper
 {
-
     private RequestLog _requestLog;
     
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
-        boolean result = super.handle(target, request, response, dispatch);
-        _requestLog.log((Request)request, (Response)response);
-        
-        return result;
+        super.handle(target, request, response, dispatch);
+        if (dispatch==REQUEST)
+            _requestLog.log((Request)request, (Response)response);
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void setRequestLog(RequestLog requestLog)
     {
+        if (getServer()!=null)
+            getServer().getContainer().update(this, _requestLog, requestLog, "logimpl");
         _requestLog = requestLog;
     }
-    
-    public RequestLog getRequestLog() {
-        
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.handler.HandlerWrapper#setServer(org.mortbay.jetty.Server)
+     */
+    public void setServer(Server server)
+    {
+        if (_requestLog!=null)
+        {
+            if (getServer()!=null && getServer()!=server)
+                getServer().getContainer().update(this, _requestLog, null, "logimpl");
+            if (server!=null && server!=getServer())
+                server.getContainer().update(this, null,_requestLog, "logimpl");
+        }
+            
+        super.setServer(server);
+    }
+
+    /* ------------------------------------------------------------ */
+    public RequestLog getRequestLog() 
+    {
         return _requestLog;
     }
 
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.handler.HandlerWrapper#doStart()
+     */
+    protected void doStart() throws Exception
+    {
+        if (_requestLog!=null)
+            _requestLog.start();
+        super.doStart();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.handler.HandlerWrapper#doStop()
+     */
+    protected void doStop() throws Exception
+    {
+        super.doStop();
+        if (_requestLog!=null)
+            _requestLog.stop();
+    }
+
+    
 }

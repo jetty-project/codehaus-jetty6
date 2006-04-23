@@ -16,7 +16,6 @@
 package org.mortbay.jetty.plugin;
 
 import java.io.File;
-import java.io.FileInputStream;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;

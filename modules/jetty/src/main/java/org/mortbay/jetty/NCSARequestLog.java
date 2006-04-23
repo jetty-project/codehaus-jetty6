@@ -219,6 +219,8 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             buf.append(request.getProtocol());
             buf.append("\" ");
             int status = response.getStatus();
+            if (status<=0)
+                status=404;
             buf.append((char)('0'+((status/100)%10)));
             buf.append((char)('0'+((status/10)%10)));
             buf.append((char)('0'+(status%10)));

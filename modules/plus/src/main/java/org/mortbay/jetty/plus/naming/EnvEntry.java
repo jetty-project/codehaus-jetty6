@@ -17,9 +17,7 @@ package org.mortbay.jetty.plus.naming;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.Name;
 import javax.naming.NameNotFoundException;
-import javax.naming.NameParser;
 import javax.naming.NamingException;
 
 import org.mortbay.log.Log;

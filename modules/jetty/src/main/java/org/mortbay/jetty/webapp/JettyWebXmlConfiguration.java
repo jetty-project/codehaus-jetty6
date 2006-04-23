@@ -15,8 +15,6 @@
 
 package org.mortbay.jetty.webapp;
 
-import java.net.URL;
-
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.xml.XmlConfiguration;

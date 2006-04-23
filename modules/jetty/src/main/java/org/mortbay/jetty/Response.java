@@ -66,7 +66,7 @@ public class Response implements HttpServletResponse
     }
 
     private HttpConnection _connection;
-    private int _status=200;
+    private int _status=-1;
     private String _reason;
     private Locale _locale;
     private String _mimeType;
@@ -95,7 +95,7 @@ public class Response implements HttpServletResponse
      */
     void recycle()
     {
-        _status=200;
+        _status=-1;
         _reason=null;
         _locale=null;
         _mimeType=null;

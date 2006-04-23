@@ -1003,7 +1003,7 @@ public class WebAppContext extends ContextHandler
         /* 
          * @see org.mortbay.jetty.handler.ErrorHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
          */
-        public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
         {
             if (_errorPages!=null)
             {
@@ -1051,12 +1051,12 @@ public class WebAppContext extends ContextHandler
                         {
                             Log.warn(Log.EXCEPTION, e);
                         }
-                        return true;
+                        return;
                     }
                 }
             }
             
-            return super.handle(target, request, response, dispatch);
+            super.handle(target, request, response, dispatch);
         }
 
         /* ------------------------------------------------------------ */

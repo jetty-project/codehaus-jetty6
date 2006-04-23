@@ -15,9 +15,7 @@
 
 package org.mortbay.jetty.plus.naming;
 
-import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NameAlreadyBoundException;
 
 import junit.framework.TestCase;
 

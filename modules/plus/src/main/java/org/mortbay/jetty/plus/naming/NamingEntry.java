@@ -17,8 +17,6 @@ package org.mortbay.jetty.plus.naming;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 import javax.naming.Binding;
 import javax.naming.Context;

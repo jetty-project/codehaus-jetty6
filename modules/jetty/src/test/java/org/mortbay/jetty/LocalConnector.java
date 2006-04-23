@@ -19,7 +19,6 @@ import java.io.IOException;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.ByteArrayEndPoint;
-import org.mortbay.jetty.handler.NotFoundHandler;
 
 public class LocalConnector extends AbstractConnector
 {

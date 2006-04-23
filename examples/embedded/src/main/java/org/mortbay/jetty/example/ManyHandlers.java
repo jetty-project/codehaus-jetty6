@@ -50,21 +50,19 @@ public class ManyHandlers
 
     public static class ParamHandler extends AbstractHandler
     {
-        public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             System.err.println(request.getParameterMap());
-            return false;
         }
     }
     
     public static class HelloHandler extends AbstractHandler
     {
-        public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             response.setContentType("text/html");
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("<h1>Hello ManyHandler</h1>");
-            return true;
         }
     }
 }

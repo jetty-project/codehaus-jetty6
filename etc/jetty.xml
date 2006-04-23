@@ -6,7 +6,6 @@
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.Server">
 
-    
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
     <!-- =========================================================== -->
@@ -24,7 +23,6 @@
     <!-- =========================================================== -->
     <Set name="connectors">
       <Array type="org.mortbay.jetty.Connector">
-
 
         <!-- Use this connector for many frequently idle connections
              and for threadless continuations.
@@ -72,20 +70,16 @@
     </Set>
 
     <!-- =========================================================== -->
-    <!-- Set handler Structure                                       -->    
-    <!-- If not logging , you can remove the PrePostHandler          -->
-    <!-- If one configured webapp, remove ContextHandlerCollection   -->
+    <!-- Set handler Collection Structure                            --> 
     <!-- =========================================================== -->
-    
     <Set name="handler">
-      <New id="prepost" class="org.mortbay.jetty.handler.PrePostHandler">
+      <New id="handlers" class="org.mortbay.jetty.handler.HandlerCollection">
+        <Set name="conditional">false</Set>
         <Set name="handler">
           <New id="contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
         </Set>
       </New>
     </Set>
-    
-    
     
     <!-- ======================================================= -->
     <!-- Configure specific contexts                             -->
@@ -153,7 +147,7 @@
 
 
     <!-- =========================================================== -->
-    <!-- Additional contexts not defined above                       -->
+    <!-- Discover contexts from webapps directory                    -->
     <!-- =========================================================== -->
     <Call class="org.mortbay.jetty.webapp.WebAppContext" name="addWebApplications">
       <Arg><Ref id="Server"/></Arg>
@@ -162,7 +156,6 @@
       <Arg type="boolean">True</Arg>
       <Arg type="boolean">False</Arg>
     </Call>
-
 
 
     <!-- =========================================================== -->
@@ -180,12 +173,24 @@
     </Set>
     
     <!-- =========================================================== -->
+    <!-- NotFoundHandler                                             -->
+    <!-- =========================================================== -->
+    <Ref id="handlers">
+      <Call name="addHandler">
+       <Arg>
+        <New class="org.mortbay.jetty.handler.NotFoundHandler"/>
+       </Arg>
+      </Call>
+    </Ref>
+    
+    <!-- =========================================================== -->
     <!-- Configure Request Log                                       -->
     <!-- =========================================================== -->
     <!--  uncomment for a request log (and create logs directory)  -->
-    <Ref id="prepost">
-      <Set name="postHandler">
-       <New id="requestLogImpl" class="org.mortbay.jetty.handler.RequestLogHandler">
+    <Ref id="handlers">
+      <Call name="addHandler">
+       <Arg>
+        <New id="requestLog" class="org.mortbay.jetty.handler.RequestLogHandler">
          <Set name="requestLog">
            <New id="requestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
             <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
@@ -195,8 +200,9 @@
             <Set name="LogTimeZone">GMT</Set>
            </New>
           </Set>
-        </New>
-      </Set>
+         </New>
+        </Arg>
+      </Call>
     </Ref>
 
     <!-- =========================================================== -->

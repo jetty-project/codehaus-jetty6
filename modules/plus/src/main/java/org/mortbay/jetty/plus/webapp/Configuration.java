@@ -15,17 +15,10 @@
 
 package org.mortbay.jetty.plus.webapp;
 
-import java.util.Iterator;
-import java.util.List;
-
-import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 
 import org.mortbay.jetty.plus.naming.EnvEntry;
-import org.mortbay.jetty.plus.naming.NamingEntry;
 import org.mortbay.jetty.plus.naming.Resource;
 import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.log.Log;

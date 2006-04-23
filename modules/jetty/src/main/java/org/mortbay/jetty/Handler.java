@@ -45,11 +45,10 @@ public interface Handler extends LifeCycle
      * object or a wrapper of that request. The {@link HttpConnection#getCurrentConnection()} 
      * method can be used access the Response object if required.
      * @param dispatch The dispatch mode: {@link #REQUEST}, {@link #FORWARD}, {@link #INCLUDE}, {@link #ERROR}
-     * @return True if the request has been handled
      * @throws IOException
      * @throws ServletException
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException, ServletException;
     
     public void setServer(Server server);
