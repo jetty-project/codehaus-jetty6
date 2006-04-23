@@ -90,6 +90,7 @@ public class Main
     private Classpath _classpath=new Classpath();
     private String _config=System.getProperty("START","org/mortbay/start/start.config");
     private ArrayList _xml=new ArrayList();
+    private boolean _version=false;
 
     public static void main(String[] args)
     {
@@ -97,11 +98,18 @@ public class Main
         {
             if (args.length>0 && args[0].equalsIgnoreCase("--help"))
             {
-                System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop] [config ...]");
+                System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop|--version] [config ...]");
                 System.exit(1);
             }
             else if(args.length>0 && args[0].equalsIgnoreCase("--stop")) {
                 new Main().stop();
+            }
+            else if(args.length>0 && args[0].equalsIgnoreCase("--version")) {
+                String[] nargs = new String[args.length-1];
+                System.arraycopy(args, 1, nargs, 0, nargs.length);
+                Main main =new Main();
+                main._version=true;
+                main.start(nargs);
             }
             else 
             {
@@ -152,18 +160,27 @@ public class Main
         return false;
     }
 
-    public static void invokeMain(ClassLoader classloader,String classname,String[] args)
+    public void invokeMain(ClassLoader classloader,String classname,String[] args)
             throws IllegalAccessException,InvocationTargetException,NoSuchMethodException,ClassNotFoundException
     {
-        System.err.println("Starting jetty "+Main.class.getPackage().getImplementationVersion()+" ...");
         Class invoked_class=null;
         invoked_class=classloader.loadClass(classname);
+        
+        if (_version)
+        {
+            System.err.println(invoked_class.getPackage().getImplementationTitle()+" "+
+                        invoked_class.getPackage().getImplementationVersion());
+            System.exit(0);
+        }
+        
         Class[] method_param_types=new Class[1];
         method_param_types[0]=args.getClass();
         Method main=null;
         main=invoked_class.getDeclaredMethod("main",method_param_types);
         Object[] method_params=new Object[1];
         method_params[0]=args;
+        
+        
         main.invoke(null,method_params);
     }
 

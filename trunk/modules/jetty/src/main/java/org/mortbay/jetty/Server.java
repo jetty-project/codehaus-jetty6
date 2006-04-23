@@ -251,6 +251,7 @@ public class Server extends HandlerCollection
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
+        Log.info(this.getClass().getPackage().getImplementationTitle()+" "+this.getClass().getPackage().getImplementationVersion());
         MultiException mex=new MultiException();
         
         if (_threadPool==null)
