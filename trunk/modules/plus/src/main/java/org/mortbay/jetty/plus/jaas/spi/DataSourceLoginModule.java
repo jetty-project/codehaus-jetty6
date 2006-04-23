@@ -1,11 +1,5 @@
 package org.mortbay.jetty.plus.jaas.spi;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.naming.InitialContext;
@@ -13,11 +7,6 @@ import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.sql.DataSource;
-
-import org.mortbay.jetty.plus.jaas.JAASRole;
-import org.mortbay.jetty.security.Credential;
-import org.mortbay.log.Log;
-import org.mortbay.util.Loader;
 // ========================================================================
 // $Id$
 // Copyright 1999-2004 Mort Bay Consulting Pty. Ltd.

@@ -35,12 +35,11 @@ import org.mortbay.util.StringUtil;
  */
 public class ErrorHandler extends AbstractHandler
 {
-
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
     {
         response.setContentType(MimeTypes.TEXT_HTML);
         ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
@@ -50,7 +49,6 @@ public class ErrorHandler extends AbstractHandler
         response.setContentLength(writer.size());
         writer.writeTo(response.getOutputStream());
         writer.destroy();
-        return true;
     }
 
     /* ------------------------------------------------------------ */

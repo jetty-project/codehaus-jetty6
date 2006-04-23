@@ -24,10 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.xml.XmlParser;
 

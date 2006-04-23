@@ -25,8 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Response;
 import org.mortbay.jetty.servlet.PathMap;
-import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 public class ContextHandlerCollection extends HandlerCollection
@@ -110,16 +111,16 @@ public class ContextHandlerCollection extends HandlerCollection
     /* 
      * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         Handler[] handlers = getHandlers();
         if (handlers==null || handlers.length==0)
         {
             response.sendError(500);
-            return true;
         }
         else
         {
+            Response base_response = HttpConnection.getCurrentConnection().getResponse();
             PathMap map = _contextMap;
             if (map!=null && target!=null && target.startsWith("/"))
             {
@@ -131,21 +132,21 @@ public class ContextHandlerCollection extends HandlerCollection
                     for (int j=0; j<LazyList.size(list); j++)
                     {
                         Handler handler = (Handler)LazyList.get(list,j);
-                        if (handler.handle(target,request, response, dispatch))
-                            return true;
+                        handler.handle(target,request, response, dispatch);
+                        if (response.isCommitted() || base_response.getStatus()!=-1)
+                            return;
                     }
                 }
             }
             
             for (int i=0;i<handlers.length;i++)
             {
-                if (handlers[i].handle(target,request, response, dispatch))
-                    return true;
+                handlers[i].handle(target,request, response, dispatch);
+                if (response.isCommitted() || base_response.getStatus()!=-1)
+                    return;
             }
             
         }    
-        
-        return false;
     }
 
     

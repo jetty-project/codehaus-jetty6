@@ -24,7 +24,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.plugin.util.Scanner;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.xml.XmlConfiguration;
 
 /**
  * 

@@ -15,12 +15,7 @@
 
 package org.mortbay.jetty.plus.webapp;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
-import org.mortbay.log.Log;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
 

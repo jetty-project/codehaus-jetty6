@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.URI;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -51,7 +50,6 @@ import org.mortbay.jetty.handler.ContextHandler.Context;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -130,7 +128,6 @@ public class Request implements HttpServletRequest
     {
         if (_context!=null)
             throw new IllegalStateException("Request in context!");
-        
         if(_attributes!=null)
             _attributes.clearAttributes();
         _authType=null;

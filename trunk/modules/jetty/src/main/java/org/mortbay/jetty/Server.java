@@ -19,21 +19,16 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
-import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
@@ -57,7 +52,6 @@ public class Server extends HandlerWrapper
     private ThreadPool _threadPool;
     private Connector[] _connectors;
     private UserRealm[] _realms;
-    private Handler _notFoundHandler;
     private Container _container=new Container();
     private SessionIdManager _sessionIdManager;
     private boolean _sendServerVersion = true; //send Server: header by default
@@ -236,36 +230,6 @@ public class Server extends HandlerWrapper
     }
 
     /* ------------------------------------------------------------ */
-    /* 
-     * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
-     */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
-    {
-        boolean handled = super.handle(target, request, response, dispatch);
-        if (handled)
-            return handled;
-        
-        // TODO - somehow move this to a post handler?
-        synchronized(this)
-        {
-            if (_notFoundHandler==null)
-            {
-                try
-                {
-                    NotFoundHandler nfh=new NotFoundHandler();
-                    
-                    setNotFoundHandler(nfh);
-                }
-                catch(Exception e)
-                {
-                    Log.warn(e);
-                }
-            }
-        }
-        return _notFoundHandler.handle(target, request, response, dispatch);
-    }
-    
-    /* ------------------------------------------------------------ */
     public void join() throws InterruptedException 
     {
         getThreadPool().join();
@@ -300,26 +264,6 @@ public class Server extends HandlerWrapper
     public void removeUserRealm(UserRealm realm)
     {
         setUserRealms((UserRealm[])LazyList.removeFromArray(getUserRealms(), realm));
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the notFoundHandler.
-     */
-    public Handler getNotFoundHandler()
-    {
-        return _notFoundHandler;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param notFoundHandler The notFoundHandler to set.
-     */
-    public void setNotFoundHandler(Handler notFoundHandler)
-    {
-        _container.update(this, _notFoundHandler, notFoundHandler, "notFoundHandler");
-        notFoundHandler.setServer(this);
-        _notFoundHandler = notFoundHandler;
     }
 
     /* ------------------------------------------------------------ */

@@ -291,6 +291,15 @@ public class IO extends BoundedThreadPool
     }
 
     /* ------------------------------------------------------------ */
+    public static byte[] readBytes(InputStream in)
+        throws IOException
+    {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        copy(in,bout);
+        return bout.toByteArray();
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * closes an output stream, and logs exceptions
      *
@@ -352,6 +361,7 @@ public class IO extends BoundedThreadPool
         public void write(String s,int o,int l){}
     }
     private static NullWrite __nullWriter = new NullWrite();
+
 }
 
 

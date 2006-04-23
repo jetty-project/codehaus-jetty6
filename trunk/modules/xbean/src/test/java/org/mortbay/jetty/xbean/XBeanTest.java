@@ -17,14 +17,14 @@
 
 package org.mortbay.jetty.xbean;
 
-import org.mortbay.jetty.Server;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.core.io.UrlResource;
-import org.apache.xbean.spring.context.ResourceXmlApplicationContext;
-
 import java.net.URL;
 
 import junit.framework.TestCase;
+
+import org.apache.xbean.spring.context.ResourceXmlApplicationContext;
+import org.mortbay.jetty.Server;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.core.io.UrlResource;
 
 public class XBeanTest extends TestCase {
 

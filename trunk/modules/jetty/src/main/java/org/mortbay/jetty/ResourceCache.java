@@ -14,7 +14,6 @@
 
 package org.mortbay.jetty;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

@@ -21,7 +21,7 @@ import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
-
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
@@ -385,6 +385,7 @@ public class HttpConnection
             {
                 if (!retry)
                 {
+      
                     if (_request.getContinuation()!=null && _request.getContinuation().isPending())
                     {
                         Log.debug("continuation still pending {}");
@@ -393,6 +394,8 @@ public class HttpConnection
                     
                     if (!error) 
                     {
+                        if (!_response.isCommitted() && _response.getStatus()<0)
+                            _response.sendError(HttpServletResponse.SC_NOT_FOUND);
                         _response.complete();
 
                         while (!_generator.isComplete() && _endp.isOpen())

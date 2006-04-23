@@ -15,8 +15,6 @@
 package org.mortbay.jetty; 
 
 import org.mortbay.component.LifeCycle;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
 
 /** 
  * RequestLog

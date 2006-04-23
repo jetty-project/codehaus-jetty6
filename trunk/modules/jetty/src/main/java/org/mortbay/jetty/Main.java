@@ -14,8 +14,6 @@
 
 package org.mortbay.jetty;
 
-import java.io.ObjectInputStream;
-
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;

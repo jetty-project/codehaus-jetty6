@@ -26,8 +26,8 @@ import java.util.Properties;
 
 import org.mortbay.jetty.Request;
 import org.mortbay.log.Log;
-import org.mortbay.util.Loader;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.Loader;
 
 /* ------------------------------------------------------------ */
 /** HashMapped User Realm with JDBC as data source.
@@ -219,11 +219,11 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
                 _roles.clear();
                 _lastHashPurge = now;
             }
-            Principal user = (Principal)super.getPrincipal(username);
+            Principal user = super.getPrincipal(username);
             if (user == null)
             {
                 loadUser(username);
-                user = (Principal)super.getPrincipal(username);
+                user = super.getPrincipal(username);
             }
         }
         return super.authenticate(username, credentials, request);

@@ -25,7 +25,6 @@ import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.start.Main;
 
 /**
  * Jetty6PluginServer

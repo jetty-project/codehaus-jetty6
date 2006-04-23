@@ -12,13 +12,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-
 import junit.framework.TestCase;
+
+import org.mortbay.jetty.handler.AbstractHandler;
 
 /**
  * HttpServer Tester.
@@ -492,7 +488,7 @@ public class HttpServerTestBase
 
         //~ Methods ------------------------------------------------------------
 
-        public boolean handle(String target, HttpServletRequest request,
+        public void handle(String target, HttpServletRequest request,
                               HttpServletResponse response, int dispatch)
                        throws IOException, ServletException
         {
@@ -500,7 +496,7 @@ public class HttpServerTestBase
             BufferedReader reader = request.getReader();
             int            count  = 0;
             String         line;
-
+            response.setStatus(200);
             while ((line = reader.readLine()) != null) {
                 writer.print(line);
                 writer.print('\n');
@@ -509,8 +505,6 @@ public class HttpServerTestBase
 
             if (count==0)
                 throw new IllegalStateException("no input recieved");
-
-            return true;
         }
     }
 
@@ -520,13 +514,12 @@ public class HttpServerTestBase
 
         //~ Methods ------------------------------------------------------------
 
-        public boolean handle(String target, HttpServletRequest request,
+        public void handle(String target, HttpServletRequest request,
                               HttpServletResponse response, int dispatch)
                        throws IOException, ServletException
         {
+            response.setStatus(200);
             response.getOutputStream().print("Hello world");
-
-            return true;
         }
     }
     

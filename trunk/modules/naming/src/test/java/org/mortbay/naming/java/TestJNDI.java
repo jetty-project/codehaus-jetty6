@@ -18,23 +18,26 @@ package org.mortbay.naming.java;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Hashtable;
 import java.util.HashMap;
+import java.util.Hashtable;
+
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
-import javax.naming.Context;
 import javax.naming.Name;
+import javax.naming.NameAlreadyBoundException;
 import javax.naming.NameClassPair;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.NameAlreadyBoundException;
-import javax.naming.NameNotFoundException;
-import javax.naming.spi.ObjectFactory;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
+import javax.naming.spi.ObjectFactory;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
 import org.mortbay.log.Log;
 import org.mortbay.naming.NamingContext;
 

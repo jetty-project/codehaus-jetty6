@@ -17,8 +17,6 @@ package org.mortbay.log;
 
 import java.lang.reflect.Method;
 
-import org.mortbay.util.Loader;
-
 class Slf4jLog implements Logger
 {
     private static final String LOGGER="org.slf4j.Logger";

@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Response;
 import org.mortbay.jetty.Server;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
@@ -34,6 +36,7 @@ import org.mortbay.util.MultiException;
 public class HandlerCollection extends AbstractHandler implements Handler
 {
     private Handler[] _handlers;
+    private boolean _conditional=true;
 
     /* ------------------------------------------------------------ */
     public HandlerCollection()
@@ -107,17 +110,18 @@ public class HandlerCollection extends AbstractHandler implements Handler
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         if (_handlers!=null && isStarted())
         {
+            Response base_response = _conditional?HttpConnection.getCurrentConnection().getResponse():null;
             for (int i=0;i<_handlers.length;i++)
             {
-                if (_handlers[i].handle(target,request, response, dispatch))
-                    return true;
+                _handlers[i].handle(target,request, response, dispatch);
+                if ( _conditional && base_response.getStatus()>0)
+                    return;
             }
         }    
-        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -214,5 +218,23 @@ public class HandlerCollection extends AbstractHandler implements Handler
         for (int i=0;handlers!=null && i<handlers.length;i++)
             list=expandHandler(handlers[i], list, byClass);
         return list;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the conditional.
+     */
+    public boolean isConditional()
+    {
+        return _conditional;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param conditional The conditional to set.
+     */
+    public void setConditional(boolean conditional)
+    {
+        _conditional = conditional;
     }
 }

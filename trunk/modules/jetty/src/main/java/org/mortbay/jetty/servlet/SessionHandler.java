@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
@@ -129,10 +128,9 @@ public class SessionHandler extends HandlerWrapper
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
-        boolean result=false;
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         SessionManager old_session_manager=null;
         HttpSession old_session=null;
@@ -218,7 +216,7 @@ public class SessionHandler extends HandlerWrapper
                 Log.debug("session="+session);
             }
         
-            result=getHandler().handle(target, request, response, dispatch);
+            getHandler().handle(target, request, response, dispatch);
         }
         catch (RetryRequest r)
         {
@@ -232,7 +230,6 @@ public class SessionHandler extends HandlerWrapper
             base_request.setSessionManager(old_session_manager);
             base_request.setSession(old_session);
         }
-        return result;
     }
     
     /* ------------------------------------------------------------ */
