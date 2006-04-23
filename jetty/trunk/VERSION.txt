@@ -11,6 +11,7 @@
     + ContextHandler.setContextPath can be called after start.
     + Fixed handling of params after forward 
     + Added --version to start.jar
+    + Added embedded examples
 
 jetty-6.0.0beta14 - 9/4/2006
     + ignore dirs and files that don't exist in plugin scanner
