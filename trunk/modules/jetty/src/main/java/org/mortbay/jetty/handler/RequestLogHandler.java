@@ -33,7 +33,7 @@ import org.mortbay.log.Log;
  * @author Nigel Canonizado
  * 
  */
-public class RequestLogHandler extends WrappedHandler
+public class RequestLogHandler extends HandlerWrapper
 {
 
     private RequestLog _requestLog;

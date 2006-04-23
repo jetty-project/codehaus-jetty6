@@ -6,6 +6,7 @@
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.Server">
 
+    
     <!-- =========================================================== -->
     <!-- Server Thread Pool                                          -->
     <!-- =========================================================== -->
@@ -71,13 +72,30 @@
     </Set>
 
     <!-- =========================================================== -->
-    <!-- Set handlers                                                -->
+    <!-- Set handler Structure                                       -->    
+    <!-- If not logging , you can remove the PrePostHandler          -->
+    <!-- If one configured webapp, remove ContextHandlerCollection   -->
     <!-- =========================================================== -->
-    <Set name="handlers">
+    
+    <Set name="handler">
+      <New id="prepost" class="org.mortbay.jetty.handler.PrePostHandler">
+        <Set name="handler">
+          <New id="contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+        </Set>
+      </New>
+    </Set>
+    
+    
+    
+    <!-- ======================================================= -->
+    <!-- Configure specific contexts                             -->
+    <!-- ======================================================= -->
+    <Ref id="contexts">
+     <Set name="handlers">
       <Array type="org.mortbay.jetty.Handler">
 
         <!-- ======================================================= -->
-        <!-- Configure a test web application with web.xml           -->
+        <!-- Configure a webapp with specific options                -->
         <!-- ======================================================= -->
 	<!--
         <Item>
@@ -91,7 +109,6 @@
           </New>
         </Item>
 	-->
-
 
         <!-- ======================================================= -->
         <!-- Configure a context directly - no XML parser required   -->
@@ -131,7 +148,8 @@
 	-->
 
       </Array>
-    </Set>
+     </Set>
+    </Ref>
 
 
     <!-- =========================================================== -->
@@ -164,17 +182,22 @@
     <!-- =========================================================== -->
     <!-- Configure Request Log                                       -->
     <!-- =========================================================== -->
-    <!--  uncomment for a request log (and create logs directory) 
-    <Set name="requestLog">
-       <New id="requestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
-          <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
-          <Set name="retainDays">90</Set>
-          <Set name="append">true</Set>
-          <Set name="extended">false</Set>
-          <Set name="LogTimeZone">GMT</Set>
-       </New>
-    </Set>
-    -->
+    <!--  uncomment for a request log (and create logs directory)  -->
+    <Ref id="prepost">
+      <Set name="postHandler">
+       <New id="requestLogImpl" class="org.mortbay.jetty.handler.RequestLogHandler">
+         <Set name="requestLog">
+           <New id="requestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
+            <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
+            <Set name="retainDays">90</Set>
+            <Set name="append">true</Set>
+            <Set name="extended">false</Set>
+            <Set name="LogTimeZone">GMT</Set>
+           </New>
+          </Set>
+        </New>
+      </Set>
+    </Ref>
 
     <!-- =========================================================== -->
     <!-- extra options                                               -->

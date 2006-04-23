@@ -27,7 +27,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.jetty.handler.WrappedHandler;
+import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
@@ -38,7 +38,7 @@ import org.mortbay.util.LazyList;
  *
  * @author Greg Wilkins (gregw)
  */
-public class SecurityHandler extends WrappedHandler
+public class SecurityHandler extends HandlerWrapper
 {   
 
     /* ------------------------------------------------------------ */

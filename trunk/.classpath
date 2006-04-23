@@ -14,6 +14,7 @@
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-container-default-1.0-alpha-9.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-utils-1.1.jar"/>
 	<classpathentry output="examples/test-webapp/target/classes" kind="src" path="examples/test-webapp/src/main/java"/>
+	<classpathentry output="examples/embedded/target/classes" kind="src" path="examples/embedded/src/main/java"/>
 	<classpathentry output="modules/jetty/target/classes" kind="src" path="modules/jetty/src/main/java"/>
 	<classpathentry output="modules/jetty/target/test-classes" kind="src" path="modules/jetty/src/test/java"/>
 	<classpathentry output="modules/jsp-2.1/target/classes" kind="src" path="modules/jsp-2.1/src/main/java"/>

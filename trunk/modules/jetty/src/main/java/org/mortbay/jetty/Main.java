@@ -18,6 +18,7 @@ import java.io.ObjectInputStream;
 
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
@@ -49,7 +50,8 @@ public class Main
             
             // Create the server
             Server server = new Server();
-            
+            ContextHandlerCollection contexts = new ContextHandlerCollection();
+            server.setHandler(contexts);
             
             SocketConnector connector = new SocketConnector();
             String address = args[0];
@@ -63,17 +65,15 @@ public class Main
             }
             server.setConnectors(new Connector[]{connector});
             
-
-            
             if (args.length<3)
             {
                 ContextHandler context = new ContextHandler();
                 context.setContextPath("/");
                 context.setResourceBase(args.length==1?".":args[1]);
                 ServletHandler servlet = new ServletHandler();
-                servlet.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");
+                servlet.addServletWithMapping("org.mortbay.jetty.servlet.DefaultServlet", "/");
                 context.setHandler(servlet);
-                server.addHandler(context);
+                contexts.addHandler(context);
             }
             else if ("-webapps".equals(args[1]))
             {
@@ -84,7 +84,7 @@ public class Main
                 WebAppContext webapp = new WebAppContext();
                 webapp.setResourceBase(args[2]);
                 webapp.setContextPath("/");
-                server.addHandler(webapp);
+                contexts.addHandler(webapp);
                 
             }
                 

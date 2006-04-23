@@ -18,6 +18,8 @@ package org.mortbay.jetty.plugin;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
@@ -129,7 +131,10 @@ public class Jetty6PluginServer implements JettyPluginServer
      */
     public void addWebApplication(JettyPluginWebApplication webapp) throws Exception
     {
-        this.server.addHandler ((Handler)webapp.getProxiedObject());
+        HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+        if (contexts==null)
+            contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
+        contexts.addHandler ((Handler)webapp.getProxiedObject());
     }
 
     /* (non-Javadoc)

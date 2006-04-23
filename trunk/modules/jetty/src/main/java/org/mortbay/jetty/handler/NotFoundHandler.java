@@ -67,13 +67,10 @@ public class NotFoundHandler extends AbstractHandler
 
 
         Server server = getServer();
-        Handler[] handlers = server==null?null:server.getAllHandlers();
-        
+        Handler[] handlers = server==null?null:server.getChildHandlersByClass(ContextHandler.class);
  
         for (int i=0;handlers!=null && i<handlers.length;i++)
         {
-            if (!(handlers[i] instanceof ContextHandler))
-                continue;
             ContextHandler context = (ContextHandler)handlers[i];
             if (context.isRunning())
             {

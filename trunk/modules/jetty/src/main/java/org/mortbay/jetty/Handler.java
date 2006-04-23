@@ -54,5 +54,9 @@ public interface Handler extends LifeCycle
     
     public void setServer(Server server);
     public Server getServer();
+    
+    public Handler[] getChildHandlers();
+    public Handler[] getChildHandlersByClass(Class byclass);
+    public Handler getChildHandlerByClass(Class byclass);
 }
 

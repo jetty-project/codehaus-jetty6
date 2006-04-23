@@ -28,9 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.NotFoundHandler;
-import org.mortbay.jetty.handler.WrappedHandler;
+import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
@@ -49,7 +50,7 @@ import org.mortbay.util.MultiException;
  * @author gregw
  *
  */
-public class Server extends HandlerCollection 
+public class Server extends HandlerWrapper 
 {
     private static ShutdownHookThread hookThread = new ShutdownHookThread();
     
@@ -58,8 +59,6 @@ public class Server extends HandlerCollection
     private UserRealm[] _realms;
     private Handler _notFoundHandler;
     private Container _container=new Container();
-    private RequestLog _requestLog;
-    private PathMap _contextMap;
     private SessionIdManager _sessionIdManager;
     private boolean _sendServerVersion = true; //send Server: header by default
     
@@ -142,73 +141,6 @@ public class Server extends HandlerCollection
                 connectors[i].setServer(this);
         }
     }
-    
-    
-    
-    /* ------------------------------------------------------------ */
-    /* 
-     * @see org.mortbay.jetty.handler.HandlerCollection#setHandlers(org.mortbay.jetty.Handler[])
-     */
-    public void setHandlers(Handler[] handlers)
-    {
-        _contextMap=null;
-        super.setHandlers(handlers);
-        if (isStarted())
-            mapContexts();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Remap the context paths.
-     * TODO make this private
-     */
-    public void mapContexts()
-    {
-        _contextMap=null;
-        Handler[] handlers=getHandlers();
-        if (handlers!=null && handlers.length>0)
-        {
-            PathMap contextMap = new PathMap();
-            List list = new ArrayList();
-            for (int i=0;i<handlers.length;i++)
-            {
-                list.clear();
-                expandHandler(handlers[i], list);
-                
-                Iterator iter = list.iterator();
-                while(iter.hasNext())
-                {
-                    Handler handler = (Handler)iter.next();
-                    
-                    if (handler instanceof ContextHandler)
-                    {
-                        String contextPath=((ContextHandler)handler).getContextPath();
-                        
-                        if (contextPath==null ||
-                            contextPath.indexOf(',')>=0 ||
-                            contextPath.startsWith("*"))
-                            throw new IllegalArgumentException ("Illegal context spec:"+contextPath);
-
-                        if(!contextPath.startsWith("/"))
-                            contextPath='/'+contextPath;
-
-                        if (contextPath.length()>1)
-                        {
-                            if (contextPath.endsWith("/"))
-                                contextPath+="*";
-                            else if (!contextPath.endsWith("/*"))
-                                contextPath+="/*";
-                        }
-                        
-                        Object contexts=contextMap.get(contextPath);
-                        contexts = LazyList.add(contexts, handlers[i]);
-                        contextMap.put(contextPath, contexts);
-                    }
-                }
-            }
-            _contextMap=contextMap;
-        }
-    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -230,25 +162,6 @@ public class Server extends HandlerCollection
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @param requestLog
-     */
-    public void setRequestLog(RequestLog requestLog)
-    {
-        _container.update(this,_requestLog,requestLog, "requestLog");
-        _requestLog = requestLog;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return
-     */
-    public RequestLog getRequestLog() 
-    {    
-        return _requestLog;
-    }
-    
-    /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
         Log.info(this.getClass().getPackage().getImplementationTitle()+" "+this.getClass().getPackage().getImplementationVersion());
@@ -262,10 +175,6 @@ public class Server extends HandlerCollection
         
         if (_sessionIdManager!=null)
             _sessionIdManager.start();
-        
-        mapContexts();
-        
-        try{if (_requestLog!=null)_requestLog.start();} catch(Throwable e) { mex.add(e);}
         
         try{_threadPool.start();} catch(Throwable e) { mex.add(e);}
         
@@ -304,8 +213,6 @@ public class Server extends HandlerCollection
             _sessionIdManager.stop();
         
         try{_threadPool.stop();}catch(Throwable e){mex.add(e);}
-
-        try{if (_requestLog!=null)_requestLog.stop();} catch(Throwable e) { mex.add(e);}
         
         mex.ifExceptionThrow();
     }
@@ -326,9 +233,6 @@ public class Server extends HandlerCollection
         }
         else
             handle(target, connection.getRequest(), connection.getResponse(), Handler.REQUEST);
-        
-        if (_requestLog!=null)
-            _requestLog.log(connection.getRequest(), connection.getResponse());
     }
 
     /* ------------------------------------------------------------ */
@@ -337,38 +241,11 @@ public class Server extends HandlerCollection
      */
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
-        Handler[] handlers = getHandlers();
-        if (handlers==null || handlers.length==0)
-        {
-            response.sendError(500);
-            return true;
-        }
-        else
-        {
-            if (_contextMap!=null && target!=null && target.startsWith("/"))
-            {
-                Object contexts = _contextMap.getLazyMatches(target);
-                for (int i=0; i<LazyList.size(contexts); i++)
-                {
-                    Map.Entry entry = (Map.Entry)LazyList.get(contexts, i);
-                    Object list = entry.getValue();
-                    for (int j=0; j<LazyList.size(list); j++)
-                    {
-                        Handler handler = (Handler)LazyList.get(list,j);
-                        if (handler.handle(target,request, response, dispatch))
-                            return true;
-                    }
-                }
-            }
-            
-            for (int i=0;i<handlers.length;i++)
-            {
-                if (handlers[i].handle(target,request, response, dispatch))
-                    return true;
-            }
-            
-        }    
+        boolean handled = super.handle(target, request, response, dispatch);
+        if (handled)
+            return handled;
         
+        // TODO - somehow move this to a post handler?
         synchronized(this)
         {
             if (_notFoundHandler==null)
@@ -384,43 +261,15 @@ public class Server extends HandlerCollection
                     Log.warn(e);
                 }
             }
-            _notFoundHandler.handle(target, request, response, dispatch);
         }
-        
-        return false;
+        return _notFoundHandler.handle(target, request, response, dispatch);
     }
-
+    
     /* ------------------------------------------------------------ */
-    public Handler[] getAllHandlers()
+    public void join() throws InterruptedException 
     {
-        Handler[] handlers = getHandlers();
-        List list = new ArrayList();
-        for (int i=0;i<handlers.length;i++)
-            expandHandler(handlers[i],list);
-        return (Handler[])list.toArray(new Handler[list.size()]);
+        getThreadPool().join();
     }
-
-    /* ------------------------------------------------------------ */
-    private void expandHandler(Handler handler, List list)
-    {
-        if (handler==null)
-            return;
-        list.add(handler);
-        if (handler instanceof WrappedHandler)
-            expandHandler(((WrappedHandler)handler).getHandler(),list);
-        if (handler instanceof HandlerCollection)
-        {
-            Handler[] ha = ((HandlerCollection)handler).getHandlers();
-            for (int i=0;ha!=null && i<ha.length; i++)
-                expandHandler(ha[i], list);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-	public void join() throws InterruptedException 
-	{
-		getThreadPool().join();
-	}
 
     /* ------------------------------------------------------------ */
     /**
@@ -631,6 +480,65 @@ public class Server extends HandlerCollection
         }
     }
 
+    
+    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated 
+     */
+    public void addHandler(Handler handler)
+    {
+        getHandlerCollection().addHandler(handler);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated 
+     */
+    public void removeHandler(Handler handler)
+        throws Exception
+    {
+        getHandlerCollection().removeHandler(handler);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated 
+     */
+    public Handler[] getHandlers()
+    {
+        return getHandlerCollection().getHandlers();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated 
+     */
+    public void setHandlers(Handler[] handlers)
+    {
+        getHandlerCollection().setHandlers(handlers);
+    }
+
+    /* ------------------------------------------------------------ */
+    private HandlerCollection getHandlerCollection()
+    {
+        HandlerCollection collection=(HandlerCollection)getChildHandlerByClass(ContextHandlerCollection.class);
+        if (collection==null)
+        {
+            collection=(HandlerCollection)getChildHandlerByClass(HandlerCollection.class);
+            if (collection==null)
+            {
+                collection=new ContextHandlerCollection();
+                
+                HandlerWrapper wrapper = this;
+                while (wrapper.getHandler()!=null && wrapper.getHandler() instanceof HandlerWrapper)
+                    wrapper=(HandlerWrapper)wrapper.getHandler();
+                wrapper.setHandler(collection);
+            }
+        }
+        return collection;
+    }
 
 
 }

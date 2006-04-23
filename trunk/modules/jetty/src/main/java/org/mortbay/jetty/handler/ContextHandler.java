@@ -71,7 +71,7 @@ import org.mortbay.util.URIUtil;
  * @author gregw
  *
  */
-public class ContextHandler extends WrappedHandler implements Attributes
+public class ContextHandler extends HandlerWrapper implements Attributes
 {
     private static ThreadLocal __context=new ThreadLocal();
     
@@ -85,8 +85,6 @@ public class ContextHandler extends WrappedHandler implements Attributes
     public static Context getCurrentContext()
     {
         Context context = (Context)__context.get();
-        if (context==null)
-            throw new IllegalStateException("Only valid during call to doStart()");
         return context;
     }
     
@@ -629,7 +627,11 @@ public class ContextHandler extends WrappedHandler implements Attributes
             throw new IllegalArgumentException("ends with /");
         _contextPath = contextPath;
         if (getServer()!=null && getServer().isStarted())
-            getServer().mapContexts();
+        {
+            Handler[] contextCollections = getServer().getChildHandlersByClass(ContextHandlerCollection.class);
+            for (int h=0;contextCollections!=null&& h<contextCollections.length;h++)
+                ((ContextHandlerCollection)contextCollections[h]).mapContexts();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -908,10 +910,10 @@ public class ContextHandler extends WrappedHandler implements Attributes
             // TODO this is a very poor implementation!
             // TODO move this to Server
             ContextHandler context=null;
-            Handler[] handlers = getServer().getAllHandlers();
+            Handler[] handlers = getServer().getChildHandlersByClass(ContextHandler.class);
             for (int i=0;i<handlers.length;i++)
             {
-                if (handlers[i]==null || !handlers[i].isStarted() || !(handlers[i] instanceof ContextHandler))
+                if (handlers[i]==null || !handlers[i].isStarted())
                     continue;
                 ContextHandler ch = (ContextHandler)handlers[i];
                 String context_path=ch.getContextPath();
