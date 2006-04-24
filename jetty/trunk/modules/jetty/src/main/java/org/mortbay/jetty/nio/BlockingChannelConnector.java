@@ -41,8 +41,9 @@ import org.mortbay.log.Log;
  * @org.apache.xbean.XBean element="blockingNioConnector" description="Creates a blocking NIO based socket connector"
  * 
  * @author gregw
+ *
  */
-public class BlockingChannelConnector extends AbstractConnector
+public class BlockingChannelConnector extends AbstractConnector implements NIOConnector
 {
     private transient ServerSocketChannel _acceptChannel;
     

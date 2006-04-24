@@ -29,18 +29,16 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 
 /* ------------------------------------------------------------ */
-/** HandlerCollection.
- * A handler that delegates to a list of handlers. If {@link #isConditional()}
- * returns true then the handlers are called in turn until the response is committed,
- * a positive response status is set or an exception is thrown. If {@link #isConditional()}
- * return false, then all handlers are called regardless of status or exceptions.
+/** A collection of handlers.  
+ * For each request, all handler are called, regardless of 
+ * the response status or exceptions.
+ *  
  * @author gregw
  *
  */
 public class HandlerCollection extends AbstractHandler implements Handler
 {
     private Handler[] _handlers;
-    private boolean _conditional=true;
 
     /* ------------------------------------------------------------ */
     public HandlerCollection()
@@ -119,36 +117,24 @@ public class HandlerCollection extends AbstractHandler implements Handler
     {
         if (_handlers!=null && isStarted())
         {
-            if (_conditional)
+            MultiException mex=null;
+            
+            for (int i=0;i<_handlers.length;i++)
             {
-                Response base_response = _conditional?HttpConnection.getCurrentConnection().getResponse():null;
-                for (int i=0;i<_handlers.length;i++)
+                try
                 {
                     _handlers[i].handle(target,request, response, dispatch);
-                    if ( response.isCommitted() || base_response.getStatus()>0)
-                        return;
                 }
-            }
-            else
-            {
-                MultiException mex=null;
-                
-                for (int i=0;i<_handlers.length;i++)
+                catch(Throwable e)
                 {
-                    try
-                    {
-                        _handlers[i].handle(target,request, response, dispatch);
-                    }
-                    catch(Throwable e)
-                    {
-                        if (mex==null)
-                            mex=new MultiException();
-                        mex.add(e);
-                    }
+                    if (mex==null)
+                        mex=new MultiException();
+                    mex.add(e);
                 }
-                if (mex!=null)
-                    throw new ServletException(mex);
             }
+            if (mex!=null)
+                throw new ServletException(mex);
+            
         }    
     }
 
@@ -248,21 +234,5 @@ public class HandlerCollection extends AbstractHandler implements Handler
         return list;
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the conditional.
-     */
-    public boolean isConditional()
-    {
-        return _conditional;
-    }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param conditional The conditional to set.
-     */
-    public void setConditional(boolean conditional)
-    {
-        _conditional = conditional;
-    }
 }

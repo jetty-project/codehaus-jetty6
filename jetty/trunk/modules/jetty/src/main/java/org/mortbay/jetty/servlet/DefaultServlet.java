@@ -36,6 +36,7 @@ import org.mortbay.io.IO;
 import org.mortbay.io.View;
 import org.mortbay.io.WriterOutputStream;
 import org.mortbay.io.nio.NIOBuffer;
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpContent;
 import org.mortbay.jetty.HttpFields;
@@ -47,6 +48,7 @@ import org.mortbay.jetty.MultiPartResponse;
 import org.mortbay.jetty.ResourceCache;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
@@ -80,10 +82,6 @@ import org.mortbay.util.URIUtil;
  *                    servlet context root. Useful for only serving static content out
  *                    of only specific subdirectories.
  * 
- *  maxByteBuffer     The maximum size of byte buffer content
- *  maxDirectBuffer   The maximum size of NIO direct buffer content
- *  maxFileBuffer     The maximum size of NIO file mapped buffer content
- * 
  *  maxCacheSize      The maximum total size of the cache or 0 for no cache.
  *  maxCachedFileSize The maximum size of a file to cache
  *  maxCachedFiles    The maximum number of files to cache
@@ -92,16 +90,13 @@ import org.mortbay.util.URIUtil;
  * The MOVE method is allowed if PUT and DELETE are allowed             
  *
  * @author Greg Wilkins (gregw)
+ * @author Nigel Canonizado
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory
 {
     
     private ContextHandler.Context _context;
-    
-    private int _maxByteBuffer=1024;
-    private int _maxDirectBuffer=128*1024;
-    private int _maxFileBuffer=256*1024;
-        
+      
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
     private boolean _redirectWelcome=true;
@@ -129,8 +124,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         _dirAllowed=getInitBoolean("dirAllowed",_dirAllowed);
         _redirectWelcome=getInitBoolean("redirectWelcome",_redirectWelcome);
         _gzip=getInitBoolean("gzip",_gzip);
-        
-        _maxByteBuffer=getInitInt("maxByteBuffer",_maxByteBuffer);
         
         String rrb = getInitParameter("relativeResourceBase");
         if (rrb!=null)
@@ -163,7 +156,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         {
             if (_resourceBase==null)
                 _resourceBase=Resource.newResource(_context.getResource("/"));
-            
 
             int max_cache_size=getInitInt("maxCacheSize", -2);
             if (max_cache_size>0)
@@ -453,49 +445,38 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     {
         Content content=new Content(resource);
         Buffer mime_type=_mimeTypes.getMimeByExtension(pathInContext);
+        Connector connector = HttpConnection.getCurrentConnection().getConnector();
         if (mime_type!=null) content.setContentType(mime_type);
         
         if (!resource.isDirectory())   
         {
             Buffer buffer=null;
             long length=resource.length();
-            if (length<_maxByteBuffer)
+            
+            if (length<=_cache.getMaxCachedFileSize())
             {
-                buffer=new ByteArrayBuffer((int)length);
-                byte[] array = buffer.array();
-                InputStream in=resource.getInputStream();
-                
-                int l=0;
-                while(l<length)
+                if (connector instanceof NIOConnector) 
                 {
-                    int r=in.read(array,l,array.length-l);
-                    if (r<0)
-                        throw new IOException("unexpect EOF");
-                    l+=r;
-                }
-                buffer.setPutIndex(l);
-            }
-            else if (length<_maxDirectBuffer)
-            {
-                buffer=new NIOBuffer((int)length,NIOBuffer.DIRECT);
-                byte[] buf = new byte[8192];
-                InputStream in=resource.getInputStream();
-                
-                int l=0;
-                while(l<length)
+                    File file = resource.getFile();
+                    if (file != null)
+                        buffer = new NIOBuffer(file);
+                } 
+                else 
                 {
-                    int r=in.read(buf,0,buf.length);
-                    if (r<0)
-                        throw new IOException("unexpect EOF");
-                    buffer.put(buf,0,r);
-                    l+=r;
+                    buffer = new ByteArrayBuffer((int)length);
+                    byte[] array = buffer.array();
+                    InputStream in = resource.getInputStream();
+                    
+                    int l = 0;
+                    while (l < length) 
+                    {
+                        int r = in.read(array,l,array.length-l);
+                        if (r < 0)
+                            throw new IOException("unexpected EOF");
+                        l+=r;
+                    }
+                    buffer.setPutIndex(l);
                 }
-            }
-            else if (length<_maxFileBuffer)
-            {
-                File file = resource.getFile();
-                if (file!=null)
-                    buffer=new NIOBuffer(file);
             }
             
             if (buffer!=null)
