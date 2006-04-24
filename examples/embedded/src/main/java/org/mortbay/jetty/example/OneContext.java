@@ -24,46 +24,39 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 
-public class ManyHandlers
+public class OneContext
 {
     public static void main(String[] args)
-        throws Exception
+    throws Exception
     {
         Server server = new Server();
         Connector connector=new SelectChannelConnector();
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
         
-        Handler param=new ParamHandler();
-        Handler hello=new HelloHandler();
+        ContextHandler context = new ContextHandler();
+        context.setContextPath("/");
+        context.setResourceBase(".");
+        context.setClassLoader(Thread.currentThread().getContextClassLoader());
+        server.setHandler(context);
         
-        HandlerCollection handlers = new HandlerCollection();
-        handlers.setHandlers(new Handler[]{param,hello});
-        handlers.setConditional(false);
-        server.setHandler(handlers);
+        Handler handler=new HelloHandler();
+        context.setHandler(handler);
         
         server.start();
         server.join();
-    }
-
-    public static class ParamHandler extends AbstractHandler
-    {
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
-        {
-            System.err.println(request.getParameterMap());
-        }
     }
     
     public static class HelloHandler extends AbstractHandler
     {
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            response.setContentType("text/html");
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("<h1>Hello ManyHandler</h1>");
+            response.setContentType("text/html");
+            response.getWriter().println("<h1>Hello OneContext</h1>");
         }
     }
 }
