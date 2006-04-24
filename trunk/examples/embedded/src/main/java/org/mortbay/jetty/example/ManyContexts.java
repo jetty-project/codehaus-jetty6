@@ -24,11 +24,14 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 
-public class ManyHandlers
+public class ManyContexts
 {
+
     public static void main(String[] args)
         throws Exception
     {
@@ -37,33 +40,37 @@ public class ManyHandlers
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
         
-        Handler param=new ParamHandler();
-        Handler hello=new HelloHandler();
+        ContextHandler context0 = new ContextHandler();
+        context0.setContextPath("/zero");
+
+        ContextHandler context1 = new ContextHandler();
+        context1.setContextPath("/one");
         
-        HandlerCollection handlers = new HandlerCollection();
-        handlers.setHandlers(new Handler[]{param,hello});
-        handlers.setConditional(false);
-        server.setHandler(handlers);
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        contexts.setHandlers(new Handler[]{context0,context1,new NotFoundHandler()});
+        server.setHandler(contexts);
+        
+        Handler handler0=new HelloHandler();
+        context0.setHandler(handler0);
+        
+        Handler handler1=new HelloHandler();
+        context1.setHandler(handler1);    
         
         server.start();
         server.join();
     }
 
-    public static class ParamHandler extends AbstractHandler
+    public static class HelloHandler extends AbstractHandler
     {
+        static int h=0;
+        int hello=h++;
+        
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
-            System.err.println(request.getParameterMap());
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("text/html");
+            response.getWriter().println("<h1>Hello OneContext "+hello+"</h1>");
         }
     }
     
-    public static class HelloHandler extends AbstractHandler
-    {
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
-        {
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("<h1>Hello ManyHandler</h1>");
-        }
-    }
 }

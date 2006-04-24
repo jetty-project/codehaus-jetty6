@@ -535,7 +535,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             // Handle the request
             try
             {
-                getHandler().handle(target, request, response, dispatch);
+                Handler handler = getHandler();
+                if (handler!=null)
+                    handler.handle(target, request, response, dispatch);
             }
             finally
             {
