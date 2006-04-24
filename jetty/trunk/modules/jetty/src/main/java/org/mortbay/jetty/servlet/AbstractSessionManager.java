@@ -350,7 +350,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public void setMaxInactiveInterval(int seconds)
     {
         _dftMaxIdleSecs = seconds;
-        if (_dftMaxIdleSecs>0 && _scavengePeriodMs>_dftMaxIdleSecs*100)
+        if (_dftMaxIdleSecs>0 && _scavengePeriodMs>_dftMaxIdleSecs*1000)
             setScavengePeriod((_dftMaxIdleSecs+9)/10);
     }
     
@@ -408,14 +408,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         
         if (_sessions==null)
             _sessions=new HashMap();
-        
-        // Start the session scavenger if we haven't already
-        if (_scavenger == null)
-        {
-            _scavenger = new SessionScavenger();
-            _scavenger.start();
-        }
-        
+
         if (_sessionIdManager==null)
         {
             Server server = getSessionHandler().getServer();
@@ -433,6 +426,13 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             _sessionIdManager.start();
         
         super.doStart();
+
+        // Start the session scavenger if we haven't already
+        if (_scavenger == null)
+        {
+            _scavenger = new SessionScavenger();
+            _scavenger.start();
+        }
     }
     
     
