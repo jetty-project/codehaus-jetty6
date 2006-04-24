@@ -37,9 +37,10 @@ import org.mortbay.util.LazyList;
  * {@link org.mortbay.jetty.servlet.PathMap} to it's contained handlers based
  * on the context path of any contained {@link org.mortbay.jetty.handler.ContextHandler}s.
  * The contexts do not need to be directly contained, only children of the contained handlers.
- * 
+ * Multiple contexts may have the same context path and they are called in order until one
+ * handles the request.
  */
-public class ContextHandlerCollection extends HandlerList
+public class ContextHandlerCollection extends HandlerCollection
 {
     private PathMap _contextMap;
     
@@ -148,7 +149,14 @@ public class ContextHandlerCollection extends HandlerList
                 }
             }
             else
-                super.handle(target, request, base_response, dispatch);
+            {
+                for (int i=0;i<handlers.length;i++)
+                {
+                    handlers[i].handle(target,request, response, dispatch);
+                    if ( response.isCommitted() || base_response.getStatus()>0)
+                        return;
+                }
+            }
         }    
     }
 
