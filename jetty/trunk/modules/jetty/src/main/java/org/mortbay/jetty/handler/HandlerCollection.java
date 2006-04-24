@@ -30,6 +30,10 @@ import org.mortbay.util.MultiException;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.
+ * A handler that delegates to a list of handlers. If {@link #isConditional()}
+ * returns true then the handlers are called in turn until the response is committed,
+ * a positive response status is set or an exception is thrown. If {@link #isConditional()}
+ * return false, then all handlers are called regardless of status or exceptions.
  * @author gregw
  *
  */
@@ -110,16 +114,40 @@ public class HandlerCollection extends AbstractHandler implements Handler
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) 
+        throws IOException, ServletException
     {
         if (_handlers!=null && isStarted())
         {
-            Response base_response = _conditional?HttpConnection.getCurrentConnection().getResponse():null;
-            for (int i=0;i<_handlers.length;i++)
+            if (_conditional)
             {
-                _handlers[i].handle(target,request, response, dispatch);
-                if ( _conditional && base_response.getStatus()>0)
-                    return;
+                Response base_response = _conditional?HttpConnection.getCurrentConnection().getResponse():null;
+                for (int i=0;i<_handlers.length;i++)
+                {
+                    _handlers[i].handle(target,request, response, dispatch);
+                    if ( response.isCommitted() || base_response.getStatus()>0)
+                        return;
+                }
+            }
+            else
+            {
+                MultiException mex=null;
+                
+                for (int i=0;i<_handlers.length;i++)
+                {
+                    try
+                    {
+                        _handlers[i].handle(target,request, response, dispatch);
+                    }
+                    catch(Throwable e)
+                    {
+                        if (mex==null)
+                            mex=new MultiException();
+                        mex.add(e);
+                    }
+                }
+                if (mex!=null)
+                    throw new ServletException(mex);
             }
         }    
     }
