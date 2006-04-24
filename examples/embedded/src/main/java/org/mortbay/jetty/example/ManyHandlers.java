@@ -42,7 +42,6 @@ public class ManyHandlers
         
         HandlerCollection handlers = new HandlerCollection();
         handlers.setHandlers(new Handler[]{param,hello});
-        handlers.setConditional(false);
         server.setHandler(handlers);
         
         server.start();
