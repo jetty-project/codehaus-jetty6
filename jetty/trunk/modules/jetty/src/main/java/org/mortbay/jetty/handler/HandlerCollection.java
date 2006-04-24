@@ -170,31 +170,6 @@ public class HandlerCollection extends AbstractHandler implements Handler
         mex.ifExceptionThrow();
     }
     
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Conveniance method to set a single handler
-     * @return  the handler.
-     */
-    public Handler getHandler()
-    {
-        if (_handlers==null || _handlers.length==0)
-            return null;
-        if (_handlers.length>1)
-            throw new IllegalStateException("Multiple Handlers");
-        return _handlers[0];
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Conveniance method to set a single handler
-     * @param handler The handler to set.
-     */
-    public void setHandler(Handler handler)
-    {
-        setHandlers(new Handler[]{handler});
-    }    
-
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
