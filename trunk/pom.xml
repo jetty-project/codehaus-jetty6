@@ -80,7 +80,7 @@
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-external</artifactId>
-        <version>1.0-alpha-5</version>
+        <version>1.0-alpha-6</version>
       </extension>
     </extensions>
     <defaultGoal>install</defaultGoal>
