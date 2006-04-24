@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.Server;
 import org.mortbay.util.LazyList;
@@ -125,7 +126,11 @@ public class HandlerCollection extends AbstractHandler implements Handler
                 {
                     _handlers[i].handle(target,request, response, dispatch);
                 }
-                catch(Throwable e)
+                catch(RuntimeException e)
+                {
+                    throw e;
+                }
+                catch(Exception e)
                 {
                     if (mex==null)
                         mex=new MultiException();
