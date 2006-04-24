@@ -61,7 +61,8 @@ public class CGI extends HttpServlet
   private String  _path;
   private String  _cmdPrefix;
   private EnvList _env;
-
+  private boolean _ignoreExitState;
+  
   /* ------------------------------------------------------------ */
   public void init() throws ServletException
   {
@@ -116,6 +117,7 @@ public class CGI extends HttpServlet
     if (_path != null)
       _env.set("PATH", _path);
 
+    _ignoreExitState = "true".equalsIgnoreCase(getInitParameter("ignoreExitState"));
     Enumeration e = getInitParameterNames();
     while (e.hasMoreElements())
     {
@@ -138,6 +140,8 @@ public class CGI extends HttpServlet
       Log.debug("CGI: ServletPath : " + req.getServletPath());
       Log.debug("CGI: PathInfo    : " + req.getPathInfo());
       Log.debug("CGI: _docRoot    : " + _docRoot);
+      Log.debug("CGI: _path       : " + _path);
+      Log.debug("CGI: _ignoreExitState: " + _ignoreExitState);
     }
 
     // pathInContext may actually comprises scriptName/pathInfo...We will
@@ -316,12 +320,15 @@ public class CGI extends HttpServlet
       IO.copy(br, writer);
       p.waitFor();
 
-      int exitValue = p.exitValue();
-      if (0 != exitValue)
+      if (!_ignoreExitState)
       {
-        Log.warn("Non-zero exit status ("+exitValue+") from CGI program: "+path);
-        if (!res.isCommitted())
-          res.sendError(500, "Failed to exec CGI");
+        int exitValue = p.exitValue();
+        if (0 != exitValue)
+        {
+          Log.warn("Non-zero exit status ("+exitValue+") from CGI program: "+path);
+          if (!res.isCommitted())
+            res.sendError(500, "Failed to exec CGI");
+        }
       }
     }
     catch (IOException e)
