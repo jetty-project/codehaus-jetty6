@@ -66,8 +66,9 @@ import org.mortbay.util.ajax.Continuation;
  * @org.apache.xbean.XBean element="nioConnector" description="Creates an NIO based socket connector"
  * 
  * @author gregw
+ *
  */
-public class SelectChannelConnector extends AbstractConnector
+public class SelectChannelConnector extends AbstractConnector implements NIOConnector
 {
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;

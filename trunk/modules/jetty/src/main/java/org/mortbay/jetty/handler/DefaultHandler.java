@@ -35,17 +35,23 @@ import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------ */
-/** Handler for resources that were not found.
- * Implements OPTIONS and TRACE methods for the server.
+/** Default Handler.
+ * 
+ * This handle will deal with unhandled requests in the server.
+ * For requests for favicon.ici, the Jetty icon is served. 
+ * For reqests to '/' a 404 with a list of known contexts is served.
+ * For all other requests a normal 404 is served.
+ * TODO Implement OPTIONS and TRACE methods for the server.
  * 
  * @author Greg Wilkins (gregw)
  */
-public class NotFoundHandler extends AbstractHandler
+public class DefaultHandler extends AbstractHandler
 {
     long _faviconModified=(System.currentTimeMillis()/1000)*1000;
     byte[] _favicon;
+    boolean _serveIcon=true;
     
-    public NotFoundHandler()
+    public DefaultHandler()
     {
         try
         {
@@ -71,7 +77,7 @@ public class NotFoundHandler extends AbstractHandler
         String method=request.getMethod();
 
         // little cheat for common request
-        if (_favicon!=null && method.equals(HttpMethods.GET) && request.getRequestURI().equals("/favicon.ico"))
+        if (_serveIcon && _favicon!=null && method.equals(HttpMethods.GET) && request.getRequestURI().equals("/favicon.ico"))
         {
             if (request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE)==_faviconModified)
                 response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
@@ -148,6 +154,24 @@ public class NotFoundHandler extends AbstractHandler
         out.close();
         
         return;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns true if the handle can server the jetty favicon.ico
+     */
+    public boolean getServeIcon()
+    {
+        return _serveIcon;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param serveIcon true if the handle can server the jetty favicon.ico
+     */
+    public void setServeIcon(boolean serveIcon)
+    {
+        _serveIcon = serveIcon;
     }
 
 

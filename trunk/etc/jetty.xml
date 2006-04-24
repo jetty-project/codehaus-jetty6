@@ -74,9 +74,18 @@
     <!-- =========================================================== -->
     <Set name="handler">
       <New id="handlers" class="org.mortbay.jetty.handler.HandlerCollection">
-        <Set name="conditional">false</Set>
-        <Set name="handler">
-          <New id="contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+        <Set name="handlers">
+         <Array type="org.mortbay.jetty.Handler">
+           <Item>
+             <New id="contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+           </Item>
+           <Item>
+             <New id="defaultHandler" class="org.mortbay.jetty.handler.DefaultHandler"/>
+           </Item>
+           <Item>
+             <New id="requestLog" class="org.mortbay.jetty.handler.RequestLogHandler"/>
+           </Item>
+         </Array>
         </Set>
       </New>
     </Set>
@@ -107,11 +116,10 @@
         <!-- ======================================================= -->
         <!-- Configure a context directly - no XML parser required   -->
         <!-- ======================================================= -->
-	<!--
         <Item>
           <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
             <Set name="contextPath">/javadoc</Set>
-            <Set name="resourceBase">./javadoc</Set>
+            <Set name="resourceBase">./modules/jetty/target/javadoc/</Set>
             <Set name="handler">
               <New id="javadocServletHandler" class="org.mortbay.jetty.servlet.ServletHandler">
                 <Set name="servlets">
@@ -139,7 +147,6 @@
             </Set>
           </New>
         </Item>
-	-->
 
       </Array>
      </Set>
@@ -172,37 +179,20 @@
       </Array>
     </Set>
     
-    <!-- =========================================================== -->
-    <!-- NotFoundHandler                                             -->
-    <!-- =========================================================== -->
-    <Ref id="handlers">
-      <Call name="addHandler">
-       <Arg>
-        <New class="org.mortbay.jetty.handler.NotFoundHandler"/>
-       </Arg>
-      </Call>
-    </Ref>
     
     <!-- =========================================================== -->
     <!-- Configure Request Log                                       -->
     <!-- =========================================================== -->
-    <!--  uncomment for a request log (and create logs directory)  -->
-    <Ref id="handlers">
-      <Call name="addHandler">
-       <Arg>
-        <New id="requestLog" class="org.mortbay.jetty.handler.RequestLogHandler">
-         <Set name="requestLog">
-           <New id="requestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
-            <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
-            <Set name="retainDays">90</Set>
-            <Set name="append">true</Set>
-            <Set name="extended">false</Set>
-            <Set name="LogTimeZone">GMT</Set>
-           </New>
-          </Set>
-         </New>
-        </Arg>
-      </Call>
+    <Ref id="requestLog">
+      <Set name="requestLog">
+        <New id="requestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
+          <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
+          <Set name="retainDays">90</Set>
+          <Set name="append">true</Set>
+          <Set name="extended">false</Set>
+          <Set name="LogTimeZone">GMT</Set>
+        </New>
+      </Set>
     </Ref>
 
     <!-- =========================================================== -->

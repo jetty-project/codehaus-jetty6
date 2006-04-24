@@ -32,7 +32,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
 {   
     private int _maxCachedFileSize =254*1024;
     private int _maxCachedFiles=1024;
-    private int _maxCacheSize =4096*1024;
+    private int _maxCacheSize =10*1024*1024;
     
     protected transient Map _cache;
     protected transient int _cacheSize;

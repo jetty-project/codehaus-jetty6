@@ -26,7 +26,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.NotFoundHandler;
+import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 
 public class ManyContexts
@@ -47,7 +47,7 @@ public class ManyContexts
         context1.setContextPath("/one");
         
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new Handler[]{context0,context1,new NotFoundHandler()});
+        contexts.setHandlers(new Handler[]{context0,context1,new DefaultHandler()});
         server.setHandler(contexts);
         
         Handler handler0=new HelloHandler();
