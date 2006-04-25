@@ -388,8 +388,11 @@ public class WebAppContext extends ContextHandler
             _configurations=null;
             
             // restore security handler
-            _securityHandler.setHandler(_servletHandler);
-            _sessionHandler.setHandler(_securityHandler);
+            if (_securityHandler.getHandler()==null)
+            {
+                _sessionHandler.setHandler(_securityHandler);
+                _securityHandler.setHandler(_servletHandler);
+            }
             
             // delete temp directory
             if (_tmpDir!=null && !"work".equals(_tmpDir.getName()))

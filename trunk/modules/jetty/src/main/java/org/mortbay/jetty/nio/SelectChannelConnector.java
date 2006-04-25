@@ -173,8 +173,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             _acceptChannel.close();
         _acceptChannel = null;
 
-        // TODO stop SelectSets
-
+        // TODO stop SelectSets ?
     }
 
     /* ------------------------------------------------------------ */
@@ -226,7 +225,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         private transient int _nextSet;
 
         /* ------------------------------------------------------------ */
- 
         SelectSet(int acceptorID) throws Exception
         {
             _setID=acceptorID;
@@ -242,6 +240,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
 
         }
 
+        /* ------------------------------------------------------------ */
         Selector getSelector()
         {
             return _selector;
@@ -276,6 +275,9 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         /* ------------------------------------------------------------ */
         public void accept() throws IOException
         {
+            long idle_next = 0;
+            long retry_next = 0;
+            
             // Make any key changes required
             synchronized (_changes)
             {
@@ -313,19 +315,24 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                     }
                     catch (CancelledKeyException e)
                     {
-                        Log.warn(e);
+                        if (isRunning())
+                            Log.warn(e);
+                        else
+                            Log.debug(e);
                     }
                 }
                 _changes.clear();
                 
+                idle_next=_idleTimeout.getTimeToNext();
+                retry_next=_retryTimeout.getTimeToNext();
             }
             
             // workout how low to wait in select
             long wait = getMaxIdleTime();
-            long to_next = _idleTimeout.getTimeToNext();
+            long to_next = idle_next;
             if (wait < 0 || to_next >= 0 && wait > to_next)
                 wait = to_next;
-            to_next = _retryTimeout.getTimeToNext();
+            to_next = retry_next;
             if (wait < 0 || to_next >= 0 && wait > to_next)
                 wait = to_next;
             
@@ -412,13 +419,18 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                 }
                 catch (CancelledKeyException e)
                 {
-                    if (isRunning()) // TODO investigate if this actually is a problem?
-                        Log.debug(e.toString());
+                    // TODO investigate if this actually is a problem?
+                    if (isRunning())
+                        Log.warn(e);
+                    else
+                        Log.ignore(e);
                 }
                 catch (Exception e)
                 {
                     if (isRunning())
                         Log.warn(e);
+                    else
+                        Log.ignore(e);
                     if (key != null && key != _acceptKey)
                         key.interestOps(0);
                 }
@@ -441,12 +453,18 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
 
         public void scheduleIdle(Timeout.Task task)
         {
-            task.schedule(_idleTimeout);
+            synchronized (_changes)
+            {
+                task.schedule(_idleTimeout);
+            }
         }
 
         public void scheduleTimeout(Timeout.Task task, long timeout)
         {
-            _retryTimeout.schedule(task, timeout);
+            synchronized (_changes)
+            {
+                _retryTimeout.schedule(task, timeout);
+            }
         }
 
         public void addChange(Object point)
@@ -580,6 +598,11 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             }
             catch (Exception e)
             {
+                // TODO investigate if this actually is a problem?
+                if (isRunning())
+                    Log.warn(e);
+                else
+                    Log.ignore(e);
                 Log.warn(e);
                 _interestOps = -1;
                 _selectSet.addChange(this);
