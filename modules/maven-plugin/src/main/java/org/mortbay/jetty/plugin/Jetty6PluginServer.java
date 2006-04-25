@@ -19,6 +19,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
@@ -44,6 +45,9 @@ public class Jetty6PluginServer implements JettyPluginServer
     
     private UserRealm[] realms;
     
+    private ContextHandlerCollection contexts; //the list of ContextHandlers
+    
+    HandlerCollection handlers; //the list of lists of Handlers
     
     
     /**
@@ -129,13 +133,41 @@ public class Jetty6PluginServer implements JettyPluginServer
      * @see org.mortbay.jetty.plugin.util.JettyPluginServer#addWebApplication(java.lang.Object)
      */
     public void addWebApplication(JettyPluginWebApplication webapp) throws Exception
-    {
-        HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
-        if (contexts==null)
-            contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
+    {  
         contexts.addHandler ((Handler)webapp.getProxiedObject());
     }
 
+    
+    /**
+     * Set up the handler structure to receive a webapp.
+     * Also put in a DefaultHandler so we get a nice page
+     * than a 404 if we hit the root and the webapp's
+     * context isn't at root.
+     * @throws Exception
+     */
+    public void configureHandlers () throws Exception 
+    {
+        contexts = (ContextHandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+        if (contexts==null)
+        {   
+            contexts = new ContextHandlerCollection();
+            handlers = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
+            if (handlers==null)
+            {
+                handlers = new HandlerCollection();               
+                server.setHandler(handlers);                            
+                handlers.setHandlers(new Handler[]{contexts, new DefaultHandler()});
+            }
+            else
+            {
+                handlers.addHandler(contexts);
+            }
+        }  
+    }
+    
+    
+    
+    
     /* (non-Javadoc)
      * @see org.mortbay.jetty.plugin.JettyPluginServer#createDefaultConnector()
      */
