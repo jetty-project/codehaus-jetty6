@@ -92,6 +92,8 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     
     public String getDatedFilename()
     {
+        if (_fileOut instanceof RolloverFileOutputStream)
+            return ((RolloverFileOutputStream)_fileOut).getDatedFilename();
         return null;
     }
     
