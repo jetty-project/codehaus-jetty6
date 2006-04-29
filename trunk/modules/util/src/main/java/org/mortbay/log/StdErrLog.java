@@ -45,6 +45,11 @@ public class StdErrLog implements Logger
         return debug;
     }
     
+    public void setDebugEnabled(boolean enabled)
+    {
+        debug=enabled;
+    }
+    
     public void info(String msg,Object arg0, Object arg1)
     {
         System.err.println(name+":INFO:  "+format(msg,arg0,arg1));

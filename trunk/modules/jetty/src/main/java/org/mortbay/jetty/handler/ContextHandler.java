@@ -1181,6 +1181,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes
          */
         public synchronized void setAttribute(String name, Object value)
         {
+            if (_contextAttributes==null)
+                return;
+            
             Object old_value=_contextAttributes==null?null:_contextAttributes.getAttribute(name);
             
             if (value==null)

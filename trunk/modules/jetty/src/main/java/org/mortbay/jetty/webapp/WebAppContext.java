@@ -528,12 +528,14 @@ public class WebAppContext extends ContextHandler
         File work=null;
         try
         {
-            work=new File(System.getProperty("jetty.home"),"work");
-            if (!work.exists() || !work.canWrite() || !work.isDirectory())
+            File w=new File(System.getProperty("jetty.home"),"work");
+            if (w.exists() && w.canWrite() && w.isDirectory())
+                work=w;
+            else if (getBaseResource()!=null)
             {
-                work=new File(getWebInf().getFile(),"work");
-                if (!work.exists() || !work.canWrite() || !work.isDirectory())
-                    work=null;
+                w=new File(getWebInf().getFile(),"work");
+                if (w.exists() && w.canWrite() && w.isDirectory())
+                    work=w;
             }
         }
         catch(Exception e)

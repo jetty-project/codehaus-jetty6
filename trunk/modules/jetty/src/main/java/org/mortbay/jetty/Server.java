@@ -170,10 +170,12 @@ public class Server extends HandlerWrapper
         if (_sessionIdManager!=null)
             _sessionIdManager.start();
         
-        try{_threadPool.start();} catch(Throwable e) { mex.add(e);}
+        try{_threadPool.start();} 
+        catch(Throwable e) { mex.add(e);}
         
         
-        try { super.doStart(); } catch(Throwable e) { mex.add(e);}
+        try { super.doStart(); } 
+        catch(Throwable e) { mex.add(e);}
         
         if (_connectors!=null)
         {

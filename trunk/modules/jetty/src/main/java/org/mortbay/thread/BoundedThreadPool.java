@@ -39,8 +39,6 @@ import org.mortbay.log.Log;
  */
 public class BoundedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
 {
-    private static final long serialVersionUID = 2806675379803919606L;
-    
     private static int __id;
     private transient List _blocked;
     private int _blockMs=10000;
@@ -66,11 +64,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     public BoundedThreadPool()
     {
-        _name= this.getClass().getName();
-        int dot= _name.lastIndexOf('.');
-        if (dot >= 0)
-            _name= _name.substring(dot + 1);
-        _name=_name+__id++;
+        _name="btpool"+__id++;
     }
 
     /* ------------------------------------------------------------ */

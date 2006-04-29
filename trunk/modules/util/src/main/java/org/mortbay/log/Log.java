@@ -174,12 +174,11 @@ public class Log
         log.warn(EXCEPTION,th);
         unwind(th);
     }
-    
 
     public static Logger getLogger(String name)
     {
         if (log==null)
-            return null;
+            return log;
         return log.getLogger(name);
     }
 
@@ -199,6 +198,7 @@ public class Log
             catch(Exception ignore){}
         }
     }
+    
 
 }
 
