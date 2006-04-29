@@ -14,6 +14,10 @@
     + Added embedded examples
     + Simplified DefaultServlet static content buffering
     + readded BoundedThreadPool shrinking
+    + improved MBean names
+    + improved support for java5 jconsole
+    + Session scavenger threads from threadpool
+    + Thread names include URI if debug set
 
 jetty-6.0.0beta14 - 9/4/2006
     + ignore dirs and files that don't exist in plugin scanner

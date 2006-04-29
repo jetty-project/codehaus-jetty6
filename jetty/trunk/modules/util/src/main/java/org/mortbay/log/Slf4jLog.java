@@ -149,4 +149,10 @@ class Slf4jLog implements Logger
     {
         return logger.toString();
     }
+
+    /* ------------------------------------------------------------ */
+    public void setDebugEnabled(boolean enabled)
+    {
+        warn("setDebugEnabled not implemented",null,null);
+    }
 }
