@@ -59,6 +59,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     private Set _threads;
     private List _idle;
     private boolean _warned=false;
+    private long _lastShrink;
 
     /* ------------------------------------------------------------------- */
     /* Construct
@@ -274,6 +275,8 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     public void setMaxThreads(int maxThreads)
     {
+        if (maxThreads<_minThreads)
+            throw new IllegalArgumentException("!minThreads<maxThreads");
         _maxThreads=maxThreads;
     }
 
@@ -285,7 +288,16 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     public void setMinThreads(int minThreads)
     {
+        if (minThreads<=0 || minThreads>_maxThreads)
+            throw new IllegalArgumentException("!0<=minThreads<maxThreads");
         _minThreads=minThreads;
+        synchronized (_lock)
+        {
+            while (isStarted() && _threads.size()<_minThreads)
+            {
+              newThread();   
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -404,7 +416,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                     {
                         try
                         {
-                            while(_job==null)
+                            if(_job==null)
                                 this.wait(getMaxIdleTimeMs());  
                             
                             if (isRunning() && _job!=null)
@@ -421,6 +433,19 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                                     if (_idle.size()>=_minThreads)
                                         _warned=false;
                                 }
+                                else 
+                                {
+                                    long now = System.currentTimeMillis();
+                                    if (_idle.size()-_blocked.size()>0 &&     // are there idle threads?
+                                        _threads.size()>_minThreads &&        // are there more than min threads?
+                                        (now-_lastShrink)>getMaxIdleTimeMs()) // have we shrunk recently?
+                                    {
+                                        _lastShrink=now;
+                                        _idle.remove(this);
+                                        return;
+                                    }
+                                }
+                                
                                 _job=null;
                                 if (_blocked.size()>0)
                                     ((Thread)_blocked.get(0)).interrupt();
