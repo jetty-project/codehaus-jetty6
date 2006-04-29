@@ -60,6 +60,7 @@ public class MBeanContainer implements Container.Listener
     {
         this._server = server;
         container.addEventListener(this);
+        addBean(Log.getLogger(null));
     }
 
     public void setManagementPort(int port)
@@ -195,7 +196,8 @@ public class MBeanContainer implements Container.Listener
             count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
             _unique.put(name, count);
 
-            ObjectName oname = ObjectName.getInstance("", name, String.valueOf(count));
+            String domain=obj.getClass().getPackage().getName();
+            ObjectName oname = ObjectName.getInstance(domain+":type="+name+",id="+count);
             
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
             Log.debug("Registered {}" , oinstance.getObjectName());

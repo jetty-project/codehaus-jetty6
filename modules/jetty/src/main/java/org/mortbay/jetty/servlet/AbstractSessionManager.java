@@ -78,7 +78,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     private SessionIdManager _sessionIdManager;
     private SessionHandler _sessionHandler;
     
-    private  SessionScavenger _scavenger = null;
+    private  Thread _scavenger = null;
     protected boolean _secureCookies=false;
     protected  Object _sessionAttributeListeners;
     protected  Object _sessionListeners;
@@ -428,11 +428,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         super.doStart();
 
         // Start the session scavenger if we haven't already
-        if (_scavenger == null)
-        {
-            _scavenger = new SessionScavenger();
-            _scavenger.start();
-        }
+        _sessionHandler.getServer().getThreadPool().dispatch(new SessionScavenger());    
     }
     
     
@@ -452,7 +448,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _sessions.clear();
         
         // stop the scavenger
-        SessionScavenger scavenger = _scavenger;
+        Thread scavenger = _scavenger;
         _scavenger=null;
         if (scavenger!=null)
             scavenger.interrupt();
@@ -799,19 +795,17 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     /* -------------------------------------------------------------- */
     /** SessionScavenger is a background thread that kills off old sessions */
-    class SessionScavenger extends Thread
+    class SessionScavenger implements Runnable
     {
-        
-        SessionScavenger()
-        {
-            super("SessionScavenger");
-            setDaemon(true);
-        }
+ 
         public void run()
         {
+            _scavenger=Thread.currentThread();
+            String name = Thread.currentThread().getName();
+            Thread.currentThread().setName(name+" - Invalidator - "+_context.getContextPath());
             int period=-1;
             try{
-                while (isStarted())
+                do
                 {
                     try {
                         if (period!=_scavengePeriodMs)
@@ -819,18 +813,24 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                             if(Log.isDebugEnabled())Log.debug("Session scavenger period = "+_scavengePeriodMs/1000+"s");
                             period=_scavengePeriodMs;
                         }
-                        sleep(period>1000?period:1000);
+                        Thread.sleep(period>1000?period:1000);
                         AbstractSessionManager.this.scavenge();
                     }
                     catch (InterruptedException ex){continue;}
                     catch (Error e) {Log.warn(Log.EXCEPTION,e);}
                     catch (Exception e) {Log.warn(Log.EXCEPTION,e);}
                 }
+                while (isStarted());
             }
             finally
             {
                 AbstractSessionManager.this._scavenger=null;
-                Log.debug("Session scavenger exited");
+                String exit="Session scavenger exited";
+                if (isStarted())
+                    Log.warn(exit);
+                else
+                    Log.debug(exit);
+                Thread.currentThread().setName(name);
             }
         }
         

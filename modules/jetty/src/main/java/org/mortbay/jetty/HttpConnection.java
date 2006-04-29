@@ -354,6 +354,7 @@ public class HttpConnection
         {
             boolean retry = false;
             boolean error = false;
+            String threadName=null;
             try
             {
                 // TODO try to do this lazily or more efficiently
@@ -361,6 +362,12 @@ public class HttpConnection
                 
                 if (_out!=null)
                     _out.reopen();
+                
+                if (Log.isDebugEnabled())
+                {
+                    threadName=Thread.currentThread().getName();
+                    Thread.currentThread().setName(threadName+" - "+_uri);
+                }
                 
                 _connector.customize(_endp, _request);
                 
@@ -383,6 +390,9 @@ public class HttpConnection
             }
             finally
             {
+                if (threadName!=null)
+                    Thread.currentThread().setName(threadName);
+                
                 if (!retry)
                 {
       
