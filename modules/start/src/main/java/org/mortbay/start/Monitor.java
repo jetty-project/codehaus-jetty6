@@ -42,6 +42,7 @@ public class Monitor extends Thread
             if(_port<0)
                 return;
             setDaemon(true);
+	    setName("StopMonitor");
             _socket=new ServerSocket(_port,1,InetAddress.getByName("127.0.0.1"));
             if (_port==0)
             {
