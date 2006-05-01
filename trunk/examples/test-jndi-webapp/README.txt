@@ -15,11 +15,15 @@ The names of the currently supported transaction managers for the demo are:
 
 Running the demo
 ----------------
+You will need to copy a derby.jar to the jetty lib/ directory, as well
+as copy all the necessary jars for the flavour of transaction manager
+you are using. There are instructions for some of the popular 
+transaction managers on the wiki at:
+http://docs.codehaus.org/display/JETTY/Jetty+User+Guides
 
-After it is built, you run the demo:
+After it is built, you run the demo like so:
    
    java -jar start.jar etc/jetty.xml etc/jetty-plus.xml etc/jetty-test-jndi.xml
-   
 
 
 To add support for a different transaction manager to the demo
