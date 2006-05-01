@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Iterator;
 
 import javax.servlet.ServletException;
@@ -32,6 +33,8 @@ import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
+import org.mortbay.util.Attributes;
+import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 
@@ -45,7 +48,7 @@ import org.mortbay.util.MultiException;
  * @author gregw
  *
  */
-public class Server extends HandlerWrapper 
+public class Server extends HandlerWrapper implements Attributes
 {
     private static ShutdownHookThread hookThread = new ShutdownHookThread();
     
@@ -55,6 +58,7 @@ public class Server extends HandlerWrapper
     private Container _container=new Container();
     private SessionIdManager _sessionIdManager;
     private boolean _sendServerVersion = true; //send Server: header by default
+    private AttributesMap _attributes;
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -484,6 +488,51 @@ public class Server extends HandlerWrapper
             }
         }
         return collection;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.util.AttributesMap#clearAttributes()
+     */
+    public void clearAttributes()
+    {
+        _attributes.clearAttributes();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.util.AttributesMap#getAttribute(java.lang.String)
+     */
+    public Object getAttribute(String name)
+    {
+        return _attributes.getAttribute(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.util.AttributesMap#getAttributeNames()
+     */
+    public Enumeration getAttributeNames()
+    {
+        return _attributes.getAttributeNames();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.util.AttributesMap#removeAttribute(java.lang.String)
+     */
+    public void removeAttribute(String name)
+    {
+        _attributes.removeAttribute(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.util.AttributesMap#setAttribute(java.lang.String, java.lang.Object)
+     */
+    public void setAttribute(String name, Object attribute)
+    {
+        _attributes.setAttribute(name, attribute);
     }
 
 
