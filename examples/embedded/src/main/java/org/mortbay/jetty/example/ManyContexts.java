@@ -27,11 +27,11 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 
 public class ManyContexts
 {
-
     public static void main(String[] args)
         throws Exception
     {
@@ -42,19 +42,21 @@ public class ManyContexts
         
         ContextHandler context0 = new ContextHandler();
         context0.setContextPath("/zero");
+        Handler handler0=new HelloHandler();
+        context0.setHandler(handler0);
 
         ContextHandler context1 = new ContextHandler();
         context1.setContextPath("/one");
+        Handler handler1=new HelloHandler();
+        context1.setHandler(handler1);   
         
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new Handler[]{context0,context1,new DefaultHandler()});
-        server.setHandler(contexts);
+        contexts.setHandlers(new Handler[]{context0,context1});
         
-        Handler handler0=new HelloHandler();
-        context0.setHandler(handler0);
+        HandlerCollection handlers = new HandlerCollection();
+        handlers.setHandlers(new Handler[]{contexts,new DefaultHandler()});
         
-        Handler handler1=new HelloHandler();
-        context1.setHandler(handler1);    
+        server.setHandler(handlers);
         
         server.start();
         server.join();
