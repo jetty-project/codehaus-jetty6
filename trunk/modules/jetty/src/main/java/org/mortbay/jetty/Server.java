@@ -58,7 +58,7 @@ public class Server extends HandlerWrapper implements Attributes
     private Container _container=new Container();
     private SessionIdManager _sessionIdManager;
     private boolean _sendServerVersion = true; //send Server: header by default
-    private AttributesMap _attributes;
+    private AttributesMap _attributes = new AttributesMap();
     
     /* ------------------------------------------------------------ */
     public Server()
