@@ -314,11 +314,17 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         if (_threadPool!=_server.getThreadPool())
             _threadPool.stop();
         
-        if (_acceptorThread != null)
-            for (int i=0;i<_acceptorThread.length;i++)
-                if (_acceptorThread[i]!=null)
-                    _acceptorThread[i].interrupt();
+        Thread[] acceptors=_acceptorThread;
         _acceptorThread=null;
+        if (acceptors != null)
+        {
+            for (int i=0;i<acceptors.length;i++)
+            {
+                Thread thread=acceptors[i];
+                if (thread!=null)
+                    thread.interrupt();
+            }
+        }
         
         try{close();} catch(IOException e) {Log.warn(e);}
 
