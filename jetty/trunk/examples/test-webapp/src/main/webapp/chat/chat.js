@@ -5,9 +5,8 @@ var room =
   _last: "",
   _username: null,
   
-  join: function()
+  join: function(name)
   {
-    var name = $('username').value;
     if (name == null || name.length==0 )
     {
       alert('Please enter a username!');
@@ -34,10 +33,8 @@ var room =
        room._username=null;
   },
   
-  chat: function()
+  chat: function(text)
   {
-    var text = $F('phrase');
-    $('phrase').value='';
     if (text != null && text.length>0 )
     {
         ajax.sendMessage('chat',text);
@@ -118,7 +115,7 @@ var chatBehaviours =
            keyc=ev.keyCode;
         if (keyc==13 || keyc==10)
         {
-      	  room.join();
+          room.join($F('username'));
 	  return false;
 	}
 	return true;
@@ -129,8 +126,8 @@ var chatBehaviours =
   {
     element.onclick = function(event)
     {
-      room.join();
-      return true;
+      room.join($F('username'));
+      return false;
     }
   },
   
@@ -147,7 +144,8 @@ var chatBehaviours =
            
         if (keyc==13 || keyc==10)
         {
-          room.chat();
+          room.chat($F('phrase'));
+          $('phrase').value='';
 	  return false;
 	}
 	return true;
@@ -158,7 +156,9 @@ var chatBehaviours =
   {
     element.onclick = function(event)
     {
-      room.chat();
+      room.chat($F('phrase'));
+      $('phrase').value='';
+      return false;
     }
   },
   
