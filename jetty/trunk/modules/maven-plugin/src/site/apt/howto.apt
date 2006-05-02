@@ -95,6 +95,8 @@ Configuration for the jetty6:run Goal
   * <<webXml>> By default, this is set to either the variable <<<${maven.war.webxml}>>> or <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>, whichever is not null. If neither of these are appropriate, set this parameter.
 
   * <<jettyEnvXml>> This is an optional parameter. it is the location of a <<<jetty-env.xml>>> file, which allows you to make JNDI bindings that will satisfy \<env-entry\>, \<resource-env-ref\> and \<resource-ref\> linkages in the <<<web.xml>>> that are scoped only to the webapp and not shared with other webapps that you may be deploying at the same time (eg by using a <<<jettyConfig>>> file).
+  
+  * <<scanTargets>> A list of files and directories to also periodically scan in addition to those automatically scanned by the plugin. Optional.
 
  Here's an example of setting these parameters:
 
@@ -111,6 +113,10 @@ Configuration for the jetty6:run Goal
           <webXml>${basedir}/src/over/here/web.xml</webXml>
           <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml>
           <classesDirectory>${basedir}/somewhere/else</classesDirectory>
+          <scanTargets>
+            <scanTarget>src/mydir</scanTarget>
+            <scanTarget>src/myfile.txt</scanTarget>
+          </scanTargets>
         </configuration>
       </plugin>
   </plugins>

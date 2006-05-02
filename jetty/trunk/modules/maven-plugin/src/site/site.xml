@@ -37,6 +37,7 @@
     <menu name="General Guides">
       <item name="Installation" href="install.html"/>
       <item name="Configuration" href="howto.html"/>
+      <item name="FAQ" href="http://docs.codehaus.org/display/JETTY/FAQ"/>
     </menu>
     <menu name="Parameter Guides">
       <item name="jetty6:run" href="run-mojo.html"/>

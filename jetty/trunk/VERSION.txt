@@ -1,4 +1,6 @@
 
+    + Added automatic scan of all WEB-INF/jetty-*.xml files for plugin
+    + Added <scanTargets> parameter to allow other locations to scan for plugin
     + Major refactor to simplify Server and handler hierarchy
     + setSendServerVersion method added to Server to control sending of Server: http header
     + removed SelectBlockingChannelConnector (unmaintained)

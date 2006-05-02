@@ -600,4 +600,32 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         }
 
     }
+    
+    /**
+     * Try and find a jetty-web.xml file, using some
+     * historical naming conventions if necessary.
+     * @param webInfDir
+     * @return
+     */
+    public File findJettyWebXmlFile (File webInfDir)
+    {
+        if (webInfDir == null)
+            return null;
+        if (!webInfDir.exists())
+            return null;
+        
+        File f = new File (webInfDir, "jetty-web.xml");
+        if (f.exists())
+            return f;
+        
+        //try some historical alternatives
+        f = new File (webInfDir, "web-jetty.xml");
+        if (f.exists())
+            return f;
+        f = new File (webInfDir, "jetty6-web.xml");
+        if (f.exists())
+            return f;
+        
+        return null;
+    }
 }
