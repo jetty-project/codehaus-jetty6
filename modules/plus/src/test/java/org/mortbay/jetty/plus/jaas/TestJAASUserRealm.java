@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.Random;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -58,6 +59,7 @@ public class TestJAASUserRealm extends TestCase
 
 {
     private static boolean setupDone = false;
+    private Random random = new Random();
    
     
     public TestJAASUserRealm(String name)
@@ -133,7 +135,7 @@ public class TestJAASUserRealm extends TestCase
     {
         String tmpDir = System.getProperty("java.io.tmpdir")+System.getProperty("file.separator");
         System.setProperty("derby.system.home", tmpDir);
-        
+        String dbname = "derby-"+(int)(random.nextDouble()*10000);
         
         EmbeddedDataSource eds = new EmbeddedDataSource();
         
@@ -145,8 +147,9 @@ public class TestJAASUserRealm extends TestCase
             Context env = comp.createSubcontext ("env");
             
             //make a DataSource    
-            eds.setDatabaseName("ttt");          
+            eds.setDatabaseName(dbname);          
             eds.setCreateDatabase("create");
+            
                         
             env.createSubcontext("jdbc");
             env.bind("ds", eds);
