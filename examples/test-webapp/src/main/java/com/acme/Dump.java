@@ -363,16 +363,15 @@ public class Dump extends HttpServlet
                     pout.write("<th align=\"right\">"+name+" Values:&nbsp;</th>");
                     pout.write("<td>"+"NULL!"+"</td>");
                 }
-                else
-                    if (values.length > 1)
+                else if (values.length > 1)
+                {
+                    for (int i= 0; i < values.length; i++)
                     {
-                        for (int i= 0; i < values.length; i++)
-                        {
-                            pout.write("</tr><tr>\n");
-                            pout.write("<th align=\"right\">"+name+"["+i+"]:&nbsp;</th>");
-                            pout.write("<td>"+values[i]+"</td>");
-                        }
+                        pout.write("</tr><tr>\n");
+                        pout.write("<th align=\"right\">"+name+"["+i+"]:&nbsp;</th>");
+                        pout.write("<td>"+values[i]+"</td>");
                     }
+                }
             }
 
             pout.write("</tr><tr>\n");
