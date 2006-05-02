@@ -33,10 +33,12 @@ public class HttpURI
     AUTH_OR_PATH=1,
     SCHEME_OR_PATH=2,
     AUTH=4,
-    PATH=5,
-    PARAM=6,
-    QUERY=7;
+    PORT=5,
+    PATH=6,
+    PARAM=7,
+    QUERY=8;
     
+    boolean _partial=false;
     byte[] _raw;
     String _rawString;
     int _scheme;
@@ -52,6 +54,16 @@ public class HttpURI
     public HttpURI()
     {
         
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param parsePartialAuth If True, parse auth without prior scheme, else treat all URIs starting with / as paths
+     */
+    public HttpURI(boolean parsePartialAuth)
+    {
+        _partial=parsePartialAuth;
     }
     
     public HttpURI(String raw)
@@ -140,9 +152,11 @@ public class HttpURI
 
                 case AUTH_OR_PATH:
                 {
-                    if (c=='/')
+                    if ((_partial||_scheme!=_authority) && c=='/')
                     {
                         _host=i;
+                        _port=_end;
+                        _path=_end;
                         state=AUTH;
                     }
                     else
@@ -226,8 +240,7 @@ public class HttpURI
                     {
                         m=s;
                         _path=m;
-                        if (_port<=_authority)
-                            _port=_path;
+                        _port=_path;
                         state=PATH;
                     }
                     else if (c=='@')
@@ -237,6 +250,20 @@ public class HttpURI
                     else if (c==':')
                     {
                         _port=s;
+                        state=PORT;
+                    }
+                    continue;
+                }
+                
+                case PORT:
+                {
+                    if (c=='/')
+                    {
+                        m=s;
+                        _path=m;
+                        if (_port<=_authority)
+                            _port=_path;
+                        state=PATH;
                     }
                     continue;
                 }
@@ -384,7 +411,6 @@ public class HttpURI
     {
         if (_query==_fragment)
             return;
-        // TODO need to use bytes directly
         UrlEncoded.decodeUtf8To(_raw,_query+1,_fragment-_query-1,parameters);
     }
     
