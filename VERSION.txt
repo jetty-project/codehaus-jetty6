@@ -18,6 +18,7 @@
     + improved support for java5 jconsole
     + Session scavenger threads from threadpool
     + Thread names include URI if debug set
+    + don't accept partial authority in request line.
 
 jetty-6.0.0beta14 - 9/4/2006
     + ignore dirs and files that don't exist in plugin scanner
