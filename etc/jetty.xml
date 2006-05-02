@@ -100,7 +100,7 @@
         <!-- ======================================================= -->
         <!-- Configure a webapp with specific options                -->
         <!-- ======================================================= -->
-	<!-- -->
+	<!-- 
         <Item>
           <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppContext">
             <Set name="contextPath">/</Set>
@@ -115,6 +115,7 @@
             </Get>
           </New>
         </Item>
+        -->
 
         <!-- ======================================================= -->
         <!-- Configure a context directly - no XML parser required   -->
@@ -163,8 +164,8 @@
       <Arg><Ref id="Server"/></Arg>
       <Arg>./webapps</Arg>
       <Arg>org/mortbay/jetty/webapp/webdefault.xml</Arg>
-      <Arg type="boolean">True</Arg>
-      <Arg type="boolean">False</Arg>
+      <Arg type="boolean">True</Arg>  <!-- extract -->
+      <Arg type="boolean">False</Arg> <!-- parent priority class loading -->
     </Call>
 
 
