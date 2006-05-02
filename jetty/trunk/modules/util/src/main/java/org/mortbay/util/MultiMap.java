@@ -275,7 +275,11 @@ public class MultiMap extends HashMap
         {
             Map.Entry entry = (Map.Entry)i.next();
             Object l = entry.getValue();
-            map.put(entry.getKey(),LazyList.toStringArray(l));
+            String[] a = LazyList.toStringArray(l);
+            // for (int j=a.length;j-->0;)
+            //    if (a[j]==null)
+            //         a[j]="";
+            map.put(entry.getKey(),a);
         }
         return map;
     }
