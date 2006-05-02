@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
@@ -125,6 +126,10 @@ public class HandlerCollection extends AbstractHandler implements Handler
                 try
                 {
                     _handlers[i].handle(target,request, response, dispatch);
+                }
+                catch(EofException e)
+                {
+                    throw e;
                 }
                 catch(RuntimeException e)
                 {
