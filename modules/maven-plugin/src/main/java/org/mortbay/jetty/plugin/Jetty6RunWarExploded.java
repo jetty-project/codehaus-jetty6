@@ -110,6 +110,9 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
         scanList.add(getProject().getFile());
         File webInfDir = new File(webApp,"WEB-INF");
         scanList.add(new File(webInfDir, "web.xml"));
+        File jettyWebXmlFile = findJettyWebXmlFile(webInfDir);
+        if (jettyWebXmlFile != null)
+            scanList.add(jettyWebXmlFile);
         scanList.add(new File(webInfDir, "classes"));
         scanList.add(new File(webInfDir, "lib"));
         setScanList(scanList);
@@ -138,6 +141,9 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
                         scanList.add(getProject().getFile());
                         File webInfDir = new File(webApp,"WEB-INF");
                         scanList.add(new File(webInfDir, "web.xml"));
+                        File jettyWebXmlFile = findJettyWebXmlFile(webInfDir);
+                        if (jettyWebXmlFile != null)
+                            scanList.add(jettyWebXmlFile);
                         scanList.add(new File(webInfDir, "classes"));
                         scanList.add(new File(webInfDir, "lib"));
                         setScanList(scanList);

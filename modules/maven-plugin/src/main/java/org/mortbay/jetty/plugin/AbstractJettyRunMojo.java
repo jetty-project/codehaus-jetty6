@@ -18,6 +18,7 @@ package org.mortbay.jetty.plugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +72,13 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      */
     private File webAppSourceDirectory;
     
+    
+    /**
+     * List of files or directories to additionally periodically scan for changes. Optional.
+     * @parameter
+     */
+    private File[] scanTargets;
+    
 
     /**
      * web.xml as a File
@@ -87,6 +95,12 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      * List of files on the classpath for the webapp
      */
     private List classPathFiles;
+    
+    
+    /**
+     * Extra scan targets as a list
+     */
+    private List extraScanTargets;
 
     public String getWebXml()
     {
@@ -139,6 +153,15 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     }
 
 
+    public List getExtraScanTargets ()
+    {
+        return this.extraScanTargets;
+    }
+    
+    public void setExtraScanTargets(List list)
+    {
+        this.extraScanTargets = list;
+    }
 
     /**
      * Run the mojo
@@ -243,6 +266,20 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
             }
             
         }
+        
+        
+        if (scanTargets == null)
+            setExtraScanTargets(Collections.EMPTY_LIST);
+        else
+        {
+            ArrayList list = new ArrayList();
+            for (int i=0; i< scanTargets.length; i++)
+            {
+                getLog().info("Added extra scan target:"+ scanTargets[i]);
+                list.add(scanTargets[i]);
+            }
+            setExtraScanTargets(list);
+        }
     }
 
    
@@ -271,6 +308,10 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         scanList.add(getWebXmlFile());
         if (getJettyEnvXmlFile() != null)
             scanList.add(getJettyEnvXmlFile());
+        File jettyWebXmlFile = findJettyWebXmlFile(new File(getWebAppSourceDirectory(),"WEB-INF"));
+        if (jettyWebXmlFile != null)
+            scanList.add(jettyWebXmlFile);
+        scanList.addAll(getExtraScanTargets());
         scanList.add(getProject().getFile());
         scanList.addAll(getClassPathFiles());
         setScanList(scanList);
@@ -298,6 +339,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                         scanList.add(getWebXmlFile());
                         if (getJettyEnvXmlFile() != null)
                             scanList.add(getJettyEnvXmlFile());
+                        scanList.addAll(getExtraScanTargets());
                         scanList.add(getProject().getFile());
                         scanList.addAll(getClassPathFiles());
                         scanner.setRoots(scanList);
