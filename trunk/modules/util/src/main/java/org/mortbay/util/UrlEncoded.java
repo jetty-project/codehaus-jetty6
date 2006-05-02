@@ -184,30 +184,26 @@ public class UrlEncoded extends MultiMap
                 switch (c)
                 {
                   case '&':
-                      value = encoded
-                          ?decodeString(content,mark+1,i-mark-1,charset)
-                          :content.substring(mark+1,i);
-                      
+                      int l=i-mark-1;
+                      value = l==0?"":
+                          (encoded?decodeString(content,mark+1,l,charset):content.substring(mark+1,i));
                       mark=i;
                       encoded=false;
                       if (key != null)
                       {
                           map.add(key,value);
-                          key = null;
-                          value=null;
                       }
-                      else if (value!=null)
+                      else if (value!=null&&value.length()>0)
                       {
-                          map.add(value,null);
-                          value=null;
+                          map.add(value,"");
                       }
+                      key = null;
+                      value=null;
                       break;
                   case '=':
                       if (key!=null)
                           break;
-                      key = encoded
-                          ?decodeString(content,mark+1,i-mark-1,charset)
-                          :content.substring(mark+1,i);
+                      key = encoded?decodeString(content,mark+1,i-mark-1,charset):content.substring(mark+1,i);
                       mark=i;
                       encoded=false;
                       break;
@@ -222,9 +218,8 @@ public class UrlEncoded extends MultiMap
             
             if (key != null)
             {
-                value =  encoded
-                    ?decodeString(content,mark+1,content.length()-mark-1,charset)
-                    :content.substring(mark+1);
+                int l=content.length()-mark-1;
+                value = l==0?"":(encoded?decodeString(content,mark+1,l,charset):content.substring(mark+1));
                 map.add(key,value);
             }
             else if (mark<content.length())
@@ -257,19 +252,18 @@ public class UrlEncoded extends MultiMap
                 switch ((char)(0xff&b))
                 {
                     case '&':
-                        value = buffer.length()==0?null:buffer.toString();
+                        value = buffer.length()==0?"":buffer.toString();
                         buffer.reset();
                         if (key != null)
                         {
                             map.add(key,value);
-                            key = null;
-                            value=null;
                         }
-                        else if (value!=null)
+                        else if (value!=null&&value.length()>0)
                         {
-                            map.add(value,null);
-                            value=null;
+                            map.add(value,"");
                         }
+                        key = null;
+                        value=null;
                         break;
                         
                     case '=':
@@ -298,9 +292,13 @@ public class UrlEncoded extends MultiMap
             
             if (key != null)
             {
-                value = buffer.toString();
+                value = buffer.length()==0?"":buffer.toString();
                 buffer.reset();
                 map.add(key,value);
+            }
+            else if (buffer.length()>0)
+            {
+                map.add(buffer.toString(),"");
             }
         }
     }
@@ -327,19 +325,18 @@ public class UrlEncoded extends MultiMap
                 switch ((char) b)
                 {
                     case '&':
-                        value = buffer.length()==0?null:buffer.toString();
+                        value = buffer.length()==0?"":buffer.toString();
                         buffer.reset();
                         if (key != null)
                         {
                             map.add(key,value);
-                            key = null;
-                            value=null;
                         }
-                        else if (value!=null)
+                        else if (value!=null&&value.length()>0)
                         {
-                            map.add(value,null);
-                            value=null;
+                            map.add(value,"");
                         }
+                        key = null;
+                        value=null;
                         break;
                         
                     case '=':
@@ -371,12 +368,17 @@ public class UrlEncoded extends MultiMap
             
             if (key != null)
             {
-                value = buffer.toString();
+                value = buffer.length()==0?"":buffer.toString();
                 buffer.reset();
                 map.add(key,value);
             }
+            else if (buffer.length()>0)
+            {
+                map.add(buffer.toString(), "");
+            }
         }
     }
+    
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
      * @param in the stream containing the encoded parameters
@@ -413,19 +415,18 @@ public class UrlEncoded extends MultiMap
                     switch ((char) c)
                     {
                         case '&':
-                            value = buf.size()==0?null:new String(buf.getBuf(), 0, buf.size(), charset);
+                            value = buf.size()==0?"":new String(buf.getBuf(), 0, buf.size(), charset);
                             buf.reset();
                             if (key != null)
                             {
                                 map.add(key,value);
-                                key = null;
-                                value=null;
                             }
-                            else if (value!=null)
+                            else if (value!=null&&value.length()>0)
                             {
-                                map.add(value,null);
-                                value=null;
+                                map.add(value,"");
                             }
+                            key = null;
+                            value=null;
                             break;
                         case '=':
                             if (key!=null)
@@ -459,11 +460,16 @@ public class UrlEncoded extends MultiMap
                     }
                 }
             }
+            
             if (key != null)
             {
-                value = new String(buf.getBuf(), 0, buf.size(), charset);
+                value = buf.size()==0?"":new String(buf.getBuf(), 0, buf.size(), charset);
                 buf.reset();
                 map.add(key,value);
+            }
+            else if (buf.size()>0)
+            {
+                map.add(new String(buf.getBuf(), 0, buf.size(), charset),"");
             }
             
         }

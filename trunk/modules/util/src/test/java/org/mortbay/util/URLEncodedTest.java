@@ -101,10 +101,7 @@ public class URLEncodedTest extends junit.framework.TestCase
     
         url_encoded.clear();
         url_encoded.decode("Name7=aaa&Name7=b%2Cb&Name7=ccc");
-        assertEquals("multi encode",
-                         "Name7=aaa&Name7=b%2Cb&Name7=ccc"
-                         ,
-                        url_encoded.encode());
+        assertEquals("multi encode","Name7=aaa&Name7=b%2Cb&Name7=ccc",url_encoded.encode());
         assertEquals("list get all", url_encoded.getString("Name7"),"aaa,b,b,ccc");
         assertEquals("list get","aaa", url_encoded.getValues("Name7").get(0));
         assertEquals("list get", url_encoded.getValues("Name7").get(1),"b,b");
@@ -119,9 +116,7 @@ public class URLEncodedTest extends junit.framework.TestCase
         url_encoded.clear();
         url_encoded.decode("Name9=%83e%83X%83g", "SJIS"); // "Test" in Japanese Katakana
         assertEquals("encoded param size",1, url_encoded.size());
-        assertEquals("encoded get", "\u30c6\u30b9\u30c8", url_encoded.getString("Name9"));        
-        
-        
+        assertEquals("encoded get", "\u30c6\u30b9\u30c8", url_encoded.getString("Name9"));   
         
         
     }
@@ -138,8 +133,8 @@ public class URLEncodedTest extends junit.framework.TestCase
         System.err.println(m);
         assertEquals("stream length",4,m.size());
         assertEquals("stream name0","value 0",m.getString("name0"));
-        assertEquals("stream name1",null,m.getString("name1"));
-        assertEquals("stream name2",null,m.getString("name2"));
+        assertEquals("stream name1","",m.getString("name1"));
+        assertEquals("stream name2","",m.getString("name2"));
         assertEquals("stream name3","value 3",m.getString("name3"));
         
         
