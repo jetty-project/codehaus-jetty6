@@ -14,10 +14,12 @@
 
 package org.mortbay.resource;
 
+
 import java.io.File;
 import java.io.FilePermission;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.jar.JarInputStream;
 
 import junit.framework.TestSuite;
 
@@ -242,13 +244,29 @@ public class ResourceTest extends junit.framework.TestCase
         {
             if (data[i]==null || data[i].content==null)
                 continue;
-
+          
             InputStream in = data[i].resource.getInputStream();
             String c=IO.toString(in);
             assertTrue(""+i+":"+data[i].test,c.startsWith(data[i].content));
         }
     }
     
+    
+    
+    public void testJarFile()
+    throws Exception
+    {
+      
+        String s = "jar:"+__userURL+"TestData/test.zip!/subdir/";
+        Resource r = Resource.newResource(s);
+        InputStream is = r.getInputStream();        
+        JarInputStream jin = new JarInputStream(is);
+        assertNotNull(is);
+        assertNotNull(jin);
+        
+    }
+    
+   
     
     
 }
