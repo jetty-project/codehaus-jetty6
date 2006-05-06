@@ -92,12 +92,14 @@ public class JarResource extends URLResource
     /* ------------------------------------------------------------ */
     public InputStream getInputStream()
         throws java.io.IOException
-    {
+    {     
+        checkConnection();
         if (!_urlString.endsWith("!/"))
             return super.getInputStream();
-        
-        URL url = new URL(_urlString.substring(4,_urlString.length()-2));
-        return url.openStream();
+                    
+        URL url = new URL(_urlString.substring(4,_urlString.length()-2));      
+        InputStream is = url.openStream();
+        return is;
     }
     
     /* ------------------------------------------------------------ */
@@ -105,11 +107,73 @@ public class JarResource extends URLResource
         throws IOException
     {
         if(Log.isDebugEnabled())Log.debug("Extract "+resource+" to "+directory);
-        JarInputStream jin = new JarInputStream(resource.getInputStream());
+        
+        
+        String urlString = resource.getURL().toExternalForm().trim();
+        int endOfJarUrl = urlString.indexOf("!/");
+        int startOfJarUrl = (endOfJarUrl >= 0?4:0);
+        
+        if (endOfJarUrl < 0)
+            throw new IOException("Not a valid jar url: "+urlString);
+        
+        URL jarFileURL = new URL(urlString.substring(startOfJarUrl, endOfJarUrl));
+        String subEntryName = (endOfJarUrl+2 < urlString.length() ? urlString.substring(endOfJarUrl + 2) : null);
+        boolean subEntryIsDir = (subEntryName != null && subEntryName.endsWith("/")?true:false);
+      
+        if (Log.isDebugEnabled()) Log.debug("Extracting entry = "+subEntryName+" from jar "+jarFileURL);
+        
+        InputStream is = jarFileURL.openConnection().getInputStream();
+        JarInputStream jin = new JarInputStream(is);
         JarEntry entry=null;
+        boolean shouldExtract = true;
         while((entry=jin.getNextJarEntry())!=null)
         {
-            File file=new File(directory,entry.getName());
+            String entryName = entry.getName();
+           
+
+            if ((subEntryName != null) && (entryName.startsWith(subEntryName)))
+            { 
+                //if there is a particular subEntry that we are looking for, only
+                //extract it.
+                if (subEntryIsDir)
+                {
+                    //if it is a subdirectory we are looking for, then we
+                    //are looking to extract its contents into the target
+                    //directory. Remove the name of the subdirectory so
+                    //that we don't wind up creating it too.
+                    entryName = entryName.substring(subEntryName.length());
+                    if (!entryName.equals(""))
+                    {
+                        //the entry is 
+                        shouldExtract = true;                   
+                    }
+                    else
+                        shouldExtract = false;
+                }
+                else
+                    shouldExtract = true;
+            }
+            else if ((subEntryName != null) && (!entryName.startsWith(subEntryName)))
+            {
+                //there is a particular entry we are looking for, and this one
+                //isn't it
+                shouldExtract = false;
+            }
+            else
+            {
+                //we are extracting everything
+                shouldExtract =  true;
+            }
+                
+            
+            if (!shouldExtract)
+            {
+                if (Log.isDebugEnabled()) Log.debug("Skipping entry: "+entryName);
+                continue;
+            }
+                
+           
+            File file=new File(directory,entryName);
             if (entry.isDirectory())
             {
                 // Make directory

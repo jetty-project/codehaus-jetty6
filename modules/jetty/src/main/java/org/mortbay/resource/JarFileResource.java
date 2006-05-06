@@ -180,9 +180,10 @@ class JarFileResource extends JarResource
         return _exists;
     }
 
+    
     /* ------------------------------------------------------------ */
     /**
-     * Returns true if the respresenetd resource is a container/directory.
+     * Returns true if the represented resource is a container/directory.
      * If the resource is not a file, resources ending with "/" are
      * considered directories.
      */
