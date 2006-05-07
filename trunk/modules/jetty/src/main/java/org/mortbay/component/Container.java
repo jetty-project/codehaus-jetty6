@@ -201,7 +201,7 @@ public class Container
      */
     public interface Listener extends EventListener
     {
-        public void add(Container.Relationship event);
-        public void remove(Container.Relationship event);
+        public void add(Container.Relationship relationship);
+        public void remove(Container.Relationship relationship);
     }
 }

@@ -38,7 +38,7 @@ import org.mortbay.util.MultiException;
  * @author gregw
  *
  */
-public class HandlerCollection extends AbstractHandler implements Handler
+public class HandlerCollection extends AbstractHandler 
 {
     private Handler[] _handlers;
 

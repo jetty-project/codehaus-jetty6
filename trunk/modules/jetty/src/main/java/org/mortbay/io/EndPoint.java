@@ -20,9 +20,7 @@ import java.io.IOException;
 
 /**
  * @author gregw
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * A transport EndPoint
  */
 public interface EndPoint
 {
