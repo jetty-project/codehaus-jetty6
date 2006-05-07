@@ -20,23 +20,14 @@ import java.security.acl.Group;
 
 
 /* ---------------------------------------------------- */
-/** StrictRoleChecPolicy
+/** StrictRoleCheckPolicy
  * <p>Enforces that if a runAsRole is present, then the
  * role to check must be the same as that runAsRole and
  * the set of static roles is ignored.
+ * 
  *
- * <p><h4>Notes</h4>
- * <p>
- *
- * <p><h4>Usage</h4>
- * <pre>
- */
-/*
- * </pre>
- *
- * @see
- * @version 1.0 Mon Apr 14 2003
- * @author Jan Bartel (janb)
+ * 
+ * @org.apache.xbean.XBean description ="Check only topmost role in stack of roles for user"
  */
 public class StrictRoleCheckPolicy implements RoleCheckPolicy
 {

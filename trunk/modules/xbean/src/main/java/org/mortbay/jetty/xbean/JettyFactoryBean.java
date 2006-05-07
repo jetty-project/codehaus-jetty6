@@ -22,6 +22,7 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -42,6 +43,7 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
     private Server server;
     private Handler[] handlers = {};
     private Connector[] connectors = {};
+    private UserRealm[] userRealms = {};
     
     public Object getObject() throws Exception {
         return getServer();
@@ -79,7 +81,14 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
             contexts=new ContextHandlerCollection();
             server.setHandler(contexts);
         }
+        
         contexts.setHandlers(handlers);
+        
+        for (int i=0; i < userRealms.length; i++) {
+            Log.info("Using UserRealm: "+userRealms[i]);
+        }
+        server.setUserRealms(userRealms);
+        
         server.start();
     }
 
@@ -127,6 +136,14 @@ public class JettyFactoryBean implements FactoryBean, InitializingBean, Disposab
         this.handlers = handlers;
     }
 
+    
+    public void setUserRealms (UserRealm[] userRealms) {
+        this.userRealms = userRealms;
+    }
+    
+    public UserRealm[] getUserRealms () {
+        return this.userRealms;
+    }
     // Implementation methods
     // -------------------------------------------------------------------------
     protected Server createServer() throws Exception {
