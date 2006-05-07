@@ -74,6 +74,9 @@
                     <include name="handler/**/*.java"></include>
                     <include name="webapp/**/*.java"></include>
                   </fileset>
+                  <fileset dir="${basedir}/../plus/src/main/java/org/mortbay/jetty/plus/jaas">
+                    <include name="**/*.java"></include>
+                  </fileset>
                 </copy>
                 <mkdir dir="${basedir}/target/generated/"></mkdir>
                 <mapping namespace="http://mortbay.com/schemas/jetty/1.0" srcdir="${basedir}/target/xbean-src-to-parse" destFile="target/jetty.xsd" metaInfDir="${basedir}/target/generated/"></mapping>
@@ -106,6 +109,11 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
+      <version>6.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-plus</artifactId>
       <version>6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
