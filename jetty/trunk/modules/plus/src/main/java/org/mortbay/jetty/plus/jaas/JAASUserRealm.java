@@ -44,14 +44,11 @@ import org.mortbay.util.Loader;
  * <p>
  *
  * <p><h4>Usage</h4>
- * <pre>
- */
-/*
- * </pre>
+ * 
  *
- * @see
- * @version 1.0 Mon Apr 14 2003
- * @author Jan Bartel (janb)
+ *
+ * 
+ * @org.apache.xbean.XBean description="Creates a UserRealm suitable for use with JAAS"
  */
 public class JAASUserRealm implements UserRealm
 {
