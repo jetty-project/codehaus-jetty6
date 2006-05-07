@@ -131,15 +131,6 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /**
-     * @return Returns the handler.
-     */
-    public Handler getHandler()
-    {
-        return _server;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @return Returns the requestFields.
      */
     public HttpFields getRequestFields()
@@ -296,7 +287,7 @@ public class HttpConnection
                     Log.debug("resume continuation {}",continuation);
                     if (_request.getMethod()==null)
                         throw new IllegalStateException();
-                    doHandler();
+                    handlerRequest();
                 }
                 else
                 {
@@ -348,7 +339,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    private void doHandler() throws IOException
+    private void handlerRequest() throws IOException
     {
         if (_server != null)
         {
@@ -615,7 +606,7 @@ public class HttpConnection
 
             // Either handle now or wait for first content
             if (_parser.getContentLength()<=0 && !_parser.isChunking())
-                doHandler();
+                handlerRequest();
             else
                 _delayedHandling=true;
         }
@@ -629,7 +620,7 @@ public class HttpConnection
             if (_delayedHandling)
             {
                 _delayedHandling=false;
-                doHandler();
+                handlerRequest();
             }
         }
 
