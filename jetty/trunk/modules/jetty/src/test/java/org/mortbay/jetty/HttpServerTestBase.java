@@ -267,37 +267,55 @@ public class HttpServerTestBase
         Server    server     = startServer(new EchoHandler());
 
         try {
+            
+            if (this instanceof SelectChannelServerTest) System.err.println("**********START FRAGMENT TEST******************");
             for (int i = 0; i < 100; i++) {
                 
                 int[]        points  = new int[pointCount];
                 StringBuffer message = new StringBuffer();
-
+                
                 message.append("iteration #" + (i + 1));
-
+                
                 // Pick fragment points at random
                 for (int j = 0; j < points.length; ++j) {
+                    
+                    if (this instanceof SelectChannelServerTest)
+                    {
+                        System.err.println("points["+j+"]="+points[j]);
+                    }
+                    
                     points[j] = random.nextInt(bytes.length);
-                    //System.err.println("points["+j+"]="+points[j]);
                 }
-
+                
                 // Sort the list
                 Arrays.sort(points);
-
+                
                 Socket       client = client = new Socket(HOST, port);
                 OutputStream os     = client.getOutputStream();
-
-                writeFragments(bytes, points, message, os);
-
+                
+                
+                boolean writeOutput = false;
+                if (this instanceof SelectChannelServerTest)
+                {               
+                    writeOutput = true;
+                }
+                writeFragments(bytes, points, message, os, writeOutput);
+                
                 // Read the response
                 String response = readResponse(client);
-                //System.err.println("\nresponse:\n"+response);
-
+                
+                if (this instanceof SelectChannelServerTest)
+                {
+                    System.err.println("\nresponse:\n"+response);
+                    
+                    System.err.println("**********END FRAGMENT TEST******************");
+                }
                 // Close the client
                 client.close();
-
+                
                 // Check the response
                 assertEquals("response for "+i+" " + message.toString(), RESPONSE2,
-                             response);
+                        response);
             }
         }
         finally {
@@ -305,9 +323,9 @@ public class HttpServerTestBase
             server.stop();
         }
     }
-
+    
     public void testRequest2Iterate_jetty()
-                                   throws Exception
+    throws Exception
     {
         byte[] bytes  = REQUEST2.getBytes();
         Server server = startServer(new EchoHandler());
@@ -451,8 +469,16 @@ public class HttpServerTestBase
     }
 
     
+    private void writeFragments (byte[] bytes, int[] points,
+            StringBuffer message, OutputStream os)
+    throws IOException, InterruptedException
+    {
+        writeFragments(bytes, points, message, os, false);
+    }
+    
+    
     private void writeFragments(byte[] bytes, int[] points,
-                                StringBuffer message, OutputStream os)
+                                StringBuffer message, OutputStream os, boolean writeDebug)
                          throws IOException, InterruptedException
     {
         int last = 0;
@@ -461,8 +487,11 @@ public class HttpServerTestBase
         for (int j = 0; j < points.length; ++j) {
             int point = points[j];
 
-            //String dump = new String(bytes,last,point-last);
-            //System.err.println("\nFragment "+j+"='"+dump+"'");
+            if (writeDebug)
+            {
+                String dump = new String(bytes,last,point-last);
+                System.err.println("\nFragment "+j+"='"+dump+"'");
+            }
             os.write(bytes, last, point - last);
             last = point;
             os.flush();
@@ -473,8 +502,11 @@ public class HttpServerTestBase
         }
 
         // Write the last fragment
-        //String dump = new String(bytes,last,bytes.length-last);
-        //System.err.println("\nFragment N='"+dump+"'");
+        if (writeDebug)
+        {
+            String dump = new String(bytes,last,bytes.length-last);
+            System.err.println("\nFragment N='"+dump+"'");
+        }
         os.write(bytes, last, bytes.length - last);
         os.flush();
         Thread.sleep(PAUSE);
