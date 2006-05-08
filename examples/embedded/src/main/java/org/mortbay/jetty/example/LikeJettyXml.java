@@ -16,6 +16,7 @@ package org.mortbay.jetty.example;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.NCSARequestLog;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
@@ -57,7 +58,9 @@ public class LikeJettyXml
         userRealm.setConfig("./etc/realm.properties");
         server.setUserRealms(new UserRealm[]{userRealm});
         
-        // TODO configure request log
+        NCSARequestLog requestLog = new NCSARequestLog("./log/jetty-yyyy-mm-dd.log");
+        requestLog.setExtended(false);
+        requestLogHandler.setRequestLog(requestLog);
         
         server.setStopAtShutdown(true);
         server.setSendServerVersion(true);

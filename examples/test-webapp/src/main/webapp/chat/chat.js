@@ -107,12 +107,8 @@ var chatBehaviours =
   {
     element.setAttribute("autocomplete","OFF"); 
     element.onkeyup = function(ev)
-    {  
-        var keyc;
-        if (window.event)
-           keyc=window.event.keyCode;
-        else
-           keyc=ev.keyCode;
+    {          
+        var keyc=EvUtil.getKeyCode(ev);
         if (keyc==13 || keyc==10)
         {
           room.join($F('username'));
@@ -136,12 +132,7 @@ var chatBehaviours =
     element.setAttribute("autocomplete","OFF");
     element.onkeyup = function(ev)
     {   
-        var keyc;
-        if (window.event)
-           keyc=window.event.keyCode;
-        else
-           keyc=ev.keyCode;
-           
+        var keyc=EvUtil.getKeyCode(ev);
         if (keyc==13 || keyc==10)
         {
           room.chat($F('phrase'));
