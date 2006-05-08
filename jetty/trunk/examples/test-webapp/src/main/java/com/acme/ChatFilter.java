@@ -95,7 +95,7 @@ public class ChatFilter extends AjaxFilter
                 member.setName(name);
             
             // exists already, so just update name
-            sendEvent(member,"has joined the chat",true);
+            sendMessage(member,"has joined the chat",true);
             
             //response.objectResponse("joined", "<joined from=\""+name+"\"/>");
             sendMembers(response);
@@ -116,9 +116,9 @@ public class ChatFilter extends AjaxFilter
             if (member==null)
                 return;
             if ("Elvis".equals(member.getName()))
-                sendEvent(member,"has left the building",true);
+                sendMessage(member,"has left the building",true);
             else
-                sendEvent(member,"has left the chat",true);
+                sendMessage(member,"has left the chat",true);
             chatroom.remove(id);
             member.setName(null);
         }
@@ -140,7 +140,7 @@ public class ChatFilter extends AjaxFilter
             
             if (member==null)
                 return;
-            sendEvent(member, text, false);
+            sendMessage(member, text, false);
         }
     }
 
@@ -163,8 +163,9 @@ public class ChatFilter extends AjaxFilter
                 member = new Member(session,null);
                 chatroom.put(session.getId(),member);
             }
+            
             // Get an existing Continuation or create a new one if there are no events.
-            if (!member.hasEvents())
+            if (!member.hasMessages())
             {
                 Continuation continuation = ContinuationSupport.getContinuation(request, mutex);
                 member.setContinuation(continuation);
@@ -172,16 +173,16 @@ public class ChatFilter extends AjaxFilter
             }
             member.setContinuation(null);
             
-            if (member.sendEvents(response))
+            if (member.sendMessages(response))
                 sendMembers(response);
         }
         
     }
 
     /* ------------------------------------------------------------ */
-    private void sendEvent(Member member, String text, boolean alert)
+    private void sendMessage(Member member, String text, boolean alert)
     {
-        Event event=new Event(member.getName(),text,alert);
+        Message event=new Message(member.getName(),text,alert);
         
         ArrayList invalids=null;
         synchronized (mutex)
@@ -194,7 +195,7 @@ public class ChatFilter extends AjaxFilter
                 try 
                 {
                     m.getSession().getAttribute("anything");
-                    m.addEvent(event);
+                    m.addMessage(event);
                 }
                 catch(IllegalStateException e)
                 {
@@ -209,7 +210,7 @@ public class ChatFilter extends AjaxFilter
         for (int i=0;invalids!=null && i<invalids.size();i++)
         {
             Member m = (Member)invalids.get(i);
-            sendEvent(m,"has timed out of the chat",true);
+            sendMessage(m,"has timed out of the chat",true);
         }
     }
     
@@ -235,13 +236,13 @@ public class ChatFilter extends AjaxFilter
     }
 
     
-    private static class Event
+    private static class Message
     {
         private String _from;
         private String _text;
         private boolean _alert;
         
-        Event(String from, String text, boolean alert)
+        Message(String from, String text, boolean alert)
         {
             _from=from;
             _text=text;
@@ -266,7 +267,7 @@ public class ChatFilter extends AjaxFilter
     {
         private HttpSession _session;
         private String _name;
-        private List _events = new ArrayList();
+        private List _messages = new ArrayList();
         private Continuation _continuation;
         
         Member(HttpSession session, String name)
@@ -315,22 +316,22 @@ public class ChatFilter extends AjaxFilter
         }
         
         /* ------------------------------------------------------------ */
-        public void addEvent(Event event)
+        public void addMessage(Message event)
         {
             synchronized (mutex)
             {
                 if (_name==null)
                     return;
-                _events.add(event);
+                _messages.add(event);
                 if (_continuation!=null)
                     _continuation.resume();
             }
         }
 
         /* ------------------------------------------------------------ */
-        public boolean hasEvents()
+        public boolean hasMessages()
         {
-            return _events!=null && _events.size()>0;
+            return _messages!=null && _messages.size()>0;
         }
         
         /* ------------------------------------------------------------ */
@@ -339,22 +340,22 @@ public class ChatFilter extends AjaxFilter
             String oldName = getName();
             setName(name);
             if (oldName!=null)
-                ChatFilter.this.sendEvent(this,oldName+" has been renamed to "+name,true);
+                ChatFilter.this.sendMessage(this,oldName+" has been renamed to "+name,true);
         }
 
         /* ------------------------------------------------------------ */
-        public boolean sendEvents(AjaxResponse response)
+        public boolean sendMessages(AjaxResponse response)
         {
             synchronized (mutex)
             {
                 boolean alerts=false;
-                for (int i=0;i<_events.size();i++)
+                for (int i=0;i<_messages.size();i++)
                 {
-                    Event event = (Event)_events.get(i);
+                    Message event = (Message)_messages.get(i);
                     response.objectResponse("chat", event.toString());
                     alerts |= event.isAlert();
                 }
-                _events.clear();
+                _messages.clear();
                 return alerts;
             }
         }

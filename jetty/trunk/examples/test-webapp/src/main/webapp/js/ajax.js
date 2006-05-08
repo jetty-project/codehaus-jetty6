@@ -177,5 +177,18 @@ var ajax =
   
 };
 
+var EvUtil =
+{
+    getKeyCode : function(ev)
+    {
+        var keyc;
+        if (window.event)
+            keyc=window.event.keyCode;
+        else
+            keyc=ev.keyCode;
+        return keyc;
+    }
+};
+
 Behaviour.addLoadEvent(ajax._startPolling);  
 
