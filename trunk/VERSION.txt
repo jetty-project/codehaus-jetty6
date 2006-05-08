@@ -1,3 +1,4 @@
+jetty-6.0.0beta15 - ????
 
     + Added automatic scan of all WEB-INF/jetty-*.xml files for plugin
     + Added <scanTargets> parameter to allow other locations to scan for plugin
