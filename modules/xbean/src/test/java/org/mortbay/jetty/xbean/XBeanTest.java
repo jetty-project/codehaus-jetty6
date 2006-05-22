@@ -22,7 +22,11 @@ import java.net.URL;
 import junit.framework.TestCase;
 
 import org.apache.xbean.spring.context.ResourceXmlApplicationContext;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.io.UrlResource;
 
@@ -31,6 +35,7 @@ public class XBeanTest extends TestCase {
     protected AbstractApplicationContext context;
 
     public void testUsingXBeanXmlConfig() throws Exception {
+        System.setProperty("DEBUG", "true");
         URL url = getClass().getClassLoader().getResource("org/mortbay/jetty/xbean/xbean.xml");
         assertNotNull("Could not find xbean.xml on the classpath!", url);
         
@@ -39,7 +44,16 @@ public class XBeanTest extends TestCase {
         assertEquals("Should have the name of a Jetty server", 1, names.length);
         Server server = (Server) context.getBean(names[0]);
         assertNotNull("Should have a Jetty Server", server);
-        Thread.currentThread().sleep(10000L);
+        
+        HandlerCollection hcollection = (HandlerCollection) server.getChildHandlerByClass(HandlerCollection.class);
+        assertNotNull("Should have a HandlerCollection", hcollection);
+        assertNotNull("HandlerCollection should contain handlers", hcollection.getHandlers());
+        Handler[] handlers = hcollection.getHandlers();
+        assertEquals("Should be 3 handlers", 3,handlers.length);
+        assertTrue("First handler should be a ContextHandlerCollection", handlers[0] instanceof ContextHandlerCollection);
+        Handler[] webapps = ((ContextHandlerCollection)handlers[0]).getChildHandlers();
+        assertNotNull("Should be at least one webapp", webapps);
+        assertTrue("Should be an instance of WebAppContext", webapps[0] instanceof WebAppContext);
     }
 
     protected void tearDown() throws Exception {
