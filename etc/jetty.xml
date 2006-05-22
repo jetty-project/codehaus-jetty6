@@ -11,8 +11,9 @@
     <!-- =========================================================== -->
     <Set name="ThreadPool">
       <New class="org.mortbay.thread.BoundedThreadPool">
-        <Set name="minThreads">25</Set>
-        <Set name="maxThreads">250</Set>
+        <Set name="minThreads">5</Set>
+        <Set name="lowThreads">4</Set>
+        <Set name="maxThreads">10</Set>
       </New>
     </Set>
 
@@ -30,27 +31,30 @@
         <Item>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
             <Set name="port">8080</Set>
-            <Set name="maxIdleTime">30000</Set>
+            <Set name="maxIdleTime">60000</Set>
+            <Set name="lowResourceMaxIdleTime">3000</Set>
             <Set name="Acceptors">2</Set>
           </New>
         </Item>
 
         <!-- Use this connector if NIO is not available.
+        -->
         <Item>
           <New class="org.mortbay.jetty.bio.SocketConnector">
             <Set name="port">8081</Set>
             <Set name="maxIdleTime">50000</Set>
           </New>
         </Item>
-        -->
 
         <!-- Use this connector for few very active connections.
+        -->
         <Item>
           <New class="org.mortbay.jetty.nio.BlockingChannelConnector">
-            <Set name="port">8082</Set>
+            <Set name="port">8083</Set>
+            <Set name="maxIdleTime">30000</Set>
+            <Set name="lowResourceMaxIdleTime">3000</Set>
           </New>
         </Item>
-        -->
 
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
         <!-- Add a HTTPS SSL listener on port 8443                           -->
