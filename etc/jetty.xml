@@ -38,16 +38,16 @@
         </Item>
 
         <!-- Use this connector if NIO is not available.
-        -->
         <Item>
           <New class="org.mortbay.jetty.bio.SocketConnector">
             <Set name="port">8081</Set>
             <Set name="maxIdleTime">50000</Set>
           </New>
         </Item>
-
-        <!-- Use this connector for few very active connections.
         -->
+
+        <!-- Use this connector for few very active connections ONLY IF
+	     SelectChannelConnector cannot handle your load
         <Item>
           <New class="org.mortbay.jetty.nio.BlockingChannelConnector">
             <Set name="port">8083</Set>
@@ -55,12 +55,12 @@
             <Set name="lowResourceMaxIdleTime">3000</Set>
           </New>
         </Item>
+        -->
 
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
         <!-- Add a HTTPS SSL listener on port 8443                           -->
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
         <!--
-        -->
         <Item>
           <New class="org.mortbay.jetty.security.SslSocketConnector">
             <Set name="Port">8443</Set>
@@ -70,6 +70,7 @@
             <Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
           </New>
         </Item>
+        -->
       </Array>
     </Set>
 
