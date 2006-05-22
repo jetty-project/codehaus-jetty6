@@ -40,6 +40,16 @@ import org.mortbay.util.StringUtil;
  */
 public class DumpHandler extends AbstractHandler
 {
+    String label="Dump HttpHandler";
+    
+    public DumpHandler()
+    {
+    }
+    
+    public DumpHandler(String label)
+    {
+        this.label=label;
+    }
     
     /* ------------------------------------------------------------ */
     /* 
@@ -56,7 +66,7 @@ public class DumpHandler extends AbstractHandler
         OutputStream out = response.getOutputStream();
         ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
         Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
-        writer.write("<html><h1>Dump HttpHandler</h1>");
+        writer.write("<html><h1>"+label+"</h1>");
         writer.write("<pre>\npathInfo="+request.getPathInfo()+"\n</pre>\n");
         writer.write("<h3>Header:</h3><pre>");
         writer.write(request.toString());

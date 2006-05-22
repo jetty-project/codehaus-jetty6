@@ -10,6 +10,9 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
+
 import junit.framework.TestCase;
 
 /**
@@ -29,7 +32,21 @@ public class RFC2616Test extends TestCase
     {
         super(arg0);
         server.setConnectors(new Connector[]{connector});
-        server.setHandler(new DumpHandler());
+        
+
+        ContextHandler vcontext = new ContextHandler();
+        vcontext.setContextPath("/");
+        vcontext.setVirtualHosts(new String[]{"VirtualHost"});
+        vcontext.setHandler(new DumpHandler("Virtual Dump"));
+        
+        ContextHandler context = new ContextHandler();
+        context.setContextPath("/");
+        context.setHandler(new DumpHandler());
+        
+        HandlerCollection collection = new HandlerCollection();
+        collection.setHandlers(new Handler[]{vcontext,context});
+        
+        server.setHandler(collection);
     }
 
     /*
@@ -326,94 +343,65 @@ public class RFC2616Test extends TestCase
     }
     
     /* --------------------------------------------------------------- */
-    public void test5_2()
+    public void test5_2() throws Exception
     {        
-        // TODO
-        /*
-        try
-        {
-            TestListener listener = new TestListener();
-            connector.getHttpServer().getContext("VirtualHost","/path/*")
-                .addHandler(new DumpHandler());
-            connector.getHttpServer().start();
-            String response;
-            int offset=0; connector.reopen();
-
-            // Default Host
-            offset=0; connector.reopen();
-            response=connector.getResponses("GET /path/R1 HTTP/1.1\n"+
-                                           "Host: localhost\n"+
-                                           "\n");
-            
-            offset=checkContains(response,offset,
-                                   "HTTP/1.1 200",
-                                   "Default host")+1;
-            offset=checkContains(response,offset,
-                                   "contextPath=",
-                                   "Default host")+1;
-            offset=checkContains(response,offset,
-                                   "pathInContext=/path/R1",
-                                   "Default host")+1;
-            
-            // Virtual Host
-            offset=0; connector.reopen();
-            response=connector.getResponses("GET http://VirtualHost/path/R1 HTTP/1.1\n"+
-                                           "Host: ignored\n"+
-                                           "\n");
-            
-            offset=checkContains(response,offset,
-                                   "HTTP/1.1 200",
-                                   "1. virtual host uri")+1;
-            offset=checkContains(response,offset,
-                                   "contextPath=/path",
-                                   "1. virtual host uri")+1;
-            offset=checkContains(response,offset,
-                                   "pathInContext=/R1",
-                                   "1. virtual host uri")+1;
-
-            // Virtual Host
-            offset=0; connector.reopen();
-            response=connector.getResponses("GET /path/R1 HTTP/1.1\n"+
-                                           "Host: VirtualHost\n"+
-                                           "\n");
-            offset=checkContains(response,offset,
-                                   "HTTP/1.1 200",
-                                   "2. virtual host field")+1;
-            offset=checkContains(response,offset,
-                                   "contextPath=/path",
-                                   "2. virtual host field")+1;
-            offset=checkContains(response,offset,
-                                   "pathInContext=/R1",
-                                   "2. virtual host field")+1;
-
-            // Virtual Host case insensitive
-            offset=0; connector.reopen();
-            response=connector.getResponses("GET /path/R1 HTTP/1.1\n"+
-                                           "Host: ViRtUalhOst\n"+
-                                           "\n");
-            offset=checkContains(response,offset,
-                                   "HTTP/1.1 200",
-                                   "2. virtual host field")+1;
-            offset=checkContains(response,offset,
-                                   "contextPath=/path",
-                                   "2. virtual host field")+1;
-            offset=checkContains(response,offset,
-                                   "pathInContext=/R1",
-                                   "2. virtual host field")+1;
-
-            // Virtual Host
-            offset=0; connector.reopen();
-            response=connector.getResponses("GET /path/R1 HTTP/1.1\n"+
-                                           "\n");
-            offset=checkContains(response,offset,
-                                   "HTTP/1.1 400","3. no host")+1;            
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            assertTrue(false);
-        }
-        */
+        String response;
+        int offset=0; connector.reopen();
+        
+        // Default Host
+        offset=0; connector.reopen();
+        response=connector.getResponses("GET /path/R1 HTTP/1.1\n"+
+                        "Host: localhost\n"+
+        "\n");
+        
+        offset=checkContains(response,offset,
+                        "HTTP/1.1 200",
+        "Default host")+1;
+        offset=checkContains(response,offset,
+                        "Dump HttpHandler",
+        "Default host")+1;
+        offset=checkContains(response,offset,
+                        "pathInfo=/path/R1",
+        "Default host")+1;
+        
+        
+        // Virtual Host
+        offset=0; connector.reopen();
+        response=connector.getResponses("GET /path/R1 HTTP/1.1\n"+
+                        "Host: VirtualHost\n"+
+        "\n");
+        offset=checkContains(response,offset,
+                        "HTTP/1.1 200",
+        "2. virtual host field")+1;
+        offset=checkContains(response,offset,
+                        "Virtual Dump",
+        "2. virtual host field")+1;
+        offset=checkContains(response,offset,
+                        "pathInfo=/path/R1",
+        "2. virtual host field")+1;
+        
+        // Virtual Host case insensitive
+        offset=0; connector.reopen();
+        response=connector.getResponses("GET /path/R1 HTTP/1.1\n"+
+                        "Host: ViRtUalhOst\n"+
+        "\n");
+        offset=checkContains(response,offset,
+                        "HTTP/1.1 200",
+        "2. virtual host field")+1;
+        offset=checkContains(response,offset,
+                        "Virtual Dump",
+        "2. virtual host field")+1;
+        offset=checkContains(response,offset,
+                        "pathInfo=/path/R1",
+        "2. virtual host field")+1;
+        
+        // Virtual Host
+        offset=0; connector.reopen();
+        response=connector.getResponses("GET /path/R1 HTTP/1.1\n"+
+        "\n");
+        offset=checkContains(response,offset,
+                        "HTTP/1.1 400","3. no host")+1;      
+        
     }
     
     /* --------------------------------------------------------------- */
