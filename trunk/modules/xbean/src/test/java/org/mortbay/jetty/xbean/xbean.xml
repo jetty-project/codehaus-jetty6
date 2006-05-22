@@ -3,29 +3,26 @@
       <connectors>
         <nioConnector port="8181" />
       </connectors>
-<!--   
     <handlers>
-      <webAppContext contextPath="/" resourceBase="/tmp/webapp" parentLoaderPriority="false" />
-    </handlers>
--->
-
-    <handler>
-      <handlerCollection>
+      <contexts>
         <handlers>
-          <contexts>
-            <handlers>
-              <webAppContext contextPath="/test" resourceBase="/tmp/webapp" parentLoaderPriority="false" />
-            </handlers>
-          </contexts>
-          <defaultHandler serveIcon="true"/>
-          <requestLogHandler>
-            <requestLog>
-             <ncsaLog filename="/tmp/foo" retainDays="90" append="true" extended="false" logTimeZone="GMT"/>
-           </requestLog>
-          </requestLogHandler>
-        </handlers>
-      </handlerCollection>
-    </handler>
+          <webAppContext contextPath="/test" 
+                         resourceBase="/tmp/webapp" 
+                         parentLoaderPriority="false" />
+       </handlers>
+      </contexts>
+      <defaultHandler serveIcon="true"/>
+      <requestLogHandler>
+        <requestLog>
+          <ncsaLog filename="/tmp/foo" 
+                   retainDays="90" 
+                   append="true" 
+                   extended="false" 
+                   logTimeZone="GMT"/>
+        </requestLog>
+      </requestLogHandler>
+    </handlers>
+
     <userRealms>
       <jaasUserRealm  name="xyzrealm" loginModuleName="xyz" />
     </userRealms>
