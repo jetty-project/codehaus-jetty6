@@ -2,14 +2,14 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0.0beta15</version>
+    <version>6.0.0beta16</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>test</artifactId>
   <packaging>war</packaging>
   <name>Jetty Test Webapp</name>
-  <version>6.0.0beta15</version>
+  <version>6.0.0beta16</version>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -34,7 +34,7 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty6-plugin</artifactId>
-        <version>6.0.0beta15</version>
+        <version>6.0.0beta16</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
         </configuration>
@@ -62,12 +62,12 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-util</artifactId>
-      <version>6.0.0beta15</version>
+      <version>6.0.0beta16</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jsp-api-2.1</artifactId>
-      <version>6.0.0beta15</version>
+      <version>6.0.0beta16</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
