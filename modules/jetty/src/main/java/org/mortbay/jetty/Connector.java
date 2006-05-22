@@ -39,15 +39,21 @@ public interface Connector extends LifeCycle, Buffers
 { 
     /* ------------------------------------------------------------ */
     /**
+     * @return the name of the connector. Defaults to the HostName:port
+     */
+    String getName();
+    
+    /* ------------------------------------------------------------ */
+    /**
      * Opens the connector 
      * @throws IOException
      */
-    public void open() throws IOException;
+    void open() throws IOException;
     
-    public void close() throws IOException;
+    void close() throws IOException;
 
-    public void setServer(Server server);
-    public Server getServer();
+    void setServer(Server server);
+    Server getServer();
 
     /* ------------------------------------------------------------ */
     /**
@@ -141,8 +147,13 @@ public interface Connector extends LifeCycle, Buffers
      */
     int getLocalPort();
     
-    long getMaxIdleTime();
-    void setMaxIdleTime(long ms);
+    /* ------------------------------------------------------------ */
+    int getMaxIdleTime();
+    void setMaxIdleTime(int ms);
+    
+    /* ------------------------------------------------------------ */
+    int getLowResourceMaxIdleTime();
+    void setLowResourceMaxIdleTime(int ms);
     
     /* ------------------------------------------------------------ */
     /**

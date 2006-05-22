@@ -20,7 +20,15 @@ public class HttpException extends IOException
 {
     int _status;
     String _reason;
-    
+
+    /* ------------------------------------------------------------ */
+    public HttpException(int status)
+    {
+        _status=status;
+        _reason=null;
+    }
+
+    /* ------------------------------------------------------------ */
     public HttpException(int status,String reason)
     {
         _status=status;

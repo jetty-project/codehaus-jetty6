@@ -107,6 +107,13 @@ public class SocketConnector extends AbstractConnector
     public void customize(EndPoint endpoint, Request request)
         throws IOException
     {
+        Connection connection = (Connection)endpoint;
+        if (connection._sotimeout!=_maxIdleTime)
+        {
+            connection._sotimeout=_maxIdleTime;
+            ((Socket)endpoint.getConnection()).setSoTimeout(_maxIdleTime);
+        }
+              
         super.customize(endpoint, request);
         configure((Socket)endpoint.getConnection());
     }
@@ -126,11 +133,15 @@ public class SocketConnector extends AbstractConnector
     {
         boolean _dispatched=false;
         HttpConnection _connection;
+        int _sotimeout;
+        Socket _socket;
         
         public Connection(Socket socket) throws IOException
         {
             super(socket);
             _connection = new HttpConnection(SocketConnector.this,this,getServer());
+            _sotimeout=socket.getSoTimeout();
+            _socket=socket;
         }
         
         public void dispatch() throws InterruptedException, IOException
@@ -150,13 +161,25 @@ public class SocketConnector extends AbstractConnector
             return l;
         }
         
-        
         public void run()
         {
             try
             {
                 while (!isClosed())
+                {
+                    if (_connection.isIdle())
+                    {
+                        if (getServer().getThreadPool().isLowOnThreads())
+                        {
+                            if (_sotimeout!=getLowResourceMaxIdleTime())
+                            {
+                                _sotimeout=getLowResourceMaxIdleTime();
+                                _socket.setSoTimeout(_sotimeout);
+                            }
+                        }
+                    }
                     _connection.handle();
+                }
             }
             catch (EofException e)
             {

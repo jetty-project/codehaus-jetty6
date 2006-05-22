@@ -22,12 +22,14 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
+import org.mortbay.jetty.Request;
 import org.mortbay.log.Log;
 
 
@@ -102,6 +104,21 @@ public class BlockingChannelConnector extends AbstractConnector implements NIOCo
         return new NIOBuffer(size,NIOBuffer.DIRECT);
     }
 
+    /* ------------------------------------------------------------------------------- */
+    public void customize(EndPoint endpoint, Request request)
+        throws IOException
+    {
+        Connection connection = (Connection)endpoint;
+        if (connection._sotimeout!=_maxIdleTime)
+        {
+            connection._sotimeout=_maxIdleTime;
+            ((SocketChannel)endpoint.getConnection()).socket().setSoTimeout(_maxIdleTime);
+        }
+              
+        super.customize(endpoint, request);
+        configure(((SocketChannel)endpoint.getConnection()).socket());
+    }
+
 
     /* ------------------------------------------------------------------------------- */
     public int getLocalPort()
@@ -118,6 +135,7 @@ public class BlockingChannelConnector extends AbstractConnector implements NIOCo
     {
         boolean _dispatched=false;
         HttpConnection _connection;
+        int _sotimeout;
         
         Connection(ByteChannel channel) throws IOException
         {
@@ -147,7 +165,20 @@ public class BlockingChannelConnector extends AbstractConnector implements NIOCo
             try
             {
                 while (isOpen())
+                {
+                    if (_connection.isIdle())
+                    {
+                        if (getServer().getThreadPool().isLowOnThreads())
+                        {
+                            if (_sotimeout!=getLowResourceMaxIdleTime())
+                            {
+                                _sotimeout=getLowResourceMaxIdleTime();
+                                ((SocketChannel)getConnection()).socket().setSoTimeout(_sotimeout);
+                            }
+                        }
+                    }
                     _connection.handle();
+                }
             }
             catch (EofException e)
             {
