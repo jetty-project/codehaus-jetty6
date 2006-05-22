@@ -30,6 +30,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.UnavailableException;
 
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
 
 
@@ -53,7 +58,7 @@ public class ServletHolder extends Holder
     private Map _roleMap; 
     private String _forcedPath;
     private String _runAs;
-    
+    private UserRealm _realm;    
     
     private transient Stack _servlets;
     private transient Servlet _servlet;
@@ -216,10 +221,9 @@ public class ServletHolder extends Holder
 
         _config=new Config();
         
-        /* TODO runAs
         if (_runAs!=null)
-            _realm=_httpHandler.getHttpContext().getRealm();
-        */
+            _realm=((SecurityHandler)(ContextHandler.getCurrentContext()
+                    .getContextHandler().getChildHandlerByClass(SecurityHandler.class))).getUserRealm();
         
         if (javax.servlet.SingleThreadModel.class
             .isAssignableFrom(_class))
@@ -254,9 +258,8 @@ public class ServletHolder extends Holder
         try
         {
             // Handle run as
-            /* TODO runAs
             if (_runAs!=null && _realm!=null)
-                user=_realm.pushRole(null,_runAs); */
+                user=_realm.pushRole(null,_runAs);
                 
             if (_servlet!=null)
                 _servlet.destroy();
@@ -273,9 +276,8 @@ public class ServletHolder extends Holder
         {
             super.doStop();
             // pop run-as role
-            /* TODO runAs
             if (_runAs!=null && _realm!=null && user!=null)
-                _realm.popRole(user); */
+                _realm.popRole(user); 
         }
     }
     
@@ -371,17 +373,15 @@ public class ServletHolder extends Holder
         try
         {
             // Handle run as
-            /* TODO runAs
             if (_runAs!=null && _realm!=null)
-                user=_realm.pushRole(null,_runAs); */
+                user=_realm.pushRole(null,_runAs);
             servlet.init(config);
         }
         finally
         {
             // pop run-as role
-            /* TODO runAs
             if (_runAs!=null && _realm!=null && user!=null)
-                _realm.popRole(user); */
+                _realm.popRole(user);
         }
     }
     
@@ -404,6 +404,7 @@ public class ServletHolder extends Holder
         // Service the request
         boolean servlet_error=true;
         Principal user=null;
+        Request base_request=null;
         try
         {
             // Handle aliased path
@@ -412,13 +413,12 @@ public class ServletHolder extends Holder
                 request.setAttribute("org.apache.catalina.jsp_file",_forcedPath);
 
             // Handle run as
-            /* TODO runAs
             if (_runAs!=null && _realm!=null)
             {
-                http_request=getHttpContext().getHttpConnection().getRequest();
-                user=_realm.pushRole(http_request.getUserPrincipal(),_runAs);
-                http_request.setUserPrincipal(user);
-            } */
+                base_request=HttpConnection.getCurrentConnection().getRequest();
+                user=_realm.pushRole(base_request.getUserPrincipal(),_runAs);
+                base_request.setUserPrincipal(user);
+            }
             
             servlet.service(request,response);
             servlet_error=false;
@@ -432,13 +432,11 @@ public class ServletHolder extends Holder
         finally
         {
             // pop run-as role
-            /* TODO runAs
-            if (_runAs!=null && _realm!=null && user!=null)
+            if (_runAs!=null && _realm!=null && user!=null && base_request!=null)
             {
                 user=_realm.popRole(user);
-                http_request.setUserPrincipal(user);
+                base_request.setUserPrincipal(user);
             }
-            */
 
             // Handle error params.
             if (servlet_error)
