@@ -1,0 +1,15 @@
+<beans xmlns="http://mortbay.com/schemas/jetty/1.0">
+  <jetty>
+    <connectors>
+      <nioConnector port="8181" />
+    </connectors>
+    
+    <handlers>
+      <webAppContext contextPath="/" resourceBase="/tmp/webapp" parentLoaderPriority="false" />
+    </handlers>
+
+    <userRealms>
+      <jAASUserRealm  name="xyzrealm" loginModuleName="xyz" />
+    </userRealms>
+  </jetty>
+</beans>
