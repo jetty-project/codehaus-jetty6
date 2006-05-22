@@ -463,7 +463,6 @@ public class Server extends HandlerWrapper implements Attributes
     /**
      */
     public void removeHandler(Handler handler)
-        throws Exception
     {
         if (getHandler() instanceof HandlerCollection)
             ((HandlerCollection)getHandler()).removeHandler(handler);
