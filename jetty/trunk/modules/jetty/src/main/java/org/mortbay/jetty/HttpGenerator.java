@@ -405,9 +405,6 @@ public class HttpGenerator implements HttpTokens
                 throw new IllegalStateException("FULL");
         }
 
-        if (_buffer == null) 
-            _buffer = _buffers.getBuffer(_contentBufferSize);
-        
         // we better check we have a buffer
         if (_buffer == null) 
             _buffer = _buffers.getBuffer(_contentBufferSize);
