@@ -41,7 +41,6 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
 {
     private static int __id;
     private transient List _blocked;
-    private int _blockMs=10000;
     
     private boolean _daemon;
 
@@ -49,9 +48,10 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
 
     private final String _lock = "LOCK";
     private final String _joinLock = "JOIN";
-    private int _maxIdleTimeMs=10000;
+    private int _maxIdleTimeMs=60000;
     private int _maxThreads=255;
     private int _minThreads=1;
+    private int _lowThreads=25;
     private String _name;
     int _priority= Thread.NORM_PRIORITY;
     private Set _threads;
@@ -77,6 +77,31 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         return _idle==null?0:_idle.size();
     }
 
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return low resource threads threshhold
+     */
+    public int getLowThreads()
+    {
+        return _lowThreads;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param lowThreads low resource threads threshhold
+     */
+    public void setLowThreads(int lowThreads)
+    {
+        _lowThreads = lowThreads;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isLowOnThreads()
+    {
+        return _maxThreads-getThreads()+getIdleThreads()<_lowThreads;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the maximum thread idle time.
      * Delegated to the named or anonymous Pool.
@@ -188,13 +213,11 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
             if (!isRunning())
                 return false;
             
-            int blockMs = _blockMs;
+            int blockMs = _maxIdleTimeMs;
             
             // Wait for an idle thread!
             while (_idle.size()==0)
             {
-                // System.err.println("threads="+_threads.size()+" idle="+_idle.size());
-                
                 // Are we at max size?
                 if (_threads.size()<_maxThreads)
                 {    
@@ -227,8 +250,6 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                 }
             }
 
-            // System.err.println("Threads="+_threads.size()+" idle="+_idle.size());
-            
             PoolThread thread = (PoolThread)_idle.remove(_idle.size()-1);
             thread.dispatch(job);
             queued=true;
@@ -269,7 +290,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     public void setMaxThreads(int maxThreads)
     {
-        if (maxThreads<_minThreads)
+        if (isStarted() && maxThreads<_minThreads)
             throw new IllegalArgumentException("!minThreads<maxThreads");
         _maxThreads=maxThreads;
     }
@@ -282,7 +303,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     public void setMinThreads(int minThreads)
     {
-        if (minThreads<=0 || minThreads>_maxThreads)
+        if (isStarted() && (minThreads<=0 || minThreads>_maxThreads))
             throw new IllegalArgumentException("!0<=minThreads<maxThreads");
         _minThreads=minThreads;
         synchronized (_lock)
@@ -302,7 +323,6 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     {
         _name= name;
     }
-    
 
     /* ------------------------------------------------------------ */
     /** Set the priority of the pool threads.
@@ -319,6 +339,9 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     protected void doStart() throws Exception
     {
+        if (_maxThreads<_minThreads || _minThreads<=0)
+            throw new IllegalArgumentException("!0<minThreads<maxThreads");
+        
         _threads=new HashSet();
         _idle=new ArrayList();
         _blocked=new ArrayList();
@@ -473,4 +496,5 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
             }
         }
     }
+
 }

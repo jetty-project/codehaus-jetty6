@@ -47,10 +47,11 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private int _requestBufferSize=8*1024;
     private int _responseBufferSize=32*1024;
 
+    private String _name;
     private Server _server;
     private ThreadPool _threadPool;
     private String _host;
-    private int _port=8080;
+    private int _port=0;
     private String _integralScheme=HttpSchemes.HTTPS;
     private int _integralPort=0;
     private String _confidentialScheme=HttpSchemes.HTTPS;
@@ -59,15 +60,14 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private int _acceptors=1;
     private boolean _useDNS;
     
-    protected long _maxIdleTime=30000; 
-    protected long _soLingerTime=1000; 
+    protected int _maxIdleTime=30000; 
+    protected int _lowResourceMaxIdleTime=2500; 
+    protected int _soLingerTime=1000; 
     
     private transient ArrayList _headerBuffers;
     private transient ArrayList _requestBuffers;
     private transient ArrayList _responseBuffers;
     private transient Thread[] _acceptorThread;
-   
-    
     
     /* ------------------------------------------------------------------------------- */
     /** 
@@ -164,7 +164,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /**
      * @return Returns the maxIdleTime.
      */
-    public long getMaxIdleTime()
+    public int getMaxIdleTime()
     {
         return _maxIdleTime;
     }
@@ -173,9 +173,27 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /**
      * @param maxIdleTime The maxIdleTime to set.
      */
-    public void setMaxIdleTime(long maxIdleTime)
+    public void setMaxIdleTime(int maxIdleTime)
     {
         _maxIdleTime = maxIdleTime;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the maxIdleTime.
+     */
+    public int getLowResourceMaxIdleTime()
+    {
+        return _lowResourceMaxIdleTime;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param maxIdleTime The maxIdleTime to set.
+     */
+    public void setLowResourceMaxIdleTime(int maxIdleTime)
+    {
+        _lowResourceMaxIdleTime = maxIdleTime;
     }
     
     /* ------------------------------------------------------------ */
@@ -263,7 +281,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /**
      * @param soLingerTime The soLingerTime to set.
      */
-    public void setSoLingerTime(long soLingerTime)
+    public void setSoLingerTime(int soLingerTime)
     {
         _soLingerTime = soLingerTime;
     }
@@ -403,8 +421,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             }   
         }
         
-        return newBuffer(size);
-        
+        return newBuffer(size);    
     }
     
 
@@ -619,5 +636,17 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                 }
             }
         }
+    }
+
+    public String getName()
+    {
+        if (_name==null)
+            _name= (getHost()==null?"0.0.0.0":getHost())+":"+(getLocalPort()<=0?getPort():getLocalPort());
+        return _name;
+    }
+
+    public void setName(String name)
+    {
+        _name = name;
     }
 }
