@@ -268,7 +268,7 @@ public class HttpServerTestBase
 
         try {
             
-            if (this instanceof SelectChannelServerTest) System.err.println("**********START FRAGMENT TEST******************");
+            
             for (int i = 0; i < 100; i++) {
                 
                 int[]        points  = new int[pointCount];
@@ -278,12 +278,6 @@ public class HttpServerTestBase
                 
                 // Pick fragment points at random
                 for (int j = 0; j < points.length; ++j) {
-                    
-                    if (this instanceof SelectChannelServerTest)
-                    {
-                        System.err.println("points["+j+"]="+points[j]);
-                    }
-                    
                     points[j] = random.nextInt(bytes.length);
                 }
                 
@@ -294,22 +288,13 @@ public class HttpServerTestBase
                 OutputStream os     = client.getOutputStream();
                 
                 
-                boolean writeOutput = false;
-                if (this instanceof SelectChannelServerTest)
-                {               
-                    writeOutput = true;
-                }
-                writeFragments(bytes, points, message, os, writeOutput);
+               
+                writeFragments(bytes, points, message, os);
                 
                 // Read the response
                 String response = readResponse(client);
                 
-                if (this instanceof SelectChannelServerTest)
-                {
-                    System.err.println("\nresponse:\n"+response);
-                    
-                    System.err.println("**********END FRAGMENT TEST******************");
-                }
+                
                 // Close the client
                 client.close();
                 
@@ -469,16 +454,10 @@ public class HttpServerTestBase
     }
 
     
-    private void writeFragments (byte[] bytes, int[] points,
-            StringBuffer message, OutputStream os)
-    throws IOException, InterruptedException
-    {
-        writeFragments(bytes, points, message, os, false);
-    }
     
     
     private void writeFragments(byte[] bytes, int[] points,
-                                StringBuffer message, OutputStream os, boolean writeDebug)
+                                StringBuffer message, OutputStream os)
                          throws IOException, InterruptedException
     {
         int last = 0;
@@ -487,11 +466,6 @@ public class HttpServerTestBase
         for (int j = 0; j < points.length; ++j) {
             int point = points[j];
 
-            if (writeDebug)
-            {
-                String dump = new String(bytes,last,point-last);
-                System.err.println("\nFragment "+j+"='"+dump+"'");
-            }
             os.write(bytes, last, point - last);
             last = point;
             os.flush();
@@ -502,11 +476,6 @@ public class HttpServerTestBase
         }
 
         // Write the last fragment
-        if (writeDebug)
-        {
-            String dump = new String(bytes,last,bytes.length-last);
-            System.err.println("\nFragment N='"+dump+"'");
-        }
         os.write(bytes, last, bytes.length - last);
         os.flush();
         Thread.sleep(PAUSE);

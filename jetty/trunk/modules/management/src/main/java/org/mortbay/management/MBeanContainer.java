@@ -40,8 +40,8 @@ public class MBeanContainer implements Container.Listener
 
     public synchronized ObjectName findMBean(Object object)
     {
-        Bean bean = (Bean)_beans.get(object);
-        return bean==null?null:bean._name; 
+        ObjectName bean = (ObjectName)_beans.get(object);
+        return bean==null?null:bean; 
     }
 
     public synchronized Object findBean(ObjectName oname)
@@ -49,20 +49,19 @@ public class MBeanContainer implements Container.Listener
         for (Iterator iter = _beans.entrySet().iterator(); iter.hasNext();)
         {
             Map.Entry entry = (Map.Entry) iter.next();
-            Bean bean = (Bean)entry.getValue();
-            if (bean._name.equals(oname))
+            ObjectName bean = (ObjectName)entry.getValue();
+            if (bean.equals(oname))
                 return entry.getKey();
         }
         return null;
     }
 
-    public MBeanContainer(MBeanServer server, Container container)
+    public MBeanContainer(MBeanServer server)
     {
         this._server = server;
-        container.addEventListener(this);
         addBean(Log.getLogger(null));
     }
-
+    
     public void setManagementPort(int port)
     {
         this._managementPort = port;
@@ -102,79 +101,41 @@ public class MBeanContainer implements Container.Listener
 
     public synchronized void add(Relationship event)
     {
-        Bean parent=(Bean)_beans.get(event.getParent());
+        ObjectName parent=(ObjectName)_beans.get(event.getParent());
         if (parent==null)
-        {
             addBean(event.getParent());
-            parent=(Bean)_beans.get(event.getParent());
-        }
         
-        Bean child=(Bean)_beans.get(event.getChild());
+        ObjectName child=(ObjectName)_beans.get(event.getChild());
         if (child==null)
-        {
             addBean(event.getChild());
-            child=(Bean)_beans.get(event.getChild());
-        }
-        
-        parent._children++;
-        child._parents++;
-        if (child._parents>1)
-            Log.warn("Multiple parents for "+child);
     }
 
     public synchronized void remove(Relationship event)
     {
-        Bean parent=(Bean)_beans.get(event.getParent());
-
-        if (parent!=null)
-        {
-            parent._children--;
-            if (parent._children<=0 && parent._parents<=0)
-            {
-                _beans.remove(event.getParent());
-                removeBean(parent);
-            }
-        }
-        
-
-        Bean child=(Bean)_beans.get(event.getChild());
-        if (child!=null)
-        {
-            child._parents--;
-            if (child._children<=0 && child._parents<=0)
-            {
-                _beans.remove(event.getChild());
-                removeBean(child);
-            }
-        }
-        
     }
 
-
-    private synchronized void removeBean(Bean bean)
+    public synchronized void removeBean(Object obj)
     {
+        ObjectName bean=(ObjectName)_beans.get(obj);
         if (bean!=null)
         {
-            if (bean._name != null)
+            try
             {
-                try
-                {
-                    _server.unregisterMBean(bean._name);
-                    Log.debug("Unregistered {}", bean._name);
-                }
-                catch (javax.management.InstanceNotFoundException e)
-                {
-                    Log.ignore(e);
-                }
-                catch (Exception e)
-                {
-                    Log.warn(e);
-                }
+                _server.unregisterMBean(bean);
+                Log.debug("Unregistered {}", bean);
+            }
+            catch (javax.management.InstanceNotFoundException e)
+            {
+                Log.ignore(e);
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
             }
         }
     }
     
-    private synchronized void addBean(Object obj)
+    public synchronized void addBean(Object obj)
     {
         try
         {
@@ -201,8 +162,7 @@ public class MBeanContainer implements Container.Listener
             
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
             Log.debug("Registered {}" , oinstance.getObjectName());
-            Bean bean=new Bean(oinstance.getObjectName());
-            _beans.put(obj, bean);
+            _beans.put(obj, oinstance.getObjectName());
 
         }
         catch (Exception e)
@@ -258,12 +218,4 @@ public class MBeanContainer implements Container.Listener
         }
     }
     
-    private static class Bean
-    {
-        Bean(ObjectName name) { _name=name ; }
-        ObjectName _name;
-        int _parents;
-        int _children;
-        public String toString() { return "{"+_name+" p="+_parents+" c="+_children+"}"; }
-    }
 }

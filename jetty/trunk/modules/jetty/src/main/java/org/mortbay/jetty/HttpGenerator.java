@@ -107,6 +107,7 @@ public class HttpGenerator implements HttpTokens
     private long _contentLength = UNKNOWN_CONTENT;
     private boolean _last = false;
     private boolean _head = false;
+    private boolean _noContent = false;
     private boolean _close = false;
 
     private Buffers _buffers; // source of buffers
@@ -148,6 +149,7 @@ public class HttpGenerator implements HttpTokens
         _status = HttpStatus.ORDINAL_200_OK;
         _last = false;
         _head = false;
+        _noContent=false;
         _close = false;
         _contentWritten = 0;
         _contentLength = UNKNOWN_CONTENT;
@@ -300,6 +302,12 @@ public class HttpGenerator implements HttpTokens
      */
     public void addContent(Buffer content, boolean last) throws IOException
     {
+        if (_noContent)
+        {
+            content.clear();
+            return;
+        }
+        
         if (content.isImmutable()) throw new IllegalArgumentException("immutable");
 
         if (_last || _state==STATE_END) 
@@ -349,6 +357,9 @@ public class HttpGenerator implements HttpTokens
      */
     public boolean addContent(byte b) throws IOException
     {
+        if (_noContent)
+            return false;
+        
         if (_last || _state==STATE_END) 
             throw new IllegalStateException("Closed");
 
@@ -380,6 +391,9 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------ */
     int prepareUncheckedAddContent() throws IOException
     {
+        if (_noContent)
+            return -1;
+        
         if (_last || _state==STATE_END) 
             throw new IllegalStateException("Closed");
 
@@ -410,13 +424,27 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------ */
     void uncheckedAddContent(int b)
     {
+        if (_status==304)
+            throw new IllegalStateException();
+        
         _buffer.put((byte)b);
     }
 
     /* ------------------------------------------------------------ */
     void completeUncheckedAddContent()
     {
-        _contentWritten+=_buffer.length();
+        if (_noContent)
+        {
+            if(_buffer!=null)
+                _buffer.clear();
+            return;
+        }
+        else 
+        {
+            _contentWritten+=_buffer.length();
+            if (_head)
+                _buffer.clear();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -490,6 +518,15 @@ public class HttpGenerator implements HttpTokens
                 }
                 else
                     _reason=getReason(_status);
+            }
+
+            
+            if (_status==100 || _status==204 || _status==304)
+            {
+                _noContent=true;
+                _content=null;
+                if (_buffer!=null)
+                    _buffer.clear();
             }
             
             // Add headers
@@ -1303,6 +1340,8 @@ public class HttpGenerator implements HttpTokens
                 throw new IOException("Closed");
             
             _space= _generator.prepareUncheckedAddContent();
+            if (_space<0)
+                return;
     
             int end=offset+length;
             for (int i=offset;i<end;i++)
@@ -1339,6 +1378,8 @@ public class HttpGenerator implements HttpTokens
                 throw new IOException("Closed");
             
             _space= _generator.prepareUncheckedAddContent();
+            if (_space<0)
+                return;
     
             int end=offset+length;
             for (int i=offset;i<end;i++)

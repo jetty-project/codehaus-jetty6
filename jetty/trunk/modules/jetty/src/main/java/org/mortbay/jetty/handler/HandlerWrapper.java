@@ -77,7 +77,6 @@ public class HandlerWrapper extends AbstractHandler
             {
                 if (old_handler.isStarted())
                     old_handler.stop();
-                old_handler.setServer(null);
             }
         }
         catch(Exception e)
@@ -124,15 +123,16 @@ public class HandlerWrapper extends AbstractHandler
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
-        if (getServer()!=null && getServer()!=server)
-            getServer().getContainer().update(this, _handler, null, "handler");
-        if (server!=null && getServer()!=server)
-            server.getContainer().update(this, null,_handler, "handler");
-            
+        Server old_server=getServer();
+        
         super.setServer(server);
+        
         Handler h=getHandler();
         if (h!=null)
             h.setServer(server);
+        
+        if (server!=null && server!=old_server)
+            server.getContainer().update(this, null,_handler, "handler");
     }
     
 
