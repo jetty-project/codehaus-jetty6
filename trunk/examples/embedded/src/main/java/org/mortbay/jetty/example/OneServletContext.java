@@ -44,7 +44,7 @@ public class OneServletContext
         ServletHandler handler=new ServletHandler();
         context.setHandler(handler);
         
-        handler.addServletWithMapping("org.mortbay.jetty.example.OneServletContext$HelloServlet", "/");
+        handler.addServletWithMapping("org.mortbay.jetty.example.OneServletContext$HelloServlet", "/*");
         
         server.start();
         server.join();

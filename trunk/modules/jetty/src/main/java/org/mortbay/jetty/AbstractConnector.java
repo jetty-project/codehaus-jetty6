@@ -367,9 +367,9 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         {
             socket.setTcpNoDelay(true);
             if (_maxIdleTime >= 0)
-                socket.setSoTimeout((int)_maxIdleTime);
+                socket.setSoTimeout(_maxIdleTime);
             if (_soLingerTime >= 0)
-                socket.setSoLinger(true, (int)_soLingerTime/1000);
+                socket.setSoLinger(true, _soLingerTime/1000);
             else
                 socket.setSoLinger(false, 0);
         }
