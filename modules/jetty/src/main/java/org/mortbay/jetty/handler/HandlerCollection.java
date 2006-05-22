@@ -202,7 +202,6 @@ public class HandlerCollection extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     public void removeHandler(Handler handler)
-        throws Exception
     {
         Handler[] handlers = getHandlers();
         
