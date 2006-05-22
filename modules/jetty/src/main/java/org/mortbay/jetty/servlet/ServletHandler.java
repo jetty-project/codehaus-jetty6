@@ -112,17 +112,17 @@ public class ServletHandler extends AbstractHandler
     {
         if (getServer()!=null && getServer()!=server)
         {
-            getServer().getContainer().update(this, _filters, null, "filter");
-            getServer().getContainer().update(this, _filterMappings, null, "filterMapping");
-            getServer().getContainer().update(this, _servlets, null, "servlet");
-            getServer().getContainer().update(this, _servletMappings, null, "servletMapping");
+            getServer().getContainer().update(this, _filters, null, "filter",true);
+            getServer().getContainer().update(this, _filterMappings, null, "filterMapping",true);
+            getServer().getContainer().update(this, _servlets, null, "servlet",true);
+            getServer().getContainer().update(this, _servletMappings, null, "servletMapping",true);
         }
         if (server!=null && getServer()!=server)
         {
-            server.getContainer().update(this, null, _filters, "filter");
-            server.getContainer().update(this, null, _filterMappings, "filterMapping");
-            server.getContainer().update(this, null, _servlets, "servlet");
-            server.getContainer().update(this, null, _servletMappings, "servletMapping");
+            server.getContainer().update(this, null, _filters, "filter",true);
+            server.getContainer().update(this, null, _filterMappings, "filterMapping",true);
+            server.getContainer().update(this, null, _servlets, "servlet",true);
+            server.getContainer().update(this, null, _servletMappings, "servletMapping",true);
         }
         super.setServer(server);
         
@@ -882,7 +882,7 @@ public class ServletHandler extends AbstractHandler
     public void setFilterMappings(FilterMapping[] filterMappings)
     {
         if (getServer()!=null)
-            getServer().getContainer().update(this,_filterMappings,filterMappings,"filterMapping");
+            getServer().getContainer().update(this,_filterMappings,filterMappings,"filterMapping",true);
         _filterMappings = filterMappings;
         if (isStarted())
             updateMappings();
@@ -892,7 +892,7 @@ public class ServletHandler extends AbstractHandler
     public synchronized void setFilters(FilterHolder[] holders)
     {
         if (getServer()!=null)
-            getServer().getContainer().update(this,_filters,holders,"filter");
+            getServer().getContainer().update(this,_filters,holders,"filter",true);
         _filters=holders;
     }
     
@@ -903,7 +903,7 @@ public class ServletHandler extends AbstractHandler
     public void setServletMappings(ServletMapping[] servletMappings)
     {
         if (getServer()!=null)
-            getServer().getContainer().update(this,_servletMappings,servletMappings,"servletMapping");
+            getServer().getContainer().update(this,_servletMappings,servletMappings,"servletMapping",true);
         _servletMappings = servletMappings;
         if (isStarted())
             updateMappings();
@@ -916,7 +916,7 @@ public class ServletHandler extends AbstractHandler
     public synchronized void setServlets(ServletHolder[] holders)
     {
         if (getServer()!=null)
-            getServer().getContainer().update(this,_servlets,holders,"servlet");
+            getServer().getContainer().update(this,_servlets,holders,"servlet",true);
         _servlets=holders;
         updateMappings();
     }

@@ -133,7 +133,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     {
         super.doStop();
         for (int i=0;i<_selectSets.length;i++)
-            _selectSets[i].destroy();
+            _selectSets[i].stop();
         _selectSets=null;
     }
 
@@ -221,7 +221,8 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         private transient Timeout _idleTimeout;
         private transient Timeout _retryTimeout;
         private transient Selector _selector;
-        private transient List _changes;
+        private transient List[] _changes;
+        private transient int _change;
         private transient int _nextSet;
 
         /* ------------------------------------------------------------ */
@@ -236,8 +237,8 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
 
             // create a selector;
             _selector = Selector.open();
-            _changes = new ArrayList();
-
+            _changes = new ArrayList[] {new ArrayList(),new ArrayList()};
+            _change=0;
         }
 
         /* ------------------------------------------------------------ */
@@ -248,14 +249,12 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
 
         /* ------------------------------------------------------------ */
  
-        void destroy() throws Exception
+        void stop() throws Exception
         {
-            synchronized(_changes)
+            synchronized(this)
             {
                 _idleTimeout.cancelAll();
-                _idleTimeout = null;
                 _retryTimeout.cancelAll();
-                _retryTimeout = null;
                 
                 try
                 {
@@ -267,7 +266,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                     Log.ignore(e);
                 }
                 
-                _selector = null;
             }
 
         }
@@ -278,14 +276,22 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             long idle_next = 0;
             long retry_next = 0;
             
-            // Make any key changes required
-            synchronized (_changes)
+            List changes;
+            synchronized (this)
             {
-                for (int i = 0; i < _changes.size(); i++)
+                changes=_changes[_change];
+                _change=_change==0?1:0;
+            }
+            
+            
+            // Make any key changes required
+            synchronized (this)
+            {
+                for (int i = 0; i < changes.size(); i++)
                 {
                     try
                     {
-                        Object o = _changes.get(i);
+                        Object o = changes.get(i);
                         if (o instanceof SocketChannel)
                         {
                             // finish accepting this connection
@@ -321,7 +327,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                             Log.debug(e);
                     }
                 }
-                _changes.clear();
+                changes.clear();
                 
                 idle_next=_idleTimeout.getTimeToNext();
                 retry_next=_retryTimeout.getTimeToNext();
@@ -345,17 +351,15 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                 _selector.select();
             
             long now=-1;
-            synchronized (_changes)
-            {   
-                // have we been destroyed while sleeping
-                if (_selector==null)
-                    return;
-                
-                // update the timers for task schedule in this loop
-                now = System.currentTimeMillis();
-                _idleTimeout.setNow(now);
-                _retryTimeout.setNow(now);
-            }
+            
+            // have we been destroyed while sleeping
+            if (!_selector.isOpen())
+                return;
+            
+            // update the timers for task schedule in this loop
+            now = System.currentTimeMillis();
+            _idleTimeout.setNow(now);
+            _retryTimeout.setNow(now);
             
             // Look for things to do
             Iterator iter = _selector.selectedKeys().iterator();
@@ -405,7 +409,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                                 // assume something to do for this connection.
                                 connection.dispatch();
                             }
-                            
                         }
                     }
                     else
@@ -437,7 +440,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             }
             
             // tick over the timer
-            synchronized (_changes)
+            synchronized (this)
             {
                 if (_selector!=null)
                 {
@@ -451,30 +454,34 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
 
         }
 
+        /* ------------------------------------------------------------ */
         public void scheduleIdle(Timeout.Task task)
         {
-            synchronized (_changes)
+            synchronized (this)
             {
                 task.schedule(_idleTimeout);
             }
         }
 
+        /* ------------------------------------------------------------ */
         public void scheduleTimeout(Timeout.Task task, long timeout)
         {
-            synchronized (_changes)
+            synchronized (this)
             {
                 _retryTimeout.schedule(task, timeout);
             }
         }
 
+        /* ------------------------------------------------------------ */
         public void addChange(Object point)
         {
             synchronized (_changes)
             {
-                _changes.add(point);
+                _changes[_change].add(point);
             }
         }
 
+        /* ------------------------------------------------------------ */
         public void wakeup()
         {
             _selector.wakeup();
@@ -503,7 +510,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         {
             super(channel);
             _selectSet=selectSet;
-            _connection = new HttpConnection(SelectChannelConnector.this, this, getServer());
+            _connection = new HttpConnection(SelectChannelConnector.this, this, SelectChannelConnector.this.getServer());
             _selectSet.scheduleIdle(_timeoutTask);
       
         }
@@ -543,7 +550,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                     _key.interestOps(0);
                     return;
                 }
-                else if (!_assumeShortDispatch)
+                else if (!SelectChannelConnector.this._assumeShortDispatch)
                     _key.interestOps(0);
                     
                 // Otherwise if we are still dispatched
@@ -570,13 +577,13 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             boolean dispatch_done = false;
             try
             {
-                dispatch_done = getThreadPool().dispatch(this);
+                dispatch_done = SelectChannelConnector.this.getThreadPool().dispatch(this);
             }
             finally
             {
                 if (!dispatch_done)
                 {
-                    Log.warn("dispatch failed! threads="+getThreadPool().getThreads()+" idle="+getThreadPool().getIdleThreads());
+                    Log.warn("dispatch failed! threads="+SelectChannelConnector.this.getThreadPool().getThreads()+" idle="+SelectChannelConnector.this.getThreadPool().getIdleThreads());
                     undispatch();
                 }
             }
@@ -599,7 +606,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             catch (Exception e)
             {
                 // TODO investigate if this actually is a problem?
-                if (isRunning())
+                if (SelectChannelConnector.this.isRunning())
                     Log.warn(e);
                 else
                     Log.ignore(e);
@@ -793,7 +800,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                     boolean dispatch_done = false;
                     try
                     {
-                        dispatch_done = getThreadPool().dispatch(this);
+                        dispatch_done = SelectChannelConnector.this.getThreadPool().dispatch(this);
                     }
                     finally
                     {
@@ -874,7 +881,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class RetryContinuation extends Timeout.Task implements Continuation
+    private static class RetryContinuation extends Timeout.Task implements Continuation
     {
         Object _object;
         HttpEndPoint _endPoint=(HttpEndPoint)HttpConnection.getCurrentConnection().getEndPoint();

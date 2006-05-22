@@ -1,10 +1,7 @@
+jetty-6.0.0beta15 - 11/5/2006
 
-START RECOVERY FROM CODEHAUS CRASH
-cache SSL certificate
-
-
-jetty-6.0.0beta15 - ????
-
+    + Added Server attribute org.mortbay.jetty.Request.maxFormContentSize
+    + Renamed NotFoundHandler to DefaultHandler
     + Added automatic scan of all WEB-INF/jetty-*.xml files for plugin
     + Added <scanTargets> parameter to allow other locations to scan for plugin
     + Major refactor to simplify Server and handler hierarchy
@@ -21,12 +18,13 @@ jetty-6.0.0beta15 - ????
     + Added --version to start.jar
     + Added embedded examples
     + Simplified DefaultServlet static content buffering
-    + readded BoundedThreadPool shrinking
+    + readded BoundedThreadPool shrinking (and then fixed resulting deadlock)
     + improved MBean names
     + improved support for java5 jconsole
     + Session scavenger threads from threadpool
     + Thread names include URI if debug set
     + don't accept partial authority in request line.
+    + enforce 204 and 304 have no content
 
 jetty-6.0.0beta14 - 9/4/2006
     + ignore dirs and files that don't exist in plugin scanner

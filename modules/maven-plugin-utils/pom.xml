@@ -2,13 +2,13 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta15</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>maven-plugin-utils</artifactId>
   <name>Plugin Utilities for Maven2</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta15</version>
   <build />
   <dependencies>
     <dependency>

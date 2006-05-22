@@ -129,7 +129,7 @@ public class URLEncodedTest extends junit.framework.TestCase
         ByteArrayInputStream in = new ByteArrayInputStream (
                 "name0=value+%30&name1=&name2&name3=value+3".getBytes());
         MultiMap m = new MultiMap();
-        UrlEncoded.decodeTo(in, m, null);
+        UrlEncoded.decodeTo(in, m, null, -1);
         System.err.println(m);
         assertEquals("stream length",4,m.size());
         assertEquals("stream name0","value 0",m.getString("name0"));

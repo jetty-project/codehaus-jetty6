@@ -73,12 +73,12 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
-        if (server!=null && _server!=null)
-            Log.warn("Handler "+this+" may be in hierarchy twice or setServer() has been called explicitly");
-        
-        if (isStarted())
-            throw new IllegalStateException("Started");
+        Server old_server=_server;
+        if (old_server!=null && old_server!=server)
+            old_server.getContainer().removeBean(this);
         _server=server;
+        if (_server!=null && _server!=old_server)
+            _server.getContainer().addBean(this);
     }
 
     /* ------------------------------------------------------------ */
@@ -86,7 +86,6 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
     {
         return _server;
     }
-    
 
     /* ------------------------------------------------------------ */
     public Handler[] getChildHandlers()

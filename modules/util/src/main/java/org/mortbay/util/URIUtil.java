@@ -219,7 +219,7 @@ public class URIUtil
             return new String(bytes,0,n);
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     /* Decode a URI path.
      * @param path The path the encode
@@ -232,11 +232,11 @@ public class URIUtil
         
         for (int i=0;i<length;i++)
         {
-            byte b = buf[i];
-
+            byte b = buf[i + offset];
+            
             if (b=='%' && (i+2)<length)
             {
-                b=(byte)(0xff&TypeUtil.parseInt(buf,i+1,2,16));
+                b=(byte)(0xff&TypeUtil.parseInt(buf,i+offset+1,2,16));
                 i+=2;
             }
             else if (bytes==null)
@@ -249,14 +249,14 @@ public class URIUtil
             {
                 bytes=new byte[length];
                 for (int j=0;j<n;j++)
-                    bytes[j]=buf[j];                
+                    bytes[j]=buf[j + offset];
             }
             
             bytes[n++]=b;
         }
-
+        
         try
-        {   
+        {
             if (bytes==null)
                 return new String(buf,offset,length,__CHARSET);
             return new String(bytes,0,n,__CHARSET);
@@ -268,6 +268,7 @@ public class URIUtil
             return new String(bytes,0,n);
         }
     }
+
     
     /* ------------------------------------------------------------ */
     /** Add two URI path segments.
@@ -281,7 +282,7 @@ public class URIUtil
     {
         if (p1==null || p1.length()==0)
         {
-            if (p2==null || p2.length()==0)
+            if (p1!=null && p2==null)
                 return p1;
             return p2;
         }

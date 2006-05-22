@@ -69,9 +69,16 @@ import org.mortbay.util.ajax.Continuation;
 public class Request implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
+    private static final String __maxFormContentSizeName = "org.mortbay.jetty.Request.maxFormContentSize";
+
     private static final int __NONE=0, _STREAM=1, __READER=2;
     private static Cookie[] __noCookies = new Cookie[0];
-    
+    /* ------------------------------------------------------------ */
+    /**
+     * Max size of the form content. Limits the size of the data a client can push at the server.
+     * Set via the org.mortbay.http.HttpRequest.maxContentSize attribute on the Server class
+     */
+    private int _maxFormContentSize = 200000;
     private HttpConnection _connection;
     private EndPoint _endp;
     
@@ -121,6 +128,8 @@ public class Request implements HttpServletRequest
         _connection=connection;
         _endp=connection.getEndPoint();
         _dns=_connection.getResolveNames();
+        Integer size = (Integer)_connection.getConnector().getServer().getAttribute(__maxFormContentSizeName);
+        _maxFormContentSize = (size==null?_maxFormContentSize:size.intValue()); 
     }
 
     /* ------------------------------------------------------------ */
@@ -1119,11 +1128,17 @@ public class Request implements HttpServletRequest
      */
     private void extractParameters()
     {
-        if (_paramsExtracted) 
-            return;
-        _paramsExtracted = true;
         if (_baseParameters == null) 
             _baseParameters = new MultiMap(16);
+        
+        if (_paramsExtracted) 
+        {
+            if (_parameters==null)
+                _parameters=_baseParameters;
+            return;
+        }
+        
+        _paramsExtracted = true;
 
         // Handle query string
         String encoding = getCharacterEncoding();
@@ -1151,15 +1166,18 @@ public class Request implements HttpServletRequest
             if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) && HttpMethods.POST.equals(getMethod()))
             {
                 int content_length = getContentLength();
-                if (content_length > 0)
+                if (content_length != 0)
                 {
                     try
                     {
-                        // TODO limit size
+                        
+                        System.err.println("maxFormContentSize=="+_maxFormContentSize);
+                        if (content_length>_maxFormContentSize && _maxFormContentSize > 0)
+                                throw new IllegalStateException("Form too large");
                         InputStream in = getInputStream();
                        
                         // Add form params to query params
-                        UrlEncoded.decodeTo(in, _baseParameters, encoding);
+                        UrlEncoded.decodeTo(in, _baseParameters, encoding,content_length<0?_maxFormContentSize:-1);
                     }
                     catch (IOException e)
                     {

@@ -102,8 +102,6 @@ public class HandlerCollection extends AbstractHandler
                 {
                     mex.add(e);
                 }
-                
-                old_handlers[i].setServer(null);
             }
         }
                 
@@ -183,15 +181,17 @@ public class HandlerCollection extends AbstractHandler
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
-        if (getServer()!=null && getServer()!=server)
-            getServer().getContainer().update(this, _handlers, null, "handler");
-        if (server!=null && getServer()!=server)
-            server.getContainer().update(this, null,_handlers, "handler");
-            
+        Server old_server=getServer();
+        
         super.setServer(server);
+
         Handler[] h=getHandlers();
         for (int i=0;h!=null && i<h.length;i++)
             h[i].setServer(server);
+        
+        if (server!=null && server!=old_server)
+            server.getContainer().update(this, null,_handlers, "handler");
+        
     }
 
     /* ------------------------------------------------------------ */
