@@ -82,6 +82,9 @@ import org.mortbay.util.URIUtil;
  *                    servlet context root. Useful for only serving static content out
  *                    of only specific subdirectories.
  * 
+ *  aliases           If True, aliases of resources are allowed (eg. symbolic
+ *                    links and caps variations). May bypass security constraints.
+ *                    
  *  maxCacheSize      The maximum total size of the cache or 0 for no cache.
  *  maxCachedFileSize The maximum size of a file to cache
  *  maxCachedFiles    The maximum number of files to cache
@@ -107,6 +110,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     private MimeTypes _mimeTypes;
     private String[] _welcomes;
+    private boolean _aliases=false;
     
     
     /* ------------------------------------------------------------ */
@@ -124,6 +128,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         _dirAllowed=getInitBoolean("dirAllowed",_dirAllowed);
         _redirectWelcome=getInitBoolean("redirectWelcome",_redirectWelcome);
         _gzip=getInitBoolean("gzip",_gzip);
+        _aliases=getInitBoolean("aliases",_aliases);
         
         String rrb = getInitParameter("relativeResourceBase");
         if (rrb!=null)
@@ -229,6 +234,11 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         try
         {
             r = _resourceBase.addPath(pathInContext);
+            if (!_aliases && r.getAlias()!=null)
+            {
+                Log.warn("Aliased resource: "+r);
+                return null;
+            }
             if (Log.isDebugEnabled()) Log.debug("RESOURCE="+r);
         }
         catch (IOException e)
