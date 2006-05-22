@@ -48,7 +48,7 @@ import org.mortbay.util.Loader;
  *
  *
  * 
- * @org.apache.xbean.XBean description="Creates a UserRealm suitable for use with JAAS"
+ * @org.apache.xbean.XBean element="jaasUserRealm" description="Creates a UserRealm suitable for use with JAAS"
  */
 public class JAASUserRealm implements UserRealm
 {

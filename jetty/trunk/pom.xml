@@ -54,6 +54,13 @@
       <organization>Logic Blaze</organization>
       <organizationUrl>http://www.logicblaze.com</organizationUrl>
     </developer>
+    <developer>
+      <id>sbordet</id>
+      <name>Simone Bordet</name>
+      <email>simone.bordet@simulalabs.com</email>
+      <organization>Simula Labs</organization>
+      <organizationUrl>http://www.simulalabs.com</organizationUrl>
+    </developer>
   </developers>
   <licenses>
     <license>
@@ -163,17 +170,12 @@
     <module>examples/test-webapp</module>
     <module>examples/embedded</module>
   </modules>
-  <repositories>
+  <!-- repositories>
     <repository>
       <id>codehaus</id>
       <name>Codehaus Repo</name>
       <url>http://dist.codehaus.org</url>
       <layout>legacy</layout>
-    </repository>
-    <repository>
-      <id>central</id>
-      <name>Maven 2 Repository on ibibio</name>
-      <url>http://repo1.maven.org/maven2</url>
     </repository>
   </repositories>
   <pluginRepositories>
@@ -188,10 +190,38 @@
       <name>Maven Plugin Repository</name>
       <url>http://repo1.maven.org/maven2</url>
     </pluginRepository>
-  </pluginRepositories>
+  </pluginRepositories -->
   <reporting>
     <outputDirectory>target/site</outputDirectory>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <aggregate>true</aggregate>
+            <links>
+              <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+            </links>
+          </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <configuration>
+          <aggregate>true</aggregate>
+       </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>project-team</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clover-plugin</artifactId>

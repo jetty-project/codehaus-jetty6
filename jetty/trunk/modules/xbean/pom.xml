@@ -68,13 +68,14 @@
                 <copy todir="${basedir}/target/xbean-src-to-parse">
                   <fileset dir="${basedir}/src/main/java/org/mortbay/jetty/xbean"></fileset>
                   <fileset dir="${basedir}/../jetty/src/main/java/org/mortbay/jetty">
+                    <include name="*.java"></include>
                     <include name="bio/**/*.java"></include>
                     <include name="nio/**/*.java"></include>
                     <include name="handler/**/*.java"></include>
                     <include name="webapp/**/*.java"></include>
                   </fileset>
-                  <fileset dir="${basedir}/../plus/src/main/java/org/mortbay/jetty/plus/jaas">
-                    <include name="**/*.java"></include>
+                  <fileset dir="${basedir}/../plus/src/main/java/org/mortbay/jetty/plus">
+                    <include name="jaas/**/*.java"></include>
                   </fileset>
                 </copy>
                 <mkdir dir="${basedir}/target/generated/"></mkdir>

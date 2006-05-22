@@ -1,57 +1,51 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<!--
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
--->
 
 <project name="jetty6">
+  <skin>
+    <groupId>org.mortbay.jetty</groupId>
+    <artifactId>jetty-skin</artifactId>
+    <version>6.0-SNAPSHOT</version>
+  </skin>
   <bannerLeft>
-    <name>jetty6</name>
-    <src>http://jetty.mortbay.org/jetty/images/jetty_banner.gif</src>
+    <name>Jetty</name>
+    <src>./images/jetty_banner.gif</src>
     <href>http://jetty.mortbay.org/jetty</href>
   </bannerLeft>
+  <publishDate format="dd MMMM yyyy HH:mm"/>
   <body>
-    <menu name="About jetty6">
+    <menu name="About Jetty">
       <item name="Home" href="index.html"/>
       <item name="License" href="http://jetty.mortbay.org/jetty/LICENSE.TXT"/>
       <item name="Versions" href="VERSION.txt"/>
       <item name="Readme" href="README.txt"/>
+      <item name="Jetty Powered" href="http://www.mortbay.com/mortbay/powered.html"/>
+      <item name="Case Studies" href="http://www.mortbay.com/MB/log/jetty/"/>
     </menu>
     <menu name="Getting Started">
       <item name="Downloading" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#download"/>
       <item name="Installation" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#install"/>
       <item name="Running" href="http://docs.codehaus.org/display/JETTY/Running"/>
       <item name="User Guides" href="http://docs.codehaus.org/display/JETTY/Jetty+User+Guides"/>
+      <item name="Tutorials" href="http://docs.codehaus.org/display/JETTY/Tutorials"/>
       <item name="FAQ" href="http://docs.codehaus.org/display/JETTY/FAQ"/>
     </menu>
-    <menu name="Tools">
-      <item name="Maven2 Jetty Plugin" href="http://jetty.mortbay.org/jetty6/maven-plugin/index.html"/>
+    <menu name="Jetty Maven Plugin">
+      <item name="Intro" href="maven-plugin/index.html"/>
+      <item name="Installation" href="maven-plugin/install.html"/>
+      <item name="Configuration" href="maven-plugin/howto.html"/>
     </menu>
     <menu name="Source">
-      <item name="Jetty JavaDoc" href="jetty/index.html"/>
-      <item name="Jetty JMX JavaDoc" href="management/index.html"/>
-      <item name="Servlet API JavaDoc" href="servlet-api-2.5/index.html"/>
+      <item name="JavaDoc" href="apidocs/index.html"/>
+      <item name="Source XRef" href="xref/index.html"/>
       <item name="Browse online" href="http://fisheye.codehaus.org/viewrep/jetty"/>
       <item name="Repository" href="source-repository.html"/>
     </menu>
     <menu name="Resources">
       <item name="Wiki" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
-      <item name="XBean jetty.xsd" href="http://jetty.mortbay.org/jetty6/jetty.xsd"/>
-      <item name="XBean doc for jetty.xsd" href="http://jetty.mortbay.org/jetty6/jetty.xsd.html"/>
+      <item name="jetty.xsd" href="http://jetty.mortbay.org/jetty.xsd"/>
+      <item name="jetty.xsd.html" href="http://jetty.mortbay.org/jetty.xsd.html"/>
+      <item name="Old site" href="http://jetty.mortbay.org/jetty5"/>
     </menu>
     <menu name="Community">
       <item name="Developers" href="team-list.html"/>
@@ -59,5 +53,14 @@
       <item name="Mailing Lists" href="mail-lists.html"/>
       <item name="IRC" href="irc.html"/>
     </menu>
+    <menu name="Support">
+      <item name="Commercial Support" href="http://www.webtide.com"/>
+    </menu>
   </body>
+  <poweredBy>
+    <logo name="webtide" href="http://www.webtide.com" img="./images/webtide_logo.jpg"/>
+    <logo name="Maven" href="http://maven.apache.org" img="./images/logos/maven-feather.png"/>
+    <logo name="Codehaus" href="http://www.codehaus.org" img="./images/codehaus-small.png"/>
+    <logo name="INETU" href="http://www.inetu.net" img="./images/inetu.gif"/>
+  </poweredBy>
 </project>

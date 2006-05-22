@@ -87,7 +87,7 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-  <reporting>
+  <!-- reporting>
     <plugins>
       <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -102,5 +102,5 @@
         </reportSets>
       </plugin>
     </plugins>
-  </reporting>
+  </reporting -->
 </project>

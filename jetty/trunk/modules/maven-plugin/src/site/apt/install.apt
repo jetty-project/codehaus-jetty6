@@ -6,7 +6,7 @@
  ------
  November 7 2005
 
-Installing
+Installing the Jetty Plugin
 
   If you wish to use a released version of the plugin, then all you have to do is reference it in the <<<plugins>>> section of your pom.
 

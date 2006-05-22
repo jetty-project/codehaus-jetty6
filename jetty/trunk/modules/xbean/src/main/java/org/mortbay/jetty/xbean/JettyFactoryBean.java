@@ -38,117 +38,14 @@ import org.springframework.beans.factory.InitializingBean;
  * 
  * @version $Revision$
  */
-public class JettyFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
-
-    private Server server;
-    private Handler[] handlers = {};
-    private Connector[] connectors = {};
-    private UserRealm[] userRealms = {};
+public class JettyFactoryBean  extends Server {
     
-    public Object getObject() throws Exception {
-        return getServer();
-    }
-
-    public Class getObjectType() {
-        return Server.class;
-    }
-
-    public boolean isSingleton() {
-        return true;
-    }
-
-    public void afterPropertiesSet() throws Exception {
-        Server server = getServer();
-        Log.info("Starting Jetty Web Server");
-        for (int i = 0; i < connectors.length; i++) {
-            Connector connector = connectors[i];
-            // TODO do we need this?
-            connector.setServer(server);
-            Log.info("Using Jetty Connector: " + connector);
-        }
-        server.setConnectors(connectors);
-
-        for (int i = 0; i < handlers.length; i++) {
-            Handler handler = handlers[i];
-            Log.info("Using Jetty Handler: " + handler);
-        }
-
-        HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
-        if (contexts==null)
-            contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
-        if (contexts==null)
-        {
-            contexts=new ContextHandlerCollection();
-            server.setHandler(contexts);
-        }
-        
-        contexts.setHandlers(handlers);
-        
-        for (int i=0; i < userRealms.length; i++) {
-            Log.info("Using UserRealm: "+userRealms[i]);
-        }
-        server.setUserRealms(userRealms);
-        
-        server.start();
-    }
-
-    public void destroy() throws Exception {
-        if (server != null) {
-            server.stop();
-        }
-    }
-
-    // Properties
-    // -------------------------------------------------------------------------
-    public Server getServer() throws Exception {
-        if (server == null) {
-            server = createServer();
-        }
-        return server;
-    }
 
     /**
-     * Sets the server instance to use
+     * @org.apache.xbean.InitMethod
+     * @throws Exception
      */
-    public void setServer(Server server) {
-        this.server = server;
-    }
-
-    public Connector[] getConnectors() {
-        return connectors;
-    }
-
-    /**
-     * Sets the connectors used to listen for requests
-     */
-    public void setConnectors(Connector[] connectors) {
-        this.connectors = connectors;
-    }
-
-    public Handler[] getHandlers() {
-        return handlers;
-    }
-
-    /**
-     * Sets the handlers of content such as web application contexts
-     */
-    public void setHandlers(Handler[] handlers) {
-        this.handlers = handlers;
-    }
-
-    
-    public void setUserRealms (UserRealm[] userRealms) {
-        this.userRealms = userRealms;
-    }
-    
-    public UserRealm[] getUserRealms () {
-        return this.userRealms;
-    }
-    // Implementation methods
-    // -------------------------------------------------------------------------
-    protected Server createServer() throws Exception {
-        Server server = new Server();
-        return server;
-    }
-
+    public void run () throws Exception {
+        start();
+    }    
 }

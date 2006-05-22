@@ -6,8 +6,8 @@
  ------
  February 15 2006
 
-Introduction
-  
+Jetty Plugin Configuration Guide
+
   In order to run Jetty6 on a webapp project which is structured according to the usual Maven defaults (resources in <<<${basedir}/src/main/webapp>>>, classes in <<<${project.build.outputDirectory}>>> and the <<<web.xml>>> descriptor at <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>), you don't need to configure anything. 
 
   Simply type: 

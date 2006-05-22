@@ -39,6 +39,7 @@ public class XBeanTest extends TestCase {
         assertEquals("Should have the name of a Jetty server", 1, names.length);
         Server server = (Server) context.getBean(names[0]);
         assertNotNull("Should have a Jetty Server", server);
+        Thread.currentThread().sleep(10000L);
     }
 
     protected void tearDown() throws Exception {
