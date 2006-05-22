@@ -27,6 +27,7 @@ import java.net.URLConnection;
 import java.security.Permission;
 
 import org.mortbay.log.Log;
+import org.mortbay.util.URIUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -137,6 +138,8 @@ public class FileResource extends URLResource
         else
         {
             path = org.mortbay.util.URIUtil.canonicalPath(path);
+            if (path==null)
+                throw new MalformedURLException();   
             
             // treat all paths being added as relative
             String rel=path;
@@ -147,8 +150,11 @@ public class FileResource extends URLResource
             r=new FileResource(newFile.toURI().toURL(),null,newFile);
         }
 
-        int expected=r._urlString.length()-path.length();
-        int index = r._urlString.lastIndexOf(path, expected);
+        
+        String encoded=URIUtil.encodePath(path);
+        int expected=r._urlString.length()-encoded.length();
+        int index = r._urlString.lastIndexOf(encoded, expected);
+        
         if (expected!=index && ((expected-1)!=index || path.endsWith("/") || !r.isDirectory()))
         {
             r._alias=r._url;
