@@ -1,5 +1,6 @@
 
 START RECOVERY FROM CODEHAUS CRASH
+cache SSL certificate
 
 
 jetty-6.0.0beta15 - ????
