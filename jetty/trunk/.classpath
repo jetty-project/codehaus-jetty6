@@ -46,5 +46,7 @@
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.4.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.4.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.4.jar"/>
+	<classpathentry kind="lib" path="modules/jetty/src/test/resources"/>
+	<classpathentry output="examples/test-webapp/target/test-classes" kind="src" path="examples/test-webapp/src/test/java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

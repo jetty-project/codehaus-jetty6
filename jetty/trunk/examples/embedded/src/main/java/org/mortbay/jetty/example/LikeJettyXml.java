@@ -58,7 +58,7 @@ public class LikeJettyXml
         userRealm.setConfig("./etc/realm.properties");
         server.setUserRealms(new UserRealm[]{userRealm});
         
-        NCSARequestLog requestLog = new NCSARequestLog("./log/jetty-yyyy-mm-dd.log");
+        NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy-mm-dd.log");
         requestLog.setExtended(false);
         requestLogHandler.setRequestLog(requestLog);
         

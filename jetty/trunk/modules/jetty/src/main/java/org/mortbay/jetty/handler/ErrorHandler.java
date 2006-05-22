@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.StringUtil;
@@ -75,7 +76,7 @@ public class ErrorHandler extends AbstractHandler
         writer.write(Integer.toString(code));
         writer.write(' ');
         if (message==null)
-            message=""+code;
+            message=HttpGenerator.getReason(code);
         writer.write(message);
         writer.write("</title>\n</head>\n<body>\n<h2>HTTP ERROR: ");
         writer.write(Integer.toString(code));

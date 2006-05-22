@@ -213,8 +213,10 @@ public class Response implements HttpServletResponse
             Log.warn("Committed before "+code+" "+message);
 
         reset();
-        message=message==null?HttpGenerator.getReason(code):message;
         setStatus(code,message);
+        
+        if (message==null)
+            message=HttpGenerator.getReason(code);
 
         // If we are allowed to have a body
         if (code!=SC_NO_CONTENT &&
@@ -223,18 +225,21 @@ public class Response implements HttpServletResponse
             code>=SC_OK)
         {
             Request request = _connection.getRequest();
-            // TODO - probably should reset these after the request?
-            request.setAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE,new Integer(code));
-            request.setAttribute(ServletHandler.__J_S_ERROR_MESSAGE, message);
-            request.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI, request.getRequestURI());
-            request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,request.getServletName()); 
 
             ErrorHandler error_handler = null;
             ContextHandler.Context context = request.getContext();
             if (context!=null)
                 error_handler=context.getContextHandler().getErrorHandler();
             if (error_handler!=null)
+            {
+                // TODO - probably should reset these after the request?
+                request.setAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE,new Integer(code));
+                request.setAttribute(ServletHandler.__J_S_ERROR_MESSAGE, message);
+                request.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI, request.getRequestURI());
+                request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,request.getServletName()); 
+                
                 error_handler.handle(null,_connection.getRequest(),this, Handler.ERROR);
+            }
             else
             {
                 setContentType(MimeTypes.TEXT_HTML);
@@ -398,10 +403,7 @@ public class Response implements HttpServletResponse
     public void setStatus(int sc, String sm)
     {
         if (!_connection.isIncluding())
-        {
             _status=sc;
-            _reason=sm==null?HttpGenerator.getReason(sc):sm;
-        }
     }
 
     /* ------------------------------------------------------------ */
