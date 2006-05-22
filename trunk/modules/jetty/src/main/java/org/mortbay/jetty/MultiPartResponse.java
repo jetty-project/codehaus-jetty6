@@ -138,7 +138,7 @@ public class MultiPartResponse
         inPart=false;
     }
     
-};
+}
 
 
 

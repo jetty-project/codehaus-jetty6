@@ -39,6 +39,8 @@ import org.mortbay.util.LazyList;
  * The contexts do not need to be directly contained, only children of the contained handlers.
  * Multiple contexts may have the same context path and they are called in order until one
  * handles the request.
+ * 
+ * @org.apache.xbean.XBean element="contexts"
  */
 public class ContextHandlerCollection extends HandlerCollection
 {

@@ -25,7 +25,7 @@ import org.mortbay.jetty.Request;
  *
  * For SSO implementation sof UserRealm should also implement SSORealm.
  *
- * @org.apache.xbean.XBean description="Creates a security realm"
+ * 
  * @see SSORealm
  * @author Greg Wilkins (gregw)
  */
