@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>project</artifactId>
+    <groupId>org.mortbay.jetty</groupId>
+    <version>6.0.0beta16</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty</groupId>
+  <artifactId>test</artifactId>
+  <packaging>war</packaging>
+  <name>Jetty Test Webapp</name>
+  <version>6.0.0beta16</version>
+  <url>http://jetty.mortbay.org</url>
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <delete quiet="true" dir="../../webapps/test/"></delete>
+                <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../webapps/test/"></unjar>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <version>6.0.0beta16</version>
+        <configuration>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <id>mortbay-snapshot-repo</id>
+      <name>MortBay Snapshot Repo</name>
+      <url>http://jetty.mortbay.org/maven2/snapshot</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>mortbay-snapshot-repo</id>
+      <name>mortbay-snapshot-repo</name>
+      <url>http://jetty.mortbay.org/maven2/snapshot</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <dependencies>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>6.0.0beta16</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jsp-api-2.1</artifactId>
+      <version>6.0.0beta16</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>
