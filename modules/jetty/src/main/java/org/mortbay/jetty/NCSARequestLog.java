@@ -35,6 +35,7 @@ import org.mortbay.util.StringUtil;
  * @author Greg Wilkins
  * @author Nigel Canonizado
  * 
+ * @org.apache.xbean.XBean element="ncsaLog"
  */
 public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
 {

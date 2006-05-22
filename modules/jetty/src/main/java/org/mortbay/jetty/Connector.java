@@ -33,7 +33,7 @@ import org.mortbay.util.ajax.Continuation;
  * can be used without a Server if a thread pool and handler are directly provided.
  * 
  * @author gregw
- *
+ * 
  */
 public interface Connector extends LifeCycle, Buffers
 { 

@@ -27,6 +27,7 @@ public abstract class AbstractLifeCycle implements LifeCycle
     protected void doStart() throws Exception {}
     protected void doStop() throws Exception {}
 
+
     public final void start() throws Exception
     {
         try

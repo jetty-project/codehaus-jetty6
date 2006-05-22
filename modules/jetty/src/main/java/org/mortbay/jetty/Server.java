@@ -61,9 +61,9 @@ import org.mortbay.util.MultiException;
  *  
  *  Some attributes are read-only. The list of these is:
  *  javax.servlet.context.tempdir
- *   
- * </Call>
  *
+ *  @org.apache.xbean.XBean  description="Creates an
+ *                  embedded Jetty web server"
  */
 public class Server extends HandlerWrapper implements Attributes
 {
@@ -540,6 +540,5 @@ public class Server extends HandlerWrapper implements Attributes
     {
         _attributes.setAttribute(name, attribute);
     }
-
 
 }

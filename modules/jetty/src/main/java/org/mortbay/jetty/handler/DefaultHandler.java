@@ -44,6 +44,7 @@ import org.mortbay.util.StringUtil;
  * TODO Implement OPTIONS and TRACE methods for the server.
  * 
  * @author Greg Wilkins (gregw)
+ * @org.apache.xbean.XBean
  */
 public class DefaultHandler extends AbstractHandler
 {

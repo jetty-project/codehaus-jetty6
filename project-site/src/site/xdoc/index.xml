@@ -1,13 +1,10 @@
 <?xml version="1.0"?>
 <document>
   <properties>
-    <title>jetty6 WebServer</title>
-    <head>
-     <META http-equiv="Cache-Control" content="no-cache,no-store"/>
-    </head>
+    <title>Jetty WebServer</title>
   </properties>
+  <link REL="icon" HREF="./images/jicon.gif" TYPE="image/gif"/>
   <body>
-    <section>
      <div class="study">
        <img src="http://jetty.mortbay.org/jetty/images/casestudy.gif" />
        <h2><a href="http://www.mortbay.com/MB/log/gregw/?permalink=ScalingConnections.html">Scaling Connections for AJAX with Jetty 6</a></h2>
@@ -16,43 +13,73 @@ Jetty 6 employs a number of innovative strategies to ensure that only the resour
       </div>
        <a href="http://www.mortbay.com/MB/log/gregw/?permalink=ScalingConnections.html">Read more ...</a>
     </div>
-<div class="siteheader">
-jetty6 
-</div>
 
 <div class="summary">
-<span>jetty6</span> is a new implementation of the popular 
-<a href="http://jetty.mortbay.org/jetty">Jetty</a> HTTP Server and Servlet Container.  
-The idea behind jetty6 is to build on over 10 years experience creating and maintaining
-Jetty to produce a new container. With jetty6, we've concentrated
-on keeping the footprint to a minimum by reducing the dependencies on 3rd party libraries and
-by being rigorous with clean code, making it even easier to embed Jetty.
-
-<P>Our other paramount concerns are efficiency and scalability. For example, jetty6 comes with the same set of 
-connector types as standard Jetty, but also now includes connectors based on Sun's non-blocking IO 
-<a href="http://java.sun.com/j2se/1.4.2/docs/api/java/nio/channels/package-summary.html">(NIO)</a> package.
-</P>
-<P>
-Scalability is a particlarly important concern with the advent of <a href="http://en.wikipedia.org/wiki/AJAX">AJAX</a>. In the AJAX model, clients
-continuously poll the server, which often delays processing the request until there is data to 
-send or a timeout happens. This means that server threads are being held open leading to scalability
-problems for heavily loaded sites. jetty6's response is to offer a feature called <a href="/jetty6/jetty/apidocs/org/mortbay/util/ajax/package-summary.html">Continuations</a>
-allowing a request to be suspended (and therefore the thread freed) and resumed later.
-</P>
-Here's a summary of the new features of jetty6:
+ <div class="news">
+  <font color="#ffcc00">==&gt;&gt;</font> read about the new features in <a href="jetty6.html">jetty6</a> <font color="#ffcc00">&lt;&lt;==</font>
+ </div>
+<p>
+<span>Jetty</span> is an open-source, standards-based, full-featured web server implemented in java. It is released under the Apache 2.0 licence and is therefore free for commercial use and distribution. 
+</p>
+<p>
+First created in 1995, Jetty has benefitted both from input from a vast user community and consistent and focussed development by a stable core of lead developers. 
+</p>
+<p>
+Jetty can be used as:
+<ul>
+  <li>a stand-alone traditional web server for static and dynamic content</li>
+  <li>a dynamic content server behind a dedicated HTTP server such as Apache using mod_proxy</li>
+  <li>an embedded component within a java application</li>
+</ul>
+</p>
+<p>
+This flexibility means that Jetty can be encountered in a number of different contexts:  
+ <ul>
+  <li>shipped with products to provide out-of-the-box useability eg  <a href="http://tapestry.sourceforge.net">Tapestry</a>, <a href="http://www.liferay.com/">Liferay</a></li>
+  <li>distributed on CDs with books to make examples and exercises ready-to-run</li>
+  <li>incorporated into applications as a HTTP transport eg <a href="http://www.jxta.org/">JXTA</a>, <a href="http://www.mx4j.org">MX4J</a></li>
+  <li>integrated as a web container in J2EE app servers eg <a href="http://www.objectweb.org/jonas/index.html">JOnAS</a>, <a href="http://geronimo.apache.org">Geronimo</a>, <a href="http://sourceforge.net/projects/jboss//">JBoss</a>, <a href="http://www.huihoo.org/jfox">JFox</a></li>
+  <li>included as a component of an application eg <a href="http://maven.apache.org/continuum">Continuum</a>, <a href="http://www.cenqua.com/fisheye">FishEye</a>, <a href="http://maven.apache.org">Maven</a></li>
+ </ul>
+</p>
+<p>
+There are many more examples of Jetty in action on the  <a href="http://www.mortbay.com/mortbay/powered.html">Jetty Powered Page</a>. However, as Jetty aims to be as unobtrusive as possible, many websites and products are based around Jetty, but Jetty is invisible!
+</p>
+<p>
+Some of the defining features of Jetty are:
+</p>
 <div class="feature">
-<div class="featureitem">Codebase completely rearchitected and slimlined</div>
-<div class="featureitem"><a href="/jetty6/jetty/apidocs/org/mortbay/util/ajax/package-summary.html">Continuations API</a> for efficient AJAX polling</div>
-<div class="featureitem">Improved dependancy injection and inversion of control design of components</div>
-<div class="featureitem">Improved interceptor design of handlers</div>
-<div class="featureitem">Smart split buffer design for efficient asynchronous flushing and avoiding chunking.</div>
-<div class="featureitem">Optional use of NIO Buffering so that efficient direct buffers and memory mapped files can be used.</div>
-<div class="featureitem">Optional use of NIO non-blocking scheduling so that threads are not allocated per connection.</div>
-<div class="featureitem">Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be sent as a single operation.</div>
-</div>
+<h2>Simplicity</h2>
+The guiding principle of Jetty could be said to be "simplicity not complexity". We want to make Jetty easy to understand and use: 
+<ul>
+  <li>Configuration is either by API or by xml file</li>
+  <li>Xml file syntax is a straightforward mapping from the API operating on POJOs</li>
+  <li>Default configuration files make Jetty useable out-of-the-box</li>
+  <li>Minimal number of lines required to embed a Jetty instance</li>
+</ul>
 </div>
 
-
-  </section>
+<div class="feature">
+<h2>Efficiency</h2>
+A lot of effort goes into optimizing Jetty's performance and crafting the code so as to make the footprint as small as possible:
+<ul>
+<li>Dependencies are kept to the absolute minimum</li>
+<li>The core is kept small with extra functionality in optional jars</li>
+<li>Scalability is a key concern</li>
+<li>Performance degrades gracefully under stress</li>
+</ul>
+</div>
+<div class="feature">
+<h2>Embeddability</h2>
+Jetty is designed to be a good component. This means that it can easily be embedded in an application without forcing the application to adapt to it:
+  <ul>
+    <li>Usage of dependency injection and inversion of control patterns</li>
+  </ul>
+</div>
+<div class="feature">
+<h2>Pluggability</h2>
+Jetty is architected for pluggability. The API allows different implementations of all of the principal Jetty components to be selected. At least one, but sometimes more, implementations of a component are always provided. However if these do not meet your needs, you are free to code your own using the interfaces and abstract classes as a basis. This means that Jetty can be easily customised to a particular application environment. This is particularly useful when Jetty is acting as the web container in a J2EE server, as Jetty's pluggability ensures a tight integration with a host container. 
+</div>
+</div>
   </body>
 </document>

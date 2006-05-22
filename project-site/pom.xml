@@ -27,24 +27,32 @@
               <tasks>
                 <copy file="${basedir}/../README.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
                 <copy file="${basedir}/../VERSION.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
-                <copy todir="${basedir}/target/site/jetty" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../modules/jetty/target/javadoc">
+                <copy todir="${basedir}/target/site/apidocs" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../target/site/apidocs">
                     <include name="**/**"/>
                   </fileset>
                 </copy>
-                <copy todir="${basedir}/target/site/servlet-api-2.5" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../modules/servlet-api-2.5/target/javadoc">
+                <copy todir="${basedir}/target/site/xref" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../target/site/xref">
                     <include name="**/**"/>
                   </fileset>
                 </copy>
-                <copy todir="${basedir}/target/site/management" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../modules/management/target/javadoc">
+                <copy todir="${basedir}/target/site/xref-test" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../target/site/xref-test">
                     <include name="**/**"/>
                   </fileset>
                 </copy>
-                <copy todir="${basedir}/target/site/maven-plugin/" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../modules/maven-plugin/target/site">
+                <copy todir="${basedir}/src/site/apt/maven-plugin" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../modules/maven-plugin/src/site/apt">
                     <include name="**/**"/>
+                  </fileset>
+                </copy>
+                <copy todir="${basedir}/target/generated-site/xdoc/maven-plugin" failonerror="false" overwrite="true">
+                  <fileset dir="${basedir}/../modules/maven-plugin/target/generated-site/xdoc">
+                    <include name="index.xml"/>
+                    <include name="run-mojo.xml"/>
+                    <include name="run-war-mojo.xml"/>
+                    <include name="run-exploded-mojo.xml"/>
                   </fileset>
                 </copy>
               </tasks>
@@ -56,8 +64,9 @@
        <groupId>org.apache.maven.plugins</groupId>
        <artifactId>maven-site-plugin</artifactId>
        <configuration>
-         <templateDirectory>file:///${basedir}/src/site/resources/template/</templateDirectory>
-         <template>org/apache/maven/plugins/site/maven-site.vm</template>
+         <!--templateDirectory>file:///${basedir}/src/site/resources/template/</templateDirectory>
+         <template>org/apache/maven/plugins/site/maven-site.vm</template-->
+         <!-- templateFile>${basedir}/src/site/resources/template/org/apache/maven/plugins/site/maven-site.vm</templateFile -->
        </configuration>
       </plugin>
     </plugins>
