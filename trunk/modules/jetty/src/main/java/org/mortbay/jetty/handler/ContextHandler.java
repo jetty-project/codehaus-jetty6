@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.EventListener;
@@ -101,8 +102,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     private Map _localeEncodingMap;
     private String[] _welcomeFiles;
     private ErrorHandler _errorHandler;
-    private String[] _hosts;
     private String[] _vhosts;
+    private Set _connectors;
     private EventListener[] _eventListeners;
     private Logger _logger;
 
@@ -174,14 +175,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the hosts for the context.
-     * Set the real hosts that this context will accept requests for.
-     * If not null or empty, then only requests from server for hosts
-     * in this array are accepted by this context. 
+    /** 
+     * @deprecated use {@link #setConnectors(String[])} 
      */
     public void setHosts(String[] hosts)
     {
-        _hosts=hosts;
+        setConnectors(hosts);
     }
 
     /* ------------------------------------------------------------ */
@@ -189,7 +188,31 @@ public class ContextHandler extends HandlerWrapper implements Attributes
      */
     public String[] getHosts()
     {
-        return _hosts;
+        return getConnectors();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String[] getConnectors()
+    {
+        if (_connectors==null || _connectors.size()==0)
+            return null;
+            
+        return (String[])_connectors.toArray(new String[_connectors.size()]);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the names of accepted connectors.
+     * 
+     * Names are either "host:port" or a specific configured name for a connector.
+     * 
+     * @param connectors If non null, an array of connector names that this context
+     * will accept a request from.
+     */
+    public void setConnectors(String[] connectors)
+    {
+        if (connectors==null || connectors.length==0)
+            _connectors=null;
+        _connectors= new HashSet(Arrays.asList(connectors));
     }
     
     /* ------------------------------------------------------------ */
@@ -431,8 +454,10 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         
-        
         base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+        if(dispatch==REQUEST && base_request.getConnection().getResponse().getStatus()>0)
+            return;
+        
         old_context=base_request.getContext();
         
         // Are we already in this context?
@@ -453,16 +478,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                     return;
             }
             
-            // Check the real hosts
-            if (_hosts!=null && _hosts.length>0)
+            // Check the connector
+            if (_connectors!=null && _connectors.size()>0)
             {
-                String host=request.getLocalName();
-                boolean match=false;
-                
-                // TODO non-linear lookup
-                for (int i=0;!match && i<_hosts.length;i++)
-                    match=_hosts[i]!=null && _hosts[i].equalsIgnoreCase(host);
-                if (!match)
+                String connector=HttpConnection.getCurrentConnection().getConnector().getName();
+                if (connector==null || !_connectors.contains(connector))
                     return;
             }
             
