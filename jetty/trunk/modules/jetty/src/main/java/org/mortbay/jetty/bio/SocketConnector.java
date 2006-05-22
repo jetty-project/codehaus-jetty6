@@ -115,7 +115,6 @@ public class SocketConnector extends AbstractConnector
         }
               
         super.customize(endpoint, request);
-        configure((Socket)endpoint.getConnection());
     }
 
     /* ------------------------------------------------------------------------------- */

@@ -3,7 +3,8 @@ jetty-6.0.0RC0 - ????????????
     + ContextHandler.setConnectors replace setHosts
     + Connector lowResourceMaxIdleTime  implemented.
     + Default servlet checks for aliases resources
-    + Added clover reports and enough tests to get 50% coverage
+    + Added clover reports and enough tests to get >50% coverage
+    + fixed IE SSL issue.
 
 jetty-6.0.0beta16 - 12/5/2006
     + remove a couple of System.err.printlns
