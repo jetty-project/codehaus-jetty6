@@ -44,6 +44,7 @@ public class HttpConnection
     private EndPoint _endp;
     private Server _server;
     private boolean _expectingContinues;  // TODO use this!
+    private boolean _idle=true;
 
     private HttpURI _uri=new HttpURI();
 
@@ -277,6 +278,7 @@ public class HttpConnection
         boolean more_in_buffer =true; // assume true until proven otherwise
         while (more_in_buffer)
         {
+            _idle=false;
             try
             {
                 __currentConnection.set(this);
@@ -311,11 +313,11 @@ public class HttpConnection
                 __currentConnection.set(null);
                 
                 Buffer header = _parser.getHeaderBuffer();
-                more_in_buffer = header!=null && header.length()>0;
                 
-                // TODO - maybe do this at start of handle aswell or instead?
                 if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
                 {
+                    _idle=true;
+                    
                     _expectingContinues = false; // TODO do something with this!
                     _parser.reset(!more_in_buffer); // TODO maybe only release when low on resources
                     _requestFields.clear();
@@ -324,9 +326,9 @@ public class HttpConnection
                     _generator.reset(!more_in_buffer); // TODO maybe only release when low on resources
                     _responseFields.clear();
                     _response.recycle();
-                    
-                    // TODO low resources handling?
                 }
+
+                more_in_buffer = header!=null && (header.length()>0);
                 
                 Continuation continuation = _request.getContinuation();
                 if (continuation != null && continuation.isPending())
@@ -349,7 +351,10 @@ public class HttpConnection
             try
             {
                 // TODO try to do this lazily or more efficiently
-                _request.setPathInfo(URIUtil.canonicalPath(_uri.getDecodedPath()));
+                String info=URIUtil.canonicalPath(_uri.getDecodedPath());
+                if (info==null)
+                    throw new HttpException(400);
+                _request.setPathInfo(info);
                 
                 if (_out!=null)
                     _out.reopen();
@@ -378,6 +383,12 @@ public class HttpConnection
             {
                 Log.warn(e);
                 _generator.sendError(500, null, null, true);
+            }
+            catch (HttpException e)
+            {
+                Log.debug(e);
+                _response.sendError(e.getStatus(), e.getReason());
+                throw e;
             }
             finally
             {
@@ -477,6 +488,12 @@ public class HttpConnection
         _include--;
         if (_out!=null)
             _out.reopen();
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isIdle()
+    {
+        return _idle;
     }
     
     /* ------------------------------------------------------------ */

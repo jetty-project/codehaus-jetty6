@@ -446,59 +446,55 @@ public class Server extends HandlerWrapper implements Attributes
 
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated 
      */
     public void addHandler(Handler handler)
     {
-        getHandlerCollection().addHandler(handler);
+        if (getHandler() instanceof HandlerCollection)
+            ((HandlerCollection)getHandler()).addHandler(handler);
+        else
+        {
+            HandlerCollection collection=new HandlerCollection();
+            collection.setHandlers(new Handler[]{getHandler(),handler});
+            setHandler(collection);
+        }
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated 
      */
     public void removeHandler(Handler handler)
         throws Exception
     {
-        getHandlerCollection().removeHandler(handler);
+        if (getHandler() instanceof HandlerCollection)
+            ((HandlerCollection)getHandler()).removeHandler(handler);
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated 
      */
     public Handler[] getHandlers()
     {
-        return getHandlerCollection().getHandlers();
+        if (getHandler() instanceof HandlerCollection)
+            return ((HandlerCollection)getHandler()).getHandlers();
+        
+        return null;
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated 
      */
     public void setHandlers(Handler[] handlers)
     {
-        getHandlerCollection().setHandlers(handlers);
-    }
-
-    /* ------------------------------------------------------------ */
-    private HandlerCollection getHandlerCollection()
-    {
-        HandlerCollection collection=(HandlerCollection)getChildHandlerByClass(ContextHandlerCollection.class);
-        if (collection==null)
+        HandlerCollection collection;
+        if (getHandler() instanceof HandlerCollection)
+            collection=(HandlerCollection)getHandler();
+        else
         {
-            collection=(HandlerCollection)getChildHandlerByClass(HandlerCollection.class);
-            if (collection==null)
-            {
-                collection=new ContextHandlerCollection();
-                
-                HandlerWrapper wrapper = this;
-                while (wrapper.getHandler()!=null && wrapper.getHandler() instanceof HandlerWrapper)
-                    wrapper=(HandlerWrapper)wrapper.getHandler();
-                wrapper.setHandler(collection);
-            }
+            collection=new HandlerCollection();
+            setHandler(collection);
         }
-        return collection;
+            
+        collection.setHandlers(handlers);
     }
 
     /* ------------------------------------------------------------ */

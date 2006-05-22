@@ -72,6 +72,10 @@ public class Dump extends HttpServlet
             {
                 Thread.sleep(Long.parseLong(request.getParameter("sleep")));
             }
+            catch (InterruptedException e)
+            {
+                return;
+            }
             catch (Exception e)
             {
                 throw new ServletException(e);

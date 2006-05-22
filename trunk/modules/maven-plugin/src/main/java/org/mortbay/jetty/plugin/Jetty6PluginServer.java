@@ -36,17 +36,11 @@ import org.mortbay.jetty.security.UserRealm;
 public class Jetty6PluginServer implements JettyPluginServer
 {
     public static int DEFAULT_PORT = 8080;
-    
-    public static long DEFAULT_MAX_IDLE_TIME = 30000L;
-    
+    public static int DEFAULT_MAX_IDLE_TIME = 30000;
     private Server server;
-
     private Connector[] connectors;
-    
     private UserRealm[] realms;
-    
     private ContextHandlerCollection contexts; //the list of ContextHandlers
-    
     HandlerCollection handlers; //the list of lists of Handlers
     
     
