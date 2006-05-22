@@ -31,7 +31,6 @@ public class ByteArrayOutputStream2 extends ByteArrayOutputStream
         reset();
         if (buf.length<minSize)
         {
-            System.err.println("buf.length="+buf.length+" < minSize="+minSize);
             buf=new byte[minSize];
         }
     }

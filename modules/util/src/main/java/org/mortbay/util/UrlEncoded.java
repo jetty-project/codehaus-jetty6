@@ -305,7 +305,20 @@ public class UrlEncoded extends MultiMap
 
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
-     * @param data the byte[] containing the encoded parameters
+     * @param in InputSteam to read
+     * @param map MultiMap to add parameters to
+     */
+    public static void decodeUtf8To(InputStream in, MultiMap map)
+    throws IOException
+    {
+        decodeUtf8To(in,map,-1);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Decoded parameters to Map.
+     * @param in InputSteam to read
+     * @param map MultiMap to add parameters to
+     * @param maxLength maximum length of conent to read 0r -1 for no limit
      */
     public static void decodeUtf8To(InputStream in, MultiMap map, int maxLength)
     throws IOException
@@ -364,7 +377,7 @@ public class UrlEncoded extends MultiMap
                         buffer.append((byte)b);
                     break;
                 }
-                if (maxLength>0 && (++totalLength > maxLength))
+                if (maxLength>=0 && (++totalLength > maxLength))
                     throw new IllegalStateException("Form too large");
             }
             
@@ -379,6 +392,16 @@ public class UrlEncoded extends MultiMap
                 map.add(buffer.toString(), "");
             }
         }
+    }
+
+    /* -------------------------------------------------------------- */
+    /** Decoded parameters to Map.
+     * @param in the stream containing the encoded parameters
+     */
+    public static void decodeTo(InputStream in, MultiMap map, String charset)
+    throws IOException
+    {
+        decodeTo(in,map,charset,-1);
     }
     
     /* -------------------------------------------------------------- */
@@ -463,7 +486,7 @@ public class UrlEncoded extends MultiMap
                 }
                 
                 totalLength += l;
-                if (maxLength > 0 && totalLength > maxLength)
+                if (maxLength>=0 && totalLength > maxLength)
                     throw new IllegalStateException("Form too large");
             }
             

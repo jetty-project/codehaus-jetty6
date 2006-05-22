@@ -1,3 +1,7 @@
+jetty-6.0.0beta16 - 12/5/2006
+    + remove a couple of System.err.printlns
+    + replace backwards compativle API in UrlEncoded
+
 jetty-6.0.0beta15 - 11/5/2006
 
     + Added Server attribute org.mortbay.jetty.Request.maxFormContentSize

@@ -1170,8 +1170,6 @@ public class Request implements HttpServletRequest
                 {
                     try
                     {
-                        
-                        System.err.println("maxFormContentSize=="+_maxFormContentSize);
                         if (content_length>_maxFormContentSize && _maxFormContentSize > 0)
                                 throw new IllegalStateException("Form too large");
                         InputStream in = getInputStream();
