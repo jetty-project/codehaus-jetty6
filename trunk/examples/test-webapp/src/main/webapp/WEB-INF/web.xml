@@ -58,6 +58,7 @@
     <servlet-name>Dump</servlet-name>
     <servlet-class>com.acme.Dump</servlet-class>
     <load-on-startup>1</load-on-startup>
+    <run-as><role-name>admin</role-name></run-as>
   </servlet>
 
   <servlet-mapping>
