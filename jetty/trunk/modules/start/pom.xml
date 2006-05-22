@@ -2,12 +2,12 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0.0beta15</version>
+    <version>6.0.0beta16</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>start</artifactId>
   <name>Jetty start jar</name>
-  <version>6.0.0beta15</version>
+  <version>6.0.0beta16</version>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
