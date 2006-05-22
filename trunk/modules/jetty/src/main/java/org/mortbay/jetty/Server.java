@@ -45,7 +45,24 @@ import org.mortbay.util.MultiException;
  * The server is itself a handler and a ThreadPool.  Connectors use the ThreadPool methods
  * to run jobs that will eventually call the handle method.
  * 
- * @author gregw
+ * A server instance also supports the setting of attributes:
+ *    Object value = new Integer(99);
+ *    server.setAttribute("myAttributeName", value);
+ * 
+ * which can be retrieved at any time:
+ *    Object o = server.getAttribute("myAttributeName");
+ *    
+ * Some attributes can be used by Jetty to modify runtime behaviour
+ * in place of using System Properties. The list of these attribute
+ * names and value types is:
+ * 
+ *  Name                                            Type                    Default Value
+ *  org.mortbay.jetty.Request.maxFormContentSize    java.lang.Integer       20000
+ *  
+ *  Some attributes are read-only. The list of these is:
+ *  javax.servlet.context.tempdir
+ *   
+ * </Call>
  *
  */
 public class Server extends HandlerWrapper implements Attributes
@@ -123,21 +140,14 @@ public class Server extends HandlerWrapper implements Attributes
      */
     public void setConnectors(Connector[] connectors)
     {
-        _container.update(this, _connectors, connectors, "connector");
-        if (_connectors!=null)
-        {
-            for (int i=0;i<_connectors.length;i++)
-                if (_connectors[i]!=null)
-                    _connectors[i].setServer(null);
-        }
-
-        _connectors = connectors;
-        
         if (connectors!=null)
         {
             for (int i=0;i<connectors.length;i++)
                 connectors[i].setServer(this);
         }
+        
+        _container.update(this, _connectors, connectors, "connector");
+        _connectors = connectors;
     }
 
     /* ------------------------------------------------------------ */
@@ -155,7 +165,7 @@ public class Server extends HandlerWrapper implements Attributes
      */
     public void setThreadPool(ThreadPool threadPool)
     {
-        _container.update(this,_threadPool,threadPool, "threadpool");
+        _container.update(this,_threadPool,threadPool, "threadpool",true);
         _threadPool = threadPool;
     }
 
@@ -256,7 +266,7 @@ public class Server extends HandlerWrapper implements Attributes
      */
     public void setUserRealms(UserRealm[] realms)
     {
-        _container.update(this,_realms,realms, "realm");
+        _container.update(this,_realms,realms, "realm",true);
         _realms=realms;
     }
     
@@ -287,16 +297,17 @@ public class Server extends HandlerWrapper implements Attributes
      */
     public void setSessionIdManager(SessionIdManager sessionIdManager)
     {
-        _container.update(this,_sessionIdManager,sessionIdManager, "sessionIdManager");
+        _container.update(this,_sessionIdManager,sessionIdManager, "sessionIdManager",true);
         _sessionIdManager = sessionIdManager;
     }
-    
-    
+
+    /* ------------------------------------------------------------ */
     public void setSendServerVersion (boolean sendServerVersion)
     {
         _sendServerVersion = sendServerVersion;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public boolean getSendServerVersion()
     {
         

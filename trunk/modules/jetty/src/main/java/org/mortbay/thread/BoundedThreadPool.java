@@ -389,7 +389,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         {
             synchronized (this)
             {
-                if(_job!=null)
+                if(_job!=null || job==null)
                     throw new IllegalStateException();
                 _job=job;
                 this.notify();
@@ -402,58 +402,74 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
          */
         public void run()
         {
+
+            Runnable job=null;
             try
             {
                 while (isRunning())
                 {
-                    synchronized (this)
+                    try
                     {
-                        try
+                        synchronized (_lock)
                         {
-                            if(_job==null)
-                                this.wait(getMaxIdleTimeMs());  
-                            
-                            if (isRunning() && _job!=null)
-                                _job.run();
-                        }
-                        catch (InterruptedException e) {Log.ignore(e); break;}
-                        finally
-                        {
-                            synchronized (_lock)
+                            if (job!=null)
                             {
-                                if (_job!=null)
-                                {
-                                    _idle.add(this);
-                                    if (_idle.size()>=_minThreads)
-                                        _warned=false;
-                                }
-                                else 
-                                {
-                                    long now = System.currentTimeMillis();
-                                    if (_idle.size()-_blocked.size()>0 &&     // are there idle threads?
-                                        _threads.size()>_minThreads &&        // are there more than min threads?
-                                        (now-_lastShrink)>getMaxIdleTimeMs()) // have we shrunk recently?
-                                    {
-                                        _lastShrink=now;
-                                        _idle.remove(this);
-                                        return;
-                                    }
-                                }
-                                
-                                _job=null;
+                                _idle.add(this);
+                                if (_idle.size()>=_minThreads)
+                                    _warned=false;
                                 if (_blocked.size()>0)
                                     ((Thread)_blocked.get(0)).interrupt();
                             }
                         }
+                        
+                        synchronized (this)
+                        {
+                            job=null;
+                            if(_job==null)
+                                this.wait(getMaxIdleTimeMs());  
+                            job=_job;
+                            _job=null;
+                        }
+                            
+                        if (isRunning() && job!=null)
+                            job.run();
+                        
+                        synchronized (_lock)
+                        {
+                            if (job==null)
+                            {
+                                long now = System.currentTimeMillis();
+                                if (_idle.size()-_blocked.size()>0 &&     // are there idle threads?
+                                    _threads.size()>_minThreads &&        // are there more than min threads?
+                                    (now-_lastShrink)>getMaxIdleTimeMs()) // have we shrunk recently?
+                                {
+                                    _lastShrink=now;
+                                    _idle.remove(this);
+                                    return;
+                                }
+                            }
+                        }
                     }
+                    catch (InterruptedException e) {Log.ignore(e); return;}
                 }
             }
             finally
             {
                 synchronized (_lock)
                 {
+                    _idle.remove(this);
                     _threads.remove(this);
                 }
+                
+                synchronized (this)
+                {
+                    job=null;
+                    job=_job;
+                }
+                
+                // catch all!
+                if (job!=null && isRunning())
+                    BoundedThreadPool.this.dispatch(job);
             }
         }
     }

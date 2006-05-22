@@ -53,7 +53,7 @@ public class RequestLogHandler extends HandlerWrapper
     public void setRequestLog(RequestLog requestLog)
     {
         if (getServer()!=null)
-            getServer().getContainer().update(this, _requestLog, requestLog, "logimpl");
+            getServer().getContainer().update(this, _requestLog, requestLog, "logimpl",true);
         _requestLog = requestLog;
     }
 
@@ -66,12 +66,13 @@ public class RequestLogHandler extends HandlerWrapper
         if (_requestLog!=null)
         {
             if (getServer()!=null && getServer()!=server)
-                getServer().getContainer().update(this, _requestLog, null, "logimpl");
+                getServer().getContainer().update(this, _requestLog, null, "logimpl",true);
+            super.setServer(server);
             if (server!=null && server!=getServer())
-                server.getContainer().update(this, null,_requestLog, "logimpl");
+                server.getContainer().update(this, null,_requestLog, "logimpl",true);
         }
-            
-        super.setServer(server);
+        else
+            super.setServer(server);
     }
 
     /* ------------------------------------------------------------ */

@@ -1,16 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project>
+<?xml version="1.0" encoding="UTF-8"?><project>
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta15</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>test</artifactId>
   <packaging>war</packaging>
   <name>Jetty Test Webapp</name>
-  <version>6.0-SNAPSHOT</version>
+  <version>6.0.0beta15</version>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -35,38 +34,23 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty6-plugin</artifactId>
-        <version>6.0-SNAPSHOT</version>
+        <version>6.0.0beta15</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-util</artifactId>
-      <version>6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jsp-api-2.1</artifactId>
-      <version>6.0-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
   <repositories>
     <repository>
-      <id>mortbay-snapshot-repo</id>
-      <name>MortBay Snapshot Repo</name>
-      <url>http://jetty.mortbay.org/maven2/snapshot</url>
       <releases>
         <enabled>false</enabled>
       </releases>
+      <id>mortbay-snapshot-repo</id>
+      <name>MortBay Snapshot Repo</name>
+      <url>http://jetty.mortbay.org/maven2/snapshot</url>
     </repository>
   </repositories>
-
-
   <pluginRepositories>
     <pluginRepository>
       <id>mortbay-snapshot-repo</id>
@@ -74,4 +58,17 @@
       <url>http://jetty.mortbay.org/maven2/snapshot</url>
     </pluginRepository>
   </pluginRepositories>
+  <dependencies>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>6.0.0beta15</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jsp-api-2.1</artifactId>
+      <version>6.0.0beta15</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 </project>

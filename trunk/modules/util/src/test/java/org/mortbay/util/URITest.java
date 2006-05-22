@@ -42,15 +42,37 @@ public class URITest extends junit.framework.TestCase
     }    
     
     /* ------------------------------------------------------------ */
-    public void testURI()
+    public void testEncodePath()
     {
         // test basic encode/decode
         StringBuffer buf = new StringBuffer();
-        URIUtil.encodeString(buf,"foo%23;,:=bar",";,=");
-        assertEquals("foo%23;,:=bar",URIUtil.decodePath(buf.toString()));
+        
+        
+        buf.setLength(0);
+        URIUtil.encodePath(buf,"/foo%23+;,:=/b a r/?info ");
+        assertEquals("/foo%2523+%3B,:=/b%20a%20r/%3Finfo%20",buf.toString());
 
+        assertEquals("/foo%2523+%3B,:=/b%20a%20r/%3Finfo%20",URIUtil.encodePath("/foo%23+;,:=/b a r/?info "));
+                
+        buf.setLength(0);
+        URIUtil.encodeString(buf,"foo%23;,:=b a r",";,= ");
+        assertEquals("foo%2523%3b%2c:%3db%20a%20r",buf.toString());
+        
+        
+    }    
+    
+    /* ------------------------------------------------------------ */
+    public void testDecodePath()
+    {
+        assertEquals("foo%23;,:=b a r",URIUtil.decodePath("foo%2523%3b%2c:%3db%20a%20r"));   
+        assertEquals("foo%23;,:=b a r",URIUtil.decodePath("xxxfoo%2523%3b%2c:%3db%20a%20rxxx".getBytes(),3,27));
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void testAddPaths()
+    {
         assertEquals("null+null", URIUtil.addPaths(null,null),null);
-        assertEquals("null+", URIUtil.addPaths(null,""),null);
+        assertEquals("null+", URIUtil.addPaths(null,""),"");
         assertEquals("null+bbb", URIUtil.addPaths(null,"bbb"),"bbb");
         assertEquals("null+/", URIUtil.addPaths(null,"/"),"/");
         assertEquals("null+/bbb", URIUtil.addPaths(null,"/bbb"),"/bbb");
@@ -133,6 +155,11 @@ public class URITest extends junit.framework.TestCase
         assertEquals("aaa;JS?A=1+/", URIUtil.addPaths("aaa/;JS?A=1","/"),"aaa/;JS?A=1");
         assertEquals("aaa;JS?A=1+/bbb", URIUtil.addPaths("aaa/;JS?A=1","/bbb"),"aaa/bbb;JS?A=1");
 
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void testParentPath()
+    {
         assertEquals("parent /aaa/bbb/","/aaa/", URIUtil.parentPath("/aaa/bbb/"));
         assertEquals("parent /aaa/bbb","/aaa/", URIUtil.parentPath("/aaa/bbb"));
         assertEquals("parent /aaa/","/", URIUtil.parentPath("/aaa/"));
@@ -140,6 +167,11 @@ public class URITest extends junit.framework.TestCase
         assertEquals("parent /",null, URIUtil.parentPath("/"));
         assertEquals("parent null",null, URIUtil.parentPath(null));
 
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void testCanonicalPath()
+    {
         String[][] canonical = 
         {
             {"/aaa/bbb/","/aaa/bbb/"},
@@ -194,5 +226,6 @@ public class URITest extends junit.framework.TestCase
                           );
         
     }
+    
 
 }

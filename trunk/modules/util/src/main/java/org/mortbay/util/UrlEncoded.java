@@ -307,7 +307,7 @@ public class UrlEncoded extends MultiMap
     /** Decoded parameters to Map.
      * @param data the byte[] containing the encoded parameters
      */
-    public static void decodeUtf8To(InputStream in, MultiMap map)
+    public static void decodeUtf8To(InputStream in, MultiMap map, int maxLength)
     throws IOException
     {
         synchronized(map)
@@ -319,7 +319,7 @@ public class UrlEncoded extends MultiMap
             int b;
             
             // TODO cache of parameter names ???
-            
+            int totalLength=0;
             while ((b=in.read())>=0)
             {
                 switch ((char) b)
@@ -364,6 +364,8 @@ public class UrlEncoded extends MultiMap
                         buffer.append((byte)b);
                     break;
                 }
+                if (maxLength>0 && (++totalLength > maxLength))
+                    throw new IllegalStateException("Form too large");
             }
             
             if (key != null)
@@ -383,12 +385,12 @@ public class UrlEncoded extends MultiMap
     /** Decoded parameters to Map.
      * @param in the stream containing the encoded parameters
      */
-    public static void decodeTo(InputStream in, MultiMap map, String charset)
+    public static void decodeTo(InputStream in, MultiMap map, String charset, int maxLength)
     throws IOException
     {
         if (charset==null || StringUtil.__UTF8.equalsIgnoreCase(charset))
         {
-            decodeUtf8To(in,map);
+            decodeUtf8To(in,map,maxLength);
             return;
         }
         
@@ -406,7 +408,7 @@ public class UrlEncoded extends MultiMap
             // TODO - more efficient??? 
             byte[] bytes=new byte[256]; // TODO Configure ?? size??? tune??? // reuse???
             int l=-1;
-            
+            int totalLength = 0;
             while ((l=in.read(bytes))>=0)
             {
                 for (int i=0;i<l;i++)
@@ -459,6 +461,10 @@ public class UrlEncoded extends MultiMap
                         break;
                     }
                 }
+                
+                totalLength += l;
+                if (maxLength > 0 && totalLength > maxLength)
+                    throw new IllegalStateException("Form too large");
             }
             
             if (key != null)
@@ -471,7 +477,7 @@ public class UrlEncoded extends MultiMap
             {
                 map.add(new String(buf.getBuf(), 0, buf.size(), charset),"");
             }
-            
+
         }
     }
     
