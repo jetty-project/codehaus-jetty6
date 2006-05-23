@@ -89,6 +89,9 @@ public class Jetty6MavenConfiguration extends Configuration
         if (webXmlFile.exists())
             configure(webXmlFile.toURL().toString());
         PluginLog.getLog().debug("Finished configuring web.xml");
+        
+        bindUserTransaction();
+        lockCompEnv();
     }
 
     
