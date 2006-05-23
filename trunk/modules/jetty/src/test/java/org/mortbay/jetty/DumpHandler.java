@@ -177,6 +177,5 @@ public class DumpHandler extends AbstractHandler
         writer.write("\015\012");
         writer.flush();
         buf.writeTo(out);
-        
     }
 }

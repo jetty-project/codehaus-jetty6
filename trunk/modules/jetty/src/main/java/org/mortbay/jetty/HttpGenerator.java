@@ -32,6 +32,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.io.View;
+import org.mortbay.log.Log;
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
@@ -327,7 +328,10 @@ public class HttpGenerator implements HttpTokens
 
         // Handle the _content
         if (_head)
+        {
             content.clear();
+            _content=null;
+        }
         else if (_endp != null && _buffer == null && content.length() > 0 && _last)
         {
             // TODO - use bypass in more cases.
@@ -398,22 +402,23 @@ public class HttpGenerator implements HttpTokens
             throw new IllegalStateException("Closed");
 
         // Handle any unfinished business?
-        if (_content != null && _content.length()>0 || _bufferChunked)
+        Buffer content = _content;
+        if (content != null && content.length()>0 || _bufferChunked)
         {
             flushBuffers();
-            if (_content != null && _content.length()>0 || _bufferChunked) 
+            if (content != null && content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
 
         // we better check we have a buffer
         if (_buffer == null) 
             _buffer = _buffers.getBuffer(_contentBufferSize);
+
+        _contentWritten-=_buffer.length();
         
         // Handle the _content
         if (_head)
             return Integer.MAX_VALUE;
-        
-        _contentWritten-=_buffer.length();
         
         return _buffer.space()-(_contentLength == CHUNKED_CONTENT?CHUNK_SPACE:0);
     }
@@ -421,9 +426,6 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------ */
     void uncheckedAddContent(int b)
     {
-        if (_status==304)
-            throw new IllegalStateException();
-        
         _buffer.put((byte)b);
     }
 
@@ -549,10 +551,7 @@ public class HttpGenerator implements HttpTokens
                             _contentLength = field.getLongValue();
 
                             if (_contentLength < _contentWritten || _last && _contentLength != _contentWritten)
-                            {
-                                // TODO - warn of incorrect _content length
                                 content_length = null;
-                            }
 
                             // write the field to the header buffer
                             field.put(_header);
@@ -709,7 +708,7 @@ public class HttpGenerator implements HttpTokens
 
         else if (_contentLength >= 0 && _contentLength != _contentWritten)
         {
-            // TODO warning.
+            Log.warn("ContentLength written=="+_contentWritten+" < length=="+_contentLength);
             _close = true;
         }
 
@@ -1034,7 +1033,19 @@ public class HttpGenerator implements HttpTokens
         /* ------------------------------------------------------------ */
         public void flush() throws IOException
         {
-            _generator.flushBuffers();
+            // block until everything is flushed
+            Buffer content = _generator._content;
+            Buffer buffer = _generator._buffer;
+            if (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
+            {
+                _generator.flushBuffers();
+                while (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
+                {
+                    if (!_generator._endp.isBlocking())
+                        _generator._endp.blockWritable(_maxIdleTime);
+                    _generator.flushBuffers();
+                }
+            }
         }
 
         /* ------------------------------------------------------------ */
@@ -1344,11 +1355,9 @@ public class HttpGenerator implements HttpTokens
             for (int i=offset;i<end;i++)
             {
                 // Block until we can add _content.
-                while (_space<6 && _endp.isOpen())
+                if (_space<6 && _endp.isOpen())
                 {
                     _generator.completeUncheckedAddContent();
-                    if (!_endp.isBlocking())
-                        _endp.blockWritable(_out._maxIdleTime);
                     _out.flush();
                     _space= _generator.prepareUncheckedAddContent();
                 }
@@ -1381,12 +1390,10 @@ public class HttpGenerator implements HttpTokens
             int end=offset+length;
             for (int i=offset;i<end;i++)
             {
-                // Block until we can add _content.
-                while (_space<6 && _endp.isOpen())
+                // Do we need to flush?
+                if (_space<6 && _endp.isOpen()) // 6 is maximum UTF-8 encoded character length
                 {
                     _generator.completeUncheckedAddContent();
-                    if (!_endp.isBlocking())
-                        _endp.blockWritable(_out._maxIdleTime);
                     _out.flush();
                     _space= _generator.prepareUncheckedAddContent();
                 }
