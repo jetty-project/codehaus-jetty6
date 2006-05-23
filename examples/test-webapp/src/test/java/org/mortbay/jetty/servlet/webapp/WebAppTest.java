@@ -16,11 +16,16 @@ package org.mortbay.jetty.servlet.webapp;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 
 import org.mortbay.io.IO;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpHeaderValues;
+import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.NCSARequestLog;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -101,7 +106,7 @@ public class WebAppTest extends TestCase
         try{IO.toString(url.openStream()); assertTrue(false); } catch(FileNotFoundException e) { assertTrue(true); } 
 
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test");
-        String s0=IO.toString(url.openStream());
+        IO.toString(url.openStream());
         
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/");
         String s1=IO.toString(url.openStream());
@@ -121,4 +126,24 @@ public class WebAppTest extends TestCase
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dispatch/includeS/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<H1>"));
     }
+    
+    public void testDoPost() throws Exception
+    {
+        URL url = null;
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?query=foo");
+        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.setDoInput(true);
+        connection.addRequestProperty(HttpHeaders.CONTENT_TYPE,MimeTypes.FORM_ENCODED);
+        connection.addRequestProperty(HttpHeaders.CONTENT_LENGTH, "10");
+        connection.getOutputStream().write("abcd=1234\n".getBytes());
+        connection.getOutputStream().flush();
+        
+        connection.connect(); 
+        String s0=IO.toString(connection.getInputStream());
+        assertTrue(s0.startsWith("<html>"));
+        assertTrue(s0.indexOf("<td>POST</td>")>0);
+        assertTrue(s0.indexOf("abcd:&nbsp;</th><td>1234")>0);
+    }       
 }
