@@ -152,7 +152,6 @@ public class EnvConfiguration implements Configuration
      */
     public void deconfigureWebApp() throws Exception
     {
-        System.err.println("DECONFIGURING ENV");
         //get rid of any bindings only defined for the webapp
         ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(webAppContext.getClassLoader());

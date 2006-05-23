@@ -129,7 +129,7 @@ public class Configuration extends AbstractConfiguration
         super.deconfigureWebApp();
     }
     
-    private void lockCompEnv ()
+    protected void lockCompEnv ()
     throws Exception
     {
         Random random = new Random ();
@@ -139,7 +139,7 @@ public class Configuration extends AbstractConfiguration
         compCtx.addToEnvironment("org.mortbay.jndi.lock", key);
     }
     
-    private void unlockCompEnv ()
+    protected void unlockCompEnv ()
     throws Exception
     {
         Context context = new InitialContext();
