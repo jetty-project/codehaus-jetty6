@@ -15,6 +15,8 @@
 
 package org.mortbay.jetty.plus.webapp;
 
+import java.util.Random;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
@@ -32,6 +34,8 @@ import org.mortbay.naming.NamingUtil;
 public class Configuration extends AbstractConfiguration
 {
 
+    private Integer key;
+    
     /** 
      * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#bindEnvEntry(java.lang.String, java.lang.String)
      * @param name
@@ -109,18 +113,37 @@ public class Configuration extends AbstractConfiguration
     throws Exception
     {
         super.configureWebApp();
-        //lock this webapp's java:comp namespace as per J2EE spec      
-        Context context = new InitialContext();
-        Context compCtx = (Context)context.lookup("java:comp");
-        compCtx.addToEnvironment("org.mortbay.jndi.immutable", "TRUE");
+        //lock this webapp's java:comp namespace as per J2EE spec
+        ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getWebAppContext().getClassLoader());
+        lockCompEnv();
+        Thread.currentThread().setContextClassLoader(oldLoader);
     }
     
     public void deconfigureWebApp() throws Exception
     {
-        InitialContext icontext = new InitialContext();
-        Context compCtx = (Context)icontext.lookup("java:comp");
-        compCtx.removeFromEnvironment("org.mortbay.jndi.immutable");
+        ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getWebAppContext().getClassLoader());
+        unlockCompEnv();
+        Thread.currentThread().setContextClassLoader(oldLoader);
         super.deconfigureWebApp();
     }
     
+    private void lockCompEnv ()
+    throws Exception
+    {
+        Random random = new Random ();
+        key = new Integer(random.nextInt());
+        Context context = new InitialContext();
+        Context compCtx = (Context)context.lookup("java:comp");
+        compCtx.addToEnvironment("org.mortbay.jndi.lock", key);
+    }
+    
+    private void unlockCompEnv ()
+    throws Exception
+    {
+        Context context = new InitialContext();
+        Context compCtx = (Context)context.lookup("java:comp");
+        compCtx.addToEnvironment("org.mortbay.jndi.unlock", key);        
+    }
 }
