@@ -171,9 +171,7 @@ var ajax =
         }
      }
      return contentStr;
-  },
-  
-  
+  }
   
 };
 

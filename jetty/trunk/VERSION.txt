@@ -4,8 +4,9 @@ jetty-6.0.0RC0 - ????????????
     + Connector lowResourceMaxIdleTime  implemented.
     + Default servlet checks for aliases resources
     + Added clover reports and enough tests to get >50% coverage
-    + fixed IE SSL issue.
-    + implemented runAs on servlets
+    + Fixed IE SSL issue.
+    + Implemented runAs on servlets
+    + Flush will flush all bytes rather than just some.
 
 jetty-6.0.0beta16 - 12/5/2006
     + remove a couple of System.err.printlns
