@@ -35,40 +35,8 @@ public class EnvEntry extends NamingEntry
     public static EnvEntry getEnvEntry (String jndiName)
     throws NamingException
     {
-        try
-        {
-            //lookup an EnvEntry first in the webapp specific naming
-            //context, but if one doesn't exist, then try the global
-            Context context = getThreadLocalContext();
-            Object o = null;
-            if (context != null)
-            {
-                try
-                {
-                    o = lookupNamingEntry(context, EnvEntry.class, jndiName);
-                }
-                catch (NameNotFoundException e)
-                {
-                    Log.ignore(e);
-                    Log.debug("Didn't find "+jndiName+" in thread context context");
-                }
-            }
-            if (o == null)
-            {
-                o = lookupNamingEntry(new InitialContext(), EnvEntry.class, jndiName);
-                Log.debug("Found env entry "+jndiName+" in global context");
-            }
-            return (EnvEntry)o;
-        }
-        catch (NameNotFoundException e)
-        {
-           Log.debug("Didn't find "+jndiName+" anywhere");
-            return null;
-        }
+       return (EnvEntry)lookupNamingEntry(EnvEntry.class, jndiName);
     }
-    
-    
-
     
     
     public EnvEntry (String jndiName, Object objToBind)

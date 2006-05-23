@@ -25,10 +25,12 @@ import javax.naming.NamingException;
 
 import org.mortbay.jetty.plus.naming.EnvEntry;
 import org.mortbay.jetty.plus.naming.NamingEntry;
+import org.mortbay.jetty.plus.naming.Resource;
+import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
+
 import org.mortbay.xml.XmlConfiguration;
 
 /**
@@ -121,10 +123,10 @@ public class EnvConfiguration implements Configuration
             
             //look for a file called WEB-INF/jetty-env.xml
             //and process it if it exists
-            Resource webInf = getWebAppContext().getWebInf();
+            org.mortbay.resource.Resource webInf = getWebAppContext().getWebInf();
             if(webInf!=null && webInf.isDirectory())
             {
-                Resource jettyEnv = webInf.addPath("jetty-env.xml");
+                org.mortbay.resource.Resource jettyEnv = webInf.addPath("jetty-env.xml");
                 if(jettyEnv.exists())
                 {
                     jettyEnvXmlUrl = jettyEnv.getURL();
@@ -150,6 +152,7 @@ public class EnvConfiguration implements Configuration
      */
     public void deconfigureWebApp() throws Exception
     {
+        System.err.println("DECONFIGURING ENV");
         //get rid of any bindings only defined for the webapp
         ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(webAppContext.getClassLoader());
@@ -213,6 +216,7 @@ public class EnvConfiguration implements Configuration
     {
         List  list = NamingEntry.lookupNamingEntries (localContext, EnvEntry.class);
         list.addAll(NamingEntry.lookupNamingEntries(localContext, Resource.class));
+        list.addAll(NamingEntry.lookupNamingEntries(localContext, Transaction.class));
         
         Iterator itor = list.iterator();
         

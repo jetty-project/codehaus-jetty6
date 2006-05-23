@@ -51,6 +51,8 @@ public class JNDITest extends HttpServlet {
             System.err.println("gargle="+(Double)ic.lookup("java:comp/env/gargle"));
             
             System.err.println("mydatasource99:"+(ic.lookup("java:comp/env/jdbc/mydatasource99")==null?"NO":"YES"));
+            UserTransaction utx = (UserTransaction)ic.lookup("java:comp/UserTransaction");
+            System.err.println("utx="+utx);
         }
         catch (Exception e)
         {

@@ -22,6 +22,7 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
+import org.mortbay.log.Log;
 import org.mortbay.naming.NamingUtil;
 
 /**
@@ -39,15 +40,7 @@ public class Transaction extends NamingEntry
     public static Transaction getTransaction ()
     throws NamingException
     {
-        try
-        {
-            InitialContext ic = new InitialContext();
-            return (Transaction)ic.lookup(Transaction.class.getName()+"/"+USER_TRANSACTION);
-        }
-        catch (NameNotFoundException e)
-        {
-            return null;
-        }
+       return (Transaction)lookupNamingEntry(Transaction.class, USER_TRANSACTION);
     }
     
     
@@ -61,10 +54,29 @@ public class Transaction extends NamingEntry
     
     public void bindToEnv ()
     throws NamingException
+    {   
+        InitialContext ic = new InitialContext();
+        Context env = (Context)ic.lookup("java:comp");
+        Log.info("Binding java:comp/"+getJndiName()+" to "+objectNameInNamespace);
+        NamingUtil.bind(env, getJndiName(), new LinkRef(objectNameInNamespace.toString()));
+    }
+    
+    /**
+     * Unbind this Transaction from a java:comp
+     */
+    public void unbindEnv ()
     {
-        Context iContext = new InitialContext();
-        Context compContext = (Context)iContext.lookup("java:comp");
-        NamingUtil.bind(compContext, getJndiName(), new LinkRef(getJndiName())); 
+        try
+        {
+            InitialContext ic = new InitialContext();
+            Context env = (Context)ic.lookup("java:comp");
+            Log.info("Unbinding java:comp/"+getJndiName());
+            env.unbind(getJndiName());
+        }
+        catch (NamingException e)
+        {
+            Log.warn(e);
+        }
     }
     
     
