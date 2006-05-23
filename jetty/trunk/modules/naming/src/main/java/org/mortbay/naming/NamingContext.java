@@ -61,7 +61,8 @@ import org.mortbay.log.Log;
 public class NamingContext implements Context, Cloneable
 {
 
-    public static final String IMMUTABLE_PROPERTY = "org.mortbay.jndi.immutable";
+    public static final String LOCK_PROPERTY = "org.mortbay.jndi.lock";
+    public static final String UNLOCK_PROPERTY = "org.mortbay.jndi.unlock";
     
     public static final Enumeration EMPTY_ENUM = new Enumeration ()
         {       
@@ -318,7 +319,7 @@ public class NamingContext implements Context, Cloneable
     public void bind(Name name, Object obj) 
         throws NamingException
     {
-        if (null != _env.get(IMMUTABLE_PROPERTY))
+        if (isLocked())
             throw new NamingException ("This context is immutable");
 
         Name cname = toCanonicalName(name);
@@ -418,7 +419,7 @@ public class NamingContext implements Context, Cloneable
     public Context createSubcontext (Name name)
         throws NamingException
     {
-        if (null != _env.get(IMMUTABLE_PROPERTY))
+        if (isLocked())
         {
             NamingException ne = new NamingException ("This context is immutable"); 
             ne.setRemainingName(name);
@@ -965,7 +966,7 @@ public class NamingContext implements Context, Cloneable
                        Object obj)
         throws NamingException
     {    
-        if (null != _env.get(IMMUTABLE_PROPERTY))
+        if (isLocked())
             throw new NamingException ("This context is immutable");
 
         Name cname = toCanonicalName(name);
@@ -1073,7 +1074,7 @@ public class NamingContext implements Context, Cloneable
             return;
         
         
-        if (null != _env.get(IMMUTABLE_PROPERTY))
+        if (isLocked())
             throw new NamingException ("This context is immutable");
 
         Name cname = toCanonicalName(name);
@@ -1300,7 +1301,7 @@ public class NamingContext implements Context, Cloneable
                                    Object propVal)
         throws NamingException
     {
-        if (null != _env.get(IMMUTABLE_PROPERTY))
+        if (isLocked() && !(propName.equals(UNLOCK_PROPERTY)))
             throw new NamingException ("This context is immutable");
         
         return _env.put (propName, propVal);
@@ -1318,8 +1319,7 @@ public class NamingContext implements Context, Cloneable
     public Object removeFromEnvironment(String propName)
         throws NamingException
     {
-        
-        if (null != _env.get(IMMUTABLE_PROPERTY))
+        if (isLocked())
             throw new NamingException ("This context is immutable");
         
         return _env.remove (propName);
@@ -1416,4 +1416,17 @@ public class NamingContext implements Context, Cloneable
         return canonicalName;
     }
 
+    private boolean isLocked()
+    {
+       if ((_env.get(LOCK_PROPERTY) == null) && (_env.get(UNLOCK_PROPERTY) == null))
+           return false;
+       
+       Object lockKey = _env.get(LOCK_PROPERTY);
+       Object unlockKey = _env.get(UNLOCK_PROPERTY);
+       
+       if ((lockKey != null) && (unlockKey != null) && (lockKey.equals(unlockKey)))
+           return false;
+       return true;
+    }
+   
 } 

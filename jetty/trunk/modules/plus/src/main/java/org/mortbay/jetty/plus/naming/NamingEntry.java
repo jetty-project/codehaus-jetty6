@@ -46,13 +46,13 @@ import org.mortbay.naming.NamingUtil;
  */
 public abstract class NamingEntry
 {
-    private String jndiName;
-    private Object objectToBind;
-    private Name objectNameInNamespace;
-    private Name namingEntryName;
-    private Name objectName;
-    private Context context;
-    private static ThreadLocal webAppCompContext = new ThreadLocal();
+    protected String jndiName;
+     protected Object objectToBind;
+     protected Name objectNameInNamespace;
+     protected Name namingEntryName;
+     protected Name objectName;
+     protected Context context;
+     protected static ThreadLocal webAppCompContext = new ThreadLocal();
 
     
    
@@ -89,12 +89,65 @@ public abstract class NamingEntry
     }
     
      
+    /**
+     * Destroy a subcontext.
+     * Used to remove a subcontext representing a webapp-scoped
+     * context.
+     * @param webappName
+     * @throws NamingException
+     */
     public static void destroyContext (String webappName)
     throws NamingException
     {
         InitialContext icontext = new InitialContext();
         icontext.destroySubcontext(webappName);
     }
+    
+    /**
+     * Try and find a particular NamingEntry, looking first in a webapp-scoped
+     * namespace and then failing that look in the global namespace.
+     * @param clazz the type of the NamingEntry to find
+     * @param jndiName the name of the NamingEntryntry to find
+     * @return
+     * @throws NamingException
+     */
+    public static NamingEntry lookupNamingEntry (Class clazz, String jndiName)
+    throws NamingException
+    {
+        try
+        {
+            //lookup a Transaction manager first in the webapp specific naming
+            //context, but if one doesn't exist, then try the global
+            Context context = getThreadLocalContext();
+            Object o = null;
+            if (context != null)
+            {
+                try
+                {
+                    o = lookupNamingEntry(context, clazz, jndiName);
+                }
+                catch (NameNotFoundException e)
+                {
+                    Log.ignore(e);
+                    Log.debug("Didn't find Resource "+jndiName +" in thread local context "+context);
+                }
+            }
+            if (o == null)
+            {
+                o = lookupNamingEntry(new InitialContext(), clazz, jndiName);
+                Log.debug("Found Resource in global context for "+jndiName);
+            }
+            return (NamingEntry)o;
+        }
+        catch (NameNotFoundException e)
+        {
+            Log.debug("Returning NULL for "+jndiName);
+            return null;
+        }
+    }
+    
+    
+    
     /**
      * Find a NamingEntry.
      * @param context the context to search
@@ -126,13 +179,27 @@ public abstract class NamingEntry
     throws NamingException
     {
         ArrayList list = new ArrayList();
+        lookupNamingEntries (list, context, clazz);
+        return list;
+    }
+    
+    
+    private static List lookupNamingEntries (List list, Context context, Class clazz)
+    throws NamingException
+    {
         try
         {
-            NamingEnumeration nenum = context.listBindings(clazz.getName());
+            String name = (clazz==null?"": clazz.getName());
+            NamingEnumeration nenum = context.listBindings(name);
             while (nenum.hasMoreElements())
             {
                 Binding binding = (Binding)nenum.next();
-                list.add(binding.getObject());
+                if (binding.getObject() instanceof Context)
+                {
+                    lookupNamingEntries (list, (Context)binding.getObject(), null);
+                } 
+                else               
+                  list.add(binding.getObject());
             }
         }
         catch (NameNotFoundException e)
@@ -142,7 +209,6 @@ public abstract class NamingEntry
         
         return list;
     }
-    
   
     
     /** Constructor
