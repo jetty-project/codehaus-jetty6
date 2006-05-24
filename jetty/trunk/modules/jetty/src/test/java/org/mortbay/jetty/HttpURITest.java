@@ -101,6 +101,8 @@ public class HttpURITest extends TestCase
        /*25*/ {"//host:8080//",null,null,null,null,"//host:8080//",null,null,null}, 
        /*26*/ {"file:///path/info","file","//",null,null,"/path/info",null,null,null},    
        /*27*/ {"//",null,null,null,null,"//",null,null,null}, 
+       /*28*/ {"http://localhost/","http","//localhost","localhost",null,"/",null,null,null},
+       /*29*/ {"http://localhost:8080/", "http", "//localhost:8080", "localhost","8080","/", null, null,null},
     };
     
     
