@@ -38,7 +38,7 @@ import org.mortbay.util.StringUtil;
 /** Default Handler.
  * 
  * This handle will deal with unhandled requests in the server.
- * For requests for favicon.ici, the Jetty icon is served. 
+ * For requests for favicon.ico, the Jetty icon is served. 
  * For reqests to '/' a 404 with a list of known contexts is served.
  * For all other requests a normal 404 is served.
  * TODO Implement OPTIONS and TRACE methods for the server.
