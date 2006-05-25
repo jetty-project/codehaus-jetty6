@@ -260,7 +260,7 @@
       <dependency>
         <groupId>mx4j</groupId>
         <artifactId>mx4j-tools</artifactId>
-        <version>${mx4j-tools-version}</version>
+        <version>${mx4j-version}</version>
       </dependency>
       <dependency>
         <groupId>xerces</groupId>
@@ -307,7 +307,6 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <mx4j-tools-version>2.1.1</mx4j-tools-version>
     <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
     <spring-version>1.2.6</spring-version>
     <tomcat-jasper-version>5.5.15</tomcat-jasper-version>
@@ -316,7 +315,7 @@
     <xbean-version>2.2</xbean-version>
     <commons-el-version>1.0</commons-el-version>
     <jta-spec-groupId>geronimo-spec</jta-spec-groupId>
-    <slf4j-version>1.0-rc5</slf4j-version>
+    <slf4j-version>1.0.1</slf4j-version>
     <mx4j-version>3.0.1</mx4j-version>
     <jta-spec-version>1.0.1B-rc4</jta-spec-version>
     <xerces-version>2.6.2</xerces-version>
