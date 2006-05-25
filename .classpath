@@ -6,9 +6,7 @@
 	<classpathentry kind="var" path="M2_REPO/geronimo-spec/geronimo-spec-jta/1.0.1B-rc4/geronimo-spec-jta-1.0.1B-rc4.jar"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j/3.0.1/mx4j-3.0.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j-tools/mx4j-tools-3.0.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/derby/derby/10.1.1.0/derby-10.1.1.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/2.2-SNAPSHOT/xbean-spring-2.2-SNAPSHOT.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring/1.2.6/spring-1.2.6.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/boot/classworlds-1.1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-container-default-1.0-alpha-9.jar"/>
@@ -48,5 +46,7 @@
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.4.jar"/>
 	<classpathentry kind="lib" path="modules/jetty/src/test/resources"/>
 	<classpathentry output="examples/test-webapp/target/test-classes" kind="src" path="examples/test-webapp/src/test/java"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/2.2/xbean-spring-2.2.jar"/>
+	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j-tools/3.0.1/mx4j-tools-3.0.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

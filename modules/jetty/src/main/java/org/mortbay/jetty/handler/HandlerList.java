@@ -27,8 +27,8 @@ import org.mortbay.jetty.Response;
 /* ------------------------------------------------------------ */
 /** HandlerList.
  * This extension of {@link org.mortbay.jetty.handler.HandlerCollection} will call
- * each contained handler in turn until either an exception is thrown, the response is committed 
- * positive response status is set.
+ * each contained handler in turn until either an exception is thrown, the response 
+ * is committed or a positive response status is set.
  */
 public class HandlerList extends HandlerCollection
 {
