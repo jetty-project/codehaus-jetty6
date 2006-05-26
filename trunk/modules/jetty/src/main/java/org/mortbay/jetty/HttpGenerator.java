@@ -706,7 +706,7 @@ public class HttpGenerator implements HttpTokens
         if (_state == STATE_HEADER)
             throw new IllegalStateException("State==HEADER");
 
-        else if (_contentLength >= 0 && _contentLength != _contentWritten)
+        if (_contentLength >= 0 && _contentLength != _contentWritten)
         {
             Log.warn("ContentLength written=="+_contentWritten+" < length=="+_contentLength);
             _close = true;
@@ -717,6 +717,7 @@ public class HttpGenerator implements HttpTokens
             _state = STATE_FLUSHING;
             if (_contentLength == CHUNKED_CONTENT) _needEOC = true;
         }
+        
         flushBuffers();
     }
 
@@ -724,7 +725,7 @@ public class HttpGenerator implements HttpTokens
     public void flushBuffers() throws IOException
     {
         try
-        {
+        {   
             if (_state == STATE_HEADER) throw new IllegalStateException("State==HEADER");
             
             prepareBuffers();
@@ -798,11 +799,9 @@ public class HttpGenerator implements HttpTokens
                         if (!_needCRLF && !_needEOC && (_content == null || _content.length() == 0))
                         {
                             if (_state == STATE_FLUSHING)
-                            {
                                 _state = STATE_END;
-                                if (_close) 
-                                    _endp.close();
-                            }
+                            if (_state==STATE_END && _close) 
+                                _endp.close();
                             
                             break Flushing;
                         }
@@ -825,6 +824,7 @@ public class HttpGenerator implements HttpTokens
         }
         catch (IOException e)
         {
+            e.printStackTrace();
             throw new EofException(e);
         }
     }

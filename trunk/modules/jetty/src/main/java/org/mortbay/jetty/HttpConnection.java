@@ -94,16 +94,6 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    public void close() throws IOException
-    {
-        // _endp.close();  // TODO fix loop
-        if (_parser!=null)
-            _parser.reset(true);
-        if (_generator!=null)
-            _generator.reset(true);
-    }
-
-    /* ------------------------------------------------------------ */
     /**
      * @return Returns the associatedObject.
      */
@@ -289,6 +279,7 @@ public class HttpConnection
                     Log.debug("resume continuation {}",continuation);
                     if (_request.getMethod()==null)
                         throw new IllegalStateException();
+                    _response.setStatus(-1);  // XXXX
                     handlerRequest();
                 }
                 else

@@ -42,6 +42,7 @@ public class ErrorHandler extends AbstractHandler
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
     {
+        HttpConnection.getCurrentConnection().getRequest().setHandled(true);
         response.setContentType(MimeTypes.TEXT_HTML);
         ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
         HttpConnection connection = HttpConnection.getCurrentConnection();
@@ -50,6 +51,7 @@ public class ErrorHandler extends AbstractHandler
         response.setContentLength(writer.size());
         writer.writeTo(response.getOutputStream());
         writer.destroy();
+        
     }
 
     /* ------------------------------------------------------------ */

@@ -71,7 +71,8 @@ public class HttpGeneratorTest extends TestCase
                     // For none, keep-alive, close
                     for (int c=0;c<connect.length;c++)
                     {
-                        String t="v="+v+",tr="+tr[r]+",chunks="+chunks+",connect="+connect[c];
+                        String t="r="+r+",c="+c+",v="+v+",tr="+tr[r]+",chunks="+chunks+",connect="+connect[c];
+                        // System.err.println(t);
                         
                         hb.reset(true);
                         endp.reset();

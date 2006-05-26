@@ -72,7 +72,7 @@ public class DefaultHandler extends AbstractHandler
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
-        if (response.isCommitted() || HttpConnection.getCurrentConnection().getResponse().getStatus()>0)
+        if (response.isCommitted() || HttpConnection.getCurrentConnection().getRequest().isHandled())
             return;
         
         String method=request.getMethod();
