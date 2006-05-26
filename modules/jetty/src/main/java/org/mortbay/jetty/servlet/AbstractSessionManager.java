@@ -463,6 +463,11 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
     
     /* ------------------------------------------------------------ */
+    public void complete(HttpSession session)
+    {
+    }
+    
+    /* ------------------------------------------------------------ */
     public boolean isValid(HttpSession session)
     {
         return ((Session)session).isValid();
@@ -736,6 +741,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         /* ------------------------------------------------------------ */
         public synchronized void setAttribute(String name, Object value)
         {
+            if (value==null)
+            {
+                removeAttribute(name);
+                return;
+            }
+            
             if (_invalid) throw new IllegalStateException();
             if (_values==null)
                 _values=newAttributeMap();
@@ -802,7 +813,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         {
             _scavenger=Thread.currentThread();
             String name = Thread.currentThread().getName();
-            Thread.currentThread().setName(name+" - Invalidator - "+_context.getContextPath());
+            if (_context!=null)
+                Thread.currentThread().setName(name+" - Invalidator - "+_context.getContextPath());
             int period=-1;
             try{
                 do
