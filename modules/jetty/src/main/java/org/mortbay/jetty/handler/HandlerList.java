@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 
 /* ------------------------------------------------------------ */
@@ -43,11 +44,11 @@ public class HandlerList extends HandlerCollection
         
         if (handlers!=null && isStarted())
         {
-            Response base_response = HttpConnection.getCurrentConnection().getResponse();
+            Request base_request = HttpConnection.getCurrentConnection().getRequest();
             for (int i=0;i<handlers.length;i++)
             {
                 handlers[i].handle(target,request, response, dispatch);
-                if ( response.isCommitted() || base_response.getStatus()>0)
+                if ( base_request.isHandled())
                     return;
             }
         }

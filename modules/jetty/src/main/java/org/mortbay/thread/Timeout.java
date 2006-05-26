@@ -79,6 +79,27 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
+    public Task expired()
+    {
+        long _expiry = _now-_duration;
+        
+        if (_head._next!=_head)
+        {
+            Task task = _head._next;
+            if (task._timestamp>_expiry)
+                return null;
+            
+            task.unlink();
+            synchronized (task)
+            {
+                task._expired=true;
+            }
+            return task;
+        }
+        return null;
+    }
+
+    /* ------------------------------------------------------------ */
     public void tick()
     {
         long _expiry = _now-_duration;

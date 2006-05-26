@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -69,6 +71,8 @@ public class ManyContexts
         
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
+            Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+            base_request.setHandled(true);
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("text/html");
             response.getWriter().println("<h1>Hello OneContext "+hello+"</h1>");

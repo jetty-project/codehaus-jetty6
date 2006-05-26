@@ -78,6 +78,8 @@ public class Request implements HttpServletRequest
      * Max size of the form content. Limits the size of the data a client can push at the server.
      * Set via the org.mortbay.http.HttpRequest.maxContentSize attribute on the Server class
      */
+    
+    private boolean _handled =false;
     private int _maxFormContentSize = 200000;
     private HttpConnection _connection;
     private EndPoint _endp;
@@ -135,6 +137,7 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     void recycle()
     {
+        _handled=false;
         if (_context!=null)
             throw new IllegalStateException("Request in context!");
         if(_attributes!=null)
@@ -198,6 +201,19 @@ public class Request implements HttpServletRequest
     {
         _timeStamp = ts;
     }
+
+    /* ------------------------------------------------------------ */
+    public boolean isHandled()
+    {
+        return _handled;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setHandled(boolean h)
+    {
+        _handled=h;
+    }
+    
     
     /* ------------------------------------------------------------ */
     /* 

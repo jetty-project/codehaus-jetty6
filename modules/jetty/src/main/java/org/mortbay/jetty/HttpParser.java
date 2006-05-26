@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
@@ -76,7 +77,7 @@ public class HttpParser implements HttpTokens
     private View _tok0; // Saved token: header name, request method or response version
     private View _tok1; // Saved token: header value, request URI or response code
     private String _multiLineValue;
-    private boolean _response=false;
+    private boolean _response=false; // true if parsing a HTTP response
     
     /* ------------------------------------------------------------------------------- */
     /**
@@ -315,7 +316,7 @@ public class HttpParser implements HttpTokens
                     }
                     else if (ch < SPACE)
                     {
-                        throw new IOException("BAD");
+                        throw new HttpException(400);
                     }
                     break;
 
@@ -328,7 +329,7 @@ public class HttpParser implements HttpTokens
                     }
                     else if (ch < SPACE)
                     {
-                        throw new IOException("BAD");
+                        throw new HttpException(400);
                     }
                     break;
 

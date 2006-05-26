@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.ajax.Continuation;
+import org.mortbay.util.ajax.ContinuationSupport;
 
 /* ------------------------------------------------------------ */
 /** Dump request handler.
@@ -57,8 +59,17 @@ public class DumpHandler extends AbstractHandler
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
+        Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+        
         if (!isStarted())
             return;
+        
+        if (request.getParameter("continue")!=null)
+        {
+            Continuation continuation = ContinuationSupport.getContinuation(request, null);
+            continuation.suspend(Long.parseLong(request.getParameter("continue")));
+        }
+        base_request.setHandled(true);
         
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader(HttpHeaders.CONTENT_TYPE,MimeTypes.TEXT_HTML);
