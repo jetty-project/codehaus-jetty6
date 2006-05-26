@@ -200,19 +200,26 @@ public class SessionHandler extends HandlerWrapper
             }
             
             // access any existing session
-            HttpSession session=request.getSession(false);
-            if (session!=null)
-                getSessionManager().access(session);
-            else if (_sessionManager!=null)
+            HttpSession session=null;
+            if (_sessionManager!=null)
             {
-                session=base_request.recoverNewSession(_sessionManager);
-                if (session!=null)
-                    base_request.setSession(session);
+                session=request.getSession(false);
+                if (session==null)
+                {
+                    if(session!=old_session)
+                        _sessionManager.access(session);
+                }
+                else 
+                {
+                    session=base_request.recoverNewSession(_sessionManager);
+                    if (session!=null)
+                        base_request.setSession(session);
+                }
             }
             
             if(Log.isDebugEnabled())
             {
-                Log.debug("sessionManager="+base_request.getSessionManager());
+                Log.debug("sessionManager="+_sessionManager);
                 Log.debug("session="+session);
             }
         
@@ -227,6 +234,10 @@ public class SessionHandler extends HandlerWrapper
         }
         finally
         {
+            HttpSession session=request.getSession(false);
+            if (session!=null&& session!=old_session)
+                getSessionManager().complete(session);
+            
             base_request.setSessionManager(old_session_manager);
             base_request.setSession(old_session);
         }
