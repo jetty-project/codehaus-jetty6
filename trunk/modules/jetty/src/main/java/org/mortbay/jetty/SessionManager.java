@@ -147,6 +147,17 @@ public interface SessionManager extends LifeCycle, Serializable
     public boolean isValid(HttpSession session);
     
     /* ------------------------------------------------------------ */
+    /** Called by the {@link SessionHandler} when a session is access by a request
+     * 
+     */
     public void access(HttpSession session);
+    
+    /* ------------------------------------------------------------ */
+    /** Called by the {@link SessionHandler} when a reqeuest is not longer 
+     * handling a session.  Not this includes new sessions, so there may not
+     * be a matching call to {@link #access(HttpSession)}.
+     * 
+     */
+    public void complete(HttpSession session);
 
 }
