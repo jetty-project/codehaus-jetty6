@@ -164,11 +164,15 @@ public class SecurityHandler extends HandlerWrapper
         {
             base_request.setUserRealm(getUserRealm());
             if (dispatch==REQUEST && !checkSecurityConstraints(target,base_request,base_response))
+            {
+                base_request.setHandled(true);
                 return;
+            }
             
             if (_authenticator instanceof FormAuthenticator && target.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
             {
                 _authenticator.authenticate(getUserRealm(),target,base_request,base_response);
+                base_request.setHandled(true);
                 return;
             }
             

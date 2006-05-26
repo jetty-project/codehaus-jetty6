@@ -1,4 +1,6 @@
 jetty-6.0.0RC0 - ????????????
+    + Added Request.isHandled()
+    + Refactored Synchronization of SelectChannelConnector
     + Recovered repository from Codehaus crash
     + ContextHandler.setConnectors replace setHosts
     + Connector lowResourceMaxIdleTime  implemented.

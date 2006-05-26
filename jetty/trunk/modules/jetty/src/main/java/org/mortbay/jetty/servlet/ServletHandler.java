@@ -348,6 +348,7 @@ public class ServletHandler extends AbstractHandler
             // Do the filter/handling thang
             if (servlet_holder!=null)
             {
+                base_request.setHandled(true);
                 if (base_request.getConnection().getResponse().getStatus()<0)
                     response.setStatus(HttpServletResponse.SC_OK);  // Must be handled.
                 
@@ -361,6 +362,7 @@ public class ServletHandler extends AbstractHandler
         }
         catch(RetryRequest e)
         {
+            base_request.setHandled(false);
             throw e;
         }
         catch(EofException e)

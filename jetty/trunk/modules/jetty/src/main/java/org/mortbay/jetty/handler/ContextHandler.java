@@ -446,7 +446,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             throws IOException, ServletException
     {
         boolean new_context=false;
-        Request base_request=null;
         Context old_context=null;
         String old_context_path=null;
         String old_servlet_path=null;
@@ -454,8 +453,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         
-        base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        if(dispatch==REQUEST && base_request.getConnection().getResponse().getStatus()>0)
+        Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+        if(dispatch==REQUEST && base_request.isHandled())
             return;
         
         old_context=base_request.getContext();
@@ -494,6 +493,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                     target=_contextPath;
                     if (!target.endsWith("/"))
                     {
+                        base_request.setHandled(true);
                         if (request.getQueryString()!=null)
                             response.sendRedirect(target+"/?"+request.getQueryString());
                         else 

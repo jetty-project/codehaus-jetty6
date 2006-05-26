@@ -207,7 +207,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     /* ------------------------------------------------------------------------------- */
     public void customize(EndPoint endpoint, Request request) throws IOException
     {
-        HttpEndPoint ep = (HttpEndPoint)endpoint;
+        HttpChannelEndPoint ep = (HttpChannelEndPoint)endpoint;
         if (ep._timeoutTask._short)
             ep._selectSet.scheduleIdle(ep._timeoutTask, false);
         
@@ -221,6 +221,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             return -1;
         return _acceptChannel.socket().getLocalPort();
     }
+    
     
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
@@ -269,7 +270,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                 _idleTimeout.cancelAll();
                 _shortIdleTimeout.cancelAll();
                 _retryTimeout.cancelAll();
-                
                 try
                 {
                     if (_selector != null)
@@ -292,61 +292,59 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             long retry_next = 0;
             
             List changes;
-            synchronized (this)
+            synchronized (_changes)
             {
                 changes=_changes[_change];
                 _change=_change==0?1:0;
             }
             
             // Make any key changes required
+            for (int i = 0; i < changes.size(); i++)
+            {
+                try
+                {
+                    Object o = changes.get(i);
+                    if (o instanceof HttpChannelEndPoint)
+                    {
+                        // Update the operatios for a key.
+                        HttpChannelEndPoint endpoint = (HttpChannelEndPoint) o;
+                        endpoint.syncKey();
+                    }
+                    else if (o instanceof SocketChannel)
+                    {
+                        // finish accepting this connection
+                        SocketChannel channel=(SocketChannel)o;
+                        SelectionKey cKey = channel.register(_selector, SelectionKey.OP_READ);
+                        HttpChannelEndPoint endpoint = new HttpChannelEndPoint(channel,this,cKey);
+                        
+                        if (_assumeShortDispatch && endpoint.dispatch())
+                            dispatch(endpoint);
+                            
+                    }
+                    else if (o instanceof RetryContinuation)
+                    {
+                        dispatch(((RetryContinuation)o)._endPoint);
+                    }
+                    else
+                        throw new IllegalStateException();
+                }
+                catch (CancelledKeyException e)
+                {
+                    if (isRunning())
+                        Log.warn(e);
+                    else
+                        Log.debug(e);
+                }
+            }
+            changes.clear();
+            
             synchronized (this)
             {
-                for (int i = 0; i < changes.size(); i++)
-                {
-                    try
-                    {
-                        Object o = changes.get(i);
-                        if (o instanceof SocketChannel)
-                        {
-                            // finish accepting this connection
-                            SocketChannel channel=(SocketChannel)o;
-                            SelectionKey cKey = channel.register(_selector, SelectionKey.OP_READ);
-                            HttpEndPoint endpoint = new HttpEndPoint(channel,this,cKey);
-                           
-                            // assume something to do for this connection.
-                            endpoint.dispatch();
-                        }
-                        else
-                        {
-                            // Update the operatios for a key.
-                            HttpEndPoint endpoint = (HttpEndPoint) o;
-                            if (endpoint._interestOps >= 0 && endpoint._key != null && endpoint._key.isValid())
-                            {
-                                endpoint._key.interestOps(endpoint._interestOps);
-                            }
-                            else
-                            {
-                                if (endpoint._key != null && endpoint._key.isValid())
-                                    endpoint._key.cancel();
-                                endpoint._key = null;
-                            }
-                        }
-                    }
-                    catch (CancelledKeyException e)
-                    {
-                        if (isRunning())
-                            Log.warn(e);
-                        else
-                            Log.debug(e);
-                    }
-                }
-                changes.clear();
-                
                 short_next=_shortIdleTimeout.getTimeToNext();
                 idle_next=_idleTimeout.getTimeToNext();
                 retry_next=_retryTimeout.getTimeToNext();
             }
-            
+                        
             // workout how low to wait in select
             long wait = getMaxIdleTime();
             if (wait < 0 || short_next >= 0 && wait > short_next)
@@ -389,7 +387,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                     if (!key.isValid())
                     {
                         key.cancel();
-                        HttpEndPoint endpoint = (HttpEndPoint) key.attachment();
+                        HttpChannelEndPoint endpoint = (HttpChannelEndPoint) key.attachment();
                         if (endpoint != null)
                             endpoint.close();
                         continue;
@@ -419,18 +417,15 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                             {
                                 // bind connections to this select set.
                                 SelectionKey cKey = channel.register(_selectSets[_nextSet].getSelector(), SelectionKey.OP_READ);
-                                HttpEndPoint endpoint = new HttpEndPoint(channel,_selectSets[_nextSet],cKey);
-                                
-                                // assume something to do for this connection.
-                                endpoint.dispatch();
+                                new HttpChannelEndPoint(channel,_selectSets[_nextSet],cKey);
                             }
                         }
                     }
                     else
                     {
-                        HttpEndPoint endpoint = (HttpEndPoint) key.attachment();
-                        if (endpoint != null)
-                            endpoint.dispatch();
+                        HttpChannelEndPoint endpoint = (HttpChannelEndPoint) key.attachment();
+                        if (endpoint != null && endpoint.dispatch())
+                            dispatch(endpoint);
                     }
 
                     key = null;
@@ -453,26 +448,57 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                         key.interestOps(0);
                 }
             }
-            
+
+
             // tick over the timer
             synchronized (this)
             {
-                if (_selector!=null)
+                now = System.currentTimeMillis();
+                _retryTimeout.setNow(now);
+                _shortIdleTimeout.setNow(now);
+                _idleTimeout.setNow(now);
+            }
+            
+            while (_selector!=null)
+            {
+                Timeout.Task task=null;
+                synchronized(this)
                 {
-                    now = System.currentTimeMillis();
-                    _retryTimeout.setNow(now);
-                    _retryTimeout.tick();
-                    _shortIdleTimeout.setNow(now);
-                    _shortIdleTimeout.tick();
-                    _idleTimeout.setNow(now);
-                    _idleTimeout.tick();
+                    task=_shortIdleTimeout.expired();
+                    if (task==null)
+                        task=_idleTimeout.expired();
+                    if (task==null)
+                        task=_retryTimeout.expired();
                 }
+                if (task==null)
+                    break;
+                else
+                    task.expire();
             }
 
         }
+        
+
+        /* ------------------------------------------------------------------------------- */
+        private void dispatch(HttpChannelEndPoint endpoint)
+        {
+            boolean dispatch_done = false;
+            try
+            {
+                dispatch_done = getThreadPool().dispatch(endpoint);
+            }
+            finally
+            {
+                if (!dispatch_done)
+                {
+                    Log.warn("dispatch failed! threads="+SelectChannelConnector.this.getThreadPool().getThreads()+" idle="+SelectChannelConnector.this.getThreadPool().getIdleThreads());
+                    endpoint.undispatch();
+                }
+            }
+        }
 
         /* ------------------------------------------------------------ */
-        public void scheduleIdle(HttpEndPoint.IdleTask task, boolean idle)
+        public void scheduleIdle(HttpChannelEndPoint.IdleTask task, boolean idle)
         {
             synchronized (this)
             {
@@ -517,29 +543,29 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
-    private class HttpEndPoint extends ChannelEndPoint implements Runnable
+    private class HttpChannelEndPoint extends ChannelEndPoint implements Runnable
     {
-        Thread _thread;
-        SelectSet _selectSet;
-        boolean _dispatched = false;
-        boolean _pending = false; // continuation in progress
-        boolean _writable = true; // TODO - get rid of this bad side effect
-        SelectionKey _key;
-        HttpConnection _connection;
-        int _interestOps;
-        int _readBlocked;
-        int _writeBlocked;
+        private Thread _thread;
+        private SelectSet _selectSet;
+        private boolean _dispatched = false;
+        private boolean _writable = true; // TODO - get rid of this bad side effect
+        private SelectionKey _key;
+        private HttpConnection _connection;
+        private int _interestOps;
+        private int _readBlocked;
+        private int _writeBlocked;
 
-        IdleTask _timeoutTask = new IdleTask();
+        private IdleTask _timeoutTask = new IdleTask();
 
         /* ------------------------------------------------------------ */
-        HttpEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
+        HttpChannelEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
         {
             super(channel);
             _selectSet=selectSet;
             _connection = new HttpConnection(SelectChannelConnector.this, this, SelectChannelConnector.this.getServer());
             _key = key;
             _key.attach(this);
+            _selectSet.scheduleIdle(_timeoutTask,_connection.isIdle());
         }
 
         /* ------------------------------------------------------------ */
@@ -548,45 +574,37 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
          * woken up or the endpoint is passed to the server job queue. If the thread is dispatched
          * and then the selection key is modified so that it is no longer selected.
          */
-        void dispatch() throws IOException
-        {
-            synchronized (_selectSet)
+        private boolean dispatch() throws IOException
+        {   
+            _selectSet.scheduleIdle(_timeoutTask,_connection.isIdle());
+            
+            // If threads are blocked on this
+            synchronized (this)
             {
-                if (_key==null)
-                {
-                    _timeoutTask.cancel();
-                    return; 
+                if (_readBlocked > 0 || _writeBlocked > 0)
+                { 
+                    // wake them up is as good as a dispatched.
+                    this.notifyAll();
+                    
+                    // we are not interested in further selecting
+                    _key.interestOps(0);
+                    return false;
                 }
                 
-                _selectSet.scheduleIdle(_timeoutTask,_connection.isIdle());
-                
-                // If threads are blocked on this
-                synchronized (this)
-                {
-                    if (_readBlocked > 0 || _writeBlocked > 0)
-                    {
-                        // wake them up is as good as a dispatched.
-                        this.notifyAll();
-                        
-                        // we are not interested in further selecting
-                        _key.interestOps(0);
-                        return;
-                    }
-                    else if (!SelectChannelConnector.this._assumeShortDispatch)
-                        _key.interestOps(0);
-                }
+                if (!SelectChannelConnector.this._assumeShortDispatch)
+                    _key.interestOps(0);
                 
                 // Otherwise if we are still dispatched
                 if (_dispatched)
                 {
                     // we are not interested in further selecting
                     _key.interestOps(0);
-                    return;
+                    return false;
                 }
                 
                 // Remove writeable op
                 if (_key==null)
-                    return;
+                    return false;
                 if ((_key.readyOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE && (_key.interestOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE)
                 {
                     // Remove writeable op
@@ -595,21 +613,10 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                 }
                 
                 _dispatched = true;
-                
-                boolean dispatch_done = false;
-                try
-                {
-                    dispatch_done = SelectChannelConnector.this.getThreadPool().dispatch(this);
-                }
-                finally
-                {
-                    if (!dispatch_done)
-                    {
-                        Log.warn("dispatch failed! threads="+SelectChannelConnector.this.getThreadPool().getThreads()+" idle="+SelectChannelConnector.this.getThreadPool().getIdleThreads());
-                        undispatch();
-                    }
-                }
             }
+            
+            return true;
+            
         }
 
         /* ------------------------------------------------------------ */
@@ -619,7 +626,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
          */
         private void undispatch()
         {
-            synchronized (_selectSet)
+            synchronized (this)
             {
                 try
                 {
@@ -738,7 +745,8 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         /* ------------------------------------------------------------ */
         /**
          * Updates selection key. Adds operations types to the selection key as needed. No
-         * operations are removed as this is only done during dispatch
+         * operations are removed as this is only done during dispatch.  This method 
+         * records the new key and schedules a call to syncKey to do the keyChange
          */
         private void updateKey()
         {
@@ -755,6 +763,32 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                 }
             }
         }
+        
+
+        /* ------------------------------------------------------------ */
+        /**
+         * Synchronize the interestOps with the actual key. Call is scheduled by
+         * a call to updateKey
+         */
+        private void syncKey()
+        {
+            synchronized (this)
+            {
+                if (_key != null && _key.isValid())
+                {
+                    if (_interestOps >= 0)
+                        _key.interestOps(_interestOps);
+                    else
+                    {
+                        _key.cancel();
+                        _key = null;
+                    }
+                }
+                else
+                    _key = null; 
+            }
+        }
+        
 
         /* ------------------------------------------------------------ */
         /* 
@@ -791,55 +825,18 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             finally
             {
                 _thread=null;
-                synchronized (_selectSet)
-                {
-                    RetryContinuation continuation = (RetryContinuation) _connection.getRequest().getContinuation();
-                    if (continuation != null && continuation.isPending())
-                    {
-                        // We have a continuation
-                        Log.debug("continuation {}", continuation);
-                        long timeout = continuation.getTimeout();
-                        _pending=true;
-                        
-                        if (continuation.isPending() && (continuation.isExpired() || continuation._resumed))
-                            redispatch();
-                        else
-                        {
-                            _selectSet.scheduleTimeout(continuation,timeout);
-                            _selectSet.wakeup();
-                        }
-                    }
-                    else 
-                    {
-                        undispatch();
-                    }
-                }
-            }
-        }
-        
-
-        /* ------------------------------------------------------------ */
-        private void redispatch()
-        {
-            synchronized (_selectSet)
-            {
-                if (_pending)
-                {
-                    _pending=false;
                     
-                    boolean dispatch_done = false;
-                    try
-                    {
-                        dispatch_done = SelectChannelConnector.this.getThreadPool().dispatch(this);
-                    }
-                    finally
-                    {
-                        if (!dispatch_done)
-                        {
-                            Log.warn("redispatch failed");
-                            undispatch();
-                        }
-                    }
+                RetryContinuation continuation = (RetryContinuation) _connection.getRequest().getContinuation();
+                if (continuation != null)
+                {
+                    // We have a continuation
+                    Log.debug("continuation {}", continuation);
+                    if (!continuation.schedule())
+                        undispatch();
+                }
+                else 
+                {
+                    undispatch();
                 }
             }
         }
@@ -857,8 +854,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             try
             {
                 super.close();
-                if (_connection!=null)
-                    _connection.close();
             }
             catch (IOException e)
             {
@@ -900,7 +895,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
 
             public String toString()
             {
-                return "TimeoutTask:" + HttpEndPoint.this.toString();
+                return "TimeoutTask:" + HttpChannelEndPoint.this.toString();
             }
         }
     }
@@ -920,15 +915,38 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     private static class RetryContinuation extends Timeout.Task implements Continuation
     {
         Object _object;
-        HttpEndPoint _endPoint=(HttpEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
+        HttpChannelEndPoint _endPoint=(HttpChannelEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
         long _timeout;
         boolean _new = true;
         boolean _pending = false;
         boolean _resumed = false;
+        boolean _scheduled =false;
         RetryRequest _retry;
-
         
-        long getTimeout()
+        /* Called when a run exits */
+        boolean schedule()
+        {
+            boolean redispatch=false;
+        
+            synchronized (this)
+            {
+                if (!_pending)
+                    return false;
+                _scheduled = true;
+                
+                redispatch=isExpired() || _resumed;
+            }
+            
+            if (redispatch)
+                _endPoint._selectSet.addChange(this);
+            else
+                _endPoint._selectSet.scheduleTimeout(this,_timeout);
+            
+            _endPoint._selectSet.wakeup();
+            return true;
+        }
+        
+        public long getTimeout()
         {
             return _timeout;
         }
@@ -945,57 +963,86 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
 
         public void expire()
         {
-            synchronized (_endPoint._selectSet)
+            boolean redispatch=false;
+            synchronized (this)
             {
-                if (_pending && !_resumed)
-                    _endPoint.redispatch();
+                redispatch=_scheduled && _pending && !_resumed;
+            }
+            if (redispatch)
+            {
+                _endPoint._selectSet.addChange(this);
+                _endPoint._selectSet.wakeup();
             }
         }
 
         public boolean suspend(long timeout)
         {
-            synchronized (_endPoint._selectSet)
+            boolean resumed=false;
+            synchronized (this)
             {
-                boolean resumed=_resumed;
+                resumed=_resumed;
                 _resumed=false;
                 _new = false;
                 if (!_pending && !resumed && timeout > 0)
                 {
                     _pending=true;
+                    _scheduled = false;
                     _timeout = timeout;
                     if (_retry==null)
                      _retry = new RetryRequest();
                     throw _retry;
                 }
                 
-                reset();
-                return resumed;
+                // here only if suspend called on pending continuation.
+                // acts like a reset
+                _resumed = false;
+                _pending = false;
             }
+
+            synchronized (_endPoint._selectSet)
+            {
+                this.cancel();   
+            }
+
+            return resumed;
         } 
         
         public void resume()
         {
             boolean redispatch=false;
-            synchronized (_endPoint._selectSet)
+            synchronized (this)
             {
                 if (_pending && !isExpired())
                 {
                     _resumed = true;
-                    this.cancel();
-                    redispatch=true;
+                    redispatch=_scheduled;
                 }
             }
+
             if (redispatch)
-                _endPoint.redispatch();
+            {
+                synchronized (_endPoint._selectSet)
+                {
+                    this.cancel();   
+                }
+
+                _endPoint._selectSet.addChange(this);
+                _endPoint._selectSet.wakeup();
+            }
         }
         
         public void reset()
         {
-            synchronized (_endPoint._selectSet)
+            synchronized (this)
             {
                 _resumed = false;
                 _pending = false;
-                this.cancel();
+                _scheduled = false;
+            }
+            
+            synchronized (_endPoint._selectSet)
+            {
+                this.cancel();   
             }
         }
         

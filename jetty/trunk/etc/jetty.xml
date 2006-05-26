@@ -11,9 +11,9 @@
     <!-- =========================================================== -->
     <Set name="ThreadPool">
       <New class="org.mortbay.thread.BoundedThreadPool">
-        <Set name="minThreads">5</Set>
-        <Set name="lowThreads">4</Set>
-        <Set name="maxThreads">10</Set>
+        <Set name="minThreads">10</Set>
+        <Set name="lowThreads">25</Set>
+        <Set name="maxThreads">250</Set>
       </New>
     </Set>
 
@@ -31,9 +31,9 @@
         <Item>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
             <Set name="port">8080</Set>
-            <Set name="maxIdleTime">60000</Set>
+            <Set name="maxIdleTime">30000</Set>
             <Set name="lowResourceMaxIdleTime">3000</Set>
-            <Set name="Acceptors">2</Set>
+            <Set name="Acceptors">1</Set>
           </New>
         </Item>
 

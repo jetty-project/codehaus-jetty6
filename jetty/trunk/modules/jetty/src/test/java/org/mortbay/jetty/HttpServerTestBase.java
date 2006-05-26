@@ -493,6 +493,10 @@ public class HttpServerTestBase
                               HttpServletResponse response, int dispatch)
                        throws IOException, ServletException
         {
+
+            Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+            base_request.setHandled(true);
+            
             PrintWriter    writer = response.getWriter();
             BufferedReader reader = request.getReader();
             int            count  = 0;
@@ -519,6 +523,8 @@ public class HttpServerTestBase
                               HttpServletResponse response, int dispatch)
                        throws IOException, ServletException
         {
+            Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+            base_request.setHandled(true);
             response.setStatus(200);
             response.getOutputStream().print("Hello world");
         }

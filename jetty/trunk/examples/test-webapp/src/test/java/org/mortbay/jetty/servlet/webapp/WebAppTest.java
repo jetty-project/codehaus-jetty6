@@ -125,6 +125,9 @@ public class WebAppTest extends TestCase
         assertTrue(IO.toString(url.openStream()).startsWith("<H1>"));
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dispatch/includeS/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<H1>"));
+        
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?continue=1000");
+        assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
     }
     
     public void testDoPost() throws Exception
