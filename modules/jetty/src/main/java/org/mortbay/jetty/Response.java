@@ -262,8 +262,6 @@ public class Response implements HttpServletResponse
         }
 
         complete();
-
-
     }
 
     /* ------------------------------------------------------------ */
