@@ -204,7 +204,7 @@ public class SessionHandler extends HandlerWrapper
             if (_sessionManager!=null)
             {
                 session=request.getSession(false);
-                if (session==null)
+                if (session!=null)
                 {
                     if(session!=old_session)
                         _sessionManager.access(session);
