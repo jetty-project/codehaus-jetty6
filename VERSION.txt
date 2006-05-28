@@ -10,6 +10,7 @@ jetty-6.0.0RC0 - ????????????
     + Implemented runAs on servlets
     + Flush will flush all bytes rather than just some.
     + Protected WEB-INF and META-INF
+    + don't reset headers during forward
 
 jetty-6.0.0beta16 - 12/5/2006
     + remove a couple of System.err.printlns

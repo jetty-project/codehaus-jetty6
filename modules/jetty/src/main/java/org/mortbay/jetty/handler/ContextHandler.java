@@ -566,6 +566,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 if (handler!=null)
                     handler.handle(target, request, response, dispatch);
             }
+            catch(HttpException e)
+            {
+                Log.debug(e);
+                response.sendError(e.getStatus(), e.getReason());
+            }
             finally
             {
                 // Handle more REALLY SILLY request events!
@@ -578,11 +583,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                         base_request.removeEventListener(((ServletRequestListener)LazyList.get(_requestAttributeListeners,i)));
                 }
             }
-        }
-        catch(HttpException e)
-        {
-            Log.debug(e);
-            response.sendError(e.getStatus(), e.getReason());
         }
         finally
         {

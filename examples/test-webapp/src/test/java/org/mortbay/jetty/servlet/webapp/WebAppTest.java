@@ -44,7 +44,6 @@ import junit.framework.TestCase;
 
 public class WebAppTest extends TestCase
 {
-    
     Server server = new Server();
     BoundedThreadPool threadPool = new BoundedThreadPool();
     Connector connector=new SelectChannelConnector();

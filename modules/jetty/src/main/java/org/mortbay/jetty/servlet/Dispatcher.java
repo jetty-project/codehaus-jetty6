@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.LazyList;
@@ -204,10 +205,8 @@ public class Dispatcher implements RequestDispatcher
      */
     protected void forward(ServletRequest request, ServletResponse response, int dispatch) throws ServletException, IOException
     {
-        // TODO protect content from an include.... perhaps flush?
-        response.reset(); 
-        
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+        response.resetBuffer(); 
         
         String old_uri=base_request.getRequestURI();
         String old_context_path=base_request.getContextPath();
