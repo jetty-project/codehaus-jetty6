@@ -681,18 +681,9 @@ public class WebAppContext extends ContextHandler
     }
     
     /* ------------------------------------------------------------ */
-    protected void checkTarget(String target)
-        throws HttpException
-    {
-        if (isProtectedTarget(target))
-            throw new HttpException(HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    /* ------------------------------------------------------------ */
     protected boolean isProtectedTarget(String target)
     {
-        boolean p=StringUtil.startsWithIgnoreCase(target, "/web-inf") || StringUtil.startsWithIgnoreCase(target, "/meta-inf");
-        return p;
+        return StringUtil.startsWithIgnoreCase(target, "/web-inf") || StringUtil.startsWithIgnoreCase(target, "/meta-inf");
     }
     
     /* ------------------------------------------------------------ */
