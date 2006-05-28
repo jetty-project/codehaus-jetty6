@@ -99,13 +99,11 @@
     <servlet-name>JspSnoop</servlet-name>
     <url-pattern>/jspsnoop/*</url-pattern>
   </servlet-mapping>
-  
-  <!--  
+   
   <error-page>
     <error-code>404</error-code>
-    <location>/dump/ERROR</location>
+    <location>/dump/ERROR/404</location>
   </error-page>
-  -->
 
   <security-constraint>
     <web-resource-collection>

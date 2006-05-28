@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
@@ -511,6 +512,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                     // Not for this context!
                     return;
                 }
+                
             }
         }
         
@@ -557,6 +559,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             // Handle the request
             try
             {
+                if (dispatch==REQUEST)
+                    checkTarget(target);
+                
                 Handler handler = getHandler();
                 if (handler!=null)
                     handler.handle(target, request, response, dispatch);
@@ -573,6 +578,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                         base_request.removeEventListener(((ServletRequestListener)LazyList.get(_requestAttributeListeners,i)));
                 }
             }
+        }
+        catch(HttpException e)
+        {
+            Log.debug(e);
+            response.sendError(e.getStatus(), e.getReason());
         }
         finally
         {
@@ -591,6 +601,17 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 base_request.setPathInfo(old_path_info); 
             }
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Check the target.
+     * Called by {@link #handle(String, HttpServletRequest, HttpServletResponse, int)} when a
+     * target within a context is determined.  Derived implementation can throw HttpException if 
+     * the target is not suitable (eg WEB-INF).
+     */
+    protected void checkTarget(String target)
+        throws HttpException
+    {    
     }
 
     /* ------------------------------------------------------------ */

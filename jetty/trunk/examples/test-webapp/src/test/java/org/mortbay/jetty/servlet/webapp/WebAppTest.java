@@ -16,7 +16,9 @@ package org.mortbay.jetty.servlet.webapp;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -56,7 +58,6 @@ public class WebAppTest extends TestCase
         File dir = new File(".").getAbsoluteFile();
         while (!new File(dir,"webapps").exists())
         {
-            System.err.println("DIR="+dir);
             dir=dir.getParentFile();
         }
         
@@ -149,4 +150,55 @@ public class WebAppTest extends TestCase
         assertTrue(s0.indexOf("<td>POST</td>")>0);
         assertTrue(s0.indexOf("abcd:&nbsp;</th><td>1234")>0);
     }       
+    
+    
+    public void testWebInfAccess() throws Exception
+    {
+        assertNotFound("WEB-INF/foo");
+        assertNotFound("web-inf");
+        assertNotFound("web-inf/");
+        assertNotFound("./web-inf/");
+        assertNotFound("web-inf/jetty-web.xml");
+        assertNotFound("Web-Inf/web.xml");
+        assertNotFound("./WEB-INF/web.xml");
+        assertNotFound("META-INF");
+        assertNotFound("meta-inf/manifest.mf");
+        assertNotFound("Meta-Inf/foo");
+        assertFound("index.html"); 
+    }
+    
+
+    private void assertNotFound(String resource) throws MalformedURLException, IOException
+    {
+        try
+        {
+            getResource(resource);
+        }
+        catch (FileNotFoundException e)
+        {
+            return;
+        }
+        fail("Expected 404 for resource: " + resource);
+    }
+
+    private void assertFound(String resource) throws MalformedURLException, IOException
+    {
+        try
+        {
+            getResource(resource);
+        }
+        catch (FileNotFoundException e)
+        {
+            fail("Expected 200 for resource: " + resource);
+        }
+        // Pass
+        return;
+    }
+
+    private void getResource(String resource) throws MalformedURLException, IOException
+    {
+        URL url;
+        url = new URL("http://127.0.0.1:" + connector.getLocalPort() + "/test/" + resource);
+        url.openStream();
+    }   
 }

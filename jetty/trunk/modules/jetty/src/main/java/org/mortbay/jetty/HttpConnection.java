@@ -379,7 +379,6 @@ public class HttpConnection
             {
                 Log.debug(e);
                 _response.sendError(e.getStatus(), e.getReason());
-                throw e;
             }
             finally
             {
@@ -388,7 +387,6 @@ public class HttpConnection
                 
                 if (!retry)
                 {
-      
                     if (_request.getContinuation()!=null && _request.getContinuation().isPending())
                     {
                         Log.debug("continuation still pending {}");
