@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.io.IO;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -49,6 +50,7 @@ import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
 /* ------------------------------------------------------------ */
@@ -677,6 +679,22 @@ public class WebAppContext extends ContextHandler
             _configurations[i]=(Configuration)Loader.loadClass(this.getClass(), _configurationClasses[i]).newInstance();
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    protected void checkTarget(String target)
+        throws HttpException
+    {
+        if (isProtectedTarget(target))
+            throw new HttpException(HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    /* ------------------------------------------------------------ */
+    protected boolean isProtectedTarget(String target)
+    {
+        boolean p=StringUtil.startsWithIgnoreCase(target, "/web-inf") || StringUtil.startsWithIgnoreCase(target, "/meta-inf");
+        return p;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Resolve Web App directory
      * If the BaseResource has not been set, use the war resource to
