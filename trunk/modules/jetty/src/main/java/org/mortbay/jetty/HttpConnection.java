@@ -279,7 +279,6 @@ public class HttpConnection
                     Log.debug("resume continuation {}",continuation);
                     if (_request.getMethod()==null)
                         throw new IllegalStateException();
-                    _response.setStatus(-1);  // XXXX
                     handlerRequest();
                 }
                 else

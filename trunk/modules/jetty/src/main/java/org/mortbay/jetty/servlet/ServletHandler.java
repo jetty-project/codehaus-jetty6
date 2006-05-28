@@ -349,9 +349,6 @@ public class ServletHandler extends AbstractHandler
             if (servlet_holder!=null)
             {
                 base_request.setHandled(true);
-                if (base_request.getConnection().getResponse().getStatus()<0)
-                    response.setStatus(HttpServletResponse.SC_OK);  // Must be handled.
-                
                 if (chain!=null)
                     chain.doFilter(request, response);
                 else 
