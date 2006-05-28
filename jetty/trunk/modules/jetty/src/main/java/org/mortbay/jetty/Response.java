@@ -66,7 +66,7 @@ public class Response implements HttpServletResponse
     }
 
     private HttpConnection _connection;
-    private int _status=-1;
+    private int _status=SC_OK;
     private String _reason;
     private Locale _locale;
     private String _mimeType;
@@ -95,7 +95,7 @@ public class Response implements HttpServletResponse
      */
     void recycle()
     {
-        _status=-1;
+        _status=SC_OK;
         _reason=null;
         _locale=null;
         _mimeType=null;
@@ -106,7 +106,6 @@ public class Response implements HttpServletResponse
         _outputState=NONE;
         _writer=null;
     }
-
 
     /* ------------------------------------------------------------ */
     /*

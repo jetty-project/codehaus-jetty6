@@ -482,16 +482,13 @@ public class HttpServerTestBase
     }
 
     //~ Inner Classes ----------------------------------------------------------
-
     private static class EchoHandler
         extends AbstractHandler
     {
 
         //~ Methods ------------------------------------------------------------
-
-        public void handle(String target, HttpServletRequest request,
-                              HttpServletResponse response, int dispatch)
-                       throws IOException, ServletException
+        public void handle(String target, HttpServletRequest request,HttpServletResponse response, int dispatch)
+            throws IOException, ServletException
         {
 
             Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
@@ -501,7 +498,7 @@ public class HttpServerTestBase
             BufferedReader reader = request.getReader();
             int            count  = 0;
             String         line;
-            response.setStatus(200);
+            
             while ((line = reader.readLine()) != null) {
                 writer.print(line);
                 writer.print('\n');

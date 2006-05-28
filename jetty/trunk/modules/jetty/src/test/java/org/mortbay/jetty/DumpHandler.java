@@ -69,9 +69,8 @@ public class DumpHandler extends AbstractHandler
             Continuation continuation = ContinuationSupport.getContinuation(request, null);
             continuation.suspend(Long.parseLong(request.getParameter("continue")));
         }
-        base_request.setHandled(true);
         
-        response.setStatus(HttpServletResponse.SC_OK);
+        base_request.setHandled(true);
         response.setHeader(HttpHeaders.CONTENT_TYPE,MimeTypes.TEXT_HTML);
         
         OutputStream out = response.getOutputStream();
