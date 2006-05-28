@@ -559,8 +559,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             // Handle the request
             try
             {
-                if (dispatch==REQUEST)
-                    checkTarget(target);
+                if (dispatch==REQUEST && isProtectedTarget(target))
+                    throw new HttpException(HttpServletResponse.SC_NOT_FOUND);
                 
                 Handler handler = getHandler();
                 if (handler!=null)
@@ -606,12 +606,14 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     /* ------------------------------------------------------------ */
     /** Check the target.
      * Called by {@link #handle(String, HttpServletRequest, HttpServletResponse, int)} when a
-     * target within a context is determined.  Derived implementation can throw HttpException if 
-     * the target is not suitable (eg WEB-INF).
+     * target within a context is determined.  If the target is protected, 404 is returned.
+     * The default implementation always returns false.
+     * @see {@link org.mortbay.jetty.webapp.WebAppContext#isProtectedTarget(String)}
      */
-    protected void checkTarget(String target)
-        throws HttpException
-    {    
+    /* ------------------------------------------------------------ */
+    protected boolean isProtectedTarget(String target)
+    { 
+        return false;
     }
 
     /* ------------------------------------------------------------ */
