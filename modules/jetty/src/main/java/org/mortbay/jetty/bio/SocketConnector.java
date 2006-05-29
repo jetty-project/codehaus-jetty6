@@ -164,7 +164,7 @@ public class SocketConnector extends AbstractConnector
         {
             try
             {
-                while (!isClosed())
+                while (isStarted() && !isClosed())
                 {
                     if (_connection.isIdle())
                     {

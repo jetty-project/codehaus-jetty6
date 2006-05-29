@@ -11,6 +11,7 @@ jetty-6.0.0RC0 - ????????????
     + Flush will flush all bytes rather than just some.
     + Protected WEB-INF and META-INF
     + don't reset headers during forward
+    + BoundedThreadPool.doStop waits for threads to complete
 
 jetty-6.0.0beta16 - 12/5/2006
     + remove a couple of System.err.printlns
