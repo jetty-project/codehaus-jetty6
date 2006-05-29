@@ -172,7 +172,10 @@ public class Server extends HandlerWrapper implements Attributes
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
-        Log.info(this.getClass().getPackage().getImplementationTitle()+" "+this.getClass().getPackage().getImplementationVersion());
+        if (this.getClass().getPackage().getImplementationVersion()==null)
+            Log.info("Jetty 6.0.x");
+        else
+            Log.info(this.getClass().getPackage().getImplementationTitle()+" "+this.getClass().getPackage().getImplementationVersion());
         MultiException mex=new MultiException();
         
         if (_threadPool==null)

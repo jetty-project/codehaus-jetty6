@@ -266,7 +266,7 @@ public class HttpConnection
     {
         // Loop while more in buffer
         boolean more_in_buffer =true; // assume true until proven otherwise
-        while (more_in_buffer)
+        while (more_in_buffer && _endp.isOpen())
         {
             _idle=false;
             try
@@ -331,7 +331,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    private void handlerRequest() throws IOException
+    void handlerRequest() throws IOException
     {
         if (_server != null)
         {
