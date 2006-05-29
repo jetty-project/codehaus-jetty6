@@ -362,16 +362,33 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     protected void doStop() throws Exception
     {   
-        synchronized (_lock)
-        {
-            Iterator iter = _threads.iterator();
-            while (iter.hasNext())
-                ((Thread)iter.next()).interrupt();
-        }
-        
         super.doStop();
         
+        for (int i=0;i<100;i++)
+        {
+            synchronized (_lock)
+            {
+                Iterator iter = _threads.iterator();
+                while (iter.hasNext())
+                    ((Thread)iter.next()).interrupt();
+            }
+            
+            Thread.yield();
+            if (_threads.size()==0)
+               break;
+            
+            try
+            {
+                Thread.sleep(i*100);
+            }
+            catch(InterruptedException e){}
+        }
+
         // TODO perhaps force stops
+        if (_threads.size()>0)
+            Log.warn(_threads.size()+" threads could not be stopped");
+        
+        
         
         synchronized (_joinLock)
         {
