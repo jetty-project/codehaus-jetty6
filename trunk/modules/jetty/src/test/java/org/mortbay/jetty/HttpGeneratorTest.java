@@ -46,7 +46,6 @@ public class HttpGeneratorTest extends TestCase
     {
         junit.textui.TestRunner.run(HttpGeneratorTest.class);
     }
-
     
     public void testHTTP()
     	throws Exception
@@ -71,7 +70,7 @@ public class HttpGeneratorTest extends TestCase
                     // For none, keep-alive, close
                     for (int c=0;c<connect.length;c++)
                     {
-                        String t="r="+r+",c="+c+",v="+v+",tr="+tr[r]+",chunks="+chunks+",connect="+connect[c];
+                        String t="v="+v+",r="+r+",chunks="+chunks+",connect="+connect[c]+",tr="+tr[r];
                         // System.err.println(t);
                         
                         hb.reset(true);
@@ -85,8 +84,8 @@ public class HttpGeneratorTest extends TestCase
                         if (v==9)
                         {
                             assertFalse(t,hb.isPersistent());
-                            if (tr[r].content!=null)
-                                assertEquals(t,tr[r].content, response);
+                            if (tr[r].body!=null)
+                                assertEquals(t,tr[r].body, response);
                             continue;
                         }
                         
@@ -97,13 +96,13 @@ public class HttpGeneratorTest extends TestCase
                         }
                         catch(IOException e)
                         {
-                            if (tr[r].content!=null)
+                            if (tr[r].body!=null)
                                 throw e;
                             continue;
                         }
                         
-                        if (tr[r].content!=null)
-                            assertEquals(t,tr[r].content, this.content);
+                        if (tr[r].body!=null)
+                            assertEquals(t,tr[r].body, this.content);
                         if (v==10)
                             assertTrue(t,hb.isPersistent() || tr[r].values[1]==null || c==2 || c==0);
                         else
@@ -123,7 +122,7 @@ public class HttpGeneratorTest extends TestCase
     {
         int code;
         String[] values=new String[headers.length];
-        String content;
+        String body;
         
         TR(int code,String ct, String cl ,String content)
         {
@@ -131,7 +130,7 @@ public class HttpGeneratorTest extends TestCase
             values[0]=ct;
             values[1]=cl;
             values[4]="value";
-            this.content=content;
+            this.body=content;
         }
         
         void build(int version,HttpGenerator hb,String reason, String connection, String te, int chunks, HttpFields fields)
@@ -149,10 +148,10 @@ public class HttpGeneratorTest extends TestCase
                 fields.put(new ByteArrayBuffer(headers[i]),new ByteArrayBuffer(values[i]));
             }
                         
-            if (content!=null)
+            if (body!=null)
             {
-                int inc=1+content.length()/chunks;
-                Buffer buf=new ByteArrayBuffer(content);
+                int inc=1+body.length()/chunks;
+                Buffer buf=new ByteArrayBuffer(body);
                 View view = new View(buf);
                 for (int i=1;i<chunks;i++)
                 {
@@ -183,20 +182,20 @@ public class HttpGeneratorTest extends TestCase
         
         public String toString()
         {
-            return "["+code+","+values[0]+","+values[1]+","+(content==null?"none":"_content")+"]";
+            return "["+code+","+values[0]+","+values[1]+","+(body==null?"none":"_content")+"]";
         }
     }
     
     private TR[] tr =
     {
-       new TR(200,null,null,null),
-       new TR(200,null,null,CONTENT),
-       new TR(200,null,""+CONTENT.length(),null),
-       new TR(200,null,""+CONTENT.length(),CONTENT),
-       new TR(200,"text/html",null,null),
-       new TR(200,"text/html",null,CONTENT),
-       new TR(200,"text/html",""+CONTENT.length(),null),
-       new TR(200,"text/html",""+CONTENT.length(),CONTENT),
+      /* 0 */  new TR(200,null,null,null),
+      /* 1 */  new TR(200,null,null,CONTENT),
+      /* 2 */  new TR(200,null,""+CONTENT.length(),null),
+      /* 3 */  new TR(200,null,""+CONTENT.length(),CONTENT),
+      /* 4 */  new TR(200,"text/html",null,null),
+      /* 5 */  new TR(200,"text/html",null,CONTENT),
+      /* 6 */  new TR(200,"text/html",""+CONTENT.length(),null),
+      /* 7 */  new TR(200,"text/html",""+CONTENT.length(),CONTENT),
     };
     
 
