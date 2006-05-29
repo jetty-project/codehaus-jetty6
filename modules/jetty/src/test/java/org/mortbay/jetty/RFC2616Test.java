@@ -408,8 +408,7 @@ public class RFC2616Test extends TestCase
     public void test8_1()
     {        
         try
-        {
-            
+        {  
             String response;
             int offset=0; connector.reopen();
 
@@ -417,11 +416,8 @@ public class RFC2616Test extends TestCase
             response=connector.getResponses("GET /R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "\n");
-            offset=checkContains(response,offset,
-                                   "HTTP/1.1 200 OK\015\012","8.1.2 default")+10;
-            
-            checkContains(response,offset,
-                            "Content-Length: ","8.1.2 default");
+            offset=checkContains(response,offset,"HTTP/1.1 200 OK\015\012","8.1.2 default")+10;
+            checkContains(response,offset,"Content-Length: ","8.1.2 default");
 
             offset=0; connector.reopen();
             response=connector.getResponses("GET /R1 HTTP/1.1\n"+
