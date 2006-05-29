@@ -279,9 +279,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                 {
                     Log.ignore(e);
                 }
-                
             }
-
         }
 
         /* ------------------------------------------------------------ */
@@ -512,6 +510,15 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                     task._short=false;
                     task.schedule(_idleTimeout);
                 }
+            }
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void cancelIdle(HttpChannelEndPoint.IdleTask task)
+        {
+            synchronized (this)
+            {
+                task.cancel();
             }
         }
 
@@ -851,6 +858,10 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             if (_key!=null)
                 _key.cancel();
             _key=null;
+            _selectSet.cancelIdle(_timeoutTask);
+            RetryContinuation continuation = (RetryContinuation) _connection.getRequest().getContinuation();
+            if (continuation!=null && continuation.isPending())
+                continuation.reset();
             try
             {
                 super.close();
