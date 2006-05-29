@@ -25,8 +25,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.IO;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.DefaultHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 
 import junit.framework.TestCase;
@@ -35,6 +38,8 @@ public class ServletTest extends TestCase
 {
     Server server = new Server();
     Connector connector=new SelectChannelConnector();
+    HandlerCollection collection = new HandlerCollection();
+    DefaultHandler dft = new DefaultHandler();
     ContextHandler context = new ContextHandler();
     ServletHandler handler=new ServletHandler();
     
@@ -42,10 +47,11 @@ public class ServletTest extends TestCase
     {
         server.setConnectors(new Connector[]{connector});
         context.setContextPath("/context");
-        server.setHandler(context);
+        
+        collection.setHandlers(new Handler[]{context,dft});
+        server.setHandler(collection);
         
         context.setHandler(handler);
-        
         handler.addServletWithMapping("org.mortbay.jetty.servlet.ServletTest$TestServlet", "/servlet/*");
         
         server.start();
@@ -64,9 +70,14 @@ public class ServletTest extends TestCase
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/context/servlet/info?query=foo");
         assertEquals("<h1>Hello SimpleServlet</h1>",IO.toString(url.openStream()));
         
-        
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/");
-        try{IO.toString(url.openStream()); assertTrue(false); } catch(FileNotFoundException e) { assertTrue(true); } 
+        try
+        {
+            String s=IO.toString(url.openStream()); 
+            System.err.println("s="+s);
+            assertTrue(false); 
+        } 
+        catch(FileNotFoundException e) { assertTrue(true); } 
         
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/context");
         try{IO.toString(url.openStream()); assertTrue(false); } catch(FileNotFoundException e) { assertTrue(true); } 
