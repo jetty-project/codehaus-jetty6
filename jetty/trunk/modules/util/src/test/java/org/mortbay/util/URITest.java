@@ -217,7 +217,6 @@ public class URITest extends junit.framework.TestCase
             {"a/..",""},
             {"a/../..",null},
             {"/foo/../bar//","/bar/"},
-            {"/?x=y", "/"},
         };
 
         for (int t=0;t<canonical.length;t++)
