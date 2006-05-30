@@ -15,6 +15,7 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -88,6 +89,12 @@ import org.mortbay.util.URIUtil;
  *  maxCacheSize      The maximum total size of the cache or 0 for no cache.
  *  maxCachedFileSize The maximum size of a file to cache
  *  maxCachedFiles    The maximum number of files to cache
+ *  
+ *  useFileMappedBuffer 
+ *                    If set to true, it will use mapped file buffer to serve static content
+ *                    when using NIO connector. Setting this value to false means that
+ *                    a direct buffer will be used instead of a mapped file buffer. 
+ *                    By default, this is set to true.
  * </PRE>
  *                                                               
  * The MOVE method is allowed if PUT and DELETE are allowed             
@@ -99,7 +106,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
 {
     
     private ContextHandler.Context _context;
-      
+    
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
     private boolean _redirectWelcome=true;
@@ -111,6 +118,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private MimeTypes _mimeTypes;
     private String[] _welcomes;
     private boolean _aliases=false;
+    private boolean _useFileMappedBuffer=true;
     
     
     /* ------------------------------------------------------------ */
@@ -129,6 +137,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         _redirectWelcome=getInitBoolean("redirectWelcome",_redirectWelcome);
         _gzip=getInitBoolean("gzip",_gzip);
         _aliases=getInitBoolean("aliases",_aliases);
+        _useFileMappedBuffer=getInitBoolean("useFileMappedBuffer",_useFileMappedBuffer);
         
         String rrb = getInitParameter("relativeResourceBase");
         if (rrb!=null)
@@ -229,7 +238,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     {
         if (_resourceBase==null)
             return null;
-        
         Resource r=null;
         try
         {
@@ -467,16 +475,36 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             {
                 if (connector instanceof NIOConnector) 
                 {
-                    File file = resource.getFile();
-                    if (file != null)
-                        buffer = new NIOBuffer(file);
+                    if (_useFileMappedBuffer) {
+                        
+                        File file = resource.getFile();
+                        if (file != null) 
+                            buffer = new NIOBuffer(file);
+                    } 
+                    else 
+                    {
+                        FileInputStream fis = new FileInputStream(resource.getFile());
+                        buffer = new NIOBuffer((int) length, NIOBuffer.DIRECT);
+                        byte[] buf = new byte[8192]; 
+                        int i = 0;
+                        while (i < length)
+                        {
+                            int r = fis.read(buf, 0, buf.length);
+                            if (r < 0)
+                                throw new IOException("unexpected EOF");
+                            buffer.put(buf, 0, r);
+                            i+=r;
+                        }
+                        if (fis != null) 
+                            fis.close();
+                    }
                 } 
                 else 
                 {
                     buffer = new ByteArrayBuffer((int)length);
                     byte[] array = buffer.array();
                     InputStream in = resource.getInputStream();
-                    
+
                     int l = 0;
                     while (l < length) 
                     {

@@ -104,6 +104,10 @@
       <param-name>maxCachedFiles</param-name>
       <param-value>1000</param-value>
     </init-param>
+	<init-param>
+		<param-name>useFileMappedBuffer</param-name>
+		<param-value>true</param-value>
+	</init-param>  
     <load-on-startup>0</load-on-startup>
   </servlet> 
 
