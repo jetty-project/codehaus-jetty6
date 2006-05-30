@@ -25,6 +25,8 @@ import org.mortbay.util.UrlEncoded;
 /* ------------------------------------------------------------ */
 /** Http URI.
  * Parse a HTTP URI from a string or byte array.
+ * 
+ *  protocol://user@host:port/path/morepath;param?query#fragment
  */
 public class HttpURI
 {
@@ -159,6 +161,11 @@ public class HttpURI
                         _path=_end;
                         state=AUTH;
                     }
+                    else if (c==';' || c=='?' || c=='#')
+                    {
+                        i--;
+                        state=PATH;
+                    }  
                     else
                     {
                         _host=m;
