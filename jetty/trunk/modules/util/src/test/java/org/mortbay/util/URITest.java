@@ -216,13 +216,14 @@ public class URITest extends junit.framework.TestCase
             {"a/.","a/"},
             {"a/..",""},
             {"a/../..",null},
-            {"/foo/../bar//","/bar/"}
+            {"/foo/../bar//","/bar/"},
+            {"/?x=y", "/"},
         };
 
         for (int t=0;t<canonical.length;t++)
             assertEquals( "canonical "+canonical[t][0],
-                          URIUtil.canonicalPath(canonical[t][0]),
-                          canonical[t][1]
+                          canonical[t][1],
+                          URIUtil.canonicalPath(canonical[t][0])
                           );
         
     }
