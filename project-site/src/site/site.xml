@@ -45,16 +45,19 @@
       <item name="Wiki" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
       <item name="jetty.xsd" href="http://jetty.mortbay.org/jetty.xsd"/>
       <item name="jetty.xsd.html" href="http://jetty.mortbay.org/jetty.xsd.html"/>
-      <item name="Old site" href="http://jetty.mortbay.org/jetty5"/>
+      <item name="Old Jetty5.x site" href="http://jetty.mortbay.org/jetty5"/>
     </menu>
     <menu name="Community">
       <item name="Developers" href="team-list.html"/>
+      <item name="Continuous Build" href="http://build1.webtide.com:8080/continuum/servlet/continuum"/>
       <item name="Issue Tracking" href="issue-tracking.html"/>
       <item name="Mailing Lists" href="mail-lists.html"/>
-      <item name="IRC" href="irc.html"/>
+      <item name="Chat" href="irc.html"/>
     </menu>
-    <menu name="Support">
-      <item name="Commercial Support" href="http://www.webtide.com"/>
+    <menu name="Commercial Offerings">
+      <item name="Support" href="http://www.webtide.com"/>
+      <item name="Training" href="http://www.webtide.com"/>
+      <item name="Consulting" href="http://www.webtide.com"/>
     </menu>
   </body>
   <poweredBy>

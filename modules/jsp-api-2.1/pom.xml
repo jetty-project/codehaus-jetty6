@@ -34,6 +34,20 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
+            <id>clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <delete failonerror="false">
+                  <fileset dir="../../lib/jsp-api-2.1/" includes="${project.artifactId}.${project.packaging}"/>
+                </delete>
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
             <phase>install</phase>
             <goals>
               <goal>run</goal>
