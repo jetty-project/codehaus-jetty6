@@ -75,7 +75,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;
     private transient SelectSet[] _selectSets;
-    private boolean _assumeShortDispatch=false;
+    private boolean _delaySelectKeyUpdate=false;
 
 
     /* ------------------------------------------------------------------------------- */
@@ -100,18 +100,20 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
      * be complete before the select is tried again.
      * @return Returns the assumeShortDispatch.
      */
-    public boolean getAssumeShortDispatch()
+    public boolean getDelaySelectKeyUpdate()
     {
-        return _assumeShortDispatch;
+        return _delaySelectKeyUpdate;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @param assumeShortDispatch The assumeShortDispatch to set.
+     * @param delay If true, updating a {@link SelectionKey} is delayed until a redundant event is 
+     * schedules.  This is an optimization that assumes event handling can be completed before the next select
+     * completes.
      */
-    public void setAssumeShortDispatch(boolean assumeShortDispatch)
+    public void setDelaySelectKeyUpdate(boolean delay)
     {
-        _assumeShortDispatch = assumeShortDispatch;
+        _delaySelectKeyUpdate = delay;
     }
 
     /* ------------------------------------------------------------ */
@@ -139,15 +141,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         _selectSets=null;
     }
 
-    /* ------------------------------------------------------------ */
-    /*
-     * @see org.mortbay.jetty.AbstractConnector#setMaxIdleTime(long)
-     */
-    public void setMaxIdleTime(int maxIdleTime)
-    {
-        super.setMaxIdleTime(maxIdleTime);
-        // TODO update SelectSets
-    }
 
     /* ------------------------------------------------------------ */
     public void open() throws IOException
@@ -315,7 +308,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                         SelectionKey cKey = channel.register(_selector, SelectionKey.OP_READ);
                         HttpChannelEndPoint endpoint = new HttpChannelEndPoint(channel,this,cKey);
                         
-                        if (_assumeShortDispatch && endpoint.dispatch())
+                        if (_delaySelectKeyUpdate && endpoint.dispatch())
                             dispatch(endpoint);
                             
                     }
@@ -338,6 +331,8 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             
             synchronized (this)
             {
+                _shortIdleTimeout.setDuration(getLowResourceMaxIdleTime());
+                _idleTimeout.setDuration(getMaxIdleTime());
                 short_next=_shortIdleTimeout.getTimeToNext();
                 idle_next=_idleTimeout.getTimeToNext();
                 retry_next=_retryTimeout.getTimeToNext();
@@ -600,7 +595,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                     return false;
                 }
                 
-                if (!SelectChannelConnector.this._assumeShortDispatch)
+                if (!SelectChannelConnector.this._delaySelectKeyUpdate)
                     _key.interestOps(0);
                 
                 // Otherwise if we are still dispatched
