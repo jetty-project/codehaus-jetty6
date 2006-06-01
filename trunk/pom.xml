@@ -70,8 +70,8 @@
   </licenses>
   <scm>
     <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:https//svn.codehaus.org/jetty/jetty/trunk</developerConnection>
-    <url>https://svn.codehaus.org/jetty/</url>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
+    <url>http://fisheye.codehaus.org/viewrep/jetty/</url>
   </scm>
   <organization>
     <name>Mort Bay Consulting</name>
