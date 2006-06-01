@@ -620,6 +620,7 @@ public class Response implements HttpServletResponse
                 int i1=contentType.indexOf("charset=",i0+1);
                 if (i1>=0)
                 {
+                    _explicitEncoding=true;
                     int i8=i1+8;
                     int i2 = contentType.indexOf(' ',i8);
 
