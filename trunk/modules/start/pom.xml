@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?><project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0beta17</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>start</artifactId>
@@ -29,7 +29,7 @@
             </goals>
             <configuration>
               <tasks>
-                <delete failonerror="false" file="../../${project.artifactId}.${project.packaging}"/>
+                <delete failonerror="false" file="../../${project.artifactId}.${project.packaging}" />
               </tasks>
             </configuration>
           </execution>
@@ -40,7 +40,7 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../${project.artifactId}.${project.packaging}"></copy>
+                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../${project.artifactId}.${project.packaging}" />
               </tasks>
             </configuration>
           </execution>
