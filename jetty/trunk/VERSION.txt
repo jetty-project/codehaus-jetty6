@@ -1,5 +1,5 @@
 
-jetty-6.0.0beta17 -
+jetty-6.0.0beta17 - 1/6/2006
     + Added Request.isHandled()
     + Refactored Synchronization of SelectChannelConnector
     + Recovered repository from Codehaus crash
