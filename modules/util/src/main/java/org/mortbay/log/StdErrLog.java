@@ -15,13 +15,9 @@
 package org.mortbay.log;
 
 /*-----------------------------------------------------------------------*/
-/** Logging.
- * This class provides a static logging interface.  If an instance of the 
- * org.slf4j.Logger class is found on the classpath, the static log methods
- * are directed to a slf4j logger for "org.mortbay.log".   Otherwise the logs
- * are directed to stderr.
+/** StdErr Logging.
+ * This implementation of the Logging facade sends all logs to StdErr with minimal formatting.
  * 
- * If the system property VERBOSE is set, then ignored exceptions are logged in detail.
  * If the system property DEBUG is set, then debug logs are printed if stderr is being used.
  * 
  */
