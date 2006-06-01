@@ -201,11 +201,11 @@ public class EnvConfiguration implements Configuration
         List  list = NamingEntry.lookupNamingEntries (context, EnvEntry.class);
         Iterator itor = list.iterator();
         
-        Log.info("Finding env entries: size="+list.size());
+        Log.debug("Finding env entries: size="+list.size());
         while (itor.hasNext())
         {
             EnvEntry ee = (EnvEntry)itor.next();
-            Log.info("configuring env entry "+ee.getJndiName());
+            Log.debug("configuring env entry "+ee.getJndiName());
             ee.bindToEnv();
         }
     }
@@ -223,7 +223,7 @@ public class EnvConfiguration implements Configuration
         while (itor.hasNext())
         {
             NamingEntry ne = (NamingEntry)itor.next();
-            Log.info("Unbinding naming entry "+ne.getJndiName());
+            Log.debug("Unbinding naming entry "+ne.getJndiName());
             ne.unbindEnv();
             ne.unbind();
         }
