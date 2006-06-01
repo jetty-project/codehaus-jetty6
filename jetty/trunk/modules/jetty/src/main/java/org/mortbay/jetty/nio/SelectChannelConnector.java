@@ -397,6 +397,8 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                         {
                             // Accept a new connection.
                             SocketChannel channel = _acceptChannel.accept();
+                            if (channel==null)
+                                continue;
                             channel.configureBlocking(false);
                             Socket socket = channel.socket();
                             configure(socket);
