@@ -69,7 +69,7 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/jetty/jetty/trunk</connection>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
     <developerConnection>scm:svn:https//svn.codehaus.org/jetty/jetty/trunk</developerConnection>
     <url>http://svn.codehaus.org/jetty/</url>
   </scm>
