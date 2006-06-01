@@ -16,6 +16,20 @@
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
+         <execution>
+            <id>clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <delete failonerror="false" includeemptydirs="true">
+                  <fileset dir="../../webapps-plus/test-jndi/" includes="**/**"/>
+                </delete>
+              </tasks>
+            </configuration>
+          </execution>
           <execution>
             <id>mkconfig</id>
             <phase>process-sources</phase>
@@ -42,7 +56,6 @@
             </goals>
             <configuration>
               <tasks>
-                <delete quiet="true" dir="../../webapps-plus/test-jndi/"></delete>
                 <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../webapps-plus/test-jndi/"></unjar>
                 <copy file="target/config/jetty-test-jndi.xml" todir="../../etc" overwrite="true"/>
               </tasks>
@@ -56,12 +69,38 @@
         <version>${project.version}</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
-          <jettyConfig>target/config/jetty-test-jndi.xml</jettyConfig>
         </configuration>
+   <dependencies>
+  </dependencies>
       </plugin>
     </plugins>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>jotm</groupId>
+      <artifactId>jotm</artifactId>
+      <version>2.0.10</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>jta</artifactId>
+          <groupId>javax.transaction</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>connector</artifactId>
+          <groupId>javax.resource</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>geronimo-spec</groupId>
+      <artifactId>geronimo-spec-j2ee-connector</artifactId>
+      <version>1.5-rc4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.enhydra</groupId>
+      <artifactId>xapool</artifactId>
+      <version>1.5.0</version>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>

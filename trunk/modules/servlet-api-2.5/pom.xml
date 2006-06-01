@@ -32,6 +32,18 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
+            <id>clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <delete failonerror="false" file="../../lib/${project.artifactId}.${project.packaging}"/>
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
             <phase>install</phase>
             <goals>
               <goal>run</goal>
