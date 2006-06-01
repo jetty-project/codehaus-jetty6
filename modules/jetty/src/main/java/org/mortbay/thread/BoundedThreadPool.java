@@ -479,7 +479,8 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
                             if (job==null)
                             {
                                 long now = System.currentTimeMillis();
-                                if (_idle.size()-_blocked.size()>0 &&     // are there idle threads?
+                                if (_threads.size()>_maxThreads ||      // we have too many threads  OR
+                                    _idle.size()-_blocked.size()>0 &&     // are there idle threads?
                                     _threads.size()>_minThreads &&        // are there more than min threads?
                                     (now-_lastShrink)>getMaxIdleTimeMs()) // have we shrunk recently?
                                 {
