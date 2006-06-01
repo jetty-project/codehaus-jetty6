@@ -824,7 +824,7 @@ public class HttpGenerator implements HttpTokens
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Log.ignore(e);
             throw new EofException(e);
         }
     }
