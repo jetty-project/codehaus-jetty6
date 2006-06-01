@@ -24,9 +24,19 @@ import org.mortbay.util.UrlEncoded;
 
 /* ------------------------------------------------------------ */
 /** Http URI.
- * Parse a HTTP URI from a string or byte array.
+ * Parse a HTTP URI from a string or byte array.  Given a URI
+ * <code>http://user@host:port/path/info;param?query#fragment</code>
+ * this class will split it into the following undecoded optional elements:<ul>
+ * <li>{@link #getScheme()} - http:</li>
+ * <li>{@link #getAuthority()} - //name@host:port</li>
+ * <li>{@link #getHost()} - host</li>
+ * <li>{@link #getPort()} - port</li>
+ * <li>{@link #getPath()} - /path/info</li>
+ * <li>{@link #getParam()} - param</li>
+ * <li>{@link #getQuery()} - query</li>
+ * <li>{@link #getFragment()} - fragment</li>
+ * </ul>
  * 
- *  protocol://user@host:port/path/morepath;param?query#fragment
  */
 public class HttpURI
 {
