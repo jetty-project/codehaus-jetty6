@@ -27,7 +27,6 @@ import org.mortbay.util.Loader;
  * are directed to stderr.
  * 
  * If the system property VERBOSE is set, then ignored exceptions are logged in detail.
- * If the system property DEBUG is set, then debug logs are printed if stderr is being used.
  * 
  */
 public class Log 
@@ -175,6 +174,9 @@ public class Log
         unwind(th);
     }
 
+    /** Obtain a named Logger.
+     * Obtain a named Logger or the default Logger if null is passed.
+     */
     public static Logger getLogger(String name)
     {
         if (log==null)
