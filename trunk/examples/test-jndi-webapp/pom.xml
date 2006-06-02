@@ -97,7 +97,7 @@
       <version>1.5-rc4</version>
     </dependency>
     <dependency>
-      <groupId>org.enhydra</groupId>
+      <groupId>com.experlog</groupId>
       <artifactId>xapool</artifactId>
       <version>1.5.0</version>
     </dependency>
