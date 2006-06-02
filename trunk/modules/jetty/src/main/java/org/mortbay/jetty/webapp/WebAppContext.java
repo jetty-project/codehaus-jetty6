@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -97,6 +98,7 @@ public class WebAppContext extends ContextHandler
     
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
+    private Random _randomGenerator = new Random();
 
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
@@ -553,6 +555,14 @@ public class WebAppContext extends ContextHandler
             temp=temp.replace('.','_');
             temp=temp.replace('\\','_');
 
+            String randomString = "";
+            while (randomString.length() < 8)
+            {
+                randomString = Long.toString(_randomGenerator.nextLong(), 36).toUpperCase();
+                randomString = (randomString.startsWith("-")?randomString.substring(1):randomString);
+                randomString = (randomString.length() > 8? randomString.substring(0, 8): randomString);
+            }
+            temp = temp+"_"+randomString;
             
             if (work!=null)
                 _tmpDir=new File(work,temp);
