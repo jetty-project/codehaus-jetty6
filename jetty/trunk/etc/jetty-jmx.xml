@@ -31,7 +31,6 @@
     </Get>
     
     <!-- optionally add a remote JMX connector 
-    -->
     <Call id="jmxConnector" class="javax.management.remote.JMXConnectorServerFactory" name="newJMXConnectorServer">
       <Arg>
         <New  class="javax.management.remote.JMXServiceURL">
@@ -42,6 +41,7 @@
       <Arg><Ref id="MBeanServer"/></Arg>
       <Call name="start"/>
     </Call>
+    -->
     
 </Configure>
 
