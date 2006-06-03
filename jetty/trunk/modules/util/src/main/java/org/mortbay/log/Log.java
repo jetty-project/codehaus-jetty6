@@ -181,6 +181,8 @@ public class Log
     {
         if (log==null)
             return log;
+        if (name==null)
+          return log;
         return log.getLogger(name);
     }
 
