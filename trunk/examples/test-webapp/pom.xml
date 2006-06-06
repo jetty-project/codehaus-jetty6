@@ -100,7 +100,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jsp-api-2.0</artifactId>
+      <artifactId>jsp-api-2.1</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
