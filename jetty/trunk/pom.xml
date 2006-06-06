@@ -170,6 +170,14 @@
     <module>examples/test-webapp</module>
     <module>examples/embedded</module>
   </modules>
+
+  <repositories>
+    <repository>
+      <id>main-public-repository</id>
+      <url>http://repo.mergere.com/maven2/</url>
+    </repository>
+  </repositories>
+
   <reporting>
     <outputDirectory>target/site</outputDirectory>
     <plugins>
@@ -220,6 +228,7 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit-version}</version>
+	<scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -287,7 +296,7 @@
   </distributionManagement>
   <properties>
     <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
-    <spring-version>1.2.6</spring-version>
+    <spring-version>1.2.8</spring-version>
     <tomcat-jasper-version>5.5.15</tomcat-jasper-version>
     <junit-version>3.8.1</junit-version>
     <ant-version>1.6.4</ant-version>
