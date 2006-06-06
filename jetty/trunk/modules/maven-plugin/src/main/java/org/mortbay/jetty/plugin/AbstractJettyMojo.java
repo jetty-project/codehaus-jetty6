@@ -19,15 +19,10 @@ package org.mortbay.jetty.plugin;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -37,14 +32,11 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
-import org.codehaus.classworlds.ClassRealm;
-import org.codehaus.classworlds.ClassWorld;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.plugin.util.Scanner;
 import org.mortbay.jetty.plugin.util.SystemProperty;
-import org.mortbay.start.Version;
 
 
 
@@ -55,31 +47,6 @@ import org.mortbay.start.Version;
  */
 public abstract class AbstractJettyMojo extends AbstractMojo
 {
-    
-    public static String POM_VERSION;
-
-    
-    
-    static
-    {
-        try
-        {
-            InputStream stream = AbstractJettyMojo.class.getResourceAsStream("/META-INF/maven/org.mortbay.jetty/maven-jetty6-plugin/pom.properties");
-            if (stream != null)
-            {
-                Properties props = new Properties();
-                props.load(stream);
-                POM_VERSION = props.getProperty("version");
-            }
-        }
-        catch (Exception e)
-        {
-            POM_VERSION = "6.0-SNAPSHOT";
-        }
-        
-        
-    }
-    
     /**
      * The "virtual" webapp created by the plugin
      */
@@ -162,59 +129,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     private String jettyConfig;
   
     
-    /**
-     * @component
-     */
-    private ArtifactResolver artifactResolver;
-    
-    /**
-     * The component used for creating artifact instances.
-     *
-     * @component
-     */
-    private ArtifactFactory artifactFactory;
 
-    
-    
-    
-    /**
-    *
-    *
-    * @component
-    */
-    private ArtifactMetadataSource metadataSource;
-    
-    
-    /**
-     * The local repository.
-     *
-     * @parameter expression="${localRepository}"
-     */
-    private ArtifactRepository localRepository;
-
-    /**
-     * Remote repositories used for the project.
-     *
-     * @todo this is used for site descriptor resolution - it should relate to the actual project but for some reason they are not always filled in
-     * @parameter expression="${project.remoteArtifactRepositories}"
-     */
-    private List remoteRepositories;
-
-    
-    /**
-     * Plugin repositories listed for the project.
-     * 
-     * @parameter expression="${project.pluginArtifactRepositories}"
-     */
-    private List pluginRepositories;
-    
-    
-    /**
-    *
-    *
-    * @component 
-    */
-    private MavenProjectBuilder projectBuilder;
     
     /**
      *  List of files and directories to scan
@@ -225,9 +140,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * List of Listeners for the scanner
      */
     private ArrayList scannerListeners;
-    
-    
-    private RuntimeDependencyResolver resolver;
     
     
     /**
@@ -363,9 +275,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         {
             getLog().debug("Starting Jetty Server ...");
             
-            getLog().debug("Resolving runtime dependencies for jdk version: "+System.getProperty("java.version"));
-            setupRuntimeClasspath();
-            
             configureSystemProperties();
             setServer(createServer());
         
@@ -481,124 +390,6 @@ public abstract class AbstractJettyMojo extends AbstractMojo
                     + getSystemProperties()[i].getValue() + " was "
                     + (result ? "set" : "skipped"));
         }
-    }
-    
-    
-    /**
-     * Insert another classloader into the maven classloader
-     * hierarchy with all runtime-resolved jars on it.
-     * 
-     * @throws Exception
-     */
-    private void setupRuntimeClasspath () 
-    throws Exception
-    {
-        List allRemoteRepositories = new ArrayList();
-        allRemoteRepositories.addAll(remoteRepositories);
-        allRemoteRepositories.addAll(pluginRepositories);
-        
-        if (getLog().isDebugEnabled())
-        {
-            Iterator itor = allRemoteRepositories.iterator();
-            while (itor.hasNext())
-            {
-                getLog().debug("Remote repository: "+itor.next());
-            }
-        }
-        resolver = new RuntimeDependencyResolver(artifactFactory, artifactResolver, 
-                metadataSource, localRepository, allRemoteRepositories);
-        
-        
-        Set runtimeArtifacts = resolveRuntimeJSP();
-        
-        
-        ClassWorld world = new ClassWorld();
-        ClassRealm realm = world.newRealm("jetty.container", Thread.currentThread().getContextClassLoader());
-        ClassRealm jspRealm = realm.createChildRealm("jsp");
-        
-        
-        URL[] urls = new URL[runtimeArtifacts.size()];
-        Iterator itor = runtimeArtifacts.iterator();
-        int i = 0;
-        while (itor.hasNext())
-        {
-            Artifact a = (Artifact)itor.next();
-            urls[i] = a.getFile().toURL();
-            getLog().debug("Adding to runtime classpath: "+a);
-            jspRealm.addConstituent(urls[i]);
-            i++; 
-        }
-        
-       Thread.currentThread().setContextClassLoader(jspRealm.getClassLoader());
-    }
-    
-    
-    
-    /** Sort out which version of JSP libs to use at runtime
-     * based on the jvm version in use.
-     * @return
-     * @throws Exception
-     */
-    private Set resolveRuntimeJSP () 
-    throws Exception
-    {
-        try
-        {
-            Version jdkVersion = new Version(System.getProperty("java.version"));
-            Version jdk1_5Version = new Version("1.5");
-            
-            Set dependencies = Collections.EMPTY_SET;
-            if (jdkVersion.compare(jdk1_5Version) < 0)
-            {
-                getLog().info("Using JSP2.0 for non-jdk1.5 runtime");
-                
-                //get the dependencies
-                dependencies = resolver.transitivelyResolvePomDependencies(projectBuilder, "org.mortbay.jetty", "jsp-2.0", POM_VERSION, true);
-                
-                //check if there is already commons logging on the classpath, and if so, take out the jetty default slf4j commons
-                //logging bridge, and the slf4j impl
-                try
-                {
-                    Thread.currentThread().getContextClassLoader().loadClass("org.apache.commons.logging.Log");   
-                    //there is already a CommonsLogging jar on the classpath, so we want to remove the default jetty one
-                    resolver.removeDependency (dependencies, "org.slf4j", "jcl104-over-slf4j", null, "jar");
-                    resolver.removeDependency (dependencies, "org.slf4j", "slf4j-simple", null, "jar");
-                }
-                catch (ClassNotFoundException e)
-                {
-                   getLog().debug("Using jetty default jcl104-over-slf4j bridge");
-                }
-                
-                try
-                {
-                    Thread.currentThread().getContextClassLoader().loadClass("org.slf4j.Logger");
-                    //already an slf4j log impl on the classpath, so take out the default jetty one
-                    resolver.removeDependency (dependencies, "org.slf4j", "slf4j-simple", null, "jar");
-                }
-                catch (ClassNotFoundException e)
-                {
-                    getLog().debug("Using jetty default slf4j-simple log impl");
-                }   
-            }
-            else
-            {
-                getLog().info("Using JSP2.1 for jdk1.5 runtime");
-                dependencies = resolver.transitivelyResolvePomDependencies(projectBuilder, 
-                                                                           "org.mortbay.jetty", "jsp-2.1", POM_VERSION, true);
-            }
-               
-            //get rid of any copies of the servlet-api jar that might have been transitively introduced
-            //by the jsp project
-            resolver.removeDependency(dependencies, "org.mortbay.jetty", "servlet-api-2.5", null, "jar");
-            
-            return dependencies;
-        }
-        catch (Exception e)
-        {
-            getLog().debug(e);
-            throw e;
-        }
-
     }
     
     /**
