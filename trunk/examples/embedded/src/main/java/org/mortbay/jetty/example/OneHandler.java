@@ -25,8 +25,8 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
 
 public class OneHandler
 {
@@ -34,7 +34,7 @@ public class OneHandler
         throws Exception
     {
         Server server = new Server();
-        Connector connector=new SelectChannelConnector();
+        Connector connector=new SocketConnector();
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
         
