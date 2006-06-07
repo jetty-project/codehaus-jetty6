@@ -1,4 +1,4 @@
-
+    + Ssl algorithm taken from system property
     + Added 8 random letters&digits to Jetty-generated tmp work dir name to ensure uniqueness
 
 jetty-6.0.0beta17 - 1/6/2006

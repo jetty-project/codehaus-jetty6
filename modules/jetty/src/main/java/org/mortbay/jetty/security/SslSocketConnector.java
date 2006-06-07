@@ -80,7 +80,7 @@ public class SslSocketConnector extends SocketConnector
     private transient Password _password;
     private transient Password _keypassword;
     private String _protocol= "TLS";
-    private String _algorithm = "SunX509"; // cert algorithm
+    private String _algorithm = System.getProperty("ssl.KeyManagerFactory.algorithm","SunX509"); // cert algorithm
     private String _keystoreType = "JKS"; // type of the key store
     private String _provider;
     
