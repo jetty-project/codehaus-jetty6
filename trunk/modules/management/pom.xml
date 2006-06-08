@@ -62,7 +62,7 @@
                   <groupId>${project.groupId}</groupId>
                   <artifactId>${project.artifactId}</artifactId>
                   <version>${project.version}</version>
-                  <destFileName>${project.artifactId}.jar</destFileName>
+                  <destFileName>${project.artifactId}-${project.version}.jar</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>mx4j</groupId>

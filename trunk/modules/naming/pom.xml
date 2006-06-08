@@ -52,7 +52,7 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/naming/${project.artifactId}.${project.packaging}" />
+                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/naming/${project.artifactId}-${project.version}.${project.packaging}" />
               </tasks>
             </configuration>
           </execution>
