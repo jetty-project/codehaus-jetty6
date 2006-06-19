@@ -447,7 +447,7 @@ public class HttpConnection
         }
         catch(IOException e)
         {
-            throw new EofException(e); // TODO review this?
+            throw (e instanceof EofException) ? e:new EofException(e);
         }
     }
 

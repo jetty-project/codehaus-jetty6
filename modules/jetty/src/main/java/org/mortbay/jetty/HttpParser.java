@@ -259,11 +259,11 @@ public class HttpParser implements HttpTokens
                     if (filled>0)
                         total_filled+=filled;
                 }
-                catch(IOException ioe)
+                catch(IOException e)
                 {
-                    Log.debug(ioe);
+                    Log.debug(e);
                     reset(true);
-                    throw new EofException(ioe);
+                    throw (e instanceof EofException) ? e:new EofException(e);
                 }
             }
             
