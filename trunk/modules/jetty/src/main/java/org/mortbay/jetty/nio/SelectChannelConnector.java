@@ -865,7 +865,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             }
             catch (IOException e)
             {
-                throw new EofException(e);
+                throw (e instanceof EofException) ? e:new EofException(e);
             }
         }
 
@@ -891,9 +891,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                 try
                 {
                     close();
-                    Thread t=_thread;
-                    if (t!=null)
-                        t.interrupt();
                 }
                 catch (IOException e)
                 {
