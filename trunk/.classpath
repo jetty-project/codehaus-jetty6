@@ -16,13 +16,13 @@
 	<classpathentry output="modules/jetty/target/test-classes" kind="src" path="modules/jetty/src/test/java"/>
 	<classpathentry output="modules/management/target/classes" kind="src" path="modules/management/src/main/java"/>
 	<classpathentry output="modules/management/target/test-classes" kind="src" path="modules/management/src/test/java"/>
-	<classpathentry output="modules/maven/target/classes" kind="src" path="modules/maven-plugin/src/main/java"/>
-	<classpathentry output="modules/maven/target/classes" kind="src" path="modules/maven-plugin-utils/src/main/java"/>
+	<classpathentry output="modules/maven-plugin/target/classes" kind="src" path="modules/maven-plugin/src/main/java"/>
+	<classpathentry output="modules/maven-plugin-utils/target/classes" kind="src" path="modules/maven-plugin-utils/src/main/java"/>
 	<classpathentry output="modules/naming/target/classes" kind="src" path="modules/naming/src/main/java"/>
 	<classpathentry output="modules/naming/target/test-classes" kind="src" path="modules/naming/src/test/java"/>
 	<classpathentry output="modules/plus/target/classes" kind="src" path="modules/plus/src/main/java"/>
 	<classpathentry output="modules/plus/target/test-classes" kind="src" path="modules/plus/src/test/java"/>
-	<classpathentry output="modules/servlet/target/classes" kind="src" path="modules/servlet-api-2.5/src/main/java"/>
+	<classpathentry output="modules/servlet-api-2.5/target/classes" kind="src" path="modules/servlet-api-2.5/src/main/java"/>
 	<classpathentry output="modules/start/target/classes" kind="src" path="modules/start/src/main/java"/>
 	<classpathentry output="modules/util/target/classes" kind="src" path="modules/util/src/main/java"/>
 	<classpathentry output="modules/util/target/test-classes" kind="src" path="modules/util/src/test/java"/>
