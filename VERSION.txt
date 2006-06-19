@@ -1,3 +1,4 @@
+    + Cleaned up idle expiry.
     + Ssl algorithm taken from system property
     + Added 8 random letters&digits to Jetty-generated tmp work dir name to ensure uniqueness
     + Simplify runtime resolution of JSP library for plugin
