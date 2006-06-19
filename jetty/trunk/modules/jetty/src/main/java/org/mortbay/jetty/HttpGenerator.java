@@ -825,7 +825,7 @@ public class HttpGenerator implements HttpTokens
         catch (IOException e)
         {
             Log.ignore(e);
-            throw new EofException(e);
+            throw (e instanceof EofException) ? e:new EofException(e);
         }
     }
 
