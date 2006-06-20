@@ -880,7 +880,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         /* ------------------------------------------------------------ */
         private class IdleTask extends Timeout.Task
         {
-            boolean _short=false;
+            volatile boolean _short=false;
             
             /* ------------------------------------------------------------ */
             /*
