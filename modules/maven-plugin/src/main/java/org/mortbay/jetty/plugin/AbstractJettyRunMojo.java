@@ -60,7 +60,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      *
      * @parameter expression="${project.build.outputDirectory}"
      * @required
-     * @readonly
+     * 
      */
     private File classesDirectory;
     
