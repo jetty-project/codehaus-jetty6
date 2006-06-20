@@ -553,7 +553,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                         ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
                 }
                 for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                    base_request.addEventListener(((ServletRequestListener)LazyList.get(_requestAttributeListeners,i)));
+                    base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
             }
             
             // Handle the request
@@ -580,7 +580,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                         ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
                     
                     for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
-                        base_request.removeEventListener(((ServletRequestListener)LazyList.get(_requestAttributeListeners,i)));
+                        base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
                 }
             }
         }
