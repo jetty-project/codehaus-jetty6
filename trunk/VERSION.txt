@@ -1,3 +1,6 @@
+    + ensure explicitly set tmp directory called "work" is not deleted on exit
+    + ensure war is only unpacked if war is newer than "work" directory
+    + change name of generated tmp directory to be "Jetty_"+host+"_"+port+"_"+contextpath+"_"+virtualhost
     + Cleaned up idle expiry.
     + Ssl algorithm taken from system property
     + Added 8 random letters&digits to Jetty-generated tmp work dir name to ensure uniqueness
