@@ -538,7 +538,7 @@ public class ServletHandler extends AbstractHandler
         // Start filters
         if (_filters!=null)
         {
-            for (int i=_filters.length; i-->0;)
+            for (int i=0;i<_filters.length; i++)
                 _filters[i].start();
         }
         
