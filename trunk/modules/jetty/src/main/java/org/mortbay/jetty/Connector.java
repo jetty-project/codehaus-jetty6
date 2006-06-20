@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.EndPoint;
+import org.mortbay.log.Log;
 import org.mortbay.util.ajax.Continuation;
 
 /** HTTP Connector.
@@ -157,7 +158,7 @@ public interface Connector extends LifeCycle, Buffers
     
     /* ------------------------------------------------------------ */
     /**
-     * @return
+     * @return the underlying socket, channel, buffer etc. for the connector.
      */
     Object getConnection();
     
@@ -167,4 +168,112 @@ public interface Connector extends LifeCycle, Buffers
      * @return true if names resolution should be done.
      */
     boolean getResolveNames();
+    
+    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Get the number of requests handled by this connector
+     * since last call of statsReset(). If setStatsOn(false) then this
+     * is undefined.
+     */
+    public int getRequests();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsDurationMin.
+     */
+    public long getConnectionsDurationMin();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsDurationTotal.
+     */
+    public long getConnectionsDurationTotal();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsOpenMin.
+     */
+    public int getConnectionsOpenMin();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsRequestsMin.
+     */
+    public int getConnectionsRequestsMin();
+
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of connections accepted by the server since
+     * statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnections() ;
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of connections currently open that were opened
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsOpen() ;
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum number of connections opened simultaneously
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsOpenMax() ;
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Average duration in milliseconds of open connections
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getConnectionsDurationAve() ;
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum duration in milliseconds of an open connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getConnectionsDurationMax();
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Average number of requests per connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsRequestsAve() ;
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum number of requests per connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsRequestsMax();
+
+
+    
+    /* ------------------------------------------------------------ */
+    /** Reset statistics.
+     */
+    public void statsReset();
+    
+    /* ------------------------------------------------------------ */
+    public void setStatsOn(boolean on);
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if statistics collection is turned on.
+     */
+    public boolean getStatsOn();
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Timestamp stats were started at.
+     */
+    public long getStatsOnMs();
+    
+    
 }
