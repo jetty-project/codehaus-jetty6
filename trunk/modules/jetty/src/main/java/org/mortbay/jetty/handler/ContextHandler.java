@@ -421,7 +421,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             if (_contextListeners != null )
             {
                 ServletContextEvent event= new ServletContextEvent(_context);
-                for (int i= 0; i < LazyList.size(_contextListeners); i++)
+                for (int i=LazyList.size(_contextListeners); i-->0;)
                 {
                     ((ServletContextListener)LazyList.get(_contextListeners, i)).contextDestroyed(event);
                 }
@@ -576,7 +576,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 // Handle more REALLY SILLY request events!
                 if (new_context)
                 {
-                    for(int i=0;i<LazyList.size(_requestListeners);i++)
+                    for(int i=LazyList.size(_requestListeners);i-->0;)
                         ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
                     
                     for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)

@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.io.IO;
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
