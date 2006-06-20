@@ -540,7 +540,9 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         /* ------------------------------------------------------------ */
         public void wakeup()
         {
-            _selector.wakeup();
+            Selector selector = _selector;
+            if (selector!=null)
+                selector.wakeup();
         }
     }
 
@@ -549,7 +551,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     /* ------------------------------------------------------------------------------- */
     private class HttpChannelEndPoint extends ChannelEndPoint implements Runnable
     {
-        private Thread _thread;
         private SelectSet _selectSet;
         private boolean _dispatched = false;
         private boolean _writable = true; // TODO - get rid of this bad side effect
@@ -801,7 +802,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         {
             try
             {
-                _thread=Thread.currentThread();
                 _connection.handle();
             }
             catch (ClosedChannelException e)
@@ -828,8 +828,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             }
             finally
             {
-                _thread=null;
-                    
                 RetryContinuation continuation = (RetryContinuation) _connection.getRequest().getContinuation();
                 if (continuation != null)
                 {
