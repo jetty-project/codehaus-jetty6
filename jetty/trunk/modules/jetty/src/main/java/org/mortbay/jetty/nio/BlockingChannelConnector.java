@@ -164,6 +164,8 @@ public class BlockingChannelConnector extends AbstractConnector implements NIOCo
         {
             try
             {
+                connectionOpened(_connection);
+                
                 while (isOpen())
                 {
                     if (_connection.isIdle())
@@ -200,6 +202,7 @@ public class BlockingChannelConnector extends AbstractConnector implements NIOCo
             }
             finally
             {
+                connectionClosed(_connection);
             }
         }
     }

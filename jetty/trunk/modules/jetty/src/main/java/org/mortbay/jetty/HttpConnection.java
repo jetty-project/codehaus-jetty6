@@ -40,6 +40,9 @@ public class HttpConnection
     private static int UNKNOWN = -2;
     private static ThreadLocal __currentConnection = new ThreadLocal();
 
+    private long _timeStamp=System.currentTimeMillis();
+    private int _requests;
+    
     private Connector _connector;
     private EndPoint _endp;
     private Server _server;
@@ -70,6 +73,7 @@ public class HttpConnection
     private transient boolean _head = false;
     private transient boolean _host = false;
 
+    /* ------------------------------------------------------------ */
     public static HttpConnection getCurrentConnection()
     {
         return (HttpConnection) __currentConnection.get();
@@ -93,6 +97,24 @@ public class HttpConnection
         _server = server;
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the number of requests handled by this connection
+     */
+    public int getRequests()
+    {
+        return _requests;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The time this connection was established.
+     */
+    public long getTimeStamp()
+    {
+        return _timeStamp;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the associatedObject.
@@ -327,7 +349,6 @@ public class HttpConnection
                 }
             }
         }
-        
     }
 
     /* ------------------------------------------------------------ */
@@ -386,6 +407,8 @@ public class HttpConnection
                 
                 if (!retry)
                 {
+                    _requests++;
+                    
                     if (_request.getContinuation()!=null && _request.getContinuation().isPending())
                     {
                         Log.debug("continuation still pending {}");
@@ -742,4 +765,6 @@ public class HttpConnection
             super(HttpConnection.this._out);
         }
     }
+
+
 }

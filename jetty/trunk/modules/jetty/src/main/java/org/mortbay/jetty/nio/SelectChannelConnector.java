@@ -559,6 +559,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         private int _interestOps;
         private int _readBlocked;
         private int _writeBlocked;
+        private boolean _closed=false;
 
         private IdleTask _timeoutTask = new IdleTask();
 
@@ -568,6 +569,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             super(channel);
             _selectSet=selectSet;
             _connection = new HttpConnection(SelectChannelConnector.this, this, SelectChannelConnector.this.getServer());
+            connectionOpened(_connection);
             _key = key;
             _key.attach(this);
             _selectSet.scheduleIdle(_timeoutTask,_connection.isIdle());
@@ -851,19 +853,33 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         public void close() throws IOException
         {
             if (_key!=null)
+            {
                 _key.cancel();
+            }
             _key=null;
             _selectSet.cancelIdle(_timeoutTask);
             RetryContinuation continuation = (RetryContinuation) _connection.getRequest().getContinuation();
             if (continuation!=null && continuation.isPending())
                 continuation.reset();
-            try
+            
+
+            synchronized (this)
             {
-                super.close();
+                if (!_closed)
+                    connectionClosed(_connection);
+                _closed=true;
             }
-            catch (IOException e)
+            
+            if (super.isOpen())
             {
-                throw (e instanceof EofException) ? e:new EofException(e);
+                try
+                {
+                    super.close();
+                }
+                catch (IOException e)
+                {
+                    throw (e instanceof EofException) ? e:new EofException(e);
+                }
             }
         }
 
