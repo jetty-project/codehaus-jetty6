@@ -42,5 +42,8 @@
 	<classpathentry kind="lib" path="modules/jetty/src/test/resources"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/2.2/xbean-spring-2.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j-tools/3.0.1/mx4j-tools-3.0.1.jar"/>
+	<classpathentry output="examples/test-webapp/target/test-6.0-SNAPSHOT/WEB-INF/classes" kind="src" path="examples/test-webapp/src/main/java"/>
+	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-api-2.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
