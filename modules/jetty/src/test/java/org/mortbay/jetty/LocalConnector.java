@@ -61,6 +61,7 @@ public class LocalConnector extends AbstractConnector
         endp.setIn(in);
         endp.setOut(out);
         connection=new HttpConnection(this,endp,getServer());
+        connectionOpened(connection);
         accepting=false;
     }
     
@@ -75,6 +76,7 @@ public class LocalConnector extends AbstractConnector
         endp.setIn(in);
         endp.setOut(out);
         connection=new HttpConnection(this,endp,getServer());
+        connectionOpened(connection);
         accepting=false;
     }
     
@@ -94,6 +96,7 @@ public class LocalConnector extends AbstractConnector
             while(accepting)
                 this.wait();
         }
+
         
         // System.err.println("\nRESPONSES:\n"+out);
         return out.toString();
@@ -123,6 +126,7 @@ public class LocalConnector extends AbstractConnector
             
             try
             {
+                connectionOpened(connection);
                 while (in.length()>0)
                     connection.handle();
             }
@@ -133,6 +137,7 @@ public class LocalConnector extends AbstractConnector
                     accepting=false;
                     this.notify();
                 }
+                connectionClosed(connection);
             }
         }
         

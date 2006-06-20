@@ -69,6 +69,23 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private transient ArrayList _responseBuffers;
     private transient Thread[] _acceptorThread;
     
+    Object _statsLock = new Object();
+    transient long _statsStartedAt=-1;
+    transient int _requests;
+    transient int _connections;                  // total number of connections made to server
+    
+    transient int _connectionsOpen;              // number of connections currently open
+    transient int _connectionsOpenMin;           // min number of connections open simultaneously
+    transient int _connectionsOpenMax;           // max number of connections open simultaneously
+    
+    transient long _connectionsDurationMin;      // min duration of a connection
+    transient long _connectionsDurationMax;      // max duration of a connection
+    transient long _connectionsDurationTotal;    // total duration of all coneection
+    
+    transient int _connectionsRequestsMin;       // min requests per connection
+    transient int _connectionsRequestsMax;       // max requests per connection
+
+    
     /* ------------------------------------------------------------------------------- */
     /** 
      */
@@ -649,4 +666,197 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     {
         _name = name;
     }
+    
+    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Get the number of requests handled by this context
+     * since last call of statsReset(). If setStatsOn(false) then this
+     * is undefined.
+     */
+    public int getRequests() {return _requests;}
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsDurationMin.
+     */
+    public long getConnectionsDurationMin()
+    {
+        return _connectionsDurationMin;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsDurationTotal.
+     */
+    public long getConnectionsDurationTotal()
+    {
+        return _connectionsDurationTotal;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsOpenMin.
+     */
+    public int getConnectionsOpenMin()
+    {
+        return _connectionsOpenMin;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsRequestsMin.
+     */
+    public int getConnectionsRequestsMin()
+    {
+        return _connectionsRequestsMin;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of connections accepted by the server since
+     * statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnections() {return _connections;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of connections currently open that were opened
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsOpen() {return _connectionsOpen;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum number of connections opened simultaneously
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsOpenMax() {return _connectionsOpenMax;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Average duration in milliseconds of open connections
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getConnectionsDurationAve() {return _connections==0?0:(_connectionsDurationTotal/_connections);}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum duration in milliseconds of an open connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getConnectionsDurationMax() {return _connectionsDurationMax;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Average number of requests per connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsRequestsAve() {return _connections==0?0:(_requests/_connections);}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum number of requests per connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsRequestsMax() {return _connectionsRequestsMax;}
+
+
+    
+    /* ------------------------------------------------------------ */
+    /** Reset statistics.
+     */
+    public void statsReset()
+    {
+        _statsStartedAt=_statsStartedAt==-1?-1:System.currentTimeMillis();
+
+        _connections=0;
+        
+        _connectionsOpenMin=_connectionsOpen;
+        _connectionsOpenMax=_connectionsOpen;
+        _connectionsOpen=0;
+        
+        _connectionsDurationMin=0;
+        _connectionsDurationMax=0;
+        _connectionsDurationTotal=0;
+
+        _requests=0;
+
+        _connectionsRequestsMin=0;
+        _connectionsRequestsMax=0;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setStatsOn(boolean on)
+    {
+        if (on && _statsStartedAt!=-1)
+            return;
+        Log.info("Statistics on = "+on+" for "+this);
+        statsReset();
+        _statsStartedAt=on?System.currentTimeMillis():-1;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if statistics collection is turned on.
+     */
+    public boolean getStatsOn()
+    {
+        return _statsStartedAt!=-1;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Timestamp stats were started at.
+     */
+    public long getStatsOnMs()
+    {
+        return (_statsStartedAt!=-1)?(System.currentTimeMillis()-_statsStartedAt):0;
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    protected void connectionOpened(HttpConnection connection)
+    {
+        if (_statsStartedAt==-1)
+            return;
+        synchronized(_statsLock)
+        {
+            _connectionsOpen++;
+            if (_connectionsOpen > _connectionsOpenMax)
+                _connectionsOpenMax=_connectionsOpen;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void connectionClosed(HttpConnection connection)
+    {
+        if (_statsStartedAt==-1)
+            return;
+        
+        synchronized(_statsLock)
+        {
+            int requests=connection.getRequests();
+            _requests+=requests;
+            long duration=System.currentTimeMillis()-connection.getTimeStamp();
+            _connections++;
+            _connectionsOpen--;
+            _connectionsDurationTotal+=duration;
+            if (_connectionsOpen<0)
+                _connectionsOpen=0;
+            if (_connectionsOpen<_connectionsOpenMin)
+                _connectionsOpenMin=_connectionsOpen;
+            if (_connectionsDurationMin==0 || duration<_connectionsDurationMin)
+                _connectionsDurationMin=duration;
+            if (duration>_connectionsDurationMax)
+                _connectionsDurationMax=duration;
+            if (_connectionsRequestsMin==0 || requests<_connectionsRequestsMin)
+                _connectionsRequestsMin=requests;
+            if (requests>_connectionsRequestsMax)
+                _connectionsRequestsMax=requests;
+        }
+    }
+
 }
