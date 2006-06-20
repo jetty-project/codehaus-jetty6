@@ -635,7 +635,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                     if (_sessionListeners!=null)
                     {
                         HttpSessionEvent event=new HttpSessionEvent(this);
-                        for (int i=0; i<LazyList.size(_sessionListeners); i++)
+                        for (int i=LazyList.size(_sessionListeners); i-->0;)
                             ((HttpSessionListener)LazyList.get(_sessionListeners,i)).sessionDestroyed(event);
                     }
 
