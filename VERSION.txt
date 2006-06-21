@@ -1,3 +1,4 @@
+    + patch to allow Jetty to use JSP2.1 from Glassfish instead of Jasper from Tomcat
     + fixed classesDirectory param for maven plugin to be configurable
     + ensure explicitly set tmp directory called "work" is not deleted on exit
     + ensure war is only unpacked if war is newer than "work" directory
