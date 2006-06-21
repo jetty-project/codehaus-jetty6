@@ -1,0 +1,7 @@
+Glassfish JSP Patch
+-------------------
+
+This patch allows Jetty to use Glassfish's JSP 2.1 implementation instead of Jasper from the Tomcat project.
+
+Apply the patch, and the follow the instructions in the modules/glassfish-jsp-api
+and modules/glassfish-jsp README.txt files.
