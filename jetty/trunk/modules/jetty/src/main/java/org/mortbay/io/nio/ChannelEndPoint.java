@@ -37,12 +37,12 @@ import org.mortbay.io.Portable;
  */
 public class ChannelEndPoint implements EndPoint
 {
-    ByteChannel _channel;
-    ByteBuffer[] _gather2;
-    ByteBuffer[] _gather3;
-    Socket _socket;
-    InetSocketAddress _local;
-    InetSocketAddress _remote;
+    protected ByteChannel _channel;
+    protected ByteBuffer[] _gather2;
+    protected ByteBuffer[] _gather3;
+    protected Socket _socket;
+    protected InetSocketAddress _local;
+    protected InetSocketAddress _remote;
     
     /**
      * 
