@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
@@ -81,6 +82,19 @@ public class Server extends HandlerWrapper implements Attributes
     public Server()
     {
         setServer(this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Convenience constructor
+     * Creates server and a {@link SocketConnector} at the passed port.
+     */
+    public Server(int port)
+    {
+        setServer(this);
+
+        Connector connector=new SocketConnector();
+        connector.setPort(8080);
+        setConnectors(new Connector[]{connector});
     }
 
     /* ------------------------------------------------------------ */
