@@ -341,27 +341,17 @@ public class Main
                 }
                 else if(subject.endsWith("/*"))
                 {
-                    // directory of JAR files
-                    File extdir=new File(file.substring(0,file.length()-1));
-                    File[] jars=extdir.listFiles(new FilenameFilter()
-                    {
-                        public boolean accept(File dir,String name)
-                        {
-                            String namelc=name.toLowerCase();
-                            return namelc.endsWith(".jar")||name.endsWith(".zip");
-                        }
-                    });
-                    for(int i=0;jars!=null&&i<jars.length;i++)
-                    {
-                        String jar=jars[i].getCanonicalPath();
-                        if(!done.containsKey(jar))
-                        {
-                            done.put(jar,jar);
-                            boolean added=_classpath.addComponent(jar);
-                            if(_debug)
-                                System.err.println((added?"  CLASSPATH+=":"  !")+jar);
-                        }
-                    }
+                    // directory of JAR files - only add jars and zips
+                    // within the directory
+                    File dir = new File(file.substring(0,file.length()-1));
+                    addJars (dir, done, false);
+                }
+                else if (subject.endsWith("/**"))
+                {
+                    //directory hierarchy of jar files - recursively add all
+                    //jars and zips in the hierarchy
+                    File dir = new File (file.substring(0, file.length()-2));
+                    addJars (dir, done, true);
                 }
                 else if(subject.endsWith("/"))
                 {
@@ -546,5 +536,32 @@ public class Main
             }
         }
 
-    
+        private void addJars (File dir, Hashtable table, boolean recurse)
+        throws IOException
+        {
+            File[] entries = dir.listFiles();
+ 
+            for(int i=0;entries!=null&&i<entries.length;i++)
+            {
+                File entry = entries[i];
+                
+                if (entry.isDirectory() && recurse)
+                    addJars(entry, table, recurse);
+                else
+                {
+                    String name = entry.getName().toLowerCase();
+                    if (name.endsWith(".jar") || name.endsWith(".zip"))
+                    {
+                        String jar = entry.getCanonicalPath();
+                        if(!table.containsKey(jar))
+                        {
+                            table.put(jar,jar);
+                            boolean added=_classpath.addComponent(jar);
+                            if(_debug)
+                                System.err.println((added?"  CLASSPATH+=":"  !")+jar);
+                        }
+                    }
+                }
+            }
+        }
 }
