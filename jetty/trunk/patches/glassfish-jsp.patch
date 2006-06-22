@@ -6,8 +6,8 @@ Index: pom.xml
      <module>modules/jetty</module>
      <module>modules/jsp-api-2.1</module>
      <module>modules/jsp-2.1</module>
-+    <module>modules/glassfish-jasper-api</module>
-+    <module>modules/glassfish-jasper</module>
++    <module>modules/glassfish-jsp-api</module>
++    <module>modules/glassfish-jsp</module>
      <module>modules/jsp-api-2.0</module>
      <module>modules/jsp-2.0</module>
      <module>modules/management</module>
@@ -34,10 +34,10 @@ Index: modules/start/src/main/java/org/mortbay/start/start.config
 +$(java.home)/lib/tools.jar                       ! available com.sun.tools.javac.Main
 +$(java.home)/../lib/tools.jar                    ! available com.sun.tools.javac.Main
 +
-Index: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/Log.java
+Index: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java
 ===================================================================
---- modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/Log.java	(revision 0)
-+++ modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/Log.java	(revision 0)
+--- modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java	(revision 0)
++++ modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java	(revision 0)
 @@ -0,0 +1,85 @@
 +/**
 + * 
@@ -126,7 +126,7 @@ Index: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging
 +}
 \ No newline at end of file
 
-Property changes on: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/Log.java
+Property changes on: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java
 ___________________________________________________________________
 Name: svn:mime-type
    + text/plain
@@ -135,10 +135,10 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
-Index: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java
+Index: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java
 ===================================================================
---- modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java	(revision 0)
-+++ modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java	(revision 0)
+--- modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java	(revision 0)
++++ modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java	(revision 0)
 @@ -0,0 +1,50 @@
 +/**
 + * 
@@ -191,7 +191,7 @@ Index: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging
 +
 +}
 
-Property changes on: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java
+Property changes on: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java
 ___________________________________________________________________
 Name: svn:mime-type
    + text/plain
@@ -200,10 +200,10 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
-Index: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java
+Index: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java
 ===================================================================
---- modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java	(revision 0)
-+++ modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java	(revision 0)
+--- modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java	(revision 0)
++++ modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java	(revision 0)
 @@ -0,0 +1,26 @@
 +/**
 + * 
@@ -232,7 +232,7 @@ Index: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging
 +    }
 +}
 
-Property changes on: modules/glassfish-jasper/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java
+Property changes on: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java
 ___________________________________________________________________
 Name: svn:mime-type
    + text/plain
@@ -241,10 +241,10 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
-Index: modules/glassfish-jasper/pom.xml
+Index: modules/glassfish-jsp/pom.xml
 ===================================================================
---- modules/glassfish-jasper/pom.xml	(revision 0)
-+++ modules/glassfish-jasper/pom.xml	(revision 0)
+--- modules/glassfish-jsp/pom.xml	(revision 0)
++++ modules/glassfish-jsp/pom.xml	(revision 0)
 @@ -0,0 +1,135 @@
 +<?xml version="1.0" encoding="UTF-8"?><project>
 +  <parent>
@@ -382,7 +382,7 @@ Index: modules/glassfish-jasper/pom.xml
 +  </properties>
 +</project>
 
-Property changes on: modules/glassfish-jasper/pom.xml
+Property changes on: modules/glassfish-jsp/pom.xml
 ___________________________________________________________________
 Name: svn:mime-type
    + text/xml
@@ -391,10 +391,10 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
-Index: modules/glassfish-jasper/README.txt
+Index: modules/glassfish-jsp/README.txt
 ===================================================================
---- modules/glassfish-jasper/README.txt	(revision 0)
-+++ modules/glassfish-jasper/README.txt	(revision 0)
+--- modules/glassfish-jsp/README.txt	(revision 0)
++++ modules/glassfish-jsp/README.txt	(revision 0)
 @@ -0,0 +1,22 @@
 +Building Jetty with glassfish jsp
 +---------------------------------
@@ -407,7 +407,7 @@ Index: modules/glassfish-jasper/README.txt
 +   For example, if you are the user called "fred", you do:
 +   cvs -d :pserver:fred@cvs.dev.java.net:/cvs login
 +
-+3. Create a build.properties file in the modules/glassfish-jasper directory.
++3. Create a build.properties file in the modules/glassfish-jsp directory.
 +   This file will contain your dev.java.net login name and a cvs tag
 +   which will be the tag of the glassfish source to export. Assuming you have
 +   the login "fred", and the tag (for the first release of glassfish) of 
@@ -419,7 +419,7 @@ Index: modules/glassfish-jasper/README.txt
 +4. Execute "mvn install" from the top level of the Jetty directory.
 +
 
-Property changes on: modules/glassfish-jasper/README.txt
+Property changes on: modules/glassfish-jsp/README.txt
 ___________________________________________________________________
 Name: svn:mime-type
    + text/plain
@@ -428,10 +428,10 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
-Index: modules/glassfish-jasper/build.xml
+Index: modules/glassfish-jsp/build.xml
 ===================================================================
---- modules/glassfish-jasper/build.xml	(revision 0)
-+++ modules/glassfish-jasper/build.xml	(revision 0)
+--- modules/glassfish-jsp/build.xml	(revision 0)
++++ modules/glassfish-jsp/build.xml	(revision 0)
 @@ -0,0 +1,94 @@
 +<!-- ================================================================= -->
 +<!-- Updates the glassfish files in jetty from glassfish cvs           -->
@@ -528,7 +528,7 @@ Index: modules/glassfish-jasper/build.xml
 +  <target name="export-update" description="Export the src and copy selected files to the src/main/java dir" depends="export,update"/>
 +</project>
 
-Property changes on: modules/glassfish-jasper/build.xml
+Property changes on: modules/glassfish-jsp/build.xml
 ___________________________________________________________________
 Name: svn:mime-type
    + text/xml
@@ -537,10 +537,10 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
-Index: modules/glassfish-jasper-api/pom.xml
+Index: modules/glassfish-jsp-api/pom.xml
 ===================================================================
---- modules/glassfish-jasper-api/pom.xml	(revision 0)
-+++ modules/glassfish-jasper-api/pom.xml	(revision 0)
+--- modules/glassfish-jsp-api/pom.xml	(revision 0)
++++ modules/glassfish-jsp-api/pom.xml	(revision 0)
 @@ -0,0 +1,88 @@
 +<?xml version="1.0" encoding="UTF-8"?><project>
 +  <parent>
@@ -631,7 +631,7 @@ Index: modules/glassfish-jasper-api/pom.xml
 +  </properties>
 +</project>
 
-Property changes on: modules/glassfish-jasper-api/pom.xml
+Property changes on: modules/glassfish-jsp-api/pom.xml
 ___________________________________________________________________
 Name: svn:mime-type
    + text/xml
@@ -640,10 +640,10 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
-Index: modules/glassfish-jasper-api/README.txt
+Index: modules/glassfish-jsp-api/README.txt
 ===================================================================
---- modules/glassfish-jasper-api/README.txt	(revision 0)
-+++ modules/glassfish-jasper-api/README.txt	(revision 0)
+--- modules/glassfish-jsp-api/README.txt	(revision 0)
++++ modules/glassfish-jsp-api/README.txt	(revision 0)
 @@ -0,0 +1,22 @@
 +Building Jetty with glassfish jsp
 +---------------------------------
@@ -656,7 +656,7 @@ Index: modules/glassfish-jasper-api/README.txt
 +   For example, if you are the user called "fred", you do:
 +   cvs -d :pserver:fred@cvs.dev.java.net:/cvs login
 +
-+3. Create a build.properties file in the modules/glassfish-jasper-api directory.
++3. Create a build.properties file in the modules/glassfish-jsp-api directory.
 +   This file will contain your dev.java.net login name and a cvs tag
 +   which will be the tag of the glassfish source to export. Assuming you have
 +   the login "fred", and the tag (for the first release of glassfish) of 
@@ -668,7 +668,7 @@ Index: modules/glassfish-jasper-api/README.txt
 +4. Execute "mvn install" from the top level of the Jetty directory.
 +
 
-Property changes on: modules/glassfish-jasper-api/README.txt
+Property changes on: modules/glassfish-jsp-api/README.txt
 ___________________________________________________________________
 Name: svn:mime-type
    + text/plain
@@ -677,10 +677,10 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
-Index: modules/glassfish-jasper-api/build.xml
+Index: modules/glassfish-jsp-api/build.xml
 ===================================================================
---- modules/glassfish-jasper-api/build.xml	(revision 0)
-+++ modules/glassfish-jasper-api/build.xml	(revision 0)
+--- modules/glassfish-jsp-api/build.xml	(revision 0)
++++ modules/glassfish-jsp-api/build.xml	(revision 0)
 @@ -0,0 +1,81 @@
 +<!-- ================================================================= -->
 +<!-- Updates the glassfish files in jetty from glassfish cvs           -->
@@ -764,7 +764,7 @@ Index: modules/glassfish-jasper-api/build.xml
 +  <target name="export-update" description="Export the src and copy selected files to the src/main/java dir" depends="export,update"/>
 +</project>
 
-Property changes on: modules/glassfish-jasper-api/build.xml
+Property changes on: modules/glassfish-jsp-api/build.xml
 ___________________________________________________________________
 Name: svn:mime-type
    + text/xml
