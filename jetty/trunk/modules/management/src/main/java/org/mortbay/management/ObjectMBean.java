@@ -517,10 +517,10 @@ public class ObjectMBean implements DynamicMBean
             if (methods[m].getName().equals("get" + uName) && methods[m].getParameterTypes().length == 0)
             {
                 if (getter != null)
-                    throw new IllegalArgumentException("Multiple getters for attr " + name);
+                    throw new IllegalArgumentException("Multiple getters for attr " + name+ " in "+oClass);
                 getter = methods[m];
                 if (type != null && !type.equals(methods[m].getReturnType()))
-                    throw new IllegalArgumentException("Type conflict for attr " + name);
+                    throw new IllegalArgumentException("Type conflict for attr " + name+ " in "+oClass);
                 type = methods[m].getReturnType();
             }
 
@@ -528,10 +528,10 @@ public class ObjectMBean implements DynamicMBean
             if (methods[m].getName().equals("is" + uName) && methods[m].getParameterTypes().length == 0)
             {
                 if (getter != null)
-                    throw new IllegalArgumentException("Multiple getters for attr " + name);
+                    throw new IllegalArgumentException("Multiple getters for attr " + name+ " in "+oClass);
                 getter = methods[m];
                 if (type != null && !type.equals(methods[m].getReturnType()))
-                    throw new IllegalArgumentException("Type conflict for attr " + name);
+                    throw new IllegalArgumentException("Type conflict for attr " + name+ " in "+oClass);
                 type = methods[m].getReturnType();
             }
 
@@ -539,10 +539,10 @@ public class ObjectMBean implements DynamicMBean
             if (writable && methods[m].getName().equals("set" + uName) && methods[m].getParameterTypes().length == 1)
             {
                 if (setter != null)
-                    throw new IllegalArgumentException("Multiple setters for attr " + name);
+                    throw new IllegalArgumentException("Multiple setters for attr " + name+ " in "+oClass);
                 setter = methods[m];
                 if (type != null && !type.equals(methods[m].getParameterTypes()[0]))
-                    throw new IllegalArgumentException("Type conflict for attr " + name);
+                    throw new IllegalArgumentException("Type conflict for attr " + name+ " in "+oClass);
                 type = methods[m].getParameterTypes()[0];
             }
         }
@@ -552,7 +552,7 @@ public class ObjectMBean implements DynamicMBean
 
 
         if (getter == null && setter == null)
-            throw new IllegalArgumentException("No getter or setters found for " + name);
+            throw new IllegalArgumentException("No getter or setters found for " + name+ " in "+oClass);
 
         try
         {
