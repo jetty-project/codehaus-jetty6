@@ -22,17 +22,25 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
-public class OneServletContext
+public class ManyServletContext
 {
     public static void main(String[] args)
         throws Exception
     {
         Server server = new Server(8080);
-        Context context = new Context(server,"/",Context.SESSIONS);
-        context.addServlet(new ServletHolder(new HelloServlet()), "/*");
+        
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        server.setHandler(contexts);
+        
+        Context root = new Context(contexts,"/",Context.SESSIONS);
+        root.addServlet(new ServletHolder(new HelloServlet("Ciao")), "/*");
+        
+        Context other = new Context(contexts,"/other",Context.SESSIONS);
+        other.addServlet("org.mortbay.jetty.example.ManyServletContext$HelloServlet", "/*");
         
         server.start();
         server.join();
@@ -40,11 +48,18 @@ public class OneServletContext
 
     public static class HelloServlet extends HttpServlet
     {
+        String greeting="Hello";
+        public HelloServlet()
+        {}
+        
+        public HelloServlet(String hi)
+        {greeting=hi;}
+        
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
         {
             response.setContentType("text/html");
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("<h1>Hello SimpleServlet</h1>");
+            response.getWriter().println("<h1>"+greeting+" SimpleServlet</h1>");
             response.getWriter().println("session="+request.getSession(true).getId());
         }
     }

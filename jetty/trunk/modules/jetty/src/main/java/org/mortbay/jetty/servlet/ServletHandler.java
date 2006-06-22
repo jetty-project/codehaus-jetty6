@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -80,6 +81,7 @@ public class ServletHandler extends AbstractHandler
     private FilterHolder[] _filters;
     private FilterMapping[] _filterMappings;
     private boolean _filterChainsCached=true;
+    private int _maxFilterChainsCacheSize=1000;
     
     private ServletHolder[] _servlets;
     private ServletMapping[] _servletMappings;
@@ -499,6 +501,8 @@ public class ServletHandler extends AbstractHandler
             {
                 if (LazyList.size(filters) > 0)
                     chain= new CachedChain(filters, servletHolder);
+                if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
+                    _chainCache[requestType].clear();
                 _chainCache[requestType].put(key,chain);
             }
         }
@@ -584,10 +588,48 @@ public class ServletHandler extends AbstractHandler
     }
 
     /* ------------------------------------------------------------ */
-    protected ServletHolder newServletHolder()
+    /**
+     * @deprecated use {@link #newServletHolder(Class)}
+     */
+    protected final ServletHolder newServletHolder()
     {
-        return new ServletHolder();
+        return null;
     }
+    
+    /* ------------------------------------------------------------ */
+    public ServletHolder newServletHolder(Class servlet)
+    {
+        return new ServletHolder(servlet);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a servlet.
+     * @return The servlet holder.
+     */
+    public ServletHolder addServletWithMapping (String className,String pathSpec)
+    {
+        ServletHolder holder = newServletHolder(null);
+        holder.setName(className);
+        holder.setClassName(className);
+        
+        addServletWithMapping(holder,pathSpec);
+        
+        return holder;
+    }   
+    
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a servlet.
+     * @return The servlet holder.
+     */
+    public ServletHolder addServletWithMapping (Class servlet,String pathSpec)
+    {
+        ServletHolder holder = newServletHolder(servlet);
+        setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder, ServletHolder.class));
+        
+        addServletWithMapping(holder,pathSpec);
+        
+        return holder;
+    }   
     
     /* ------------------------------------------------------------ */
     /** conveniance method to add a servlet.
@@ -596,38 +638,27 @@ public class ServletHandler extends AbstractHandler
      * @param pathSpec
      * @return The servlet holder.
      */
-    public ServletHolder addServletWithMapping (String className,String pathSpec)
+    public void addServletWithMapping (ServletHolder servlet,String pathSpec)
     {
-        ServletHolder holder = null;
+        ServletHolder[] holders=getServlets();
+        if (holders!=null)
+            holders = (ServletHolder[])holders.clone();
+        
         try
         {
-            holder = newServletHolder();
-            holder.setName(className);
-            holder.setClassName(className);
-            setServlets((ServletHolder[])LazyList.addToArray(getServlets(), holder, ServletHolder.class));
-            
+            setServlets((ServletHolder[])LazyList.addToArray(holders, servlet, ServletHolder.class));
             
             ServletMapping mapping = new ServletMapping();
-            mapping.setServletName(className);
+            mapping.setServletName(servlet.getName());
             mapping.setPathSpec(pathSpec);
             setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping, ServletMapping.class));
-            
-            return holder;
         }
         catch (Exception e)
         {
-            //back out the holder addition if it all went wrong
-            ServletHolder[] currentHolders = getServlets();
-            ServletHolder[] holders = new ServletHolder[currentHolders.length-1];
-            int j=0;
-            for (int i=0; i<currentHolders.length; i++)
-            {
-                if (currentHolders[i]!=holder)
-                    holders[j++] = currentHolders[i];
-            }
             setServlets(holders);
-            
-            throw (RuntimeException)e;
+            if (e instanceof RuntimeException)
+                throw (RuntimeException)e;
+            throw new RuntimeException(e);
         }
     }
 
@@ -662,12 +693,35 @@ public class ServletHandler extends AbstractHandler
         setServletMappings((ServletMapping[])LazyList.addToArray(getServletMappings(), mapping, ServletMapping.class));
     }
     
-    
+    /* ------------------------------------------------------------ */
+    public FilterHolder newFilterHolder(Class filter)
+    {
+        return new FilterHolder(filter);
+    }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated use {@link #newFilterHolder(Class)}
+     */
     protected FilterHolder newFilterHolder()
     {
-        return new FilterHolder();
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a filter.
+     * @param name
+     * @param className
+     * @param pathSpec
+     * @param dispatches see {@link FilterMapping#setDispatches(int)}
+     * @return The filter holder.
+     */
+    public FilterHolder addFilterWithMapping (Class filter,String pathSpec,int dispatches)
+    {
+        FilterHolder holder = newFilterHolder(filter);
+        addFilterWithMapping(holder,pathSpec,dispatches);
+        
+        return holder;
     }
     
     /* ------------------------------------------------------------ */
@@ -680,18 +734,49 @@ public class ServletHandler extends AbstractHandler
      */
     public FilterHolder addFilterWithMapping (String className,String pathSpec,int dispatches)
     {
-        FilterHolder holder = newFilterHolder();
+        FilterHolder holder = newFilterHolder(null);
         holder.setName(className);
         holder.setClassName(className);
-        setFilters((FilterHolder[])LazyList.addToArray(getFilters(), holder, FilterHolder.class));
         
-        FilterMapping mapping = new FilterMapping();
-        mapping.setFilterName(className);
-        mapping.setPathSpec(pathSpec);
-        mapping.setDispatches(dispatches);
-        setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping, FilterMapping.class));
-        
+        addFilterWithMapping(holder,pathSpec,dispatches);
         return holder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a filter.
+     * @param name
+     * @param className
+     * @param pathSpec
+     * @param dispatches see {@link FilterMapping#setDispatches(int)}
+     * @return The filter holder.
+     */
+    public void addFilterWithMapping (FilterHolder holder,String pathSpec,int dispatches)
+    {
+        FilterHolder[] holders = getFilters();
+        if (holders!=null)
+            holders = (FilterHolder[])holders.clone();
+        
+        try
+        {
+            setFilters((FilterHolder[])LazyList.addToArray(holders, holder, FilterHolder.class));
+            
+            FilterMapping mapping = new FilterMapping();
+            mapping.setFilterName(holder.getName());
+            mapping.setPathSpec(pathSpec);
+            mapping.setDispatches(dispatches);
+            setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping, FilterMapping.class));
+        }
+        catch (RuntimeException e)
+        {
+            setFilters(holders);
+            throw e;
+        }
+        catch (Error e)
+        {
+            setFilters(holders);
+            throw e;
+        }
+            
     }
     
     /* ------------------------------------------------------------ */
@@ -1032,5 +1117,26 @@ public class ServletHandler extends AbstractHandler
             b.append(_servletHolder);
             return b.toString();
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The maximum entries in a filter chain cache.
+     */
+    public int getMaxFilterChainsCacheSize()
+    {
+        return _maxFilterChainsCacheSize;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the maximum filter chain cache size.
+     * Filter chains are cached if {@link #isFilterChainsCached()} is true. If the max cache size
+     * is greater than zero, then the cache is flushed whenever it grows to be this size.
+     * 
+     * @param maxFilterChainsCacheSize  the maximum number of entries in a filter chain cache.
+     */
+    public void setMaxFilterChainsCacheSize(int maxFilterChainsCacheSize)
+    {
+        _maxFilterChainsCacheSize = maxFilterChainsCacheSize;
     }
 }

@@ -78,12 +78,27 @@ public class ServletHolder extends Holder
      */
     public ServletHolder(Servlet servlet)
     {
-        // TODO test
-        _servlet=servlet;
-        if (_servlet instanceof SingleThreadModel)
+        setServlet(servlet);
+    }
+
+    /* ---------------------------------------------------------------- */
+    /** Constructor for existing servlet.
+     */
+    public ServletHolder(Class servlet)
+    {
+        super(servlet);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public synchronized void setServlet(Servlet servlet)
+    {
+        
+        if (_servlet==null || _servlet instanceof SingleThreadModel)
             throw new IllegalArgumentException();
+
+        _servlet=servlet;
+        setHeldClass(servlet.getClass());
         setName(servlet.getClass().getName());
-        setClassName(servlet.getClass().getName());
     }
     
     /* ------------------------------------------------------------ */
@@ -280,7 +295,7 @@ public class ServletHolder extends Holder
                 _realm.popRole(user); 
         }
     }
-    
+
 
     /* ------------------------------------------------------------ */
     /** Get the servlet.

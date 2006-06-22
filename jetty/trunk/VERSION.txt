@@ -11,6 +11,8 @@
     + Do not wrap EofException with EofException
     + reverse order for destroy event listeners
     + added StatisticsHandler and statistics on Connector.
+    + Simplified Servlet Context API
+    + Added maximum limit to filter chain cache.
 
 jetty-6.0.0beta17 - 1/6/2006
     + Added config to disable file memory mapped buffers for windows
