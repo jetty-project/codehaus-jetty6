@@ -1,0 +1,498 @@
+Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
++++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
+@@ -0,0 +1,157 @@
++package org.mortbay.jetty.security;
++
++import java.io.File;
++import java.io.IOException;
++import java.nio.channels.SelectionKey;
++import java.nio.channels.SocketChannel;
++import java.security.KeyStore;
++
++import javax.net.ssl.KeyManagerFactory;
++import javax.net.ssl.SSLContext;
++import javax.net.ssl.SSLEngine;
++import javax.net.ssl.TrustManagerFactory;
++
++import org.mortbay.jetty.nio.HttpChannelEndPoint;
++import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.log.Log;
++import org.mortbay.resource.Resource;
++
++public class SslSelectChannelConnector extends SelectChannelConnector
++{
++    /** Default value for the cipher Suites. */
++    private String _cipherSuites[] = null;
++
++    /** Default value for the keystore location path. */
++    public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator + ".keystore";
++
++    /** String name of keystore password property. */
++    public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
++
++    /** String name of key password property. */
++    public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
++
++    private String _keystore = DEFAULT_KEYSTORE;
++    private transient Password _password;
++    private transient Password _keypassword;
++    private String _protocol = "TLS";
++    private String _algorithm = "SunX509"; // cert algorithm
++    private String _keystoreType = "JKS"; // type of the key store
++    private String _provider;
++
++    /* ------------------------------------------------------------ */
++    public String[] getCipherSuites()
++    {
++        return _cipherSuites;
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @author Tony Jiang
++     */
++    public void setCipherSuites(String[] cipherSuites)
++    {
++        this._cipherSuites = cipherSuites;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setPassword(String password)
++    {
++        _password = Password.getPassword(PASSWORD_PROPERTY, password, null);
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setKeyPassword(String password)
++    {
++        _keypassword = Password.getPassword(KEYPASSWORD_PROPERTY, password, null);
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getAlgorithm()
++    {
++        return (this._algorithm);
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setAlgorithm(String algorithm)
++    {
++        this._algorithm = algorithm;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getProtocol()
++    {
++        return _protocol;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setProtocol(String protocol)
++    {
++        _protocol = protocol;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setKeystore(String keystore)
++    {
++        _keystore = keystore;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getKeystore()
++    {
++        return _keystore;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getKeystoreType()
++    {
++        return (_keystoreType);
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setKeystoreType(String keystoreType)
++    {
++        _keystoreType = keystoreType;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getProvider()
++    {
++        return _provider;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setProvider(String _provider)
++    {
++        this._provider = _provider;
++    }
++
++    /* ------------------------------------------------------------ */
++    public HttpChannelEndPoint newHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectChannelConnector.SelectSet selectSet, SelectionKey sKey) throws IOException
++    {
++        return new SslHttpChannelEndPoint(connector, channel, selectSet, sKey, createSSLEngine());
++    }
++
++    /* ------------------------------------------------------------ */
++    protected SSLEngine createSSLEngine() throws IOException
++    {
++        SSLEngine engine = null;
++        try
++        {
++            SSLContext context = _provider == null ? SSLContext.getInstance(_protocol) : SSLContext.getInstance(_protocol, _provider);
++            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_algorithm);
++            KeyStore keyStore = KeyStore.getInstance(_keystoreType);
++            keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
++            keyManagerFactory.init(keyStore, _keypassword.toString().toCharArray());
++            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_algorithm);
++            trustManagerFactory.init(keyStore);
++            context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
++            engine = context.createSSLEngine();
++        }
++        catch (Exception e)
++        {
++            Log.debug(e);
++        }
++
++        return engine;
++    }
++}
+Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
++++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
+@@ -0,0 +1,310 @@
++package org.mortbay.jetty.security;
++
++import java.io.IOException;
++import java.nio.ByteBuffer;
++import java.nio.channels.SelectionKey;
++import java.nio.channels.SocketChannel;
++
++import javax.net.ssl.SSLEngine;
++import javax.net.ssl.SSLEngineResult;
++import javax.net.ssl.SSLException;
++import javax.net.ssl.SSLSession;
++
++import org.mortbay.io.Buffer;
++import org.mortbay.io.nio.NIOBuffer;
++import org.mortbay.jetty.HttpTokens;
++import org.mortbay.jetty.nio.HttpChannelEndPoint;
++import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.jetty.nio.SelectChannelConnector.SelectSet;
++import org.mortbay.log.Log;
++
++public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runnable
++{
++    private final SSLEngine _engine;
++    private ByteBuffer _handshakeBuffer;
++    private SSLEngineResult.HandshakeStatus _handshakeStatus;
++    private boolean _initialHandshake = false;
++    private final NIOBuffer _netData;
++    private final ByteBuffer _peerAppData;
++    // ssl
++    private final SSLSession _session;
++    private SSLEngineResult.Status _status = null;
++
++    /* ------------------------------------------------------------ */
++    public SslHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectSet selectSet, SelectionKey key, SSLEngine engine) throws SSLException, IOException
++    {
++        super(connector, channel, selectSet, key);
++
++        // ssl
++        _engine = engine;
++        _engine.setUseClientMode(false);
++        _session = engine.getSession();
++        _peerAppData = ByteBuffer.allocate(_session.getApplicationBufferSize());
++        _netData = new NIOBuffer(_session.getPacketBufferSize(), false);
++
++        _peerAppData.position(_peerAppData.limit());
++        _netData.getByteBuffer().position(_netData.getByteBuffer().limit());
++
++        // begin handshake
++        _engine.beginHandshake();
++        _handshakeStatus = _engine.getHandshakeStatus();
++        _initialHandshake = true;
++        _handshakeBuffer = ByteBuffer.allocate(_session.getApplicationBufferSize());
++        doHandshake();
++    }
++
++    /* ------------------------------------------------------------ */
++    private void doHandshake() throws IOException
++    {
++        Log.debug("inside");
++        while (true)
++        {
++            SSLEngineResult result;
++            if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.FINISHED))
++            {
++                if (_initialHandshake)
++                {
++                    _initialHandshake = false;
++                }
++                return;
++            }
++            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_TASK))
++            {
++                doTasks();
++            }
++            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_UNWRAP))
++            {
++                if (_channel.read(_handshakeBuffer) < 0)
++                {
++                    _engine.closeInbound();
++                }
++                _peerAppData.clear();
++                _handshakeBuffer.flip();
++                do
++                {
++                    result = _engine.unwrap(_handshakeBuffer, _peerAppData);
++                }
++                while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
++
++                if (result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.FINISHED)
++                {
++                    _initialHandshake = false;
++                }
++
++                // If no data was produced, and the status is still ok, try to read once more
++                if (_peerAppData.position() == 0 && result.getStatus() == SSLEngineResult.Status.OK && _handshakeBuffer.hasRemaining())
++                {
++                    result = _engine.unwrap(_handshakeBuffer, _peerAppData);
++                }
++
++                _status = result.getStatus();
++                _handshakeStatus = result.getHandshakeStatus();
++
++                _handshakeBuffer.compact();
++                _peerAppData.flip();
++            }
++            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_WRAP))
++            {
++                if (_netData.getByteBuffer().hasRemaining()) { return; }
++
++                // Prepare to write
++                _netData.getByteBuffer().clear();
++                result = _engine.wrap(_handshakeBuffer, _netData.getByteBuffer());
++                _handshakeStatus = result.getHandshakeStatus();
++                _netData.getByteBuffer().flip();
++                _channel.write(_netData.getByteBuffer());
++            }
++            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING)) { return; }
++        }
++
++    }
++
++    /* ------------------------------------------------------------ */
++    private void doTasks()
++    {
++        Runnable task;
++        while ((task = _engine.getDelegatedTask()) != null)
++        {
++            task.run();
++        }
++        _handshakeStatus = _engine.getHandshakeStatus();
++    }
++
++    /* ------------------------------------------------------------ */
++    private ByteBuffer extractByteBuffer(Buffer buffer)
++    {
++        ByteBuffer src = null;
++        if (buffer instanceof NIOBuffer)
++        {
++            NIOBuffer nBuf = (NIOBuffer) buffer;
++            synchronized (nBuf)
++            {
++                // TODO... do you need to reset this buffer afterwards?  See ChannelEndPoint flush
++                src = nBuf.getByteBuffer();
++                src.flip();
++                src.position(nBuf.getIndex());
++                src.limit(nBuf.putIndex());
++            }
++        }
++        else
++        {
++            synchronized (buffer)
++            {
++                // TODO - expensive to do this all the time - need to reuse this buffer!
++                src = ByteBuffer.allocate(buffer.length());
++                for (int i = 0; i < buffer.length(); i++)
++                {
++                    src.put(buffer.peek(i));
++                }
++                src.flip();
++                src.position(buffer.getIndex());
++                src.limit(buffer.putIndex());
++            }
++        }
++        return src;
++    }
++
++    /* ------------------------------------------------------------ */
++    /* 
++     */
++    public int fill(Buffer buffer) throws IOException
++    {
++        if (_initialHandshake) { return 0; }
++
++        int l = super.fill(buffer);
++        if (l < 0) { return l; }
++
++        // TODO - are we sure this is always an NIOBuffer?
++        return unWrap((NIOBuffer) buffer);
++    }
++
++    /* ------------------------------------------------------------ */
++    public int flush(Buffer buffer) throws IOException
++    {
++
++        if (_initialHandshake) { return 0; }
++
++        ByteBuffer src = extractByteBuffer(buffer);
++
++        // set length to 0
++        buffer.setGetIndex(buffer.putIndex());
++
++        wrap(new ByteBuffer[]
++        { src}, 0, 1);
++
++        return super.flush(buffer);
++    }
++
++    /* ------------------------------------------------------------ */
++    /*
++     */
++    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
++    {
++        if (_initialHandshake) { return 0; }
++        int len = 0;
++        synchronized (_netData)
++        {
++            if (header != null)
++            {
++                _netData.getByteBuffer().clear();
++                NIOBuffer nBufHeader = (NIOBuffer) header;
++                nBufHeader.getByteBuffer().position(0);
++                nBufHeader.getByteBuffer().limit(nBufHeader.putIndex());
++                wrap(new ByteBuffer[]
++                { nBufHeader.getByteBuffer()}, 0, 1);
++
++                // set length to 0
++                header.setGetIndex(header.putIndex());
++                len += super.flush(_netData);
++            }
++
++            if (buffer != null)
++            {
++                _netData.getByteBuffer().clear();
++                ByteBuffer src = extractByteBuffer(buffer);
++                wrap(new ByteBuffer[]
++                { src}, 0, 1);
++
++                // set length to 0
++                buffer.setGetIndex(buffer.putIndex());
++                len += super.flush(_netData);
++            }
++
++            if (trailer != null)
++            {
++                _netData.getByteBuffer().clear();
++                NIOBuffer nBufTrailer = (NIOBuffer) trailer;
++                wrap(new ByteBuffer[]
++                { nBufTrailer.getByteBuffer()}, 0, 1);
++
++                // set length to 0
++                trailer.setGetIndex(trailer.putIndex());
++                len += super.flush(_netData);
++            }
++        }
++
++        return len;
++    }
++
++    /* ------------------------------------------------------------ */
++    private int unWrap(NIOBuffer buffer) throws IOException
++    {
++        ByteBuffer bBuf = buffer.getByteBuffer();
++        _peerAppData.clear();
++        SSLEngineResult result;
++
++        do
++        {
++            result = _engine.unwrap(bBuf, _peerAppData);
++        }
++        while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
++
++        if (_peerAppData.position() == 0 && result.getStatus() == SSLEngineResult.Status.OK && bBuf.hasRemaining())
++        {
++            result = _engine.unwrap(bBuf, _peerAppData);
++        }
++
++        _status = result.getStatus();
++        _handshakeStatus = result.getHandshakeStatus();
++
++        // copy unencrypted data to the buffer
++        int l = _peerAppData.position();
++        int bufferLim = buffer.putIndex();
++        bBuf.clear();
++
++        _peerAppData.flip();
++        for (int i = 0; i < bufferLim; i++)
++        {
++            if (i < l)
++                bBuf.put(_peerAppData.get(i));
++            else
++                bBuf.put(HttpTokens.SPACE);
++        }
++
++        buffer.setGetIndex(0);
++        buffer.setPutIndex(bBuf.position());
++        bBuf.position(0);
++
++        if (_handshakeStatus == SSLEngineResult.HandshakeStatus.NEED_TASK || _handshakeStatus == SSLEngineResult.HandshakeStatus.NEED_WRAP || _handshakeStatus == SSLEngineResult.HandshakeStatus.FINISHED)
++        {
++            doHandshake();
++        }
++
++        return result.bytesProduced();
++    }
++
++    /* ------------------------------------------------------------ */
++    private void wrap(ByteBuffer[] bBufArray, int offset, int length) throws SSLException
++    {
++        SSLEngineResult result = null;
++        synchronized (_netData)
++        {
++            result = _engine.wrap(bBufArray, offset, length, _netData.getByteBuffer());
++        }
++        _status = result.getStatus();
++        _handshakeStatus = result.getHandshakeStatus();
++        _netData.setGetIndex(0);
++        _netData.setPutIndex(_netData.getByteBuffer().position());
++
++    }
++}
+Index: etc/jetty.xml
+===================================================================
+--- etc/jetty.xml	(revision 606)
++++ etc/jetty.xml	(working copy)
+@@ -60,6 +60,16 @@
+         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+         <!-- Add a HTTPS SSL listener on port 8443                           -->
+         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
++        <Item>
++          <New class="org.mortbay.jetty.security.SslSelectChannelConnector">
++            <Set name="Port">8443</Set>
++            <Set name="maxIdleTime">30000</Set>
++            <Set name="Keystore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
++            <Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
++            <Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
++          </New>
++        </Item>
++        
+         <!--
+         <Item>
+           <New class="org.mortbay.jetty.security.SslSocketConnector">
