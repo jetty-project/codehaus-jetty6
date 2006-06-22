@@ -735,6 +735,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                     _connector.connectionClosed(_connection);
                 _closed = true;
             }
+            super.close();
         }
     }
 }
