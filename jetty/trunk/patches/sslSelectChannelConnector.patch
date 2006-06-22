@@ -2,7 +2,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 ===================================================================
 --- modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,163 @@
 +package org.mortbay.jetty.security;
 +
 +import java.io.File;
@@ -21,6 +21,12 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 +import org.mortbay.log.Log;
 +import org.mortbay.resource.Resource;
 +
++/* ------------------------------------------------------------ */
++/** SslSelectChannelConnector.
++ *
++ * @author Nik Gonzalez <ngonzalez@exist.com>
++ * @author Greg Wilkins <gregw@mortbay.com>
++ */
 +public class SslSelectChannelConnector extends SelectChannelConnector
 +{
 +    /** Default value for the cipher Suites. */
@@ -164,7 +170,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 ===================================================================
 --- modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
-@@ -0,0 +1,363 @@
+@@ -0,0 +1,368 @@
 +package org.mortbay.jetty.security;
 +
 +import java.io.IOException;
@@ -185,6 +191,12 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +import org.mortbay.jetty.nio.SelectChannelConnector.SelectSet;
 +import org.mortbay.log.Log;
 +
++/* ------------------------------------------------------------ */
++/** SslHttpChannelEndPoint.
++ *
++ * @author Nik Gonzalez <ngonzalez@exist.com>
++ * @author Greg Wilkins <gregw@mortbay.com>
++ */
 +public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runnable
 +{
 +    private final SSLEngine _engine;
@@ -365,7 +377,6 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +            return super.flush(_outBuffer);
 +        
 +        // TODO.  The idea here would be to wrap all 3 buffers at once and then flush the resulting out buffer!
-+        
 +        int len = 0;
 +        
 +        
