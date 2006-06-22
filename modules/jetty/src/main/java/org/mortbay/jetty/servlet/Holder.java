@@ -43,12 +43,24 @@ public class Holder extends AbstractLifeCycle implements Serializable
     protected Holder()
     {}
 
+    /* ---------------------------------------------------------------- */
+    protected Holder(Class held)
+    {
+        _class=held;
+        if (held!=null)
+        {
+            _className=held.getName();
+            _name=held.getName();
+        }
+    }
+
 
     /* ------------------------------------------------------------ */
     public void doStart()
         throws Exception
     {
-        _class=Loader.loadClass(Holder.class, _className);
+        if (_class==null)
+            _class=Loader.loadClass(Holder.class, _className);
         if(Log.isDebugEnabled())Log.debug("Holding {}",_class);
     }
 
@@ -63,6 +75,12 @@ public class Holder extends AbstractLifeCycle implements Serializable
     public String getClassName()
     {
         return _className;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Class getHeldClass()
+    {
+        return _class;
     }
     
     /* ------------------------------------------------------------ */
@@ -125,6 +143,17 @@ public class Holder extends AbstractLifeCycle implements Serializable
     public void setClassName(String className)
     {
         _className = className;
+        _class=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param className The className to set.
+     */
+    public void setHeldClass(Class held)
+    {
+        _class=held;
+        _className = held!=null?held.getName():null;
     }
     
     /* ------------------------------------------------------------ */

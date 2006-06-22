@@ -44,6 +44,7 @@ import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.Dispatcher;
+import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.Log;
@@ -69,7 +70,7 @@ import org.mortbay.util.TypeUtil;
  * @author gregw
  *
  */
-public class WebAppContext extends ContextHandler
+public class WebAppContext extends Context
 {   
     public final static String WEB_DEFAULTS_XML="org/mortbay/jetty/webapp/webdefault.xml";
     public final static String ERROR_PAGE="org.mortbay.jetty.error_page";
@@ -88,9 +89,6 @@ public class WebAppContext extends ContextHandler
     private boolean _extractWAR=true;
     private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
-    private SecurityHandler _securityHandler;
-    private ServletHandler _servletHandler;
-    private SessionHandler _sessionHandler;
     private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
     private String[] _serverClasses = {"org.mortbay.", "-org.mortbay.naming.","-org.mortbay.util.", "org.slf4j."}; // TODO hide all mortbay classes
     private File _tmpDir;
@@ -242,17 +240,14 @@ public class WebAppContext extends ContextHandler
         this(null,null,null,null);
     }
 
-
     /* ------------------------------------------------------------ */
     public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
-        _sessionHandler = sessionHandler!=null?sessionHandler:new SessionHandler();
-        _securityHandler = securityHandler!=null?securityHandler:new SecurityHandler();
-        _servletHandler = servletHandler!=null?servletHandler:new ServletHandler();
-        
-        setHandler(_sessionHandler);
-        _sessionHandler.setHandler(_securityHandler);
-        _securityHandler.setHandler(_servletHandler);
+        super(null,
+              sessionHandler!=null?sessionHandler:new SessionHandler(),
+              securityHandler!=null?securityHandler:new SecurityHandler(),
+              servletHandler!=null?servletHandler:new ServletHandler(),
+              null);
         
         setErrorHandler(errorHandler!=null?errorHandler:new WebAppErrorHandler());
     }    
@@ -445,14 +440,6 @@ public class WebAppContext extends ContextHandler
         return _permissions;
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the securityHandler.
-     */
-    public SecurityHandler getSecurityHandler()
-    {
-        return _securityHandler;
-    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -463,23 +450,6 @@ public class WebAppContext extends ContextHandler
         return _serverClasses;
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the servletHandler.
-     */
-    public ServletHandler getServletHandler()
-    {
-        return _servletHandler;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the sessionHandler.
-     */
-    public SessionHandler getSessionHandler()
-    {
-        return _sessionHandler;
-    }
     
     /* ------------------------------------------------------------ */
     /**
