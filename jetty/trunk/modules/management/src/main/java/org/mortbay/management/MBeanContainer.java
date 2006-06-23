@@ -29,6 +29,7 @@ import javax.management.loading.PrivateMLet;
 import org.mortbay.component.Container;
 import org.mortbay.component.Container.Relationship;
 import org.mortbay.log.Log;
+import org.mortbay.log.Logger;
 import org.mortbay.util.TypeUtil;
 
 public class MBeanContainer implements Container.Listener
@@ -59,7 +60,9 @@ public class MBeanContainer implements Container.Listener
     public MBeanContainer(MBeanServer server)
     {
         this._server = server;
-        addBean(Log.getLogger(null));
+        Logger log = Log.getLogger(null);
+        if (log!=null)
+            addBean(log);
     }
     
     public void setManagementPort(int port)
