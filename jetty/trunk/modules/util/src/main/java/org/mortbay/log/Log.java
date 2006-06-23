@@ -63,6 +63,11 @@ public class Log
         log.info("Logging to {} via {}",log,log_class.getName());
     }
     
+    public static void setLog(Logger log)
+    {
+        Log.log=log;
+    }
+    
     
     public static void debug(Throwable th)
     {
