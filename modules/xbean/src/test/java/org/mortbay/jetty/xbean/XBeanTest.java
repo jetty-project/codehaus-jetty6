@@ -35,7 +35,7 @@ public class XBeanTest extends TestCase {
     protected AbstractApplicationContext context;
 
     public void testUsingXBeanXmlConfig() throws Exception {
-        System.setProperty("DEBUG", "true");
+        System.setProperty("DEBUG", "false");
         URL url = getClass().getClassLoader().getResource("org/mortbay/jetty/xbean/xbean.xml");
         assertNotNull("Could not find xbean.xml on the classpath!", url);
         

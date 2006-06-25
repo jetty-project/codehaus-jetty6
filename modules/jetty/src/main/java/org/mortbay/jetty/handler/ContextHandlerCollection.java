@@ -28,6 +28,7 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.servlet.PathMap;
+import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
@@ -45,6 +46,7 @@ import org.mortbay.util.LazyList;
 public class ContextHandlerCollection extends HandlerCollection
 {
     private PathMap _contextMap;
+    private Class _contextClass = ContextHandler.class;
     
     /* ------------------------------------------------------------ */
     /**
@@ -161,6 +163,56 @@ public class ContextHandlerCollection extends HandlerCollection
             }
         }    
     }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Add a context handler.
+     * @param contextPath  The context path to add
+     * @return
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
+     */
+    public ContextHandler addContext(String contextPath,String resourceBase) 
+    {
+        try
+        {
+            ContextHandler context = (ContextHandler)_contextClass.newInstance();
+            context.setContextPath(contextPath);
+            context.setResourceBase(resourceBase);
+            addHandler(context);
+            return context;
+        }
+        catch (Exception e)
+        {
+            Log.warn(e);
+            throw new Error(e);
+        }
+    }
+
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The class to use to add new Contexts
+     */
+    public Class getContextClass()
+    {
+        return _contextClass;
+    }
+
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param contextClass The class to use to add new Contexts
+     */
+    public void setContextClass(Class contextClass)
+    {
+        if (contextClass ==null || !(ContextHandler.class.isAssignableFrom(contextClass)))
+            throw new IllegalArgumentException();
+        _contextClass = contextClass;
+    }
+    
 
     
 }

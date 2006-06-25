@@ -68,6 +68,11 @@ public class Log
         Log.log=log;
     }
     
+    public static Logger getLog()
+    {
+        return log;
+    }
+    
     
     public static void debug(Throwable th)
     {
