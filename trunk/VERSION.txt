@@ -17,6 +17,7 @@ jetty-6.0.0rc1 - ?????????????
     + Added maximum limit to filter chain cache.
     + refactor HttpChannelEndPoint in preparation for SslEngine
     + ContextHandlerCollection addContext and setContextClass 
+    + Discard excess bytes in header buffer if connection is closing
 
 jetty-6.0.0beta17 - 1/6/2006
     + Added config to disable file memory mapped buffers for windows

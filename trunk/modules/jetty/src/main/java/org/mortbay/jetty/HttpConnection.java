@@ -316,8 +316,18 @@ public class HttpConnection
             }
             catch (HttpException e)
             {
-                Log.debug(e);
+                if (Log.isDebugEnabled())
+                {
+                    Log.debug("uri="+_uri);
+                    Log.debug("fields="+_requestFields);
+                    Log.debug(e);
+                }
+                
                 _generator.sendError(e.getStatus(), e.getReason(), e.toString(), true);
+                // TODO.  Need to consider how to really flush this for non-blocking
+                
+                Buffer header = _parser.getHeaderBuffer();
+                header.skip(header.length());
                 throw e;
             }
             finally
@@ -325,10 +335,15 @@ public class HttpConnection
                 __currentConnection.set(null);
                 
                 Buffer header = _parser.getHeaderBuffer();
+
+                more_in_buffer = header!=null && (header.length()>0);
                 
                 if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
                 {
                     _idle=true;
+                    
+                    if (!_generator.isPersistent())
+                        header.skip(header.length());
                     
                     _expectingContinues = false; // TODO do something with this!
                     _parser.reset(!more_in_buffer); // TODO maybe only release when low on resources
@@ -338,9 +353,8 @@ public class HttpConnection
                     _generator.reset(!more_in_buffer); // TODO maybe only release when low on resources
                     _responseFields.clear();
                     _response.recycle();
+                    
                 }
-
-                more_in_buffer = header!=null && (header.length()>0);
                 
                 Continuation continuation = _request.getContinuation();
                 if (continuation != null && continuation.isPending())
