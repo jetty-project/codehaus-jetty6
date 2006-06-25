@@ -26,13 +26,13 @@
                  <fileset dir="../../lib/jsp-2.0">
                    <include name="slf4j-simple-${slf4j-version}.jar"/>
                    <include name="jcl104-over-slf4j-${slf4j-version}.jar"/>
-                   <include name="jasper-compiler-jdt-${tomcat-jasper-version}.jar"/>
+                   <include name="jasper-compiler-jdt-${jasper-version}.jar"/>
                    <include name="commons-el-${commons-el-version}.jar"/>
                    <include name="xercesImpl-${xerces-version}.jar"/>
                    <include name="xmlParserAPIs-${xerces-version}.jar"/>
-                   <include name="jasper-compiler-${tomcat-jasper-version}.jar"/>
-                   <include name="jasper-compiler-jdt-${tomcat-jasper-version}.jar"/>
-                   <include name="jasper-runtime-${tomcat-jasper-version}.jar"/>
+                   <include name="jasper-compiler-${jasper-version}.jar"/>
+                   <include name="jasper-compiler-jdt-${jasper-version}.jar"/>
+                   <include name="jasper-runtime-${jasper-version}.jar"/>
                    <include name="ant-${ant-version}.jar"/>
                  </fileset> 
                 </delete>
@@ -60,7 +60,7 @@
                 <artifactItem>
                   <groupId>tomcat</groupId>
                   <artifactId>jasper-compiler-jdt</artifactId>
-                  <version>${tomcat-jasper-version}</version>
+                  <version>${jasper-version}</version>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.slf4j</groupId>
@@ -80,7 +80,7 @@
                 <artifactItem>
                   <groupId>tomcat</groupId>
                   <artifactId>jasper-compiler</artifactId>
-                  <version>${tomcat-jasper-version}</version>
+                  <version>${jasper-version}</version>
                 </artifactItem>
                 <artifactItem>
                   <groupId>ant</groupId>
@@ -90,7 +90,7 @@
                 <artifactItem>
                   <groupId>tomcat</groupId>
                   <artifactId>jasper-runtime</artifactId>
-                  <version>${tomcat-jasper-version}</version>
+                  <version>${jasper-version}</version>
                 </artifactItem>
                 <artifactItem>
                   <groupId>xerces</groupId>
@@ -114,7 +114,7 @@
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-compiler-jdt</artifactId>
-      <version>${tomcat-jasper-version}</version>
+      <version>${jasper-version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -156,7 +156,7 @@
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-compiler</artifactId>
-      <version>${tomcat-jasper-version}</version>
+      <version>${jasper-version}</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
@@ -172,7 +172,7 @@
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-runtime</artifactId>
-      <version>${tomcat-jasper-version}</version>
+      <version>${jasper-version}</version>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
