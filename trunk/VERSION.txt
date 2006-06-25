@@ -1,5 +1,5 @@
 jetty-6.0.0rc1 - ?????????????
-    + add ability to have a lib/user dir from which to recursively add all jars and zips to the classpath
+    + add ability to have a lib/ext dir from which to recursively add all jars and zips to the classpath
     + patch to allow Jetty to use JSP2.1 from Glassfish instead of Jasper from Tomcat
     + fixed classesDirectory param for maven plugin to be configurable
     + ensure explicitly set tmp directory called "work" is not deleted on exit
