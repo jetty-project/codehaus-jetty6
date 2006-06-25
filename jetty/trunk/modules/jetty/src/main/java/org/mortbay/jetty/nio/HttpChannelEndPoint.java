@@ -35,6 +35,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
         _selectSet = selectSet;
         _connector = connector;
         _connection = new HttpConnection(connector, this, connector.getServer());
+        open(_connection);
         _key = key;
         _key.attach(this);
         _selectSet.scheduleIdle(_timeoutTask, _connection.isIdle());

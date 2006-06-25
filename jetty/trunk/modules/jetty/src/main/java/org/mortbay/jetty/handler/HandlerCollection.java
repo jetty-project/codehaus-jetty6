@@ -38,7 +38,7 @@ import org.mortbay.util.MultiException;
  * @author gregw
  * @org.apache.xbean.XBean
  */
-public class HandlerCollection extends AbstractHandler 
+public class HandlerCollection extends AbstractHandlerContainer
 {
     private Handler[] _handlers;
 
@@ -195,6 +195,10 @@ public class HandlerCollection extends AbstractHandler
     }
 
     /* ------------------------------------------------------------ */
+    /* Add a handler.
+     * This implementation adds the passed handler to the end of the existing collection of handlers. 
+     * @see org.mortbay.jetty.HandlerContainer#addHandler(org.mortbay.jetty.Handler)
+     */
     public void addHandler(Handler handler)
     {
         setHandlers((Handler[])LazyList.addToArray(getHandlers(), handler, Handler.class));

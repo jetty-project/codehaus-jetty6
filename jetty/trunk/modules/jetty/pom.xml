@@ -35,6 +35,7 @@
               <tasks>
                 <delete includeemptydirs="true">
                   <fileset dir="../../lib/" includes="${project.artifactId}-${project.version}.${project.packaging}" />
+                  <fileset dir="../../etc/" includes="webdefault.xml" />
                 </delete>
               </tasks>
             </configuration>
@@ -48,6 +49,7 @@
             <configuration>
               <tasks>
                 <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}-${project.version}.${project.packaging}" />
+                <copy failonerror="false" file="src/main/resources/org/mortbay/jetty/webapp/webdefault.xml" tofile="../../etc/webdefault.xml" />
               </tasks>
             </configuration>
           </execution>

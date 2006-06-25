@@ -60,7 +60,7 @@ public class MBeanContainer implements Container.Listener
     public MBeanContainer(MBeanServer server)
     {
         this._server = server;
-        Logger log = Log.getLogger(null);
+        Logger log = Log.getLog();
         if (log!=null)
             addBean(log);
     }

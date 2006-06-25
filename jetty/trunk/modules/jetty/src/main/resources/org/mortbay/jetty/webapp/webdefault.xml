@@ -8,15 +8,13 @@
 <!-- descriptor, it is applied before the contexts own web.xml file        -->
 <!--                                                                       -->
 <!-- A context may be assigned a default descriptor by:                    -->
-<!--  + Allowing the default defaultweb.xml to be applied                  -->
 <!--  + Calling WebApplicationContext.setDefaultsDescriptor                -->
 <!--  + Passed an arg to addWebApplications                                -->
 <!--                                                                       -->
-<!-- If a defaults descriptor is set, it is first looked for as a system   -->
-<!-- resource. The jetty jar contains a webdefault.xml file as a resource  -->
-<!-- at "org/mortbay/jetty/servlet/webdefault.xml".   If a system resource -->
-<!-- is not found, then a normal resource is tried, thus a filename or URL -->
-<!-- may be used to specify an arbitrary file.                             -->
+<!-- This file is used both as the resource within the jetty.jar (which is -->
+<!-- used as the default if no explicit defaults descriptor is set) and it -->
+<!-- is copied to the etc directory of the Jetty distro and explicitly     -->
+<!-- by the jetty.xml file.                                                -->
 <!--                                                                       -->
 <!-- ===================================================================== -->
 <web-app 
@@ -29,7 +27,6 @@
     Default web.xml file.  
     This file is applied to a Web application before it's own WEB_INF/web.xml file
   </description>
-
 
 
   <!-- ==================================================================== -->

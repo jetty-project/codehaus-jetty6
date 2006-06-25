@@ -716,13 +716,19 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         protected SelectChannelConnector _connector;
         protected HttpConnection _connection;
         private boolean _closed;
-        
+
+        /* ------------------------------------------------------------ */
         public SelectChannelEndPoint(SelectChannelConnector connector, ByteChannel channel)
         {
             super(channel);
-            _connector=connector;
         }
 
+        /* ------------------------------------------------------------ */
+        protected void open(HttpConnection connection)
+        {
+            _connector.connectionOpened(_connection);
+        }
+        
         /* ------------------------------------------------------------ */
         /*
          * @see org.mortbay.io.nio.ChannelEndPoint#close()

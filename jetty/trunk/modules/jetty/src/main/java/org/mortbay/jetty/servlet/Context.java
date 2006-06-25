@@ -16,6 +16,7 @@
 package org.mortbay.jetty.servlet;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -48,21 +49,21 @@ public class Context extends ContextHandler
     }
     
     /* ------------------------------------------------------------ */
-    public Context(Handler parent, String contextPath)
+    public Context(HandlerContainer parent, String contextPath)
     {
         this(parent,null,null,null,null);
         setContextPath(contextPath);
     }
     
     /* ------------------------------------------------------------ */
-    public Context(Handler parent, String contextPath, int options)
+    public Context(HandlerContainer parent, String contextPath, int options)
     {
         this(parent,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?new SecurityHandler():null,null,null);
         setContextPath(contextPath);
     }
 
     /* ------------------------------------------------------------ */
-    public Context(Handler parent, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
         _sessionHandler = sessionHandler;
         _securityHandler = securityHandler;
@@ -98,12 +99,7 @@ public class Context extends ContextHandler
 
         if (parent!=null)
         {
-            if (parent instanceof HandlerWrapper)
-                ((HandlerWrapper)parent).setHandler(this);
-            else if (parent instanceof HandlerCollection)
-                ((HandlerCollection)parent).addHandler(this);
-            else 
-                throw new IllegalArgumentException("Bad parent "+parent);
+            parent.addHandler(this);
         }
         
     }    

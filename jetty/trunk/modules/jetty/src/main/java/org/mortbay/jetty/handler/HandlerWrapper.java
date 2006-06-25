@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.Server;
 
 /* ------------------------------------------------------------ */
@@ -29,7 +30,7 @@ import org.mortbay.jetty.Server;
  * @author gregw
  *
  */
-public class HandlerWrapper extends AbstractHandler
+public class HandlerWrapper extends AbstractHandlerContainer
 {
     private Handler _handler;
 
@@ -87,6 +88,26 @@ public class HandlerWrapper extends AbstractHandler
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /** Add a handler.
+     * This implementation of addHandler calls setHandler with the 
+     * passed handler.  If this HandlerWrapper had a previous wrapped
+     * handler, then it is passed to a call to addHandler on the passed
+     * handler.  Thus this call can add a handler in a chain of 
+     * wrapped handlers.
+     * 
+     * @param handler
+     */
+    public void addHandler(Handler handler)
+    {
+        Handler old = getHandler();
+        if (old!=null && !(handler instanceof HandlerContainer))
+            throw new IllegalArgumentException("Cannot add");
+        setHandler(handler);
+        if (old!=null)
+            ((HandlerContainer)handler).addHandler(old);
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.thread.AbstractLifeCycle#doStart()
