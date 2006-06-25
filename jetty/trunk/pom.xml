@@ -297,7 +297,7 @@
   <properties>
     <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
     <spring-version>1.2.8</spring-version>
-    <tomcat-jasper-version>5.5.15</tomcat-jasper-version>
+    <jasper-version>5.5.15</jasper-version>
     <junit-version>3.8.1</junit-version>
     <ant-version>1.6.4</ant-version>
     <xbean-version>2.2</xbean-version>
