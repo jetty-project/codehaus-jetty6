@@ -109,7 +109,8 @@
         <Item>
           <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppContext">
             <Set name="contextPath">/</Set>
-            <Set name="war">./webapps/test</Set>
+            <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/test</Set>
+            <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
             <Set name="VirtualHosts">
               <Array type="java.lang.String">
                 <Item>localhost</Item>
@@ -156,7 +157,6 @@
             </Set>
           </New>
         </Item>
-
       </Array>
      </Set>
     </Ref>
@@ -166,13 +166,12 @@
     <!-- Discover contexts from webapps directory                    -->
     <!-- =========================================================== -->
     <Call class="org.mortbay.jetty.webapp.WebAppContext" name="addWebApplications">
-      <Arg><Ref id="Server"/></Arg>
+      <Arg><Ref id="contexts"/></Arg>
       <Arg>./webapps</Arg>
-      <Arg>org/mortbay/jetty/webapp/webdefault.xml</Arg>
+      <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
       <Arg type="boolean">True</Arg>  <!-- extract -->
       <Arg type="boolean">False</Arg> <!-- parent priority class loading -->
     </Call>
-
 
     <!-- =========================================================== -->
     <!-- Configure Realms                                            -->

@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.io.IO;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -140,6 +141,8 @@ public class WebAppContext extends Context
      * @param extract If true, extract war files
      * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
      * @exception IOException 
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
      */
     public static void addWebApplications(Server server,
                                           String webapps,
@@ -149,23 +152,75 @@ public class WebAppContext extends Context
                                           boolean java2CompliantClassLoader)
         throws IOException
     {
-        if (configurations==null)
-            configurations=__dftConfigurationClasses;
-        
-        ArrayList wacs = new ArrayList();
         HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
         if (contexts==null)
             contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
         
-        if (contexts==null)
-            throw new IllegalStateException("No HandlerCollection configured in "+server);
+        addWebApplications(contexts,webapps,defaults,configurations,extract,java2CompliantClassLoader);
+    }        
+
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If the
+     * webapp is called "root" it is added as the "/" context.
+     * @param contexts A HandlerContainer to which the contexts will be added
+     * @param webapps Directory file name or URL to look for auto
+     * webapplication.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * If null the default defaults file is used. If the empty string, then
+     * no defaults file is used.
+     * @param configurations Array of classnames of {@link Configuration} implementations to apply.
+     * @param extract If true, extract war files
+     * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
+     * @exception IOException 
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
+     */
+    public static void addWebApplications(HandlerContainer contexts,
+                                          String webapps,
+                                          String defaults,
+                                          boolean extract,
+                                          boolean java2CompliantClassLoader)
+    throws IOException
+    {
+        addWebApplications(contexts, webapps, defaults, __dftConfigurationClasses, extract, java2CompliantClassLoader);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If the
+     * webapp is called "root" it is added as the "/" context.
+     * @param contexts A HandlerContainer to which the contexts will be added
+     * @param webapps Directory file name or URL to look for auto
+     * webapplication.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * If null the default defaults file is used. If the empty string, then
+     * no defaults file is used.
+     * @param configurations Array of classnames of {@link Configuration} implementations to apply.
+     * @param extract If true, extract war files
+     * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
+     * @exception IOException 
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
+     */
+    public static void addWebApplications(HandlerContainer contexts,
+                                          String webapps,
+                                          String defaults,
+                                          String[] configurations,
+                                          boolean extract,
+                                          boolean java2CompliantClassLoader)
+    throws IOException
+    {
         
-        Handler[] installed=contexts.getChildHandlersByClass(ContextHandler.class);
-        if(installed != null) 
-        {
-            java.util.List installedWacs = Arrays.asList(installed);
-            wacs.addAll(installedWacs);
-        } 
+        if (contexts==null)
+            throw new IllegalArgumentException("No HandlerContainer");
+        
+        if (configurations==null)
+            configurations=__dftConfigurationClasses;
         
         Resource r=Resource.newResource(webapps);
         if (!r.exists())
@@ -206,38 +261,50 @@ public class WebAppContext extends Context
                 context=context.substring(0,context.length()-1);
             
             // Check the webapp has not already been added.
-            for (int i=0;i<wacs.size();i++)
+            Handler[] installed = contexts.getChildHandlersByClass(WebAppContext.class);
+            for (int i=0;i<installed.length;i++)
             {
-                Object o =wacs.get(i);
-                if (o instanceof WebAppContext)
-                {
-                    WebAppContext w = (WebAppContext)o;
-                    if (app.equals(Resource.newResource(w.getWar())))
-                        continue files;
-                }
+                WebAppContext w = (WebAppContext)installed[i];
+                if (app.equals(Resource.newResource(w.getWar())))
+                    continue files;
             }
             
             // add it
-            WebAppContext wah = new WebAppContext();
+            WebAppContext wah = null;
+            
+            if (contexts instanceof ContextHandlerCollection && WebAppContext.class.isAssignableFrom(((ContextHandlerCollection)contexts).getContextClass()))
+                wah=(WebAppContext)((ContextHandlerCollection)contexts).addContext(context, null);
+            else
+            {
+                wah=new WebAppContext();
+                wah.setContextPath(context);
+                contexts.addHandler(wah);
+            }
             wah.setConfigurationClasses(configurations);
-            wah.setServer(server);
-            wah.setContextPath(context);
             if (defaults!=null)
                 wah.setDefaultsDescriptor(defaults);
             wah.setExtractWAR(extract);
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(java2CompliantClassLoader);
-            
-            wacs.add(wah);
         }
-
-        contexts.setHandlers((Handler[])wacs.toArray(new Handler[wacs.size()]));
     }
     
     /* ------------------------------------------------------------ */
     public WebAppContext()
     {
         this(null,null,null,null);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param contextPath The context path
+     * @param webApp The URL or filename of the webapp directory or war file.
+     */
+    public WebAppContext(String contextPath, String webApp)
+    {
+        this(null,null,null,null);
+        setContextPath(contextPath);
+        setWar(webApp);
     }
 
     /* ------------------------------------------------------------ */
