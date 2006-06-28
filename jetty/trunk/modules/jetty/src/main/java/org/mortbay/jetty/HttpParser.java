@@ -589,6 +589,7 @@ public class HttpParser implements HttpTokens
                     _contentPosition += chunk.length();
                     _contentView.update(chunk);
                     _handler.content(chunk);
+                    // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
 
                 case STATE_CONTENT: 
@@ -609,6 +610,7 @@ public class HttpParser implements HttpTokens
                     _contentPosition += chunk.length();
                     _contentView.update(chunk);
                     _handler.content(chunk);
+                    // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
                 }
 
@@ -689,6 +691,7 @@ public class HttpParser implements HttpTokens
                     _chunkPosition += chunk.length();
                     _contentView.update(chunk);
                     _handler.content(chunk);
+                    // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
                 }
             }
