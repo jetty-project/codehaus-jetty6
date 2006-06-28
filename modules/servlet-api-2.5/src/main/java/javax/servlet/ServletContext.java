@@ -1,68 +1,18 @@
 /*
- * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
-
-/*
- * The Apache Software License, Version 1.1
- *
- * Copyright (c) 1999 The Apache Software Foundation.  All rights 
- * reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "The Jakarta Project", "Tomcat", and "Apache Software
- *    Foundation" must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
- *    permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache"
- *    nor may "Apache" appear in their names without prior written
- *    permission of the Apache Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
- *
- * ====================================================================
- *
- * This source code implements specifications defined by the Java
- * Community Process. In order to remain compliant with the specification
- * DO NOT add / change / or delete method signatures!
- */
-
+* Copyright 2004 The Apache Software Foundation
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 package javax.servlet;
 
 import java.io.InputStream;
@@ -104,32 +54,6 @@ import java.util.Set;
 
 public interface ServletContext {
 
-    /**
-     * Returns the context path of the web application.
-     *
-     * <p>The context path is the portion of the request URI that is used
-     * to select the context of the request. The context path always comes
-     * first in a request URI. The path starts with a "/" character but does
-     * not end with a "/" character. For servlets in the default (root)
-     * context, this method returns "".
-     *
-     * <p>It is possible that a servlet container may match a context by
-     * more than one context path. In such cases the
-     * {@link javax.servlet.http.HttpServletRequest#getContextPath()}
-     * will return the actual context path used by the request and it may
-     * differ from the path returned by this method.
-     * The context path returned by this method should be considered as the
-     * prime or preferred context path of the application.
-     *
-     * @return The context path of the web application, or "" for the 
-     * default (root) context 
-     *
-     * @see javax.servlet.http.HttpServletRequest#getContextPath()
-     *
-     * @since Servlet 2.5
-     */
-    public String getContextPath();
-
 
     /**
      * Returns a <code>ServletContext</code> object that 
@@ -158,12 +82,14 @@ public interface ServletContext {
 
     public ServletContext getContext(String uripath);
     
-    
+
+    public String getContextPath();
+
 
     /**
      * Returns the major version of the Java Servlet API that this
      * servlet container supports. All implementations that comply
-     * with Version 2.5 must have this method
+     * with Version 2.4 must have this method
      * return the integer 2.
      *
      * @return 		2
@@ -177,10 +103,10 @@ public interface ServletContext {
     /**
      * Returns the minor version of the Servlet API that this
      * servlet container supports. All implementations that comply
-     * with Version 2.5 must have this method
-     * return the integer 5.
+     * with Version 2.4 must have this method
+     * return the integer 4.
      *
-     * @return 		5
+     * @return 		4
      *
      */
 

@@ -18,6 +18,7 @@ jetty-6.0.0rc1 - ?????????????
     + refactor HttpChannelEndPoint in preparation for SslEngine
     + ContextHandlerCollection addContext and setContextClass 
     + Discard excess bytes in header buffer if connection is closing
+    + Updated javax code from http://svn.apache.org/repos/asf/tomcat/tc6.0.x/trunk/java/javax@417727
 
 jetty-6.0.0beta17 - 1/6/2006
     + Added config to disable file memory mapped buffers for windows
