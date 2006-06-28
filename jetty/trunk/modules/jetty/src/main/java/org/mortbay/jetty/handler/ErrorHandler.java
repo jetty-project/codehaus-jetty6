@@ -13,6 +13,8 @@
 // ========================================================================
 package org.mortbay.jetty.handler;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URLDecoder;
 
@@ -89,6 +91,21 @@ public class ErrorHandler extends AbstractHandler
         writer.write(uri);
         writer.write(
             "</p>\n<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by Jetty://</a></small></i></p>");
+        
+        Throwable th = (Throwable)request.getAttribute("javax.servlet.error.exception");
+        while(th!=null)
+        {
+            writer.write("<h3>Caused by:</h2><pre>");
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            th.printStackTrace(pw);
+            pw.flush();
+            writer.write(sw.getBuffer().toString());
+            writer.write("</pre>\n");
+            
+            th =th.getCause();
+        }
+        
         for (int i= 0; i < 20; i++)
             writer.write("\n                                                ");
         writer.write("\n</body>\n</html>\n");
