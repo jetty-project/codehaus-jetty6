@@ -54,7 +54,7 @@ public class Jetty6PluginServer implements JettyPluginServer
     }
 
     /**
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#setConnectors(org.mortbay.jetty.plugin.util.JettyPluginConnector[])
+     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#setConnectorNames(org.mortbay.jetty.plugin.util.JettyPluginConnector[])
      */
     public void setConnectors(Object[] connectors)
     {
