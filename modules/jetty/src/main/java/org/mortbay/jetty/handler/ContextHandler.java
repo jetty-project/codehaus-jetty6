@@ -213,7 +213,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     {
         if (connectors==null || connectors.length==0)
             _connectors=null;
-        _connectors= new HashSet(Arrays.asList(connectors));
+        else
+            _connectors= new HashSet(Arrays.asList(connectors));
     }
     
     /* ------------------------------------------------------------ */
