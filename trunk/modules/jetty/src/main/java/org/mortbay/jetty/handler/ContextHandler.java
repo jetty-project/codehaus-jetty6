@@ -107,6 +107,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     private Set _connectors;
     private EventListener[] _eventListeners;
     private Logger _logger;
+    private boolean _shutdown;
 
     private Object _contextListeners;
     private Object _contextAttributeListeners;
@@ -177,11 +178,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes
 
     /* ------------------------------------------------------------ */
     /** 
-     * @deprecated use {@link #setConnectors(String[])} 
+     * @deprecated use {@link #setConnectorNames(String[])} 
      */
     public void setHosts(String[] hosts)
     {
-        setConnectors(hosts);
+        setConnectorNames(hosts);
     }
 
     /* ------------------------------------------------------------ */
@@ -209,7 +210,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
      * @param connectors If non null, an array of connector names that this context
      * will accept a request from.
      */
-    public void setConnectors(String[] connectors)
+    public void setConnectorNames(String[] connectors)
     {
         if (connectors==null || connectors.length==0)
             _connectors=null;
@@ -331,6 +332,26 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return true if this context is accepting new requests
+     */
+    public boolean isShutdown()
+    {
+        return !_shutdown;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set shutdown status.
+     * This field allows for graceful shutdown of a context. A started context may be put into non accepting state so
+     * that existing requests can complete, but no new requests are accepted.
+     * @param accepting true if this context is accepting new requests
+     */
+    public void setShutdown(boolean shutdown)
+    {
+        _shutdown = shutdown;
+    }
     
     /* ------------------------------------------------------------ */
     /* 
@@ -446,7 +467,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
-    {
+    {   
         boolean new_context=false;
         Context old_context=null;
         String old_context_path=null;
@@ -456,7 +477,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         Thread current_thread=null;
         
         Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        if(dispatch==REQUEST && base_request.isHandled())
+        if(_shutdown || (dispatch==REQUEST && base_request.isHandled()))
             return;
         
         old_context=base_request.getContext();
@@ -513,7 +534,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                     // Not for this context!
                     return;
                 }
-                
             }
         }
         
@@ -1306,5 +1326,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         }
 
     }
+
 
 }
