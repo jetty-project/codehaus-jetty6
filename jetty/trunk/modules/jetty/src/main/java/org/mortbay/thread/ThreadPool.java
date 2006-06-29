@@ -22,7 +22,7 @@ import org.mortbay.component.LifeCycle;
  * @author gregw
  *
  */
-public interface ThreadPool extends LifeCycle
+public interface ThreadPool
 {
     /* ------------------------------------------------------------ */
     public abstract boolean dispatch(Runnable job);
