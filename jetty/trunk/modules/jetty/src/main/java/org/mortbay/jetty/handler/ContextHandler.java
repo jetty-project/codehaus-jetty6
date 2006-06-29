@@ -684,6 +684,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
      */
     public void setInitParams(Map initParams)
     {
+        if (initParams == null)
+            return;
         _initParams = new HashMap(initParams);
     }
     

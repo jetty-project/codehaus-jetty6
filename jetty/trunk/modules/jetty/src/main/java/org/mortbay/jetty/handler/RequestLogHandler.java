@@ -24,6 +24,8 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.Server;
+import org.mortbay.log.Log;
+
 
 
 /** 
@@ -52,9 +54,32 @@ public class RequestLogHandler extends HandlerWrapper
     /* ------------------------------------------------------------ */
     public void setRequestLog(RequestLog requestLog)
     {
+        //are we changing the request log impl?
+        try
+        {
+            if (_requestLog != null)
+                _requestLog.stop();
+        }
+        catch (Exception e)
+        {
+            Log.warn (e);
+        }
+        
         if (getServer()!=null)
             getServer().getContainer().update(this, _requestLog, requestLog, "logimpl",true);
+        
         _requestLog = requestLog;
+        
+        //if we're already started, then start our request log
+        try
+        {
+            if (isStarted() && (_requestLog != null))
+                _requestLog.start();
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException (e);
+        }
     }
 
     /* ------------------------------------------------------------ */
