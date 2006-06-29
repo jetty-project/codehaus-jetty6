@@ -38,6 +38,8 @@ import org.mortbay.util.StringUtil;
  */
 public class ErrorHandler extends AbstractHandler
 {
+    boolean _showStacks=true;
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
@@ -60,11 +62,11 @@ public class ErrorHandler extends AbstractHandler
     protected void handleErrorPage(HttpServletRequest request, Writer writer, int code, String message)
         throws IOException
     {
-        writeErrorPage(request, writer, code, message);
+        writeErrorPage(request, writer, code, message, _showStacks);
     }
     
     /* ------------------------------------------------------------ */
-    public static void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message)
+    public static void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message, boolean showStacks)
         throws IOException
     {
         if (message != null)
@@ -92,23 +94,44 @@ public class ErrorHandler extends AbstractHandler
         writer.write(
             "</p>\n<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by Jetty://</a></small></i></p>");
         
-        Throwable th = (Throwable)request.getAttribute("javax.servlet.error.exception");
-        while(th!=null)
+        if (showStacks)
         {
-            writer.write("<h3>Caused by:</h2><pre>");
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            th.printStackTrace(pw);
-            pw.flush();
-            writer.write(sw.getBuffer().toString());
-            writer.write("</pre>\n");
-            
-            th =th.getCause();
+            Throwable th = (Throwable)request.getAttribute("javax.servlet.error.exception");
+            while(th!=null)
+            {
+                writer.write("<h3>Caused by:</h2><pre>");
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                th.printStackTrace(pw);
+                pw.flush();
+                writer.write(sw.getBuffer().toString());
+                writer.write("</pre>\n");
+                
+                th =th.getCause();
+            }
         }
         
         for (int i= 0; i < 20; i++)
             writer.write("\n                                                ");
         writer.write("\n</body>\n</html>\n");
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if stack traces are shown in the error pages
+     */
+    public boolean isShowStacks()
+    {
+        return _showStacks;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param showStacks True if stack traces are shown in the error pages
+     */
+    public void setShowStacks(boolean showStacks)
+    {
+        _showStacks = showStacks;
     }
 
 }
