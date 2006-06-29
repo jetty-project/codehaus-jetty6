@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
+import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -201,7 +202,11 @@ public class Server extends HandlerWrapper implements Attributes
         if (_sessionIdManager!=null)
             _sessionIdManager.start();
         
-        try{_threadPool.start();} 
+        try
+        {
+            if (_threadPool instanceof LifeCycle)
+                ((LifeCycle)_threadPool).start();
+        } 
         catch(Throwable e) { mex.add(e);}
         
         
@@ -239,7 +244,12 @@ public class Server extends HandlerWrapper implements Attributes
         if (_sessionIdManager!=null)
             _sessionIdManager.stop();
         
-        try{_threadPool.stop();}catch(Throwable e){mex.add(e);}
+        try
+        {
+            if (_threadPool instanceof LifeCycle)
+                ((LifeCycle)_threadPool).stop();
+        }
+        catch(Throwable e){mex.add(e);}
         
         mex.ifExceptionThrow();
     }

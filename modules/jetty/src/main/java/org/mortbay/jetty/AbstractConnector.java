@@ -20,6 +20,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import org.mortbay.component.AbstractLifeCycle;
+import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
@@ -326,8 +327,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         
         if (_threadPool==null)
             _threadPool=_server.getThreadPool();
-        if (_threadPool!=_server.getThreadPool())
-            _threadPool.start();
+        if (_threadPool!=_server.getThreadPool() && (_threadPool instanceof LifeCycle))
+            ((LifeCycle)_threadPool).start();
         
         // Start selector thread
         _acceptorThread=new Thread[getAcceptors()];
@@ -346,8 +347,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     protected void doStop() throws Exception
     {
-        if (_threadPool!=_server.getThreadPool())
-            _threadPool.stop();
+        if (_threadPool!=_server.getThreadPool() && _threadPool instanceof LifeCycle)
+            ((LifeCycle)_threadPool).stop();
         
         Thread[] acceptors=_acceptorThread;
         _acceptorThread=null;
@@ -621,7 +622,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             try
             {
                 current.setPriority(current.getPriority()-1);
-                while (isRunning() && getThreadPool().isRunning())
+                while (isRunning() && 
+                       (!(getThreadPool() instanceof LifeCycle) || ((LifeCycle)getThreadPool()).isRunning()))
                 {
                     try
                     {
