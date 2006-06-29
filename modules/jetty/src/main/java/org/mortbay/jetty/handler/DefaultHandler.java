@@ -96,11 +96,11 @@ public class DefaultHandler extends AbstractHandler
         
         if (!method.equals(HttpMethods.GET) || !request.getRequestURI().equals("/"))
         {
-            response.sendError(HttpServletResponse.SC_OK);
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;   
         }
 
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         response.setContentType(MimeTypes.TEXT_HTML);
         
         ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
