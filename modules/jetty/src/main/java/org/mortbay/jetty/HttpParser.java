@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
@@ -316,7 +317,7 @@ public class HttpParser implements HttpTokens
                     }
                     else if (ch < SPACE)
                     {
-                        throw new HttpException(400);
+                        throw new HttpException(HttpServletResponse.SC_BAD_REQUEST);
                     }
                     break;
 
@@ -329,7 +330,7 @@ public class HttpParser implements HttpTokens
                     }
                     else if (ch < SPACE)
                     {
-                        throw new HttpException(400);
+                        throw new HttpException(HttpServletResponse.SC_BAD_REQUEST);
                     }
                     break;
 

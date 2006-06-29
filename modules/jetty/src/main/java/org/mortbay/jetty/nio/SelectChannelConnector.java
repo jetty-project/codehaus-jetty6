@@ -154,7 +154,10 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             _acceptChannel.socket().bind(addr,getAcceptQueueSize());
 
             // Register accepts on the server socket with the selector.
-            _acceptKey = _acceptChannel.register(_selectSets[0].getSelector(), SelectionKey.OP_ACCEPT);
+            synchronized (_selectSets[0])
+            {
+                _acceptKey = _acceptChannel.register(_selectSets[0].getSelector(), SelectionKey.OP_ACCEPT);
+            }
         }
     }
 
