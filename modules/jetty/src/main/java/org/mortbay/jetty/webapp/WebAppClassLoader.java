@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
+import java.util.Enumeration;
 import java.util.StringTokenizer;
 
 import org.mortbay.io.IO;
@@ -44,7 +45,7 @@ import org.mortbay.util.LazyList;
  *
  * @author Greg Wilkins (gregw)
  */
-public class WebAppClassLoader extends ClassLoader
+public class WebAppClassLoader extends URLClassLoader
 {
     private WebAppContext _context;
     private ClassLoader _loader;
@@ -57,6 +58,7 @@ public class WebAppClassLoader extends ClassLoader
      */
     public WebAppClassLoader(ClassLoader parent, WebAppContext context)
     {
+        super(new URL[0],null);
         _parent=parent;
         _context=context;
         if (parent==null)
@@ -75,7 +77,7 @@ public class WebAppClassLoader extends ClassLoader
      * @param parent The parent classloader
      * @return A new classloader.
      */
-    ClassLoader newInstance(URL[] urls, ClassLoader parent)
+    ClassLoader newDelegateInstance(URL[] urls, ClassLoader parent)
     {
         return new URLClassLoader(urls,parent);
     }
@@ -161,13 +163,19 @@ public class WebAppClassLoader extends ClassLoader
         }
     }
 
-    private void addURL(URL url)
-        throws IOException
+    /* ------------------------------------------------------------ */
+    public void addURL(URL url)
     {
         _urls = (URL[])LazyList.addToArray(_urls, url, URL.class);
     }
     
-    
+
+    /* ------------------------------------------------------------ */
+    public URL[] getURLs()
+    {
+        return _urls;
+    }
+
     /* ------------------------------------------------------------ */
     /** Add elements to the class path for the context from the jar and zip files found
      *  in the specified resource.
@@ -221,7 +229,7 @@ public class WebAppClassLoader extends ClassLoader
     {
         if (_loader==null)
         {
-            _loader=newInstance(_urls,_parent);
+            _loader=newDelegateInstance(_urls,_parent);
             _parent=_loader.getParent();
         }
         
@@ -346,7 +354,7 @@ public class WebAppClassLoader extends ClassLoader
     {
         if (_loader==null)
         {
-            _loader=newInstance(_urls,_parent);
+            _loader=newDelegateInstance(_urls,_parent);
             _parent=_loader.getParent();
         }
         
