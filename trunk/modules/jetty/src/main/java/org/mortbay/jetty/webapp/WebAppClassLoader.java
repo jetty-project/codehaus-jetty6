@@ -35,9 +35,9 @@ import org.mortbay.util.LazyList;
 /** ClassLoader for HttpContext.
  * Specializes ClassLoader to be knowledgeable about Web Context.
  *
- * This loader delegates to a loader created by a call to {@link #newInstance(URL[], ClassLoader)}
- * and potentially to the classloader returned by {@link java.lang.ClassLoader#getParent()} of that
- * loader.
+ * This classloader extends the behaviour of {@link java.net.URLClassLoader} to support
+ * the servlet specification behaviour where a webapp may override non system and non server
+ * implementation classes.
  * 
  * Java2 compliant loading, where the parent loader
  * always has priority, can be selected with the 
@@ -48,10 +48,9 @@ import org.mortbay.util.LazyList;
 public class WebAppClassLoader extends URLClassLoader
 {
     private WebAppContext _context;
-    private ClassLoader _loader;
-    private ClassLoader _parent;
-    private String _urlClassPath;
-    private URL[] _urls=new URL[0];
+    protected ClassLoader _loader;
+    protected ClassLoader _parent;
+    protected String _urlClassPath;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -59,28 +58,13 @@ public class WebAppClassLoader extends URLClassLoader
     public WebAppClassLoader(ClassLoader parent, WebAppContext context)
     {
         super(new URL[0],null);
+        _loader=this;
         _parent=parent;
         _context=context;
         if (parent==null)
             throw new IllegalArgumentException("no parent classloader!");
     }
 
-    /* ------------------------------------------------------------ */
-    /** Create new instance of a classloader.
-     * This method is called by {@link #loadClass(String, boolean)} and 
-     * {@link #getResource(String)} the first time they are called in order to create
-     * the classloader that this loader delegaes to.   This class should be specialized if
-     * specialized class loading is required.  Note that the loader returned by
-     * {@link java.lang.ClassLoader#getParent()} may also be directly accessed when loading 
-     * classes.
-     * @param urls Array of URLs to load from
-     * @param parent The parent classloader
-     * @return A new classloader.
-     */
-    ClassLoader newDelegateInstance(URL[] urls, ClassLoader parent)
-    {
-        return new URLClassLoader(urls,parent);
-    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -164,19 +148,6 @@ public class WebAppClassLoader extends URLClassLoader
     }
 
     /* ------------------------------------------------------------ */
-    public void addURL(URL url)
-    {
-        _urls = (URL[])LazyList.addToArray(_urls, url, URL.class);
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    public URL[] getURLs()
-    {
-        return _urls;
-    }
-
-    /* ------------------------------------------------------------ */
     /** Add elements to the class path for the context from the jar and zip files found
      *  in the specified resource.
      * @param lib the resource that contains the jar and/or zip files.
@@ -211,6 +182,8 @@ public class WebAppClassLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     public void destroy()
     {
+        this._context=null;
+        this._loader=null;
         this._parent=null;
         this._urlClassPath=null;
     }
@@ -227,12 +200,6 @@ public class WebAppClassLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     public synchronized URL getResource(String name)
     {
-        if (_loader==null)
-        {
-            _loader=newDelegateInstance(_urls,_parent);
-            _parent=_loader.getParent();
-        }
-        
         URL url= null;
         boolean tried_parent= false;
         if (_context.isParentLoaderPriority() || isSystemPath(name))
@@ -352,12 +319,6 @@ public class WebAppClassLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException
     {
-        if (_loader==null)
-        {
-            _loader=newDelegateInstance(_urls,_parent);
-            _parent=_loader.getParent();
-        }
-        
         Class c= findLoadedClass(name);
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
