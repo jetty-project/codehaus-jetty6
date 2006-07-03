@@ -612,7 +612,8 @@ public class Request implements HttpServletRequest
     {
         if (!_paramsExtracted) 
             extractParameters();
-        return _parameters.toStringArrayMap();
+        
+        return Collections.unmodifiableMap(_parameters.toStringArrayMap());
     }
 
     /* ------------------------------------------------------------ */
