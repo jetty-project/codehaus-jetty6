@@ -97,7 +97,6 @@ public class WebAppContext extends Context
     
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
-    private Random _randomGenerator = new Random();
 
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
@@ -611,9 +610,13 @@ public class WebAppContext extends Context
                 work=w;
             else if (getBaseResource()!=null)
             {
-                w=new File(getWebInf().getFile(),"work");
-                if (w.exists() && w.canWrite() && w.isDirectory())
-                    work=w;
+                Resource web_inf = getWebInf();
+                if (web_inf !=null && web_inf.exists())
+                {
+                    w=new File(web_inf.getFile(),"work");
+                    if (w.exists() && w.canWrite() && w.isDirectory())
+                        work=w;
+                }
             }
         }
         catch(Exception e)
@@ -1077,7 +1080,7 @@ public class WebAppContext extends Context
         Resource web_inf=getWebInf();
         if (web_inf!=null)
         {
-            Resource work= getWebInf().addPath("work");
+            Resource work= web_inf.addPath("work");
             if (work.exists()
                             && work.isDirectory()
                             && work.getFile() != null

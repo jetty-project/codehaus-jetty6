@@ -146,9 +146,10 @@ public class TagLibConfiguration implements Configuration
         }
         
         // Look for any tlds in WEB-INF directly.
-        if (_context.getWebInf()!=null)
+        Resource web_inf = _context.getWebInf();
+        if (web_inf!=null)
         {
-            String[] contents = _context.getWebInf().list();
+            String[] contents = web_inf.list();
             for (int i=0;i<contents.length;i++)
             {
                 if (contents[i]!=null && contents[i].toLowerCase().endsWith(".tld"))

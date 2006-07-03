@@ -59,18 +59,18 @@ public class WebInfConfiguration implements Configuration
             return;
         }
 
-        Resource webInf=_context.getWebInf();
+        Resource web_inf=_context.getWebInf();
 
         // Add WEB-INF classes and lib classpaths
-        if (webInf != null && webInf.isDirectory() && _context.getClassLoader() instanceof WebAppClassLoader)
+        if (web_inf != null && web_inf.isDirectory() && _context.getClassLoader() instanceof WebAppClassLoader)
         {
             // Look for classes directory
-            Resource classes= webInf.addPath("classes/");
+            Resource classes= web_inf.addPath("classes/");
             if (classes.exists())
                 ((WebAppClassLoader)_context.getClassLoader()).addClassPath(classes.toString());
 
             // Look for jars
-            Resource lib= webInf.addPath("lib/");
+            Resource lib= web_inf.addPath("lib/");
             if (lib.exists() || lib.isDirectory())
                 ((WebAppClassLoader)_context.getClassLoader()).addJars(lib);
         }

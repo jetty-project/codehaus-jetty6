@@ -79,16 +79,16 @@ public class JettyWebXmlConfiguration implements Configuration
         if(Log.isDebugEnabled())
             Log.debug("Configuring web-jetty.xml");
         
-        Resource webInf=getWebAppContext().getWebInf();
+        Resource web_inf=getWebAppContext().getWebInf();
         // handle any WEB-INF descriptors
-        if(webInf!=null&&webInf.isDirectory())
+        if(web_inf!=null&&web_inf.isDirectory())
         {
             // do jetty.xml file
-            Resource jetty=webInf.addPath("jetty6-web.xml");
+            Resource jetty=web_inf.addPath("jetty6-web.xml");
             if(!jetty.exists())
-                jetty=webInf.addPath("jetty-web.xml");
+                jetty=web_inf.addPath("jetty-web.xml");
             if(!jetty.exists())
-                jetty=webInf.addPath("web-jetty.xml");
+                jetty=web_inf.addPath("web-jetty.xml");
 
             if(jetty.exists())
             {
