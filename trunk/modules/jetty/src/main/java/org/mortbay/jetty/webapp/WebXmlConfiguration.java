@@ -167,12 +167,12 @@ public class WebXmlConfiguration implements Configuration
             if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
-        Resource webInf=getWebAppContext().getWebInf();
+        Resource web_inf=getWebAppContext().getWebInf();
         // handle any WEB-INF descriptors
-        if(webInf!=null&&webInf.isDirectory())
+        if(web_inf!=null && web_inf.isDirectory())
         {
             // do web.xml file
-            Resource web=webInf.addPath("web.xml");
+            Resource web=web_inf.addPath("web.xml");
             if(web.exists())
             {
                 _welcomeFileList=false;
