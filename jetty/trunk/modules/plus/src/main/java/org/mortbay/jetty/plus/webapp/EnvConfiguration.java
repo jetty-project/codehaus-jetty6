@@ -123,10 +123,10 @@ public class EnvConfiguration implements Configuration
             
             //look for a file called WEB-INF/jetty-env.xml
             //and process it if it exists
-            org.mortbay.resource.Resource webInf = getWebAppContext().getWebInf();
-            if(webInf!=null && webInf.isDirectory())
+            org.mortbay.resource.Resource web_inf = getWebAppContext().getWebInf();
+            if(web_inf!=null && web_inf.isDirectory())
             {
-                org.mortbay.resource.Resource jettyEnv = webInf.addPath("jetty-env.xml");
+                org.mortbay.resource.Resource jettyEnv = web_inf.addPath("jetty-env.xml");
                 if(jettyEnv.exists())
                 {
                     jettyEnvXmlUrl = jettyEnv.getURL();
