@@ -60,7 +60,7 @@ public class ContextHandlerTest extends TestCase
 
     private File setupTestDirectory() throws IOException
     {
-        File root = new File(System.getProperty("basedir", "modules/jetty"), "target/" + getClass().getSimpleName());
+        File root = new File(System.getProperty("basedir", "modules/jetty"), "target/" + getClass().getName());
         root.mkdir();
 
         File webInf = new File(root, "WEB-INF");
