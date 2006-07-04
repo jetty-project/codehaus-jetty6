@@ -1,3 +1,5 @@
+    + added setters and getters on SessionManager API for session related config: cookie name, url parameter name, domain, max age and path.
+
 jetty-6.0.0rc0 - DOH!
     + add ability to have a lib/ext dir from which to recursively add all jars and zips to the classpath
     + patch to allow Jetty to use JSP2.1 from Glassfish instead of Jasper from Tomcat

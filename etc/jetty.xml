@@ -105,7 +105,6 @@
         <!-- ======================================================= -->
         <!-- Configure a webapp with specific options                -->
         <!-- ======================================================= -->
-	<!-- 
         <Item>
           <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppContext">
             <Set name="contextPath">/</Set>
@@ -117,11 +116,15 @@
               </Array>
             </Set>
             <Get name="SessionHandler">
-              <Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
+              <Set name="SessionManager">
+                <New class="org.mortbay.jetty.servlet.HashSessionManager">
+                  <Set name="sessionCookie">MYJESSIONID</Set>
+                  <Set name="sessionURL">myjessionid</Set>
+                </New>
+              </Set>
             </Get>
           </New>
         </Item>
-        -->
 
         <!-- ======================================================= -->
         <!-- Configure a context directly - no XML parser required   -->

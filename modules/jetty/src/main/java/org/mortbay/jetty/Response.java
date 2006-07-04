@@ -151,8 +151,10 @@ public class Response implements HttpServletResponse
 
         // TODO Check host and port are for this server
 
+        SessionManager sessionManager = request.getSessionManager();
+        String sessionURLPrefix = sessionManager.getSessionURLPrefix();
         // Already encoded
-        int prefix=url.indexOf(SessionManager.__SessionUrlPrefix);
+        int prefix=url.indexOf(sessionURLPrefix);
         if (prefix!=-1)
         {
             int suffix=url.indexOf("?",prefix);
@@ -160,8 +162,8 @@ public class Response implements HttpServletResponse
                 suffix=url.indexOf("#",prefix);
 
             if (suffix<=prefix)
-                return url.substring(0,prefix+SessionManager.__SessionUrlPrefix.length())+id;
-            return url.substring(0,prefix+SessionManager.__SessionUrlPrefix.length())+id+
+                return url.substring(0,prefix+sessionURLPrefix.length())+id;
+            return url.substring(0,prefix+sessionURLPrefix.length())+id+
                 url.substring(suffix);
         }
 
@@ -170,9 +172,9 @@ public class Response implements HttpServletResponse
         if (suffix<0)
             suffix=url.indexOf('#');
         if (suffix<0)
-            return url+SessionManager.__SessionUrlPrefix+id;
+            return url+sessionURLPrefix+id;
         return url.substring(0,suffix)+
-            SessionManager.__SessionUrlPrefix+id+url.substring(suffix);
+            sessionURLPrefix+id+url.substring(suffix);
     }
 
     /* ------------------------------------------------------------ */
