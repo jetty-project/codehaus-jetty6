@@ -263,6 +263,11 @@ public class ServletHolder extends Holder
                 else
                     throw new ServletException(e);
             }            
+            
+            if(_servlets != null)
+            {
+                _servlets.push(_servlet);
+            }
         }  
     }
 

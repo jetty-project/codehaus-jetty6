@@ -26,7 +26,7 @@ public interface RoleCheckPolicy
      * @param role the role to check
      * @param runAsRole a pushed role (can be null)
      * @param roles a Group whose Principals are role names
-     * @return 
+     * @return <code>true</code> if <code>role</code> equals <code>runAsRole</code> or is a member of <code>roles</code>.
      */
     public boolean checkRole (Principal role, Principal runAsRole, Group roles);
     

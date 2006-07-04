@@ -103,7 +103,7 @@ public class WebAppContext extends Context
      * Add auto webapplications to the server.  The name of the
      * webapp directory or war is used as the context name. If the
      * webapp matches the rootWebApp it is added as the "/" context.
-     * @param host Virtual host name or null
+     * @param server Must not be <code>null</code>
      * @param webapps Directory file name or URL to look for auto
      * webapplication.
      * @param defaults The defaults xml filename or URL which is
@@ -129,7 +129,7 @@ public class WebAppContext extends Context
      * Add auto webapplications to the server.  The name of the
      * webapp directory or war is used as the context name. If the
      * webapp matches the rootWebApp it is added as the "/" context.
-     * @param host Virtual host name or null
+     * @param server Must not be <code>null</code>.
      * @param webapps Directory file name or URL to look for auto
      * webapplication.
      * @param defaults The defaults xml filename or URL which is
@@ -986,7 +986,7 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /**
-     * @param sessionHandler The sessionHandler to set.
+     * @param securityHandler The {@link SecurityHandler} to set on this context.
      */
     public void setSecurityHandler(SecurityHandler securityHandler)
     {

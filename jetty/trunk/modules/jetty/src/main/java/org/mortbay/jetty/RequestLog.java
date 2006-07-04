@@ -17,9 +17,9 @@ package org.mortbay.jetty;
 import org.mortbay.component.LifeCycle;
 
 /** 
- * RequestLog
+ * A <code>RequestLog</code> can be attached to a {@link Server} to enable logging of requests/responses.
  * @author Nigel Canonizado
- * 
+ * @see Server#setRequestLog
  */
 public interface RequestLog extends LifeCycle
 {
