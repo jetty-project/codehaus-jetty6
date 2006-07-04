@@ -149,7 +149,7 @@ public class SessionHandler extends HandlerWrapper
                 {
                     for (int i=0;i<cookies.length;i++)
                     {
-                        if (SessionManager.__SessionCookie.equalsIgnoreCase(cookies[i].getName()))
+                        if (_sessionManager.getSessionCookie().equalsIgnoreCase(cookies[i].getName()))
                         {
                             if (requested_session_id!=null)
                             {
@@ -177,9 +177,9 @@ public class SessionHandler extends HandlerWrapper
                         String path_params=uri.substring(semi+1);
                         
                         // check if there is a url encoded session param.
-                        if (path_params!=null && path_params.startsWith(SessionManager.__SessionURL))
+                        if (path_params!=null && path_params.startsWith(_sessionManager.getSessionURL()))
                         {
-                            requested_session_id = path_params.substring(SessionManager.__SessionURL.length()+1);
+                            requested_session_id = path_params.substring(_sessionManager.getSessionURL().length()+1);
                             if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from URL");
                         }
                     }

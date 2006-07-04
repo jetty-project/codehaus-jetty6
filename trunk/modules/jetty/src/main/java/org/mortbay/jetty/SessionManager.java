@@ -34,23 +34,33 @@ import org.mortbay.jetty.servlet.SessionHandler;
  */
 public interface SessionManager extends LifeCycle, Serializable
 {
+    
     /* ------------------------------------------------------------ */
     /** Session cookie name.
      * Defaults to JSESSIONID, but can be set with the
      * org.mortbay.jetty.servlet.SessionCookie system property.
      */
-    public final static String __SessionCookie=
-        System.getProperty("org.mortbay.jetty.servlet.SessionCookie","JSESSIONID");
+    public final static String __SessionCookieProperty = "org.mortbay.jetty.servlet.SessionCookie";
+    
+    public final static String __DefaultSessionCookie = "JSESSIONID";   
+
+    public final static String __SessionCookieSystemProperty=
+        System.getProperty(__SessionCookieProperty,__DefaultSessionCookie);
+    
     
     /* ------------------------------------------------------------ */
     /** Session URL parameter name.
      * Defaults to jsessionid, but can be set with the
      * org.mortbay.jetty.servlet.SessionURL system property.
      */
-    public final static String __SessionURL = 
-        System.getProperty("org.mortbay.jetty.servlet.SessionURL","jsessionid");
+    public final static String __SessionURLProperty = "org.mortbay.jetty.servlet.SessionURL";
+    
+    public final static String __DefaultSessionURL = "jsessionid";
+    
+    public final static String __SessionURLSystemProperty = 
+        System.getProperty(__SessionURLProperty,__DefaultSessionURL);
 
-    final static String __SessionUrlPrefix=";"+__SessionURL+"=";
+  
 
     /* ------------------------------------------------------------ */
     /** Session Domain.
@@ -58,7 +68,10 @@ public interface SessionManager extends LifeCycle, Serializable
      * used as the domain for session cookies. If it is not set, then
      * no domain is specified for the session cookie.
      */
-    public final static String __SessionDomain="org.mortbay.jetty.servlet.SessionDomain";
+    public final static String __SessionDomainProperty="org.mortbay.jetty.servlet.SessionDomain";
+    
+    public final static String __DefaultSessionDomain = null;
+    
     
     /* ------------------------------------------------------------ */
     /** Session Path.
@@ -66,7 +79,7 @@ public interface SessionManager extends LifeCycle, Serializable
      * used as the path for the session cookie.  If it is not set, then
      * the context path is used as the path for the cookie.
      */
-    public final static String __SessionPath="org.mortbay.jetty.servlet.SessionPath";
+    public final static String __SessionPathProperty="org.mortbay.jetty.servlet.SessionPath";
     
     /* ------------------------------------------------------------ */
     /** Session Max Age.
@@ -74,7 +87,14 @@ public interface SessionManager extends LifeCycle, Serializable
      * used as the max age for the session cookie.  If it is not set, then
      * a max age of -1 is used.
      */
-    public final static String __MaxAge="org.mortbay.jetty.servlet.MaxAge";
+    public final static String __MaxAgeProperty="org.mortbay.jetty.servlet.MaxAge";
+    
+    public final static String __DefaultMaxAge =  "-1";
+    
+    public final static String __MaxAgeSystemProperty =
+        System.getProperty(__MaxAgeProperty,__DefaultMaxAge);
+    
+    
     
     /* ------------------------------------------------------------ */
     public HttpSession getHttpSession(String id);
@@ -160,4 +180,27 @@ public interface SessionManager extends LifeCycle, Serializable
      */
     public void complete(HttpSession session);
 
+    
+    public void setSessionCookie (String cookieName);
+    
+    public String getSessionCookie ();
+    
+    public void setSessionURL (String url);
+    
+    public String getSessionURL ();
+    
+    public String getSessionURLPrefix();
+    
+    public void setSessionDomain (String domain);
+    
+    public String getSessionDomain ();
+    
+    public void setSessionPath (String path);
+    
+    public String getSessionPath ();
+    
+    public void setMaxSessionCookieAge (int maxCookieAge);
+    
+    public int getMaxCookieAge ();
+    
 }

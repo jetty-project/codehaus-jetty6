@@ -86,12 +86,74 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     private boolean _usingCookies=true;
     protected  ClassLoader _loader;
     protected  ContextHandler.Context _context;
+    protected String _sessionCookie;
+    protected String _sessionURL;
+    protected String _sessionURLPrefix;
+    protected String _sessionDomain;
+    protected String _sessionPath;
+    protected int _maxSessionCookieAge = Integer.parseInt(SessionManager.__DefaultMaxAge);
+    protected boolean _maxAgeSet = false;
     
     /* ------------------------------------------------------------ */
     public AbstractSessionManager()
     {
     }
     
+    public void setSessionCookie (String cookieName)
+    {
+        _sessionCookie = cookieName;
+    }
+    
+    public String getSessionCookie ()
+    {
+        return _sessionCookie;
+    }
+    
+    public void setSessionURL (String url)
+    {
+        _sessionURL = url;
+    }
+    
+    public String getSessionURL ()
+    {
+        return _sessionURL;
+    }
+    
+    public String getSessionURLPrefix()
+    {
+        return _sessionURLPrefix;
+    }
+    
+    public void setSessionDomain (String domain)
+    {
+        _sessionDomain = domain;
+    }
+    
+    public String getSessionDomain ()
+    {
+        return _sessionDomain;
+    }
+    
+    public void setSessionPath (String path)
+    {
+        _sessionPath = path;
+    }
+    
+    public String getSessionPath ()
+    {
+        return _sessionPath;
+    }
+    
+    public void setMaxSessionCookieAge (int maxCookieAge)
+    {
+        _maxSessionCookieAge = maxCookieAge;
+        _maxAgeSet = true;
+    }
+    
+    public int getMaxCookieAge ()
+    {
+        return _maxSessionCookieAge;
+    }
 
     /* ------------------------------------------------------------ */
     public void clearEventListeners()
@@ -188,26 +250,19 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         if (isUsingCookies())
         {
             Cookie cookie = getHttpOnly()
-                ?new HttpOnlyCookie(SessionManager.__SessionCookie,session.getId())
-                :new Cookie(SessionManager.__SessionCookie,session.getId());  
+                ?new HttpOnlyCookie(_sessionCookie,session.getId())
+                :new Cookie(_sessionCookie,session.getId());  
          
+                
             cookie.setPath((contextPath==null||contextPath.length()==0)?"/":contextPath);
-            cookie.setMaxAge(-1);
+            cookie.setMaxAge(_maxSessionCookieAge);
             cookie.setSecure(requestIsSecure && getSecureCookies());
             
-            if (_context!=null)
-            {
-                String domain=_context.getInitParameter(SessionManager.__SessionDomain);
-                String maxAge=_context.getInitParameter(SessionManager.__MaxAge);
-                String path=_context.getInitParameter(SessionManager.__SessionPath);
-                
-                if (path!=null)
-                    cookie.setPath(path);
-                if (domain!=null)
-                    cookie.setDomain(domain);       
-                if (maxAge!=null)
-                    cookie.setMaxAge(Integer.parseInt(maxAge));
-            }
+            //set up the overrides
+            if (_sessionDomain!=null)
+                cookie.setDomain(_sessionDomain); 
+            if (_sessionPath!=null)
+                cookie.setPath(_sessionPath);
             
             return cookie;    
         }
@@ -424,7 +479,57 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
         if (!_sessionIdManager.isStarted())
             _sessionIdManager.start();
+       
         
+        //set up the cookie name if it isn't already
+        if (_sessionCookie==null)
+        {
+            //try the context initParams then the system properties using the defaults
+            String str = null;
+            if (_context != null)
+                str = _context.getInitParameter(SessionManager.__SessionCookieProperty);
+            _sessionCookie = (str==null?SessionManager.__SessionCookieSystemProperty:str); 
+        }
+        
+        //set up the parameter name of the session for urls
+        if (_sessionURL == null)
+        {
+            String str = null;
+            if (_context != null)
+                str = _context.getInitParameter(SessionManager.__SessionURLProperty);
+            _sessionURL = (str==null?SessionManager.__SessionURLSystemProperty:str);
+        }
+        //set up the whole session url
+        _sessionURLPrefix = ";"+_sessionURL+"=";
+        
+        //set up the max session cookie age if it isn't already
+        if (!_maxAgeSet)
+        {
+            String str = null;
+            if (_context != null)
+                str = _context.getInitParameter(SessionManager.__MaxAgeProperty);
+            str = (str==null?SessionManager.__MaxAgeSystemProperty:str);
+            _maxSessionCookieAge = Integer.parseInt(str.trim());
+            _maxAgeSet = true;
+        }       
+        
+        //set up the session domain if it isn't already
+        if (_sessionDomain==null)
+        {
+            //only try the context initParams
+            if (_context != null)
+                _sessionDomain = _context.getInitParameter(SessionManager.__SessionDomainProperty);
+        }
+        
+        //set up the sessionPath if it isn't already
+        if (_sessionPath==null)
+        {
+            //only the context initParams
+            if (_context != null)
+                _sessionPath =_context.getInitParameter(SessionManager.__SessionPathProperty);
+        }
+        
+ 
         super.doStart();
 
         // Start the session scavenger if we haven't already
@@ -846,6 +951,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             }
         }
         
+        
+        
     }   // SessionScavenger
 
     /* ------------------------------------------------------------ */
@@ -877,4 +984,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
     }
 
+    
+    
 }
