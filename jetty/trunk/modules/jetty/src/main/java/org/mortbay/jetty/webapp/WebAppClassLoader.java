@@ -75,9 +75,6 @@ public class WebAppClassLoader extends URLClassLoader
     public void addClassPath(String classPath)
     	throws IOException
     {
-        if (_loader!=null)
-            throw new IllegalStateException();
-        
         if (classPath == null)
             return;
             

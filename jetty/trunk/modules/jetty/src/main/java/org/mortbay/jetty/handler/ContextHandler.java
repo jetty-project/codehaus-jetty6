@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.MimeTypes;
@@ -125,6 +126,27 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         _context=new Context();
         _attributes=new AttributesMap();
         _initParams=new HashMap();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * 
+     */
+    public ContextHandler(String contextPath)
+    {
+        this();
+        setContextPath(contextPath);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * 
+     */
+    public ContextHandler(HandlerContainer parent, String contextPath)
+    {
+        this();
+        setContextPath(contextPath);
+        parent.addHandler(this);
     }
     
 

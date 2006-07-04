@@ -26,7 +26,7 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
-public class ManyServletContext
+public class ManyServletContexts
 {
     public static void main(String[] args)
         throws Exception
