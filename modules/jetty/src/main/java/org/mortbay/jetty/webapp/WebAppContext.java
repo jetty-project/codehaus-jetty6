@@ -299,14 +299,31 @@ public class WebAppContext extends Context
      * @param contextPath The context path
      * @param webApp The URL or filename of the webapp directory or war file.
      */
-    public WebAppContext(String contextPath, String webApp)
+    public WebAppContext(String webApp,String contextPath)
     {
-        this(null,null,null,null);
+        super(null,contextPath,SESSIONS|SECURITY);
         setContextPath(contextPath);
         setWar(webApp);
+        setErrorHandler(new WebAppErrorHandler());
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param parent The parent HandlerContainer.
+     * @param contextPath The context path
+     * @param webApp The URL or filename of the webapp directory or war file.
+     */
+    public WebAppContext(HandlerContainer parent, String webApp, String contextPath)
+    {
+        super(parent,contextPath,SESSIONS|SECURITY);
+        setWar(webApp);
+        setErrorHandler(new WebAppErrorHandler());
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
     public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
         super(null,
