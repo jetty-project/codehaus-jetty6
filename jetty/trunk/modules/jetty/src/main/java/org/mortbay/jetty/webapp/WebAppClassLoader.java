@@ -212,7 +212,10 @@ public class WebAppClassLoader extends URLClassLoader
 
         if (url == null)
         {
-            url= _loader.getResource(name);
+            if (_loader==this)
+                url= super.getResource(name);
+            else
+                url= _loader.getResource(name);
 
             if (url == null && name.startsWith("/"))
             {
@@ -342,7 +345,10 @@ public class WebAppClassLoader extends URLClassLoader
         {
             try
             {
-                c= _loader.loadClass(name);
+                if (_loader==this)
+                    c=super.loadClass(name,resolve);
+                else
+                    c= _loader.loadClass(name);
             }
             catch (ClassNotFoundException e)
             {
