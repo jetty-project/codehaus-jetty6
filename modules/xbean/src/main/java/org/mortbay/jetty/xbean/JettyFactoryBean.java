@@ -17,16 +17,9 @@
 package org.mortbay.jetty.xbean;
 
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
+
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.log.Log;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
+
 
 /**
  * Creates an instance of Jetty inside an <a href="http://xbean.org/">XBean</a>
