@@ -288,7 +288,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
 
     /* ------------------------------------------------------------ */
     /**
-     * @param acceptQueueSize The number of acceptor threads to set.
+     * @param acceptors The number of acceptor threads to set.
      */
     public void setAcceptors(int acceptors)
     {

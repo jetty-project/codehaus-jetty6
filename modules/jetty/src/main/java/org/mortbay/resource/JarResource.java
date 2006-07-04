@@ -64,8 +64,10 @@ public class JarResource extends URLResource
     }
 
     /* ------------------------------------------------------------ */
-    protected void newConnection()
-        throws IOException
+    /**
+     * @throws IOException Sub-classes of <code>JarResource</code> may throw an IOException (or subclass) 
+     */
+    protected void newConnection() throws IOException
     {
         _jarConnection=(JarURLConnection)_connection;
     }

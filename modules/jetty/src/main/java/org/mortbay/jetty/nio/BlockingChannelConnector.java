@@ -137,13 +137,13 @@ public class BlockingChannelConnector extends AbstractConnector implements NIOCo
         HttpConnection _connection;
         int _sotimeout;
         
-        Connection(ByteChannel channel) throws IOException
+        Connection(ByteChannel channel) 
         {
             super(channel);
             _connection = new HttpConnection(BlockingChannelConnector.this,this,getServer());
         }
         
-        void dispatch() throws InterruptedException, IOException
+        void dispatch() throws IOException
         {
             if (!getThreadPool().dispatch(this))
             {

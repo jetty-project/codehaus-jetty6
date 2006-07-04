@@ -162,7 +162,6 @@ public abstract class AbstractLoginModule implements LoginModule
     }
     /** 
      * @see javax.security.auth.spi.LoginModule#abort()
-     * @return
      * @throws LoginException
      */
     public boolean abort() throws LoginException

@@ -96,7 +96,9 @@ public class MultiException extends Exception
      * If this multi exception is empty then no action is taken. If it
      * contains a single error or runtime exception that is thrown, otherwise the this
      * multi exception is thrown, wrapped in a runtime exception. 
-     * @exception Exception 
+     * @exception Error If this exception contains exactly 1 {@link Error} 
+     * @exception RuntimeException If this exception contains 1 {@link Throwable} but it is not an error,
+     *                             or it contains more than 1 {@link Throwable} of any type.
      */
     public void ifExceptionThrowRuntime()
         throws Error
@@ -109,8 +111,6 @@ public class MultiException extends Exception
               Throwable th=(Throwable)LazyList.get(nested,0);
               if (th instanceof Error)
                   throw (Error)th;
-              else if (th instanceof RuntimeException)
-                  throw (RuntimeException)th;
               else if (th instanceof RuntimeException)
                   throw (RuntimeException)th;
               else

@@ -187,7 +187,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
     
     /* ------------------------------------------------------------ */
     /**
-     * @param servletContext The servletHandler to set.
+     * @param servletHandler The {@link ServletHandler} that will handle requests dispatched to this servlet.
      */
     public void setServletHandler(ServletHandler servletHandler)
     {

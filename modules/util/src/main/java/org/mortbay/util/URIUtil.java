@@ -355,7 +355,7 @@ public class URIUtil
     /* ------------------------------------------------------------ */
     /** Convert a path to a cananonical form.
      * All instances of "//", "." and ".." are factored out.  Null is returned
-     * if the path tries to .. above it's root.
+     * if the path tries to .. above its root.
      * @param path 
      * @return path or null.
      */

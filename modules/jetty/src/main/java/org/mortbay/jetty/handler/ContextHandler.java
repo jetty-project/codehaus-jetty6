@@ -629,7 +629,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
      * Called by {@link #handle(String, HttpServletRequest, HttpServletResponse, int)} when a
      * target within a context is determined.  If the target is protected, 404 is returned.
      * The default implementation always returns false.
-     * @see {@link org.mortbay.jetty.webapp.WebAppContext#isProtectedTarget(String)}
+     * @see org.mortbay.jetty.webapp.WebAppContext#isProtectedTarget(String)
      */
     /* ------------------------------------------------------------ */
     protected boolean isProtectedTarget(String target)
@@ -929,12 +929,15 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             
             if (resource!=null && resource.exists())
             {
+                if (!path.endsWith("/"))
+                    path=path+"/";
+                
                 String[] l=resource.list();
                 if (l!=null)
                 {
                     HashSet set = new HashSet();
                     for(int i=0;i<l.length;i++)
-                        set.add(path+"/"+l[i]);
+                        set.add(path+l[i]);
                     return set;
                 }   
             }

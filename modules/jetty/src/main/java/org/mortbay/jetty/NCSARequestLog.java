@@ -31,7 +31,11 @@ import org.mortbay.util.RolloverFileOutputStream;
 import org.mortbay.util.StringUtil;
 
 /** 
- * RequestLogImpl
+ * This {@link RequestLog} implementation outputs logs in the pseudo-standard NCSA common log format.
+ * Configuration options allow a choice between the standard Common Log Format (as used in the 3 log format)
+ * and the Combined Log Format (single log format).
+ * This log format can be output by most web servers, and almost all web log analysing software can understand
+ *  these formats.
  * @author Greg Wilkins
  * @author Nigel Canonizado
  * 

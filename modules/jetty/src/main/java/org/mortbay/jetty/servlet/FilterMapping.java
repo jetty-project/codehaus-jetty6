@@ -50,10 +50,10 @@ public class FilterMapping
     }
     
     /* ------------------------------------------------------------ */
-    /** Check if this filter applies to a path.
-     * @param path The path to check or null to just check type
-     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
-     * @return True if this filter applies
+    /** Check if this filter applies to a particular dispatch type.
+     * @param type The type of request:
+     *      {@link Handler#REQUEST}, {@link Handler#FORWARD}, {@link Handler#INCLUDE} or {@link Handler#ERROR}.
+     * @return <code>true</code> if this filter applies
      */
     boolean appliesTo(int type)
     {
@@ -102,11 +102,11 @@ public class FilterMapping
     /* ------------------------------------------------------------ */
     /**
      * @param dispatches The dispatches to set.
-     * @see {@link Handler#DEFAULT}
-     * @see {@link Handler#REQUEST}
-     * @see {@link Handler#ERROR}
-     * @see {@link Handler#FORWARD}
-     * @see {@link Handler#INCLUDE}
+     * @see Handler#DEFAULT
+     * @see Handler#REQUEST
+     * @see Handler#ERROR
+     * @see Handler#FORWARD
+     * @see Handler#INCLUDE
      */
     public void setDispatches(int dispatches)
     {
@@ -133,7 +133,7 @@ public class FilterMapping
     
     /* ------------------------------------------------------------ */
     /**
-     * @param pathSpec The pathSpecs to set.
+     * @param pathSpecs The Path specifications to which this filter should be mapped. 
      */
     public void setPathSpecs(String[] pathSpecs)
     {
@@ -160,7 +160,8 @@ public class FilterMapping
     
     /* ------------------------------------------------------------ */
     /**
-     * @param servletName The servletName to set.
+     * @param servletNames Maps the {@link #setFilterName(String) named filter} to multiple servlets
+     * @see #setServletName
      */
     public void setServletNames(String[] servletNames)
     {
@@ -169,7 +170,8 @@ public class FilterMapping
     
     /* ------------------------------------------------------------ */
     /**
-     * @param servletName The servletName to set.
+     * @param servletName Maps the {@link #setFilterName(String) named filter} to a single servlet
+     * @see #setServletNames
      */
     public void setServletName(String servletName)
     {
