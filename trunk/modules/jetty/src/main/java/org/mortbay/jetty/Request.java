@@ -161,7 +161,7 @@ public class Request implements HttpServletRequest
         if (_baseParameters!=null)
             _baseParameters.clear();
         _parameters=null;
-        _paramsExtracted=false;;
+        _paramsExtracted=false;
         _inputState=__NONE;
         _reader=null; 
         _cookiesExtracted=false;
@@ -1384,7 +1384,8 @@ public class Request implements HttpServletRequest
     }
     /* ------------------------------------------------------------ */
     /**
-     * @param servletPath The servletPath to set.
+     * Sets the "context path" for this request
+     * @see HttpServletRequest#getContextPath
      */
     public void setContextPath(String contextPath)
     {

@@ -176,7 +176,8 @@ public class HttpConnection
     /**
      * Find out if the request is INTEGRAL security.
      * @param request
-     * @return
+     * @return <code>true</code> if there is a {@link #getConnector() connector} and it considers <code>request</code>
+     *         to be {@link Connector#isIntegral(Request) integral}
      */
     public boolean isIntegral(Request request)
     {

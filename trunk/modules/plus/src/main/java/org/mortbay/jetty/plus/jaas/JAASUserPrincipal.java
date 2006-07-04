@@ -149,7 +149,7 @@ public class JAASUserPrincipal implements Principal
     
     /* ------------------------------------------------ */
     /** Determine the roles that the LoginModule has set
-     * @return 
+     * @return  A {@link Group} of {@link Principal Principals} representing the roles this user holds
      */
     public Group getRoles ()
     {
@@ -196,7 +196,6 @@ public class JAASUserPrincipal implements Principal
 
     /* ------------------------------------------------ */
     /** Get the name identifying the user
-     * @return 
      */
     public String getName ()
     {
@@ -219,7 +218,6 @@ public class JAASUserPrincipal implements Principal
     
     /* ------------------------------------------------ */
     /** Provide access to the current Subject
-     * @return 
      */
     public Subject getSubject ()
     {

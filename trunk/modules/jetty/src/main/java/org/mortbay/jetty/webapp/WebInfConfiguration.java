@@ -55,7 +55,7 @@ public class WebInfConfiguration implements Configuration
         //cannot configure if the context is already started
         if (_context.isStarted())
         {
-            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
+            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
             return;
         }
 

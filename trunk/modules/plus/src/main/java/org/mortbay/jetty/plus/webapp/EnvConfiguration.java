@@ -74,7 +74,6 @@ public class EnvConfiguration implements Configuration
     
     /** 
      * @see org.mortbay.jetty.webapp.Configuration#getWebAppContext()
-     * @return
      */
     public WebAppContext getWebAppContext()
     {

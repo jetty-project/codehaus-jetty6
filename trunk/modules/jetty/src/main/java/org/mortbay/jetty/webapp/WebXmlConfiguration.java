@@ -14,8 +14,6 @@
 package org.mortbay.jetty.webapp;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.EventListener;
@@ -26,6 +24,7 @@ import java.util.Map;
 import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.ClientCertAuthenticator;
@@ -144,7 +143,7 @@ public class WebXmlConfiguration implements Configuration
         //cannot configure if the context is already started
         if (_context.isStarted())
         {
-            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
+            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
             return;
         }
 
@@ -164,7 +163,7 @@ public class WebXmlConfiguration implements Configuration
         //cannot configure if the context is already started
         if (_context.isStarted())
         {
-            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
+            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
             return;
         }
         Resource web_inf=getWebAppContext().getWebInf();
@@ -353,7 +352,7 @@ public class WebXmlConfiguration implements Configuration
     }
 
     /* ------------------------------------------------------------ */
-    protected void initFilter(XmlParser.Node node) throws ClassNotFoundException,UnavailableException
+    protected void initFilter(XmlParser.Node node)
     {
         FilterHolder holder= newFilterHolder();
         holder.setName(node.getString("filter-name",false,true));
@@ -414,8 +413,7 @@ public class WebXmlConfiguration implements Configuration
     }
 
     /* ------------------------------------------------------------ */
-    protected void initServlet(XmlParser.Node node) throws ClassNotFoundException,UnavailableException,IOException,
-            MalformedURLException
+    protected void initServlet(XmlParser.Node node) 
     {
         String id=node.getAttribute("id");
 
@@ -763,7 +761,7 @@ public class WebXmlConfiguration implements Configuration
         {
             String realm_name=name.toString(false,true);
 
-            UserRealm[] realms=WebAppContext.getCurrentContext().getContextHandler().getServer().getUserRealms();
+            UserRealm[] realms=ContextHandler.getCurrentContext().getContextHandler().getServer().getUserRealms();
             UserRealm realm=getWebAppContext().getSecurityHandler().getUserRealm();
             for (int i=0;realm==null && realms!=null && i<realms.length; i++)
             {

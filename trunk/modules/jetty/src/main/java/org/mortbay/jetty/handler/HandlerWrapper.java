@@ -1,6 +1,6 @@
 //========================================================================
 //$Id: WrappedHandler.java,v 1.2 2005/11/11 22:55:39 gregwilkins Exp $
-//Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
+//Copyright 2004-2006 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.Server;
 
 /* ------------------------------------------------------------ */
-/** HandlerCollection.
+/** A <code>HandlerWrapper</code> acts as a {@link Handler} but delegates the {@link Handler#handle handle} method and
+ * {@link LifeCycle life cycle} events to a delegate. This is primarily used to implement the <i>Decorator</i> pattern.
  * @author gregw
- *
  */
 public class HandlerWrapper extends AbstractHandlerContainer
 {
@@ -54,7 +55,7 @@ public class HandlerWrapper extends AbstractHandlerContainer
     
     /* ------------------------------------------------------------ */
     /**
-     * @param handlers The handlers to set.
+     * @param handler Set the {@link Handler} which should be wrapped.
      */
     public void setHandler(Handler handler)
     {
