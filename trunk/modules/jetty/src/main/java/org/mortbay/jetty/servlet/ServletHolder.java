@@ -92,8 +92,7 @@ public class ServletHolder extends Holder
     /* ------------------------------------------------------------ */
     public synchronized void setServlet(Servlet servlet)
     {
-        
-        if (_servlet==null || _servlet instanceof SingleThreadModel)
+        if (servlet==null || servlet instanceof SingleThreadModel)
             throw new IllegalArgumentException();
 
         _servlet=servlet;
