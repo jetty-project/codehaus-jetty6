@@ -61,8 +61,17 @@ public class Context extends ContextHandler
         this(parent,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?new SecurityHandler():null,null,null);
         setContextPath(contextPath);
     }
+    
+    /* ------------------------------------------------------------ */
+    public Context(HandlerContainer parent, String contextPath, boolean sessions, boolean security)
+    {
+        this(parent,contextPath,(sessions?SESSIONS:0)|(security?SECURITY:0));
+    }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
     public Context(HandlerContainer parent, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
         _sessionHandler = sessionHandler;
