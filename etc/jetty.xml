@@ -99,6 +99,7 @@
     <!-- ======================================================= -->
     <!-- Configure a WebApp                                      -->
     <!-- ======================================================= -->
+    <!--
     <New class="org.mortbay.jetty.webapp.WebAppContext">
       <Arg><Ref id="contexts"/></Arg>
       <Arg><SystemProperty name="jetty.home" default="."/>/webapps/test</Arg>
@@ -110,7 +111,6 @@
         </Array>
       </Set>
       
-      <!-- Configure session manager (if need be)
       <Get name="SessionHandler">
         <Set name="SessionManager">
           <New class="org.mortbay.jetty.servlet.HashSessionManager">
@@ -118,8 +118,8 @@
           </New>
         </Set>
       </Get>
-      -->
     </New>
+    -->
 
     <!-- ======================================================= -->
     <!-- Configure a Context                                     -->
