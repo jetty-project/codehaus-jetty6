@@ -14,14 +14,23 @@
     <mailingList>
       <name>Jetty Discuss List</name>
       <archive>http://lists.sourceforge.net/lists/listinfo/jetty-discuss</archive>
+      <otherArchives>
+        <otherArchive>http://www.nabble.com/Jetty-Discuss-f60.html</otherArchive>
+      </otherArchives>
     </mailingList>
     <mailingList>
       <name>Jetty Support List</name>
       <archive>http://lists.sourceforge.net/lists/listinfo/jetty-support</archive>
+      <otherArchives>
+        <otherArchive>http://www.nabble.com/Jetty-Support-f61.html</otherArchive>
+      </otherArchives>
     </mailingList>
     <mailingList>
       <name>Jetty Announce List</name>
       <archive>http://lists.sourceforge.net/lists/listinfo/jetty-announce</archive>
+      <otherArchives>
+        <otherArchive>http://www.nabble.com/Jetty---Announce-f2649.html</otherArchive>
+      </otherArchives>
     </mailingList>
   </mailingLists>
   <developers>
@@ -139,7 +148,7 @@
         </executions>
       </plugin>
 
-      <plugin>
+      <!-- plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clover-plugin</artifactId>
         <configuration>
@@ -154,7 +163,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin -->
 
     </plugins>
   </build>
