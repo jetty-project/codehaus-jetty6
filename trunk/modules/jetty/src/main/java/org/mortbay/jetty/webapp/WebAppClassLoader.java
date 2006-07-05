@@ -22,24 +22,21 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
-import java.util.Enumeration;
 import java.util.StringTokenizer;
 
 import org.mortbay.io.IO;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.LazyList;
 
 
 /* ------------------------------------------------------------ */
 /** ClassLoader for HttpContext.
- * Specializes ClassLoader to be knowledgeable about Web Context.
+ * Specializes URLClassLoader with some utility and file mapping
+ * methods.
  *
- * This classloader extends the behaviour of {@link java.net.URLClassLoader} to support
- * the servlet specification behaviour where a webapp may override non system and non server
- * implementation classes.
- * 
- * Java2 compliant loading, where the parent loader
+ * This loader defaults to the 2.3 servlet spec behaviour where non
+ * system classes are loaded from the classpath in preference to the
+ * parent loader.  Java2 compliant loading, where the parent loader
  * always has priority, can be selected with the 
  * {@link org.mortbay.jetty.webapp.WebAppContext#setParentLoaderPriority(boolean)} method.
  *
@@ -48,23 +45,20 @@ import org.mortbay.util.LazyList;
 public class WebAppClassLoader extends URLClassLoader
 {
     private WebAppContext _context;
-    protected ClassLoader _loader;
-    protected ClassLoader _parent;
-    protected String _urlClassPath;
+    private ClassLoader _parent;
+    private String _urlClassPath;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
      */
     public WebAppClassLoader(ClassLoader parent, WebAppContext context)
     {
-        super(new URL[0],null);
-        _loader=this;
+        super(new URL[0], parent);
         _parent=parent;
         _context=context;
         if (parent==null)
             throw new IllegalArgumentException("no parent classloader!");
     }
-
     
     /* ------------------------------------------------------------ */
     /**
@@ -144,6 +138,8 @@ public class WebAppClassLoader extends URLClassLoader
         }
     }
 
+    
+    
     /* ------------------------------------------------------------ */
     /** Add elements to the class path for the context from the jar and zip files found
      *  in the specified resource.
@@ -174,13 +170,9 @@ public class WebAppClassLoader extends URLClassLoader
             }
         }
     }
-    
-    
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        this._context=null;
-        this._loader=null;
         this._parent=null;
         this._urlClassPath=null;
     }
@@ -191,7 +183,8 @@ public class WebAppClassLoader extends URLClassLoader
     {
         // TODO check CodeSource
         PermissionCollection permissions=_context.getPermissions();
-        return permissions;
+        PermissionCollection pc= (permissions == null) ? super.getPermissions(cs) : permissions;
+        return pc;
     }
 
     /* ------------------------------------------------------------ */
@@ -209,10 +202,7 @@ public class WebAppClassLoader extends URLClassLoader
 
         if (url == null)
         {
-            if (_loader==this)
-                url= super.getResource(name);
-            else
-                url= _loader.getResource(name);
+            url= this.findResource(name);
 
             if (url == null && name.startsWith("/"))
             {
@@ -342,10 +332,7 @@ public class WebAppClassLoader extends URLClassLoader
         {
             try
             {
-                if (_loader==this)
-                    c=super.loadClass(name,resolve);
-                else
-                    c= _loader.loadClass(name);
+                c= this.findClass(name);
             }
             catch (ClassNotFoundException e)
             {
