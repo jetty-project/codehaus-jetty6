@@ -209,14 +209,19 @@ public class ContextHandler extends HandlerWrapper implements Attributes
 
     /* ------------------------------------------------------------ */
     /** Get the hosts for the context.
+     * @deprecated
      */
     public String[] getHosts()
     {
-        return getConnectors();
+        return getConnectorNames();
     }
-    
+
     /* ------------------------------------------------------------ */
-    public String[] getConnectors()
+    /**
+     * @return an array of connector names that this context
+     * will accept a request from.
+     */
+    public String[] getConnectorNames()
     {
         if (_connectors==null || _connectors.size()==0)
             return null;

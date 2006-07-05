@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
@@ -134,7 +135,7 @@ public class ContextHandlerCollection extends HandlerCollection
         }
         else
         {
-            Response base_response = HttpConnection.getCurrentConnection().getResponse();
+            Request base_request = HttpConnection.getCurrentConnection().getRequest();
             PathMap map = _contextMap;
             if (map!=null && target!=null && target.startsWith("/"))
             {
@@ -147,7 +148,8 @@ public class ContextHandlerCollection extends HandlerCollection
                     {
                         Handler handler = (Handler)LazyList.get(list,j);
                         handler.handle(target,request, response, dispatch);
-                        if (response.isCommitted() || base_response.getStatus()!=-1)
+                        
+                        if (base_request.isHandled())
                             return;
                     }
                 }
@@ -157,7 +159,7 @@ public class ContextHandlerCollection extends HandlerCollection
                 for (int i=0;i<handlers.length;i++)
                 {
                     handlers[i].handle(target,request, response, dispatch);
-                    if ( response.isCommitted() || base_response.getStatus()>0)
+                    if ( base_request.isHandled())
                         return;
                 }
             }
