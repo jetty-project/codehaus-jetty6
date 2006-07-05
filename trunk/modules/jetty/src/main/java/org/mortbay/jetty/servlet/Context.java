@@ -70,7 +70,6 @@ public class Context extends ContextHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated
      */
     public Context(HandlerContainer parent, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
