@@ -45,5 +45,7 @@
 	<classpathentry output="examples/test-webapp/target/test-6.0-SNAPSHOT/WEB-INF/classes" kind="src" path="examples/test-webapp/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-api-2.1.jar"/>
+	<classpathentry output="modules/html/target/classes" kind="src" path="modules/html/src/main/java"/>
+	<classpathentry output="modules/html/target/test-classes" kind="src" path="modules/html/src/test/java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

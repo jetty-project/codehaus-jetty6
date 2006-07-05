@@ -39,7 +39,7 @@
             </goals>
             <configuration>
               <tasks>
-                <delete failonerror="false" file="../../lib/${project.artifactId}.${project.packaging}" />
+                <delete failonerror="false" file="../../lib/${project.artifactId}-${project.version}.${project.packaging}" />
               </tasks>
             </configuration>
           </execution>
@@ -50,7 +50,7 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}.${project.packaging}" />
+                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}-${project.version}.${project.packaging}" />
               </tasks>
             </configuration>
           </execution>
