@@ -26,6 +26,7 @@ jetty-6.0.0rc0 - ???
     + support graceful shutdown
     + Added WebAppContextClassLoader.newInstance to better support exensible loaders.
     + immutable getParameterMap()
+    + fixed HttpGenerator convertion of non UTF-8: JETTY-82
 
 jetty-6.0.0beta17 - 1/6/2006
     + Added config to disable file memory mapped buffers for windows

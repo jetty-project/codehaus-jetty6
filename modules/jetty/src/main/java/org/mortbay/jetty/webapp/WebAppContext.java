@@ -99,6 +99,19 @@ public class WebAppContext extends Context
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
 
+    public static WebAppContext getCurrentWebAppContext()
+    {
+        ContextHandler.Context context=ContextHandler.getCurrentContext();
+        if (context!=null)
+        {
+            ContextHandler handler = context.getContextHandler();
+            if (handler instanceof WebAppContext)
+                return (WebAppContext)handler;
+        }
+        return null;
+        
+    }
+    
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
@@ -323,7 +336,6 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated
      */
     public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
