@@ -575,7 +575,7 @@ public class WebAppContext extends Context
      * </ol>
      * 
      * <p>B. Create a directory based on global settings. The new directory 
-     * will be called "Jetty_[contextpath]_[8 random digits]".
+     * will be called "Jetty_"+host+"_"+port+"__"+context+"_"+virtualhost
      * Work out where to create this directory:
      * <ol>
      * <li>
