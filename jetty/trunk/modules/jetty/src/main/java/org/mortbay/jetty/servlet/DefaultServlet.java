@@ -244,7 +244,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             r = _resourceBase.addPath(pathInContext);
             if (!_aliases && r.getAlias()!=null)
             {
-                Log.warn("Aliased resource: "+r);
+                Log.warn("Aliased resource: "+r+"=="+r.getAlias());
                 return null;
             }
             if (Log.isDebugEnabled()) Log.debug("RESOURCE="+r);

@@ -147,9 +147,11 @@ public class FileResource extends URLResource
                 rel = path.substring(1);
             
             File newFile = new File(_file,rel.replace('/', File.separatorChar));
-            r=new FileResource(newFile.toURI().toURL(),null,newFile);
+            if (newFile.exists())
+                r=new FileResource(newFile.toURI().toURL(),null,newFile);
+            else
+                r=(FileResource)Resource.newResource(_urlString+rel);
         }
-
         
         String encoded=URIUtil.encodePath(path);
         int expected=r._urlString.length()-encoded.length();
