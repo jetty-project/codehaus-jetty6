@@ -38,6 +38,7 @@ import org.mortbay.io.IO;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -1186,7 +1187,10 @@ public class WebAppContext extends Context
                         Dispatcher dispatcher = (Dispatcher) getServletHandler().getServletContext().getRequestDispatcher(error_page);
                         try
                         {
-                            dispatcher.error(request, response);
+                            if(dispatcher!=null)
+                                dispatcher.error(request, response);
+                            else
+                                throw new HttpException(500,"No dispatcher for "+error_page);
                         }
                         catch (ServletException e)
                         {

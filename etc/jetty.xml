@@ -104,7 +104,7 @@
       <Arg><SystemProperty name="jetty.home" default="."/>/webapps/test</Arg>
       <Arg>/</Arg>
       <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
-      <Set name="VirtualHosts">
+      <Set name="virtualHosts">
         <Array type="java.lang.String">
           <Item>localhost</Item>
         </Array>

@@ -167,6 +167,7 @@
     <module>modules/xbean</module>
     <module>modules/naming</module>
     <module>modules/plus</module>
+    <module>modules/html</module>
     <module>examples/test-webapp</module>
     <module>examples/embedded</module>
   </modules>
