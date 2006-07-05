@@ -1214,8 +1214,10 @@ public class HttpGenerator implements HttpTokens
                     
                 int end=offset+length;
                 
+                // for each CHAR in the string 
                 for (int i=offset;i<end; )
                 {
+                    // work out the size of a good chunk to convert
                     int chunk=_writeChunk;
                     int next=i+chunk;
                     if (next>end)
@@ -1223,12 +1225,17 @@ public class HttpGenerator implements HttpTokens
                         next=end;
                         chunk=next-i;
                     }
+                    
+                    // get a chunk of characters to convert
                     s.getChars(i, next, _chars, 0);
                     i+=chunk;
+                    
+                    // for each CHAR in the chunk
                     for (int n=0;n<chunk;)
                     {
                         char c=_chars[n];
                         
+                        // convert and write
                         if (c<_maxChar) 
                         {
                             _bytes.writeUnchecked(c); 
@@ -1236,12 +1243,12 @@ public class HttpGenerator implements HttpTokens
                         }
                         else
                         {
-                            // write a chunket
+                            // write a chunk characters to the converter
                             int i0=n++;
-                            n+=_writeChunk/2;
+                            n+=(_writeChunk+5)/6;
                             if (n>chunk)
                                 n=chunk;
-                            _converter.write(_chars,i0,i-i0);
+                            _converter.write(_chars,i0,n-i0);
                             _converter.flush();
                         }
                     }
