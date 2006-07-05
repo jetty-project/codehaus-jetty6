@@ -94,6 +94,7 @@ public class WebAppContext extends Context
     private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
     private String[] _serverClasses = {"org.mortbay.", "-org.mortbay.naming.","-org.mortbay.util.", "org.slf4j."}; // TODO hide all mortbay classes
     private File _tmpDir;
+    private boolean _isExistingTmpDir;
     private String _war;
     
     private transient Map _resourceAliases;
@@ -489,8 +490,8 @@ public class WebAppContext extends Context
                 _securityHandler.setHandler(_servletHandler);
             }
             
-            // delete temp directory
-            if (_tmpDir!=null && !"work".equals(_tmpDir.getName()))
+            // delete temp directory if we had to create it or if it isn't called work
+            if (!_isExistingTmpDir && !isTempWorkDirectory())//_tmpDir!=null && !"work".equals(_tmpDir.getName()))
                 IO.delete(_tmpDir);
         }
         finally
@@ -1081,6 +1082,8 @@ public class WebAppContext extends Context
             dir.mkdir();
             dir.deleteOnExit();
         }
+        else if (dir != null)
+            _isExistingTmpDir = true;
 
         if (dir!=null && ( !dir.exists() || !dir.isDirectory() || !dir.canWrite()))
             throw new IllegalArgumentException("Bad temp directory: "+dir);
