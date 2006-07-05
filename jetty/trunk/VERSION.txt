@@ -26,6 +26,8 @@ jetty-6.0.0rc0 - ???
     + support graceful shutdown
     + Added WebAppContextClassLoader.newInstance to better support exensible loaders.
     + immutable getParameterMap()
+    + support <load-on-startup> for SingleThreadModel
+    + changed ServletContext.getResourcePaths()  to not return paths containing double slashes
     + fixed HttpGenerator convertion of non UTF-8: JETTY-82
     + added html module from jetty 5 - but deprecated until maintainer found
 

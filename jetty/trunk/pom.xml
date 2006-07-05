@@ -61,6 +61,12 @@
       <organization>Simula Labs</organization>
       <organizationUrl>http://www.simulalabs.com</organizationUrl>
     </developer>
+    <developer>
+      <id>tvernum</id>
+      <name>Tim Vernum</name>
+      <email>tim@adjective.org</email>
+      <organization />
+    </developer>
   </developers>
   <licenses>
     <license>
