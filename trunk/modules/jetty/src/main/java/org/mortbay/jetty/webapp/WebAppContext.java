@@ -1188,15 +1188,20 @@ public class WebAppContext extends Context
                         try
                         {
                             if(dispatcher!=null)
+                            {    
                                 dispatcher.error(request, response);
+                                return;
+                            }
                             else
-                                throw new HttpException(500,"No dispatcher for "+error_page);
+                            {
+                                Log.warn("No error page "+error_page);
+                            }
                         }
                         catch (ServletException e)
                         {
                             Log.warn(Log.EXCEPTION, e);
+                            return;
                         }
-                        return;
                     }
                 }
             }
