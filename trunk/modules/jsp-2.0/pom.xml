@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0rc0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jsp-2.0</artifactId>
@@ -24,16 +24,16 @@
               <tasks>
                 <delete failonerror="false" includeemptydirs="true">
                  <fileset dir="../../lib/jsp-2.0">
-                   <include name="slf4j-simple-${slf4j-version}.jar"/>
-                   <include name="jcl104-over-slf4j-${slf4j-version}.jar"/>
-                   <include name="jasper-compiler-jdt-${jasper-version}.jar"/>
-                   <include name="commons-el-${commons-el-version}.jar"/>
-                   <include name="xercesImpl-${xerces-version}.jar"/>
-                   <include name="xmlParserAPIs-${xerces-version}.jar"/>
-                   <include name="jasper-compiler-${jasper-version}.jar"/>
-                   <include name="jasper-compiler-jdt-${jasper-version}.jar"/>
-                   <include name="jasper-runtime-${jasper-version}.jar"/>
-                   <include name="ant-${ant-version}.jar"/>
+                   <include name="slf4j-simple-${slf4j-version}.jar" />
+                   <include name="jcl104-over-slf4j-${slf4j-version}.jar" />
+                   <include name="jasper-compiler-jdt-${jasper-version}.jar" />
+                   <include name="commons-el-${commons-el-version}.jar" />
+                   <include name="xercesImpl-${xerces-version}.jar" />
+                   <include name="xmlParserAPIs-${xerces-version}.jar" />
+                   <include name="jasper-compiler-${jasper-version}.jar" />
+                   <include name="jasper-compiler-jdt-${jasper-version}.jar" />
+                   <include name="jasper-runtime-${jasper-version}.jar" />
+                   <include name="ant-${ant-version}.jar" />
                  </fileset> 
                 </delete>
               </tasks>
