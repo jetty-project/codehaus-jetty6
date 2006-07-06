@@ -1,0 +1,933 @@
+Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
++++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
+@@ -0,0 +1,163 @@
++package org.mortbay.jetty.security;
++
++import java.io.File;
++import java.io.IOException;
++import java.nio.channels.SelectionKey;
++import java.nio.channels.SocketChannel;
++import java.security.KeyStore;
++
++import javax.net.ssl.KeyManagerFactory;
++import javax.net.ssl.SSLContext;
++import javax.net.ssl.SSLEngine;
++import javax.net.ssl.TrustManagerFactory;
++
++import org.mortbay.jetty.nio.HttpChannelEndPoint;
++import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.log.Log;
++import org.mortbay.resource.Resource;
++
++/* ------------------------------------------------------------ */
++/** SslSelectChannelConnector.
++ *
++ * @author Nik Gonzalez <ngonzalez@exist.com>
++ * @author Greg Wilkins <gregw@mortbay.com>
++ */
++public class SslSelectChannelConnector extends SelectChannelConnector
++{
++    /** Default value for the cipher Suites. */
++    private String _cipherSuites[] = null;
++
++    /** Default value for the keystore location path. */
++    public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator + ".keystore";
++
++    /** String name of keystore password property. */
++    public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
++
++    /** String name of key password property. */
++    public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
++
++    private String _keystore = DEFAULT_KEYSTORE;
++    private transient Password _password;
++    private transient Password _keypassword;
++    private String _protocol = "TLS";
++    private String _algorithm = "SunX509"; // cert algorithm
++    private String _keystoreType = "JKS"; // type of the key store
++    private String _provider;
++
++    /* ------------------------------------------------------------ */
++    public String[] getCipherSuites()
++    {
++        return _cipherSuites;
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @author Tony Jiang
++     */
++    public void setCipherSuites(String[] cipherSuites)
++    {
++        this._cipherSuites = cipherSuites;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setPassword(String password)
++    {
++        _password = Password.getPassword(PASSWORD_PROPERTY, password, null);
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setKeyPassword(String password)
++    {
++        _keypassword = Password.getPassword(KEYPASSWORD_PROPERTY, password, null);
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getAlgorithm()
++    {
++        return (this._algorithm);
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setAlgorithm(String algorithm)
++    {
++        this._algorithm = algorithm;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getProtocol()
++    {
++        return _protocol;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setProtocol(String protocol)
++    {
++        _protocol = protocol;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setKeystore(String keystore)
++    {
++        _keystore = keystore;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getKeystore()
++    {
++        return _keystore;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getKeystoreType()
++    {
++        return (_keystoreType);
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setKeystoreType(String keystoreType)
++    {
++        _keystoreType = keystoreType;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getProvider()
++    {
++        return _provider;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setProvider(String _provider)
++    {
++        this._provider = _provider;
++    }
++
++    /* ------------------------------------------------------------ */
++    public HttpChannelEndPoint newHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectChannelConnector.SelectSet selectSet, SelectionKey sKey) throws IOException
++    {
++        return new SslHttpChannelEndPoint(connector, channel, selectSet, sKey, createSSLEngine());
++    }
++
++    /* ------------------------------------------------------------ */
++    protected SSLEngine createSSLEngine() throws IOException
++    {
++        SSLEngine engine = null;
++        try
++        {
++            SSLContext context = _provider == null ? SSLContext.getInstance(_protocol) : SSLContext.getInstance(_protocol, _provider);
++            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_algorithm);
++            KeyStore keyStore = KeyStore.getInstance(_keystoreType);
++            keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
++            keyManagerFactory.init(keyStore, _keypassword.toString().toCharArray());
++            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_algorithm);
++            trustManagerFactory.init(keyStore);
++            context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
++            engine = context.createSSLEngine();
++        }
++        catch (Exception e)
++        {
++            Log.debug(e);
++        }
++
++        return engine;
++    }
++}
+Index: modules/jetty/src/main/java/org/mortbay/jetty/security/MockSslHttpChannelEndPoint.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/MockSslHttpChannelEndPoint.java	(revision 0)
++++ modules/jetty/src/main/java/org/mortbay/jetty/security/MockSslHttpChannelEndPoint.java	(revision 0)
+@@ -0,0 +1,287 @@
++package org.mortbay.jetty.security;
++
++import java.io.IOException;
++import java.nio.ByteBuffer;
++import java.nio.channels.SelectionKey;
++import java.nio.channels.SocketChannel;
++
++import javax.net.ssl.SSLEngine;
++import javax.net.ssl.SSLEngineResult;
++import javax.net.ssl.SSLException;
++import javax.net.ssl.SSLSession;
++
++import org.mortbay.io.Buffer;
++import org.mortbay.io.nio.NIOBuffer;
++import org.mortbay.jetty.nio.HttpChannelEndPoint;
++import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.jetty.nio.SelectChannelConnector.SelectSet;
++import org.mortbay.log.Log;
++
++/* ------------------------------------------------------------ */
++/** SslHttpChannelEndPoint.
++ *
++ * @author Nik Gonzalez <ngonzalez@exist.com>
++ * @author Greg Wilkins <gregw@mortbay.com>
++ */
++public class MockSslHttpChannelEndPoint extends HttpChannelEndPoint implements Runnable
++{
++    private final SSLEngine _engine;
++    private boolean _initialHandshake = false;
++    private final NIOBuffer _outBuffer;
++    private final ByteBuffer _peerAppData;
++    // ssl
++    private final SSLSession _session;
++
++    /* ------------------------------------------------------------ */
++    public MockSslHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectSet selectSet, SelectionKey key, SSLEngine engine) throws SSLException, IOException
++    {
++        super(connector, channel, selectSet, key);
++
++        // ssl
++        _engine = engine;
++        _engine.setUseClientMode(false);
++        _session = engine.getSession();
++        _peerAppData = ByteBuffer.allocate(_session.getApplicationBufferSize());
++        _outBuffer = new NIOBuffer(_session.getPacketBufferSize(), false);
++
++        _peerAppData.position(_peerAppData.limit());
++        _outBuffer.getByteBuffer().position(_outBuffer.getByteBuffer().limit());
++
++        _initialHandshake = true;
++    }
++
++    /* ------------------------------------------------------------ */
++    private ByteBuffer extractByteBuffer(Buffer buffer)
++    {
++        ByteBuffer src = null;
++        NIOBuffer nBuf = null;
++        synchronized (buffer)
++        {
++            // TODO - expensive to do this all the time - need to reuse this buffer!
++        	if (buffer.buffer() instanceof NIOBuffer)
++        	{
++        		Log.debug("reuse the buffer");
++        		nBuf = (NIOBuffer)buffer.buffer();
++        		src = nBuf.getByteBuffer();
++        	}
++        	else
++        	{
++        		Log.debug("allocate another bytebuffer");
++                src = ByteBuffer.allocate(buffer.length());
++                for (int i = 0; i < buffer.length(); i++)
++                {
++                    src.put(buffer.peek(i));
++                }
++        	}
++        }
++
++        if (src != null)
++        {
++	        synchronized (buffer)
++	        {
++	            // TODO... do you need to reset this buffer afterwards?  See ChannelEndPoint flush
++	            // I am pretty sure this would be why it is not working 100%
++	            if (src.position() > 0);
++	        		src.flip();
++	            Log.debug("buffer.getIndex()="+buffer.getIndex()+",src.limit()="+src.limit());
++	            src.position(buffer.getIndex());
++	            src.limit(buffer.putIndex());
++	        }
++        }
++
++        return src;
++    }
++
++    /* ------------------------------------------------------------ */
++    /* 
++     */
++    public int fill(Buffer buffer) throws IOException
++    {
++
++        int l = super.fill(buffer);
++        if (l < 0) { return l; }
++
++        return unWrap((NIOBuffer) buffer);
++    }
++
++    /* ------------------------------------------------------------ */
++    public int flush(Buffer buffer) throws IOException
++    {
++        // TODO let us use the one flush method for now... until it is working properly!
++        return flush(buffer,null,null);
++    }
++
++    /* ------------------------------------------------------------ */
++    /*
++     */
++    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
++    {
++        // TODO - have you had a read of http://forum.java.sun.com/thread.jspa?threadID=638881
++        
++        if (_outBuffer.length()>0)
++            return super.flush(_outBuffer);
++        
++        // TODO.  The idea here would be to wrap all 3 buffers at once and then flush the resulting out buffer!
++        int len = 0;
++        
++        synchronized (_outBuffer)
++        {
++            if (header != null && header.length()>0)
++            {
++            	len += wrapAndFlush(header);
++            }
++
++            if (_outBuffer.length()==0 && buffer != null && buffer.length()>0)
++            {
++            	len += wrapAndFlush(buffer);
++
++            }
++
++            if (_outBuffer.length()==0 && trailer != null && trailer.length()>0)
++            {
++            	len += wrapAndFlush(trailer);
++            }
++        }
++
++        return len;
++    }
++    
++    /* ------------------------------------------------------------ */
++    /*
++     */
++    public int flushX(Buffer header, Buffer buffer, Buffer trailer) throws IOException
++    {
++        if (_initialHandshake) { return 0; }
++        
++        if (_outBuffer.length()>0)
++            return super.flush(_outBuffer);
++        
++        // TODO.  The idea here would be to wrap all 3 buffers at once and then flush the resulting out buffer!
++        // So for now, let us simplify this and we can put a fast implementation in later.
++        
++        int len = 0;
++
++        if (header!=null)
++        {
++            int tw=header.length();
++            if (tw>0)
++            {
++                int f=flush(header);
++                len=f;
++                if (f<tw)
++                    return len;
++            }
++        }
++        
++        if (buffer!=null)
++        {
++            int tw=buffer.length();
++            if (tw>0)
++            {
++                int f=flush(buffer);
++                if (f<0)
++                    return len>0?len:f;
++                len+=f;
++                if (f<tw)
++                    return len;
++            }
++        }
++        
++        if (trailer!=null)
++        {
++            int tw=trailer.length();
++            if (tw>0)
++            {
++                int f=flush(trailer);
++                if (f<0)
++                    return len>0?len:f;
++                len+=f;
++            }
++        }
++        
++        return len;
++    }
++
++    /* ------------------------------------------------------------ */
++    private int unWrap(NIOBuffer buffer)
++    {
++        ByteBuffer bBuf = buffer.getByteBuffer();
++        _peerAppData.clear();
++        int n = buffer.putIndex();
++        _peerAppData.clear();
++
++        for (int i = 0; i < n; i++)
++        {
++            _peerAppData.put(bBuf.get(i));
++        }
++
++        // copy unencrypted data to the buffer
++        int l = _peerAppData.position();
++        bBuf.clear();
++
++        _peerAppData.flip();
++        for (int i = 0; i < l; i++)
++        {
++            bBuf.put(_peerAppData.get(i));
++        }
++
++        buffer.setGetIndex(0);
++        buffer.setPutIndex(bBuf.position());
++        bBuf.position(0);
++
++        return buffer.putIndex();
++    }
++
++    /* ------------------------------------------------------------ */
++    private int wrapAndFlush (Buffer buffer) throws SSLException,IOException
++    {
++        int total_written=0;
++        ByteBuffer src = extractByteBuffer(buffer);
++        try {
++			synchronized (_outBuffer)
++			{
++				outer:while (src.hasRemaining())
++				{
++					_outBuffer.getByteBuffer().clear();
++					//debugging copy buffers to outBuffer
++
++					int offset = src.position();
++					int l = Math.min(src.remaining(),_outBuffer.getByteBuffer().capacity());
++
++					Log.debug("offset="+offset+",l="+l);
++                    while (src.position() < l+offset)
++                    {
++                    	_outBuffer.getByteBuffer().put(src.get());
++                    }
++                    Log.debug("src.position()="+src.position());
++					_outBuffer.setGetIndex(0);
++					_outBuffer.setPutIndex(_outBuffer.getByteBuffer().position());
++					_outBuffer.getByteBuffer().flip();
++
++					total_written += super.flush(_outBuffer);
++                    Log.debug("total_written="+total_written);
++					if (!_outBuffer.getByteBuffer().hasRemaining())
++					{
++						Log.debug("break!");
++						break;
++					}
++					Log.debug("remaining="+src.remaining());
++				}
++			}
++		} 
++        finally
++        {
++			//set buffer length to 0
++			buffer.setGetIndex(buffer.putIndex());
++
++			src.position(0);
++        	src.limit(src.capacity());
++		}
++
++        _outBuffer.setGetIndex(0);
++        _outBuffer.setPutIndex(_outBuffer.getByteBuffer().position());
++
++        return total_written;
++    }
++}
++
+Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
++++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
+@@ -0,0 +1,429 @@
++package org.mortbay.jetty.security;
++
++import java.io.IOException;
++import java.nio.ByteBuffer;
++import java.nio.channels.SelectionKey;
++import java.nio.channels.SocketChannel;
++
++import javax.net.ssl.SSLEngine;
++import javax.net.ssl.SSLEngineResult;
++import javax.net.ssl.SSLException;
++import javax.net.ssl.SSLSession;
++
++import org.mortbay.io.Buffer;
++import org.mortbay.io.nio.NIOBuffer;
++import org.mortbay.jetty.HttpTokens;
++import org.mortbay.jetty.nio.HttpChannelEndPoint;
++import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.jetty.nio.SelectChannelConnector.SelectSet;
++import org.mortbay.log.Log;
++
++/* ------------------------------------------------------------ */
++/** SslHttpChannelEndPoint.
++ *
++ * @author Nik Gonzalez <ngonzalez@exist.com>
++ * @author Greg Wilkins <gregw@mortbay.com>
++ */
++public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runnable
++{
++    private final SSLEngine _engine;
++    private ByteBuffer _handshakeBuffer;
++    private SSLEngineResult.HandshakeStatus _handshakeStatus;
++    private boolean _initialHandshake = false;
++    private final NIOBuffer _outBuffer;
++    private final ByteBuffer _peerAppData;
++    // ssl
++    private final SSLSession _session;
++    private SSLEngineResult.Status _status = null;
++
++    /* ------------------------------------------------------------ */
++    public SslHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectSet selectSet, SelectionKey key, SSLEngine engine) throws SSLException, IOException
++    {
++        super(connector, channel, selectSet, key);
++
++        // ssl
++        _engine = engine;
++        _engine.setUseClientMode(false);
++        _session = engine.getSession();
++        _peerAppData = ByteBuffer.allocate(_session.getApplicationBufferSize());
++        _outBuffer = new NIOBuffer(_session.getPacketBufferSize(), false);
++
++        _peerAppData.position(_peerAppData.limit());
++        _outBuffer.getByteBuffer().position(_outBuffer.getByteBuffer().limit());
++
++        // begin handshake
++        _engine.beginHandshake();
++        _handshakeStatus = _engine.getHandshakeStatus();
++        _initialHandshake = true;
++        _handshakeBuffer = ByteBuffer.allocate(_session.getApplicationBufferSize());
++        doHandshake();
++    }
++
++    /* ------------------------------------------------------------ */
++    private void doHandshake() throws IOException
++    {
++        Log.debug("inside");
++        while (true)
++        {
++            SSLEngineResult result;
++            if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.FINISHED))
++            {
++                if (_initialHandshake)
++                {
++                    _initialHandshake = false;
++                }
++                return;
++            }
++            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_TASK))
++            {
++                doTasks();
++            }
++            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_UNWRAP))
++            {
++                if (_channel.read(_handshakeBuffer) < 0)
++                {
++                    _engine.closeInbound();
++                }
++                _peerAppData.clear();
++                _handshakeBuffer.flip();
++                do
++                {
++                    result = _engine.unwrap(_handshakeBuffer, _peerAppData);
++                }
++                while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
++
++                if (result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.FINISHED)
++                {
++                    _initialHandshake = false;
++                }
++
++                // If no data was produced, and the status is still ok, try to read once more
++                if (_peerAppData.position() == 0 && result.getStatus() == SSLEngineResult.Status.OK && _handshakeBuffer.hasRemaining())
++                {
++                    result = _engine.unwrap(_handshakeBuffer, _peerAppData);
++                }
++
++                _status = result.getStatus();
++                _handshakeStatus = result.getHandshakeStatus();
++
++                _handshakeBuffer.compact();
++                _peerAppData.flip();
++            }
++            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_WRAP))
++            {
++                if (_outBuffer.getByteBuffer().hasRemaining()) { return; }
++
++                // Prepare to write
++                _outBuffer.getByteBuffer().clear();
++                result = _engine.wrap(_handshakeBuffer, _outBuffer.getByteBuffer());
++                _handshakeStatus = result.getHandshakeStatus();
++                _outBuffer.getByteBuffer().flip();
++                _channel.write(_outBuffer.getByteBuffer());
++            }
++            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING)) { return; }
++        }
++
++    }
++
++    /* ------------------------------------------------------------ */
++    private void doTasks()
++    {
++        Runnable task;
++        while ((task = _engine.getDelegatedTask()) != null)
++        {
++            task.run();
++        }
++        _handshakeStatus = _engine.getHandshakeStatus();
++    }
++
++    /* ------------------------------------------------------------ */
++    private ByteBuffer extractByteBuffer(Buffer buffer)
++    {
++        ByteBuffer src = null;
++        NIOBuffer nBuf = null;
++        synchronized (buffer)
++        {
++            // TODO - expensive to do this all the time - need to reuse this buffer!
++        	if (buffer.buffer() instanceof NIOBuffer)
++        	{
++        		nBuf = (NIOBuffer)buffer.buffer();
++        		src = nBuf.getByteBuffer();
++        	}
++        	else
++        	{
++        		Log.debug("allocate another bytebuffer: "+buffer.getClass().getName());
++                src = ByteBuffer.allocate(buffer.length());
++                for (int i = 0; i < buffer.length(); i++)
++                {
++                    src.put(buffer.peek(i));
++                }
++        	}
++        }
++
++        if (src != null)
++        {
++	        synchronized (buffer)
++	        {
++	            // TODO... do you need to reset this buffer afterwards?  See ChannelEndPoint flush
++	            // I am pretty sure this would be why it is not working 100%
++	            src.flip();
++	            src.position(buffer.getIndex());
++	            src.limit(buffer.putIndex());
++	        }
++        }
++
++        return src;
++    }
++
++    /* ------------------------------------------------------------ */
++    /* 
++     */
++    public int fill(Buffer buffer) throws IOException
++    {
++        if (_initialHandshake) { return 0; }
++
++        int l = super.fill(buffer);
++        if (l < 0) { return l; }
++
++        return unWrap((NIOBuffer) buffer);
++    }
++
++    /* ------------------------------------------------------------ */
++    public int flush(Buffer buffer) throws IOException
++    {
++        // TODO let us use the one flush method for now... until it is working properly!
++        return flush(buffer,null,null);
++    }
++
++    /* ------------------------------------------------------------ */
++    /*
++     */
++    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
++    {
++        // TODO - have you had a read of http://forum.java.sun.com/thread.jspa?threadID=638881
++        
++        if (_initialHandshake) { return 0; }
++        
++        if (_outBuffer.length()>0)
++            return super.flush(_outBuffer);
++        
++        // TODO.  The idea here would be to wrap all 3 buffers at once and then flush the resulting out buffer!
++        int len = 0;
++        
++        synchronized (_outBuffer)
++        {
++            if (header != null && header.length()>0)
++            {
++            	len += wrapAndFlush(header);
++            }
++
++            if (_outBuffer.length()==0 && buffer != null && buffer.length()>0)
++            {
++            	len += wrapAndFlush(buffer);
++
++            }
++
++            if (_outBuffer.length()==0 && trailer != null && trailer.length()>0)
++            {
++            	len += wrapAndFlush(trailer);
++            }
++        }
++
++        return len;
++    }
++    
++    /* ------------------------------------------------------------ */
++    /*
++     */
++    public int flushX(Buffer header, Buffer buffer, Buffer trailer) throws IOException
++    {
++        if (_initialHandshake) { return 0; }
++        
++        if (_outBuffer.length()>0)
++            return super.flush(_outBuffer);
++        
++        // TODO.  The idea here would be to wrap all 3 buffers at once and then flush the resulting out buffer!
++        // So for now, let us simplify this and we can put a fast implementation in later.
++        
++        int len = 0;
++
++        if (header!=null)
++        {
++            int tw=header.length();
++            if (tw>0)
++            {
++                int f=flush(header);
++                len=f;
++                if (f<tw)
++                    return len;
++            }
++        }
++        
++        if (buffer!=null)
++        {
++            int tw=buffer.length();
++            if (tw>0)
++            {
++                int f=flush(buffer);
++                if (f<0)
++                    return len>0?len:f;
++                len+=f;
++                if (f<tw)
++                    return len;
++            }
++        }
++        
++        if (trailer!=null)
++        {
++            int tw=trailer.length();
++            if (tw>0)
++            {
++                int f=flush(trailer);
++                if (f<0)
++                    return len>0?len:f;
++                len+=f;
++            }
++        }
++        
++        return len;
++    }
++
++    /* ------------------------------------------------------------ */
++    private int unWrap(NIOBuffer buffer) throws IOException
++    {
++        ByteBuffer bBuf = buffer.getByteBuffer();
++        _peerAppData.clear();
++        SSLEngineResult result;
++
++        do
++        {
++            result = _engine.unwrap(bBuf, _peerAppData);
++        }
++        while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
++
++        if (_peerAppData.position() == 0 && result.getStatus() == SSLEngineResult.Status.OK && bBuf.hasRemaining())
++        {
++            result = _engine.unwrap(bBuf, _peerAppData);
++        }
++
++        _status = result.getStatus();
++        _handshakeStatus = result.getHandshakeStatus();
++
++        // copy unencrypted data to the buffer
++        int l = _peerAppData.position();
++        bBuf.clear();
++
++        _peerAppData.flip();
++        for (int i = 0; i < l; i++)
++        {
++            bBuf.put(_peerAppData.get(i));
++        }
++
++        buffer.setGetIndex(0);
++        buffer.setPutIndex(bBuf.position());
++        bBuf.position(0);
++
++        if (_handshakeStatus == SSLEngineResult.HandshakeStatus.NEED_TASK || _handshakeStatus == SSLEngineResult.HandshakeStatus.NEED_WRAP || _handshakeStatus == SSLEngineResult.HandshakeStatus.FINISHED)
++        {
++            doHandshake();
++        }
++
++        return result.bytesProduced();
++    }
++
++    /* ------------------------------------------------------------ */
++    private int wrapAndFlush (Buffer buffer) throws SSLException,IOException
++    {
++        SSLEngineResult result = null;
++        int total_written=0;
++        ByteBuffer src = extractByteBuffer(buffer);
++        try {
++			synchronized (_outBuffer)
++			{
++				while (src.hasRemaining())
++				{
++					_outBuffer.getByteBuffer().clear();
++					result = _engine.wrap(src, _outBuffer.getByteBuffer());
++                    
++					_outBuffer.setGetIndex(0);
++					_outBuffer.setPutIndex(_outBuffer.getByteBuffer().position());
++					_outBuffer.getByteBuffer().flip();
++					
++					if (result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW)
++					{
++						break ;
++					}
++					else if (result.getStatus() == SSLEngineResult.Status.BUFFER_OVERFLOW)
++					{
++						int written = super.flush(_outBuffer);
++						if (written <= 0)
++					    {
++					    	break;
++					    }
++						total_written += written;
++					    continue;
++						
++					}
++					else if (result.getStatus() == SSLEngineResult.Status.CLOSED)
++					{
++						throw new IOException("SSLEngine closed");
++					}
++					else if (result.getStatus() == SSLEngineResult.Status.OK) 
++					{
++							//TODO: check for rehandshake
++					}
++
++					total_written += super.flush(_outBuffer);
++					if (!_outBuffer.getByteBuffer().hasRemaining())
++					{
++						break;
++					}
++				}
++			}
++		} 
++        finally
++        {
++        	src.position(0);
++        	src.limit(src.capacity());
++
++        	//set buffer length to 0
++			buffer.setGetIndex(buffer.putIndex());
++		}
++
++        _status = result.getStatus();
++        _handshakeStatus = result.getHandshakeStatus();
++        _outBuffer.setGetIndex(0);
++        _outBuffer.setPutIndex(_outBuffer.getByteBuffer().position());
++
++        return total_written;
++    }
++
++	public void close() throws IOException {
++
++		_engine.closeOutbound();
++		if (_outBuffer.getByteBuffer().hasRemaining())
++		{
++			super.flush(_outBuffer);
++		}
++		/*
++		 * By RFC 2616, we can "fire and forget" our close_notify
++		 * message, so that's what we'll do here.
++		 */
++		_outBuffer.getByteBuffer().clear();
++        SSLEngineResult result = _engine.wrap(_handshakeBuffer, _outBuffer.getByteBuffer());
++        if (result.getStatus() != SSLEngineResult.Status.CLOSED)
++        {
++        	throw new SSLException("Improper closed state.");
++        }
++        _outBuffer.getByteBuffer().flip();
++        _outBuffer.setPutIndex(0);
++        _outBuffer.setGetIndex(_outBuffer.getByteBuffer().position());
++        _outBuffer.setGetIndex(_outBuffer.putIndex());
++        if (_outBuffer.getByteBuffer().hasRemaining())
++        {
++        	super.flush(_outBuffer);
++        }
++
++		super.close();
++	}
++}
+Index: modules/jetty/pom.xml
+===================================================================
+--- modules/jetty/pom.xml	(revision 621)
++++ modules/jetty/pom.xml	(working copy)
+@@ -23,6 +23,13 @@
+     </testResources>
+     <plugins>
+       <plugin>
++        <artifactId>maven-compiler-plugin</artifactId>
++        <configuration>
++          <source>1.5</source>
++          <target>1.5</target>
++        </configuration>
++      </plugin>
++      <plugin>
+         <artifactId>maven-antrun-plugin</artifactId>
+         <executions>
+           <execution>
+Index: etc/jetty.xml
+===================================================================
+--- etc/jetty.xml	(revision 621)
++++ etc/jetty.xml	(working copy)
+@@ -60,6 +60,16 @@
+         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+         <!-- Add a HTTPS SSL listener on port 8443                           -->
+         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
++        <Item>
++          <New class="org.mortbay.jetty.security.SslSelectChannelConnector">
++            <Set name="Port">8443</Set>
++            <Set name="maxIdleTime">30000</Set>
++            <Set name="Keystore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
++            <Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
++            <Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
++          </New>
++        </Item>
++        
+         <!--
+         <Item>
+           <New class="org.mortbay.jetty.security.SslSocketConnector">
