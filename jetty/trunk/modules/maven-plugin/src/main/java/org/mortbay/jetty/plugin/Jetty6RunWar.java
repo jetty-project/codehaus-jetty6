@@ -25,7 +25,7 @@ import org.mortbay.jetty.plugin.util.Scanner;
 
 /**
  * <p>
- *  This goal is used to assemble your webapp into a war and automatically deploy it to Jetty6.
+ *  This goal is used to assemble your webapp into a war and automatically deploy it to Jetty.
  *  </p>
  *  <p>
  *  Once invoked, the plugin can be configured to run continuously, scanning for changes in the project and to the
