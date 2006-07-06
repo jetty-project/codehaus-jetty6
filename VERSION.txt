@@ -1,5 +1,7 @@
 
 jetty-6.0.0rc0 - ???
+    + change prefix from "jetty6" to just "jetty" for plugin: eg is now mvn jetty:run
+    + allow <key> or <name> in <systemProperty> for plugin
     + simplified jetty.xml with new constructor injections
     + added setters and getters on SessionManager API for session related config: cookie name, url parameter name, domain, max age and path.
     + add ability to have a lib/ext dir from which to recursively add all jars and zips to the classpath
