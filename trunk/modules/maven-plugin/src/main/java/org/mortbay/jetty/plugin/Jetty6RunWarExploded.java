@@ -28,7 +28,7 @@ import org.mortbay.jetty.security.UserRealm;
 /**
  * 
  *  <p>
- *  This goal is used to assemble your webapp into an exploded war and automatically deploy it to Jetty6.
+ *  This goal is used to assemble your webapp into an exploded war and automatically deploy it to Jetty.
  *  </p>
  *  <p>
  *  Once invoked, the plugin can be configured to run continuously, scanning for changes in the pom.xml and 

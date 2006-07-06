@@ -72,6 +72,11 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      */
     private File webAppSourceDirectory;
     
+    /**
+     * @parameter expression="${plugin.artifacts}"
+     * @readonly
+     */
+    private List pluginArtifacts;
     
     /**
      * List of files or directories to additionally periodically scan for changes. Optional.
