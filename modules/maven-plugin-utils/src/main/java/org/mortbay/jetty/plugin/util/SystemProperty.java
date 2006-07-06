@@ -46,6 +46,16 @@ public class SystemProperty
 	{
 		this.name = name;
 	}
+    
+    public String getKey()
+    {
+        return this.name;
+    }
+    
+    public void setKey (String name)
+    {
+        this.name = name;
+    }
 	/**
 	 * @return Returns the value.
 	 */
