@@ -22,15 +22,22 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
@@ -58,7 +65,7 @@ import org.mortbay.resource.Resource;
 public class SslSocketConnector extends SocketConnector
 {
     /** Default value for the cipher Suites. */
-    private String _cipherSuites[] = null;
+    private String _excludeCipherSuites[] = null;
 
     /** Default value for the keystore location path. */
     public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator
@@ -80,7 +87,9 @@ public class SslSocketConnector extends SocketConnector
     private transient Password _password;
     private transient Password _keypassword;
     private String _protocol= "TLS";
-    private String _algorithm = System.getProperty("ssl.KeyManagerFactory.algorithm","SunX509"); // cert algorithm
+    private String _sslKeyManagerFactoryAlgorithm = System.getProperty("ssl.KeyManagerFactory.algorithm","SunX509"); // cert algorithm
+    private String _sslTrustManagerFactoryAlgorithm = System.getProperty("ssl.TrustManagerFactory.algorithm","SunX509"); // cert algorithm
+    private String _secureRandomAlgorithm; // cert algorithm
     private String _keystoreType = "JKS"; // type of the key store
     private String _provider;
     
@@ -101,16 +110,16 @@ public class SslSocketConnector extends SocketConnector
 
 
     /* ------------------------------------------------------------ */    
-    public String[] getCipherSuites() {
-        return _cipherSuites;
+    public String[] getExcludeCipherSuites() {
+        return _excludeCipherSuites;
     }
 
     /* ------------------------------------------------------------ */
     /** 
      * @author Tony Jiang
      */
-    public void setCipherSuites(String[] cipherSuites) {
-        this._cipherSuites = cipherSuites;
+    public void setExcludeCipherSuites(String[] cipherSuites) {
+        this._excludeCipherSuites = cipherSuites;
     }
 
     /* ------------------------------------------------------------ */
@@ -126,15 +135,39 @@ public class SslSocketConnector extends SocketConnector
     }
 
     /* ------------------------------------------------------------ */
-    public String getAlgorithm() 
+    public String getSslKeyManagerFactoryAlgorithm() 
     {
-        return (this._algorithm);
+        return (this._sslKeyManagerFactoryAlgorithm);
     }
 
     /* ------------------------------------------------------------ */
-    public void setAlgorithm(String algorithm) 
+    public void setSslKeyManagerFactoryAlgorithm(String algorithm) 
     {
-        this._algorithm = algorithm;
+        this._sslKeyManagerFactoryAlgorithm = algorithm;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getSslTrustManagerFactoryAlgorithm() 
+    {
+        return (this._sslTrustManagerFactoryAlgorithm);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setSslTrustManagerFactoryAlgorithm(String algorithm) 
+    {
+        this._sslTrustManagerFactoryAlgorithm = algorithm;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getSecureRandomAlgorithm() 
+    {
+        return (this._secureRandomAlgorithm);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setSecureRandomAlgorithm(String algorithm) 
+    {
+        this._secureRandomAlgorithm = algorithm;
     }
 
     /* ------------------------------------------------------------ */
@@ -251,13 +284,24 @@ public class SslSocketConnector extends SocketConnector
     protected SSLServerSocketFactory createFactory() 
         throws Exception
     {
-        SSLContext context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_algorithm);        
         KeyStore keyStore = KeyStore.getInstance(_keystoreType);
+        if (_password == null) 
+            throw new SSLException("_password is not set");
         keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
+
+        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
+        if (_keypassword == null) 
+            throw new SSLException("_keypassword is not set");
         keyManagerFactory.init(keyStore,_keypassword.toString().toCharArray());
-        
-        context.init(keyManagerFactory.getKeyManagers(), null, new java.security.SecureRandom());
+
+        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
+        trustManagerFactory.init(keyStore);
+
+        SecureRandom secureRandom = _secureRandomAlgorithm==null?new SecureRandom():SecureRandom.getInstance(_secureRandomAlgorithm);
+
+        SSLContext context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
+
+        context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), secureRandom);
 
         return context.getServerSocketFactory();
     }
@@ -287,14 +331,30 @@ public class SslSocketConnector extends SocketConnector
             socket = (SSLServerSocket) (host==null?
                             factory.createServerSocket(port,backlog):
                             factory.createServerSocket(port,backlog,InetAddress.getByName(host)));
-            socket.setNeedClientAuth(_needClientAuth);
-            socket.setWantClientAuth(_wantClientAuth);
 
-            if(_cipherSuites != null && _cipherSuites.length >0) {
-                socket.setEnabledCipherSuites(_cipherSuites);
-                for ( int i=0; i<_cipherSuites.length; i++ ) {
-                    Log.debug("SslListener enabled ciphersuite: " + _cipherSuites[i]);
-                }            
+            if (_wantClientAuth)
+                socket.setWantClientAuth(_wantClientAuth);
+            if (_needClientAuth)
+                socket.setNeedClientAuth(_needClientAuth);
+
+            if (_excludeCipherSuites != null && _excludeCipherSuites.length >0) 
+            {
+                List excludedCSList = Arrays.asList(_excludeCipherSuites);
+                String[] enabledCipherSuites = socket.getEnabledCipherSuites();
+            	List enabledCSList = new ArrayList(Arrays.asList(enabledCipherSuites));
+            	Iterator exIter = excludedCSList.iterator();
+
+                while (exIter.hasNext())
+            	{
+            	    String cipherName = (String)exIter.next();
+                    if (enabledCSList.contains(cipherName))
+                    {
+                        enabledCSList.remove(cipherName);
+                    }
+            	}
+                enabledCipherSuites = (String[])enabledCSList.toArray(new String[enabledCSList.size()]);
+
+                socket.setEnabledCipherSuites(enabledCipherSuites);
             }
             
         }
