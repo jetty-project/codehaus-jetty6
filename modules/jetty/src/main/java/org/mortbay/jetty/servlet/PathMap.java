@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.
@@ -407,15 +408,25 @@ public class PathMap extends HashMap implements Externalizable
                                       pathSpec,1,pathSpec.length()-1);
         return false;
     }
-    
+
+    /* --------------------------------------------------------------- */
     private static boolean isPathWildcardMatch(String pathSpec, String path)
     {
-        if (pathSpec.endsWith("/*"))
+        // For a spec of "/foo/*" match "/foo" , "/foo/..." , "/foo;..." but not "/foobar"
+        int cpl=pathSpec.length()-2;
+        if (pathSpec.endsWith("/*") && path.regionMatches(0,pathSpec,0,cpl))
         {
-            // For a spec of "/foo/*" match "/foo" , "/foo/..." , "/foo;..." but not "/foobar"
-            String specPrefix = pathSpec.substring(0, pathSpec.length() - 2);
-            if (path.equals(specPrefix) || path.startsWith(specPrefix + '/') || path.startsWith(specPrefix + ';'))
+            if (path.length()==cpl)
                 return true;
+            char c=path.charAt(cpl);
+            switch (c)
+            {
+                case '/':
+                case ';':
+                case '?':
+                case '#':
+                    return true;
+            }
         }
         return false;
     }
