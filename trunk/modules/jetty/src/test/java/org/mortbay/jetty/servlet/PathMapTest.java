@@ -163,6 +163,8 @@ public class PathMapTest extends TestCase
         assertMatch(spec, "/xyz/");
         assertMatch(spec, "/xyz/123");
         assertMatch(spec, "/xyz;jsessionid=99");
+        assertMatch(spec, "/xyz#foo");
+        assertMatch(spec, "/xyz?something");
         assertMatch(spec, "/xyz/;jessionid=99");
         assertMatch(spec, "/xyz/123;jessionid=99");
         assertMatch(spec, "/xyz/123/");
