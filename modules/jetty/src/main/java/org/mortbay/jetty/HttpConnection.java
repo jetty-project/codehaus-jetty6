@@ -78,6 +78,12 @@ public class HttpConnection
     {
         return (HttpConnection) __currentConnection.get();
     }
+    
+    /* ------------------------------------------------------------ */
+    protected static void setCurrentConnection(HttpConnection connection)
+    {
+        __currentConnection.set(connection);
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -294,7 +300,7 @@ public class HttpConnection
             _idle=false;
             try
             {
-                __currentConnection.set(this);
+                setCurrentConnection(this);
                 
                 Continuation continuation = _request.getContinuation();
                 if (continuation != null && continuation.isPending())
@@ -333,7 +339,7 @@ public class HttpConnection
             }
             finally
             {
-                __currentConnection.set(null);
+                setCurrentConnection(null);
                 
                 Buffer header = _parser.getHeaderBuffer();
 
