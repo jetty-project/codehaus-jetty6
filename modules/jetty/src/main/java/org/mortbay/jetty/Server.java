@@ -476,7 +476,9 @@ public class Server extends HandlerWrapper implements Attributes
      */
     public void addHandler(Handler handler)
     {
-        if (getHandler() instanceof HandlerCollection)
+        if (getHandler() == null) 
+            setHandler(handler);
+        else if (getHandler() instanceof HandlerCollection)
             ((HandlerCollection)getHandler()).addHandler(handler);
         else
         {
