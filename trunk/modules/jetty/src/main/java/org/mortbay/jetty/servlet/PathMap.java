@@ -423,8 +423,6 @@ public class PathMap extends HashMap implements Externalizable
             {
                 case '/':
                 case ';':
-                case '?':
-                case '#':
                     return true;
             }
         }
