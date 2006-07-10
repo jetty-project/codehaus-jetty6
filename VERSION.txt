@@ -1,3 +1,4 @@
+    + Change path mapping so that a path spec of /foo/* does not match /foo.bar : JETTY-88
     + add <requestLog> config param to jetty plugin
     + Improve Ssl config JETTY-85 JETTY-86
 
