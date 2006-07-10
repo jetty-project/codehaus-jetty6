@@ -25,7 +25,10 @@ package org.mortbay.jetty.plugin.util;
  */
 public interface JettyPluginServer extends Proxy
 {
+    public void setRequestLog(Object requestLog);
     
+    public Object getRequestLog();
+  
     public void setConnectors (Object[] connectors) throws Exception;
     public Object[] getConnectors();
     

@@ -21,6 +21,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -85,6 +86,21 @@ public class Jetty6RunMojo extends AbstractJettyRunMojo
     
 
 
+    /**
+     * A RequestLog implementation to use for the webapp at runtime.
+     * Optional.
+     * @parameter
+     */
+    private RequestLog requestLog;
+    
+    
+    public Object getConfiguredRequestLog()
+    {
+        return this.requestLog;
+    }
+
+    
+   
     /**
      * 
      * 
