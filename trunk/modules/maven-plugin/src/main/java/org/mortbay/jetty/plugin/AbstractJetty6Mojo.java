@@ -18,6 +18,7 @@ package org.mortbay.jetty.plugin;
 import java.io.File;
 
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.xml.XmlConfiguration;
@@ -47,6 +48,16 @@ public abstract class AbstractJetty6Mojo extends AbstractJettyMojo
     private UserRealm[] userRealms;
     
     
+
+    /**
+     * A RequestLog implementation to use for the webapp at runtime.
+     * Optional.
+     * @parameter
+     */
+    private RequestLog requestLog;
+    
+    
+    
     /**
      * @see org.mortbay.jetty.plugin.AbstractJettyMojo#getConfiguredUserRealms()
      */
@@ -64,6 +75,10 @@ public abstract class AbstractJetty6Mojo extends AbstractJettyMojo
     }
 
 
+    public Object getConfiguredRequestLog()
+    {
+        return this.requestLog;
+    }
  
     
     public void applyJettyXml() throws Exception

@@ -17,10 +17,12 @@ package org.mortbay.jetty.plugin;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
@@ -42,6 +44,10 @@ public class Jetty6PluginServer implements JettyPluginServer
     private UserRealm[] realms;
     private ContextHandlerCollection contexts; //the list of ContextHandlers
     HandlerCollection handlers; //the list of lists of Handlers
+    private RequestLogHandler requestLogHandler; //the request log handler
+    private DefaultHandler defaultHandler; //default handler
+    
+    private RequestLog requestLog; //the particular request log implementation
     
     
     /**
@@ -105,6 +111,16 @@ public class Jetty6PluginServer implements JettyPluginServer
         return this.realms;
     }
 
+    
+    public void setRequestLog (Object requestLog)
+    {
+        this.requestLog = (RequestLog)requestLog;
+    }
+    
+    public Object getRequestLog ()
+    {
+        return this.requestLog;
+    }
 
     /**
      * @see org.mortbay.jetty.plugin.util.JettyPluginServer#start()
@@ -141,20 +157,25 @@ public class Jetty6PluginServer implements JettyPluginServer
      */
     public void configureHandlers () throws Exception 
     {
-        contexts = (ContextHandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
-        if (contexts==null)
+        this.defaultHandler = new DefaultHandler();
+        this.requestLogHandler = new RequestLogHandler();
+        if (this.requestLog != null)
+            this.requestLogHandler.setRequestLog(this.requestLog);
+        
+        this.contexts = (ContextHandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+        if (this.contexts==null)
         {   
-            contexts = new ContextHandlerCollection();
-            handlers = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
-            if (handlers==null)
+            this.contexts = new ContextHandlerCollection();
+            this.handlers = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
+            if (this.handlers==null)
             {
-                handlers = new HandlerCollection();               
-                server.setHandler(handlers);                            
-                handlers.setHandlers(new Handler[]{contexts, new DefaultHandler()});
+                this.handlers = new HandlerCollection();               
+                this.server.setHandler(handlers);                            
+                this.handlers.setHandlers(new Handler[]{this.contexts, this.defaultHandler, this.requestLogHandler});
             }
             else
             {
-                handlers.addHandler(contexts);
+                this.handlers.addHandler(this.contexts);
             }
         }  
     }

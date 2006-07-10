@@ -32,6 +32,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
+import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
@@ -152,6 +153,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      */
     public abstract Object[] getConfiguredConnectors();
 
+    public abstract Object getConfiguredRequestLog();
     
 
     public abstract void checkPomConfiguration() throws MojoExecutionException;
@@ -295,6 +297,10 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             }
             
             plugin.setConnectors(configuredConnectors);
+            
+            //set up a RequestLog if one is provided
+            if (getConfiguredRequestLog() != null)
+                getServer().setRequestLog(getConfiguredRequestLog());
             
             //set up the webapp and any context provided
             getServer().configureHandlers();
