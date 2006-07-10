@@ -82,22 +82,17 @@ public class PathMapTest extends TestCase
         for (int i = 0; i < tests.length; i++)
         {
             assertEquals(tests[i][0], tests[i][1], p.getMatch(tests[i][0]).getValue());
-            assertEquals(tests[i][0] + "?a=1", tests[i][1], p.getMatch(tests[i][0] + "?a=1")
-                    .getValue());
-            assertEquals(tests[i][0] + ";a=1", tests[i][1], p.getMatch(tests[i][0] + ";a=1")
-                    .getValue());
-            assertEquals(tests[i][0] + ";a=1?a=1", tests[i][1], p
-                    .getMatch(tests[i][0] + ";a=1?a=1").getValue());
+            assertEquals(tests[i][0] + "?a=1", tests[i][1], p.getMatch(tests[i][0] + "?a=1").getValue());
+            assertEquals(tests[i][0] + ";a=1", tests[i][1], p.getMatch(tests[i][0] + ";a=1").getValue());
+            assertEquals(tests[i][0] + ";a=1?a=1", tests[i][1], p.getMatch(tests[i][0] + ";a=1?a=1").getValue());
         }
 
         assertEquals("Get absolute path", "1", p.get("/abs/path"));
         assertEquals("Match absolute path", "/abs/path", p.getMatch("/abs/path").getKey());
-        assertEquals("all matches", "[/animal/bird/*=3, /animal/*=5, *.tar.gz=6, *.gz=7, /=8]", p
-                .getMatches("/animal/bird/path.tar.gz").toString());
-        assertEquals("Dir matches", "[/animal/fish/*=4, /animal/*=5, /=8]", p.getMatches(
-                "/animal/fish/").toString());
-        assertEquals("Dir matches", "[/animal/fish/*=4, /animal/*=5, /=8]", p.getMatches(
-                "/animal/fish").toString());
+        assertEquals("all matches", "[/animal/bird/*=3, /animal/*=5, *.tar.gz=6, *.gz=7, /=8]",
+                                    p.getMatches("/animal/bird/path.tar.gz").toString());
+        assertEquals("Dir matches", "[/animal/fish/*=4, /animal/*=5, /=8]", p.getMatches("/animal/fish/").toString());
+        assertEquals("Dir matches", "[/animal/fish/*=4, /animal/*=5, /=8]", p.getMatches("/animal/fish").toString());
         assertEquals("Dir matches", "[/=8]", p.getMatches("/").toString());
         assertEquals("Dir matches", "[/=8]", p.getMatches("").toString());
 
@@ -155,6 +150,39 @@ public class PathMapTest extends TestCase
         assertTrue("!match /foo/*", !PathMap.match("/foo/*", "/bar/anything"));
         assertTrue("match *.foo", PathMap.match("*.foo", "anything.foo"));
         assertTrue("!match *.foo", !PathMap.match("*.foo", "anything.bar"));
+    }
 
+    /**
+     * See JIRA issue: JETTY-88.
+     */
+    public void testPathMappingsOnlyMatchOnDirectoryNames() throws Exception
+    {
+        String spec = "/xyz/*";
+        
+        assertMatch(spec, "/xyz");
+        assertMatch(spec, "/xyz/");
+        assertMatch(spec, "/xyz/123");
+        assertMatch(spec, "/xyz;jsessionid=99");
+        assertMatch(spec, "/xyz/;jessionid=99");
+        assertMatch(spec, "/xyz/123;jessionid=99");
+        assertMatch(spec, "/xyz/123/");
+        assertMatch(spec, "/xyz/123.txt");
+        assertNotMatch(spec, "/xyz123");
+        assertNotMatch(spec, "/xyz123;jessionid=99");
+        assertNotMatch(spec, "/xyz123/");
+        assertNotMatch(spec, "/xyz123/456");
+        assertNotMatch(spec, "/xyz.123");
+    }
+
+    private void assertMatch(String spec, String path)
+    {
+        boolean match = PathMap.match(spec, path);
+        assertTrue("PathSpec '" + spec + "' should match path '" + path + "'", match);
+    }
+
+    private void assertNotMatch(String spec, String path)
+    {
+        boolean match = PathMap.match(spec, path);
+        assertFalse("PathSpec '" + spec + "' should not match path '" + path + "'", match);
     }
 }

@@ -380,23 +380,7 @@ public class PathMap extends HashMap implements Externalizable
     public static boolean match(String pathSpec, String path)
         throws IllegalArgumentException
     {
-        char c = pathSpec.charAt(0);
-        if (c=='/')
-        {
-            if (pathSpec.length()==1 || pathSpec.equals(path))
-                return true;
-            
-            if (pathSpec.endsWith("/*") &&
-                    pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
-                return true;
-            
-            if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
-                return true;
-        }
-        else if (c=='*')
-            return path.regionMatches(path.length()-pathSpec.length()+1,
-                    pathSpec,1,pathSpec.length()-1);
-        return false;
+        return match(pathSpec, path, false);
     }
 
     /* --------------------------------------------------------------- */
@@ -412,8 +396,7 @@ public class PathMap extends HashMap implements Externalizable
             if (!noDefault && pathSpec.length()==1 || pathSpec.equals(path))
                 return true;
             
-            if (pathSpec.endsWith("/*") &&
-                pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
+            if(isPathWildcardMatch(pathSpec, path))
                 return true;
             
             if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
@@ -424,6 +407,19 @@ public class PathMap extends HashMap implements Externalizable
                                       pathSpec,1,pathSpec.length()-1);
         return false;
     }
+    
+    private static boolean isPathWildcardMatch(String pathSpec, String path)
+    {
+        if (pathSpec.endsWith("/*"))
+        {
+            // For a spec of "/foo/*" match "/foo" , "/foo/..." , "/foo;..." but not "/foobar"
+            String specPrefix = pathSpec.substring(0, pathSpec.length() - 2);
+            if (path.equals(specPrefix) || path.startsWith(specPrefix + '/') || path.startsWith(specPrefix + ';'))
+                return true;
+        }
+        return false;
+    }
+    
     
     /* --------------------------------------------------------------- */
     /** Return the portion of a path that matches a path spec.
@@ -441,8 +437,7 @@ public class PathMap extends HashMap implements Externalizable
             if (pathSpec.equals(path))
                 return path;
             
-            if (pathSpec.endsWith("/*") &&
-                pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
+            if (isPathWildcardMatch(pathSpec, path))
                 return path.substring(0,pathSpec.length()-2);
             
             if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
