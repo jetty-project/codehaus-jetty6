@@ -47,7 +47,7 @@ public class RequestLogHandler extends HandlerWrapper
             throws IOException, ServletException
     {
         super.handle(target, request, response, dispatch);
-        if (dispatch==REQUEST)
+        if (dispatch==REQUEST && _requestLog!=null)
             _requestLog.log((Request)request, (Response)response);
     }
 
