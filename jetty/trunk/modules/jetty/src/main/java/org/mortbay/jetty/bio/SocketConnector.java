@@ -172,9 +172,10 @@ public class SocketConnector extends AbstractConnector
                     {
                         if (getServer().getThreadPool().isLowOnThreads())
                         {
-                            if (_sotimeout!=getLowResourceMaxIdleTime())
+                            int lrmit = getLowResourceMaxIdleTime();
+                            if (lrmit>=0 && _sotimeout!= lrmit)
                             {
-                                _sotimeout=getLowResourceMaxIdleTime();
+                                _sotimeout=lrmit;
                                 _socket.setSoTimeout(_sotimeout);
                             }
                         }
