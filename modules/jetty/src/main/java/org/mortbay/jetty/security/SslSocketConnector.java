@@ -64,40 +64,89 @@ import org.mortbay.resource.Resource;
  */
 public class SslSocketConnector extends SocketConnector
 {
-    /** Default value for the cipher Suites. */
-    private String _excludeCipherSuites[] = null;
-
-    /** Default value for the keystore location path. */
-    public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator
-            + ".keystore";
-
-    /** String name of keystore password property. */
-    public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
-
-    /** String name of key password property. */
-    public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
-
     /**
      * The name of the SSLSession attribute that will contain any cached information.
      */
     static final String CACHED_INFO_ATTR = CachedInfo.class.getName();
 
+    /** Default value for the keystore location path. */
+    public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator
+            + ".keystore";
 
+    /** String name of key password property. */
+    public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
+
+    /** String name of keystore password property. */
+    public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
+
+    /**
+     * Return the chain of X509 certificates used to negotiate the SSL Session.
+     * <p>
+     * Note: in order to do this we must convert a javax.security.cert.X509Certificate[], as used by
+     * JSSE to a java.security.cert.X509Certificate[],as required by the Servlet specs.
+     * 
+     * @param sslSession the javax.net.ssl.SSLSession to use as the source of the cert chain.
+     * @return the chain of java.security.cert.X509Certificates used to negotiate the SSL
+     *         connection. <br>
+     *         Will be null if the chain is missing or empty.
+     */
+    private static X509Certificate[] getCertChain(SSLSession sslSession)
+    {
+        try
+        {
+            javax.security.cert.X509Certificate javaxCerts[] = sslSession.getPeerCertificateChain();
+            if (javaxCerts == null || javaxCerts.length == 0)
+                return null;
+
+            int length = javaxCerts.length;
+            X509Certificate[] javaCerts = new X509Certificate[length];
+
+            java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
+            for (int i = 0; i < length; i++)
+            {
+                byte bytes[] = javaxCerts[i].getEncoded();
+                ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+                javaCerts[i] = (X509Certificate) cf.generateCertificate(stream);
+            }
+
+            return javaCerts;
+        }
+        catch (SSLPeerUnverifiedException pue)
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            Log.warn(Log.EXCEPTION, e);
+            return null;
+        }
+    }
+
+
+    /** Default value for the cipher Suites. */
+    private String _excludeCipherSuites[] = null;
+    
     private String _keystore=DEFAULT_KEYSTORE ;
-    private transient Password _password;
-    private transient Password _keypassword;
-    private String _protocol= "TLS";
-    private String _sslKeyManagerFactoryAlgorithm = System.getProperty("ssl.KeyManagerFactory.algorithm","SunX509"); // cert algorithm
-    private String _sslTrustManagerFactoryAlgorithm = System.getProperty("ssl.TrustManagerFactory.algorithm","SunX509"); // cert algorithm
-    private String _secureRandomAlgorithm; // cert algorithm
     private String _keystoreType = "JKS"; // type of the key store
-    private String _provider;
     
     /** Set to true if we require client certificate authentication. */
     private boolean _needClientAuth = false;
+    private transient Password _password;
+    private transient Password _keyPassword;
+    private transient Password _trustPassword;
+    private String _protocol= "TLS";
+    private String _provider;
+    private String _secureRandomAlgorithm; // cert algorithm
+    private String _sslKeyManagerFactoryAlgorithm = System.getProperty("ssl.KeyManagerFactory.algorithm","SunX509"); // cert algorithm
     
+    private String _sslTrustManagerFactoryAlgorithm = System.getProperty("ssl.TrustManagerFactory.algorithm","SunX509"); // cert algorithm
+    
+    private String _truststore;
+    private String _truststoreType = "JKS"; // type of the key store
+
     /** Set to true if we would like client certificate authentication. */
     private boolean _wantClientAuth = false;
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -108,6 +157,120 @@ public class SslSocketConnector extends SocketConnector
         super();
     }
 
+    /* ------------------------------------------------------------ */
+    protected void configure(Socket socket)
+        throws IOException
+    {   
+        super.configure(socket);
+
+        ((SSLSocket)socket).startHandshake(); // block until SSL handshaking is done
+    }
+
+    /* ------------------------------------------------------------ */
+    protected SSLServerSocketFactory createFactory() 
+        throws Exception
+    {
+        if (_password==null)
+            _password=new Password("");
+        if (_keyPassword==null)
+            _keyPassword=_password;
+        if (_trustPassword==null)
+            _trustPassword=_password;
+        
+        if (_truststore==null)
+        {
+            _truststore=_keystore;
+            _truststoreType=_keystoreType;
+        }
+        
+        KeyStore keyStore = KeyStore.getInstance(_keystoreType);
+        if (_password == null) 
+            throw new SSLException("_password is not set");
+        keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
+
+        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
+        if (_keyPassword == null) 
+            throw new SSLException("_keypassword is not set");
+        keyManagerFactory.init(keyStore,_keyPassword.toString().toCharArray());
+
+
+        KeyStore trustStore = KeyStore.getInstance(_truststoreType);
+        keyStore.load(Resource.newResource(_truststore).getInputStream(), _trustPassword.toString().toCharArray());
+        
+        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
+        trustManagerFactory.init(trustStore);
+
+        SecureRandom secureRandom = _secureRandomAlgorithm==null?new SecureRandom():SecureRandom.getInstance(_secureRandomAlgorithm);
+
+        SSLContext context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
+
+        context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), secureRandom);
+
+        return context.getServerSocketFactory();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Allow the Listener a chance to customise the request. before the server does its stuff. <br>
+     * This allows the required attributes to be set for SSL requests. <br>
+     * The requirements of the Servlet specs are:
+     * <ul>
+     * <li> an attribute named "javax.servlet.request.cipher_suite" of type String.</li>
+     * <li> an attribute named "javax.servlet.request.key_size" of type Integer.</li>
+     * <li> an attribute named "javax.servlet.request.X509Certificate" of type
+     * java.security.cert.X509Certificate[]. This is an array of objects of type X509Certificate,
+     * the order of this array is defined as being in ascending order of trust. The first
+     * certificate in the chain is the one set by the client, the next is the one used to
+     * authenticate the first, and so on. </li>
+     * </ul>
+     * 
+     * @param endpoint The Socket the request arrived on. 
+     *        This should be a {@link SocketEndPoint} wrapping a {@link SSLSocket}.
+     * @param request HttpRequest to be customised.
+     */
+    public void customize(EndPoint endpoint, Request request)
+        throws IOException
+    {
+        super.customize(endpoint, request);
+        request.setScheme(HttpSchemes.HTTPS);
+        
+        SocketEndPoint socket_end_point = (SocketEndPoint)endpoint;
+        SSLSocket sslSocket = (SSLSocket)socket_end_point.getConnection();
+        
+        try
+        {
+            SSLSession sslSession = sslSocket.getSession();
+            String cipherSuite = sslSession.getCipherSuite();
+            Integer keySize;
+            X509Certificate[] certs;
+
+            CachedInfo cachedInfo = (CachedInfo) sslSession.getValue(CACHED_INFO_ATTR);
+            if (cachedInfo != null)
+            {
+                keySize = cachedInfo.getKeySize();
+                certs = cachedInfo.getCerts();
+            }
+            else
+            {
+                keySize = new Integer(ServletSSL.deduceKeyLength(cipherSuite));
+                certs = getCertChain(sslSession);
+                cachedInfo = new CachedInfo(keySize, certs);
+                sslSession.putValue(CACHED_INFO_ATTR, cachedInfo);
+            }
+
+            if (certs != null)
+                request.setAttribute("javax.servlet.request.X509Certificate", certs);
+            else if (_needClientAuth) // Sanity check
+                throw new IllegalStateException("no client auth");
+
+            request.setAttribute("javax.servlet.request.cipher_suite", cipherSuite);
+            request.setAttribute("javax.servlet.request.key_size", keySize);
+        }
+        catch (Exception e)
+        {
+            Log.warn(Log.EXCEPTION, e);
+        }
+    }
 
     /* ------------------------------------------------------------ */    
     public String[] getExcludeCipherSuites() {
@@ -115,135 +278,15 @@ public class SslSocketConnector extends SocketConnector
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @author Tony Jiang
-     */
-    public void setExcludeCipherSuites(String[] cipherSuites) {
-        this._excludeCipherSuites = cipherSuites;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setPassword(String password)
-    {
-        _password = Password.getPassword(PASSWORD_PROPERTY,password,null);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setKeyPassword(String password)
-    {
-        _keypassword = Password.getPassword(KEYPASSWORD_PROPERTY,password,null);
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getSslKeyManagerFactoryAlgorithm() 
-    {
-        return (this._sslKeyManagerFactoryAlgorithm);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setSslKeyManagerFactoryAlgorithm(String algorithm) 
-    {
-        this._sslKeyManagerFactoryAlgorithm = algorithm;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getSslTrustManagerFactoryAlgorithm() 
-    {
-        return (this._sslTrustManagerFactoryAlgorithm);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setSslTrustManagerFactoryAlgorithm(String algorithm) 
-    {
-        this._sslTrustManagerFactoryAlgorithm = algorithm;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getSecureRandomAlgorithm() 
-    {
-        return (this._secureRandomAlgorithm);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setSecureRandomAlgorithm(String algorithm) 
-    {
-        this._secureRandomAlgorithm = algorithm;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getProtocol() 
-    {
-        return _protocol;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setProtocol(String protocol) 
-    {
-        _protocol = protocol;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setKeystore(String keystore)
-    {
-        _keystore = keystore;
-    }
-    
-    /* ------------------------------------------------------------ */
     public String getKeystore()
     {
         return _keystore;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getKeystoreType() 
     {
         return (_keystoreType);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setKeystoreType(String keystoreType) 
-    {
-        _keystoreType = keystoreType;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getProvider() {
-	return _provider;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setProvider(String _provider) {
-	this._provider = _provider;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Set the value of the _wantClientAuth property. This property is used when
-     * {@link #newServerSocket(SocketAddress, int) opening server sockets}.
-     * 
-     * @param wantClientAuth true iff we want client certificate authentication.
-     * @see SSLServerSocket#setWantClientAuth
-     */
-    public void setWantClientAuth(boolean wantClientAuth)
-    {
-        _wantClientAuth = wantClientAuth;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean getWantClientAuth()
-    {
-        return _wantClientAuth;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Set the value of the needClientAuth property
-     * 
-     * @param needClientAuth true iff we require client certificate authentication.
-     */
-    public void setNeedClientAuth(boolean needClientAuth)
-    {
-        _needClientAuth = needClientAuth;
     }
 
     /* ------------------------------------------------------------ */
@@ -253,17 +296,50 @@ public class SslSocketConnector extends SocketConnector
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * By default, we're integral, given we speak SSL. But, if we've been told about an integral
-     * port, and said port is not our port, then we're not. This allows separation of listeners
-     * providing INTEGRAL versus CONFIDENTIAL constraints, such as one SSL listener configured to
-     * require client certs providing CONFIDENTIAL, whereas another SSL listener not requiring
-     * client certs providing mere INTEGRAL constraints.
-     */
-    public boolean isIntegral(Request request)
+    public String getProtocol() 
     {
-        final int integralPort = getIntegralPort();
-        return integralPort == 0 || integralPort == request.getServerPort();
+        return _protocol;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getProvider() {
+	return _provider;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getSecureRandomAlgorithm() 
+    {
+        return (this._secureRandomAlgorithm);
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getSslKeyManagerFactoryAlgorithm() 
+    {
+        return (this._sslKeyManagerFactoryAlgorithm);
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getSslTrustManagerFactoryAlgorithm() 
+    {
+        return (this._sslTrustManagerFactoryAlgorithm);
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getTruststore()
+    {
+        return _truststore;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getTruststoreType()
+    {
+        return _truststoreType;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getWantClientAuth()
+    {
+        return _wantClientAuth;
     }
 
     /* ------------------------------------------------------------ */
@@ -279,31 +355,19 @@ public class SslSocketConnector extends SocketConnector
         final int confidentialPort = getConfidentialPort();
         return confidentialPort == 0 || confidentialPort == request.getServerPort();
     }
-
+    
     /* ------------------------------------------------------------ */
-    protected SSLServerSocketFactory createFactory() 
-        throws Exception
+    /**
+     * By default, we're integral, given we speak SSL. But, if we've been told about an integral
+     * port, and said port is not our port, then we're not. This allows separation of listeners
+     * providing INTEGRAL versus CONFIDENTIAL constraints, such as one SSL listener configured to
+     * require client certs providing CONFIDENTIAL, whereas another SSL listener not requiring
+     * client certs providing mere INTEGRAL constraints.
+     */
+    public boolean isIntegral(Request request)
     {
-        KeyStore keyStore = KeyStore.getInstance(_keystoreType);
-        if (_password == null) 
-            throw new SSLException("_password is not set");
-        keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
-
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
-        if (_keypassword == null) 
-            throw new SSLException("_keypassword is not set");
-        keyManagerFactory.init(keyStore,_keypassword.toString().toCharArray());
-
-        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
-        trustManagerFactory.init(keyStore);
-
-        SecureRandom secureRandom = _secureRandomAlgorithm==null?new SecureRandom():SecureRandom.getInstance(_secureRandomAlgorithm);
-
-        SSLContext context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
-
-        context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), secureRandom);
-
-        return context.getServerSocketFactory();
+        final int integralPort = getIntegralPort();
+        return integralPort == 0 || integralPort == request.getServerPort();
     }
     
     /* ------------------------------------------------------------ */
@@ -370,121 +434,107 @@ public class SslSocketConnector extends SocketConnector
         return socket;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @author Tony Jiang
+     */
+    public void setExcludeCipherSuites(String[] cipherSuites) {
+        this._excludeCipherSuites = cipherSuites;
+    }
 
     /* ------------------------------------------------------------ */
-    protected void configure(Socket socket)
-        throws IOException
-    {   
-        super.configure(socket);
+    public void setKeyPassword(String password)
+    {
+        _keyPassword = Password.getPassword(KEYPASSWORD_PROPERTY,password,null);
+    }
 
-        ((SSLSocket)socket).startHandshake(); // block until SSL handshaking is done
+    /* ------------------------------------------------------------ */
+    public void setKeystore(String keystore)
+    {
+        _keystore = keystore;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setKeystoreType(String keystoreType) 
+    {
+        _keystoreType = keystoreType;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the value of the needClientAuth property
+     * 
+     * @param needClientAuth true iff we require client certificate authentication.
+     */
+    public void setNeedClientAuth(boolean needClientAuth)
+    {
+        _needClientAuth = needClientAuth;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setPassword(String password)
+    {
+        _password = Password.getPassword(PASSWORD_PROPERTY,password,null);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setTrustPassword(String password)
+    {
+        _trustPassword = Password.getPassword(PASSWORD_PROPERTY,password,null);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setProtocol(String protocol) 
+    {
+        _protocol = protocol;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setProvider(String _provider) {
+	this._provider = _provider;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setSecureRandomAlgorithm(String algorithm) 
+    {
+        this._secureRandomAlgorithm = algorithm;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setSslKeyManagerFactoryAlgorithm(String algorithm) 
+    {
+        this._sslKeyManagerFactoryAlgorithm = algorithm;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setSslTrustManagerFactoryAlgorithm(String algorithm) 
+    {
+        this._sslTrustManagerFactoryAlgorithm = algorithm;
+    }
+
+
+    public void setTruststore(String truststore)
+    {
+        _truststore = truststore;
     }
     
 
-    /* ------------------------------------------------------------ */
-    /**
-     * Allow the Listener a chance to customise the request. before the server does its stuff. <br>
-     * This allows the required attributes to be set for SSL requests. <br>
-     * The requirements of the Servlet specs are:
-     * <ul>
-     * <li> an attribute named "javax.servlet.request.cipher_suite" of type String.</li>
-     * <li> an attribute named "javax.servlet.request.key_size" of type Integer.</li>
-     * <li> an attribute named "javax.servlet.request.X509Certificate" of type
-     * java.security.cert.X509Certificate[]. This is an array of objects of type X509Certificate,
-     * the order of this array is defined as being in ascending order of trust. The first
-     * certificate in the chain is the one set by the client, the next is the one used to
-     * authenticate the first, and so on. </li>
-     * </ul>
-     * 
-     * @param endpoint The Socket the request arrived on. 
-     *        This should be a {@link SocketEndPoint} wrapping a {@link SSLSocket}.
-     * @param request HttpRequest to be customised.
-     */
-    public void customize(EndPoint endpoint, Request request)
-        throws IOException
+    public void setTruststoreType(String truststoreType)
     {
-        super.customize(endpoint, request);
-        request.setScheme(HttpSchemes.HTTPS);
-        
-        SocketEndPoint socket_end_point = (SocketEndPoint)endpoint;
-        SSLSocket sslSocket = (SSLSocket)socket_end_point.getConnection();
-        
-        try
-        {
-            SSLSession sslSession = sslSocket.getSession();
-            String cipherSuite = sslSession.getCipherSuite();
-            Integer keySize;
-            X509Certificate[] certs;
-
-            CachedInfo cachedInfo = (CachedInfo) sslSession.getValue(CACHED_INFO_ATTR);
-            if (cachedInfo != null)
-            {
-                keySize = cachedInfo.getKeySize();
-                certs = cachedInfo.getCerts();
-            }
-            else
-            {
-                keySize = new Integer(ServletSSL.deduceKeyLength(cipherSuite));
-                certs = getCertChain(sslSession);
-                cachedInfo = new CachedInfo(keySize, certs);
-                sslSession.putValue(CACHED_INFO_ATTR, cachedInfo);
-            }
-
-            if (certs != null)
-                request.setAttribute("javax.servlet.request.X509Certificate", certs);
-            else if (_needClientAuth) // Sanity check
-                throw new IllegalStateException("no client auth");
-
-            request.setAttribute("javax.servlet.request.cipher_suite", cipherSuite);
-            request.setAttribute("javax.servlet.request.key_size", keySize);
-        }
-        catch (Exception e)
-        {
-            Log.warn(Log.EXCEPTION, e);
-        }
+        _truststoreType = truststoreType;
     }
 
+    /* ------------------------------------------------------------ */
     /**
-     * Return the chain of X509 certificates used to negotiate the SSL Session.
-     * <p>
-     * Note: in order to do this we must convert a javax.security.cert.X509Certificate[], as used by
-     * JSSE to a java.security.cert.X509Certificate[],as required by the Servlet specs.
+     * Set the value of the _wantClientAuth property. This property is used when
+     * {@link #newServerSocket(SocketAddress, int) opening server sockets}.
      * 
-     * @param sslSession the javax.net.ssl.SSLSession to use as the source of the cert chain.
-     * @return the chain of java.security.cert.X509Certificates used to negotiate the SSL
-     *         connection. <br>
-     *         Will be null if the chain is missing or empty.
+     * @param wantClientAuth true iff we want client certificate authentication.
+     * @see SSLServerSocket#setWantClientAuth
      */
-    private static X509Certificate[] getCertChain(SSLSession sslSession)
+    public void setWantClientAuth(boolean wantClientAuth)
     {
-        try
-        {
-            javax.security.cert.X509Certificate javaxCerts[] = sslSession.getPeerCertificateChain();
-            if (javaxCerts == null || javaxCerts.length == 0)
-                return null;
-
-            int length = javaxCerts.length;
-            X509Certificate[] javaCerts = new X509Certificate[length];
-
-            java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
-            for (int i = 0; i < length; i++)
-            {
-                byte bytes[] = javaxCerts[i].getEncoded();
-                ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-                javaCerts[i] = (X509Certificate) cf.generateCertificate(stream);
-            }
-
-            return javaCerts;
-        }
-        catch (SSLPeerUnverifiedException pue)
-        {
-            return null;
-        }
-        catch (Exception e)
-        {
-            Log.warn(Log.EXCEPTION, e);
-            return null;
-        }
+        _wantClientAuth = wantClientAuth;
     }
 
     /**
@@ -493,8 +543,8 @@ public class SslSocketConnector extends SocketConnector
      */
     private class CachedInfo
     {
-        private Integer _keySize;
         private X509Certificate[] _certs;
+        private Integer _keySize;
 
         CachedInfo(Integer keySize, X509Certificate[] certs)
         {
@@ -502,14 +552,14 @@ public class SslSocketConnector extends SocketConnector
             this._certs = certs;
         }
 
-        Integer getKeySize()
-        {
-            return _keySize;
-        }
-
         X509Certificate[] getCerts()
         {
             return _certs;
+        }
+
+        Integer getKeySize()
+        {
+            return _keySize;
         }
     }
 
