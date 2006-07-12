@@ -125,10 +125,9 @@ public abstract class Resource implements Serializable
             }
         }
 
+        // Make sure that any special characters stripped really are ignorable.
         String nurl=url.toString();
-        if (nurl.length()>0 &&
-            nurl.charAt(nurl.length()-1)!=
-            resource.charAt(resource.length()-1))
+        if (nurl.length()>0 &&  nurl.charAt(nurl.length()-1)!=resource.charAt(resource.length()-1))
         {
             if ((nurl.charAt(nurl.length()-1)!='/' ||
                  nurl.charAt(nurl.length()-2)!=resource.charAt(resource.length()-1))
