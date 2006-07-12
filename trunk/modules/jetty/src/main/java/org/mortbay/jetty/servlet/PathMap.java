@@ -48,8 +48,9 @@ import org.mortbay.util.StringUtil;
  * in the "org.mortbay.http.PathMap.separators" System property, which
  * defaults to :
  * <P>
- * Note that this is a very different mapping to that provided by PathMap
- * in Jetty2.
+ * Special characters within paths such as '?´ and ';' are not treated specially
+ * as it is assumed they would have been either encoded in the original URL or 
+ * stripped from the path.
  * <P>
  * This class is not synchronized for get's.  If concurrent modifications are
  * possible then it should be synchronized at a higher level.
@@ -224,13 +225,7 @@ public class PathMap extends HashMap implements Externalizable
         if (path==null)
             return null;
         
-        int l=path.indexOf(';');
-        if (l<0)
-        {
-            l=path.indexOf('?');
-            if (l<0)
-                l=path.length();
-        }
+        int l=path.length();        
 
         // try exact match
         entry=_exactMap.getEntry(path,0,l);
@@ -277,13 +272,7 @@ public class PathMap extends HashMap implements Externalizable
         if (path==null)
             return LazyList.getList(entries);
         
-        int l=path.indexOf(';');
-        if (l<0)
-        {
-            l=path.indexOf('?');
-            if (l<0)
-                l=path.length();
-        }
+        int l=path.length();
 
         // try exact match
         entry=_exactMap.getEntry(path,0,l);
@@ -399,9 +388,6 @@ public class PathMap extends HashMap implements Externalizable
             
             if(isPathWildcardMatch(pathSpec, path))
                 return true;
-            
-            if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
-                return true;
         }
         else if (c=='*')
             return path.regionMatches(path.length()-pathSpec.length()+1,
@@ -412,19 +398,12 @@ public class PathMap extends HashMap implements Externalizable
     /* --------------------------------------------------------------- */
     private static boolean isPathWildcardMatch(String pathSpec, String path)
     {
-        // For a spec of "/foo/*" match "/foo" , "/foo/..." , "/foo;..." but not "/foobar"
+        // For a spec of "/foo/*" match "/foo" , "/foo/..." but not "/foobar"
         int cpl=pathSpec.length()-2;
         if (pathSpec.endsWith("/*") && path.regionMatches(0,pathSpec,0,cpl))
         {
-            if (path.length()==cpl)
+            if (path.length()==cpl || '/'==path.charAt(cpl))
                 return true;
-            char c=path.charAt(cpl);
-            switch (c)
-            {
-                case '/':
-                case ';':
-                    return true;
-            }
         }
         return false;
     }
@@ -448,9 +427,6 @@ public class PathMap extends HashMap implements Externalizable
             
             if (isPathWildcardMatch(pathSpec, path))
                 return path.substring(0,pathSpec.length()-2);
-            
-            if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
-                return path;
         }
         else if (c=='*')
         {
@@ -476,9 +452,8 @@ public class PathMap extends HashMap implements Externalizable
             
             if (pathSpec.equals(path))
                 return null;
-            
-            if (pathSpec.endsWith("/*") &&
-                pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
+
+            if (isPathWildcardMatch(pathSpec, path))
             {
                 if (path.length()==pathSpec.length()-2)
                     return null;
