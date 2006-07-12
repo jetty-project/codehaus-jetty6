@@ -98,7 +98,7 @@
       <Get name="SessionHandler">
         <Set name="SessionManager">
           <New class="org.mortbay.jetty.servlet.HashSessionManager">
-            <Set name="maxInactiveIntervale">600</Set>
+            <Set name="maxInactiveInterval">600</Set>
           </New>
         </Set>
       </Get>
