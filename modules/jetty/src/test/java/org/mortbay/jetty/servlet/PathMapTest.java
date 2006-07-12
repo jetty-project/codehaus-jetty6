@@ -72,19 +72,26 @@ public class PathMapTest extends TestCase
         p.put("/", "8");
         p.put("/XXX:/YYY", "9");
 
-        String[][] tests = { { "/abs/path", "1"}, { "/abs/path/xxx", "8"}, { "/abs/pith", "8"},
-                { "/abs/path/longer", "2"}, { "/abs/path/", "8"}, { "/abs/path/xxx", "8"},
-                { "/animal/bird/eagle/bald", "3"}, { "/animal/fish/shark/grey", "4"},
-                { "/animal/insect/bug", "5"}, { "/animal", "5"}, { "/animal/", "5"},
-                { "/suffix/path.tar.gz", "6"}, { "/suffix/path.gz", "7"},
-                { "/animal/path.gz", "5"}, { "/Other/path", "8"},};
+        String[][] tests = { 
+                        { "/abs/path", "1"}, 
+                        { "/abs/path/xxx", "8"}, 
+                        { "/abs/pith", "8"},
+                        { "/abs/path/longer", "2"}, 
+                        { "/abs/path/", "8"}, 
+                        { "/abs/path/xxx", "8"},
+                        { "/animal/bird/eagle/bald", "3"}, 
+                        { "/animal/fish/shark/grey", "4"},
+                        { "/animal/insect/bug", "5"}, 
+                        { "/animal", "5"}, 
+                        { "/animal/", "5"},
+                        { "/suffix/path.tar.gz", "6"}, 
+                        { "/suffix/path.gz", "7"},
+                        { "/animal/path.gz", "5"}, 
+                        { "/Other/path", "8"},};
 
         for (int i = 0; i < tests.length; i++)
         {
             assertEquals(tests[i][0], tests[i][1], p.getMatch(tests[i][0]).getValue());
-            assertEquals(tests[i][0] + "?a=1", tests[i][1], p.getMatch(tests[i][0] + "?a=1").getValue());
-            assertEquals(tests[i][0] + ";a=1", tests[i][1], p.getMatch(tests[i][0] + ";a=1").getValue());
-            assertEquals(tests[i][0] + ";a=1?a=1", tests[i][1], p.getMatch(tests[i][0] + ";a=1?a=1").getValue());
         }
 
         assertEquals("Get absolute path", "1", p.get("/abs/path"));
@@ -162,9 +169,6 @@ public class PathMapTest extends TestCase
         assertMatch(spec, "/xyz");
         assertMatch(spec, "/xyz/");
         assertMatch(spec, "/xyz/123");
-        assertMatch(spec, "/xyz;jsessionid=99");
-        assertMatch(spec, "/xyz/;jessionid=99");
-        assertMatch(spec, "/xyz/123;jessionid=99");
         assertMatch(spec, "/xyz/123/");
         assertMatch(spec, "/xyz/123.txt");
         assertNotMatch(spec, "/xyz123");
@@ -172,6 +176,8 @@ public class PathMapTest extends TestCase
         assertNotMatch(spec, "/xyz123/");
         assertNotMatch(spec, "/xyz123/456");
         assertNotMatch(spec, "/xyz.123");
+        assertNotMatch(spec, "/xyz;123"); // as if the ; was encoded and part of the path
+        assertNotMatch(spec, "/xyz?123"); // as if the ? was encoded and part of the path
     }
 
     private void assertMatch(String spec, String path)
