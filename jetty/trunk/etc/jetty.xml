@@ -22,57 +22,40 @@
     <!-- =========================================================== -->
     <!-- One of each type!                                           -->
     <!-- =========================================================== -->
-    <Set name="connectors">
-      <Array type="org.mortbay.jetty.Connector">
 
-        <!-- Use this connector for many frequently idle connections
-             and for threadless continuations.
-        -->
-        <Item>
+    <!-- Use this connector for many frequently idle connections
+         and for threadless continuations.
+    -->    
+    <Call name="addConnector">
+      <Arg>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
             <Set name="port">8080</Set>
             <Set name="maxIdleTime">30000</Set>
             <Set name="lowResourceMaxIdleTime">3000</Set>
             <Set name="Acceptors">1</Set>
           </New>
-        </Item>
+      </Arg>
+    </Call>
+        
 
-        <!-- Use this connector if NIO is not available.
-        <Item>
+    <!-- Use this connector if NIO is not available.
+    <Call name="addConnector">
+      <Arg>
           <New class="org.mortbay.jetty.bio.SocketConnector">
             <Set name="port">8081</Set>
             <Set name="maxIdleTime">50000</Set>
           </New>
-        </Item>
-        -->
+      </Arg>
+    </Call>
+    -->
 
-        <!-- Use this connector for few very active connections ONLY IF
-	     SelectChannelConnector cannot handle your load
-        <Item>
-          <New class="org.mortbay.jetty.nio.BlockingChannelConnector">
-            <Set name="port">8083</Set>
-            <Set name="maxIdleTime">30000</Set>
-            <Set name="lowResourceMaxIdleTime">3000</Set>
-          </New>
-        </Item>
-        -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- To add a HTTPS SSL listener                                     -->
+    <!-- see jetty-ssl.xml to add an ssl connector. use                  -->
+    <!-- java -jar start.jar etc/jetty.xml etc/jetty-ssl.xml             -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    
 
-        <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-        <!-- Add a HTTPS SSL listener on port 8443                           -->
-        <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-        <!--
-        <Item>
-          <New class="org.mortbay.jetty.security.SslSocketConnector">
-            <Set name="Port">8443</Set>
-            <Set name="maxIdleTime">30000</Set>
-            <Set name="Keystore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
-            <Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
-            <Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
-          </New>
-        </Item>
-        -->
-      </Array>
-    </Set>
 
     <!-- =========================================================== -->
     <!-- Set handler Collection Structure                            --> 
