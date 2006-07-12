@@ -123,8 +123,9 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         _selectSets = new SelectSet[getAcceptors()];
         for (int i=0;i<_selectSets.length;i++)
             _selectSets[i]= new SelectSet(i);
-        
+
         super.doStart();
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -247,7 +248,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             _idleTimeout = new Timeout();
             _idleTimeout.setDuration(getMaxIdleTime());
             _shortIdleTimeout = new Timeout();
-            _shortIdleTimeout.setDuration(getLowResourceMaxIdleTime());
+            _shortIdleTimeout.setDuration(getLowResourceMaxIdleTime()>0?getLowResourceMaxIdleTime():getMaxIdleTime());
             _retryTimeout = new Timeout();
             _retryTimeout.setDuration(0L);
 

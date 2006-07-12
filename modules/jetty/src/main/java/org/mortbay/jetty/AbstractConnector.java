@@ -62,7 +62,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private boolean _useDNS;
     
     protected int _maxIdleTime=30000; 
-    protected int _lowResourceMaxIdleTime=2500; 
+    protected int _lowResourceMaxIdleTime=-1; 
     protected int _soLingerTime=1000; 
     
     private transient ArrayList _headerBuffers;
