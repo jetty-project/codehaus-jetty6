@@ -2,7 +2,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 ===================================================================
 --- modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
-@@ -0,0 +1,163 @@
+@@ -0,0 +1,168 @@
 +package org.mortbay.jetty.security;
 +
 +import java.io.File;
@@ -48,7 +48,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 +    private String _algorithm = "SunX509"; // cert algorithm
 +    private String _keystoreType = "JKS"; // type of the key store
 +    private String _provider;
-+
++    private int _applicationBufferSize = 16384;
 +    /* ------------------------------------------------------------ */
 +    public String[] getCipherSuites()
 +    {
@@ -162,15 +162,20 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 +        {
 +            Log.debug(e);
 +        }
-+
 +        return engine;
++    }
++
++    protected void doStart() throws Exception
++    {
++        setHeaderBufferSize(_applicationBufferSize);        
++        super.doStart();
 +    }
 +}
 Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java
 ===================================================================
 --- modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
-@@ -0,0 +1,378 @@
+@@ -0,0 +1,389 @@
 +package org.mortbay.jetty.security;
 +
 +import java.io.IOException;
@@ -205,7 +210,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +    private boolean _initialHandshake = false;
 +    private final NIOBuffer _outNIOBuffer;
 +    private final ByteBuffer _outBuffer;
-+    private final ByteBuffer _peerAppData;
++    private final ByteBuffer _inBuffer;
++    private final NIOBuffer _inNIOBuffer;
 +    
 +    // ssl
 +    private final SSLSession _session;
@@ -220,13 +226,15 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +        _engine = engine;
 +        _engine.setUseClientMode(false);
 +        _session = engine.getSession();
-+        _peerAppData = ByteBuffer.allocate(_session.getApplicationBufferSize());
-+        _peerAppData.position(_peerAppData.limit());
 +
 +        _outNIOBuffer = new NIOBuffer(_session.getPacketBufferSize(), true);
 +        _outBuffer = _outNIOBuffer.getByteBuffer();
 +        _outBuffer.limit(_outBuffer.capacity());
 +        _outBuffer.position(_outBuffer.capacity());
++
++        _inNIOBuffer = new NIOBuffer(_session.getApplicationBufferSize(), true);
++        _inBuffer = _inNIOBuffer.getByteBuffer();
++        _inBuffer.position(_inBuffer.limit());
 +        
 +        // begin handshake
 +        _engine.beginHandshake();
@@ -237,70 +245,70 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +    }
 +
 +    /* ------------------------------------------------------------ */
-+    private void doHandshake() throws IOException
-+    {
-+        while (true)
++        private void doHandshake() throws IOException
 +        {
-+            SSLEngineResult result;
-+            if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.FINISHED))
++            while (true)
 +            {
-+                if (_initialHandshake)
++                SSLEngineResult result;
++                if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.FINISHED))
 +                {
-+                    _initialHandshake = false;
++                    if (_initialHandshake)
++                    {
++                        _initialHandshake = false;
++                    }
++                    return;
 +                }
-+                return;
-+            }
-+            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_TASK))
-+            {
-+                doTasks();
-+            }
-+            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_UNWRAP))
-+            {
-+                if (_channel.read(_handshakeBuffer) < 0)
++                else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_TASK))
 +                {
-+                    _engine.closeInbound();
++                    doTasks();
 +                }
-+                _peerAppData.clear();
-+                _handshakeBuffer.flip();
-+                do
++                else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_UNWRAP))
 +                {
-+                    result = _engine.unwrap(_handshakeBuffer, _peerAppData);
-+                }
-+                while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
-+
-+                if (result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.FINISHED)
-+                {
-+                    _initialHandshake = false;
-+                }
-+
-+                // If no data was produced, and the status is still ok, try to read once more
-+                if (_peerAppData.position() == 0 && result.getStatus() == SSLEngineResult.Status.OK && _handshakeBuffer.hasRemaining())
-+                {
-+                    result = _engine.unwrap(_handshakeBuffer, _peerAppData);
-+                }
-+
-+                _status = result.getStatus();
-+                _handshakeStatus = result.getHandshakeStatus();
-+
-+                _handshakeBuffer.compact();
-+                _peerAppData.flip();
-+            }
-+            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_WRAP))
-+            {
-+                if (!_outBuffer.hasRemaining())
-+                {
-+                    // Prepare to write
-+                    _outBuffer.clear();
-+                    result = _engine.wrap(_handshakeBuffer, _outBuffer);
++                    if (_channel.read(_handshakeBuffer) < 0)
++                    {
++                        _engine.closeInbound();
++                    }
++                    _inBuffer.clear();
++                    _handshakeBuffer.flip();
++                    do
++                    {
++                        result = _engine.unwrap(_handshakeBuffer, _inBuffer);
++                    }
++                    while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
++    
++                    if (result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.FINISHED)
++                    {
++                        _initialHandshake = false;
++                    }
++    
++                    // If no data was produced, and the status is still ok, try to read once more
++                    if (_inBuffer.position() == 0 && result.getStatus() == SSLEngineResult.Status.OK && _handshakeBuffer.hasRemaining())
++                    {
++                        result = _engine.unwrap(_handshakeBuffer, _inBuffer);
++                    }
++    
++                    _status = result.getStatus();
 +                    _handshakeStatus = result.getHandshakeStatus();
-+                    _outBuffer.flip();
++    
++                    _handshakeBuffer.compact();
++                    _inBuffer.flip();
 +                }
-+                _channel.write(_outBuffer);
++                else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_WRAP))
++                {
++                    if (!_outBuffer.hasRemaining())
++                    {
++                        // Prepare to write
++                        _outBuffer.clear();
++                        result = _engine.wrap(_handshakeBuffer, _outBuffer);
++                        _handshakeStatus = result.getHandshakeStatus();
++                        _outBuffer.flip();
++                    }
++                    _channel.write(_outBuffer);
++                }
++                else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING)) { return; }
 +            }
-+            else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING)) { return; }
++    
 +        }
-+
-+    }
 +
 +    /* ------------------------------------------------------------ */
 +    private void doTasks()
@@ -356,14 +364,26 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +     */
 +    public int fill(Buffer buffer) throws IOException
 +    {
++        int l;
 +        if (_initialHandshake) { return 0; }
 +
-+        int l = super.fill(buffer);
-+        if (l < 0) { return l; }
++        if (_inBuffer.position() == 0)
++        {
++            super.fill(_inNIOBuffer);
++        }
++        else if (buffer instanceof NIOBuffer)
++        {
++            NIOBuffer nbuf = (NIOBuffer)buffer;
++            ByteBuffer bbuf = nbuf.getByteBuffer();
++            if (bbuf.remaining() < _inBuffer.remaining())
++            {
++                super.fill(_inNIOBuffer);                
++            }
++        }            
 +
-+        buffer.setGetIndex(0);
-+        buffer.setPutIndex(l);
-+        return unWrap((NIOBuffer) buffer);
++        l = unWrap((NIOBuffer)buffer);
++
++        return l;
 +    }
 +
 +    /* ------------------------------------------------------------ */
@@ -389,8 +409,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +    }
 +
 +    /* ------------------------------------------------------------ */
-+    /*
-+     */
++    /*     */
 +    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
 +    {
 +        if (_initialHandshake) { return 0; }
@@ -433,36 +452,18 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +    private int unWrap(NIOBuffer buffer) throws IOException
 +    {
 +        ByteBuffer bBuf = buffer.getByteBuffer();
-+        bBuf.position(buffer.getIndex());
-+        bBuf.limit(buffer.putIndex());
 +
-+        _peerAppData.clear();
++        _inBuffer.position(_inNIOBuffer.getIndex());
++        _inBuffer.limit(_inNIOBuffer.putIndex());
++
++        bBuf.clear();
 +        SSLEngineResult result;
 +
-+        do
-+        {
-+            result = _engine.unwrap(bBuf, _peerAppData);
-+        }
-+        while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
-+
-+        if (_peerAppData.position() == 0 && result.getStatus() == SSLEngineResult.Status.OK && bBuf.hasRemaining())
-+        {
-+            result = _engine.unwrap(bBuf, _peerAppData);
-+        }
++        result = _engine.unwrap(_inBuffer, bBuf);
 +
 +        _status = result.getStatus();
 +        _handshakeStatus = result.getHandshakeStatus();
-+
-+        // copy unencrypted data to the buffer
-+        int l = _peerAppData.position();
-+        bBuf.clear();
-+
-+        _peerAppData.flip();
-+        for (int i = 0; i < l; i++)
-+        {
-+            bBuf.put(_peerAppData.get(i));
-+        }
-+
++        
 +        buffer.setGetIndex(0);
 +        buffer.setPutIndex(bBuf.position());
 +        bBuf.position(0);
@@ -472,6 +473,21 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +            doHandshake();
 +        }
 +
++        int bytesConsumed = result.bytesConsumed();
++ 
++        if (bytesConsumed == _inBuffer.limit())
++        {
++          _inBuffer.clear();
++        }
++        else
++        {
++            _inBuffer.position(bytesConsumed);
++            _inBuffer.compact();
++        }
++
++        _inNIOBuffer.setGetIndex(_inBuffer.position());
++        _inNIOBuffer.setPutIndex(_inBuffer.position());            
++        
 +        return result.bytesProduced();
 +    }
 +
@@ -551,7 +567,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +}
 Index: modules/jetty/pom.xml
 ===================================================================
---- modules/jetty/pom.xml	(revision 666)
+--- modules/jetty/pom.xml	(revision 675)
 +++ modules/jetty/pom.xml	(working copy)
 @@ -23,6 +23,13 @@
      </testResources>
@@ -567,24 +583,34 @@ Index: modules/jetty/pom.xml
          <artifactId>maven-antrun-plugin</artifactId>
          <executions>
            <execution>
-Index: etc/jetty.xml
+Index: etc/jetty-ssl.xml
 ===================================================================
---- etc/jetty.xml	(revision 662)
-+++ etc/jetty.xml	(working copy)
-@@ -60,6 +60,16 @@
-         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-         <!-- Add a HTTPS SSL listener on port 8443                           -->
-         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-+        <Item>
-+          <New class="org.mortbay.jetty.security.SslSelectChannelConnector">
-+            <Set name="Port">8443</Set>
-+            <Set name="maxIdleTime">30000</Set>
-+            <Set name="Keystore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
-+            <Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
-+            <Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
-+          </New>
-+        </Item>
+--- etc/jetty-ssl.xml	(revision 680)
++++ etc/jetty-ssl.xml	(working copy)
+@@ -10,6 +10,19 @@
+ <Configure id="Server" class="org.mortbay.jetty.Server">
+   <Call name="addConnector">
+     <Arg>
++      <New class="org.mortbay.jetty.security.SslSelectChannelConnector">
++	<Set name="Port">8443</Set>
++	<Set name="maxIdleTime">30000</Set>
++	<Set name="Keystore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
++	<Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
++	<Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
++      </New>
++    </Arg>
++  </Call>
 +        
-         <!--
-         <Item>
-           <New class="org.mortbay.jetty.security.SslSocketConnector">
++  <!-- Use this version if neo NIO is available
++  <Call name="addConnector">
++    <Arg>
+       <New class="org.mortbay.jetty.security.SslSocketConnector">
+         <Set name="Port">8443</Set>
+         <Set name="maxIdleTime">30000</Set>
+@@ -21,4 +34,6 @@
+       </New>
+     </Arg>
+   </Call>
++  -->
++
+ </Configure>
