@@ -76,6 +76,12 @@
       <email>tim@adjective.org</email>
       <organization />
     </developer>
+    <developer>
+      <id>ngonzalez</id>
+      <name>Nik Gonzalez</name>
+      <email>ngonzalez@exist.com</email>
+      <organization />
+    </developer>
   </developers>
   <licenses>
     <license>
