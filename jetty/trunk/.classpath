@@ -11,23 +11,23 @@
 	<classpathentry kind="var" path="MAVEN_HOME/core/boot/classworlds-1.1.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-container-default-1.0-alpha-9.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-utils-1.1.jar"/>
-	<classpathentry output="examples/embedded/target/classes" kind="src" path="examples/embedded/src/main/java"/>
-	<classpathentry output="modules/jetty/target/classes" kind="src" path="modules/jetty/src/main/java"/>
-	<classpathentry output="modules/jetty/target/test-classes" kind="src" path="modules/jetty/src/test/java"/>
-	<classpathentry output="modules/management/target/classes" kind="src" path="modules/management/src/main/java"/>
-	<classpathentry output="modules/management/target/test-classes" kind="src" path="modules/management/src/test/java"/>
-	<classpathentry output="modules/maven-plugin/target/classes" kind="src" path="modules/maven-plugin/src/main/java"/>
-	<classpathentry output="modules/maven-plugin-utils/target/classes" kind="src" path="modules/maven-plugin-utils/src/main/java"/>
-	<classpathentry output="modules/naming/target/classes" kind="src" path="modules/naming/src/main/java"/>
-	<classpathentry output="modules/naming/target/test-classes" kind="src" path="modules/naming/src/test/java"/>
-	<classpathentry output="modules/plus/target/classes" kind="src" path="modules/plus/src/main/java"/>
-	<classpathentry output="modules/plus/target/test-classes" kind="src" path="modules/plus/src/test/java"/>
-	<classpathentry output="modules/servlet-api-2.5/target/classes" kind="src" path="modules/servlet-api-2.5/src/main/java"/>
-	<classpathentry output="modules/start/target/classes" kind="src" path="modules/start/src/main/java"/>
-	<classpathentry output="modules/util/target/classes" kind="src" path="modules/util/src/main/java"/>
-	<classpathentry output="modules/util/target/test-classes" kind="src" path="modules/util/src/test/java"/>
-	<classpathentry output="modules/xbean/target/classes" kind="src" path="modules/xbean/src/main/java"/>
-	<classpathentry output="modules/xbean/target/test-classes" kind="src" path="modules/xbean/src/test/java"/>
+	<classpathentry kind="src" path="examples/embedded/src/main/java"/>
+	<classpathentry kind="src" path="modules/jetty/src/main/java"/>
+	<classpathentry kind="src" path="modules/jetty/src/test/java"/>
+	<classpathentry kind="src" path="modules/management/src/main/java"/>
+	<classpathentry kind="src" path="modules/management/src/test/java"/>
+	<classpathentry kind="src" path="modules/maven-plugin/src/main/java"/>
+	<classpathentry kind="src" path="modules/maven-plugin-utils/src/main/java"/>
+	<classpathentry kind="src" path="modules/naming/src/main/java"/>
+	<classpathentry kind="src" path="modules/naming/src/test/java"/>
+	<classpathentry kind="src" path="modules/plus/src/main/java"/>
+	<classpathentry kind="src" path="modules/plus/src/test/java"/>
+	<classpathentry kind="src" path="modules/servlet-api-2.5/src/main/java"/>
+	<classpathentry kind="src" path="modules/start/src/main/java"/>
+	<classpathentry kind="src" path="modules/util/src/main/java"/>
+	<classpathentry kind="src" path="modules/util/src/test/java"/>
+	<classpathentry kind="src" path="modules/xbean/src/main/java"/>
+	<classpathentry kind="src" path="modules/xbean/src/test/java"/>
 	<classpathentry kind="var" path="M2_REPO/org/eclipse/jdt/core/3.1.0/core-3.1.0.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xerces/xercesImpl/2.6.2/xercesImpl-2.6.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xerces/xmlParserAPIs/2.6.2/xmlParserAPIs-2.6.2.jar"/>
@@ -42,10 +42,10 @@
 	<classpathentry kind="lib" path="modules/jetty/src/test/resources"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/2.2/xbean-spring-2.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j-tools/3.0.1/mx4j-tools-3.0.1.jar"/>
-	<classpathentry output="examples/test-webapp/target/test-6.0-SNAPSHOT/WEB-INF/classes" kind="src" path="examples/test-webapp/src/main/java"/>
+	<classpathentry kind="src" path="examples/test-webapp/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-api-2.1.jar"/>
-	<classpathentry output="modules/html/target/classes" kind="src" path="modules/html/src/main/java"/>
-	<classpathentry output="modules/html/target/test-classes" kind="src" path="modules/html/src/test/java"/>
+	<classpathentry kind="src" path="modules/html/src/main/java"/>
+	<classpathentry kind="src" path="modules/html/src/test/java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
