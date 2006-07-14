@@ -63,6 +63,7 @@ public class WebXmlConfiguration implements Configuration
     protected Object _listeners;
     protected Map _errorPages;
     protected boolean _hasJSP;
+    protected String _jspServletName;
     protected boolean _welcomeFileList;
 
     public WebXmlConfiguration()
@@ -436,6 +437,7 @@ public class WebXmlConfiguration implements Configuration
         // Handle JSP
         if (id!=null && id.equals("jsp"))
         {
+            _jspServletName=servlet_name;
             try
             {
                 Loader.loadClass(this.getClass(), servlet_class);
@@ -647,6 +649,33 @@ public class WebXmlConfiguration implements Configuration
             if (o instanceof XmlParser.Node && "taglib".equals(((XmlParser.Node)o).getTag()))
                 initTagLib((XmlParser.Node)o);
         }
+        
+        // Map URLs from jsp property groups to JSP servlet.
+        // this is more JSP stupidness creaping into the servlet spec
+        Iterator iter=node.iterator("jsp-property-group");
+        Object paths=null;
+        while(iter.hasNext())
+        {
+            XmlParser.Node group=(XmlParser.Node)iter.next();
+            Iterator iter2 = group.iterator("url-pattern");
+            while (iter2.hasNext())
+            {
+                String url = ((XmlParser.Node) iter2.next()).toString(false, true);
+                paths=LazyList.add(paths,url);
+            }
+        }
+
+        if (LazyList.size(paths)>0)
+        {
+            String jspName=getJSPServletName();
+            if (jspName!=null)
+            {
+                ServletMapping mapping = new ServletMapping();
+                mapping.setServletName(jspName);
+                mapping.setPathSpecs(LazyList.toStringArray(paths));
+                _servletMappings=LazyList.add(_servletMappings,mapping);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -809,5 +838,21 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected FilterHolder newFilterHolder() {
         return new FilterHolder();
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    protected String getJSPServletName()
+    {
+        if (_jspServletName==null)
+        {
+            Map.Entry entry= _context.getServletHandler().getHolderEntry("test.jsp");
+            if (entry!=null)
+            {
+                ServletHolder holder=(ServletHolder)entry.getValue();
+                _jspServletName=holder.getName();
+            }
+        }
+        return _jspServletName;
     }
 }
