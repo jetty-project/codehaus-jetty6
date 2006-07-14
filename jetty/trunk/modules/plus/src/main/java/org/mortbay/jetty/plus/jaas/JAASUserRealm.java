@@ -59,50 +59,10 @@ public class JAASUserRealm implements UserRealm
     protected String callbackHandlerClass;
     protected String realmName;
     protected String loginModuleName;
-    protected HashMap userMap;
     protected RoleCheckPolicy roleCheckPolicy;
+    protected JAASUserPrincipal defaultUser = new JAASUserPrincipal(null, null);
     
-    /* ---------------------------------------------------- */
-    /**
-     * UserInfo
-     *
-     * Information cached for an authenticated user.
-     * 
-     *
-     * 
-     *
-     */
-    protected class UserInfo
-    {
-        String name;
-        JAASUserPrincipal principal;
-        LoginContext context;
-
-        public UserInfo (String name, JAASUserPrincipal principal, LoginContext context)
-        {
-            this.name = name;
-            this.principal = principal;
-            this.context = context;
-        }
-
-        public String getName ()
-        {
-            return name;
-        }
-
-        public JAASUserPrincipal getJAASUserPrincipal ()
-        {
-            return principal;
-        }
-
-        public LoginContext getLoginContext ()
-        {
-            return context;
-        }
-    }
-    
-    
-
+ 
 
     /* ---------------------------------------------------- */
     /**
@@ -111,7 +71,6 @@ public class JAASUserRealm implements UserRealm
      */
     public JAASUserRealm ()
     {
-        userMap = new HashMap();
     }
     
 
@@ -192,36 +151,38 @@ public class JAASUserRealm implements UserRealm
         roleCheckPolicy = policy;
     }
 
+    //TODO: delete?!
     public Principal getPrincipal(String username)
     {
-        synchronized (this)
-        {
-            return (Principal)userMap.get(username);
-        }
+        return null;
     }
 
 
     /* ------------------------------------------------------------ */
     public boolean isUserInRole(Principal user, String role)
     {
-        if (user instanceof JAASUserPrincipal)
+        JAASUserPrincipal thePrincipal = null;
+        
+        if (user == null)
+            thePrincipal = defaultUser;
+        else
         {
-            return ((JAASUserPrincipal)user).isUserInRole(role);
-        }
+            if (! (user instanceof JAASUserPrincipal))
+                return false;
             
-        return false;
+            thePrincipal = (JAASUserPrincipal)user;
+        }
+        return ((JAASUserPrincipal)user).isUserInRole(role);
     }
 
 
     /* ------------------------------------------------------------ */
     public boolean reauthenticate(Principal user)
     {
-        // TODO This is not correct if auth can expire! We need to
-        // get the user out of the cache
-        synchronized (this)
-        {
-            return (userMap.get(user.getName()) != null);
-        }
+        if (user instanceof JAASUserPrincipal)
+            return true;
+        else
+            return false;
     }
 
     
@@ -240,27 +201,7 @@ public class JAASUserRealm implements UserRealm
             Request request)
     {
         try
-        {
-            UserInfo info = null;
-            synchronized (this)
-            {
-                info = (UserInfo)userMap.get(username);
-            }
-            
-            //user has been previously authenticated, but
-            //re-authentication has been requested, so flow that 
-            //thru all the way to the login module mechanism and
-            //remove their previously authenticated status
-            //TODO: ensure cache state and "logged in status" are synchronized
-            if (info != null)
-            {
-                synchronized (this)
-                {
-                    userMap.remove (username);
-                }
-            }
-            
-            
+        {              
             AbstractCallbackHandler callbackHandler = null;
             
             //user has not been authenticated
@@ -293,11 +234,9 @@ public class JAASUserRealm implements UserRealm
             JAASUserPrincipal userPrincipal = new JAASUserPrincipal(this, username);
             userPrincipal.setSubject(loginContext.getSubject());
             userPrincipal.setRoleCheckPolicy (roleCheckPolicy);
+            userPrincipal.setLoginContext(loginContext);
             
-            synchronized (this)
-            {
-                userMap.put (username, new UserInfo (username, userPrincipal, loginContext));
-            }
+            
             
             return userPrincipal;       
         }
@@ -319,7 +258,10 @@ public class JAASUserRealm implements UserRealm
      */
     public void disassociate(Principal user)
     {
-        if (user != null)
+        //TODO: should this apply to the default user?
+        if (user == null)
+            defaultUser.disassociate();
+        else
             ((JAASUserPrincipal)user).disassociate();
     }
 
@@ -339,15 +281,28 @@ public class JAASUserRealm implements UserRealm
      */
     public Principal pushRole(Principal user, String role)
     {
-        ((JAASUserPrincipal)user).pushRole(role);
-        return user;
+        JAASUserPrincipal thePrincipal = (JAASUserPrincipal)user;
+        
+        //use the default user
+        if (thePrincipal == null)
+            thePrincipal = defaultUser;
+        
+    
+        thePrincipal.pushRole(role);
+        return thePrincipal;
     }
     
     /* ------------------------------------------------------------ */
     public Principal popRole(Principal user)
     {
-        ((JAASUserPrincipal)user).popRole();
-        return user;
+        JAASUserPrincipal thePrincipal = (JAASUserPrincipal)user;
+        
+        //use the default user
+        if (thePrincipal == null)
+            thePrincipal = defaultUser;
+        
+        thePrincipal.popRole();
+        return thePrincipal;
     }
 
 
@@ -359,10 +314,16 @@ public class JAASUserRealm implements UserRealm
         
         try
         {
+            JAASUserPrincipal thePrincipal = principal;
+            
+            if (thePrincipal == null)
+                thePrincipal = defaultUser;
+            
+            
             for (int i=0; i<roleClassNames.length;i++)
             {
                 Class load_class=Thread.currentThread().getContextClassLoader().loadClass(roleClassNames[i]);
-                Set rolesForType = principal.getSubject().getPrincipals (load_class);
+                Set rolesForType = thePrincipal.getSubject().getPrincipals (load_class);
                 Iterator itor = rolesForType.iterator();
                 while (itor.hasNext())
                     roleGroup.addMember((Principal) itor.next());
@@ -390,26 +351,19 @@ public class JAASUserRealm implements UserRealm
     {
         try
         {
+            JAASUserPrincipal authenticUser = null;
+            
+            if (user == null)
+                authenticUser = defaultUser; //TODO: should the default user ever be logged in?
+            
             if (!(user instanceof JAASUserPrincipal))
                 throw new IllegalArgumentException (user + " is not a JAASUserPrincipal");
             
-            String key = ((JAASUserPrincipal)user).getName();
+ 
+            authenticUser = (JAASUserPrincipal)user;
+ 
+            authenticUser.getLoginContext().logout();
             
-            UserInfo info = null;
-            synchronized (this)
-            {
-                info = (UserInfo)userMap.get(key);
-            }
-            
-            if (info == null)
-                Log.warn ("Logout called for user="+user+" who is NOT in the authentication cache");
-            else 
-                info.getLoginContext().logout();
-            
-            synchronized (this)
-            {
-                userMap.remove (key);
-            }
             Log.debug (user+" has been LOGGED OUT");
         }
         catch (LoginException e)
