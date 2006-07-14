@@ -210,6 +210,9 @@ public class Response implements HttpServletResponse
      */
     public void sendError(int code, String message) throws IOException
     {
+    	if (_connection.isIncluding())
+    		return;
+    	
         if (isCommitted())
             Log.warn("Committed before "+code+" "+message);
 
@@ -280,6 +283,9 @@ public class Response implements HttpServletResponse
      */
     public void sendRedirect(String location) throws IOException
     {
+    	if (_connection.isIncluding())
+    		return;
+    	
         if (location==null)
             throw new IllegalArgumentException();
 
@@ -490,6 +496,9 @@ public class Response implements HttpServletResponse
      */
     public void setCharacterEncoding(String encoding)
     {
+    	if (_connection.isIncluding())
+    		return;
+    	
         // TODO throw unsupported encoding exception ???
         
         if (this._outputState==0 && !isCommitted())
@@ -566,8 +575,9 @@ public class Response implements HttpServletResponse
         // Protect from setting after committed as default handling
         // of a servlet HEAD request ALWAYS sets _content length, even
         // if the getHandling committed the response!
-        if (!isCommitted())
-            _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
+        if (isCommitted() || _connection.isIncluding())
+        	return;
+        _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
     }
 
     /* ------------------------------------------------------------ */
@@ -579,8 +589,9 @@ public class Response implements HttpServletResponse
         // Protect from setting after committed as default handling
         // of a servlet HEAD request ALWAYS sets _content length, even
         // if the getHandling committed the response!
-        if (!isCommitted())
-            _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
+        if (isCommitted() || _connection.isIncluding())
+        	return;
+        _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
     }
 
     /* ------------------------------------------------------------ */
@@ -589,7 +600,7 @@ public class Response implements HttpServletResponse
      */
     public void setContentType(String contentType)
     {
-        if (isCommitted())
+        if (isCommitted() || _connection.isIncluding())
             return;
         
         // Yes this method is horribly complex.... but there are lots of special cases and
@@ -823,7 +834,7 @@ public class Response implements HttpServletResponse
      */
     public void setLocale(Locale locale)
     {
-        if (locale == null || isCommitted())
+        if (locale == null || isCommitted() ||_connection.isIncluding())
             return;
 
         _locale = locale;
