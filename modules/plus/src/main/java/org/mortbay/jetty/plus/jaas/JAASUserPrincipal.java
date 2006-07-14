@@ -20,6 +20,7 @@ import java.security.acl.Group;
 import java.util.Stack;
 
 import javax.security.auth.Subject;
+import javax.security.auth.login.LoginContext;
 
 
 
@@ -109,6 +110,7 @@ public class JAASUserPrincipal implements Principal
     private static RoleStack runAsRoles = new RoleStack();
     private RoleCheckPolicy roleCheckPolicy = null;
     private String name = null;
+    private LoginContext loginContext = null;
     
 
     
@@ -224,4 +226,13 @@ public class JAASUserPrincipal implements Principal
         return this.subject;
     }
     
+    protected void setLoginContext (LoginContext loginContext)
+    {
+        this.loginContext = loginContext;
+    }
+    
+    protected LoginContext getLoginContext ()
+    {
+        return this.loginContext;
+    }
 }
