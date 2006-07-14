@@ -214,6 +214,7 @@ public class JspServletWrapper {
 
             if (reload) {
                 tagHandlerClass = ctxt.load();
+                reload = false;
             }
         } catch (FileNotFoundException ex) {
             throw new JasperException(ex);
@@ -247,6 +248,7 @@ public class JspServletWrapper {
 	    if (isTagFile) {
                 if (reload) {
                     tagHandlerClass = ctxt.load();
+                    reload = false;
                 }
 		target = tagHandlerClass.newInstance();
 	    } else {
