@@ -43,9 +43,18 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/xbean/xbean-spring/2.2/xbean-spring-2.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j-tools/3.0.1/mx4j-tools-3.0.1.jar"/>
 	<classpathentry kind="src" path="examples/test-webapp/src/main/java"/>
-	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-api-2.1.jar"/>
 	<classpathentry kind="src" path="modules/html/src/main/java"/>
 	<classpathentry kind="src" path="modules/html/src/test/java"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/ant-1.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/commons-el-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/jasper-compiler-5.5.15.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/jasper-compiler-jdt-5.5.15.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/jasper-runtime-5.5.15.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/jcl104-over-slf4j-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/jsp-api-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/slf4j-simple-1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/xercesImpl-2.6.2.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/xmlParserAPIs-2.6.2.jar"/>
+	<classpathentry output="modules/spring/target/classes" kind="src" path="modules/spring/src/main/java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
