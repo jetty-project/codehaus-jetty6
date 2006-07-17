@@ -132,7 +132,6 @@
     <!-- =========================================================== -->
     <!-- Configure Realms                                            -->
     <!-- =========================================================== -->
-<!--
     <Set name="UserRealms">
       <Array type="org.mortbay.jetty.security.UserRealm">
         <Item>
@@ -143,16 +142,7 @@
         </Item>
       </Array>
     </Set>
--->
     
-<Call name="addUserRealm">
-  <Arg>
-    <New class="org.mortbay.jetty.plus.jaas.JAASUserRealm">
-      <Set name="name">Test Realm</Set>
-      <Set name="LoginModuleName">props</Set>
-    </New>
-  </Arg>
-</Call>
 
 
     
