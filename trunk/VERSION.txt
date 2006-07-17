@@ -5,6 +5,7 @@
     + parse jsp-property-group in web.xml for additional JSP servlet mappings
     + protected setContentType from being set during include
     + added toString() on JAASUserPrincipal (JETTY-91)
+    + added modules/spring with XmlBeanFactory configuration
 
 jetty-6.0.0rc0 - 7 July 2006
     + change prefix from "jetty6" to just "jetty" for plugin: eg is now mvn jetty:run
