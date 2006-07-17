@@ -235,4 +235,10 @@ public class JAASUserPrincipal implements Principal
     {
         return this.loginContext;
     }
+    
+    public String toString()
+    {
+        return getName();
+    }
+    
 }
