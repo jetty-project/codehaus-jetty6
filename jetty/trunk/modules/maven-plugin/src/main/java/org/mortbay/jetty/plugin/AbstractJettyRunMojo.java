@@ -386,10 +386,10 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
 
     private List setUpClassPath()
     {
-        List classPathFiles = new ArrayList();
-        classPathFiles.addAll(getDependencyFiles());
+        List classPathFiles = new ArrayList();       
         if (getClassesDirectory() != null)
             classPathFiles.add(getClassesDirectory());
+        classPathFiles.addAll(getDependencyFiles());
         for (int i = 0; i < classPathFiles.size(); i++)
         {
             getLog().debug("classpath element: "+ ((File) classPathFiles.get(i)).getName());
