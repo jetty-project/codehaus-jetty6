@@ -59,8 +59,6 @@ public class DataSourceLoginModule extends AbstractDatabaseLoginModule
             
             InitialContext ic = new InitialContext();
             dataSource = (DataSource)ic.lookup("java:comp/env/"+dbJNDIName);
-
-            System.err.print("Datasource is "+(dataSource != null?"found":"not found"));
         }
         catch (NamingException e)
         {
