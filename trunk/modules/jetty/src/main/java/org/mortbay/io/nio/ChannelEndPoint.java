@@ -85,14 +85,26 @@ public class ChannelEndPoint implements EndPoint
     {
         if (_channel.isOpen())
         {
-            if (_channel instanceof SocketChannel)
-            {
-                // TODO - is this really required?
-                Socket socket= ((SocketChannel)_channel).socket();
-                socket.shutdownOutput();
-                socket.close();
-            }
-            _channel.close();
+        	try
+        	{
+        		if (_channel instanceof SocketChannel)
+        		{
+        			// TODO - is this really required?
+        			Socket socket= ((SocketChannel)_channel).socket();
+                	try
+                	{
+                		socket.shutdownOutput();
+                	}
+                	finally
+                	{
+            			socket.close();
+                	}
+        		}
+        	}
+        	finally
+        	{
+        		_channel.close();
+        	}
         }
     }
 
