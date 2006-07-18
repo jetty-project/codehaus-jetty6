@@ -356,8 +356,6 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
     /* ------------------------------------------------------------ */
     public class IdleTask extends Timeout.Task // implements HttpChannelEndPointIdleTask
     {
-        volatile boolean _short = false;
-
         /* ------------------------------------------------------------ */
         /*
          * @see org.mortbay.thread.Timeout.Task#expire()
@@ -379,15 +377,6 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
             return "TimeoutTask:" + HttpChannelEndPoint.this.toString();
         }
 
-        public boolean isShort()
-        {
-            return _short;
-        }
-
-        public void setShort(boolean _short)
-        {
-            this._short = _short;
-        }
     }
 
 }

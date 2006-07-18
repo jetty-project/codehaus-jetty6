@@ -900,7 +900,6 @@ public class XmlConfiguration
                         lc.start();
                 }
             }
-            
         }
         catch (Exception e)
         {
