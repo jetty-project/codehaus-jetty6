@@ -203,9 +203,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     public void customize(EndPoint endpoint, Request request) throws IOException
     {
         HttpChannelEndPoint ep = (HttpChannelEndPoint)endpoint;
-        if (ep.getTimeoutTask().isShort())
-            ep.getSelectSet().scheduleIdle(ep.getTimeoutTask(), false);
-        
         super.customize(endpoint, request);
     }
 
@@ -233,7 +230,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     {
         private transient int _setID;
         private transient Timeout _idleTimeout;
-        private transient Timeout _shortIdleTimeout;
         private transient Timeout _retryTimeout;
         private transient Selector _selector;
         private transient List[] _changes;
@@ -247,8 +243,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             
             _idleTimeout = new Timeout();
             _idleTimeout.setDuration(getMaxIdleTime());
-            _shortIdleTimeout = new Timeout();
-            _shortIdleTimeout.setDuration(getLowResourceMaxIdleTime()>0?getLowResourceMaxIdleTime():getMaxIdleTime());
             _retryTimeout = new Timeout();
             _retryTimeout.setDuration(0L);
 
@@ -270,7 +264,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             synchronized(this)
             {
                 _idleTimeout.cancelAll();
-                _shortIdleTimeout.cancelAll();
                 _retryTimeout.cancelAll();
                 try
                 {
@@ -287,7 +280,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         /* ------------------------------------------------------------ */
         public void accept() throws IOException
         {
-            long short_next = 0;
             long idle_next = 0;
             long retry_next = 0;
             
@@ -340,17 +332,13 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             
             synchronized (this)
             {
-                _shortIdleTimeout.setDuration(getLowResourceMaxIdleTime());
                 _idleTimeout.setDuration(getMaxIdleTime());
-                short_next=_shortIdleTimeout.getTimeToNext();
                 idle_next=_idleTimeout.getTimeToNext();
                 retry_next=_retryTimeout.getTimeToNext();
             }
                         
             // workout how low to wait in select
             long wait = getMaxIdleTime();
-            if (wait < 0 || short_next >= 0 && wait > short_next)
-                wait = short_next;
             if (wait < 0 || idle_next >= 0 && wait > idle_next)
                 wait = idle_next;
             if (wait < 0 || retry_next >= 0 && wait > retry_next)
@@ -373,7 +361,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             
             // update the timers for task schedule in this loop
             now = System.currentTimeMillis();
-            _shortIdleTimeout.setNow(now);
             _idleTimeout.setNow(now);
             _retryTimeout.setNow(now);
             
@@ -459,7 +446,6 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
             {
                 now = System.currentTimeMillis();
                 _retryTimeout.setNow(now);
-                _shortIdleTimeout.setNow(now);
                 _idleTimeout.setNow(now);
             }
             
@@ -468,9 +454,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
                 Timeout.Task task=null;
                 synchronized(this)
                 {
-                    task=_shortIdleTimeout.expired();
-                    if (task==null)
-                        task=_idleTimeout.expired();
+                    task=_idleTimeout.expired();
                     if (task==null)
                         task=_retryTimeout.expired();
                 }
@@ -505,16 +489,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         {
             synchronized (this)
             {
-                if (idle && getServer().getThreadPool().isLowOnThreads())
-                {
-                    task.setShort(true);
-                    task.schedule(_shortIdleTimeout);
-                }
-                else
-                {
-                    task.setShort(false);
-                    task.schedule(_idleTimeout);
-                }
+            	task.schedule(_idleTimeout);
             }
         }
         
