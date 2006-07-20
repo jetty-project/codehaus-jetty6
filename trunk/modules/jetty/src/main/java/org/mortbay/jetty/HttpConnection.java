@@ -345,7 +345,7 @@ public class HttpConnection
 
                 more_in_buffer = header!=null && (header.length()>0);
                 
-                if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
+                if (_parser.isState(HttpParser.STATE_END) && _generator.isComplete())
                 {
                     _idle=true;
                     
@@ -438,19 +438,9 @@ public class HttpConnection
                     
                     if (!error) 
                     {
-                        if (!_response.isCommitted() && _response.getStatus()<0)
+                        if (!_response.isCommitted() && !_request.isHandled())
                             _response.sendError(HttpServletResponse.SC_NOT_FOUND);
                         _response.complete();
-
-                        while (!_generator.isComplete() && _endp.isOpen())
-                        {
-                            _generator.complete();
-                            if (!_generator.isComplete() && !_endp.isBlocking())
-                            {
-                                _endp.blockWritable(_connector.getMaxIdleTime());
-                                _generator.complete();
-                            }
-                        }
                     }
                 }
             }
