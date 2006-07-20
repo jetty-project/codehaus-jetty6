@@ -56,5 +56,6 @@
 	<classpathentry kind="lib" path="lib/jsp-2.0/xercesImpl-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jsp-2.0/xmlParserAPIs-2.6.2.jar"/>
 	<classpathentry output="modules/spring/target/classes" kind="src" path="modules/spring/src/main/java"/>
+	<classpathentry output="modules/grizzly/target/classes" kind="src" path="modules/grizzly/src/main/java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
