@@ -2,7 +2,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 ===================================================================
 --- modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelConnector.java	(revision 0)
-@@ -0,0 +1,168 @@
+@@ -0,0 +1,311 @@
 +package org.mortbay.jetty.security;
 +
 +import java.io.File;
@@ -10,10 +10,18 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 +import java.nio.channels.SelectionKey;
 +import java.nio.channels.SocketChannel;
 +import java.security.KeyStore;
++import java.security.SecureRandom;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.Iterator;
++import java.util.List;
 +
++import javax.net.ssl.KeyManager;
 +import javax.net.ssl.KeyManagerFactory;
 +import javax.net.ssl.SSLContext;
 +import javax.net.ssl.SSLEngine;
++import javax.net.ssl.SSLException;
++import javax.net.ssl.TrustManager;
 +import javax.net.ssl.TrustManagerFactory;
 +
 +import org.mortbay.jetty.nio.HttpChannelEndPoint;
@@ -29,30 +37,43 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 + */
 +public class SslSelectChannelConnector extends SelectChannelConnector
 +{
-+    /** Default value for the cipher Suites. */
-+    private String _cipherSuites[] = null;
-+
 +    /** Default value for the keystore location path. */
-+    public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator + ".keystore";
-+
-+    /** String name of keystore password property. */
-+    public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
++    public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator
++            + ".keystore";
 +
 +    /** String name of key password property. */
 +    public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
 +
-+    private String _keystore = DEFAULT_KEYSTORE;
++    /** String name of keystore password property. */
++    public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
++    
++    /** Default value for the cipher Suites. */
++    private String _excludeCipherSuites[] = null;
++
++    /** Default value for the keystore location path. */
++    private String _keystore=DEFAULT_KEYSTORE ;
++    private String _keystoreType = "JKS"; // type of the key store
++
 +    private transient Password _password;
-+    private transient Password _keypassword;
++    private transient Password _keyPassword;
++    private transient Password _trustPassword;
 +    private String _protocol = "TLS";
 +    private String _algorithm = "SunX509"; // cert algorithm
-+    private String _keystoreType = "JKS"; // type of the key store
 +    private String _provider;
++    private String _secureRandomAlgorithm; // cert algorithm
++    private String _sslKeyManagerFactoryAlgorithm = System.getProperty("ssl.KeyManagerFactory.algorithm","SunX509"); // cert algorithm
++    
++    private String _sslTrustManagerFactoryAlgorithm = System.getProperty("ssl.TrustManagerFactory.algorithm","SunX509"); // cert algorithm
++
++    private String _truststore;
++    private String _truststoreType = "JKS"; // type of the key store
++
 +    private int _applicationBufferSize = 16384;
++
 +    /* ------------------------------------------------------------ */
 +    public String[] getCipherSuites()
 +    {
-+        return _cipherSuites;
++        return _excludeCipherSuites;
 +    }
 +
 +    /* ------------------------------------------------------------ */
@@ -61,7 +82,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 +     */
 +    public void setCipherSuites(String[] cipherSuites)
 +    {
-+        this._cipherSuites = cipherSuites;
++        this._excludeCipherSuites = cipherSuites;
 +    }
 +
 +    /* ------------------------------------------------------------ */
@@ -71,9 +92,15 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 +    }
 +
 +    /* ------------------------------------------------------------ */
++    public void setTrustPassword(String password)
++    {
++        _trustPassword = Password.getPassword(PASSWORD_PROPERTY,password,null);
++    }
++
++    /* ------------------------------------------------------------ */
 +    public void setKeyPassword(String password)
 +    {
-+        _keypassword = Password.getPassword(KEYPASSWORD_PROPERTY, password, null);
++        _keyPassword = Password.getPassword(KEYPASSWORD_PROPERTY, password, null);
 +    }
 +
 +    /* ------------------------------------------------------------ */
@@ -129,11 +156,69 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 +    {
 +        return _provider;
 +    }
++    public String getSecureRandomAlgorithm() 
++    {
++        return (this._secureRandomAlgorithm);
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getSslKeyManagerFactoryAlgorithm() 
++    {
++        return (this._sslKeyManagerFactoryAlgorithm);
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getSslTrustManagerFactoryAlgorithm() 
++    {
++        return (this._sslTrustManagerFactoryAlgorithm);
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getTruststore()
++    {
++        return _truststore;
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getTruststoreType()
++    {
++        return _truststoreType;
++    }
 +
 +    /* ------------------------------------------------------------ */
 +    public void setProvider(String _provider)
 +    {
 +        this._provider = _provider;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setSecureRandomAlgorithm(String algorithm) 
++    {
++        this._secureRandomAlgorithm = algorithm;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void setSslKeyManagerFactoryAlgorithm(String algorithm) 
++    {
++        this._sslKeyManagerFactoryAlgorithm = algorithm;
++    }
++    
++    /* ------------------------------------------------------------ */
++    public void setSslTrustManagerFactoryAlgorithm(String algorithm) 
++    {
++        this._sslTrustManagerFactoryAlgorithm = algorithm;
++    }
++
++
++    public void setTruststore(String truststore)
++    {
++        _truststore = truststore;
++    }
++    
++
++    public void setTruststoreType(String truststoreType)
++    {
++        _truststoreType = truststoreType;
 +    }
 +
 +    /* ------------------------------------------------------------ */
@@ -148,15 +233,73 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslSelectChannelCo
 +        SSLEngine engine = null;
 +        try
 +        {
-+            SSLContext context = _provider == null ? SSLContext.getInstance(_protocol) : SSLContext.getInstance(_protocol, _provider);
-+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_algorithm);
-+            KeyStore keyStore = KeyStore.getInstance(_keystoreType);
-+            keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
-+            keyManagerFactory.init(keyStore, _keypassword.toString().toCharArray());
-+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_algorithm);
-+            trustManagerFactory.init(keyStore);
-+            context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
++            if (_password==null)
++                _password=new Password("");
++            if (_keyPassword==null)
++                _keyPassword=_password;
++            if (_trustPassword==null)
++                _trustPassword=_password;
++            
++            if (_truststore==null)
++            {
++                _truststore=_keystore;
++                _truststoreType=_keystoreType;
++            }
++
++            KeyManager[] keyManagers = null;
++            if (_keystore != null)
++            {
++                KeyStore keyStore = KeyStore.getInstance(_keystoreType);
++                if (_password == null) 
++                    throw new SSLException("_password is not set");
++                keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
++        
++                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
++                if (_keyPassword == null) 
++                    throw new SSLException("_keypassword is not set");
++                keyManagerFactory.init(keyStore,_keyPassword.toString().toCharArray());
++                keyManagers = keyManagerFactory.getKeyManagers();
++            }
++
++            TrustManager[] trustManagers = null;
++            if (_truststore != null)
++            {
++                KeyStore trustStore = KeyStore.getInstance(_truststoreType);
++                trustStore.load(Resource.newResource(_truststore).getInputStream(), _trustPassword.toString().toCharArray());
++                
++                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
++                trustManagerFactory.init(trustStore);
++                trustManagers = trustManagerFactory.getTrustManagers();
++            }
++
++            SecureRandom secureRandom = _secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
++
++            SSLContext context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
++
++            context.init(keyManagers, trustManagers, secureRandom);
++
 +            engine = context.createSSLEngine();
++            
++            if (_excludeCipherSuites != null && _excludeCipherSuites.length >0) 
++            {
++                List excludedCSList = Arrays.asList(_excludeCipherSuites);
++                String[] enabledCipherSuites = engine.getEnabledCipherSuites();
++                List enabledCSList = new ArrayList(Arrays.asList(enabledCipherSuites));
++                Iterator exIter = excludedCSList.iterator();
++
++                while (exIter.hasNext())
++                {
++                    String cipherName = (String)exIter.next();
++                    if (enabledCSList.contains(cipherName))
++                    {
++                        enabledCSList.remove(cipherName);
++                    }
++                }
++                enabledCipherSuites = (String[])enabledCSList.toArray(new String[enabledCSList.size()]);
++
++                engine.setEnabledCipherSuites(enabledCipherSuites);
++            }
++
 +        }
 +        catch (Exception e)
 +        {
@@ -175,7 +318,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 ===================================================================
 --- modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 0)
-@@ -0,0 +1,389 @@
+@@ -0,0 +1,393 @@
 +package org.mortbay.jetty.security;
 +
 +import java.io.IOException;
@@ -240,7 +383,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +        _engine.beginHandshake();
 +        _handshakeStatus = _engine.getHandshakeStatus();
 +        _initialHandshake = true;
-+        _handshakeBuffer = ByteBuffer.allocate(_session.getApplicationBufferSize());
++        _handshakeBuffer = ByteBuffer.allocateDirect(_session.getApplicationBufferSize());
 +        doHandshake();
 +    }
 +
@@ -249,6 +392,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +        {
 +            while (true)
 +            {
++                Log.debug("handshake status--------->"+_handshakeStatus);
++                Log.debug("    status--------------->"+_status);
 +                SSLEngineResult result;
 +                if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.FINISHED))
 +                {
@@ -275,7 +420,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +                        result = _engine.unwrap(_handshakeBuffer, _inBuffer);
 +                    }
 +                    while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
-+    
++
 +                    if (result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.FINISHED)
 +                    {
 +                        _initialHandshake = false;
@@ -337,7 +482,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +            else
 +            {
 +                Log.debug("allocate another bytebuffer: " + buffer.getClass().getName());
-+                src = ByteBuffer.allocate(buffer.length());
++                src = ByteBuffer.allocateDirect(buffer.length());
 +                for (int i = 0; i < buffer.length(); i++)
 +                {
 +                    src.put(buffer.peek(i));
@@ -369,6 +514,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndP
 +
 +        if (_inBuffer.position() == 0)
 +        {
++            _inNIOBuffer.setPutIndex(buffer.putIndex());
++            _inNIOBuffer.setGetIndex(buffer.getIndex());
 +            super.fill(_inNIOBuffer);
 +        }
 +        else if (buffer instanceof NIOBuffer)
