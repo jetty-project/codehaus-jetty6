@@ -704,7 +704,9 @@ public class HttpGenerator implements HttpTokens
         if (_state == STATE_END) return;
 
         if (_state == STATE_HEADER)
+        {
             throw new IllegalStateException("State==HEADER");
+        }
 
         if (_contentLength >= 0 && _contentLength != _contentWritten)
         {

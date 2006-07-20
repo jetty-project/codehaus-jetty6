@@ -15,7 +15,9 @@
 package org.mortbay.jetty.nio; 
 
 /** 
- * NIOConnector
+ * NIOConnector.
+ * Indicates that NIOBuffers can be handled (efficiently) by this Connector.
+ * 
  * @author Nigel Canonizado
  * 
  */
