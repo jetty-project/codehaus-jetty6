@@ -25,6 +25,7 @@ import java.security.PermissionCollection;
 import java.util.StringTokenizer;
 
 import org.mortbay.io.IO;
+import org.mortbay.io.tx.Handler;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 
@@ -40,6 +41,9 @@ import org.mortbay.resource.Resource;
  * always has priority, can be selected with the 
  * {@link org.mortbay.jetty.webapp.WebAppContext#setParentLoaderPriority(boolean)} method.
  *
+ * If no parent class loader is provided, then the current thread context classloader will
+ * be used.  If that is null then the classloader that loaded this class is used as the parent.
+ * 
  * @author Greg Wilkins (gregw)
  */
 public class WebAppClassLoader extends URLClassLoader
@@ -51,13 +55,31 @@ public class WebAppClassLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     /** Constructor.
      */
+    public WebAppClassLoader(WebAppContext context)
+    {
+        this(null,context);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     */
     public WebAppClassLoader(ClassLoader parent, WebAppContext context)
     {
-        super(new URL[0], parent);
-        _parent=parent;
+        super(new URL[]{},parent!=null?parent
+                :(Thread.currentThread().getContextClassLoader()!=null?Thread.currentThread().getContextClassLoader()
+                        :(WebAppClassLoader.class.getClassLoader()!=null?WebAppClassLoader.class.getClassLoader()
+                                :ClassLoader.getSystemClassLoader())));
+        _parent=getParent();
         _context=context;
-        if (parent==null)
+        if (_parent==null)
             throw new IllegalArgumentException("no parent classloader!");
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    public WebAppContext getContext()
+    {
+        return _context;
     }
     
     /* ------------------------------------------------------------ */
