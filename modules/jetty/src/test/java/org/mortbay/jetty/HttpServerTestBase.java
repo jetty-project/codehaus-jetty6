@@ -103,7 +103,8 @@ public class HttpServerTestBase
         RESPONSE2_CONTENT;
 
     // Useful constants
-    private static final long   PAUSE = 10L;
+    private static final long   PAUSE = 5L;
+    private static final int   LOOPS = 20;
     private static final String HOST  = "localhost";
 
     private Connector _connector;
@@ -112,7 +113,7 @@ public class HttpServerTestBase
     protected void tearDown() throws Exception
     {
         super.tearDown();
-        Thread.sleep(500);
+        Thread.sleep(250);
     }
     
     //~ Methods ----------------------------------------------------------------
@@ -234,7 +235,7 @@ public class HttpServerTestBase
         Server server = startServer(new EchoHandler());
 
         try {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < LOOPS; i++) {
                 Socket       client = client = new Socket(HOST, port);
                 OutputStream os     = client.getOutputStream();
 
@@ -269,7 +270,7 @@ public class HttpServerTestBase
         try {
             
             
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < LOOPS; i++) {
                 
                 int[]        points  = new int[pointCount];
                 StringBuffer message = new StringBuffer();

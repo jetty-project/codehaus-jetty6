@@ -84,10 +84,16 @@
     <!-- Configure a WebApp                                      -->
     <!-- ======================================================= -->
     <!--
-    <New class="org.mortbay.jetty.webapp.WebAppContext">
+    -->
+    <New id="TestContext" class="org.mortbay.jetty.webapp.WebAppContext">
       <Arg><Ref id="contexts"/></Arg>
       <Arg><SystemProperty name="jetty.home" default="."/>/webapps/test</Arg>
       <Arg>/</Arg>
+      <Set name="classLoader">
+        <New class="org.mortbay.jetty.webapp.TransformingWebAppClassLoader">
+          <Arg><Ref id="TestContext"/></Arg>
+        </New>
+      </Set>
       <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
       <Set name="virtualHosts">
         <Array type="java.lang.String">
@@ -103,7 +109,6 @@
         </Set>
       </Get>
     </New>
-    -->
 
     <!-- ======================================================= -->
     <!-- Configure a Context                                     -->

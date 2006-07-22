@@ -19,12 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.PermissionCollection;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -38,15 +35,14 @@ import org.mortbay.io.IO;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.Log;
@@ -92,7 +88,7 @@ public class WebAppContext extends Context
     private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
     private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
-    private String[] _serverClasses = {"org.mortbay.", "-org.mortbay.naming.","-org.mortbay.util.", "org.slf4j."}; // TODO hide all mortbay classes
+    private String[] _serverClasses = { "-org.mortbay.naming.","-org.mortbay.util.", "org.mortbay.", "org.slf4j."}; // TODO hide all mortbay classes
     private File _tmpDir;
     private boolean _isExistingTmpDir;
     private String _war;
@@ -109,8 +105,7 @@ public class WebAppContext extends Context
             if (handler instanceof WebAppContext)
                 return (WebAppContext)handler;
         }
-        return null;
-        
+        return null;   
     }
     
     /* ------------------------------------------------------------ */
@@ -441,22 +436,21 @@ public class WebAppContext extends Context
         _ownClassLoader=false;
         if (getClassLoader()==null)
         {
-            ClassLoader parent = Thread.currentThread().getContextClassLoader();
-            if (Log.isDebugEnabled()) 
-            {
-                Log.debug("Thread Context class loader is: " + parent);
-                for (ClassLoader loader = parent.getParent(); loader != null; loader = loader.getParent()) {
-                    Log.debug("Parent class loader is: " + loader); 
-                }
-            }
-            if (parent==null)
-                parent=this.getClass().getClassLoader();
-            if (parent==null)
-                parent=ClassLoader.getSystemClassLoader();
-            
-            WebAppClassLoader classLoader = new WebAppClassLoader(parent,this);
+            WebAppClassLoader classLoader = new WebAppClassLoader(this);
             setClassLoader(classLoader);
             _ownClassLoader=true;
+        }
+
+        if (Log.isDebugEnabled()) 
+        {
+            ClassLoader loader = getClassLoader();
+            Log.debug("Thread Context class loader is: " + loader);
+            loader=loader.getParent();
+            while(loader!=null)
+            {
+                Log.debug("Parent class loader is: " + loader); 
+                loader=loader.getParent();
+            }
         }
         
         for (int i=0;i<_configurations.length;i++)
