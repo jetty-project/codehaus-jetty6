@@ -84,7 +84,6 @@
     <!-- Configure a WebApp                                      -->
     <!-- ======================================================= -->
     <!--
-    -->
     <New id="TestContext" class="org.mortbay.jetty.webapp.WebAppContext">
       <Arg><Ref id="contexts"/></Arg>
       <Arg><SystemProperty name="jetty.home" default="."/>/webapps/test</Arg>
@@ -109,6 +108,7 @@
         </Set>
       </Get>
     </New>
+    -->
 
     <!-- ======================================================= -->
     <!-- Configure a Context                                     -->
