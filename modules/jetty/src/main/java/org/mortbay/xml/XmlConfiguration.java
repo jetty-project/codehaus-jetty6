@@ -27,12 +27,15 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.mortbay.component.LifeCycle;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.TypeUtil;
 import org.xml.sax.InputSource;
@@ -53,7 +56,8 @@ public class XmlConfiguration
 
     private static Class[] __primitiveHolders = { Boolean.class, Character.class, Byte.class,
             Short.class, Integer.class, Long.class, Float.class, Double.class, Void.class};
-
+    private static final Integer ZERO=new Integer(0);
+    
     /* ------------------------------------------------------------ */
     private static XmlParser __parser;
     private XmlParser.Node _config;
@@ -629,10 +633,11 @@ public class XmlConfiguration
      */
     private Object newArray(Object obj, XmlParser.Node node) throws Exception
     {
+
         // Get the type
         Class aClass = java.lang.Object.class;
         String type = node.getAttribute("type");
-        String id = node.getAttribute("id");
+        final String id = node.getAttribute("id");
         if (type != null)
         {
             aClass = TypeUtil.fromName(type);
@@ -649,23 +654,25 @@ public class XmlConfiguration
             }
         }
 
-        Object array = Array.newInstance(aClass, node.size());
-        if (id != null) _idMap.put(id, array);
-
-        for (int i = 0; i < node.size(); i++)
+        Object al=null;
+        
+        Iterator iter = node.iterator("Item");
+        while(iter.hasNext())
         {
-            Object o = node.get(i);
-            if (o instanceof String) continue;
-            XmlParser.Node item = (XmlParser.Node) o;
-            if (!item.getTag().equals("Item")) throw new IllegalStateException("Not an Item");
-            id = item.getAttribute("id");
+            XmlParser.Node item= (XmlParser.Node)iter.next();
+            String nid = item.getAttribute("id");
             Object v = value(obj, item);
-            if (v != null) Array.set(array, i, v);
-            if (id != null) _idMap.put(id, v);
+            al=LazyList.add(al,(v==null&&aClass.isPrimitive())?ZERO:v);
+            if (nid != null) 
+                _idMap.put(nid, v);
         }
-
-        return array;
+        
+        Object array =  LazyList.toArray(al,aClass);
+        if (id != null) 
+            _idMap.put(id, array);
+        return array; 
     }
+    
     /* ------------------------------------------------------------ */
     /*
      * Create a new map object.
