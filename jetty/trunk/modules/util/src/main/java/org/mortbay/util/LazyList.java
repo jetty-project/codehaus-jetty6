@@ -271,7 +271,7 @@ public class LazyList
     }
 
     /* ------------------------------------------------------------ */
-    public static Object[] toArray(Object list,Class aClass)
+    public static Object toArray(Object list,Class aClass)
     {
         if (list==null)
             return (Object[])Array.newInstance(aClass,0);
@@ -279,11 +279,19 @@ public class LazyList
         if (list instanceof List)
         {
             List l = (List)list;
+            if (aClass.isPrimitive())
+            {
+                Object a = Array.newInstance(aClass,l.size());
+                for (int i=0;i<l.size();i++)
+                    Array.set(a,i,l.get(i));
+                return a;
+            }
             return l.toArray((Object[])Array.newInstance(aClass,l.size()));
+            
         }
         
-        Object[] a = (Object[])Array.newInstance(aClass,1);
-        a[0]=list;
+        Object a = Array.newInstance(aClass,1);
+        Array.set(a,0,list);
         return a;
     }
 
