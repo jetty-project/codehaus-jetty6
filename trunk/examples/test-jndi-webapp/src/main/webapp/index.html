@@ -7,11 +7,10 @@
 <BODY>
 <A HREF="http://jetty.mortbay.org/jetty6"><IMG SRC="http://jetty.mortbay.org/jetty/images/jetty_banner.gif"></A>
 <P>
-<h1>Jetty 6 JNDI and Transactions</h1>
+<h1>Jetty 6 and JNDI</h1>
 
 <p>
-This example shows how to configure and lookup DataSources and a JTA transaction manager in JNDI, and how to perform a distributed transaction across
-two different databases.
+This example shows how to configure and lookup resources such as DataSources, a JTA transaction manager and a java.mail.Session in JNDI. The demo shows you how to perform a distributed transaction across two different databases, and how to send email.
 </p>
 
 <h2>Preparation</h2>
@@ -29,7 +28,9 @@ Make sure you have built this demo. Assuming your jetty src distro is installed 
 <p>
 Where <code>xxxx</code> is the name of a transaction manager to use. There is a list of these that are supported for the demo in <code>$JETTY_HOME/modules/test-jndi-webapp/src/templates</code>. Ensure that you have installed the jars etc for the transaction manager of your choice in jetty6.
 </p>
-<h2>The Demo</h2>
+<p>If you want to use the Mail demonstration, you will need to edit the <code>etc/jetty-test-jndi.xml</code> file and change the smtp authentication information and properties appropriately for your environment.
+</p>
+<h2>The Datasources/Transaction Demo</h2>
 <p>
 Click <code>Commit</code> to make a distributed update to 2 different databases, or <code>Rollback</code> to prevent the update from happening.
 </p>
@@ -39,8 +40,14 @@ Click <code>Commit</code> to make a distributed update to 2 different databases,
       <P>
       <button type="submit">Completion</button>
 </form>
+<h2> The Mail Demo </h2>
 
 
+<form action="test" method="post">
+    <p>Send a test email to:&nbsp;<input type="text" name="mailto" maxlength="30"/></p>
+    <p>From:&nbsp;<input type="text" name="mailfrom" maxlength="30"/></p>
+    <button type="submit">Send</button>
+<form>
 
 
 </BODY>
