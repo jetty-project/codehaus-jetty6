@@ -115,7 +115,8 @@ public class QuotedStringTokenizerTest extends TestCase
     {
         assertEquals("abc",QuotedStringTokenizer.quote("abc", " ,"));
         assertEquals("\"a c\"",QuotedStringTokenizer.quote("a c", " ,"));
-        assertEquals("\"a'c\"",QuotedStringTokenizer.quote("a'c", " ,"));   
+        assertEquals("\"a'c\"",QuotedStringTokenizer.quote("a'c", " ,"));  
+        assertEquals("\"a\\n\\r\\t\"",QuotedStringTokenizer.quote("a\n\r\t")); 
     }
 
 
@@ -124,6 +125,7 @@ public class QuotedStringTokenizerTest extends TestCase
         assertEquals("abc",QuotedStringTokenizer.unquote("abc"));
         assertEquals("a\"c",QuotedStringTokenizer.unquote("\"a\\\"c\""));
         assertEquals("a'c",QuotedStringTokenizer.unquote("\"a'c\""));
+        assertEquals("a\n\r\t",QuotedStringTokenizer.unquote("\"a\\n\\r\\t\""));
     }
 
 }

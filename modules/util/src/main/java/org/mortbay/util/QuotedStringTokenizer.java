@@ -270,10 +270,8 @@ public class QuotedStringTokenizer
         for (int i=0;i<s.length();i++)
         {
             char c = s.charAt(i);
-            if (c=='"' ||
-                c=='\\' ||
-                c=='\'' ||
-                delim.indexOf(c)>=0)
+            if (!Character.isJavaIdentifierPart(c)
+                || delim.indexOf(c)>=0)
             {
                 StringBuffer b=new StringBuffer(s.length()+8);
                 quote(b,s);
@@ -285,7 +283,30 @@ public class QuotedStringTokenizer
     }
 
     /* ------------------------------------------------------------ */
+    /** Quote a string.
+     * The string is quoted only if quoting is required due to
+     * embeded delimiters, quote characters or the
+     * empty string.
+     * @param s The string to quote.
+     * @return quoted string
+     */
+    public static String quote(String s)
+    {
+        if (s==null)
+            return null;
+        if (s.length()==0)
+            return "\"\"";
+        
+        StringBuffer b=new StringBuffer(s.length()+8);
+        quote(b,s);
+        return b.toString();
+   
+    }
+
+    
+    /* ------------------------------------------------------------ */
     /** Quote a string into a StringBuffer.
+     * The characters ", \, \n, \r, \t, \f and \b are escaped
      * @param buf The StringBuffer
      * @param s The String to quote.
      */
@@ -297,18 +318,34 @@ public class QuotedStringTokenizer
             for (int i=0;i<s.length();i++)
             {
                 char c = s.charAt(i);
-                if (c=='"')
-                {   
-                    buf.append("\\\"");
-                    continue;
+                switch(c)
+                {
+                    case '"':
+                        buf.append("\\\"");
+                        continue;
+                    case '\\':
+                        buf.append("\\\\");
+                        continue;
+                    case '\n':
+                        buf.append("\\n");
+                        continue;
+                    case '\r':
+                        buf.append("\\r");
+                        continue;
+                    case '\t':
+                        buf.append("\\t");
+                        continue;
+                    case '\f':
+                        buf.append("\\f");
+                        continue;
+                    case '\b':
+                        buf.append("\\b");
+                        continue;
+                        
+                    default:
+                        buf.append(c);
+                        continue;
                 }
-                if (c=='\\')
-                {   
-                    buf.append("\\\\");
-                    continue;
-                }
-                buf.append(c);
-                continue;
             }
             buf.append('"');
         }
@@ -334,18 +371,51 @@ public class QuotedStringTokenizer
         StringBuffer b=new StringBuffer(s.length()-2);
         synchronized(b)
         {
-            boolean quote=false;
+            boolean escape=false;
             for (int i=1;i<s.length()-1;i++)
             {
                 char c = s.charAt(i);
 
-                if (c=='\\' && !quote)
+                if (escape)
                 {
-                    quote=true;
+                    escape=false;
+                    switch (c)
+                    {
+                        case 'n':
+                            b.append('\n');
+                            break;
+                        case 'r':
+                            b.append('\r');
+                            break;
+                        case 't':
+                            b.append('\t');
+                            break;
+                        case 'f':
+                            b.append('\f');
+                            break;
+                        case 'b':
+                            b.append('\b');
+                            break;
+                        case 'u':
+                            b.append((char)(
+                                    (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<24)+
+                                    (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<16)+
+                                    (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<8)+
+                                    (TypeUtil.convertHexDigit((byte)s.charAt(i++)))
+                                    ) 
+                            );
+                            break;
+                        default:
+                            b.append(c);
+                    }
+                }
+                else if (c=='\\')
+                {
+                    escape=true;
                     continue;
                 }
-                quote=false;
-                b.append(c);
+                else
+                    b.append(c);
             }
             
             return b.toString();
