@@ -352,7 +352,8 @@ public class Handler extends URLStreamHandler
     protected URLConnection openConnection(URL url) throws IOException
     {
         String s=url.toString();
-        assert s.startsWith("tx:");
+        if (!s.startsWith("tx:"))
+            throw new IllegalArgumentException();
         return new BufferedURLConnection(url,new URL(s.substring(3)));
     }
 
