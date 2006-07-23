@@ -16,12 +16,14 @@
 package org.mortbay.jetty.plugin;
 
 import java.io.File;
+import java.net.URLClassLoader;
 import java.util.Iterator;
 import java.util.List;
 
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.plus.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
+import org.mortbay.util.LazyList;
 
 public class Jetty6MavenConfiguration extends Configuration 
 {
@@ -59,7 +61,7 @@ public class Jetty6MavenConfiguration extends Configuration
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
         
-        PluginLog.getLog().info("Classpath = "+((WebAppClassLoader)getWebAppContext().getClassLoader()).getUrlClassPath());
+        PluginLog.getLog().info("Classpath = "+LazyList.array2List(((URLClassLoader)getWebAppContext().getClassLoader()).getURLs()));
     }
 
     

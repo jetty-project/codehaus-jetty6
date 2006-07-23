@@ -74,6 +74,7 @@ public class WebInfConfiguration implements Configuration
             if (lib.exists() || lib.isDirectory())
                 ((WebAppClassLoader)_context.getClassLoader()).addJars(lib);
         }
+        
      }
 
     /* ------------------------------------------------------------------------------- */
