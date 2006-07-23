@@ -298,7 +298,8 @@ public class RandomConnector extends AbstractConnector implements NIOConnector
                 return -1;
             }
             
-            assert len==len2;
+            if (len!=len2)
+                throw new IllegalStateException();
             temp.mark();
             buffer.put(temp);
             temp.reset();
