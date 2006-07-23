@@ -7,7 +7,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.naming.InitialContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -24,6 +31,8 @@ import javax.transaction.UserTransaction;
  *
  */
 public class JNDITest extends HttpServlet {
+    public static final String DATE_FORMAT = "EEE, d MMM yy HH:mm:ss Z";
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
     
     private static final String TABLE1 = "mytestdata1";
@@ -33,6 +42,7 @@ public class JNDITest extends HttpServlet {
     
     private DataSource myDS;
     private DataSource myDS2;
+    private Session myMailSession;
     Double wiggle;
 
     public void init(ServletConfig config) throws ServletException
@@ -53,6 +63,11 @@ public class JNDITest extends HttpServlet {
             System.err.println("mydatasource99:"+(ic.lookup("java:comp/env/jdbc/mydatasource99")==null?"NO":"YES"));
             UserTransaction utx = (UserTransaction)ic.lookup("java:comp/UserTransaction");
             System.err.println("utx="+utx);
+            
+            myMailSession = (Session)ic.lookup("java:comp/env/mail/Session");
+            System.err.println("myMailSession: "+myMailSession);
+            
+            doSetup();
         }
         catch (Exception e)
         {
@@ -73,14 +88,24 @@ public class JNDITest extends HttpServlet {
     {
         boolean doCommit = true;
         
-        String action = request.getParameter("completion");
+        String complete = request.getParameter("completion");
+        String mailTo = request.getParameter("mailto");
+        String mailFrom = request.getParameter("mailfrom");
         
-        if (action == null)
-            doCommit = false;
-        if (action.trim().equals("commit"))
-            doCommit = true;
-        else
-            doCommit = false;
+        if (complete != null)
+        {
+            complete = complete.trim();
+            if (complete.trim().equals("commit"))
+                doCommit = true;
+            else
+                doCommit = false;
+        }
+       
+        if (mailTo != null)
+            mailTo = mailTo.trim();
+        
+        if (mailFrom != null)
+            mailFrom = mailFrom.trim();
         
         try
         {
@@ -89,10 +114,19 @@ public class JNDITest extends HttpServlet {
             out.println("<html>");
             out.println("<h1>Jetty6 JNDI & Transaction Tests</h1>");
             out.println("<body>");
-            doTransaction(out, doCommit);
-            out.println("<p>Value of foo in myDS after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS)+"</p>");
-            out.println("<p>Value of foo in myDS2 after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS2)+"</p>");
+            if (complete != null)
+            {
+              doTransaction(out, doCommit);
+              out.println("<p>Value of foo in myDS after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS)+"</p>");
+              out.println("<p>Value of foo in myDS2 after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS2)+"</p>");
+            }
+            else if (mailTo != null && mailFrom != null)
+            {
+                doMail (mailTo, mailFrom);
+                out.println("<p>Sent!</p>");
+            }
             out.println("<a href=\"index.html\">Try again?</a>");
+            
             out.println("</body>");            
             out.println("</html>");
             out.flush();
@@ -103,6 +137,24 @@ public class JNDITest extends HttpServlet {
         }
     }
     
+    public void doMail (String mailTo, String mailFrom)
+    throws Exception
+    {
+        Message msg = new MimeMessage(myMailSession);
+
+        
+        // set the from and to address
+        InternetAddress addressFrom = new InternetAddress(mailFrom);
+        msg.setFrom(addressFrom);
+
+
+        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(mailTo));
+        msg.setSubject("Jetty Mail Test Succeeded");
+        msg.setContent("The test of Jetty Mail @ "+new Date()+" has been successful.", "text/plain");
+        msg.addHeader ("Date", dateFormat.format(new Date()));
+        Transport.send(msg);
+
+    }
 
     public void doTransaction(ServletOutputStream out, boolean doCommit)
     throws Exception
