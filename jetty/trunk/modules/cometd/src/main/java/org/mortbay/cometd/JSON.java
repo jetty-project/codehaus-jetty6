@@ -27,20 +27,30 @@ import org.mortbay.util.TypeUtil;
 
 
 /** JSON Parser and Generator.
- * This class provides some static methods to convert POJOs to and from JSON
+ * <p>This class provides some static methods to convert POJOs to and from JSON
  * notation.  The mapping from JSON to java is:<pre>
- *   Object ==> Map
- *   Array  ==> Object[]
+ *   object ==> Map
+ *   array  ==> Object[]
  *   number ==> Double or Long
  *   string ==> String
  *   null   ==> null
  *   bool   ==> Boolean
  * </pre>
- *   
- * <p>
+ * </p><p>
+ * The java to JSON mapping is:<pre>
+ *   String --> string
+ *   Number --> number
+ *   Map    --> object
+ *   List   --> array
+ *   Array  --> array
+ *   null   --> null
+ *   Boolean--> boolean
+ *   Object --> string (dubious!)
+ * </pre>
+ * </p><p>
  * Note that this class has minimal dependencies on org.mortbay.util classes.  
  * If there is demand, these dependencies can be removed so this class stands on it's own.
- * 
+ * </p>
  * @author gregw
  *
  */
