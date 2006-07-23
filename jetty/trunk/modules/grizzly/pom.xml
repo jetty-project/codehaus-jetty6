@@ -12,7 +12,23 @@
   <build>
     <defaultGoal>install</defaultGoal>
   </build>
+
+  <repositories>
+    <repository>
+      <id>module-repo</id>
+      <name>module repo</name>
+      <url>file:${basedir}/repository</url>
+      <releases><enabled>false</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+  </repositories>
+
   <dependencies>
+    <dependency>
+      <groupId>com.sun.enterprise</groupId>
+      <artifactId>appserv-http-engine</artifactId>
+      <version>9.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

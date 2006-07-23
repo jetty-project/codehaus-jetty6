@@ -16,6 +16,7 @@
 package org.mortbay.jetty.grizzly;
 
 
+import com.sun.enterprise.web.connector.grizzly.SelectorThread;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,7 +53,7 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class GrizzlyConnector extends AbstractConnector implements NIOConnector
 {
-    static Random random = new Random(System.currentTimeMillis());
+    private SelectorThread _selectorThread;
 	
     /* ------------------------------------------------------------------------------- */
     /**
@@ -61,13 +62,13 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
      */
     public GrizzlyConnector()
     {
+        _selectorThread = new SelectorThread();
     }
 
     /* ------------------------------------------------------------ */
     public Object getConnection()
     {
-    	// TODO return private connection eg server socket
-        return null;
+        return _selectorThread.getServerSocketChannel();
     }
     
 
@@ -78,7 +79,9 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
      */
     protected void doStart() throws Exception
     {
-        super.doStart();
+        super.doStart();  
+
+        _selectorThread.startEndpoint();
     }
 
     /* ------------------------------------------------------------ */
@@ -88,6 +91,7 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
     protected void doStop() throws Exception
     {
         super.doStop();
+        _selectorThread.stopEndpoint();
     }
 
 
@@ -95,64 +99,35 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
     public void open() throws IOException
     {
     	// TODO Open server socket
+        try{
+            _selectorThread.initEndpoint();
+        } catch (InstantiationException ex){
+            throw new RuntimeException(ex);
+        }
     }
 
     /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
     	// TODO Close server socket
+        // XXX Only supported when calling selectorThread.stopEndpoint();
     }
 
     /* ------------------------------------------------------------ */
     public void accept(int acceptorID) throws IOException
     {
-        // TODO accept a connection for real or progress an existing one
-        // but for now.... let's just pretend.
         
-        // This creates a connection and runs it to completion.
-        // in reality there will be lots of endpoints in play and any one
-        // of them may need to be dispatched.
-        
-        try 
+        try
         {
-            File file = new File("fakeRequests.txt");
-            if (!file.exists())
-                file = new File("modules/grizzly/fakeRequests.txt");
-            if (!file.exists())
-                file = new File("/tmp/fakeRequests.txt");
-            if (!file.exists())
-            {
-                System.err.println("No such file "+file);
-                System.exit(1);
-            }
-            
-            Thread.sleep(random.nextInt(5000));
-            
-            ByteChannel channel = new FileInputStream(file).getChannel();
-            GrizzlyEndPoint gep = new GrizzlyEndPoint(this,channel);
-            
-            try
-            {
-                System.err.println("new "+gep+ " for "+channel);
-                
-                // TODO in reality this dispatches would be mixed with others from other connections.
-                while (gep.isOpen())
-                {
-                    Thread.sleep(random.nextInt(1000));
-                    if (!gep.dispatched)
-                    { 
-                        gep.dispatched=true;
-                        getThreadPool().dispatch(gep);
-                    }
-                }
-            }
-            finally
-            {
-                System.err.println("end "+gep);
-            }
+            // TODO - this may not exactly be right.  accept is called in a loop, so we
+            // may need to wait on the _selectorThread somehow?
+            // maybe we just set acceptors to zero and don't need to bother here as
+            // grizzly has it's own accepting threads.
+            _selectorThread.isAlive();
+                Thread.sleep(5000);
             
         } 
-        catch (InterruptedException e) 
+        catch (Throwable e) 
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -192,7 +167,7 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
     public int getLocalPort()
     {
     	// TODO return the actual port we are listening on
-    	return 0;
+    	return _selectorThread.getPort();
     }
     
 
@@ -258,35 +233,20 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
 
         public void blockReadable(long millisecs)
         {
-            try {Thread.sleep(random.nextInt(1000));} catch (InterruptedException e) {e.printStackTrace();}
+            // TODO implement
+            try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
         }
 
         public void blockWritable(long millisecs)
         {
-            try {Thread.sleep(random.nextInt(1000));} catch (InterruptedException e) {e.printStackTrace();}
+            // TODO implement
+            try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
         }
 
         public int fill(Buffer buffer) throws IOException
         {
-            // sometimes read nothing
-            if (random.nextInt()%10 <2 )
-                return 0;
-            
-            // Get a random amount of data
-            int len=random.nextInt(2000);
-            if (len>buffer.space())
-                len=buffer.space();
-            
-            // Load a length limited slice via a temp buffer
-            NIOBuffer temp= new NIOBuffer(len,false);
-            int len2=super.fill(temp);
-            if (len2<0)
-                return -1;
-            
-            assert len==len2;
-            buffer.put(temp);
-            
-            return len;
+            // TODO implement
+            return 0;
         }
 
         public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
@@ -315,19 +275,8 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
 
         public int flush(Buffer buffer) throws IOException
         {
-            // sometimes flush nothing
-            if (random.nextInt(10) <2 )
-                return 0;
-
-            // flush a random amount of data
-            int len=random.nextInt(2000);
-            if (len>buffer.length())
-                len=buffer.length();
-            
-            // Load a length limited slice via a temp buffer
-            Buffer temp= buffer.get(len);
-            System.err.println("flush:"+temp);
-            return len;
+            // TODO implement
+            return 0;
         }
 
         public boolean isBlocking()
@@ -335,36 +284,6 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
             return false;
         }
         
-    }
-    
-    public static void main(String[] arg)
-        throws Exception
-    {
-        // Just a little test main....
-
-        Server server = new Server();
-        server.addConnector(new GrizzlyConnector());
-        Context context = new Context(server,"/",Context.SESSIONS);
-        context.addServlet(new ServletHolder(new HelloServlet()), "/*");
-        
-        server.start();
-        server.join();
-    }
-    
-    public static class HelloServlet extends HttpServlet
-    {
-        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
-            System.err.println(request);
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
-            PrintWriter out =  response.getWriter();
-            out.println("<h1>Hello SimpleServlet: "+request.getRequestURI()+"</h1><pre>");
-            int lines = random.nextInt(100);
-            for (int i=0;i<lines;i++)
-                out.println(i+" Blah blah blah");
-            out.println("</pre>");       
-        }
     }
     
 }
