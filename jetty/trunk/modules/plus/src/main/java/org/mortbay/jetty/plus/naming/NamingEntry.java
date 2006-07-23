@@ -27,6 +27,8 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.Referenceable;
 
 import org.mortbay.log.Log;
 import org.mortbay.naming.NamingUtil;
@@ -312,7 +314,21 @@ public abstract class NamingEntry
      * @return
      */
     public Object getObjectToBind()
-    {
+    throws NamingException
+    {      
+        //object is a Referenceable, so bind Referenceable.getReference()
+        if (this.objectToBind instanceof Referenceable)
+        {
+            return ((Referenceable)this.objectToBind).getReference();
+        }
+        
+        //object is a Reference, so bind it
+        if (this.objectToBind instanceof Reference)
+        {
+            return ((Reference)this.objectToBind);
+        }
+        
+        // object is a POJO, just bind it
         return this.objectToBind;
     }
     
