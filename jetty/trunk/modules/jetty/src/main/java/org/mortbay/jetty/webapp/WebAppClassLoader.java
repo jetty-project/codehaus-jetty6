@@ -28,6 +28,7 @@ import org.mortbay.io.IO;
 import org.mortbay.io.tx.Handler;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.LazyList;
 
 
 /* ------------------------------------------------------------ */
@@ -46,11 +47,10 @@ import org.mortbay.resource.Resource;
  * 
  * @author Greg Wilkins (gregw)
  */
-public class WebAppClassLoader extends URLClassLoader
+public class WebAppClassLoader extends URLClassLoader implements Cloneable
 {
     private WebAppContext _context;
     private ClassLoader _parent;
-    private String _urlClassPath;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -75,6 +75,14 @@ public class WebAppClassLoader extends URLClassLoader
             throw new IllegalArgumentException("no parent classloader!");
     }
     
+    /* ------------------------------------------------------------ */
+    public Object clone() throws CloneNotSupportedException
+    {
+        // TODO Auto-generated method stub
+        WebAppClassLoader clone = (WebAppClassLoader)super.clone();
+        
+        return clone;
+    }
 
     /* ------------------------------------------------------------ */
     public WebAppContext getContext()
@@ -107,7 +115,6 @@ public class WebAppClassLoader extends URLClassLoader
             {
                 URL url= resource.getURL();
                 addURL(url);
-                _urlClassPath= (_urlClassPath == null) ? url.toString() : (_urlClassPath + "," + url.toString());
             }
             else
             {
@@ -146,15 +153,11 @@ public class WebAppClassLoader extends URLClassLoader
                     
                     URL url= jar.toURL();
                     addURL(url);
-                    _urlClassPath=
-                        (_urlClassPath == null) ? url.toString() : (_urlClassPath + "," + url.toString());
                 }
                 else
                 {
                     URL url= resource.getURL();
                     addURL(url);
-                    _urlClassPath=
-                        (_urlClassPath == null) ? url.toString() : (_urlClassPath + "," + url.toString());
                 }
             }
         }
@@ -196,7 +199,6 @@ public class WebAppClassLoader extends URLClassLoader
     public void destroy()
     {
         this._parent=null;
-        this._urlClassPath=null;
     }
     
 
@@ -246,16 +248,7 @@ public class WebAppClassLoader extends URLClassLoader
 
         return url;
     }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the urlClassPath.
-     */
-    public String getUrlClassPath()
-    {
-        return _urlClassPath;
-    }
-
+    
     /* ------------------------------------------------------------ */
     public boolean isServerPath(String name)
     {
@@ -381,7 +374,7 @@ public class WebAppClassLoader extends URLClassLoader
     public String toString()
     {
         if (Log.isDebugEnabled())
-            return "ContextLoader@" + hashCode() + "(" + _urlClassPath + ") / " + _parent;
+            return "ContextLoader@" + hashCode() + "(" + LazyList.array2List(getURLs()) + ") / " + _parent;
         return "ContextLoader@" + hashCode();
     }
     
