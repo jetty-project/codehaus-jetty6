@@ -1,7 +1,6 @@
 jetty-6.0.0rc1 - ???
     + Support for binding References and Referenceables and javax.mail.Sessions in JNDI
     + Added TransformingWebAppClassLoader for spring 2.0 byte code modification support
-    + Template grizzly connector
     + Ensure classes come before dependencies for plugin [JETTY-90]
     + Fixed FD leak for bad TCP acks. JETTY-63
     + new Server().addHandler(handler) no longer throws NPE [JETTY-87]
@@ -13,6 +12,8 @@ jetty-6.0.0rc1 - ???
     + added toString() on JAASUserPrincipal (JETTY-91)
     + added modules/spring with XmlBeanFactory configuration
     + removed support for lowResources from SelectChannelConnector
+    + added start of cometd implementation (JSON only)
+    + added start of grizzly connector
 
 jetty-6.0.0rc0 - 7 July 2006
     + change prefix from "jetty6" to just "jetty" for plugin: eg is now mvn jetty:run
