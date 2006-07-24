@@ -4,7 +4,7 @@
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
     <version>6.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>./pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -14,6 +14,43 @@
   <version>6.0-SNAPSHOT</version>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.0.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>exec-plugin-doc</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>mvn</executable>
+              <workingDirectory>../../modules/maven-plugin</workingDirectory>
+              <arguments>
+                <argument>-Dmaven.test.skip=true</argument>
+                <argument>plugin:xdoc</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>exec-site</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>mvn</executable>
+              <workingDirectory>../..</workingDirectory>
+              <arguments>
+                <argument>-Dmaven.test.skip=true</argument>
+                <argument>site</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
@@ -33,37 +70,37 @@
           </execution>
           <execution>
             <id>copyfile</id>
-            <phase>validate</phase>
+            <phase>process-sources</phase>
             <goals>
               <goal>run</goal>
             </goals>
             <configuration>
               <tasks>
-                <copy file="${basedir}/../README.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
-                <copy file="${basedir}/../VERSION.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
-                <copy file="${basedir}/../legal/LICENSE.TXT" todir="${basedir}/target/site/" failonerror="false"></copy>
+                <copy file="${basedir}/../../README.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
+                <copy file="${basedir}/../../VERSION.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
+                <copy file="${basedir}/../../legal/LICENSE.TXT" todir="${basedir}/target/site/" failonerror="false"></copy>
                 <copy todir="${basedir}/target/site/apidocs" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../target/site/apidocs">
+                  <fileset dir="${basedir}/../../target/site/apidocs">
                     <include name="**/**"/>
                   </fileset>
                 </copy>
                 <copy todir="${basedir}/target/site/xref" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../target/site/xref">
+                  <fileset dir="${basedir}/../../target/site/xref">
                     <include name="**/**"/>
                   </fileset>
                 </copy>
                 <copy todir="${basedir}/target/site/xref-test" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../target/site/xref-test">
+                  <fileset dir="${basedir}/../../target/site/xref-test">
                     <include name="**/**"/>
                   </fileset>
                 </copy>
                 <copy todir="${basedir}/src/site/apt/maven-plugin" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../modules/maven-plugin/src/site/apt">
+                  <fileset dir="${basedir}/../../modules/maven-plugin/src/site/apt">
                     <include name="**/**"/>
                   </fileset>
                 </copy>
                 <copy todir="${basedir}/target/generated-site/xdoc/maven-plugin" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../modules/maven-plugin/target/generated-site/xdoc">
+                  <fileset dir="${basedir}/../../modules/maven-plugin/target/generated-site/xdoc">
                     <include name="index.xml"/>
                     <include name="run-mojo.xml"/>
                     <include name="run-war-mojo.xml"/>
@@ -78,11 +115,17 @@
       <plugin>
        <groupId>org.apache.maven.plugins</groupId>
        <artifactId>maven-site-plugin</artifactId>
-       <configuration>
-         <!--templateDirectory>file:///${basedir}/src/site/resources/template/</templateDirectory>
-         <template>org/apache/maven/plugins/site/maven-site.vm</template-->
-         <!-- templateFile>${basedir}/src/site/resources/template/org/apache/maven/plugins/site/maven-site.vm</templateFile -->
-       </configuration>
+       <executions>
+          <execution>
+            <id>site</id>
+            <phase>install</phase>
+            <goals>
+              <goal>site</goal>
+            </goals>
+          </execution>
+         <configuration>
+         </configuration>
+       </executions>
       </plugin>
     </plugins>
   </build>

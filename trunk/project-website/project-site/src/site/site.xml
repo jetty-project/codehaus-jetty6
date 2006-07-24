@@ -16,11 +16,11 @@
   <body>
     <menu name="About Jetty">
       <item name="Home" href="index.html"/>
-      <item name="License" href="http://jetty.mortbay.org/jetty/LICENSE.TXT"/>
+      <item name="License" href="LICENSE.TXT"/>
       <item name="Versions" href="VERSION.txt"/>
       <item name="Readme" href="README.txt"/>
       <item name="Jetty Powered" href="http://www.mortbay.com/mortbay/powered.html"/>
-      <item name="Case Studies" href="http://www.mortbay.com/MB/log/jetty/"/>
+      <item name="Case Studies" href="http://blogs.webtide.com/jetty/"/>
     </menu>
     <menu name="Getting Started">
       <item name="Downloading" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#download"/>
@@ -30,11 +30,6 @@
       <item name="Tutorials" href="http://docs.codehaus.org/display/JETTY/Tutorials"/>
       <item name="FAQ" href="http://docs.codehaus.org/display/JETTY/FAQ"/>
     </menu>
-    <menu name="Jetty Maven Plugin">
-      <item name="Intro" href="maven-plugin/index.html"/>
-      <item name="Installation" href="maven-plugin/install.html"/>
-      <item name="Configuration" href="maven-plugin/howto.html"/>
-    </menu>
     <menu name="Source">
       <item name="JavaDoc" href="apidocs/index.html"/>
       <item name="Source XRef" href="xref/index.html"/>
@@ -43,8 +38,8 @@
     </menu>
     <menu name="Resources">
       <item name="Wiki" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
-      <item name="jetty.xsd" href="http://jetty.mortbay.org/jetty.xsd"/>
-      <item name="jetty.xsd.html" href="http://jetty.mortbay.org/jetty.xsd.html"/>
+      <item name="jetty.xsd" href="http://jetty.mortbay.org/jetty/jetty.xsd"/>
+      <item name="jetty.xsd.html" href="http://jetty.mortbay.org/jetty/jetty.xsd.html"/>
       <item name="Old Jetty5.x site" href="http://jetty.mortbay.org/jetty5"/>
     </menu>
     <menu name="Community">
@@ -54,10 +49,15 @@
       <item name="Mailing Lists" href="mail-lists.html"/>
       <item name="Chat" href="irc.html"/>
     </menu>
-    <menu name="Commercial Offerings">
-      <item name="Support" href="http://www.webtide.com"/>
-      <item name="Training" href="http://www.webtide.com"/>
-      <item name="Consulting" href="http://www.webtide.com"/>
+    <menu name="Jetty Maven Plugin">
+      <item name="Intro" href="maven-plugin/index.html"/>
+      <item name="Installation" href="maven-plugin/install.html"/>
+      <item name="Configuration" href="maven-plugin/howto.html"/>
+    </menu>
+    <menu name="Commercial Services">
+      <item name="Support" href="http://www.webtide.com/support.jsp"/>
+      <item name="Training" href="http://www.webtide.com/training.jsp"/>
+      <item name="Consulting" href="http://www.webtide.com/development.jsp"/>
     </menu>
   </body>
   <poweredBy>

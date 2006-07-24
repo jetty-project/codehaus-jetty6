@@ -16,13 +16,11 @@ Jetty 6 employs a number of innovative strategies to ensure that only the resour
 
 <div class="summary">
  <div class="news">
-  <font color="#ffcc00">==&gt;&gt;</font> read about the new features in <a href="jetty6.html">jetty6</a> <font color="#ffcc00">&lt;&lt;==</font>
  </div>
 <p>
-<span>Jetty</span> is an open-source, standards-based, full-featured web server implemented in java. It is released under the Apache 2.0 licence and is therefore free for commercial use and distribution. 
-</p>
-<p>
-First created in 1995, Jetty has benefitted both from input from a vast user community and consistent and focussed development by a stable core of lead developers. 
+<span>Jetty</span> is an open-source, standards-based, full-featured web server implemented entirely in java. It is released under the <a href="LICENSE.TXT">Apache 2.0</a> licence and is therefore free for commercial use and distribution. 
+First created in 1995, Jetty has benefitted from input from a vast user community and consistent and focussed development by a stable core of lead developers. 
+Full commercial 24x7 support, training and development services for Jetty are available from <a href="http://www.webtide.com">Webtide</a>.
 </p>
 <p>
 Jetty can be used as:
@@ -43,7 +41,7 @@ This flexibility means that Jetty can be encountered in a number of different co
  </ul>
 </p>
 <p>
-There are many more examples of Jetty in action on the  <a href="http://www.mortbay.com/mortbay/powered.html">Jetty Powered Page</a>. However, as Jetty aims to be as unobtrusive as possible, many websites and products are based around Jetty, but Jetty is invisible!
+There are many more examples of Jetty in action on the  <a href="http://www.mortbay.com/mortbay/powered.html">Jetty Powered Page</a>. However, as Jetty aims to be as unobtrusive as possible, countless websites and products are based around Jetty, but Jetty is invisible!
 </p>
 <p>
 Some of the defining features of Jetty are:
