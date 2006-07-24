@@ -96,7 +96,7 @@
                 <copy todir="${basedir}/target/classes">
                   <fileset dir="${basedir}/target/generated" />
                 </copy>
-                <copy todir="${basedir}/../../project-site/src/site/resources">
+                <copy todir="${basedir}/../../project-website/project-site/src/site/resources">
                   <fileset dir="target">
                     <include name="jetty.xsd" />
                     <include name="jetty.xsd.html" />

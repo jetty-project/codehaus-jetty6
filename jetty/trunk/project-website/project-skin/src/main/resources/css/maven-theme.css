@@ -169,7 +169,7 @@ table {
 }
 #banner {
   padding: 0px;
-  background-image:  url(http://jetty.mortbay.org/jetty/images/banner_bg.gif);
+  background-image:  url(../images/background.gif);
   background-repeat: repeat;
   clear:both;
   border-bottom: 1px ridge #4876FF;

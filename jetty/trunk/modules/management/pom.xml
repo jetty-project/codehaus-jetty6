@@ -83,7 +83,7 @@
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-          <stylesheetfile>${basedir}/../../project-site/src/resources/javadoc.css</stylesheetfile>
+          <stylesheetfile>${basedir}/../../project-website/project-site/src/resources/javadoc.css</stylesheetfile>
         </configuration>
       </plugin>
     </plugins>
