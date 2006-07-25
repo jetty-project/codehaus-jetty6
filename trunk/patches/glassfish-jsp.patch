@@ -1,16 +1,783 @@
-Index: pom.xml
+Index: patches/glassfish-jsp.patch
 ===================================================================
---- pom.xml	(revision 672)
-+++ pom.xml	(working copy)
-@@ -173,6 +173,8 @@
-     <module>modules/jetty</module>
-     <module>modules/jsp-api-2.1</module>
-     <module>modules/jsp-2.1</module>
-+    <module>modules/glassfish-jsp-api</module>
-+    <module>modules/glassfish-jsp</module>
-     <module>modules/jsp-api-2.0</module>
-     <module>modules/jsp-2.0</module>
-     <module>modules/management</module>
+--- patches/glassfish-jsp.patch	(revision 721)
++++ patches/glassfish-jsp.patch	(working copy)
+@@ -1,775 +0,0 @@
+-Index: pom.xml
+-===================================================================
+---- pom.xml	(revision 672)
+-+++ pom.xml	(working copy)
+-@@ -173,6 +173,8 @@
+-     <module>modules/jetty</module>
+-     <module>modules/jsp-api-2.1</module>
+-     <module>modules/jsp-2.1</module>
+-+    <module>modules/glassfish-jsp-api</module>
+-+    <module>modules/glassfish-jsp</module>
+-     <module>modules/jsp-api-2.0</module>
+-     <module>modules/jsp-2.0</module>
+-     <module>modules/management</module>
+-Index: modules/glassfish-jsp-api/pom.xml
+-===================================================================
+---- modules/glassfish-jsp-api/pom.xml	(revision 0)
+-+++ modules/glassfish-jsp-api/pom.xml	(revision 0)
+-@@ -0,0 +1,88 @@
+-+<?xml version="1.0" encoding="UTF-8"?><project>
+-+  <parent>
+-+    <artifactId>project</artifactId>
+-+    <groupId>org.mortbay.jetty</groupId>
+-+    <version>6.0-SNAPSHOT</version>
+-+  </parent>
+-+  <modelVersion>4.0.0</modelVersion>
+-+  <artifactId>glassfish-jsp-api-2.1</artifactId>
+-+  <name>Glassfish Jasper API</name>
+-+  <build>
+-+    <defaultGoal>install</defaultGoal>
+-+    <resources>
+-+      <resource>
+-+        <directory>target/generated-sources/main/resources</directory>
+-+        <includes>
+-+          <include>**/**</include>
+-+        </includes>
+-+      </resource>
+-+    </resources>
+-+    <plugins>
+-+      <plugin>
+-+        <artifactId>maven-compiler-plugin</artifactId>
+-+        <configuration>
+-+          <source>1.5</source>
+-+          <target>1.5</target>
+-+        </configuration>
+-+      </plugin>
+-+      <plugin>
+-+        <artifactId>maven-antrun-plugin</artifactId>
+-+        <executions>
+-+          <execution>
+-+            <id>clean</id>
+-+            <phase>clean</phase>
+-+            <goals>
+-+              <goal>run</goal>
+-+            </goals>
+-+            <configuration>
+-+              <tasks>
+-+                <delete failonerror="false" includeemptydirs="true">
+-+                  <fileset dir="../../lib/glassfish-jsp-2.1/">
+-+                    <include name="${project.artifactId}.jar"/>
+-+                  </fileset>
+-+                </delete>
+-+              </tasks>
+-+            </configuration>
+-+          </execution>
+-+          <execution>
+-+            <id>export</id>
+-+            <phase>generate-sources</phase>
+-+            <goals>
+-+              <goal>run</goal>
+-+            </goals>
+-+            <configuration>
+-+              <tasks>
+-+                <ant target="export-update">
+-+                  <property name="glassfish.tag" value="${glassfish.version.tag}"/>
+-+                </ant>
+-+              </tasks>
+-+              <sourceRoot>${project.build.directory}/generated-sources/main/java</sourceRoot>
+-+            </configuration>
+-+          </execution>
+-+          <execution>
+-+            <id>copyjar</id>
+-+            <phase>install</phase>
+-+            <goals>
+-+              <goal>run</goal>
+-+            </goals>
+-+            <configuration>
+-+              <tasks>
+-+                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/glassfish-jsp-2.1/${project.artifactId}.${project.packaging}"></copy>
+-+              </tasks>
+-+            </configuration>
+-+          </execution>
+-+        </executions>
+-+      </plugin>
+-+    </plugins>
+-+  </build>
+-+  <dependencies>
+-+    <dependency>
+-+      <groupId>org.mortbay.jetty</groupId>
+-+      <artifactId>servlet-api-2.5</artifactId>
+-+      <version>${project.version}</version>
+-+    </dependency>
+-+  </dependencies>
+-+    <properties>
+-+     <glassfish.version.tag>SJSAS90_FCS_BRANCH</glassfish.version.tag>
+-+  </properties>
+-+</project>
+-
+-Property changes on: modules/glassfish-jsp-api/pom.xml
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/xml
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
+-Index: modules/glassfish-jsp-api/README.txt
+-===================================================================
+---- modules/glassfish-jsp-api/README.txt	(revision 0)
+-+++ modules/glassfish-jsp-api/README.txt	(revision 0)
+-@@ -0,0 +1,22 @@
+-+Building Jetty with glassfish jsp
+-+---------------------------------
+-+
+-+In order to build, you will need to follow these steps:
+-+
+-+1. Obtain a login at dev.java.net
+-+
+-+2. Login at least once to glassfish cvs so a .cvspass file is created in your home directory.
+-+   For example, if you are the user called "fred", you do:
+-+   cvs -d :pserver:fred@cvs.dev.java.net:/cvs login
+-+
+-+3. Create a build.properties file in the modules/glassfish-jsp-api directory.
+-+   This file will contain your dev.java.net login name and a cvs tag
+-+   which will be the tag of the glassfish source to export. Assuming you have
+-+   the login "fred", and the tag (for the first release of glassfish) of 
+-+   SJSAS90_FCS_BRANCH your build.properties file would contain:
+-+
+-+   glassfish.cvs.login=fred
+-+   glassfish.tag=SJSAS90_FCS_BRANCH
+-+
+-+4. Execute "mvn install" from the top level of the Jetty directory.
+-+
+-
+-Property changes on: modules/glassfish-jsp-api/README.txt
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/plain
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
+-Index: modules/glassfish-jsp-api/build.xml
+-===================================================================
+---- modules/glassfish-jsp-api/build.xml	(revision 0)
+-+++ modules/glassfish-jsp-api/build.xml	(revision 0)
+-@@ -0,0 +1,81 @@
+-+<!-- ================================================================= -->
+-+<!-- Updates the glassfish files in jetty from glassfish cvs           -->
+-+<!-- NOTE: you must have a login for java.net and have used cvs login  -->
+-+<!-- at least once to login to glassfish and set up the .cvspass file. -->
+-+<!-- ================================================================= -->
+-+<project name="Glassfish Jasper" default="update" basedir=".">
+-+    <property file="build.properties" />
+-+    <property name="generated.srcs" value="target/generated-sources/main"/>
+-+    <property name="generated.java" value="${generated.srcs}/java"/>
+-+    <property name="generated.resources" value="${generated.srcs}/resources"/>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Clean a previous export/checkout                               -->
+-+    <!-- ============================================================== -->
+-+     <target name="clean">
+-+       <delete dir="target/glassfish" quiet="true"/>
+-+     </target>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Ceck if files already exported/checked out                     -->
+-+    <!-- ============================================================== -->
+-+    <target name="uptodate">
+-+      
+-+      <condition property="export.notrequired">
+-+          <available file="${generated.java}/javax/servlet/jsp/JspPage.java" type="file" property="src.present"/>
+-+      </condition>
+-+    </target>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Export the selected directories from glassfish                 -->
+-+    <!-- ============================================================== -->
+-+    <target name="export" description="Export src from glassfish" depends="uptodate" unless="export.notrequired">
+-+       <echo message="NOTE: You must have already performed a cvs login at least once to the glassfish cvs repo at cvs.dev.java.net."/>
+-+       <echo/>
+-+       <fail unless="glassfish.cvs.login"/>
+-+       <fail unless="glassfish.tag"/>
+-+       <property name="CVSROOT" value=":pserver:${glassfish.cvs.login}@cvs.dev.java.net:/cvs"/>
+-+       <cvs command="export -r ${glassfish.tag}" package="glassfish/servlet-api/src/jsr245/src/share/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+-+   </target>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Checkout the src from glassfish                                -->
+-+    <!-- ============================================================== -->
+-+    <target name="checkout" description="Checkout src from glassfish" depends="uptodate" unless="export.notrequired">
+-+       <echo message="NOTE: You must have already performed a cvs login at least once to the glassfish cvs repo at cvs.dev.java.net."/>
+-+       <echo/>
+-+       <fail unless="glassfish.cvs.login"/>
+-+       <property name="CVSROOT" value=":pserver:${glassfish.cvs.login}@cvs.dev.java.net:/cvs"/>
+-+       <cvs command="co" package="glassfish/servlet-api/src/jsr245/src/share/javax" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+-+   </target>
+-+
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Copy the required directories to src                           -->
+-+    <!-- ============================================================== -->
+-+   <target name="update" description="Copy selected exported glassfish files">
+-+     <copy todir="${generated.java}/javax">
+-+      <fileset dir="target/glassfish/servlet-api/src/jsr245/src/share/javax">
+-+        <exclude name="**/CVS/*"/>
+-+        <exclude name="**/*.properties"/>
+-+      </fileset>
+-+     </copy>
+-+
+-+    <copy todir="${generated.resources}/javax/servlet/jsp/resources">
+-+      <fileset dir="target/glassfish/servlet-api/src/jsr245/src/share/dtd">
+-+        <exclude name="**/CVS/*"/>
+-+      </fileset>
+-+    </copy>
+-+
+-+    <copy todir="${generated.resources}/javax">
+-+      <fileset dir="target/glassfish/servlet-api/src/jsr245/src/share/javax">
+-+        <include name="**/*.properties"/>
+-+      </fileset>
+-+    </copy>
+-+   </target>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Export the src and copy selected bits to src/main/             -->
+-+    <!-- ============================================================== -->
+-+  <target name="export-update" description="Export the src and copy selected files to the src/main/java dir" depends="export,update"/>
+-+</project>
+-
+-Property changes on: modules/glassfish-jsp-api/build.xml
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/xml
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
+-Index: modules/start/src/main/java/org/mortbay/start/start.config
+-===================================================================
+---- modules/start/src/main/java/org/mortbay/start/start.config	(revision 672)
+-+++ modules/start/src/main/java/org/mortbay/start/start.config	(working copy)
+-@@ -60,7 +60,8 @@
+- $(jetty.home)/lib/*                              always
+- 
+- # Set the classpath for the supporting cast               
+--$(jetty.home)/lib/jsp-2.1/*                      java >= 1.5   
+-+$(jetty.home)/lib/glassfish-jsp-2.1/*            java >= 1.5   
+-+$(jetty.home)/lib/jsp-2.1/*                      ! available org.apache.jasper.servlet.JspServlet AND java >= 1.5   
+- $(jetty.home)/lib/jsp-2.0/*                      ! available org.apache.jasper.servlet.JspServlet                
+- $(jetty.home)/lib/management/*                  
+- $(jetty.home)/lib/naming/*                              
+-@@ -75,3 +76,8 @@
+- 
+- # Add a resources directory if it is there
+- $(jetty.home)/resources/
+-+
+-+# Put tools.jar on the classpath
+-+$(java.home)/lib/tools.jar                       ! available com.sun.tools.javac.Main
+-+$(java.home)/../lib/tools.jar                    ! available com.sun.tools.javac.Main
+-+
+-Index: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java
+-===================================================================
+---- modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java	(revision 0)
+-+++ modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java	(revision 0)
+-@@ -0,0 +1,85 @@
+-+/**
+-+ * 
+-+ */
+-+package com.sun.org.apache.commons.logging;
+-+
+-+import java.util.logging.Level;
+-+
+-+
+-+
+-+public class Log 
+-+{
+-+    public static void fatal (Object message)
+-+    {
+-+        org.mortbay.log.Log.warn(message.toString());
+-+    }
+-+    
+-+    public static void fatal (Object message, Throwable t)
+-+    {
+-+        org.mortbay.log.Log.warn(message.toString(), t);
+-+    }
+-+    
+-+    public static void debug(Object message)
+-+    {
+-+        org.mortbay.log.Log.debug(message.toString());
+-+    }
+-+    
+-+    public static void debug (Object message, Throwable t)
+-+    {
+-+        org.mortbay.log.Log.debug(message.toString(), t);
+-+    }
+-+    
+-+    public static void trace (Object message)
+-+    {
+-+        org.mortbay.log.Log.debug(message.toString());
+-+    }
+-+    
+-+  
+-+    public static void info(Object message)
+-+    {
+-+       org.mortbay.log.Log.info(message.toString());
+-+    }
+-+
+-+    public static void error(Object message)
+-+    {
+-+       org.mortbay.log.Log.warn(message.toString());
+-+    }
+-+    
+-+    public static void error(Object message, Throwable cause)
+-+    {
+-+        org.mortbay.log.Log.warn(message.toString(), cause);
+-+    }
+-+
+-+    public static void warn(Object message)
+-+    {
+-+        org.mortbay.log.Log.warn(message.toString());
+-+    }
+-+    
+-+    public static boolean isDebugEnabled ()
+-+    {
+-+        return org.mortbay.log.Log.isDebugEnabled();
+-+    }
+-+    
+-+    public static boolean isWarnEnabled ()
+-+    {
+-+        return org.mortbay.log.Log.isDebugEnabled();
+-+    }
+-+    
+-+    public static boolean isInfoEnabled ()
+-+    {
+-+        return true;
+-+    }
+-+    
+-+    
+-+    public static boolean isErrorEnabled ()
+-+    {
+-+        return true;
+-+    }
+-+    
+-+  
+-+    public static boolean isTraceEnabled ()
+-+    {
+-+        return org.mortbay.log.Log.isDebugEnabled();
+-+    }
+-+    
+-+}
+-\ No newline at end of file
+-
+-Property changes on: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/plain
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
+-Index: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java
+-===================================================================
+---- modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java	(revision 0)
+-+++ modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java	(revision 0)
+-@@ -0,0 +1,50 @@
+-+/**
+-+ * 
+-+ */
+-+package com.sun.org.apache.commons.logging;
+-+
+-+/**
+-+ * @author janb
+-+ *
+-+ */
+-+public class LogConfigurationException extends Exception
+-+{
+-+
+-+    /**
+-+     * 
+-+     */
+-+    public LogConfigurationException()
+-+    {
+-+        super();
+-+        // TODO Auto-generated constructor stub
+-+    }
+-+
+-+    /**
+-+     * @param message
+-+     */
+-+    public LogConfigurationException(String message)
+-+    {
+-+        super(message);
+-+        // TODO Auto-generated constructor stub
+-+    }
+-+
+-+    /**
+-+     * @param message
+-+     * @param cause
+-+     */
+-+    public LogConfigurationException(String message, Throwable cause)
+-+    {
+-+        super(message, cause);
+-+        // TODO Auto-generated constructor stub
+-+    }
+-+
+-+    /**
+-+     * @param cause
+-+     */
+-+    public LogConfigurationException(Throwable cause)
+-+    {
+-+        super(cause);
+-+        // TODO Auto-generated constructor stub
+-+    }
+-+
+-+}
+-
+-Property changes on: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogConfigurationException.java
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/plain
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
+-Index: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java
+-===================================================================
+---- modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java	(revision 0)
+-+++ modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java	(revision 0)
+-@@ -0,0 +1,26 @@
+-+/**
+-+ * 
+-+ */
+-+package com.sun.org.apache.commons.logging;
+-+
+-+import java.net.URLClassLoader;
+-+
+-+
+-+/**
+-+ * @author janb
+-+ *
+-+ */
+-+public class LogFactory
+-+{
+-+    private static final Log log = new Log();
+-+    
+-+    public static Log getLog (Class c)
+-+    {
+-+        return log;
+-+    }
+-+    
+-+    public static void release (URLClassLoader cl)
+-+    {
+-+        //noop;
+-+    }
+-+}
+-
+-Property changes on: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/LogFactory.java
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/plain
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
+-Index: modules/glassfish-jsp/pom.xml
+-===================================================================
+---- modules/glassfish-jsp/pom.xml	(revision 0)
+-+++ modules/glassfish-jsp/pom.xml	(revision 0)
+-@@ -0,0 +1,135 @@
+-+<?xml version="1.0" encoding="UTF-8"?><project>
+-+  <parent>
+-+    <artifactId>project</artifactId>
+-+    <groupId>org.mortbay.jetty</groupId>
+-+    <version>6.0-SNAPSHOT</version>
+-+  </parent>
+-+  <modelVersion>4.0.0</modelVersion>
+-+  <artifactId>glassfish-jsp-2.1</artifactId>
+-+  <name>Glassfish Jasper</name>
+-+  <build>
+-+    <defaultGoal>install</defaultGoal>
+-+    <resources>
+-+      <resource>
+-+        <directory>src/main/resources</directory>
+-+      </resource>
+-+      <resource>
+-+        <directory>target/generated-sources/main/resources</directory>
+-+        <includes>
+-+          <includes>**/**</includes>
+-+        </includes>
+-+      </resource>
+-+    </resources>
+-+    <plugins>
+-+      <plugin>
+-+        <artifactId>maven-compiler-plugin</artifactId>
+-+        <configuration>
+-+          <source>1.5</source>
+-+          <target>1.5</target>
+-+        </configuration>
+-+      </plugin>
+-+      <plugin>
+-+        <artifactId>maven-antrun-plugin</artifactId>
+-+        <executions>
+-+          <execution>
+-+            <id>clean</id>
+-+            <phase>clean</phase>
+-+            <goals>
+-+              <goal>run</goal>
+-+            </goals>
+-+            <configuration>
+-+              <tasks>
+-+                <delete failonerror="false" includeemptydirs="true">
+-+                  <fileset dir="../../lib/glassfish-jsp-2.1/">
+-+                    <include name="xercesImpl-${xerces-version}.jar"/>
+-+                    <include name="xmlParserAPIs-${xerces-version}.jar"/>
+-+                    <include name="ant-${ant-version}.jar"/>
+-+                    <include name="${project.artifactId}.jar"/>
+-+                  </fileset>
+-+                </delete>
+-+              </tasks>
+-+            </configuration>
+-+          </execution>
+-+          <execution>
+-+            <id>export</id>
+-+            <phase>generate-sources</phase>
+-+            <goals>
+-+              <goal>run</goal>
+-+            </goals>
+-+            <configuration>
+-+              <tasks>
+-+                <ant target="export-update">
+-+                  <property name="glassfish.tag" value="${glassfish.version.tag}"/>
+-+                </ant>
+-+              </tasks>
+-+              <sourceRoot>${project.build.directory}/generated-sources/main/java</sourceRoot>
+-+            </configuration>
+-+          </execution>
+-+          <execution>
+-+            <id>copyjar</id>
+-+            <phase>install</phase>
+-+            <goals>
+-+              <goal>run</goal>
+-+            </goals>
+-+            <configuration>
+-+              <tasks>
+-+                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/glassfish-jsp-2.1/${project.artifactId}.${project.packaging}"></copy>
+-+              </tasks>
+-+            </configuration>
+-+          </execution>
+-+        </executions>
+-+      </plugin>
+-+      <plugin>
+-+        <groupId>org.codehaus.mojo</groupId>
+-+        <artifactId>dependency-maven-plugin</artifactId>
+-+        <executions>
+-+          <execution>
+-+            <phase>install</phase>
+-+            <goals>
+-+              <goal>copy</goal>
+-+            </goals>
+-+            <configuration>
+-+              <artifactItems>
+-+                <artifactItem>
+-+                  <groupId>ant</groupId>
+-+                  <artifactId>ant</artifactId>
+-+                  <version>${ant-version}</version>
+-+                </artifactItem>
+-+                <artifactItem>
+-+                  <groupId>xerces</groupId>
+-+                  <artifactId>xmlParserAPIs</artifactId>
+-+                  <version>${xerces-version}</version>
+-+                </artifactItem>
+-+              </artifactItems>
+-+              <outputDirectory>${basedir}/../../lib/glassfish-jsp-2.1</outputDirectory>
+-+            </configuration>
+-+          </execution>
+-+        </executions>
+-+      </plugin>
+-+    </plugins>
+-+  </build>
+-+  <dependencies>
+-+    <dependency>
+-+      <groupId>org.mortbay.jetty</groupId>
+-+      <artifactId>servlet-api-2.5</artifactId>
+-+      <version>${project.version}</version>
+-+    </dependency>
+-+    <dependency>
+-+      <groupId>org.mortbay.jetty</groupId>
+-+      <artifactId>jetty-util</artifactId>
+-+      <version>${project.version}</version>
+-+    </dependency>
+-+    <dependency>
+-+      <groupId>org.mortbay.jetty</groupId>
+-+      <artifactId>glassfish-jsp-api-2.1</artifactId>
+-+      <version>${project.version}</version>
+-+    </dependency>
+-+    <dependency>
+-+      <groupId>ant</groupId>
+-+      <artifactId>ant</artifactId>
+-+    </dependency>
+-+  </dependencies>
+-+    <properties>
+-+     <glassfish.version.tag>SJSAS90_FCS_BRANCH</glassfish.version.tag>
+-+  </properties>
+-+</project>
+-
+-Property changes on: modules/glassfish-jsp/pom.xml
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/xml
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
+-Index: modules/glassfish-jsp/README.txt
+-===================================================================
+---- modules/glassfish-jsp/README.txt	(revision 0)
+-+++ modules/glassfish-jsp/README.txt	(revision 0)
+-@@ -0,0 +1,22 @@
+-+Building Jetty with glassfish jsp
+-+---------------------------------
+-+
+-+In order to build, you will need to follow these steps:
+-+
+-+1. Obtain a login at dev.java.net
+-+
+-+2. Login at least once to glassfish cvs so a .cvspass file is created in your home directory.
+-+   For example, if you are the user called "fred", you do:
+-+   cvs -d :pserver:fred@cvs.dev.java.net:/cvs login
+-+
+-+3. Create a build.properties file in the modules/glassfish-jsp directory.
+-+   This file will contain your dev.java.net login name and a cvs tag
+-+   which will be the tag of the glassfish source to export. Assuming you have
+-+   the login "fred", and the tag (for the first release of glassfish) of 
+-+   SJSAS90_FCS_BRANCH your build.properties file would contain:
+-+
+-+   glassfish.cvs.login=fred
+-+   glassfish.tag=SJSAS90_FCS_BRANCH
+-+
+-+4. Execute "mvn install" from the top level of the Jetty directory.
+-+
+-
+-Property changes on: modules/glassfish-jsp/README.txt
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/plain
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
+-Index: modules/glassfish-jsp/build.xml
+-===================================================================
+---- modules/glassfish-jsp/build.xml	(revision 0)
+-+++ modules/glassfish-jsp/build.xml	(revision 0)
+-@@ -0,0 +1,94 @@
+-+<!-- ================================================================= -->
+-+<!-- Updates the glassfish files in jetty from glassfish cvs           -->
+-+<!-- NOTE: you must have a login for java.net and have used cvs login  -->
+-+<!-- at least once to login to glassfish and set up the .cvspass file. -->
+-+<!-- ================================================================= -->
+-+<project name="Glassfish Jasper" default="update" basedir=".">
+-+    <property file="build.properties" />
+-+    <property name="generated.srcs" value="target/generated-sources/main"/>
+-+    <property name="generated.java" value="${generated.srcs}/java"/>
+-+    <property name="generated.resources" value="${generated.srcs}/resources"/>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Clean a previous export/checkout                               -->
+-+    <!-- ============================================================== -->
+-+     <target name="clean">
+-+       <delete dir="target/glassfish" quiet="true"/>
+-+     </target>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Ceck if files already exported/checked out                     -->
+-+    <!-- ============================================================== -->
+-+    <target name="uptodate">
+-+      
+-+      <condition property="export.notrequired">
+-+        <and>
+-+          <available file="${generated.java}/org/apache/jasper/JspC.java" type="file" property="src.present"/>
+-+          <available file="${generated.resources}/org/apache/jasper/resources/messages.properties" type="file" property="resources.present"/>
+-+        </and>
+-+      </condition>
+-+    </target>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Export the selected directories from glassfish                 -->
+-+    <!-- ============================================================== -->
+-+    <target name="export" description="Export src from glassfish" depends="uptodate" unless="export.notrequired">
+-+       <echo message="NOTE: You must have already performed a cvs login at least once to the glassfish cvs repo at cvs.dev.java.net."/>
+-+       <echo/>
+-+       <fail unless="glassfish.cvs.login"/>
+-+       <fail unless="glassfish.tag"/>
+-+       <property name="CVSROOT" value=":pserver:${glassfish.cvs.login}@cvs.dev.java.net:/cvs"/>
+-+       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+-+       <cvs command="export -r ${glassfish.tag}" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+-+   </target>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Checkout the src from glassfish                                -->
+-+    <!-- ============================================================== -->
+-+    <target name="checkout" description="Checkout src from glassfish" depends="uptodate" unless="export.notrequired">
+-+       <echo message="NOTE: You must have already performed a cvs login at least once to the glassfish cvs repo at cvs.dev.java.net."/>
+-+       <echo/>
+-+       <fail unless="glassfish.cvs.login"/>
+-+       <property name="CVSROOT" value=":pserver:${glassfish.cvs.login}@cvs.dev.java.net:/cvs"/>
+-+       <cvs command="co" package="glassfish/appserv-webtier/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+-+       <cvs command="co" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+-+   </target>
+-+
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Copy the required directories to src                           -->
+-+    <!-- ============================================================== -->
+-+   <target name="update" description="Copy selected exported glassfish files">
+-+     <copy todir="${generated.java}/com/sun/appserv">
+-+      <fileset dir="target/glassfish/common-util/src/java/com/sun/appserv">
+-+        <exclude name="**/CVS/*"/>
+-+      </fileset>
+-+     </copy>
+-+     <copy todir="${generated.java}/com/sun/common">
+-+      <fileset dir="target/glassfish/common-util/src/java/com/sun/common">
+-+        <exclude name="**/CVS/*"/>
+-+      </fileset>
+-+     </copy>
+-+    <copy todir="${generated.java}/com/sun/el">
+-+      <fileset dir="target/glassfish/appserv-webtier/src/java/com/sun/el">
+-+        <exclude name="**/CVS/*"/>
+-+      </fileset>
+-+    </copy>
+-+    <copy todir="${generated.java}/org/apache/jasper">
+-+      <fileset dir="target/glassfish/appserv-webtier/src/java/org/apache/jasper">
+-+        <exclude name="**/resources/*"/>
+-+        <exclude name="**/CVS/*"/>
+-+      </fileset>
+-+    </copy>
+-+    <copy todir="${generated.resources}/org/apache/jasper/resources">
+-+      <fileset dir="target/glassfish/appserv-webtier/src/java/org/apache/jasper/resources">
+-+        <exclude name="**/CVS/*"/>
+-+      </fileset>
+-+    </copy>
+-+   </target>
+-+
+-+    <!-- ============================================================== -->
+-+    <!-- Export the src and copy selected bits to src/main/             -->
+-+    <!-- ============================================================== -->
+-+  <target name="export-update" description="Export the src and copy selected files to the src/main/java dir" depends="export,update"/>
+-+</project>
+-
+-Property changes on: modules/glassfish-jsp/build.xml
+-___________________________________________________________________
+-Name: svn:mime-type
+-   + text/xml
+-Name: svn:keywords
+-   + Date Author Id Revision HeadURL
+-Name: svn:eol-style
+-   + native
+-
 Index: modules/glassfish-jsp-api/pom.xml
 ===================================================================
 --- modules/glassfish-jsp-api/pom.xml	(revision 0)
@@ -70,7 +837,7 @@ Index: modules/glassfish-jsp-api/pom.xml
 +            </goals>
 +            <configuration>
 +              <tasks>
-+                <ant target="export-update">
++                <ant target="extract-src">
 +                  <property name="glassfish.tag" value="${glassfish.version.tag}"/>
 +                </ant>
 +              </tasks>
@@ -101,7 +868,7 @@ Index: modules/glassfish-jsp-api/pom.xml
 +    </dependency>
 +  </dependencies>
 +    <properties>
-+     <glassfish.version.tag>SJSAS90_FCS_BRANCH</glassfish.version.tag>
++     <glassfish.version.tag></glassfish.version.tag>
 +  </properties>
 +</project>
 
@@ -114,11 +881,28 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
+Index: modules/glassfish-jsp-api/build.properties
+===================================================================
+--- modules/glassfish-jsp-api/build.properties	(revision 0)
++++ modules/glassfish-jsp-api/build.properties	(revision 0)
+@@ -0,0 +1,2 @@
++glassfish.cvs.login=
++glassfish.tag=
+
+Property changes on: modules/glassfish-jsp-api/build.properties
+___________________________________________________________________
+Name: svn:mime-type
+   + text/plain
+Name: svn:keywords
+   + Date Author Id Revision HeadURL
+Name: svn:eol-style
+   + native
+
 Index: modules/glassfish-jsp-api/README.txt
 ===================================================================
 --- modules/glassfish-jsp-api/README.txt	(revision 0)
 +++ modules/glassfish-jsp-api/README.txt	(revision 0)
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,28 @@
 +Building Jetty with glassfish jsp
 +---------------------------------
 +
@@ -139,6 +923,12 @@ Index: modules/glassfish-jsp-api/README.txt
 +   glassfish.cvs.login=fred
 +   glassfish.tag=SJSAS90_FCS_BRANCH
 +
++   On the other hand, if you want to work with the HEAD of cvs, leave
++   the glassfish.tag field blank:
++
++   glassfish.cvs.login=fred
++   glassfish.tag=
++
 +4. Execute "mvn install" from the top level of the Jetty directory.
 +
 
@@ -155,7 +945,7 @@ Index: modules/glassfish-jsp-api/build.xml
 ===================================================================
 --- modules/glassfish-jsp-api/build.xml	(revision 0)
 +++ modules/glassfish-jsp-api/build.xml	(revision 0)
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,132 @@
 +<!-- ================================================================= -->
 +<!-- Updates the glassfish files in jetty from glassfish cvs           -->
 +<!-- NOTE: you must have a login for java.net and have used cvs login  -->
@@ -179,15 +969,53 @@ Index: modules/glassfish-jsp-api/build.xml
 +    <!-- ============================================================== -->
 +    <target name="uptodate">
 +      
-+      <condition property="export.notrequired">
++      <condition property="export.required">
++        <not>
 +          <available file="${generated.java}/javax/servlet/jsp/JspPage.java" type="file" property="src.present"/>
++        </not>
 +      </condition>
 +    </target>
++
++
++    <target name="test-export" depends="uptodate">
++       <condition property="export.args.ok">
++         <and>
++           <not><equals arg1="${glassfish.cvs.login}" arg2="" trim="true"/></not>
++           <not><equals arg1="${glassfish.tag}" arg2="" trim="true"/></not>
++         </and>
++       </condition>
++       <condition property="export.checks.ok">
++         <and>
++           <isset property="export.args.ok"/>
++           <isset property="export.required"/>
++         </and>
++       </condition>
++    </target>
++
++
++    <target name="test-checkout" depends="uptodate">
++       <condition property="checkout.args.ok">
++         <and>
++           <not><equals arg1="${glassfish.cvs.login}" arg2="" trim="true"/></not>
++           <equals arg1="${glassfish.tag}" arg2="" trim="true"/>
++         </and>
++       </condition>
++       <echo message="checkout.args.ok=${checkout.args.ok} and export.required=${export.required}"/>
++       <condition property="checkout.checks.ok">
++         <and>
++           <isset property="checkout.args.ok"/>
++           <isset property="export.required"/>
++         </and>
++       </condition>
++       <echo message="checkout.checks.ok=${checkout.checks.ok}"/>
++    </target>
++
++
 +
 +    <!-- ============================================================== -->
 +    <!-- Export the selected directories from glassfish                 -->
 +    <!-- ============================================================== -->
-+    <target name="export" description="Export src from glassfish" depends="uptodate" unless="export.notrequired">
++    <target name="export" description="Export src from glassfish" depends="test-export" if="export.checks.ok">
 +       <echo message="NOTE: You must have already performed a cvs login at least once to the glassfish cvs repo at cvs.dev.java.net."/>
 +       <echo/>
 +       <fail unless="glassfish.cvs.login"/>
@@ -199,12 +1027,12 @@ Index: modules/glassfish-jsp-api/build.xml
 +    <!-- ============================================================== -->
 +    <!-- Checkout the src from glassfish                                -->
 +    <!-- ============================================================== -->
-+    <target name="checkout" description="Checkout src from glassfish" depends="uptodate" unless="export.notrequired">
++    <target name="checkout" description="Checkout src from glassfish" depends="test-checkout" if="checkout.checks.ok">
 +       <echo message="NOTE: You must have already performed a cvs login at least once to the glassfish cvs repo at cvs.dev.java.net."/>
 +       <echo/>
 +       <fail unless="glassfish.cvs.login"/>
 +       <property name="CVSROOT" value=":pserver:${glassfish.cvs.login}@cvs.dev.java.net:/cvs"/>
-+       <cvs command="co" package="glassfish/servlet-api/src/jsr245/src/share/javax" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
++       <cvs command="co" package="glassfish/servlet-api/src/jsr245/src/share/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
 +   </target>
 +
 +
@@ -236,7 +1064,20 @@ Index: modules/glassfish-jsp-api/build.xml
 +    <!-- Export the src and copy selected bits to src/main/             -->
 +    <!-- ============================================================== -->
 +  <target name="export-update" description="Export the src and copy selected files to the src/main/java dir" depends="export,update"/>
++
++    <!-- ============================================================== -->
++    <!-- Checkout the src and copy selected bits to src/main/             -->
++    <!-- ============================================================== -->
++  <target name="checkout-update" description="Checkout the src and copy selected files to the src/main/java dir" depends="checkout,update"/>
++
++    <!-- ============================================================== -->
++    <!-- Export or Checkout the src and copy selected bits to src/main/ -->
++    <!-- ============================================================== -->
++  <target name="extract-src" description="Export src if glassfish.tag is set, otherwise do a checkout of head" depends="export,checkout,update">
++  </target>
++
 +</project>
++
 
 Property changes on: modules/glassfish-jsp-api/build.xml
 ___________________________________________________________________
@@ -249,7 +1090,7 @@ Name: svn:eol-style
 
 Index: modules/start/src/main/java/org/mortbay/start/start.config
 ===================================================================
---- modules/start/src/main/java/org/mortbay/start/start.config	(revision 672)
+--- modules/start/src/main/java/org/mortbay/start/start.config	(revision 721)
 +++ modules/start/src/main/java/org/mortbay/start/start.config	(working copy)
 @@ -60,7 +60,8 @@
  $(jetty.home)/lib/*                              always
@@ -270,6 +1111,451 @@ Index: modules/start/src/main/java/org/mortbay/start/start.config
 +$(java.home)/lib/tools.jar                       ! available com.sun.tools.javac.Main
 +$(java.home)/../lib/tools.jar                    ! available com.sun.tools.javac.Main
 +
+Index: modules/glassfish-jsp/src/main/java/org/apache/jasper/compiler/JDTCompiler.java
+===================================================================
+--- modules/glassfish-jsp/src/main/java/org/apache/jasper/compiler/JDTCompiler.java	(revision 0)
++++ modules/glassfish-jsp/src/main/java/org/apache/jasper/compiler/JDTCompiler.java	(revision 0)
+@@ -0,0 +1,430 @@
++/*
++ * Copyright 1999,2004 The Apache Software Foundation.
++ * 
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ * 
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ * 
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package org.apache.jasper.compiler;
++
++import java.io.BufferedOutputStream;
++import java.io.BufferedReader;
++import java.io.ByteArrayOutputStream;
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.FileNotFoundException;
++import java.io.FileOutputStream;
++import java.io.IOException;
++import java.io.InputStream;
++import java.io.InputStreamReader;
++import java.io.Reader;
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.Locale;
++import java.util.Map;
++import java.util.StringTokenizer;
++
++import org.apache.jasper.JasperException;
++import org.eclipse.jdt.core.compiler.IProblem;
++import org.eclipse.jdt.internal.compiler.ClassFile;
++import org.eclipse.jdt.internal.compiler.CompilationResult;
++import org.eclipse.jdt.internal.compiler.Compiler;
++import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
++import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
++import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
++import org.eclipse.jdt.internal.compiler.IProblemFactory;
++import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
++import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
++import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
++import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
++import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
++import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
++
++/**
++ * JDT class compiler. This compiler will load source dependencies from the
++ * context classloader, reducing dramatically disk access during 
++ * the compilation process.
++ *
++ * @author Cocoon2
++ * @author Remy Maucherat
++ */
++public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
++
++    
++    /** 
++     * Compile the servlet from .java file to .class file
++     */
++    protected void generateClass(String[] smap)
++        throws FileNotFoundException, JasperException, Exception {
++
++        long t1 = 0;
++        if (log.isDebugEnabled()) {
++            t1 = System.currentTimeMillis();
++        }
++        
++        final String sourceFile = ctxt.getServletJavaFileName();
++        final String outputDir = ctxt.getOptions().getScratchDir().getAbsolutePath();
++        String packageName = ctxt.getServletPackageName();
++        final String targetClassName = 
++            ((packageName.length() != 0) ? (packageName + ".") : "") 
++                    + ctxt.getServletClassName();
++        final ClassLoader classLoader = ctxt.getJspLoader();
++        String[] fileNames = new String[] {sourceFile};
++        String[] classNames = new String[] {targetClassName};
++        final ArrayList problemList = new ArrayList();
++        
++        class CompilationUnit implements ICompilationUnit {
++
++            String className;
++            String sourceFile;
++
++            CompilationUnit(String sourceFile, String className) {
++                this.className = className;
++                this.sourceFile = sourceFile;
++            }
++
++            public char[] getFileName() {
++                return className.toCharArray();
++            }
++            
++            public char[] getContents() {
++                char[] result = null;
++                try {
++                    InputStreamReader isReader =
++                        new InputStreamReader(new FileInputStream(sourceFile),
++                                ctxt.getOptions().getJavaEncoding());
++                    Reader reader = new BufferedReader(isReader);
++                    if (reader != null) {
++                        char[] chars = new char[8192];
++                        StringBuffer buf = new StringBuffer();
++                        int count;
++                        while ((count = reader.read(chars, 0, 
++                                                    chars.length)) > 0) {
++                            buf.append(chars, 0, count);
++                        }
++                        result = new char[buf.length()];
++                        buf.getChars(0, result.length, result, 0);
++                    }
++                } catch (IOException e) {
++                    log.error("Compilation error", e);
++                }
++                return result;
++            }
++            
++            public char[] getMainTypeName() {
++                int dot = className.lastIndexOf('.');
++                if (dot > 0) {
++                    return className.substring(dot + 1).toCharArray();
++                }
++                return className.toCharArray();
++            }
++            
++            public char[][] getPackageName() {
++                StringTokenizer izer = 
++                    new StringTokenizer(className, ".");
++                char[][] result = new char[izer.countTokens()-1][];
++                for (int i = 0; i < result.length; i++) {
++                    String tok = izer.nextToken();
++                    result[i] = tok.toCharArray();
++                }
++                return result;
++            }
++        }
++
++        final INameEnvironment env = new INameEnvironment() {
++
++                public NameEnvironmentAnswer 
++                    findType(char[][] compoundTypeName) {
++                    String result = "";
++                    String sep = "";
++                    for (int i = 0; i < compoundTypeName.length; i++) {
++                        result += sep;
++                        result += new String(compoundTypeName[i]);
++                        sep = ".";
++                    }
++                    return findType(result);
++                }
++
++                public NameEnvironmentAnswer 
++                    findType(char[] typeName, 
++                             char[][] packageName) {
++                        String result = "";
++                        String sep = "";
++                        for (int i = 0; i < packageName.length; i++) {
++                            result += sep;
++                            result += new String(packageName[i]);
++                            sep = ".";
++                        }
++                        result += sep;
++                        result += new String(typeName);
++                        return findType(result);
++                }
++                
++                private NameEnvironmentAnswer findType(String className) {
++
++                    InputStream is = null;
++                    try {
++                        if (className.equals(targetClassName)) {
++                            ICompilationUnit compilationUnit = 
++                                new CompilationUnit(sourceFile, className);
++                            return 
++                                new NameEnvironmentAnswer(compilationUnit, null);
++                        }
++                        String resourceName = 
++                            className.replace('.', '/') + ".class";
++                        is = classLoader.getResourceAsStream(resourceName);
++                        if (is != null) {
++                            byte[] classBytes;
++                            byte[] buf = new byte[8192];
++                            ByteArrayOutputStream baos = 
++                                new ByteArrayOutputStream(buf.length);
++                            int count;
++                            while ((count = is.read(buf, 0, buf.length)) > 0) {
++                                baos.write(buf, 0, count);
++                            }
++                            baos.flush();
++                            classBytes = baos.toByteArray();
++                            char[] fileName = className.toCharArray();
++                            ClassFileReader classFileReader = 
++                                new ClassFileReader(classBytes, fileName, 
++                                                    true);
++                            return 
++                                new NameEnvironmentAnswer(classFileReader, null);
++                        }
++                    } catch (IOException exc) {
++                        log.error("Compilation error", exc);
++                    } catch (org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException exc) {
++                        log.error("Compilation error", exc);
++                    } finally {
++                        if (is != null) {
++                            try {
++                                is.close();
++                            } catch (IOException exc) {
++                                // Ignore
++                            }
++                        }
++                    }
++                    return null;
++                }
++
++                private boolean isPackage(String result) {
++                    if (result.equals(targetClassName)) {
++                        return false;
++                    }
++                    String resourceName = result.replace('.', '/') + ".class";
++                    InputStream is = 
++                        classLoader.getResourceAsStream(resourceName);
++                    return is == null;
++                }
++
++                public boolean isPackage(char[][] parentPackageName, 
++                                         char[] packageName) {
++                    String result = "";
++                    String sep = "";
++                    if (parentPackageName != null) {
++                        for (int i = 0; i < parentPackageName.length; i++) {
++                            result += sep;
++                            String str = new String(parentPackageName[i]);
++                            result += str;
++                            sep = ".";
++                        }
++                    }
++                    String str = new String(packageName);
++                    if (Character.isUpperCase(str.charAt(0))) {
++                        if (!isPackage(result)) {
++                            return false;
++                        }
++                    }
++                    result += sep;
++                    result += str;
++                    return isPackage(result);
++                }
++
++                public void cleanup() {
++                }
++
++            };
++
++        final IErrorHandlingPolicy policy = 
++            DefaultErrorHandlingPolicies.proceedWithAllProblems();
++
++        final Map settings = new HashMap();
++        settings.put(CompilerOptions.OPTION_LineNumberAttribute,
++                     CompilerOptions.GENERATE);
++        settings.put(CompilerOptions.OPTION_SourceFileAttribute,
++                     CompilerOptions.GENERATE);
++        settings.put(CompilerOptions.OPTION_ReportDeprecation,
++                     CompilerOptions.IGNORE);
++        if (ctxt.getOptions().getJavaEncoding() != null) {
++            settings.put(CompilerOptions.OPTION_Encoding,
++                    ctxt.getOptions().getJavaEncoding());
++        }
++        if (ctxt.getOptions().getClassDebugInfo()) {
++            settings.put(CompilerOptions.OPTION_LocalVariableAttribute,
++                         CompilerOptions.GENERATE);
++        }
++
++        // Source JVM
++        if(ctxt.getOptions().getCompilerSourceVM() != null) {
++            String opt = ctxt.getOptions().getCompilerSourceVM();
++            if(opt.equals("1.1")) {
++                settings.put(CompilerOptions.OPTION_Source,
++                             CompilerOptions.VERSION_1_1);
++            } else if(opt.equals("1.2")) {
++                settings.put(CompilerOptions.OPTION_Source,
++                             CompilerOptions.VERSION_1_2);
++            } else if(opt.equals("1.3")) { 
++                settings.put(CompilerOptions.OPTION_Source,
++                             CompilerOptions.VERSION_1_3);
++            } else if(opt.equals("1.4")) {
++                settings.put(CompilerOptions.OPTION_Source,
++                             CompilerOptions.VERSION_1_4);
++            } else if(opt.equals("1.5")) {
++                settings.put(CompilerOptions.OPTION_Source,
++                             CompilerOptions.VERSION_1_5);
++            } else {
++                log.warn("Unknown source VM " + opt + " ignored.");
++                settings.put(CompilerOptions.OPTION_Source,
++                        CompilerOptions.VERSION_1_5);
++            }
++        } else {
++            // Default to 1.5
++            settings.put(CompilerOptions.OPTION_Source,
++                    CompilerOptions.VERSION_1_5);
++        }
++        
++        // Target JVM
++        if(ctxt.getOptions().getCompilerTargetVM() != null) {
++            String opt = ctxt.getOptions().getCompilerTargetVM();
++            if(opt.equals("1.1")) {
++                settings.put(CompilerOptions.OPTION_TargetPlatform,
++                             CompilerOptions.VERSION_1_1);
++            } else if(opt.equals("1.2")) {
++                settings.put(CompilerOptions.OPTION_TargetPlatform,
++                             CompilerOptions.VERSION_1_2);
++            } else if(opt.equals("1.3")) { 
++                settings.put(CompilerOptions.OPTION_TargetPlatform,
++                             CompilerOptions.VERSION_1_3);
++            } else if(opt.equals("1.4")) {
++                settings.put(CompilerOptions.OPTION_TargetPlatform,
++                             CompilerOptions.VERSION_1_4);
++            } else if(opt.equals("1.5")) {
++                settings.put(CompilerOptions.OPTION_TargetPlatform,
++                             CompilerOptions.VERSION_1_5);
++            } else {
++                log.warn("Unknown target VM " + opt + " ignored.");
++                settings.put(CompilerOptions.OPTION_TargetPlatform,
++                        CompilerOptions.VERSION_1_5);
++            }
++        } else {
++            // Default to 1.5
++            settings.put(CompilerOptions.OPTION_TargetPlatform,
++                    CompilerOptions.VERSION_1_5);
++        }
++
++        final IProblemFactory problemFactory = 
++            new DefaultProblemFactory(Locale.getDefault());
++        
++        final ICompilerRequestor requestor = new ICompilerRequestor() {
++                public void acceptResult(CompilationResult result) {
++                    try {
++                        if (result.hasProblems()) {
++                            IProblem[] problems = result.getProblems();
++                            for (int i = 0; i < problems.length; i++) {
++                                IProblem problem = problems[i];
++                                if (problem.isError()) {
++                                    String name = 
++                                        new String(problems[i].getOriginatingFileName());
++                                    try {
++                                        problemList.add(ErrorDispatcher.createJavacError
++                                                (name, pageNodes, new StringBuffer(problem.getMessage()), 
++                                                        problem.getSourceLineNumber()));
++                                    } catch (JasperException e) {
++                                        log.error("Error visiting node", e);
++                                    }
++                                }
++                            }
++                        }
++                        if (problemList.isEmpty()) {
++                            ClassFile[] classFiles = result.getClassFiles();
++                            for (int i = 0; i < classFiles.length; i++) {
++                                ClassFile classFile = classFiles[i];
++                                char[][] compoundName = 
++                                    classFile.getCompoundName();
++                                String className = "";
++                                String sep = "";
++                                for (int j = 0; 
++                                     j < compoundName.length; j++) {
++                                    className += sep;
++                                    className += new String(compoundName[j]);
++                                    sep = ".";
++                                }
++                                byte[] bytes = classFile.getBytes();
++                                String outFile = outputDir + "/" + 
++                                    className.replace('.', '/') + ".class";
++                                FileOutputStream fout = 
++                                    new FileOutputStream(outFile);
++                                BufferedOutputStream bos = 
++                                    new BufferedOutputStream(fout);
++                                bos.write(bytes);
++                                bos.close();
++                            }
++                        }
++                    } catch (IOException exc) {
++                        log.error("Compilation error", exc);
++                    }
++                }
++            };
++
++        ICompilationUnit[] compilationUnits = 
++            new ICompilationUnit[classNames.length];
++        for (int i = 0; i < compilationUnits.length; i++) {
++            String className = classNames[i];
++            compilationUnits[i] = new CompilationUnit(fileNames[i], className);
++        }
++        Compiler compiler = new Compiler(env,
++                                         policy,
++                                         settings,
++                                         requestor,
++                                         problemFactory);
++        compiler.compile(compilationUnits);
++
++        if (!ctxt.keepGenerated()) {
++            File javaFile = new File(ctxt.getServletJavaFileName());
++            javaFile.delete();
++        }
++    
++        if (!problemList.isEmpty()) {
++            JavacErrorDetail[] jeds = 
++                (JavacErrorDetail[]) problemList.toArray(new JavacErrorDetail[0]);
++            errDispatcher.javacError(jeds);
++        }
++        
++        if( log.isDebugEnabled() ) {
++            long t2=System.currentTimeMillis();
++            log.debug("Compiled " + ctxt.getServletJavaFileName() + " "
++                      + (t2-t1) + "ms");
++        }
++
++        if (ctxt.isPrototypeMode()) {
++            return;
++        }
++
++        // JSR45 Support
++        if (! options.isSmapSuppressed()) {
++            SmapUtil.installSmap(smap);
++        }
++        
++    }
++    
++    
++}
+
+Property changes on: modules/glassfish-jsp/src/main/java/org/apache/jasper/compiler/JDTCompiler.java
+___________________________________________________________________
+Name: svn:mime-type
+   + text/plain
+Name: svn:keywords
+   + Date Author Id Revision HeadURL
+Name: svn:eol-style
+   + native
+
 Index: modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java
 ===================================================================
 --- modules/glassfish-jsp/src/main/java/com/sun/org/apache/commons/logging/Log.java	(revision 0)
@@ -481,7 +1767,7 @@ Index: modules/glassfish-jsp/pom.xml
 ===================================================================
 --- modules/glassfish-jsp/pom.xml	(revision 0)
 +++ modules/glassfish-jsp/pom.xml	(revision 0)
-@@ -0,0 +1,135 @@
+@@ -0,0 +1,146 @@
 +<?xml version="1.0" encoding="UTF-8"?><project>
 +  <parent>
 +    <artifactId>project</artifactId>
@@ -529,6 +1815,7 @@ Index: modules/glassfish-jsp/pom.xml
 +                    <include name="xmlParserAPIs-${xerces-version}.jar"/>
 +                    <include name="ant-${ant-version}.jar"/>
 +                    <include name="${project.artifactId}.jar"/>
++                    <include name="core-${eclipse-compiler-version}.jar"/>
 +                  </fileset>
 +                </delete>
 +              </tasks>
@@ -542,7 +1829,7 @@ Index: modules/glassfish-jsp/pom.xml
 +            </goals>
 +            <configuration>
 +              <tasks>
-+                <ant target="export-update">
++                <ant target="extract-src">
 +                  <property name="glassfish.tag" value="${glassfish.version.tag}"/>
 +                </ant>
 +              </tasks>
@@ -584,6 +1871,11 @@ Index: modules/glassfish-jsp/pom.xml
 +                  <artifactId>xmlParserAPIs</artifactId>
 +                  <version>${xerces-version}</version>
 +                </artifactItem>
++               <artifactItem>
++                  <groupId>org.eclipse.jdt</groupId>
++                  <artifactId>core</artifactId>
++                  <version>${eclipse-compiler-version}</version>
++                </artifactItem>
 +              </artifactItems>
 +              <outputDirectory>${basedir}/../../lib/glassfish-jsp-2.1</outputDirectory>
 +            </configuration>
@@ -593,6 +1885,11 @@ Index: modules/glassfish-jsp/pom.xml
 +    </plugins>
 +  </build>
 +  <dependencies>
++    <dependency>
++      <groupId>org.eclipse.jdt</groupId>
++      <artifactId>core</artifactId>
++      <version>${eclipse-compiler-version}</version>
++    </dependency>
 +    <dependency>
 +      <groupId>org.mortbay.jetty</groupId>
 +      <artifactId>servlet-api-2.5</artifactId>
@@ -614,7 +1911,7 @@ Index: modules/glassfish-jsp/pom.xml
 +    </dependency>
 +  </dependencies>
 +    <properties>
-+     <glassfish.version.tag>SJSAS90_FCS_BRANCH</glassfish.version.tag>
++     <glassfish.version.tag></glassfish.version.tag>
 +  </properties>
 +</project>
 
@@ -627,11 +1924,28 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
+Index: modules/glassfish-jsp/build.properties
+===================================================================
+--- modules/glassfish-jsp/build.properties	(revision 0)
++++ modules/glassfish-jsp/build.properties	(revision 0)
+@@ -0,0 +1,2 @@
++glassfish.cvs.login=
++glassfish.tag=
+
+Property changes on: modules/glassfish-jsp/build.properties
+___________________________________________________________________
+Name: svn:mime-type
+   + text/plain
+Name: svn:keywords
+   + Date Author Id Revision HeadURL
+Name: svn:eol-style
+   + native
+
 Index: modules/glassfish-jsp/README.txt
 ===================================================================
 --- modules/glassfish-jsp/README.txt	(revision 0)
 +++ modules/glassfish-jsp/README.txt	(revision 0)
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,28 @@
 +Building Jetty with glassfish jsp
 +---------------------------------
 +
@@ -652,6 +1966,12 @@ Index: modules/glassfish-jsp/README.txt
 +   glassfish.cvs.login=fred
 +   glassfish.tag=SJSAS90_FCS_BRANCH
 +
++   On the other hand, if you want to work with the HEAD of cvs, leave
++   the glassfish.tag field blank:
++
++   glassfish.cvs.login=fred
++   glassfish.tag=
++
 +4. Execute "mvn install" from the top level of the Jetty directory.
 +
 
@@ -668,7 +1988,7 @@ Index: modules/glassfish-jsp/build.xml
 ===================================================================
 --- modules/glassfish-jsp/build.xml	(revision 0)
 +++ modules/glassfish-jsp/build.xml	(revision 0)
-@@ -0,0 +1,94 @@
+@@ -0,0 +1,146 @@
 +<!-- ================================================================= -->
 +<!-- Updates the glassfish files in jetty from glassfish cvs           -->
 +<!-- NOTE: you must have a login for java.net and have used cvs login  -->
@@ -692,37 +2012,72 @@ Index: modules/glassfish-jsp/build.xml
 +    <!-- ============================================================== -->
 +    <target name="uptodate">
 +      
-+      <condition property="export.notrequired">
-+        <and>
-+          <available file="${generated.java}/org/apache/jasper/JspC.java" type="file" property="src.present"/>
-+          <available file="${generated.resources}/org/apache/jasper/resources/messages.properties" type="file" property="resources.present"/>
-+        </and>
++      <condition property="export.required">
++        <not>
++          <and>
++            <available file="${generated.java}/org/apache/jasper/JspC.java" type="file" property="src.present"/>
++            <available file="${generated.resources}/org/apache/jasper/resources/messages.properties" type="file" property="resources.present"/>
++          </and>
++        </not>
 +      </condition>
 +    </target>
++
++    <target name="test-export" depends="uptodate">
++       <condition property="export.args.ok">
++         <and>
++           <not><equals arg1="${glassfish.cvs.login}" arg2="" trim="true"/></not>
++           <not><equals arg1="${glassfish.tag}" arg2="" trim="true"/></not>
++         </and>
++       </condition>
++       <condition property="export.checks.ok">
++         <and>
++           <isset property="export.args.ok"/>
++           <isset property="export.required"/> 
++         </and>
++       </condition>
++    </target>
++
++
++    <target name="test-checkout" depends="uptodate">
++       <condition property="checkout.args.ok">
++         <and>
++           <not><equals arg1="${glassfish.cvs.login}" arg2="" trim="true"/></not>
++           <equals arg1="${glassfish.tag}" arg2="" trim="true"/>
++         </and>
++       </condition>
++       <echo message="checkout.args.ok=${checkout.args.ok} and export.required=${export.required}"/>
++       <condition property="checkout.checks.ok">
++         <and>
++           <isset property="checkout.args.ok"/>
++           <isset property="export.required"/> 
++         </and>
++       </condition>
++       <echo message="checkout.checks.ok=${checkout.checks.ok}"/>
++    </target>
++
 +
 +    <!-- ============================================================== -->
 +    <!-- Export the selected directories from glassfish                 -->
 +    <!-- ============================================================== -->
-+    <target name="export" description="Export src from glassfish" depends="uptodate" unless="export.notrequired">
++    <target name="export" description="Export src from glassfish" depends="test-export" if="export.checks.ok">
 +       <echo message="NOTE: You must have already performed a cvs login at least once to the glassfish cvs repo at cvs.dev.java.net."/>
 +       <echo/>
-+       <fail unless="glassfish.cvs.login"/>
-+       <fail unless="glassfish.tag"/>
 +       <property name="CVSROOT" value=":pserver:${glassfish.cvs.login}@cvs.dev.java.net:/cvs"/>
 +       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
 +       <cvs command="export -r ${glassfish.tag}" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
++       <property name="export.done" value="true"/>
 +   </target>
 +
 +    <!-- ============================================================== -->
 +    <!-- Checkout the src from glassfish                                -->
 +    <!-- ============================================================== -->
-+    <target name="checkout" description="Checkout src from glassfish" depends="uptodate" unless="export.notrequired">
++    <target name="checkout" description="Checkout src from glassfish" depends="test-checkout" if="checkout.checks.ok">
 +       <echo message="NOTE: You must have already performed a cvs login at least once to the glassfish cvs repo at cvs.dev.java.net."/>
 +       <echo/>
-+       <fail unless="glassfish.cvs.login"/>
 +       <property name="CVSROOT" value=":pserver:${glassfish.cvs.login}@cvs.dev.java.net:/cvs"/>
 +       <cvs command="co" package="glassfish/appserv-webtier/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
 +       <cvs command="co" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
++       <property name="checkout.done" value="true"/>
 +   </target>
 +
 +
@@ -730,6 +2085,8 @@ Index: modules/glassfish-jsp/build.xml
 +    <!-- Copy the required directories to src                           -->
 +    <!-- ============================================================== -->
 +   <target name="update" description="Copy selected exported glassfish files">
++     <available file="target/glassfish" type="dir" property="src.exists"/>
++     <fail unless="src.exists"/>
 +     <copy todir="${generated.java}/com/sun/appserv">
 +      <fileset dir="target/glassfish/common-util/src/java/com/sun/appserv">
 +        <exclude name="**/CVS/*"/>
@@ -762,6 +2119,21 @@ Index: modules/glassfish-jsp/build.xml
 +    <!-- Export the src and copy selected bits to src/main/             -->
 +    <!-- ============================================================== -->
 +  <target name="export-update" description="Export the src and copy selected files to the src/main/java dir" depends="export,update"/>
++
++    <!-- ============================================================== -->
++    <!-- Checkout the src and copy selected bits to src/main/             -->
++    <!-- ============================================================== -->
++  <target name="checkout-update" description="Checkout the src and copy selected files to the src/main/java dir" depends="checkout,update"/>
++
++    <!-- ============================================================== -->
++    <!-- Export or Checkout the src and copy selected bits to src/main/ -->
++    <!-- The intent is to do either a checkout or an update, depending  -->
++    <!-- on whether a cvs tag has been provided or not.                 -->
++    <!-- ============================================================== -->
++  <target name="extract-src" description="Export src if glassfish.tag is set, otherwise do a checkout of head" depends="export,checkout,update">
++  </target>
++
++
 +</project>
 
 Property changes on: modules/glassfish-jsp/build.xml
@@ -773,3 +2145,23 @@ Name: svn:keywords
 Name: svn:eol-style
    + native
 
+Index: pom.xml
+===================================================================
+--- pom.xml	(revision 721)
++++ pom.xml	(working copy)
+@@ -179,6 +179,8 @@
+     <module>modules/jetty</module>
+     <module>modules/jsp-api-2.1</module>
+     <module>modules/jsp-2.1</module>
++    <module>modules/glassfish-jsp-api</module>
++    <module>modules/glassfish-jsp</module>
+     <module>modules/jsp-api-2.0</module>
+     <module>modules/jsp-2.0</module>
+     <module>modules/management</module>
+@@ -340,5 +342,6 @@
+     <xerces-version>2.6.2</xerces-version>
+     <mail-version>1.4</mail-version>
+     <activation-version>1.1</activation-version>
++    <eclipse-compiler-version>3.1.0</eclipse-compiler-version>
+   </properties>
+ </project>
