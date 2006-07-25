@@ -536,7 +536,6 @@ public class Dump extends HttpServlet
             pout.write("<input type=\"submit\" name=\"Action\" value=\"getResource\">");
             pout.write("</form>\n");
             
-            pout.write("</body>\n</html>\n");
 
         }
         catch (Exception e)
@@ -544,7 +543,17 @@ public class Dump extends HttpServlet
             getServletContext().log("dump", e);
         }
 
+        
+        if (request.getParameter("stream")!=null)
+        {
+            pout.flush();
+            Continuation continuation = ContinuationSupport.getContinuation(request, null);
+            continuation.suspend(Long.parseLong(request.getParameter("stream")));
+        }
 
+
+        pout.write("</body>\n</html>\n");
+        
         pout.close();
 
         if (pi != null)
