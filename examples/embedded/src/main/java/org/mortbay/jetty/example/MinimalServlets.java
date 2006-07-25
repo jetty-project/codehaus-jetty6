@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.ServletHandler;
 
@@ -32,7 +33,7 @@ public class MinimalServlets
         throws Exception
     {
         Server server = new Server();
-        Connector connector=new SelectChannelConnector();
+        Connector connector=new SocketConnector();
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
         
