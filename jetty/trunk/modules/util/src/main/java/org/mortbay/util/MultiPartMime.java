@@ -12,12 +12,11 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.mortbay.util.StringUtil;
 
 /* ================================================================ */
 /** Handle a multipart MIME response.
@@ -25,8 +24,11 @@ import org.mortbay.util.StringUtil;
  * @author Greg Wilkins
  * @author Jim Crossley
 */
-public class MultiPartResponse
+public class MultiPartMime
 {
+    public static String MULTIPART_MIXED="multipart/mixed";
+    public static String MULTIPART_X_MIXED_REPLACE="multipart/x-mixed-replace";
+    
     /* ------------------------------------------------------------ */
     private static byte[] __CRLF;
     private static byte[] __DASHDASH;
@@ -45,7 +47,7 @@ public class MultiPartResponse
     private byte[] boundaryBytes;
 
     /* ------------------------------------------------------------ */
-    private MultiPartResponse()
+    private MultiPartMime()
     {
         try
         {
@@ -75,7 +77,7 @@ public class MultiPartResponse
     private boolean inPart=false;
     
     /* ------------------------------------------------------------ */
-    public MultiPartResponse(OutputStream out)
+    public MultiPartMime(OutputStream out)
          throws IOException
     {
         this();
