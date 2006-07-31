@@ -45,7 +45,6 @@ import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.InclusiveByteRange;
 import org.mortbay.jetty.MimeTypes;
-import org.mortbay.jetty.MultiPartResponse;
 import org.mortbay.jetty.ResourceCache;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -53,6 +52,7 @@ import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
+import org.mortbay.util.MultiPartMime;
 import org.mortbay.util.URIUtil;
 
 
@@ -711,7 +711,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             //
             writeHeaders(response,content,-1);
             String mimetype=content.getContentType().toString();
-            MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
+            MultiPartMime multi = new MultiPartMime(response.getOutputStream());
             response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
             
             // If the request has a "Request-Range" header then we need to
