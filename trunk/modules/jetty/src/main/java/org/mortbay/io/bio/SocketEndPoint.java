@@ -58,8 +58,6 @@ public class SocketEndPoint extends StreamEndPoint
      */
     public void close() throws IOException
     {
-        if (!(_socket instanceof SSLSocket))
-            _socket.shutdownOutput();
         _socket.close();
         _in=null;
         _out=null;
