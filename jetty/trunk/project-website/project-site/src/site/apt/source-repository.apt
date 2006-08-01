@@ -17,14 +17,14 @@ http://fisheye.codehaus.org/viewrep/jetty
  The source can be checked out anonymously from SVN using:
 
 +-----------------
-svn checkout https://svn.codehaus.org/jetty/jetty/trunk jetty
+svn checkout http://svn.codehaus.org/jetty/jetty/trunk jetty
 +-----------------
 
 
 * Developer Access
 
-  Everyone can access the Subversion repository via HTTPS, but Committers must checkout the Subversion repository via SSH:
+  Everyone can access the Subversion repository via HTTP, but Committers must checkout the Subversion repository via HTTPS:
 
 +---------------------
-  svn checkout svn+ssh://svn.codehaus.org/home/projects/jetty/scm/jetty/trunk jetty
+  svn checkout https://svn.codehaus.org/home/projects/jetty/jetty/trunk jetty
 +---------------------
