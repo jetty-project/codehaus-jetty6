@@ -22,16 +22,14 @@ import java.net.Socket;
 /*-------------------------------------------*/
 /** Monitor thread.
  * This thread listens on the port specified by the STOP.PORT system parameter
- * (defaults to 8079) for request authenticated with the key given by the STOP.KEY
+ * (defaults to 0 or not listening) for request authenticated with the key given by the STOP.KEY
  * system parameter (defaults to "mortbay") for admin requests. Commands "stop" and
  * "status" are currently supported.
  */
 public class Monitor extends Thread
 {
-    public static final int DEFAULT_STOP_PORT = 8079;
-    public static final String DEFAULT_STOP_KEY = "mortbay";
-    private int _port = Integer.getInteger("STOP.PORT", DEFAULT_STOP_PORT).intValue();
-    private String _key = System.getProperty("STOP.KEY", DEFAULT_STOP_KEY);
+    private int _port = Integer.getInteger("STOP.PORT", -1).intValue();
+    private String _key = System.getProperty("STOP.KEY", null);
 
     ServerSocket _socket;
     
@@ -49,10 +47,11 @@ public class Monitor extends Thread
                 _port=_socket.getLocalPort();
                 System.out.println(_port);
             }
-            if (!"mortbay".equals(_key))
+            
+            if (_key==null)
             {
-                _key=Long.toString((long)(Long.MAX_VALUE*Math.random()),36);
-                System.out.println(_key);
+                _key=Long.toString((long)(Long.MAX_VALUE*Math.random()+this.hashCode()+System.currentTimeMillis()),36);
+                System.out.println("-DSTOP.KEY="+_key);
             }
         }
         catch(Exception e)

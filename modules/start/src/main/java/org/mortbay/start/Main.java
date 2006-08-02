@@ -511,7 +511,7 @@ public class Main
         public void stop()
         {  
             int _port = Integer.getInteger("STOP.PORT", Monitor.DEFAULT_STOP_PORT).intValue();
-            String _key = System.getProperty("STOP.KEY", Monitor.DEFAULT_STOP_KEY);
+            String _key = System.getProperty("STOP.KEY", null);
                
             try
             {
@@ -520,6 +520,7 @@ public class Main
                 if (_key==null)
                 {
                     _key="";
+                    System.err.println("STOP.KEY system property must be specified");
                     System.err.println("Using empty key");
                 }
     
@@ -527,7 +528,6 @@ public class Main
                 OutputStream out=s.getOutputStream();
                 out.write((_key+"\r\nstop\r\n").getBytes());
                 out.flush();
-                s.shutdownOutput();
                 s.close();
             }
             catch (Exception e)
