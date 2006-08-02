@@ -510,7 +510,7 @@ public class Main
          */
         public void stop()
         {  
-            int _port = Integer.getInteger("STOP.PORT", Monitor.DEFAULT_STOP_PORT).intValue();
+            int _port = Integer.getInteger("STOP.PORT", -1).intValue();
             String _key = System.getProperty("STOP.KEY", null);
                
             try
