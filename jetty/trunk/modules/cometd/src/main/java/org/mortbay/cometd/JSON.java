@@ -79,12 +79,21 @@ public class JSON
         return buffer.toString();
     }
 
+    /**
+     * @param s String containing JSON object or array.
+     * @return A Map, Object array or primitive array parsed from the JSON.
+     */
     public static Object parse(String s)
     {
         return parse(new Source(s));
     }
     
-    private static void append(StringBuffer buffer, Object object)
+    /**
+     * Append object as JSON to string buffer.
+     * @param buffer
+     * @param object
+     */
+    public static void append(StringBuffer buffer, Object object)
     {
         if (object==null)
             buffer.append("null");
@@ -288,7 +297,7 @@ public class JSON
         char next = seekTo("\"}",source);
         
         while(source.hasNext())
-        {
+        {   
             if (next=='}')
             {
                 source.next();
@@ -302,9 +311,11 @@ public class JSON
             Object value=parse(source);
             map.put(name,value);
             
-            next = seekTo(",}",source);
-            source.next();
-            if (next==',')
+            seekTo(",}",source);
+            next=source.next();
+            if (next=='}')
+                break;
+            else
                 next = seekTo("\"}",source);
         }
      
@@ -469,10 +480,12 @@ public class JSON
         {
             char c=source.peek();
             if(seek.indexOf(c)>=0)
+            {
                 return c;
+            }
             
             if (!Character.isWhitespace(c))
-                throw new IllegalStateException("Unexpected '"+c+" while seeking one of '"+seek+"'");
+                throw new IllegalStateException("Unexpected '"+c+"' while seeking one of '"+seek+"'");
             source.next();
         }
 
