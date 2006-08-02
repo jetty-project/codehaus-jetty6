@@ -35,12 +35,8 @@ import org.mortbay.util.URIUtil;
  *
  * Handle resources of implied or explicit file type.
  * This class can check for aliasing in the filesystem (eg case
- * insensitivity).  By default this is turned on if the platform does
- * not have the "/" path separator, or it can be controlled with the
+ * insensitivity).  By default this is turned on, or it can be controlled with the
  * "org.mortbay.util.FileResource.checkAliases" system parameter.
- *
- * If alias checking is turned on, then aliased resources are
- * treated as if they do not exist, nor can they be created.
  *
  * @author Greg Wilkins (gregw)
  */
