@@ -52,7 +52,7 @@ import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
-import org.mortbay.util.MultiPartMime;
+import org.mortbay.util.MultiPartOutputStream;
 import org.mortbay.util.URIUtil;
 
 
@@ -485,7 +485,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     {
                         FileInputStream fis = new FileInputStream(resource.getFile());
                         buffer = new NIOBuffer((int) length, NIOBuffer.DIRECT);
-                        byte[] buf = new byte[8192]; 
+                        byte[] buf = new byte[connector.getResponseBufferSize()]; 
                         int i = 0;
                         while (i < length)
                         {
@@ -711,7 +711,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             //
             writeHeaders(response,content,-1);
             String mimetype=content.getContentType().toString();
-            MultiPartMime multi = new MultiPartMime(response.getOutputStream());
+            MultiPartOutputStream multi = new MultiPartOutputStream(out);
             response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
             
             // If the request has a "Request-Range" header then we need to
@@ -750,12 +750,12 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                         in.skip(start-pos);
                         pos=start;
                     }
-                    IO.copy(in,out,size);
+                    IO.copy(in,multi,size);
                     pos+=size;
                 }
                 else
                     // Handle cached resource
-                    (resource).writeTo(out,start,size);
+                    (resource).writeTo(multi,start,size);
                 
             }
             if (in!=null)

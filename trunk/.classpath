@@ -12,16 +12,14 @@
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-container-default-1.0-alpha-9.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-utils-1.1.jar"/>
 	<classpathentry kind="src" path="examples/embedded/src/main/java"/>
+	<classpathentry output="modules/cometd/target/classes" kind="src" path="modules/cometd/src/main/java"/>
 	<classpathentry kind="src" path="modules/jetty/src/main/java"/>
 	<classpathentry kind="src" path="modules/jetty/src/test/java"/>
 	<classpathentry kind="src" path="modules/management/src/main/java"/>
 	<classpathentry kind="src" path="modules/management/src/test/java"/>
-	<classpathentry kind="src" path="modules/maven-plugin/src/main/java"/>
 	<classpathentry kind="src" path="modules/maven-plugin-utils/src/main/java"/>
 	<classpathentry kind="src" path="modules/naming/src/main/java"/>
 	<classpathentry kind="src" path="modules/naming/src/test/java"/>
-	<classpathentry kind="src" path="modules/plus/src/main/java"/>
-	<classpathentry kind="src" path="modules/plus/src/test/java"/>
 	<classpathentry kind="src" path="modules/servlet-api-2.5/src/main/java"/>
 	<classpathentry kind="src" path="modules/start/src/main/java"/>
 	<classpathentry kind="src" path="modules/util/src/main/java"/>
@@ -45,17 +43,10 @@
 	<classpathentry kind="src" path="examples/test-webapp/src/main/java"/>
 	<classpathentry kind="src" path="modules/html/src/main/java"/>
 	<classpathentry kind="src" path="modules/html/src/test/java"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/ant-1.6.4.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/commons-el-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/jasper-compiler-5.5.15.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/jasper-compiler-jdt-5.5.15.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/jasper-runtime-5.5.15.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/jcl104-over-slf4j-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/jsp-api-2.0.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/slf4j-simple-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/xercesImpl-2.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/xmlParserAPIs-2.6.2.jar"/>
 	<classpathentry output="modules/spring/target/classes" kind="src" path="modules/spring/src/main/java"/>
 	<classpathentry output="modules/grizzly/target/classes" kind="src" path="modules/grizzly/src/main/java"/>
+	<classpathentry sourcepath="/home/gregw/src/glassfish/appserv-http-engine/src/java" kind="lib" path="modules/grizzly/repository/com/sun/enterprise/appserv-http-engine/9.0-SNAPSHOT/appserv-http-engine-9.0-SNAPSHOT.jar"/>
+	<classpathentry output="modules/cometd/target/test-classes" kind="src" path="modules/cometd/src/test/java"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0/jsp-api-2.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
