@@ -14,6 +14,7 @@
 
 package org.mortbay.util;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -24,14 +25,14 @@ import java.io.OutputStream;
  * @author Greg Wilkins
  * @author Jim Crossley
 */
-public class MultiPartMime
+public class MultiPartOutputStream extends FilterOutputStream
 {
-    public static String MULTIPART_MIXED="multipart/mixed";
-    public static String MULTIPART_X_MIXED_REPLACE="multipart/x-mixed-replace";
-    
     /* ------------------------------------------------------------ */
     private static byte[] __CRLF;
     private static byte[] __DASHDASH;
+    
+    public static String MULTIPART_MIXED="multipart/mixed";
+    public static String MULTIPART_X_MIXED_REPLACE="multipart/x-mixed-replace";
     static
     {
         try
@@ -47,8 +48,13 @@ public class MultiPartMime
     private byte[] boundaryBytes;
 
     /* ------------------------------------------------------------ */
-    private MultiPartMime()
+    private boolean inPart=false;    
+    
+    /* ------------------------------------------------------------ */
+    public MultiPartOutputStream(OutputStream out)
+         throws IOException
     {
+        super(out);
         try
         {
             boundary = "jetty"+System.identityHashCode(this)+
@@ -59,32 +65,37 @@ public class MultiPartMime
         {
             e.printStackTrace(); System.exit(1);
         }
-    }    
+        
+        inPart=false;
+    }
+    
+    
+
+    /* ------------------------------------------------------------ */
+    /** End the current part.
+     * @exception IOException IOException
+     */
+    public void close()
+         throws IOException
+    {
+        if (inPart)
+            out.write(__CRLF);
+        out.write(__DASHDASH);
+        out.write(boundaryBytes);
+        out.write(__DASHDASH);
+        out.write(__CRLF);
+        inPart=false;
+        super.close();
+    }
     
     /* ------------------------------------------------------------ */
     public String getBoundary()
     {
         return boundary;
     }
-    
-    /* ------------------------------------------------------------ */    
-    /** PrintWriter to write content too.
-     */
-    private OutputStream out = null; 
+
     public OutputStream getOut() {return out;}
-
-    /* ------------------------------------------------------------ */
-    private boolean inPart=false;
     
-    /* ------------------------------------------------------------ */
-    public MultiPartMime(OutputStream out)
-         throws IOException
-    {
-        this();
-        this.out=out;
-        inPart=false;
-    }
-
     /* ------------------------------------------------------------ */
     /** Start creation of the next Content.
      */
@@ -101,7 +112,7 @@ public class MultiPartMime
         out.write(__CRLF);
         out.write(__CRLF);
     }
-    
+        
     /* ------------------------------------------------------------ */
     /** Start creation of the next Content.
      */
@@ -122,22 +133,6 @@ public class MultiPartMime
             out.write(__CRLF);
         }
         out.write(__CRLF);
-    }
-        
-    /* ------------------------------------------------------------ */
-    /** End the current part.
-     * @exception IOException IOException
-     */
-    public void close()
-         throws IOException
-    {
-        if (inPart)
-            out.write(__CRLF);
-        out.write(__DASHDASH);
-        out.write(boundaryBytes);
-        out.write(__DASHDASH);
-        out.write(__CRLF);
-        inPart=false;
     }
     
 }
