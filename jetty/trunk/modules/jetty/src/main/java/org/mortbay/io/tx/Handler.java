@@ -119,21 +119,18 @@ public class Handler extends URLStreamHandler
 
         public int getConnectTimeout()
         {
-            return _connection.getConnectTimeout();
+            // TODO reflect if jre 1.5
+            return 0;
         }
 
         public Object getContent() throws IOException
         {
-            System.err.println("getContent "+_src);
             return _connection.getContent();
-            // eturn getInputStream();
         }
 
         public Object getContent(Class[] classes) throws IOException
         {
-            System.err.println("getContent(classes) "+_src);
             return _connection.getContent(classes);
-            // return getInputStream();
         }
 
         public String getContentEncoding()
@@ -239,7 +236,8 @@ public class Handler extends URLStreamHandler
 
         public int getReadTimeout()
         {
-            return _connection.getReadTimeout();
+            // TODO jre 1.5
+            return 0;
         }
 
         public Map getRequestProperties()
@@ -274,7 +272,7 @@ public class Handler extends URLStreamHandler
 
         public void setConnectTimeout(int timeout)
         {
-            _connection.setConnectTimeout(timeout);
+            // TODO jre 1.5
         }
 
         public void setDefaultUseCaches(boolean defaultusecaches)
@@ -299,7 +297,7 @@ public class Handler extends URLStreamHandler
 
         public void setReadTimeout(int timeout)
         {
-            _connection.setReadTimeout(timeout);
+            // TODO jre 1.5
         }
 
         public void setRequestProperty(String key, String value)
