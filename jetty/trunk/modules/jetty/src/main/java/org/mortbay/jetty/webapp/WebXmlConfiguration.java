@@ -64,7 +64,7 @@ public class WebXmlConfiguration implements Configuration
     protected Map _errorPages;
     protected boolean _hasJSP;
     protected String _jspServletName;
-    protected boolean _welcomeFileList;
+    protected boolean _defaultWelcomeFileList;
 
     public WebXmlConfiguration()
     {
@@ -147,7 +147,6 @@ public class WebXmlConfiguration implements Configuration
             if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
             return;
         }
-
         String defaultsDescriptor=getWebAppContext().getDefaultsDescriptor();
         if(defaultsDescriptor!=null&&defaultsDescriptor.length()>0)
         {
@@ -155,6 +154,7 @@ public class WebXmlConfiguration implements Configuration
             if(dftResource==null)
                 dftResource=Resource.newResource(defaultsDescriptor);
             configure(dftResource.getURL().toString());
+            _defaultWelcomeFileList=_welcomeFiles!=null;
         }
     }
 
@@ -168,16 +168,14 @@ public class WebXmlConfiguration implements Configuration
             return;
         }
         Resource web_inf=getWebAppContext().getWebInf();
+        
         // handle any WEB-INF descriptors
         if(web_inf!=null && web_inf.isDirectory())
         {
             // do web.xml file
             Resource web=web_inf.addPath("web.xml");
             if(web.exists())
-            {
-                _welcomeFileList=false;
                 configure(web.getURL().toString());
-            }
             else
             {
                 Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
@@ -196,7 +194,7 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------------------------- */
     public void deconfigureWebApp() throws Exception
     {
-        // TODO presever any configuration that pre-existed.
+        // TODO preserve any configuration that pre-existed.
 
         ServletHandler servlet_handler = getWebAppContext().getServletHandler();
 
@@ -593,9 +591,10 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initWelcomeFileList(XmlParser.Node node)
     {
-        if (!_welcomeFileList)
-            _welcomeFiles=null; // erase welcome files from default web.xml
-        _welcomeFileList=true;
+        if (_defaultWelcomeFileList)
+            _welcomeFiles=null; // erase welcome files from default web.xml 
+        
+        _defaultWelcomeFileList=false;
         Iterator iter=node.iterator("welcome-file");
         while(iter.hasNext())
         {
