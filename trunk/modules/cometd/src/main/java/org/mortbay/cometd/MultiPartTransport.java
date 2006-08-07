@@ -37,11 +37,8 @@ public class MultiPartTransport implements Transport
     {
         if (replies!=null)
         {
-            for (int i=0;i<replies.size();i++)
-            {
-                _writer.startPart("text/plain; charset=utf8");
-                _writer.write(JSON.toString(replies.get(i)));
-            }
+            _writer.startPart("text/plain; charset=utf8");
+            _writer.write(JSON.toString(replies));
             _writer.endPart();
             _writer.flush();
         }
