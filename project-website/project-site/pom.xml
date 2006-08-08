@@ -78,7 +78,7 @@
               <tasks>
                 <copy file="${basedir}/../../README.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
                 <copy file="${basedir}/../../VERSION.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
-                <copy file="${basedir}/../../legal/LICENSE.TXT" todir="${basedir}/target/site/" failonerror="false"></copy>
+                <copy file="${basedir}/../../LICENSES/LICENSE.txt" todir="${basedir}/target/site/" failonerror="false"></copy>
                 <copy todir="${basedir}/target/site/apidocs" failonerror="false" overwrite="true">
                   <fileset dir="${basedir}/../../target/site/apidocs">
                     <include name="**/**"/>

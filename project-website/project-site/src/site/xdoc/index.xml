@@ -5,14 +5,9 @@
   </properties>
   <link REL="icon" HREF="./images/jicon.gif" TYPE="image/gif"/>
   <body>
-     <div class="study">
-       <img src="http://jetty.mortbay.org/jetty/images/casestudy.gif" />
-       <h2><a href="http://www.mortbay.com/MB/log/gregw/?permalink=ScalingConnections.html">Scaling Connections for AJAX with Jetty 6</a></h2>
-       <div>
-Jetty 6 employs a number of innovative strategies to ensure that only the resources that are actually required are assigned to a connection and only for the duration of they are needed. This careful resource management gives Jetty an architecture designed to scale to meet the needs of AJAX applications.
-      </div>
-       <a href="http://www.mortbay.com/MB/log/gregw/?permalink=ScalingConnections.html">Read more ...</a>
-    </div>
+     <iframe src="http://www.webtide.com/include/inc_blogs.jsp" class="study">
+       <a href="http://blogs.webtide.com">Blogs about Jetty.</a>
+    </iframe>
 
 <div class="summary">
  <div class="news">
