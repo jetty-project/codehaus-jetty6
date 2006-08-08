@@ -185,10 +185,10 @@
     <module>modules/start</module>
     <module>modules/maven-plugin-utils</module>
     <module>modules/maven-plugin</module>
-    <module>modules/xbean</module>
     <module>modules/naming</module>
     <module>modules/plus</module>
     <module>modules/html</module>
+    <module>extras/xbean</module>
     <module>examples/test-webapp</module>
     <module>examples/embedded</module>
   </modules>
@@ -292,16 +292,6 @@
         <version>${ant-version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.xbean</groupId>
-        <artifactId>xbean-spring</artifactId>
-        <version>${xbean-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring</artifactId>
-        <version>${spring-version}</version>
-      </dependency>
-      <dependency>
         <groupId>javax.mail</groupId>
         <artifactId>mail</artifactId>
         <version>${mail-version}</version>
@@ -326,19 +316,17 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
-    <spring-version>1.2.8</spring-version>
-    <jasper-version>5.5.15</jasper-version>
-    <junit-version>3.8.1</junit-version>
-    <ant-version>1.6.4</ant-version>
-    <xbean-version>2.2</xbean-version>
-    <commons-el-version>1.0</commons-el-version>
-    <jta-spec-groupId>geronimo-spec</jta-spec-groupId>
-    <slf4j-version>1.0.1</slf4j-version>
-    <mx4j-version>3.0.1</mx4j-version>
-    <jta-spec-version>1.0.1B-rc4</jta-spec-version>
-    <xerces-version>2.6.2</xerces-version>
-    <mail-version>1.4</mail-version>
     <activation-version>1.1</activation-version>
+    <ant-version>1.6.4</ant-version>
+    <commons-el-version>1.0</commons-el-version>
+    <jasper-version>5.5.15</jasper-version>
+    <jta-spec-artifactId>geronimo-spec-jta</jta-spec-artifactId>
+    <jta-spec-groupId>geronimo-spec</jta-spec-groupId>
+    <jta-spec-version>1.0.1B-rc4</jta-spec-version>
+    <junit-version>3.8.1</junit-version>
+    <mail-version>1.4</mail-version>
+    <mx4j-version>3.0.1</mx4j-version>
+    <slf4j-version>1.0.1</slf4j-version>
+    <xerces-version>2.6.2</xerces-version>
   </properties>
 </project>

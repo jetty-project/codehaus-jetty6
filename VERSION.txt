@@ -16,6 +16,7 @@ jetty-6.0.0rc1 - ???
     + added start of grizzly connector
     + removed org.mortbay. from context system classes configuration
     + -DSTOP.PORT must be specified.
+    + moved optional modules to extras
 
 jetty-6.0.0rc0 - 7 July 2006
     + change prefix from "jetty6" to just "jetty" for plugin: eg is now mvn jetty:run
