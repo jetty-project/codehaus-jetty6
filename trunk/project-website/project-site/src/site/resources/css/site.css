@@ -52,7 +52,7 @@ div.news
 }
 
 
-div.study
+iframe.study
 {
   float: right;
   border-left: 2px solid #999999;
@@ -65,16 +65,17 @@ div.study
   padding-bottom: 8px;
   padding-left: 8px;
   padding-right: 8px;
-  width: 350px;
+  width: 320px;
+  height: 380px;
   margin-left: 10px;
 }
 
-div.study img
+iframe.study img
 {
   vertical-align: bottom;
   padding-bottom:6px;
 }
-div.study h1
+.text02 
 {
   font-size: 14pt;
   font-weight: bold;
@@ -88,7 +89,7 @@ div.study h1
   margin-right: 0px
 }
 
-div.study h2
+.itemTitle
 {
   font-size: 10pt;
   font-style: normal;
@@ -100,13 +101,11 @@ div.study h2
 }
 
 
-div.study div
+iframe.study *.description
 {
   margin-top: 6px;
   padding: 4px;
   margin-bottom: 6px;
-  border-top: 1px solid #666666;
-  border-bottom: 1px solid #666666;
   font-size: 9pt;
   font-style: oblique;
   font-family: helvetica, sans-serif;
