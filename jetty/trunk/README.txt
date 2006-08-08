@@ -26,7 +26,7 @@ given to select specific configurations.
 JETTY DEPENDENCIES
 ==================
 
-Jetty depends only on a jre 1.4 runtime and the two jars found in
+Jetty depends only on a jre 1.4 runtime and the three jars found in
 the top level of the $JETTY_HOME/lib directory:
 
   servlet-api-2.5.jar
