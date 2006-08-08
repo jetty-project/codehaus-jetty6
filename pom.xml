@@ -183,12 +183,12 @@
     <module>modules/jsp-2.0</module>
     <module>modules/management</module>
     <module>modules/start</module>
-    <module>modules/maven-plugin-utils</module>
     <module>modules/maven-plugin</module>
     <module>modules/naming</module>
     <module>modules/plus</module>
     <module>modules/html</module>
     <module>extras/xbean</module>
+    <module>extras/cometd</module>
     <module>examples/test-webapp</module>
     <module>examples/embedded</module>
   </modules>
