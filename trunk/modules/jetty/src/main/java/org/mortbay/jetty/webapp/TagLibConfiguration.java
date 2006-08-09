@@ -190,6 +190,12 @@ public class TagLibConfiguration implements Configuration
                 if (Log.isDebugEnabled()) Log.debug("TLD="+tld);
                 
                 XmlParser.Node root = parser.parse(tld.getURL().toString());
+
+		if (root==null)
+		{
+		    Log.warn("No TLD root in {}",tld);
+		    continue;
+		}
                 
                 for (int i=0;i<root.size();i++)
                 {
