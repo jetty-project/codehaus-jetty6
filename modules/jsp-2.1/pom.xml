@@ -59,7 +59,7 @@
             </goals>
             <configuration>
               <tasks>
-                <ant target="extract-src">
+                <ant antfile="checkout.xml" target="extract-src">
                   <property name="glassfish.tag" value="${glassfish.version.tag}"/>
                 </ant>
               </tasks>
