@@ -14,11 +14,6 @@
 
 package org.mortbay.jetty.security;
 
-import java.io.IOException;
-
-
-package org.mortbay.jetty.security;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
