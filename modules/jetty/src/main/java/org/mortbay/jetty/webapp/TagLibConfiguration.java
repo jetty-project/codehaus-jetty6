@@ -17,6 +17,7 @@ package org.mortbay.jetty.webapp;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashSet;
@@ -97,6 +98,21 @@ public class TagLibConfiguration implements Configuration
                 }
             }
         }
+        
+        try
+        {
+            // hack to discover jstl libraries
+            URL url = Loader.getResource(TagLibConfiguration.class,"org/apache/jasper/servlet/JspServlet.class",true);
+            String s=url.toString();
+            if (s.startsWith("jar:file:"))
+                list.add(Resource.newResource(s.substring(4,s.indexOf("!/"))));
+        }
+        catch(Exception e)
+        {
+            Log.ignore(e);
+        }
+        
+        Log.debug("TLD search {}",list);
         return list;
         
     }
