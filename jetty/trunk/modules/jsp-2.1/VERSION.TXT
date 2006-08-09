@@ -1,4 +1,0 @@
-
-http://svn.apache.org/repos/asf/tomcat/jasper/tc6.0.x Revision: 421820
-
-Very dump hacking out of JCL.  This version is dangerous as it logs almost NOTHING!
