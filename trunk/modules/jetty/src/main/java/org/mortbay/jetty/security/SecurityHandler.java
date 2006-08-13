@@ -29,6 +29,7 @@ import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
+import org.mortbay.log.Logger;
 import org.mortbay.util.LazyList;
 
 
@@ -39,7 +40,6 @@ import org.mortbay.util.LazyList;
  */
 public class SecurityHandler extends HandlerWrapper
 {   
-
     /* ------------------------------------------------------------ */
     private String _authMethod=Constraint.__BASIC_AUTH;
     private UserRealm _userRealm;
@@ -380,6 +380,7 @@ public class SecurityHandler extends HandlerWrapper
         {
             if (realm == null)
             {
+                Log.warn("Request "+request.getRequestURI()+" failed - no realm");
                 response.sendError(Response.SC_INTERNAL_SERVER_ERROR,"No realm");
                 return false;
             }
