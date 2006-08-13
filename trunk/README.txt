@@ -91,7 +91,7 @@ dependencies:
 BUILDING JETTY
 ==============
 
-Jetty uses maven 2 as it's build system.  Maven will fetch
+Jetty uses maven 2 as its build system.  Maven will fetch
 the dependancies, build the server and assemble a runnable
 version:
 
