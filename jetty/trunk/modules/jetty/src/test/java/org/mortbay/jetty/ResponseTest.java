@@ -231,4 +231,42 @@ public class ResponseTest extends TestCase
         assertEquals("foo/bar; other=pq charset=utf8 other=xyz",response.getContentType());
 
     }
+    
+    public void testStatusCodes() throws Exception
+    {
+        Response response=newResponse();
+
+        response.sendError(404);
+        assertEquals(404, response.getStatus());
+        assertEquals(null, response.getReason());
+        
+        response=newResponse();
+        
+        response.sendError(500, "Database Error");
+        assertEquals(500, response.getStatus());
+        assertEquals("Database Error", response.getReason());
+
+        response=newResponse();
+        
+        response.setStatus(200);
+        assertEquals(200, response.getStatus());
+        assertEquals(null, response.getReason());
+        
+        response=newResponse();
+        
+        response.sendError(406, "Super Nanny");
+        assertEquals(406, response.getStatus());
+        assertEquals("Super Nanny", response.getReason());
+    }
+
+    private Response newResponse()
+    {
+        HttpConnection connection=connector.getHttpConnection();
+        connection.getGenerator().reset(false);
+        HttpConnection.setCurrentConnection(connection);
+        Response response = connection.getResponse();
+        connection.getRequest().setRequestURI("/test");
+        return response;
+    }
+
 }
