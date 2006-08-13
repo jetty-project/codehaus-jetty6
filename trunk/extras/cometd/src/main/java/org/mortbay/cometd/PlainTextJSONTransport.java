@@ -45,13 +45,22 @@ public class PlainTextJSONTransport implements Transport
                 break;
                 
             case 1:
+            {
                 _response.setContentType("text/plain; charset=utf8");
-                _response.getWriter().write(JSON.toString(LazyList.get(_responses,0)));
+                String s = JSON.toString(LazyList.get(_responses,0));
+                System.err.println(s);
+                _response.getWriter().write(s);
                 break;
+            }
                 
             default:
+            {
                 _response.setContentType("text/plain; charset=utf8");
-                _response.getWriter().write(JSON.toString(LazyList.getList(_responses)));      
+                String s = JSON.toString(LazyList.getList(_responses));
+                System.err.println(s);
+                _response.getWriter().write(s); 
+                break;   
+            }
         }
         _response.getWriter().close();
         _response=null;

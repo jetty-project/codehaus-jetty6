@@ -28,16 +28,17 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class Client 
+public class Client
 {
-    private String _id=System.identityHashCode(this)+Long.toString(System.currentTimeMillis(),36);
+    private String _id;
     private String _type;
     private ArrayList _messages=new ArrayList();
     private Object _continuations;
 
     /* ------------------------------------------------------------ */
-    public Client()
+    Client()
     {
+        _id=Long.toString(System.identityHashCode(this)*System.currentTimeMillis(),36);
     }
 
     /* ------------------------------------------------------------ */
@@ -47,7 +48,7 @@ public class Client
     }
     
     /* ------------------------------------------------------------ */
-    public void setConnectionType(String type)
+    void setConnectionType(String type)
     {
         _type=type;
     }
@@ -59,13 +60,13 @@ public class Client
     }
     
     /* ------------------------------------------------------------ */
-    public void setId(String _id)
+    void setId(String _id)
     {
         this._id=_id;
     }
 
     /* ------------------------------------------------------------ */
-    public void removeContinuation(Continuation continuation)
+    void removeContinuation(Continuation continuation)
     {
         synchronized (this)
         {
@@ -74,7 +75,7 @@ public class Client
     }
 
     /* ------------------------------------------------------------ */
-    public void addContinuation(Continuation continuation)
+    void addContinuation(Continuation continuation)
     {
         synchronized (this)
         {
@@ -83,7 +84,7 @@ public class Client
     }
 
     /* ------------------------------------------------------------ */
-    public void send(Map message)
+    void send(Map message)
     {
         synchronized (this)
         {
@@ -100,7 +101,7 @@ public class Client
     }
 
     /* ------------------------------------------------------------ */
-    public List getMessages()
+    List takeMessages()
     {
         synchronized (this)
         {
