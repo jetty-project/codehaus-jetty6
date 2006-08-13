@@ -31,17 +31,23 @@ import org.mortbay.util.ajax.ContinuationSupport;
 
 public class CometdServlet extends HttpServlet
 {
+    public static final String ORG_MORTBAY_BAYEUX="org.mortbay.bayeux";
+    
+    private static final String TUNNEL_INIT_ATTR="tunnelInit";
+    private static final String MESSAGE_ATTR="message";
+    private static final String TRANSPORT_ATTR="transport";
+    private static final String CLIENT_ATTR="client";
     private Bayeux _bayeux;
     
     public void init() throws ServletException
     {
         synchronized (CometdServlet.class)
         {
-            _bayeux=(Bayeux)getServletContext().getAttribute("org.mortbay.cometd");
+            _bayeux=(Bayeux)getServletContext().getAttribute(ORG_MORTBAY_BAYEUX);
             if (_bayeux==null)
             {
                 _bayeux=new Bayeux(getServletContext());
-                getServletContext().setAttribute("org.mortbay.cometd",_bayeux);
+                getServletContext().setAttribute(ORG_MORTBAY_BAYEUX,_bayeux);
             }
         }
     }
@@ -57,13 +63,13 @@ public class CometdServlet extends HttpServlet
         if (continuation.isPending())
         {
             // re-establish state
-            client=(Client)req.getAttribute("client");
-            transport=(Transport)req.getAttribute("transport");
+            client=(Client)req.getAttribute(CLIENT_ATTR);
+            transport=(Transport)req.getAttribute(TRANSPORT_ATTR);
         }
         else
         {
             // handle all messages (before any polling)
-            String[] messages=req.getParameterValues("message");
+            String[] messages=req.getParameterValues(MESSAGE_ATTR);
             Object objects=null;
             int index=0;
             for (int m=0;m<messages.length;m++)
@@ -98,16 +104,15 @@ public class CometdServlet extends HttpServlet
                 if (client==null)
                 {
                     client = _bayeux.getClient(message);
-                    req.setAttribute("client",client);
+                    req.setAttribute(CLIENT_ATTR,client);
                 }
 
                 if (transport==null)
                 {
                     transport=_bayeux.newTransport(client,message);
-                    req.setAttribute("transport",transport);
-                    System.err.println(req.hashCode()+" transport="+transport);
+                    req.setAttribute(TRANSPORT_ATTR,transport);
                     
-                    if (req.getParameter("tunnelInit")!=null)
+                    if (req.getParameter(TUNNEL_INIT_ATTR)!=null)
                     {
                         transport.initTunnel(resp);
                         return;
@@ -117,7 +122,6 @@ public class CometdServlet extends HttpServlet
                 }
               
                 Map reply=_bayeux.handle(client,transport, message);
-                System.err.println(req.hashCode()+" reply   <== "+reply);
                 
                 transport.encode(reply); 
             }
@@ -137,8 +141,7 @@ public class CometdServlet extends HttpServlet
                 
                 if (client.hasMessages())
                 {
-                    List messages=client.getMessages();
-                    System.err.println(req.hashCode()+" messages<== "+messages);
+                    List messages=client.takeMessages();
                     transport.encode(messages);
                 }
                 else
@@ -153,6 +156,7 @@ public class CometdServlet extends HttpServlet
         // complete
         if (transport!=null)
         {
+            System.err.print(req.hashCode()+" messages<== ");
             transport.complete();
             transport.setPolling(false);
         }

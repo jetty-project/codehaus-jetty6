@@ -22,20 +22,20 @@ public class Channel
 {
     private Bayeux _bayeux;
     private String _id;
-    private Object _subscribers=null;
     private long _nextMsgId;
+    private Object _subscribers=null;
+    private Object _dataFilters=null;
     
-    public Channel(String id,Bayeux bayeux)
+    Channel(String id,Bayeux bayeux)
     {
         _id=id;
         _bayeux=bayeux;
     }
     
-    public String getId()
-    {
-        return _id;
-    }
-    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param client
+     */
     public void addSubscriber(Client client)
     {
         synchronized (this)
@@ -43,9 +43,40 @@ public class Channel
             _subscribers=LazyList.add(_subscribers,client);
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param filter
+     */
+    public void addDataFilter(DataFilter filter)
+    {
+        _dataFilters=LazyList.add(_dataFilters,filter);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param filter
+     */
+    public void removeDataFilter(DataFilter filter)
+    {
+        _dataFilters=LazyList.remove(_dataFilters,filter);
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public String getId()
+    {
+        return _id;
+    }
 
     /* ------------------------------------------------------------ */
-    public void removeSubscriber(Client client)
+    /**
+     * @param client
+     */
+    void removeSubscriber(Client client)
     {
         synchronized (this)
         {
@@ -54,12 +85,18 @@ public class Channel
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param data
+     */
     public void send(Object data)
     {
+        for (int f=0;data!=null && f<LazyList.size(_dataFilters);f++)
+            data=((DataFilter)LazyList.get(_dataFilters,f)).filter(data);
+        
         HashMap msg = new HashMap();
-        msg.put("channel",_id);
-        msg.put("data",data);
-        msg.put("timestamp",_bayeux.getTimeOnServer());
+        msg.put(Bayeux.CHANNEL_ATTR,_id);
+        msg.put(Bayeux.DATA_ATTR,data);
+        msg.put(Bayeux.TIMESTAMP_ATTR,_bayeux.getTimeOnServer());
         
         synchronized (this)
         {
@@ -71,7 +108,22 @@ public class Channel
                 ((Client)LazyList.get(_subscribers,i)).send(msg);
         }
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param client The client for which this token will be valid
+     * @param subscribe True if this token may be used for subscriptions
+     * @param send True if this token may be used for send
+     * @param oneTime True if this token may only be used in one request batch.
+     * @return A new token that can be used for subcriptions and or sending.
+     */
+    public String getToken(Client client, boolean subscribe, boolean send, boolean oneTime)
+    {
+        String token=Long.toString(_bayeux.getRandom(),36);
+        // TODO register somewher
+        return token;
+    }
+    
     /* ------------------------------------------------------------ */
     public String toString()
     {
