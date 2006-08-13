@@ -23,15 +23,18 @@ which gives a configuration file on the commandline. An explicit
 configuration file (or multiple configuration files) may be
 given to select specific configurations.
 
+There is also a unix start script in bin/jetty.sh that can be used
+in /etc/init.d
+
 JETTY DEPENDENCIES
 ==================
 
 Jetty depends only on a jre 1.4 runtime and the three jars found in
 the top level of the $JETTY_HOME/lib directory:
 
-  servlet-api-2.5.jar
-  jetty.jar
-  jetty-util.jar
+  servlet-api-2.5-$VERSION.jar
+  jetty-$VERSION.jar
+  jetty-util-$VERSION.jar
 
 The jars found in the subdirectories are all optional:
 
