@@ -28,6 +28,7 @@ import java.util.Set;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
+import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
 
 /* ------------------------------------------------------------ */
@@ -51,6 +52,10 @@ import org.mortbay.xml.XmlParser;
 public class TagLibConfiguration implements Configuration
 {
     WebAppContext _context;
+    String[] _serverTagLibClasses=
+    { 
+        "org.apache.jasper.servlet.JspServlet"
+    };
     
     public void setWebAppContext(WebAppContext context)
     {
@@ -99,17 +104,11 @@ public class TagLibConfiguration implements Configuration
             }
         }
         
-        try
+        for (int i=0;_serverTagLibClasses!=null && i<_serverTagLibClasses.length;i++)
         {
-            // hack to discover jstl libraries
-            URL url = Loader.getResource(TagLibConfiguration.class,"org/apache/jasper/servlet/JspServlet.class",true);
-            String s=url.toString();
-            if (s.startsWith("jar:file:"))
-                list.add(Resource.newResource(s.substring(4,s.indexOf("!/"))));
-        }
-        catch(Exception e)
-        {
-            Log.ignore(e);
+            URL jar = TypeUtil.jarFor(_serverTagLibClasses[i]);
+            if (jar!=null)
+                list.add(Resource.newResource(jar));       
         }
         
         Log.debug("TLD search {}",list);
@@ -248,5 +247,25 @@ public class TagLibConfiguration implements Configuration
 
     public void deconfigureWebApp() throws Exception
     {
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public String[] getServerTagLibClasses()
+    {
+        return _serverTagLibClasses;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param serverTagLibClasses An array of class names. The jars that these 
+     * classes are loaded from will be examined for TLD files (even if these jars 
+     * are on the server or system classpath).
+     */
+    public void setServerTagLibClasses(String[] serverTagLibClasses)
+    {
+        _serverTagLibClasses=serverTagLibClasses;
     }
 }
