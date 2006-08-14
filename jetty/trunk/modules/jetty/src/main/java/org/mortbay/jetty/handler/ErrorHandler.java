@@ -99,7 +99,7 @@ public class ErrorHandler extends AbstractHandler
             Throwable th = (Throwable)request.getAttribute("javax.servlet.error.exception");
             while(th!=null)
             {
-                writer.write("<h3>Caused by:</h2><pre>");
+                writer.write("<h3>Caused by:</h3><pre>");
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 th.printStackTrace(pw);
