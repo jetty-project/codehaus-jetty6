@@ -16,6 +16,7 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.bio.StreamEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
@@ -751,8 +753,34 @@ public class HttpConnection
                 if (c.getContentType() != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER)) _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
                 if (c.getContentLength() > 0) _responseFields.addLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
                 if (c.getLastModified() != null) _responseFields.add(HttpHeaders.LAST_MODIFIED_BUFFER, c.getLastModified());
-                if (c.getBuffer() != null) _generator.addContent(c.getBuffer(), HttpGenerator.LAST);
-                commitResponse(HttpGenerator.LAST);
+                
+
+                if (c.getBuffer()!=null)
+                {
+                    if (c.getBuffer() != null) _generator.addContent(c.getBuffer(), HttpGenerator.LAST);
+                    commitResponse(HttpGenerator.LAST);
+                }
+                else
+                {
+                    InputStream in = c.getInputStream();
+                    
+                    int max = _generator.prepareUncheckedAddContent();
+                    Buffer buffer = _generator.getUncheckedBuffer();
+                    
+                    int len=buffer.readFrom(in,max);
+                    
+                    while (len>=0)
+                    {
+                        _generator.completeUncheckedAddContent();
+                        _out.flush();
+                        
+                        max = _generator.prepareUncheckedAddContent();
+                        buffer = _generator.getUncheckedBuffer();
+                        len=buffer.readFrom(in,max);
+                    }
+                    _generator.completeUncheckedAddContent();
+                    _out.flush();                        
+                }
             }
             else if (content instanceof Buffer)
             {

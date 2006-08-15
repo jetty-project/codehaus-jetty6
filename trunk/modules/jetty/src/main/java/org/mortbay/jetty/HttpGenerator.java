@@ -117,7 +117,7 @@ public class HttpGenerator implements HttpTokens
     private Buffer _header; // Buffer for HTTP header (and maybe small _content)
     private Buffer _buffer; // Buffer for copy of passed _content
     private Buffer _content; // Buffer passed to addContent
-    boolean _bypass = false; // True if _content buffer can be written directly to endp and bypass the content buffer
+    private boolean _bypass = false; // True if _content buffer can be written directly to endp and bypass the content buffer
     private boolean _needCRLF = false;
     private boolean _needEOC = false;
     private boolean _bufferChunked = false;
@@ -192,6 +192,12 @@ public class HttpGenerator implements HttpTokens
         _content=null;
         if (_buffer!=null)
             _buffer.clear();  
+    }
+
+    /* ------------------------------------------------------------ */    
+    public Buffer getUncheckedBuffer()
+    {
+        return _buffer;
     }
     
     /* ------------------------------------------------------------ */    
@@ -393,6 +399,11 @@ public class HttpGenerator implements HttpTokens
 
 
     /* ------------------------------------------------------------ */
+    /** Prepare buffer for unchecked writes.
+     * Prepare the generator buffer to receive unchecked writes
+     * @return the available space in the buffer.
+     * @throws IOException
+     */
     int prepareUncheckedAddContent() throws IOException
     {
         if (_noContent)
