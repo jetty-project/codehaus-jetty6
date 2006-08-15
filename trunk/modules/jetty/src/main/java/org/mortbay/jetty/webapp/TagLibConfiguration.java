@@ -54,7 +54,9 @@ public class TagLibConfiguration implements Configuration
     WebAppContext _context;
     String[] _serverTagLibClasses=
     { 
-        "org.apache.jasper.servlet.JspServlet"
+        "org.apache.jasper.servlet.JspServlet", //find tlds bundled with jasper (jstl)
+        "com.sun.faces.config.ConfigureListener", //find tlds from sun's jsf impl
+        "org.apache.myfaces.webapp.MyFacesServlet" //find tlds from myfaces impl
     };
     
     public void setWebAppContext(WebAppContext context)
