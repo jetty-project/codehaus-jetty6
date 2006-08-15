@@ -14,6 +14,10 @@
 
 package org.mortbay.io;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /* ------------------------------------------------------------------------------- */
 /**
  * @author gregw
@@ -147,4 +151,23 @@ public class ByteArrayBuffer extends AbstractBuffer
         setPutIndex(b.length);
     }
 
+    /* ------------------------------------------------------------ */
+    public void writeTo(OutputStream out)
+        throws IOException
+    {
+        out.write(_bytes,getIndex(),length());
+        clear();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int readFrom(InputStream in,int max) throws IOException
+    {
+        if (max>space())
+            max=space();
+        int p = putIndex();
+        int len = in.read(_bytes,p,max);
+        if (len>0)
+            setPutIndex(p+len);
+        return len;
+    }
 }
