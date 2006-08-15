@@ -31,7 +31,7 @@ import org.mortbay.io.EndPoint;
  */
 public class StreamEndPoint implements EndPoint
 {
-	InputStream _in;
+    InputStream _in;
     OutputStream _out;
 
     /**
@@ -95,15 +95,9 @@ public class StreamEndPoint implements EndPoint
     	    throw new IOException("FULL");
     	}
         
-	    byte[] bytes = buffer.array();
-		int n=_in.read(bytes,buffer.putIndex(),space);
-		if (n>=0)
-		{
-		  	buffer.setPutIndex(buffer.putIndex()+n);
-			return n;
-    	}
-    	
-    	return -1;
+        int len = buffer.readFrom(_in,space);
+    
+    	return len;
     }
 
     /* (non-Javadoc)
@@ -116,20 +110,7 @@ public class StreamEndPoint implements EndPoint
             return -1;
         int length=buffer.length();
         if (length>0)
-        {
-            if (buffer.array()!=null)
-                _out.write(buffer.array(),buffer.getIndex(),length);
-            else
-            {
-                // TODO horrid hack
-                byte[] b = new byte[8192];
-                while (buffer.length()>0)
-                {
-                    int len = buffer.get(b,0,8192);
-                    _out.write(b,0,len);
-                }
-            }
-        }
+            buffer.writeTo(_out);
         if (!buffer.isImmutable())
             buffer.clear();
         return length;

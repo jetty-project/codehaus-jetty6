@@ -17,8 +17,13 @@ package org.mortbay.io.nio;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
@@ -35,6 +40,8 @@ public class NIOBuffer extends AbstractBuffer
   		INDIRECT=false;
   	
     private ByteBuffer _buf;
+    private ReadableByteChannel _in;
+    private WritableByteChannel _out;
 
     public NIOBuffer(int size, boolean direct)
     {
@@ -44,7 +51,6 @@ public class NIOBuffer extends AbstractBuffer
         	:ByteBuffer.allocate(size);
         _buf.position(0);
         _buf.limit(_buf.capacity());
-
     }
     
     /**
@@ -169,4 +175,54 @@ public class NIOBuffer extends AbstractBuffer
     {
         return _buf;
     }
+
+
+    public int readFrom(InputStream in, int max) throws IOException
+    {
+        if (_in==null || !_in.isOpen())
+            _in=Channels.newChannel(in);
+
+        if (max>space())
+            max=space();
+        int p = putIndex();
+        
+        try
+        {
+            _buf.position(p);
+            _buf.limit(p+max);
+            int len=_in.read(_buf);
+            if (len>0)
+                setPutIndex(p+len);
+            else
+                _in=null;
+            return len;
+        }
+        finally
+        {
+            _buf.position(0);
+            _buf.limit(_buf.capacity());
+        }
+    }
+
+    public void writeTo(OutputStream out) throws IOException
+    {
+        if (_out==null || !_out.isOpen())
+            _out=Channels.newChannel(out);
+
+        try
+        {
+            _buf.position(getIndex());
+            _buf.limit(putIndex());
+            _out.write(_buf);
+        }
+        finally
+        {
+            _buf.position(0);
+            _buf.limit(_buf.capacity());
+            clear();
+        }
+        
+    }
+    
+    
 }

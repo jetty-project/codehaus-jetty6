@@ -15,6 +15,7 @@
 package org.mortbay.io;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -547,6 +548,7 @@ public abstract class AbstractBuffer implements Buffer
         return buf.toString();
     }
 
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         if (isImmutable())
@@ -557,17 +559,42 @@ public abstract class AbstractBuffer implements Buffer
         }
         return new String(asArray(), 0, length());
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void writeTo(OutputStream out)
     	throws IOException
     {
         byte array[] = array();
+        
         if (array!=null)
-            out.write(array,_get,_put-_get);
+        {
+            out.write(array,getIndex(),length());
+        }
         else
         {
+            // System.err.println(this.getClass()+" OUCH!!!! Abstract writeTo: ? "+getIndex()+"-"+putIndex());
+            
+            // TODO perhaps in buffer?
             for (int i=_get;i<_put;i++)
                 out.write(peek(i));
         } 
+        clear();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int readFrom(InputStream in,int max) throws IOException
+    {
+        // System.err.println(this.getClass()+" OUCH!!!! Abstract readFrom "+max+" "+getIndex()+"-"+putIndex());
+        int len=0;
+        while (space()>0)
+        {
+            // TODO perhaps buffer
+            int b = in.read();
+            if (b<0)
+                return -1;
+            put((byte)b);
+            len++;
+        }
+        return len;
     }
 }

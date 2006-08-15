@@ -198,6 +198,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         Buffer buffer = new ByteArrayBuffer(len);
         buffer.readFrom(in,len);
         in.close();
+        content.setBuffer(buffer);
     }
     
     /* ------------------------------------------------------------ */
