@@ -14,11 +14,16 @@
 
 package org.mortbay.jetty;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.mortbay.component.AbstractLifeCycle;
+import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.View;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
@@ -30,22 +35,25 @@ import org.mortbay.resource.ResourceFactory;
  */
 public class ResourceCache extends AbstractLifeCycle implements Serializable
 {   
-    private int _maxCachedFileSize =254*1024;
-    private int _maxCachedFiles=1024;
-    private int _maxCacheSize =10*1024*1024;
+    private int _maxCachedFileSize =1024*1024;
+    private int _maxCachedFiles=2048;
+    private int _maxCacheSize =16*1024*1024;
+    private MimeTypes _mimeTypes;
     
     protected transient Map _cache;
     protected transient int _cacheSize;
     protected transient int _cachedFiles;
-    protected transient Entry _mostRecentlyUsed;
-    protected transient Entry _leastRecentlyUsed;
+    protected transient Content _mostRecentlyUsed;
+    protected transient Content _leastRecentlyUsed;
 
 
     /* ------------------------------------------------------------ */
     /** Constructor.
      */
-    public ResourceCache()
-    {}
+    public ResourceCache(MimeTypes mimeTypes)
+    {
+        _mimeTypes=mimeTypes;
+    }
 
     
     /* ------------------------------------------------------------ */
@@ -103,36 +111,33 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     /** Get a Entry from the cache.
      * Get either a valid entry object or create a new one if possible.
-     * When an non-new entry is found, the thread will wait until a
-     * non-null value is set on the entry.  It is the responsibility of the
-     * thread that creates an entry to set the value. 
      *
      * @param pathInContext The key into the cache
      * @param factory If no matching entry is found, this {@link ResourceFactory} will be used to create the {@link Resource} 
      *                for the new enry that is created.
      * @return The entry matching <code>pathInContext</code>, or a new entry if no matching entry was found
      */
-    public Entry lookup(String pathInContext, ResourceFactory factory)
+    public Content lookup(String pathInContext, ResourceFactory factory)
+        throws IOException
     {
         if (Log.isDebugEnabled()) Log.debug("lookup {}",pathInContext);
         
-        Entry entry=null;
-        boolean newEntry=false;
+        Content content=null;
         
         // Look up cache operations
         synchronized(_cache)
         {
             // Look for it in the cache
-            entry = (Entry)_cache.get(pathInContext);
-            if (entry!=null)
+            content = (Content)_cache.get(pathInContext);
+            if (content!=null)
             {
-                if (entry!=null && !entry.isValid())
-                    entry=null;
+                if (content!=null && !content.isValid())
+                    content=null;
                 else
-                    if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",entry);
+                    if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",content);
             }
 
-            if (entry==null)
+            if (content==null)
             {
                 Resource resource=factory.getResource(pathInContext);
                 if (resource==null)
@@ -144,6 +149,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                     // Is it badly named?
                     if (resource.isDirectory())
                         return null;
+
+                    content= new Content(resource);
                     
                     // Is it cacheable?
                     if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
@@ -152,27 +159,14 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                         while(_cacheSize>needed || (_maxCachedFiles>0 && _cachedFiles>_maxCachedFiles))
                             _leastRecentlyUsed.invalidate();
                         
-                        if(Log.isDebugEnabled())Log.debug("CACHED: {}",resource);
-                        entry= new Entry(pathInContext,resource);
-                        newEntry=true;
+                        fill(content);
+                        content.cache(pathInContext);
+                        Log.debug("CACHED: {}",resource);
                     }
                 }
             }
         }
-        
-        if (!newEntry && entry!=null)
-        {
-            synchronized(entry)
-            {
-                try
-                {
-                    while(entry.getKey()!=null && entry.getValue()==null)
-                        entry.wait();
-                }
-                catch(InterruptedException e){}
-            }
-        }
-        return entry; 
+        return content; 
     }
 
 
@@ -194,26 +188,50 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         flushCache();
         _cache=null;
     }
+
+    /* ------------------------------------------------------------ */
+    protected void fill(Content content)
+        throws IOException
+    {
+        InputStream in = content.getResource().getInputStream();
+        int len=(int)content.getResource().length();
+        Buffer buffer = new ByteArrayBuffer(len);
+        buffer.readFrom(in,len);
+        in.close();
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** MetaData associated with a context Resource.
      */
-    public class Entry
+    public class Content implements HttpContent
     {
         String _key;
         Resource _resource;
-        Object _value;
         long _lastModified;
-        Entry _prev;
-        Entry _next;
+        Content _prev;
+        Content _next;
+        
+        Buffer _lastModifiedBytes;
+        Buffer _contentType;
+        Buffer _buffer;
 
-        Entry(String pathInContext, Resource resource)
+        /* ------------------------------------------------------------ */
+        Content(Resource resource)
         {
-            _key=pathInContext;
             _resource=resource;
             _lastModified=resource.lastModified();
 
+            _next=this;
+            _prev=this;
+            
+            _contentType=_mimeTypes.getMimeByExtension(_resource.toString());
+        }
+
+        /* ------------------------------------------------------------ */
+        void cache(String pathInContext)
+        {
+            _key=pathInContext;
             _next=_mostRecentlyUsed;
             _mostRecentlyUsed=this;
             if (_next!=null)
@@ -225,38 +243,28 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             _cache.put(_key,this);
             _cacheSize+=_resource.length();
             _cachedFiles++;
+            
+            _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_resource.lastModified(),false));
         }
 
+        /* ------------------------------------------------------------ */
         public String getKey()
         {
             return _key;
         }
-        
+
+        /* ------------------------------------------------------------ */
+        public boolean isCached()
+        {
+            return _key!=null;
+        }
+
+        /* ------------------------------------------------------------ */
         public Resource getResource()
         {
             return _resource;
         }
         
-        public Object getValue()
-        {
-            return _value;
-        }
-        
-        public void setValue(Object value)
-        {
-            synchronized(this)
-            {
-                _value=value;
-                if (value!=null)
-                {
-                    if (value instanceof Value)
-                        ((Value)value).validate();
-                    this.notifyAll();
-                }
-            }
-        }
-        
-
         /* ------------------------------------------------------------ */
         boolean isValid()
         {
@@ -264,8 +272,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             {
                 if (_mostRecentlyUsed!=this)
                 {
-                    Entry tp = _prev;
-                    Entry tn = _next;
+                    Content tp = _prev;
+                    Content tn = _next;
 
                     _next=_mostRecentlyUsed;
                     _mostRecentlyUsed=this;
@@ -288,6 +296,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             return false;
         }
 
+        
+        
         public void invalidate()
         {
             synchronized(this)
@@ -312,20 +322,61 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 _next=null;
                 _resource=null;
                 
-                if (_value==null)
-                    this.notifyAll();
-                else if (_value instanceof Value)
-                    ((Value)_value).invalidate();
-                    
-                _value=null;
             }
         }
-    }
-    
-    public interface Value
-    {
-        public void validate();
-        public void invalidate();
+        
+        public Buffer getLastModified()
+        {
+            return _lastModifiedBytes;
+        }
+
+        public Buffer getContentType()
+        {
+            return _contentType;
+        }
+        
+        public void setContentType(Buffer type)
+        {
+            _contentType=type;
+        }
+        
+        public void release()
+        {
+            synchronized(this)
+            {
+                if (_key==null)
+                    _resource.release();
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        public Buffer getBuffer()
+        {
+            if (_buffer==null)
+                return null;
+            return new View(_buffer);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setBuffer(Buffer buffer)
+        {
+            _buffer=buffer;
+        }
+
+        /* ------------------------------------------------------------ */
+        public long getContentLength()
+        {
+            if (_buffer==null)
+                return -1;
+            return _buffer.length();
+        }
+
+        /* ------------------------------------------------------------ */
+        public InputStream getInputStream() throws IOException
+        {
+            return _resource.getInputStream();
+        }
+        
     }
 
 }
