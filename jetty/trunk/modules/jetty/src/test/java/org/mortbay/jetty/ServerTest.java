@@ -15,8 +15,8 @@
 package org.mortbay.jetty;
 
 import org.mortbay.jetty.handler.DefaultHandler;
-
 import junit.framework.TestCase;
+import java.util.Random;
 
 /**
  * @version $Revision$
@@ -38,5 +38,12 @@ public class ServerTest extends TestCase
         {
             fail("Adding handler "+handler+" to server "+server+" threw exception "+e);
         }
+    }
+    
+    public void testServerWithPort()
+    {
+        int port = new Random().nextInt(20000) + 10000;
+        Server server = new Server(port);
+        assertEquals(port, server.getConnectors()[0].getPort());
     }
 }
