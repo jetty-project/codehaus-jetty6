@@ -47,6 +47,7 @@ import org.mortbay.jetty.InclusiveByteRange;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.ResourceCache;
 import org.mortbay.jetty.Response;
+import org.mortbay.jetty.ResourceCache.Content;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
@@ -176,7 +177,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             if (max_cache_size>0)
             {
                 if (_cache==null)
-                    _cache=new ResourceCache(_mimeTypes);
+                    _cache=new NIOResourceCache(_mimeTypes);
                 _cache.setMaxCacheSize(max_cache_size);    
             }
             else if (max_cache_size!=-2)
@@ -442,52 +443,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         doGet(request,response);
     }
     
-    /* ------------------------------------------------------------ */
-    private Buffer getContent(String pathInContext, Resource resource)
-    	throws IOException	
-    {
-        Connector connector = HttpConnection.getCurrentConnection().getConnector();
-        Buffer buffer=null;
-        
-        if (!resource.isDirectory())   
-        {
-            long length=resource.length();
-            
-            if (length<=_cache.getMaxCachedFileSize())
-            {
-                if (connector instanceof NIOConnector) 
-                {
-                    if (_useFileMappedBuffer) {
-                        
-                        File file = resource.getFile();
-                        if (file != null) 
-                            buffer = new NIOBuffer(file);
-                    } 
-                    else 
-                    {
-                        FileInputStream fis = new FileInputStream(resource.getFile());
-                        buffer = new NIOBuffer((int) length, NIOBuffer.DIRECT);
-                        buffer.readFrom(fis,(int)length);
-                        fis.close();
-                    }
-                } 
-                else 
-                {
-                    InputStream in = resource.getInputStream();
-                    buffer = new ByteArrayBuffer((int)length);
-                    buffer.readFrom(in,(int)length);
-                    in.close();
-                }
-            }
-            
-            if (buffer!=null)
-            {
-                if (Log.isDebugEnabled())
-                    Log.debug("content buffer is {}",buffer.getClass());
-            }
-        }
-        return buffer;
-    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -826,6 +781,69 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             _resource.release();
             _resource=null;
         }
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    class NIOResourceCache extends ResourceCache
+    {
+
+        /* ------------------------------------------------------------ */
+        public NIOResourceCache(MimeTypes mimeTypes)
+        {
+            super(mimeTypes);
+        }
+
+        /* ------------------------------------------------------------ */
+        protected void fill(Content content) throws IOException
+        {
+            super.fill(content);
+
+            Connector connector = HttpConnection.getCurrentConnection().getConnector();
+            Buffer buffer=null;
+            Resource resource=content.getResource();
+            if (!resource.isDirectory())   
+            {
+                long length=resource.length();
+                
+                if (length<=DefaultServlet.this._cache.getMaxCachedFileSize())
+                {
+                    if (connector instanceof NIOConnector) 
+                    {
+                        if (_useFileMappedBuffer) {
+                            
+                            File file = resource.getFile();
+                            if (file != null) 
+                                buffer = new NIOBuffer(file);
+                        } 
+                        else 
+                        {
+                            FileInputStream fis = new FileInputStream(resource.getFile());
+                            buffer = new NIOBuffer((int) length, NIOBuffer.DIRECT);
+                            buffer.readFrom(fis,(int)length);
+                            fis.close();
+                        }
+                    } 
+                    else 
+                    {
+                        InputStream in = resource.getInputStream();
+                        buffer = new ByteArrayBuffer((int)length);
+                        buffer.readFrom(in,(int)length);
+                        in.close();
+                    }
+                }
+                
+                if (buffer!=null)
+                {
+                    if (Log.isDebugEnabled())
+                        Log.debug("content buffer is {}",buffer.getClass());
+                }
+            }
+            content.setBuffer(buffer);
+        }
+        
+        
         
     }
 }
