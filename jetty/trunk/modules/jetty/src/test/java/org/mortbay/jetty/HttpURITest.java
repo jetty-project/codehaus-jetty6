@@ -50,7 +50,8 @@ public class HttpURITest extends TestCase
        /*27*/ {"//",null,"//",null,null,null,null,null,null},  
        /*28*/ {"/;param",null, null, null,null,"/", "param",null,null},
        /*29*/ {"/?x=y",null, null, null,null,"/", null,"x=y",null},
-       /*30*/ {"/#fragment",null, null, null,null,"/", null,null,"fragment"},  
+       /*30*/ {"/?abc=test",null, null, null,null,"/", null,"abc=test",null},
+       /*31*/ {"/#fragment",null, null, null,null,"/", null,null,"fragment"},  
     };
 
     public void testPartialURIs()
@@ -109,7 +110,8 @@ public class HttpURITest extends TestCase
        /*30*/ {"http://localhost/?x=y", "http", "//localhost", "localhost",null,"/", null,"x=y",null},
        /*31*/ {"/;param",null, null, null,null,"/", "param",null,null},
        /*32*/ {"/?x=y",null, null, null,null,"/", null,"x=y",null},
-       /*33*/ {"/#fragment",null, null, null,null,"/", null,null,"fragment"},
+       /*33*/ {"/?abc=test",null, null, null,null,"/", null,"abc=test",null},
+       /*34*/ {"/#fragment",null, null, null,null,"/", null,null,"fragment"},
     };
     
     
