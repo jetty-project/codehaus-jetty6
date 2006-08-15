@@ -94,7 +94,7 @@ public class Server extends HandlerWrapper implements Attributes
         setServer(this);
 
         Connector connector=new SocketConnector();
-        connector.setPort(8080);
+        connector.setPort(port);
         setConnectors(new Connector[]{connector});
     }
 
