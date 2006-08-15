@@ -232,12 +232,19 @@ public class TestJAASUserRealm extends TestCase
         }
         finally
         {
-            Connection c = eds.getConnection();
-            Statement s = c.createStatement();
-            s.executeUpdate("drop table myusers");
-            s.executeUpdate("drop table myuserroles");
-            s.close();
-            c.close();
+            try
+            {
+                Connection c = eds.getConnection();
+                Statement s = c.createStatement();
+                s.executeUpdate("drop table myusers");
+                s.executeUpdate("drop table myuserroles");
+                s.close();
+                c.close();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 
