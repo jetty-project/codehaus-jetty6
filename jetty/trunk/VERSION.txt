@@ -18,6 +18,8 @@ jetty-6.0.0rc1 - ???
     + -DSTOP.PORT must be specified.
     + moved optional modules to extras
     + fixed bug that caused Response.setStatus to ignore the provided message
+    + refactored resource cache 
+    + Allow direct filling of buffers for uncached static content.
 
 jetty-6.0.0rc0 - 7 July 2006
     + change prefix from "jetty6" to just "jetty" for plugin: eg is now mvn jetty:run

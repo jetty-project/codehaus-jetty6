@@ -113,7 +113,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private boolean _gzip=true;
     
     private Resource _resourceBase;
-    private ResourceCache _cache=new ResourceCache();
+    private ResourceCache _cache;
     
     private MimeTypes _mimeTypes;
     private String[] _welcomes;
@@ -128,6 +128,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         ServletContext config=getServletContext();
         _context = (ContextHandler.Context)config;
         _mimeTypes = _context.getContextHandler().getMimeTypes();
+        
         _welcomes = _context.getContextHandler().getWelcomeFiles();
         if (_welcomes==null)
             _welcomes=new String[] {"index.jsp","index.html"};
@@ -175,7 +176,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             if (max_cache_size>0)
             {
                 if (_cache==null)
-                    _cache=new ResourceCache();
+                    _cache=new ResourceCache(_mimeTypes);
                 _cache.setMaxCacheSize(max_cache_size);    
             }
             else if (max_cache_size!=-2)
@@ -303,8 +304,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         // Find the resource and content
         String path=null;
         Resource resource=null;
-        ResourceCache.Entry cache=null;
-        Content content=null;
+        HttpContent content=null;
         try
         {   
             // Try gzipped content first
@@ -315,25 +315,22 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     resource=getResource(pathInContextGz);
                 else
                 {
-                    cache=_cache.lookup(pathInContextGz,this);
-                  
-                    if (cache!=null)
-                    {
-                        resource=cache.getResource();
-                        content=(Content)cache.getValue();
-                    }
+                    content=_cache.lookup(pathInContextGz,this);
+                    if (content!=null)
+                        resource=content.getResource();
                     else
                         resource=getResource(pathInContextGz);
                 }
             }
             
-            // If we did not find a gzipped resource
+            // If we found a gzipped resource
             if (resource!=null && resource.exists())
             {
                 path=pathInContextGz;
             }
             else
             {
+                // Look for a normal resource
                 pathInContextGz=null;
                 gzip=false;
                 path=pathInContext;
@@ -343,20 +340,17 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     resource=getResource(pathInContext);
                 else
                 {
-                    cache=_cache.lookup(pathInContext,this);
+                    content=_cache.lookup(pathInContext,this);
                     
-                    if (cache!=null)
-                    {
-                        resource=cache.getResource();
-                        content=(Content)cache.getValue();
-                    }
+                    if (content!=null)
+                        resource=content.getResource();
                     else
                         resource=getResource(pathInContext);
                 }
             }
             
             if (Log.isDebugEnabled())
-                Log.debug("resource="+resource+(cache!=null?" cache":"")+(content!=null?" content":"")+(gzip?" gzip":""));
+                Log.debug("resource="+resource+(content!=null?" content":"")+(gzip?" gzip":""));
                         
             // Handle resource
             if (resource==null || !resource.exists())
@@ -372,12 +366,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 
                 // ensure we have content
                 if (content==null)
-                {
-                    content=getContent(path,resource);
-                    // validate the cache entry if we have one;
-                    if (cache!=null)
-                        cache.setValue(content);
-                }
+                    content=new UnCachedContent(resource);
                 
                 if (included.booleanValue() || passConditionalHeaders(request,response, resource,content))  
                     sendData(request,response,included.booleanValue(),resource,content,reqRanges);   
@@ -428,7 +417,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 }
                 else 
                 {
-                    content=getContent(pathInContext,resource);
+                    content=new UnCachedContent(resource);
                     if (included.booleanValue() || passConditionalHeaders(request,response, resource,content))
                         sendDirectory(request,response,resource,pathInContext.length()>1);
                 }
@@ -440,12 +429,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         finally
         {
-            if (cache!=null && cache.getValue()==null)
-                cache.invalidate();
             if (content!=null)
                 content.release();
-            else if (resource!=null)
-                resource.release();
         }
         
     }
@@ -458,17 +443,14 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     }
     
     /* ------------------------------------------------------------ */
-    private Content getContent(String pathInContext, Resource resource)
+    private Buffer getContent(String pathInContext, Resource resource)
     	throws IOException	
     {
-        Content content=new Content(resource);
-        Buffer mime_type=_mimeTypes.getMimeByExtension(pathInContext);
         Connector connector = HttpConnection.getCurrentConnection().getConnector();
-        if (mime_type!=null) content.setContentType(mime_type);
+        Buffer buffer=null;
         
         if (!resource.isDirectory())   
         {
-            Buffer buffer=null;
             long length=resource.length();
             
             if (length<=_cache.getMaxCachedFileSize())
@@ -485,46 +467,26 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     {
                         FileInputStream fis = new FileInputStream(resource.getFile());
                         buffer = new NIOBuffer((int) length, NIOBuffer.DIRECT);
-                        byte[] buf = new byte[connector.getResponseBufferSize()]; 
-                        int i = 0;
-                        while (i < length)
-                        {
-                            int r = fis.read(buf, 0, buf.length);
-                            if (r < 0)
-                                throw new IOException("unexpected EOF");
-                            buffer.put(buf, 0, r);
-                            i+=r;
-                        }
-                        if (fis != null) 
-                            fis.close();
+                        buffer.readFrom(fis,(int)length);
+                        fis.close();
                     }
                 } 
                 else 
                 {
-                    buffer = new ByteArrayBuffer((int)length);
-                    byte[] array = buffer.array();
                     InputStream in = resource.getInputStream();
-
-                    int l = 0;
-                    while (l < length) 
-                    {
-                        int r = in.read(array,l,array.length-l);
-                        if (r < 0)
-                            throw new IOException("unexpected EOF");
-                        l+=r;
-                    }
-                    buffer.setPutIndex(l);
+                    buffer = new ByteArrayBuffer((int)length);
+                    buffer.readFrom(in,(int)length);
+                    in.close();
                 }
             }
             
             if (buffer!=null)
             {
-                content.setBuffer(buffer);
                 if (Log.isDebugEnabled())
-                    Log.debug("content buffer is "+buffer.getClass());
+                    Log.debug("content buffer is {}",buffer.getClass());
             }
         }
-        return content;
+        return buffer;
     }
     
     /* ------------------------------------------------------------ */
@@ -557,7 +519,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     /* ------------------------------------------------------------ */
     /* Check modification date headers.
      */
-    protected boolean passConditionalHeaders(HttpServletRequest request,HttpServletResponse response, Resource resource,Content content)
+    protected boolean passConditionalHeaders(HttpServletRequest request,HttpServletResponse response, Resource resource, HttpContent content)
     throws IOException
     {
         if (!request.getMethod().equals(HttpMethods.HEAD) )
@@ -638,7 +600,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                             HttpServletResponse response,
                             boolean include,
                             Resource resource,
-                            Content content,
+                            HttpContent content,
                             Enumeration reqRanges)
     throws IOException
     {
@@ -659,7 +621,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             else
             {
                 // See if a short direct method can be used?
-                if (out instanceof HttpConnection.Output && content.getBuffer()!=null)
+                if (out instanceof HttpConnection.Output)
                 {
                     ((HttpConnection.Output)out).sendContent(content);
                 }
@@ -766,14 +728,18 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     }
     
     /* ------------------------------------------------------------ */
-    protected void writeHeaders(HttpServletResponse response,Content content,long count)
+    protected void writeHeaders(HttpServletResponse response,HttpContent content,long count)
     throws IOException
-    {
+    {   
+        // TODO - use the buffers
+        
         if (content.getContentType()!=null)
             response.setContentType(content.getContentType().toString());
         if (content.getLastModified()!=null)	
             response.setHeader(HttpHeaders.LAST_MODIFIED,content.getLastModified().toString());
-       
+        else
+            response.setDateHeader(HttpHeaders.LAST_MODIFIED,content.getResource().lastModified());
+        
         if (count != -1)
         {
             if (response instanceof Response)
@@ -809,105 +775,57 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
     }
     
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /** MetaData associated with a context Resource.
-     */
-    public static class Content implements ResourceCache.Value, HttpContent
+    private class UnCachedContent implements HttpContent
     {
         Resource _resource;
-        String _name;
-        long _lastModified;
-        Buffer _lastModifiedBytes;
-        Buffer _contentType;
-        boolean _valid;
-        Buffer _buffer;
         
-        Content(Resource resource)
+        UnCachedContent(Resource resource)
         {
             _resource=resource;
-            _name=_resource.toString();
-            _lastModified=resource.lastModified();
-            _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_resource.lastModified(),false));
         }
         
-        public Resource getResource()
-        {
-            return _resource;
-        }
-        
-        public Buffer getLastModified()
-        {
-            return _lastModifiedBytes;
-        }
-
+        /* ------------------------------------------------------------ */
         public Buffer getContentType()
         {
-            return _contentType;
-        }
-        
-        public void setContentType(Buffer type)
-        {
-            _contentType=type;
+            return _mimeTypes.getMimeByExtension(_resource.toString());
         }
 
-        public void validate()
+        /* ------------------------------------------------------------ */
+        public Buffer getLastModified()
         {
-            synchronized(this)
-            {
-                _valid=true;
-            }
-        }
-        
-        public void invalidate()
-        {
-            synchronized(this)
-            {
-                _valid=false;
-            }
-        }
-        
-        public void release()
-        {
-            synchronized(this)
-            {
-                if (!_valid)
-                {
-                    _resource.release();
-                }
-            }
-        }
-        
-        public boolean isValid()
-        {
-            synchronized(this)
-            {
-                return _valid;
-            }
+            return null;
         }
 
         /* ------------------------------------------------------------ */
         public Buffer getBuffer()
         {
-            if (_buffer==null)
-                return null;
-            return new View(_buffer);
-        }
-        
-        /* ------------------------------------------------------------ */
-        public void setBuffer(Buffer buffer)
-        {
-            _buffer=buffer;
+            return null;
         }
 
         /* ------------------------------------------------------------ */
         public long getContentLength()
         {
-            if (_buffer==null)
-                return -1;
-            return _buffer.length();
+            return _resource.length();
         }
-        
+
+        /* ------------------------------------------------------------ */
+        public InputStream getInputStream() throws IOException
+        {
+            return _resource.getInputStream();
+        }
+
+        /* ------------------------------------------------------------ */
+        public Resource getResource()
+        {
+            return _resource;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void release()
+        {
+            _resource.release();
+            _resource=null;
+        }
         
     }
 }
