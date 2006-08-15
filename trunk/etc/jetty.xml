@@ -128,7 +128,7 @@
     <!-- =========================================================== -->
     <Call class="org.mortbay.jetty.webapp.WebAppContext" name="addWebApplications">
       <Arg><Ref id="contexts"/></Arg>
-      <Arg>./webapps</Arg>
+      <Arg><SystemProperty name="jetty.home" default="."/>/webapps</Arg>
       <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
       <Arg type="boolean">True</Arg>  <!-- extract -->
       <Arg type="boolean">False</Arg> <!-- parent priority class loading -->
@@ -142,22 +142,20 @@
         <Item>
           <New class="org.mortbay.jetty.security.HashUserRealm">
             <Set name="name">Test Realm</Set>
-            <Set name="config">etc/realm.properties</Set>
+            <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
           </New>
         </Item>
       </Array>
     </Set>
     
 
-
-    
     <!-- =========================================================== -->
     <!-- Configure Request Log                                       -->
     <!-- =========================================================== -->
     <Ref id="requestLog">
       <Set name="requestLog">
         <New id="requestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
-          <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
+          <Arg><SystemProperty name="jetty.logs" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
           <Set name="retainDays">90</Set>
           <Set name="append">true</Set>
           <Set name="extended">false</Set>
