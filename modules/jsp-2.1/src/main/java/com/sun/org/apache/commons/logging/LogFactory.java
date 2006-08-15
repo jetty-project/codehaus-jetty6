@@ -23,14 +23,23 @@ import java.net.URLClassLoader;
  */
 public class LogFactory
 {
-    private static final Log log = new Log();
+    private static final Log log = new JettyLog();
     
     public static Log getLog (Class c)
     {
         return log;
     }
     
+    public static Log getLog (String str)
+    {
+        return log;
+    }
     public static void release (URLClassLoader cl)
+    {
+        //noop;
+    }
+    
+    public static void releaseAll ()
     {
         //noop;
     }

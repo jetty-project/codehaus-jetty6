@@ -11,89 +11,54 @@
 // ========================================================================
 package com.sun.org.apache.commons.logging;
 
-import java.util.logging.Level;
 
 
 
-/**
- * Log
- * 
- * Bridges the com.sun.org.apache.commons.logging.Log to Jetty's log.
- *
- **/
-public class Log 
+
+public interface Log 
 {
-    public static void fatal (Object message)
-    {
-        org.mortbay.log.Log.warn(message.toString());
-    }
+    public  void fatal (Object message);
     
-    public static void fatal (Object message, Throwable t)
-    {
-        org.mortbay.log.Log.warn(message.toString(), t);
-    }
     
-    public static void debug(Object message)
-    {
-        org.mortbay.log.Log.debug(message.toString());
-    }
+    public  void fatal (Object message, Throwable t);
+   
     
-    public static void debug (Object message, Throwable t)
-    {
-        org.mortbay.log.Log.debug(message.toString(), t);
-    }
+    public  void debug(Object message);
+   
     
-    public static void trace (Object message)
-    {
-        org.mortbay.log.Log.debug(message.toString());
-    }
+    public  void debug (Object message, Throwable t);
+   
+    
+    public  void trace (Object message);
+   
     
   
-    public static void info(Object message)
-    {
-       org.mortbay.log.Log.info(message.toString());
-    }
+    public  void info(Object message);
+   
 
-    public static void error(Object message)
-    {
-       org.mortbay.log.Log.warn(message.toString());
-    }
+    public  void error(Object message);
+   
     
-    public static void error(Object message, Throwable cause)
-    {
-        org.mortbay.log.Log.warn(message.toString(), cause);
-    }
+    public  void error(Object message, Throwable cause);
+   
 
-    public static void warn(Object message)
-    {
-        org.mortbay.log.Log.warn(message.toString());
-    }
+    public  void warn(Object message);
+  
     
-    public static boolean isDebugEnabled ()
-    {
-        return org.mortbay.log.Log.isDebugEnabled();
-    }
-    
-    public static boolean isWarnEnabled ()
-    {
-        return org.mortbay.log.Log.isDebugEnabled();
-    }
-    
-    public static boolean isInfoEnabled ()
-    {
-        return true;
-    }
+    public  boolean isDebugEnabled ();
     
     
-    public static boolean isErrorEnabled ()
-    {
-        return true;
-    }
+    public  boolean isWarnEnabled ();
+    
+    
+    public  boolean isInfoEnabled ();
+    
+    
+    
+    public  boolean isErrorEnabled ();
+   
     
   
-    public static boolean isTraceEnabled ()
-    {
-        return org.mortbay.log.Log.isDebugEnabled();
-    }
-    
+    public  boolean isTraceEnabled ();
+   
 }
