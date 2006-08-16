@@ -78,6 +78,7 @@ public class Server extends HandlerWrapper implements Attributes
     private SessionIdManager _sessionIdManager;
     private boolean _sendServerVersion = true; //send Server: header by default
     private AttributesMap _attributes = new AttributesMap();
+    private String _version = "6.0.x";
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -187,10 +188,10 @@ public class Server extends HandlerWrapper implements Attributes
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
-        if (this.getClass().getPackage().getImplementationVersion()==null)
-            Log.info("Jetty 6.0.x");
-        else
-            Log.info(this.getClass().getPackage().getImplementationTitle()+" "+this.getClass().getPackage().getImplementationVersion());
+        if (this.getClass().getPackage().getImplementationVersion()!=null)
+            _version=this.getClass().getPackage().getImplementationVersion();
+        Log.info("jetty-"+_version);
+        HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
         
         if (_threadPool==null)
@@ -208,7 +209,6 @@ public class Server extends HandlerWrapper implements Attributes
                 ((LifeCycle)_threadPool).start();
         } 
         catch(Throwable e) { mex.add(e);}
-        
         
         try { super.doStart(); } 
         catch(Throwable e) { mex.add(e);}
@@ -337,8 +337,13 @@ public class Server extends HandlerWrapper implements Attributes
     /* ------------------------------------------------------------ */
     public boolean getSendServerVersion()
     {
-        
         return _sendServerVersion;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getVersion()
+    {
+        return _version;
     }
     
     /* ------------------------------------------------------------ */
