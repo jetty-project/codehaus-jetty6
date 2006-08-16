@@ -1,0 +1,31 @@
+Index: src/main/webapp/dojo/src/io/cometd.js
+===================================================================
+--- src/main/webapp/dojo/src/io/cometd.js	(revision 5283)
++++ src/main/webapp/dojo/src/io/cometd.js	(working copy)
+@@ -155,6 +155,17 @@
+ 	}
+ 
+ 	this._deliver = function(message){
++	        if (message[0]) {
++			for (var m=0 ; m < message.length ; m++ )
++				this.deliverMessage(message[m]);
++		}
++		else {
++	 		this.deliverMessage(message);
++		}
++	}
++
++	// public API functions called by cometd or by the transport classes
++	this.deliverMessage = function(message){
+ 		// dipatch events along the specified path
+ 		if(!message["channel"]){
+ 			dojo.debug("cometd error: no channel for message!");
+@@ -663,7 +674,7 @@
+ 		if(dojo.render.html.mozilla){
+ 			this.xhr.addEventListener("load", dojo.lang.hitch(this, "handleOnLoad"), false);
+ 		}else if(dojo.render.html.safari){
+-			// Blah. WebKit doesn't actually populate responseText and/or responseXML. Useless.
++			// Blah. WebKit doesnt actually populate responseText and/or responseXML. Useless.
+ 			dojo.debug("Webkit is broken with multipart responses over XHR = (");
+ 			this.xhr.onreadystatechange = dojo.lang.hitch(this, "handleOnLoad");
+ 		}else{
