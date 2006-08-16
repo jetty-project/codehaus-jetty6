@@ -729,7 +729,10 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             super.destroy();
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private class UnCachedContent implements HttpContent
     {
         Resource _resource;
@@ -799,47 +802,32 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         protected void fill(Content content) throws IOException
         {
             super.fill(content);
-
+            
             Connector connector = HttpConnection.getCurrentConnection().getConnector();
             Buffer buffer=null;
             Resource resource=content.getResource();
-            if (!resource.isDirectory())   
+            long length=resource.length();
+            if (connector instanceof NIOConnector) 
             {
-                long length=resource.length();
-                
-                if (length<=DefaultServlet.this._cache.getMaxCachedFileSize())
+                if (_useFileMappedBuffer) 
+                {    
+                    File file = resource.getFile();
+                    if (file != null) 
+                        buffer = new NIOBuffer(file);
+                } 
+                else 
                 {
-                    if (connector instanceof NIOConnector) 
-                    {
-                        if (_useFileMappedBuffer) {
-                            
-                            File file = resource.getFile();
-                            if (file != null) 
-                                buffer = new NIOBuffer(file);
-                        } 
-                        else 
-                        {
-                            FileInputStream fis = new FileInputStream(resource.getFile());
-                            buffer = new NIOBuffer((int) length, NIOBuffer.DIRECT);
-                            buffer.readFrom(fis,(int)length);
-                            fis.close();
-                        }
-                    } 
-                    else 
-                    {
-                        InputStream in = resource.getInputStream();
-                        buffer = new ByteArrayBuffer((int)length);
-                        buffer.readFrom(in,(int)length);
-                        in.close();
-                    }
+                    FileInputStream fis = new FileInputStream(resource.getFile());
+                    buffer = new NIOBuffer((int) length, NIOBuffer.DIRECT);
+                    buffer.readFrom(fis,(int)length);
+                    fis.close();
                 }
-                
-                if (buffer!=null)
-                {
-                    if (Log.isDebugEnabled())
-                        Log.debug("content buffer is {}",buffer.getClass());
-                }
-            }
+            } 
+            else 
+            {
+                super.fill(content);
+            }   
+            
             content.setBuffer(buffer);
         }
         
