@@ -40,7 +40,7 @@ public class ManyServletContexts
         root.addServlet(new ServletHolder(new HelloServlet("Ciao")), "/*");
         
         Context other = new Context(contexts,"/other",Context.SESSIONS);
-        other.addServlet("org.mortbay.jetty.example.ManyServletContext$HelloServlet", "/*");
+        other.addServlet("org.mortbay.jetty.example.ManyServletContexts$HelloServlet", "/*");
         
         server.start();
         server.join();
