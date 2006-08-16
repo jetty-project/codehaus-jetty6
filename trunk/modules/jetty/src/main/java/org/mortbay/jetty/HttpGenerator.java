@@ -69,6 +69,10 @@ public class HttpGenerator implements HttpTokens
     // other statics
     private static int CHUNK_SPACE = 12;
     
+    public static void setServerVersion(String version)
+    {
+        SERVER=Portable.getBytes("Server: Jetty("+version+")\015\012");
+    }
 
     private static String[] __reasons = new String[505];
     static

@@ -542,7 +542,7 @@ public class WebXmlConfiguration implements Configuration
         try
         {
             Class listenerClass=getWebAppContext().loadClass(className);
-            listener=listenerClass.newInstance();
+            listener=newListenerInstance(listenerClass);
             if(!(listener instanceof EventListener))
             {
                 Log.warn("Not an EventListener: "+listener);
@@ -556,7 +556,14 @@ public class WebXmlConfiguration implements Configuration
             return;
         }
     }
-
+    
+    /* ------------------------------------------------------------ */
+    protected Object newListenerInstance(Class clazz) 
+        throws InstantiationException, IllegalAccessException 
+    {
+                     return clazz.newInstance();
+    }
+    
     /* ------------------------------------------------------------ */
     protected void initDistributable(XmlParser.Node node)
     {
