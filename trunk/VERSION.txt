@@ -1,4 +1,4 @@
-jetty-6.0.0rc1 - ???
+jetty-6.0.0rc1 - 16 August 2006
     + Support for binding References and Referenceables and javax.mail.Sessions in JNDI
     + Added TransformingWebAppClassLoader for spring 2.0 byte code modification support
     + Ensure classes come before dependencies for plugin [JETTY-90]
@@ -20,6 +20,7 @@ jetty-6.0.0rc1 - ???
     + fixed bug that caused Response.setStatus to ignore the provided message
     + refactored resource cache 
     + Allow direct filling of buffers for uncached static content.
+    + Added simple ResourceHandler and FileServer example
 
 jetty-6.0.0rc0 - 7 July 2006
     + change prefix from "jetty6" to just "jetty" for plugin: eg is now mvn jetty:run
