@@ -41,8 +41,6 @@
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.4.jar"/>
 	<classpathentry output="extras/cometd/target/classes" kind="src" path="extras/cometd/src/main/java"/>
 	<classpathentry output="extras/cometd/target/test-classes" kind="src" path="extras/cometd/src/test/java"/>
-	<classpathentry output="extras/grizzly/target/classes" kind="src" path="extras/grizzly/src/main/java"/>
 	<classpathentry output="extras/spring/target/classes" kind="src" path="extras/spring/src/main/java"/>
-	<classpathentry sourcepath="/home/gregw/src/glassfish/appserv-http-engine/src/java" kind="lib" path="extras/grizzly/repository/com/sun/enterprise/appserv-http-engine/9.0-SNAPSHOT/appserv-http-engine-9.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

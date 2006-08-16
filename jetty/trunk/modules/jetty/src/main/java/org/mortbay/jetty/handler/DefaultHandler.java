@@ -28,6 +28,7 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.MimeTypes;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.log.Log;
 import org.mortbay.util.ByteArrayISO8859Writer;
@@ -72,8 +73,11 @@ public class DefaultHandler extends AbstractHandler
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
-        if (response.isCommitted() || HttpConnection.getCurrentConnection().getRequest().isHandled())
+        Request base_request = request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+        
+        if (response.isCommitted() || base_request.isHandled())
             return;
+        base_request.setHandled(true);
         
         String method=request.getMethod();
 
