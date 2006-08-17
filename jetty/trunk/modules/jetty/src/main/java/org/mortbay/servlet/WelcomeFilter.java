@@ -24,6 +24,19 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 /* ------------------------------------------------------------ */
+/** Welcome Filter
+ * This filter can be used to server an index file for a directory 
+ * when no index file actually exists (thus the web.xml mechanism does
+ * not work).
+ * 
+ * This filter will dispatch requests to a directory (URLs ending with /)
+ * to the welcome URL determined by the "welcome" init parameter.  So if
+ * the filter "welcome" init parameter is set to "index.do" then a request
+ * to "/some/directory/" will be dispatched to "/some/directory/index.do" and
+ * will be handled by any servlets mapped to that URL.
+ *
+ * Requests to "/some/directory" will be redirected to "/some/directory/".
+ */
 public  class WelcomeFilter implements Filter
 {
     private String welcome;
@@ -31,6 +44,8 @@ public  class WelcomeFilter implements Filter
     public void init(FilterConfig filterConfig)
     {
         welcome=filterConfig.getInitParameter("welcome");
+	if (welcome==null)
+	    welcome="index.html";
     }
 
     /* ------------------------------------------------------------ */
