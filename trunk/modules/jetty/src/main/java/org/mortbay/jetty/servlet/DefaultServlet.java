@@ -482,8 +482,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             if (content!=null)
             {
                 String ifms=request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
-                String mdlm=content.getLastModified().toString();
-                if (ifms!=null && mdlm!=null && ifms.equals(mdlm))
+   
+                Buffer mdlm=content.getLastModified();
+                if (ifms!=null && mdlm!=null && ifms.equals(mdlm.toString()))
                 {
                     response.reset();
                     response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
@@ -830,8 +831,5 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             
             content.setBuffer(buffer);
         }
-        
-        
-        
     }
 }
