@@ -1,3 +1,5 @@
+    + Fixed NPE when no resource cache
+
 jetty-6.0.0rc1 - 16 August 2006
     + Support for binding References and Referenceables and javax.mail.Sessions in JNDI
     + Added TransformingWebAppClassLoader for spring 2.0 byte code modification support
