@@ -8,10 +8,12 @@
      <iframe src="http://www.webtide.com/include/inc_blogs.jsp" class="study">
        <a href="http://blogs.webtide.com">Blogs about Jetty.</a>
     </iframe>
+    <iframe src="http://www.webtide.com/include/inc_offers.jsp" class="offers">
+       <a href="http://www.webtide.com">Webtide special offers</a>
+    </iframe>
 
 <div class="summary">
- <div class="news">
- </div>
+ <div class="news"></div>
 <p>
 <span>Jetty</span> is an open-source, standards-based, full-featured web server implemented entirely in java. It is released under the <a href="LICENSE.TXT">Apache 2.0</a> licence and is therefore free for commercial use and distribution. 
 First created in 1995, Jetty has benefitted from input from a vast user community and consistent and focussed development by a stable core of lead developers. 

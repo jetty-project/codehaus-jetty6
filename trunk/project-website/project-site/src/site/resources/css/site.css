@@ -51,10 +51,32 @@ div.news
   margin-bottom: 20px;
 }
 
+iframe.offers
+{
+  float: right;
+  background-image: url(../images/webtide_logo.jpg);
+  background-position: top center;
+  background-repeat: no-repeat;
+  clear:right;
+  border-left: 2px solid #999999;
+  border-bottom: 4px solid #999999;
+  border-top: 2px dotted  #999999;
+  border-right: 2px dotted  #999999;
+  text-align: left;
+  font-size: 9pt;
+  margin-top: 8px;
+  padding-top: 66px;
+  padding-bottom: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  width: 245px;
+  height: 420px; 
+}
 
 iframe.study
 {
   float: right;
+  clear:right;
   border-left: 2px solid #999999;
   border-bottom: 4px solid #999999;
   border-top: 2px dotted  #999999;
@@ -65,7 +87,7 @@ iframe.study
   padding-bottom: 8px;
   padding-left: 8px;
   padding-right: 8px;
-  width: 320px;
+  width: 245px;
   height: 380px;
   margin-left: 10px;
 }
