@@ -14,6 +14,8 @@
 package org.mortbay.jetty.webapp;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.EventListener;
@@ -167,21 +169,29 @@ public class WebXmlConfiguration implements Configuration
             if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
             return;
         }
+
+        URL webxml=findWebXml();
+        if (webxml!=null)
+            configure(webxml.toString());
+    }
+
+    protected URL findWebXml() throws IOException, MalformedURLException
+    {
         Resource web_inf=getWebAppContext().getWebInf();
-        
-        // handle any WEB-INF descriptors
         if(web_inf!=null && web_inf.isDirectory())
         {
             // do web.xml file
             Resource web=web_inf.addPath("web.xml");
-            if(web.exists())
-                configure(web.getURL().toString());
+            if(web.exists()) {
+                return web.getURL();
+            }
             else
             {
                 Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
                         +". Serving files and default/dynamic servlets only");
             }
         }
+        return null;
     }
     
     public void configure(String webXml) throws Exception
