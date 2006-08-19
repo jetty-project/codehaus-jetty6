@@ -166,7 +166,8 @@ public class WebXmlConfiguration implements Configuration
         //cannot configure if the context is already started
         if (_context.isStarted())
         {
-            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
+            if (Log.isDebugEnabled())
+		Log.debug("Cannot configure webapp after it is started");
             return;
         }
 
@@ -175,6 +176,7 @@ public class WebXmlConfiguration implements Configuration
             configure(webxml.toString());
     }
 
+    /* ------------------------------------------------------------------------------- */
     protected URL findWebXml() throws IOException, MalformedURLException
     {
         Resource web_inf=getWebAppContext().getWebInf();
@@ -182,18 +184,15 @@ public class WebXmlConfiguration implements Configuration
         {
             // do web.xml file
             Resource web=web_inf.addPath("web.xml");
-            if(web.exists()) {
+            if(web.exists()) 
                 return web.getURL();
-            }
-            else
-            {
-                Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
-                        +". Serving files and default/dynamic servlets only");
-            }
+	    Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
+		    +". Serving files and default/dynamic servlets only");
         }
         return null;
     }
     
+    /* ------------------------------------------------------------------------------- */
     public void configure(String webXml) throws Exception
     {
         XmlParser.Node config=null;
