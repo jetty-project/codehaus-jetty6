@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.bio.StreamEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;

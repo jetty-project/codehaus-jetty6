@@ -14,8 +14,6 @@
 
 package org.mortbay.xml;
 
-import java.io.File;
-import java.io.FilePermission;
 import java.net.URL;
 
 import junit.framework.TestCase;

@@ -6,12 +6,11 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
-import org.mortbay.jetty.nio.SelectChannelConnector.SelectChannelEndPoint;
 import org.mortbay.jetty.nio.SelectChannelConnector.RetryContinuation;
+import org.mortbay.jetty.nio.SelectChannelConnector.SelectChannelEndPoint;
 import org.mortbay.jetty.nio.SelectChannelConnector.SelectSet;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;

@@ -10,10 +10,10 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-
-import junit.framework.TestCase;
 
 /**
  * @author gregw
