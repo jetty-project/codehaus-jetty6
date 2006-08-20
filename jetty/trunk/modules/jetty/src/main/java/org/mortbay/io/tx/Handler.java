@@ -14,8 +14,8 @@ import java.security.Permission;
 import java.util.List;
 import java.util.Map;
 
-import org.mortbay.io.IO;
 import org.mortbay.log.Log;
+import org.mortbay.util.IO;
 
 /** Handler for the pseudo URL protocol tx.
  * This URLStreamHandler wraps other URLStream so that the context can be buffered

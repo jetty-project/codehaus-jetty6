@@ -22,8 +22,8 @@ import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.mortbay.io.IO;
 import org.mortbay.log.Log;
+import org.mortbay.util.IO;
 
 
 /* ------------------------------------------------------------ */

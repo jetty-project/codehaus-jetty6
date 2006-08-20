@@ -31,7 +31,6 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
-import org.mortbay.io.IO;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
@@ -48,6 +47,7 @@ import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.Log;
 import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.StringUtil;
