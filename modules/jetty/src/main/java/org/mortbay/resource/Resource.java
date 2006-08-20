@@ -25,8 +25,8 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.mortbay.io.IO;
 import org.mortbay.log.Log;
+import org.mortbay.util.IO;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
@@ -34,7 +34,7 @@ import org.mortbay.util.URIUtil;
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
  *
- * @author Nuno Preguiça
+ * @author Nuno Preguiï¿½a
  * @author Greg Wilkins (gregw)
  */
 public abstract class Resource implements Serializable

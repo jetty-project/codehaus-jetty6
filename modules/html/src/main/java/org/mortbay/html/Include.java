@@ -27,7 +27,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
 
-import org.mortbay.io.IO;
+import org.mortbay.util.IO;
 
 
 /* -------------------------------------------------------------------- */

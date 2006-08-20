@@ -23,7 +23,7 @@ import java.util.jar.JarInputStream;
 
 import junit.framework.TestSuite;
 
-import org.mortbay.io.IO;
+import org.mortbay.util.IO;
 
 public class ResourceTest extends junit.framework.TestCase
 {

@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.IO;
 import org.mortbay.io.WriterOutputStream;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
@@ -37,6 +36,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.util.IO;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URIUtil;

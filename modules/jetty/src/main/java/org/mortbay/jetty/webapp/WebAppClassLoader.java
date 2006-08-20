@@ -24,10 +24,10 @@ import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.util.StringTokenizer;
 
-import org.mortbay.io.IO;
 import org.mortbay.io.tx.Handler;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 
 
