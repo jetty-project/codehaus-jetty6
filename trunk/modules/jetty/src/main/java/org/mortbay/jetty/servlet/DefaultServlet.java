@@ -33,7 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.IO;
 import org.mortbay.io.View;
 import org.mortbay.io.WriterOutputStream;
 import org.mortbay.io.nio.NIOBuffer;
@@ -53,6 +52,7 @@ import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
+import org.mortbay.util.IO;
 import org.mortbay.util.MultiPartOutputStream;
 import org.mortbay.util.URIUtil;
 

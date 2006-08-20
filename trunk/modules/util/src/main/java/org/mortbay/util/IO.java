@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.io;
+package org.mortbay.util;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;

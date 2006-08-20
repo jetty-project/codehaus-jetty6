@@ -30,8 +30,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.IO;
 import org.mortbay.log.Log;
+import org.mortbay.util.IO;
 import org.mortbay.util.StringUtil;
 
 //-----------------------------------------------------------------------------

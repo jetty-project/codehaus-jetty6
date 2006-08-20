@@ -17,6 +17,8 @@ package org.mortbay.io;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import org.mortbay.util.IO;
+
 import junit.framework.TestSuite;
 
 
