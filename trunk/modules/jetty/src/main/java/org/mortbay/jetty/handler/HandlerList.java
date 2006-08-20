@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
 
 /* ------------------------------------------------------------ */
 /** HandlerList.

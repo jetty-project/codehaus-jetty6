@@ -24,7 +24,6 @@ import java.util.StringTokenizer;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
-import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.
@@ -48,7 +47,7 @@ import org.mortbay.util.StringUtil;
  * in the "org.mortbay.http.PathMap.separators" System property, which
  * defaults to :
  * <P>
- * Special characters within paths such as '?´ and ';' are not treated specially
+ * Special characters within paths such as '?ï¿½ and ';' are not treated specially
  * as it is assumed they would have been either encoded in the original URL or 
  * stripped from the path.
  * <P>

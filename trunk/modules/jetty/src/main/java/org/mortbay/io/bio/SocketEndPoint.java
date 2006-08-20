@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import javax.net.ssl.SSLSocket;
-
 import org.mortbay.io.Portable;
 
 /**

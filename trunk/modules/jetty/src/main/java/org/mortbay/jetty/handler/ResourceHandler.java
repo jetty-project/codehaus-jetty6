@@ -14,11 +14,9 @@
 
 package org.mortbay.jetty.handler;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,18 +24,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.WriterOutputStream;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.IO;
-import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URIUtil;
 
