@@ -1,9 +1,7 @@
 package org.mortbay.jetty.webapp;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
-
 
 import org.mortbay.io.tx.Handler;
 import org.mortbay.io.tx.Transformer;

@@ -2,8 +2,6 @@ package org.mortbay.cometd;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.cometd.JSON;
-
 import junit.framework.TestCase;
 
 public class JSONTest extends TestCase

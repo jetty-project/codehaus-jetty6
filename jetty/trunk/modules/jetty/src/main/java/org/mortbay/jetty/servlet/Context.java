@@ -15,12 +15,9 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.security.SecurityHandler;
 
 /* ------------------------------------------------------------ */

@@ -11,7 +11,6 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 import java.security.Permission;
-import java.util.List;
 import java.util.Map;
 
 import org.mortbay.log.Log;

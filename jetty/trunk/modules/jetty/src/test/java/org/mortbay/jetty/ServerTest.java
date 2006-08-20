@@ -14,9 +14,11 @@
 
 package org.mortbay.jetty;
 
-import org.mortbay.jetty.handler.DefaultHandler;
-import junit.framework.TestCase;
 import java.util.Random;
+
+import junit.framework.TestCase;
+
+import org.mortbay.jetty.handler.DefaultHandler;
 
 /**
  * @version $Revision$

@@ -22,13 +22,10 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.component.Container;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.security.UserRealm;

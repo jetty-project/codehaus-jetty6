@@ -29,7 +29,6 @@ import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
-import org.mortbay.log.Logger;
 import org.mortbay.util.LazyList;
 
 

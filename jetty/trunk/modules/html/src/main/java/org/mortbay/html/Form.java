@@ -17,7 +17,6 @@ package org.mortbay.html;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.MimeTypes;
 
 

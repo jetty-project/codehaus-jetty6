@@ -15,7 +15,6 @@
 package org.mortbay.jetty.security;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -62,7 +61,7 @@ import org.mortbay.resource.Resource;
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd ACN 003 491 576
- * @author Jan Hlavatý
+ * @author Jan Hlavatï¿½
  */
 public class SslSocketConnector extends SocketConnector
 {
