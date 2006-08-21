@@ -101,7 +101,6 @@ import org.mortbay.util.URIUtil;
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory
 {
-    
     private ContextHandler.Context _context;
     
     private boolean _acceptRanges=true;
@@ -815,7 +814,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 else 
                 {
                     FileInputStream fis = new FileInputStream(resource.getFile());
-                    buffer = new NIOBuffer((int) length, NIOBuffer.DIRECT);
+                    buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
                     buffer.readFrom(fis,(int)length);
                     fis.close();
                 }

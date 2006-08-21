@@ -16,13 +16,24 @@
 package org.mortbay.jetty.grizzly;
 
 
+import com.sun.enterprise.web.connector.grizzly.Handler;
+import com.sun.enterprise.web.connector.grizzly.KeepAliveStats;
+import com.sun.enterprise.web.connector.grizzly.Pipeline;
+import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
 import com.sun.enterprise.web.connector.grizzly.SelectorThread;
+import com.sun.enterprise.web.connector.grizzly.TaskListener;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.servlet.ServletException;
@@ -30,18 +41,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.coyote.RequestGroupInfo;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.nio.AbstractNIOConnector;
 import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
 import org.mortbay.util.ajax.Continuation;
@@ -51,9 +67,9 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class GrizzlyConnector extends AbstractConnector implements NIOConnector
+public class GrizzlyConnector extends AbstractNIOConnector
 {
-    private SelectorThread _selectorThread;
+    private JettySelectorThread _selectorThread;
 	
     /* ------------------------------------------------------------------------------- */
     /**
@@ -62,7 +78,7 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
      */
     public GrizzlyConnector()
     {
-        _selectorThread = new SelectorThread();
+        _selectorThread = new JettySelectorThread();
     }
 
     /* ------------------------------------------------------------ */
@@ -71,8 +87,6 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
         return _selectorThread.getServerSocketChannel();
     }
     
-
-
     /* ------------------------------------------------------------ */
     /*
      * @see org.mortbay.jetty.AbstractConnector#doStart()
@@ -133,27 +147,6 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
             e.printStackTrace();
         }
         
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    protected Buffer newBuffer(int size)
-    {
-        // TODO
-        // Header buffers always byte array buffers (efficiency of random access)
-        // There are lots of things to consider here... DIRECT buffers are faster to
-        // send but more expensive to build and access! so we have choices to make...
-        // + headers are constructed bit by bit and parsed bit by bit, so INDiRECT looks
-        // good for them.   
-        // + but will a gather write of an INDIRECT header with a DIRECT body be any good?
-        // this needs to be benchmarked.
-        // + Will it be possible to get a DIRECT header buffer just for the gather writes of
-        // content from file mapped buffers?  
-        // + Are gather writes worth the effort?  Maybe they will work well with two INDIRECT
-        // buffers being copied into a single kernel buffer?
-        // 
-        if (size==getHeaderBufferSize())
-            return new NIOBuffer(size, NIOBuffer.INDIRECT);
-        return new NIOBuffer(size, NIOBuffer.DIRECT);
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -284,6 +277,34 @@ public class GrizzlyConnector extends AbstractConnector implements NIOConnector
             return false;
         }
         
+    }
+
+    /** temp main - just to help testing */
+    public static void main(String[] args)
+        throws Exception
+    {
+        Server server = new Server();
+        Connector connector=new GrizzlyConnector();
+        connector.setPort(8080);
+        server.setConnectors(new Connector[]{connector});
+        
+        ServletHandler handler=new ServletHandler();
+        server.setHandler(handler);
+        
+        handler.addServletWithMapping("org.mortbay.jetty.grizzly.GrizzlyConnector$HelloServlet", "/");
+        
+        server.start();
+        server.join();
+    }
+
+    public static class HelloServlet extends HttpServlet
+    {
+        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+        {
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("<h1>Hello SimpleServlet</h1>");
+        }
     }
     
 }

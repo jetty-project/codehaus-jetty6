@@ -20,12 +20,11 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 
-import org.mortbay.io.IO;
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.NCSARequestLog;
@@ -39,8 +38,7 @@ import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.thread.BoundedThreadPool;
-
-import junit.framework.TestCase;
+import org.mortbay.util.IO;
 
 public class WebAppTest extends TestCase
 {

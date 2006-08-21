@@ -45,10 +45,9 @@ import org.mortbay.log.Log;
  * @author gregw
  *
  */
-public class BlockingChannelConnector extends AbstractConnector implements NIOConnector
+public class BlockingChannelConnector extends AbstractNIOConnector 
 {
     private transient ServerSocketChannel _acceptChannel;
-    private boolean _useDirectBuffers=true;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -58,18 +57,6 @@ public class BlockingChannelConnector extends AbstractConnector implements NIOCo
     {
     }
 
-
-    /* ------------------------------------------------------------------------------- */
-    public boolean getUseDirectBuffers()
-    {
-        return _useDirectBuffers;
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public void setUseDirectBuffers(boolean direct)
-    {
-        _useDirectBuffers=direct;
-    }
     /* ------------------------------------------------------------ */
     public Object getConnection()
     {
@@ -107,14 +94,6 @@ public class BlockingChannelConnector extends AbstractConnector implements NIOCo
 
         Connection connection=new Connection(channel);
         connection.dispatch();
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    protected Buffer newBuffer(int size)
-    {
-        if (size==getHeaderBufferSize())
-            return new NIOBuffer(size, NIOBuffer.INDIRECT);
-        return new NIOBuffer(size, _useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
     }
 
     /* ------------------------------------------------------------------------------- */
