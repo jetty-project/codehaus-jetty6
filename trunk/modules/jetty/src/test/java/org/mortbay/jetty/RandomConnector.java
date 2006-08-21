@@ -48,7 +48,8 @@ public class RandomConnector extends AbstractConnector implements NIOConnector
 {
     static Random random = new Random(System.currentTimeMillis());
     static int rate = 1;
-	
+    boolean _useDirectBuffers=true;
+    
     /* ------------------------------------------------------------------------------- */
     /**
      * Constructor.
@@ -58,6 +59,19 @@ public class RandomConnector extends AbstractConnector implements NIOConnector
     {
     }
 
+
+    /* ------------------------------------------------------------------------------- */
+    public boolean getUseDirectBuffers()
+    {
+        return _useDirectBuffers;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public void setUseDirectBuffers(boolean direct)
+    {
+        _useDirectBuffers=direct;
+    }
+    
     /* ------------------------------------------------------------ */
     public Object getConnection()
     {
@@ -178,7 +192,7 @@ public class RandomConnector extends AbstractConnector implements NIOConnector
         // 
         if (size==getHeaderBufferSize())
             return new NIOBuffer(size, NIOBuffer.INDIRECT);
-        return new NIOBuffer(size, NIOBuffer.DIRECT);
+        return new NIOBuffer(size, _useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -381,5 +395,5 @@ public class RandomConnector extends AbstractConnector implements NIOConnector
             out.println("</pre>");       
         }
     }
-    
+
 }

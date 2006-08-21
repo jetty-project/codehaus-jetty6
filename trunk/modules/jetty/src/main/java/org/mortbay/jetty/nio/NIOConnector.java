@@ -16,12 +16,19 @@ package org.mortbay.jetty.nio;
 
 /** 
  * NIOConnector.
- * Indicates that NIOBuffers can be handled (efficiently) by this Connector.
+ * A marker interface that indicates that NIOBuffers can be handled (efficiently) by this Connector.
  * 
  * @author Nigel Canonizado
  * 
  */
 public interface NIOConnector
 {
-
+    public boolean getUseDirectBuffers();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param direct If True (the default), the connector can use NIO direct buffers.
+     * Some JVMs have memory management issues (bugs) with direct buffers.
+     */
+    public void setUseDirectBuffers(boolean direct);
 }

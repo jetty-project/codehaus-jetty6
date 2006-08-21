@@ -1,6 +1,7 @@
     + Fixed NPE when no resource cache
     + Refactored WebXmlConfiguration to allow custom web.xml resource
     + Moved more utility packagtes to the util jar
+    + Direct buffer useage is optional
 
 jetty-6.0.0rc1 - 16 August 2006
     + Support for binding References and Referenceables and javax.mail.Sessions in JNDI
