@@ -33,6 +33,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
+import org.mortbay.jetty.nio.AbstractNIOConnector;
 import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -44,11 +45,10 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class RandomConnector extends AbstractConnector implements NIOConnector
+public class RandomConnector extends AbstractNIOConnector 
 {
     static Random random = new Random(System.currentTimeMillis());
     static int rate = 1;
-    boolean _useDirectBuffers=true;
     
     /* ------------------------------------------------------------------------------- */
     /**
@@ -60,17 +60,6 @@ public class RandomConnector extends AbstractConnector implements NIOConnector
     }
 
 
-    /* ------------------------------------------------------------------------------- */
-    public boolean getUseDirectBuffers()
-    {
-        return _useDirectBuffers;
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public void setUseDirectBuffers(boolean direct)
-    {
-        _useDirectBuffers=direct;
-    }
     
     /* ------------------------------------------------------------ */
     public Object getConnection()
@@ -173,28 +162,7 @@ public class RandomConnector extends AbstractConnector implements NIOConnector
         }
         
     }
-
-    /* ------------------------------------------------------------------------------- */
-    protected Buffer newBuffer(int size)
-    {
-        // TODO
-        // Header buffers always byte array buffers (efficiency of random access)
-        // There are lots of things to consider here... DIRECT buffers are faster to
-        // send but more expensive to build and access! so we have choices to make...
-        // + headers are constructed bit by bit and parsed bit by bit, so INDiRECT looks
-        // good for them.   
-        // + but will a gather write of an INDIRECT header with a DIRECT body be any good?
-        // this needs to be benchmarked.
-        // + Will it be possible to get a DIRECT header buffer just for the gather writes of
-        // content from file mapped buffers?  
-        // + Are gather writes worth the effort?  Maybe they will work well with two INDIRECT
-        // buffers being copied into a single kernel buffer?
-        // 
-        if (size==getHeaderBufferSize())
-            return new NIOBuffer(size, NIOBuffer.INDIRECT);
-        return new NIOBuffer(size, _useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
-    }
-
+    
     /* ------------------------------------------------------------------------------- */
     public void customize(EndPoint endpoint, Request request) throws IOException
     {
