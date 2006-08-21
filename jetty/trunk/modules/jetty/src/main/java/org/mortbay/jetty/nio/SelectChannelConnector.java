@@ -74,6 +74,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
     private transient SelectionKey _acceptKey;
     private transient SelectSet[] _selectSets;
     private boolean _delaySelectKeyUpdate=false;
+    private boolean _useDirectBuffers=true;
 
 
     /* ------------------------------------------------------------------------------- */
@@ -83,6 +84,18 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
      */
     public SelectChannelConnector()
     {
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public boolean getUseDirectBuffers()
+    {
+        return _useDirectBuffers;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public void setUseDirectBuffers(boolean direct)
+    {
+        _useDirectBuffers=direct;
     }
 
     /* ------------------------------------------------------------ */
@@ -196,7 +209,7 @@ public class SelectChannelConnector extends AbstractConnector implements NIOConn
         // 
         if (size==getHeaderBufferSize())
             return new NIOBuffer(size, NIOBuffer.INDIRECT);
-        return new NIOBuffer(size, NIOBuffer.DIRECT);
+        return new NIOBuffer(size, _useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
     }
 
     /* ------------------------------------------------------------------------------- */
