@@ -143,6 +143,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     private ArrayList scannerListeners;
     
     
+    public String PORT_SYSPROPERTY = "PORT";
+    
     /**
      * @return Returns the realms configured in the pom
      */
@@ -293,7 +295,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             Object[] configuredConnectors = getConfiguredConnectors();
             if (configuredConnectors == null|| configuredConnectors.length == 0)
             {
-                configuredConnectors = new Object[] { plugin.createDefaultConnector() };
+                //if a SystemProperty -DPORT=<portnum> has been supplied, use that as the default port
+                configuredConnectors = new Object[] { plugin.createDefaultConnector(System.getProperty(PORT_SYSPROPERTY, null)) };
             }
             
             plugin.setConnectors(configuredConnectors);

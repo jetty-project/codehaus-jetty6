@@ -1,4 +1,5 @@
 
+    + mvn -DPORT=x jetty:run uses port number given for the default connector
     + Fixed NPE when no resource cache
     + Refactored WebXmlConfiguration to allow custom web.xml resource
     + Moved more utility packagtes to the util jar
