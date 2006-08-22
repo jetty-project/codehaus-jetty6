@@ -9,6 +9,7 @@
 	<classpathentry kind="lib" path="modules/servlet-api-2.5/src/main/resources"/>
 	<classpathentry kind="lib" path="resources"/>
 	<classpathentry output="examples/embedded/target/classes" kind="src" path="examples/embedded/src/main/java"/>
+	<classpathentry kind="src" path="extras/grizzly/src/main/java"/>
 	<classpathentry output="webapps/test/WEB-INF/classes" kind="src" path="examples/test-webapp/src/main/java"/>
 	<classpathentry output="modules/html/target/classes" kind="src" path="modules/html/src/main/java"/>
 	<classpathentry output="modules/html/target/test-classes" kind="src" path="modules/html/src/test/java"/>
@@ -42,5 +43,7 @@
 	<classpathentry output="extras/cometd/target/classes" kind="src" path="extras/cometd/src/main/java"/>
 	<classpathentry output="extras/cometd/target/test-classes" kind="src" path="extras/cometd/src/test/java"/>
 	<classpathentry output="extras/spring/target/classes" kind="src" path="extras/spring/src/main/java"/>
+	<classpathentry sourcepath="/home/gregw/src/glassfish/appserv-http-engine/src/java" kind="lib" path="extras/grizzly/repository/com/sun/enterprise/appserv-http-engine/9.0-SNAPSHOT/appserv-http-engine-9.0-SNAPSHOT.jar"/>
+	<classpathentry output="examples/test-webapp/target/test-classes" kind="src" path="examples/test-webapp/src/test/java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

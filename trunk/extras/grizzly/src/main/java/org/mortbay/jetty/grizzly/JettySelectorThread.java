@@ -1,3 +1,18 @@
+//========================================================================
+// License and copyright status is a work in progress.
+// Parts Copyright 2006 Mort Bay Consulting Pty. Ltd.
+// Parts Copyright 2006 Sun Micro system and perhaps CDDL.
+//------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//========================================================================*
 /*
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,6 +36,7 @@
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  */
 
+
 package org.mortbay.jetty.grizzly;
 
 import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
@@ -34,15 +50,15 @@ public class JettySelectorThread extends SelectorThread{
     
     private GrizzlyConnector grizzlyConnector;
     
-    public JettySelectorThread() {
+    public JettySelectorThread() 
+    {
         super();
         // pipelineClassName = JettyPipelineWrapper.class.getName();
         // This is the wrapper around Jetty own ThreadPool.
     }
     
-    
-    
-    public ProcessorTask newProcessorTask(boolean initialize){
+    public ProcessorTask newProcessorTask(boolean initialize)
+    {
         JettyProcessorTask task = new JettyProcessorTask();
         task.setMaxHttpHeaderSize(maxHttpHeaderSize);
         task.setBufferSize(requestBufferSize);
@@ -51,20 +67,24 @@ public class JettySelectorThread extends SelectorThread{
         
         task.initialize();
  
-        if ( keepAlivePipeline.dropConnection() ) {
+        if ( keepAlivePipeline.dropConnection() ) 
+        {
             task.setDropConnection(true);
         }    
+        
         task.setPipeline(processorPipeline); 
         return task;
     }
     
     
-    public void setConnector(GrizzlyConnector grizzlyConnector){
+    public void setGrizzlyConnector(GrizzlyConnector grizzlyConnector)
+    {
         this.grizzlyConnector = grizzlyConnector;
     }
     
     
-    public GrizzlyConnector getGrizzlyConnector(){
+    public GrizzlyConnector getGrizzlyConnector()
+    {
         return grizzlyConnector;
     }
     
