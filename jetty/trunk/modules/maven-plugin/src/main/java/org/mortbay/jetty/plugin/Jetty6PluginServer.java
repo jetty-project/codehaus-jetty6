@@ -183,18 +183,21 @@ public class Jetty6PluginServer implements JettyPluginServer
     
     
     
-    /* (non-Javadoc)
+    /**
      * @see org.mortbay.jetty.plugin.JettyPluginServer#createDefaultConnector()
      */
-    public Object createDefaultConnector() throws Exception
+    public Object createDefaultConnector(String portnum) throws Exception
     {
         SelectChannelConnector connector = new SelectChannelConnector();
         connector = new SelectChannelConnector();
-        connector.setPort(DEFAULT_PORT);
+        int port = ((portnum==null||portnum.equals(""))?DEFAULT_PORT:Integer.parseInt(portnum.trim()));
+        connector.setPort(port);
         connector.setMaxIdleTime(DEFAULT_MAX_IDLE_TIME);
         
         return connector;
     }
+    
+ 
 
     /**
      * @see org.mortbay.jetty.plugin.util.JettyPluginServer#createWebApplication()
