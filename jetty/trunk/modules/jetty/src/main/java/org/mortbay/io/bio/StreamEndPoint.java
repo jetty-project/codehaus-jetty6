@@ -62,7 +62,7 @@ public class StreamEndPoint implements EndPoint
      */
     public boolean isOpen()
     {
-        return _in!=null && _out!=null;
+        return _in!=null;
     }
 
     /* 
@@ -227,6 +227,30 @@ public class StreamEndPoint implements EndPoint
     public Object getConnection()
     {
         return null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public InputStream getInputStream()
+    {
+        return _in;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setInputStream(InputStream in)
+    {
+        _in=in;
+    }
+
+    /* ------------------------------------------------------------ */
+    public OutputStream getOutputStream()
+    {
+        return _out;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setOutputStream(OutputStream out)
+    {
+        _out=out;
     }
 
 }
