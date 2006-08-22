@@ -1,3 +1,4 @@
+
     + Fixed NPE when no resource cache
     + Refactored WebXmlConfiguration to allow custom web.xml resource
     + Moved more utility packagtes to the util jar
