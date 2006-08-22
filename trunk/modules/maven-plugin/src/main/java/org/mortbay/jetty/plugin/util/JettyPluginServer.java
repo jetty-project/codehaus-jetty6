@@ -41,7 +41,7 @@ public interface JettyPluginServer extends Proxy
     
     public  void start() throws Exception;
     
-    public Object createDefaultConnector() throws Exception;
+    public Object createDefaultConnector (String port) throws Exception;
     
     public JettyPluginWebApplication createWebApplication () throws Exception;
     
