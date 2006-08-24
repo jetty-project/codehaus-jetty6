@@ -78,7 +78,7 @@ public class HttpConnectionTest extends TestCase
                                            "Transfer-Encoding: chunked\n"+
                                            "Content-Type: text/plain\n"+
                                            "\015\012"+
-                                           "5;\015\012");
+                                           "5;\015\012",true);
             response=connector.getResponses("ABCDE\015\012"+
                                            "0;\015\012\015\012");
             System.err.println(response);

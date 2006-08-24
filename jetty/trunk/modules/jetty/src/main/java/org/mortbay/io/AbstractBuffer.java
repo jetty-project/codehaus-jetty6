@@ -561,6 +561,12 @@ public abstract class AbstractBuffer implements Buffer
     }
 
     /* ------------------------------------------------------------ */
+    public String toDebugString()
+    {
+        return getClass()+"@"+super.hashCode();
+    }
+
+    /* ------------------------------------------------------------ */
     public void writeTo(OutputStream out)
     	throws IOException
     {

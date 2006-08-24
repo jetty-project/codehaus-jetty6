@@ -161,14 +161,17 @@ public class HttpGenerator implements HttpTokens
 
         if (returnBuffers)
         {
-            if (_header != null) _buffers.returnBuffer(_header);
+            if (_header != null) 
+                _buffers.returnBuffer(_header);
             _header = null;
-            if (_buffer != null) _buffers.returnBuffer(_buffer);
+            if (_buffer != null) 
+                _buffers.returnBuffer(_buffer);
             _buffer = null;
         }
         else
         {
-            if (_header != null) _header.clear();
+            if (_header != null) 
+                _header.clear();
 
             if (_buffer != null)
             {

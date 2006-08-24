@@ -3,6 +3,9 @@
  */
 package org.mortbay.jetty.nio;
 
+import java.io.IOException;
+
+import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
@@ -14,11 +17,8 @@ import org.mortbay.jetty.AbstractConnector;
  */
 public abstract class AbstractNIOConnector extends AbstractConnector implements NIOConnector
 {
-
     private boolean _useDirectBuffers=true;
-    
-
-
+ 
     /* ------------------------------------------------------------------------------- */
     public boolean getUseDirectBuffers()
     {
@@ -52,9 +52,13 @@ public abstract class AbstractNIOConnector extends AbstractConnector implements 
         // + Are gather writes worth the effort?  Maybe they will work well with two INDIRECT
         // buffers being copied into a single kernel buffer?
         // 
+        Buffer buf = null;
         if (size==getHeaderBufferSize())
-            return new NIOBuffer(size, NIOBuffer.INDIRECT);
-        return new NIOBuffer(size, _useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+            buf= new NIOBuffer(size, NIOBuffer.INDIRECT);
+        else
+            buf = new NIOBuffer(size, _useDirectBuffers?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+        return buf;
     }
+    
 
 }

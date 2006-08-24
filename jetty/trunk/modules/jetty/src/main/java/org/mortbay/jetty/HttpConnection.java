@@ -87,7 +87,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    /**
+    /** Constructor
      * 
      */
     public HttpConnection(Connector connector, EndPoint endpoint, Server server)
@@ -104,6 +104,23 @@ public class HttpConnection
         _server = server;
     }
 
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        if (_parser!=null)
+            _parser.reset(true);
+        
+        if (_generator!=null)
+            _generator.reset(true);
+        
+        if (_requestFields!=null)
+            _requestFields.destroy();
+        
+        if (_responseFields!=null)
+            _responseFields.destroy();
+        
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return the number of requests handled by this connection
@@ -330,8 +347,7 @@ public class HttpConnection
                     Log.debug("fields="+_requestFields);
                     Log.debug(e);
                 }
-                
-                _generator.sendError(e.getStatus(), e.getReason(), e.toString(), true);
+                _generator.sendError(e.getStatus(), e.getReason(), null, true);
                 // TODO.  Need to consider how to really flush this for non-blocking
                 
                 Buffer header = _parser.getHeaderBuffer();
