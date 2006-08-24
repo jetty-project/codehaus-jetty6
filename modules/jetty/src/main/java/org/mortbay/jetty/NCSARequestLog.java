@@ -29,6 +29,7 @@ import org.mortbay.log.Log;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.RolloverFileOutputStream;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.TypeUtil;
 
 /** 
  * This {@link RequestLog} implementation outputs logs in the pseudo-standard NCSA common log format.
@@ -56,6 +57,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     private String[] _ignorePaths;
     private boolean _logLatency = false;
     private boolean _logCookies = false;
+    private boolean _logServer = false;
     
     private transient OutputStream _out;
     private transient OutputStream _fileOut;
@@ -172,6 +174,16 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     {
         return _logCookies;
     }
+
+    public boolean getLogServer()
+    {
+        return _logServer;
+    }
+
+    public void setLogServer(boolean logServer)
+    {
+        _logServer=logServer;
+    }
     
     public void setLogLatency(boolean logLatency) 
     {
@@ -266,6 +278,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
                     if (!_logCookies)
                         _writer.write(" -");
                 }
+
                 
                 if (_logCookies)
                 {
@@ -287,8 +300,17 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
                     }
                 }
                 
+                if (_logServer)
+                {
+                    _writer.write(" ");
+                    _writer.write(request.getServerName());
+                }
+                
                 if (_logLatency)
-                    _writer.write(" " + (System.currentTimeMillis() - request.getTimeStamp()));
+                {
+                    _writer.write(" ");
+                    _writer.write(TypeUtil.toString(System.currentTimeMillis() - request.getTimeStamp()));
+                }
                 
                 _writer.write(StringUtil.__LINE_SEPARATOR);
                 _writer.flush();
@@ -325,6 +347,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             writer.write(agent);
             writer.write('"');
         }    
+        
     }
 
     protected void doStart() throws Exception
