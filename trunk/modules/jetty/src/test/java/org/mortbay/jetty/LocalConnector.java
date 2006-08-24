@@ -27,8 +27,8 @@ public class LocalConnector extends AbstractConnector
     ByteArrayBuffer out;
     
     Server server;
-    HttpConnection connection;
     boolean accepting;
+    boolean _keepOpen;
     
     public LocalConnector()
     {
@@ -41,18 +41,22 @@ public class LocalConnector extends AbstractConnector
         return endp;
     }
     
+
     /* ------------------------------------------------------------ */
-    public HttpConnection getHttpConnection()
+    public void setServer(Server server)
     {
-        return connection;
+        super.setServer(server);
+        this.server=server;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void clear()
     {
         in.clear();
         out.clear();
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void reopen()
     {
         in.clear();
@@ -60,11 +64,10 @@ public class LocalConnector extends AbstractConnector
         endp = new ByteArrayEndPoint();
         endp.setIn(in);
         endp.setOut(out);
-        connection=new HttpConnection(this,endp,getServer());
-        connectionOpened(connection);
         accepting=false;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void doStart()
         throws Exception
     {
@@ -75,14 +78,20 @@ public class LocalConnector extends AbstractConnector
         endp = new ByteArrayEndPoint();
         endp.setIn(in);
         endp.setOut(out);
-        connection=new HttpConnection(this,endp,getServer());
-        connectionOpened(connection);
         accepting=false;
     }
-    
+
+    /* ------------------------------------------------------------ */
     String getResponses(String requests)
         throws Exception
     {
+        return getResponses(requests,false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    String getResponses(String requests, boolean keepOpen)
+    throws Exception
+        {
         // System.out.println("\nREQUESTS :\n"+requests);
         // System.out.flush();
         
@@ -90,25 +99,29 @@ public class LocalConnector extends AbstractConnector
 
         synchronized (this)
         {
+            _keepOpen=keepOpen;
             accepting=true;
             this.notify();
 
             while(accepting)
                 this.wait();
         }
-
         
         // System.err.println("\nRESPONSES:\n"+out);
         return out.toString();
     }
 
+    /* ------------------------------------------------------------ */
     protected Buffer newBuffer(int size)
     {
         return new ByteArrayBuffer(size);
     }
 
+    /* ------------------------------------------------------------ */
     protected void accept(int acceptorID) throws IOException, InterruptedException
     {
+        HttpConnection connection=null;
+        
         while (isRunning())
         {
             synchronized (this)
@@ -126,18 +139,26 @@ public class LocalConnector extends AbstractConnector
             
             try
             {
-                connectionOpened(connection);
+                if (connection==null)
+                {
+                    connection=new HttpConnection(this,endp,getServer());
+                    connectionOpened(connection);
+                }
                 while (in.length()>0)
                     connection.handle();
             }
             finally
             {
+                if (!_keepOpen)
+                {
+                    connectionClosed(connection);
+                    connection=null;
+                }
                 synchronized (this)
                 {
                     accepting=false;
                     this.notify();
                 }
-                connectionClosed(connection);
             }
         }
         

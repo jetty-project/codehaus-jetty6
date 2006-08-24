@@ -59,6 +59,7 @@ public class CometdServlet extends HttpServlet
         if (client==null)
         {
             // This is the first time we have seen this request - so handle all the messages
+            // We may see this request again if a continuation retries the request.
             
             // handle all messages (before any polling)
             String[] messages=req.getParameterValues(MESSAGE_ATTR);

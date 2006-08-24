@@ -1,4 +1,5 @@
 
+jetty-6.0.0rc2 - 24 August 2006
     + use mvn -Dslf4j=false jetty:run to disable use of slf4j logging with jdk1.4/jsp2.0
     + added org.apache.commons.logging package to system classes that can't be overridden by a webapp classloader
     + mvn -Djetty.port=x jetty:run uses port number given for the default connector
@@ -6,6 +7,7 @@
     + Refactored WebXmlConfiguration to allow custom web.xml resource
     + Moved more utility packagtes to the util jar
     + Direct buffer useage is optional
+    + Destroy HttpConnection to improve buffer pooling
 
 jetty-6.0.0rc1 - 16 August 2006
     + Support for binding References and Referenceables and javax.mail.Sessions in JNDI
