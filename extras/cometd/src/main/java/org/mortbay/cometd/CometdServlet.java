@@ -53,19 +53,13 @@ public class CometdServlet extends HttpServlet
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
         int message_count=0;
-        Client client=null;
-        Transport transport=null;
+        Client client=(Client)req.getAttribute(CLIENT_ATTR);;
+        Transport transport=(Transport)req.getAttribute(TRANSPORT_ATTR);
         
-        Continuation continuation=ContinuationSupport.getContinuation(req, client);
-        
-        if (continuation.isPending())
+        if (client==null)
         {
-            // re-establish state
-            client=(Client)req.getAttribute(CLIENT_ATTR);
-            transport=(Transport)req.getAttribute(TRANSPORT_ATTR);
-        }
-        else
-        {
+            // This is the first time we have seen this request - so handle all the messages
+            
             // handle all messages (before any polling)
             String[] messages=req.getParameterValues(MESSAGE_ATTR);
             Object objects=null;
@@ -131,6 +125,7 @@ public class CometdServlet extends HttpServlet
         {
             synchronized (client)
             {      
+                Continuation continuation=ContinuationSupport.getContinuation(req, client);
                 client.addContinuation(continuation);
                 if (!client.hasMessages())
                     continuation.suspend(25000);
