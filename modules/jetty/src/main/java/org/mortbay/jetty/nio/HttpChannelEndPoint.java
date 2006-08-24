@@ -340,11 +340,13 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
         return "HEP@" + hashCode() + "[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
     }
 
+    /* ------------------------------------------------------------ */
     public HttpChannelEndPoint.IdleTask getTimeoutTask()
     {
         return _timeoutTask;
     }
 
+    /* ------------------------------------------------------------ */
     public SelectSet getSelectSet()
     {
         return _selectSet;
