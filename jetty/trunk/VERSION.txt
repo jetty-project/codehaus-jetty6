@@ -1,5 +1,5 @@
 
-jetty-6.0.0rc2 - 24 August 2006
+jetty-6.0.0rc2 - 
     + use mvn -Dslf4j=false jetty:run to disable use of slf4j logging with jdk1.4/jsp2.0
     + added org.apache.commons.logging package to system classes that can't be overridden by a webapp classloader
     + mvn -Djetty.port=x jetty:run uses port number given for the default connector
