@@ -119,6 +119,7 @@ public class HttpConnection
         if (_responseFields!=null)
             _responseFields.destroy();
         
+        _server=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -453,7 +454,7 @@ public class HttpConnection
                         _request.getContinuation().reset();
                     }
                     
-                    if (!error) 
+                    if (!error && _endp.isOpen() && _server!=null) 
                     {
                         if (!_response.isCommitted() && !_request.isHandled())
                             _response.sendError(HttpServletResponse.SC_NOT_FOUND);
