@@ -110,8 +110,6 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
                     if (_connection.isIdle())
                         _selectSet.scheduleIdle(_timeoutTask, true);
                 }
-                else
-                    _connection.destroy();
             }
             catch (Exception e)
             {
