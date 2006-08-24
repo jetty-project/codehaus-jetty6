@@ -44,7 +44,6 @@ import org.mortbay.util.TypeUtil;
  */
 public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
 {
-    
     private String _filename;
     private boolean _extended;
     private boolean _append;
@@ -214,6 +213,12 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
                 return;
             
             StringBuffer buf = new StringBuffer(160);
+
+            if (_logServer)
+            {
+                buf.append(request.getServerName());
+                buf.append(' ');
+            }
             
             String addr = null;
             if (_preferProxiedForAddress) 
@@ -298,12 +303,6 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
                         }
                         _writer.write("\"");
                     }
-                }
-                
-                if (_logServer)
-                {
-                    _writer.write(" ");
-                    _writer.write(request.getServerName());
                 }
                 
                 if (_logLatency)
