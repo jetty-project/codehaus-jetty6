@@ -273,11 +273,6 @@
       </dependency>
       <dependency>
         <groupId>xerces</groupId>
-        <artifactId>xmlParserAPIs</artifactId>
-        <version>${xerces-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
         <version>${xerces-version}</version>
       </dependency>
@@ -327,7 +322,6 @@
     <mail-version>1.4</mail-version>
     <mx4j-version>3.0.1</mx4j-version>
     <slf4j-version>1.0.1</slf4j-version>
-    <xerces-version>2.6.2</xerces-version>
     <eclipse-compiler-version>3.1.0</eclipse-compiler-version>
   </properties>
 </project>

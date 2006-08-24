@@ -123,6 +123,11 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xmlParserAPIs</artifactId>
+      <version>2.6.2</version>
+    </dependency>
+    <dependency>
       <groupId>commons-el</groupId>
       <artifactId>commons-el</artifactId>
       <version>${commons-el-version}</version>
@@ -181,4 +186,7 @@
       <scope>runtime</scope>
     </dependency>
   </dependencies>
+  <properties>
+    <xerces-version>2.6.2</xerces-version>
+  </properties>
 </project>
