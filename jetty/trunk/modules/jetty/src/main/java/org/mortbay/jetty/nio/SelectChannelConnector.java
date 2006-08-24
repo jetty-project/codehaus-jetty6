@@ -181,14 +181,10 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void customize(EndPoint endpoint, Request request) throws IOException
     {
-        HttpChannelEndPoint ep = (HttpChannelEndPoint)endpoint;
         super.customize(endpoint, request);
     }
 
     /* ------------------------------------------------------------------------------- */
-    /**
-     * TODO Comments?
-     */
     public HttpChannelEndPoint newHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectChannelConnector.SelectSet selectSet, SelectionKey sKey) throws IOException
     {
         return new HttpChannelEndPoint(connector, channel, selectSet, sKey);
@@ -357,7 +353,11 @@ public class SelectChannelConnector extends AbstractNIOConnector
                         key.cancel();
                         HttpChannelEndPoint endpoint = (HttpChannelEndPoint)key.attachment();
                         if (endpoint != null)
+                        {
                             endpoint.close();
+                            if (endpoint._connection!=null)
+                                connectionClosed(endpoint._connection);
+                        }
                         continue;
                     }
 
@@ -682,9 +682,15 @@ public class SelectChannelConnector extends AbstractNIOConnector
         }
 
         /* ------------------------------------------------------------ */
-        protected void open(HttpConnection connection)
+        protected void connectionOpened()
         {
             _connector.connectionOpened(_connection);
+        }
+        
+        /* ------------------------------------------------------------ */
+        protected void connectionClosed()
+        {
+            _connector.connectionClosed(_connection);
         }
         
         /* ------------------------------------------------------------ */
