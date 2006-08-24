@@ -673,7 +673,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
     {
         protected SelectChannelConnector _connector;
         protected HttpConnection _connection;
-        private boolean _closed;
 
         /* ------------------------------------------------------------ */
         public SelectChannelEndPoint(SelectChannelConnector connector, ByteChannel channel)
@@ -699,12 +698,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
          */
         public void close() throws IOException
         {
-            synchronized (this)
-            {
-                if (!_closed && _connection!=null)
-                    _connector.connectionClosed(_connection);
-                _closed = true;
-            }
             super.close();
         }
     }
