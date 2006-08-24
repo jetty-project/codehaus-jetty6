@@ -728,7 +728,8 @@ public class HttpGenerator implements HttpTokens
 
         if (_contentLength >= 0 && _contentLength != _contentWritten)
         {
-            Log.warn("ContentLength written=="+_contentWritten+" < length=="+_contentLength);
+            if (_endp.isOpen())
+                Log.warn("ContentLength written=="+_contentWritten+" != contentLength=="+_contentLength);
             _close = true;
         }
 
