@@ -440,7 +440,7 @@ public class HttpConnection
                 _response.sendError(e.getStatus(), e.getReason());
             }
             finally
-            {
+            {   
                 if (threadName!=null)
                     Thread.currentThread().setName(threadName);
                 
@@ -454,7 +454,7 @@ public class HttpConnection
                         _request.getContinuation().reset();
                     }
                     
-                    if (!error && _endp.isOpen() && _server!=null) 
+                    if (!error) 
                     {
                         if (!_response.isCommitted() && !_request.isHandled())
                             _response.sendError(HttpServletResponse.SC_NOT_FOUND);

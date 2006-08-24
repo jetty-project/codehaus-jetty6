@@ -133,8 +133,6 @@ public class RandomConnector extends AbstractNIOConnector
             
             try
             {
-                //System.err.println("new "+gep+ " for "+channel);
-                
                 // TODO in reality this dispatches would be mixed with others from other connections.
                 while (gep.isOpen())
                 {
@@ -151,7 +149,7 @@ public class RandomConnector extends AbstractNIOConnector
             }
             finally
             {
-                // System.err.println("end "+gep);
+                connectionClosed(gep._connection);
             }
             
         } 
@@ -190,6 +188,7 @@ public class RandomConnector extends AbstractNIOConnector
         {
             super(channel);
             _connection = new HttpConnection(connector,this,connector.getServer());
+            connector.connectionOpened(_connection);
         }
 
         public void run()
@@ -238,7 +237,6 @@ public class RandomConnector extends AbstractNIOConnector
                     // something else... normally re-enable this connection is the selectset with the latest interested ops
                 }
             }
-        
         }
 
         public void blockReadable(long millisecs)

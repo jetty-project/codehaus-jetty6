@@ -3,9 +3,6 @@
  */
 package org.mortbay.jetty.nio;
 
-import java.io.IOException;
-
-import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
@@ -34,7 +31,6 @@ public abstract class AbstractNIOConnector extends AbstractConnector implements 
     {
         _useDirectBuffers=direct;
     }
-
 
     /* ------------------------------------------------------------------------------- */
     protected Buffer newBuffer(int size)

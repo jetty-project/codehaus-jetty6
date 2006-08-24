@@ -34,7 +34,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
         _selectSet = selectSet;
         _connector = connector;
         _connection = new HttpConnection(connector, this, connector.getServer());
-        open(_connection);
+        connectionOpened();
         _key = key;
         _key.attach(this);
         _selectSet.scheduleIdle(_timeoutTask, _connection.isIdle());
@@ -110,6 +110,8 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
                     if (_connection.isIdle())
                         _selectSet.scheduleIdle(_timeoutTask, true);
                 }
+                else
+                    _connection.destroy();
             }
             catch (Exception e)
             {
@@ -251,6 +253,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
                 else
                 {
                     _key.cancel();
+                    connectionClosed();
                     _key = null;
                 }
             }
