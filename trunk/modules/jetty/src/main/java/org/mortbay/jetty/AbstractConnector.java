@@ -835,32 +835,32 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     protected void connectionClosed(HttpConnection connection)
     {
-        connection.destroy();
-        
-        if (_statsStartedAt==-1)
-            return;
-        
-        synchronized(_statsLock)
+        if (_statsStartedAt>=0)
         {
-            int requests=connection.getRequests();
-            _requests+=requests;
-            long duration=System.currentTimeMillis()-connection.getTimeStamp();
-            _connections++;
-            _connectionsOpen--;
-            _connectionsDurationTotal+=duration;
-            if (_connectionsOpen<0)
-                _connectionsOpen=0;
-            if (_connectionsOpen<_connectionsOpenMin)
-                _connectionsOpenMin=_connectionsOpen;
-            if (_connectionsDurationMin==0 || duration<_connectionsDurationMin)
-                _connectionsDurationMin=duration;
-            if (duration>_connectionsDurationMax)
-                _connectionsDurationMax=duration;
-            if (_connectionsRequestsMin==0 || requests<_connectionsRequestsMin)
-                _connectionsRequestsMin=requests;
-            if (requests>_connectionsRequestsMax)
-                _connectionsRequestsMax=requests;
+            synchronized(_statsLock)
+            {
+                int requests=connection.getRequests();
+                _requests+=requests;
+                long duration=System.currentTimeMillis()-connection.getTimeStamp();
+                _connections++;
+                _connectionsOpen--;
+                _connectionsDurationTotal+=duration;
+                if (_connectionsOpen<0)
+                    _connectionsOpen=0;
+                if (_connectionsOpen<_connectionsOpenMin)
+                    _connectionsOpenMin=_connectionsOpen;
+                if (_connectionsDurationMin==0 || duration<_connectionsDurationMin)
+                    _connectionsDurationMin=duration;
+                if (duration>_connectionsDurationMax)
+                    _connectionsDurationMax=duration;
+                if (_connectionsRequestsMin==0 || requests<_connectionsRequestsMin)
+                    _connectionsRequestsMin=requests;
+                if (requests>_connectionsRequestsMax)
+                    _connectionsRequestsMax=requests;
+            }
         }
+        
+        connection.destroy();
     }
 
 }

@@ -91,18 +91,18 @@ public class LocalConnector extends AbstractConnector
     /* ------------------------------------------------------------ */
     String getResponses(String requests, boolean keepOpen)
     throws Exception
-        {
+    {
         // System.out.println("\nREQUESTS :\n"+requests);
         // System.out.flush();
         
         in.put(new ByteArrayBuffer(requests));
-
+        
         synchronized (this)
         {
             _keepOpen=keepOpen;
             accepting=true;
             this.notify();
-
+            
             while(accepting)
                 this.wait();
         }
@@ -152,6 +152,7 @@ public class LocalConnector extends AbstractConnector
                 if (!_keepOpen)
                 {
                     connectionClosed(connection);
+                    connection.destroy();
                     connection=null;
                 }
                 synchronized (this)
@@ -161,7 +162,6 @@ public class LocalConnector extends AbstractConnector
                 }
             }
         }
-        
     }
 
     public void open() throws IOException
@@ -171,7 +171,6 @@ public class LocalConnector extends AbstractConnector
     public void close() throws IOException
     {
     }
-    
 
     /* ------------------------------------------------------------------------------- */
     public int getLocalPort()
