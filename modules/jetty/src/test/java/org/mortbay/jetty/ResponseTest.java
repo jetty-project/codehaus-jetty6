@@ -64,7 +64,7 @@ public class ResponseTest extends TestCase
     public void testContentType()
     	throws Exception
     {
-        Response response = new Response(connector.getHttpConnection());
+        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
         
         assertEquals(null,response.getContentType());
         
@@ -89,8 +89,7 @@ public class ResponseTest extends TestCase
     public void testContentTypeCharacterEncoding()
         throws Exception
     {
-      
-        Response response = new Response(connector.getHttpConnection());
+        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
         
         response.setContentType("foo/bar");
         response.setCharacterEncoding("utf8");
@@ -119,8 +118,7 @@ public class ResponseTest extends TestCase
     public void testCharacterEncodingContentType()
     throws Exception
     {
-        
-        Response response = new Response(connector.getHttpConnection());
+        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
         
         response.setCharacterEncoding("utf8");
         response.setContentType("foo/bar");
@@ -149,9 +147,8 @@ public class ResponseTest extends TestCase
     public void testContentTypeWithCharacterEncoding()
         throws Exception
     {
-      
-        Response response = new Response(connector.getHttpConnection());
-
+        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+        
         response.setCharacterEncoding("utf16");
         response.setContentType("foo/bar; charset=utf8");
         assertEquals("foo/bar; charset=utf8",response.getContentType());
@@ -179,8 +176,7 @@ public class ResponseTest extends TestCase
     public void testContentTypeWithOther()
     throws Exception
     {
-        
-        Response response = new Response(connector.getHttpConnection());
+        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
         
         response.setContentType("foo/bar; other=xyz");
         assertEquals("foo/bar; other=xyz",response.getContentType());
@@ -205,8 +201,7 @@ public class ResponseTest extends TestCase
     public void testContentTypeWithCharacterEncodingAndOther()
         throws Exception
     {
-      
-        Response response = new Response(connector.getHttpConnection());
+        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
 
         response.setCharacterEncoding("utf16");
         response.setContentType("foo/bar; charset=utf8 other=xyz");
@@ -261,7 +256,7 @@ public class ResponseTest extends TestCase
 
     private Response newResponse()
     {
-        HttpConnection connection=connector.getHttpConnection();
+        HttpConnection connection=new HttpConnection(connector,connector.endp,connector.server);
         connection.getGenerator().reset(false);
         HttpConnection.setCurrentConnection(connection);
         Response response = connection.getResponse();

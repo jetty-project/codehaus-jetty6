@@ -835,6 +835,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     protected void connectionClosed(HttpConnection connection)
     {
+        connection.destroy();
+        
         if (_statsStartedAt==-1)
             return;
         
