@@ -34,7 +34,7 @@ Installing the Jetty Plugin
     <pluginRepository>
       <id>mortbay-repo</id>
       <name>mortbay-repo</name>
-      <url>http://www.mortbay.org/maven2/snapshot</url>
+      <url>http://jetty.mortbay.org/maven2/snapshot</url>
     </pluginRepository>
   </pluginRepositories>
 +--------+
