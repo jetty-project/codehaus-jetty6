@@ -27,11 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
-import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
