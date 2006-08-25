@@ -14,6 +14,8 @@
 
 package org.mortbay.log;
 
+import org.mortbay.util.DateCache;
+
 /*-----------------------------------------------------------------------*/
 /** StdErr Logging.
  * This implementation of the Logging facade sends all logs to StdErr with minimal formatting.
@@ -25,6 +27,7 @@ public class StdErrLog implements Logger
 {    
     private static boolean debug = System.getProperty("DEBUG",null)!=null;
     private String name;
+    private DateCache _dateCache=new DateCache("dd-MM-yyyy HH:mm:ss.SSS");
     
     StdErrLog()
     {
@@ -48,14 +51,14 @@ public class StdErrLog implements Logger
     
     public void info(String msg,Object arg0, Object arg1)
     {
-        System.err.println(name+":INFO:  "+format(msg,arg0,arg1));
+        System.err.println(_dateCache.now()+":"+name+":INFO:  "+format(msg,arg0,arg1));
     }
     
     public void debug(String msg,Throwable th)
     {
         if (debug)
         {
-            System.err.println(name+":DEBUG: "+msg);
+            System.err.println(_dateCache.now()+":"+name+":DEBUG: "+msg);
             th.printStackTrace();
         }
     }
@@ -64,18 +67,18 @@ public class StdErrLog implements Logger
     {
         if (debug)
         {
-            System.err.println(name+":DEBUG: "+format(msg,arg0,arg1));
+            System.err.println(_dateCache.now()+":"+name+":DEBUG: "+format(msg,arg0,arg1));
         }
     }
     
     public void warn(String msg,Object arg0, Object arg1)
     {
-        System.err.println(name+":WARN:  "+format(msg,arg0,arg1));
+        System.err.println(_dateCache.now()+":"+name+":WARN:  "+format(msg,arg0,arg1));
     }
     
     public void warn(String msg, Throwable th)
     {
-        System.err.println(name+":WARN:  "+msg);
+        System.err.println(_dateCache.now()+":"+name+":WARN:  "+msg);
         th.printStackTrace();
     }
 
