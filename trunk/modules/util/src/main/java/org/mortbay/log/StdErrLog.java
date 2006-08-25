@@ -27,7 +27,7 @@ public class StdErrLog implements Logger
 {    
     private static boolean debug = System.getProperty("DEBUG",null)!=null;
     private String name;
-    private DateCache _dateCache=new DateCache("dd-MM-yyyy HH:mm:ss.SSS");
+    private DateCache _dateCache=new DateCache("yyyy-MM-dd HH:mm:ss.SSS");
     
     StdErrLog()
     {
