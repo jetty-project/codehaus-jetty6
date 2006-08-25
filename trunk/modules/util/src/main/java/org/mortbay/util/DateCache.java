@@ -323,4 +323,10 @@ public class DateCache
     {
         return _formatString;
     }    
+
+    /* ------------------------------------------------------------ */
+    public String now()
+    {
+        return format(System.currentTimeMillis());
+    }
 }
