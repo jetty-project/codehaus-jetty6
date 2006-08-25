@@ -34,7 +34,6 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.nio.AbstractNIOConnector;
-import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
