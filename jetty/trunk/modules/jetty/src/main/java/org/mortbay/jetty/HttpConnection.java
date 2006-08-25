@@ -454,7 +454,7 @@ public class HttpConnection
                         _request.getContinuation().reset();
                     }
                     
-                    if (!error) 
+                    if (!error && _endp.isOpen()) 
                     {
                         if (!_response.isCommitted() && !_request.isHandled())
                             _response.sendError(HttpServletResponse.SC_NOT_FOUND);
