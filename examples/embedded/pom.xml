@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.0-SNAPSHOT</version>
+    <version>6.0.0rc2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -50,9 +50,9 @@
                 <echo>-------------------------------------------------------------</echo>
                 <java classname="RunEmbedded">
                   <classpath>
-                   <path refid="maven.compile.classpath"/>
-                   <path refid="maven.test.classpath"/>
-                   <path refid="maven.dependency.classpath"/>
+                   <path refid="maven.compile.classpath" />
+                   <path refid="maven.test.classpath" />
+                   <path refid="maven.dependency.classpath" />
                   </classpath>
                 </java>
               </tasks>
