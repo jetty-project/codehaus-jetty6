@@ -1,4 +1,5 @@
     + Less verbose handling of BadResources from bad URLs
+    + Avoid double error handling of Bad requests
 
 jetty-6.0.0rc2 - 25 August 2006
     + use mvn -Dslf4j=false jetty:run to disable use of slf4j logging with jdk1.4/jsp2.0

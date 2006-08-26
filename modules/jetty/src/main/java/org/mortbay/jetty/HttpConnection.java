@@ -379,6 +379,8 @@ public class HttpConnection
                     _responseFields.clear();
                     _response.recycle();
                     
+                    _uri.clear();
+                    
                 }
                 
                 Continuation continuation = _request.getContinuation();
@@ -432,11 +434,13 @@ public class HttpConnection
             catch (ServletException e)
             {
                 Log.warn(e);
+                _request.setHandled(true);
                 _generator.sendError(500, null, null, true);
             }
             catch (HttpException e)
             {
                 Log.debug(e);
+                _request.setHandled(true);
                 _response.sendError(e.getStatus(), e.getReason());
             }
             finally
