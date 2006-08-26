@@ -726,7 +726,7 @@ public class HttpGenerator implements HttpTokens
             throw new IllegalStateException("State==HEADER");
         }
 
-        if (_contentLength >= 0 && _contentLength != _contentWritten)
+        if (_contentLength >= 0 && _contentLength != _contentWritten && !_head)
         {
             if (_endp.isOpen())
                 Log.warn("ContentLength written=="+_contentWritten+" != contentLength=="+_contentLength);
