@@ -40,6 +40,7 @@ import org.mortbay.util.UrlEncoded;
  */
 public class HttpURI
 {
+    private static byte[] __empty={}; 
     private final static int 
     START=0,
     AUTH_OR_PATH=1,
@@ -51,7 +52,7 @@ public class HttpURI
     QUERY=8;
     
     boolean _partial=false;
-    byte[] _raw;
+    byte[] _raw=__empty;
     String _rawString;
     int _scheme;
     int _authority;
@@ -429,6 +430,13 @@ public class HttpURI
         if (_query==_fragment)
             return;
         UrlEncoded.decodeUtf8To(_raw,_query+1,_fragment-_query-1,parameters);
+    }
+
+    public void clear()
+    {
+        _scheme=_authority=_host=_port=_path=_param=_query=_fragment=_end=0;
+        _raw=__empty;
+        _rawString="";
     }
     
     public String toString()

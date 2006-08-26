@@ -55,7 +55,6 @@ public class ErrorHandler extends AbstractHandler
         response.setContentLength(writer.size());
         writer.writeTo(response.getOutputStream());
         writer.destroy();
-        
     }
 
     /* ------------------------------------------------------------ */
@@ -76,8 +75,11 @@ public class ErrorHandler extends AbstractHandler
             message= StringUtil.replace(message, ">", "&gt;");
         }
         String uri= request.getRequestURI();
-        uri= StringUtil.replace(uri, "<", "&lt;");
-        uri= StringUtil.replace(uri, ">", "&gt;");
+        if (uri!=null)
+        {
+            uri= StringUtil.replace(uri, "<", "&lt;");
+            uri= StringUtil.replace(uri, ">", "&gt;");
+        }
         writer.write("<html>\n<head>\n<title>Error ");
         writer.write(Integer.toString(code));
         writer.write(' ');
