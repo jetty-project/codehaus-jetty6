@@ -134,7 +134,7 @@ public class FileResource extends URLResource
     public Resource addPath(String path)
         throws IOException,MalformedURLException
     {
-        FileResource r=null;
+        URLResource r=null;
 
         if (!isDirectory())
         {
@@ -151,17 +151,20 @@ public class FileResource extends URLResource
             if (path.startsWith("/"))
                 rel = path.substring(1);
             
-            r=(FileResource)Resource.newResource(URIUtil.addPaths(_urlString,URIUtil.encodePath(rel)));
+            r=(URLResource)Resource.newResource(URIUtil.addPaths(_urlString,URIUtil.encodePath(rel)));
         }
         
         String encoded=URIUtil.encodePath(path);
-        int expected=r._urlString.length()-encoded.length();
+        int expected=r.toString().length()-encoded.length();
         int index = r._urlString.lastIndexOf(encoded, expected);
         
         if (expected!=index && ((expected-1)!=index || path.endsWith("/") || !r.isDirectory()))
         {
-            r._alias=r._url;
-            r._aliasChecked=true;
+            if (!(r instanceof BadResource))
+            {
+                ((FileResource)r)._alias=r._url;
+                ((FileResource)r)._aliasChecked=true;
+            }
         }                             
         return r;
     }
