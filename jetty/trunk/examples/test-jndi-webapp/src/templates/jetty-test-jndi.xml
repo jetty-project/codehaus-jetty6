@@ -61,7 +61,7 @@
  <New id="xxxmail" class="org.mortbay.jetty.plus.naming.Resource">
      <Arg>mail/Session</Arg>
      <Arg>
-       <New class="org.mortbay.jetty.plus.naming.mail.MailSessionReference">
+       <New class="org.mortbay.naming.factories.MailSessionReference">
          <Set name="user">fred</Set>
          <Set name="password">OBF:1xmk1w261z0f1w1c1xmq</Set>
          <Set name="properties">
