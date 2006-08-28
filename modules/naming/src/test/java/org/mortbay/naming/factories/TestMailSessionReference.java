@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.plus.naming;
+package org.mortbay.naming.factories;
 
 import java.util.Properties;
 
@@ -24,7 +24,6 @@ import javax.naming.LinkRef;
 import javax.naming.Name;
 import javax.naming.NameParser;
 
-import org.mortbay.jetty.plus.naming.mail.MailSessionReference;
 import org.mortbay.naming.NamingUtil;
 
 import junit.framework.TestCase;
@@ -47,7 +46,7 @@ public class TestMailSessionReference extends TestCase
         props.put("mail.smtp.host", "xxx");
         props.put("mail.debug", "true");
         sref.setProperties(props);
-        Resource resource = new Resource ("mail/Session", sref);
+        NamingUtil.bind(icontext, "mail/Session", sref);
         Object x = icontext.lookup("mail/Session");
         assertNotNull(x);
         assertTrue(x instanceof javax.mail.Session);
