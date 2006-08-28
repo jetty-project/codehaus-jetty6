@@ -1,3 +1,4 @@
+    + Move MailSessionReference to org.mortbay.naming.factories
     + Less verbose handling of BadResources from bad URLs
     + Avoid double error handling of Bad requests
     + don't warn for content length on head requests
