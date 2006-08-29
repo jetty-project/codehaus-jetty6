@@ -39,7 +39,7 @@ import org.mortbay.util.URIUtil;
  */
 public abstract class Resource implements Serializable
 {
-
+    public static boolean __defaultUseCaches = true;
     Object _associate;
     
     /* ------------------------------------------------------------ */
@@ -49,6 +49,18 @@ public abstract class Resource implements Serializable
      */
     public static Resource newResource(URL url)
         throws IOException
+    {
+        return newResource(url, __defaultUseCaches);
+    }
+    
+    /* ------------------------------------------------------------ */   
+    /**
+     * Construct a resource from a url.
+     * @param url the url for which to make the resource
+     * @param useCaches true enables URLConnection caching if applicable to the type of resource
+     * @return
+     */
+    public static Resource newResource(URL url, boolean useCaches)
     {
         if (url==null)
             return null;
@@ -69,16 +81,18 @@ public abstract class Resource implements Serializable
         }
         else if( urls.startsWith( "jar:file:"))
         {
-            return new JarFileResource(url);
+            return new JarFileResource(url, useCaches);
         }
         else if( urls.startsWith( "jar:"))
         {
-            return new JarResource(url);
+            return new JarResource(url, useCaches);
         }
 
-        return new URLResource(url,null);
+        return new URLResource(url,null,useCaches);
     }
 
+    
+    
     /* ------------------------------------------------------------ */
     /** Construct a resource from a string.
      * @param resource A URL or filename.
@@ -86,6 +100,18 @@ public abstract class Resource implements Serializable
      */
     public static Resource newResource(String resource)
         throws MalformedURLException, IOException
+    {
+        return newResource(resource, __defaultUseCaches);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Construct a resource from a string.
+     * @param resource A URL or filename.
+     * @param useCaches controls URLConnection caching
+     * @return A Resource object.
+     */
+    public static Resource newResource (String resource, boolean useCaches)       
+    throws MalformedURLException, IOException
     {
         URL url=null;
         try
@@ -109,6 +135,7 @@ public abstract class Resource implements Serializable
                     url=file.toURI().toURL();                    
                     
                     URLConnection connection=url.openConnection();
+                    connection.setUseCaches(useCaches);
                     FileResource fileResource= new FileResource(url,connection,file);
                     return fileResource;
                 }

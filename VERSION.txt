@@ -1,3 +1,4 @@
+    + turn URLConnection caching off when searching for tlds [JETTY-103]
     + Move MailSessionReference to org.mortbay.naming.factories
     + Less verbose handling of BadResources from bad URLs
     + Avoid double error handling of Bad requests
