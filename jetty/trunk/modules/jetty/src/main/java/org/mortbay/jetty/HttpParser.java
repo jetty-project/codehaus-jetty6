@@ -188,14 +188,19 @@ public class HttpParser implements HttpTokens
      * @see #parse
      * @see #parseNext
      */
-    public void parseAvailable() throws IOException
+    public long parseAvailable() throws IOException
     {
-        parseNext();
+        long len = parseNext();
+        long total=len>0?len:0;
+        
         // continue parsing
         while (_state != STATE_END && _buffer!=null && _buffer.length() > 0)
         {
-            parseNext();
+            len = parseNext();
+            if (len>0)
+                total+=len;
         }
+        return total;
     }
 
     /* ------------------------------------------------------------------------------- */

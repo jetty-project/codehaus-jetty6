@@ -41,7 +41,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     {
         super(channel);
         System.err.println("new GrizzlyEndPoint channel="+channel);
-        _connection = new HttpConnection(connector,this,connector.getServer());
+        _connection = new GrizzlyHttpConnection(connector,this,connector.getServer());
     }
 
     public void handle()

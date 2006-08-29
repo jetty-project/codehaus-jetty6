@@ -743,7 +743,7 @@ public class HttpGenerator implements HttpTokens
     }
 
     /* ------------------------------------------------------------ */
-    public void flushBuffers() throws IOException
+    public long flushBuffers() throws IOException
     {
         try
         {   
@@ -755,11 +755,12 @@ public class HttpGenerator implements HttpTokens
             {
                 if (_needCRLF && _buffer != null) _buffer.put(CRLF);
                 if (_needEOC && _buffer != null) _buffer.put(LAST_CHUNK);
-                return;
+                return 0;
             }
             
             // Keep flushing while there is something to flush (except break below)
-            int last_len = -1;
+            int total= 0;
+            long last_len = -1;
             Flushing: while (true)
             {
                 int len = -1;
@@ -840,8 +841,10 @@ public class HttpGenerator implements HttpTokens
                     break;
                 }
                 last_len = len;
+                total+=len;
             }
             
+            return total;
         }
         catch (IOException e)
         {
