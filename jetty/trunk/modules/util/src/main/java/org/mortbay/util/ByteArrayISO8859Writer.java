@@ -157,6 +157,12 @@ public class ByteArrayISO8859Writer extends Writer
     public void write(String s)
         throws IOException
     {
+        if (s==null)
+        {
+            write("null",0,4);
+            return;
+        }
+        
         int length=s.length();
         ensureSpareCapacity(length);
         for (int i=0;i<length;i++)
@@ -170,8 +176,6 @@ public class ByteArrayISO8859Writer extends Writer
                 break;
             }
         }
-
-        
     }
     
     /* ------------------------------------------------------------ */
