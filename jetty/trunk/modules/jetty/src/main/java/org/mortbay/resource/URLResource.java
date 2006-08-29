@@ -28,16 +28,18 @@ import org.mortbay.util.URIUtil;
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
  *
- * @author Nuno Preguiça
+ * @author Nuno Preguiï¿½a
  * @author Greg Wilkins (gregw)
  */
 public class URLResource extends Resource
 {
 
+    
     protected URL _url;
     protected String _urlString;
     protected transient URLConnection _connection;
     protected transient InputStream _in=null;
+    transient boolean _useCaches = Resource.__defaultUseCaches;
     
     /* ------------------------------------------------------------ */
     protected URLResource(URL url, URLConnection connection)
@@ -45,6 +47,12 @@ public class URLResource extends Resource
         _url = url;
         _urlString=_url.toString();
         _connection=connection;
+    }
+    
+    protected URLResource (URL url, URLConnection connection, boolean useCaches)
+    {
+        this (url, connection);
+        _useCaches = useCaches;
     }
 
     /* ------------------------------------------------------------ */
@@ -54,6 +62,7 @@ public class URLResource extends Resource
         {
             try{
                 _connection=_url.openConnection();
+                _connection.setUseCaches(_useCaches);
             }
             catch(IOException e)
             {
@@ -277,4 +286,8 @@ public class URLResource extends Resource
             _url.equals(((URLResource)o)._url);
     }
 
+    public boolean getUseCaches ()
+    {
+        return _useCaches;
+    }
 }

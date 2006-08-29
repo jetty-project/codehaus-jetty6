@@ -38,6 +38,10 @@ public class JarResource extends URLResource
         super(url,null);
     }
 
+    JarResource(URL url, boolean useCaches)
+    {
+        super(url, null, useCaches);
+    }
     /* ------------------------------------------------------------ */
     public synchronized void release()
     {
