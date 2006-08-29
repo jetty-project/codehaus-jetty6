@@ -314,12 +314,15 @@ public class HttpConnection
     {
         // Loop while more in buffer
         boolean more_in_buffer =true; // assume true until proven otherwise
+        int no_progress=0;
+        
         while (more_in_buffer && _endp.isOpen())
         {
             _idle=false;
             try
             {
                 setCurrentConnection(this);
+                long io=0;
                 
                 Continuation continuation = _request.getContinuation();
                 if (continuation != null && continuation.isPending())
@@ -327,17 +330,22 @@ public class HttpConnection
                     Log.debug("resume continuation {}",continuation);
                     if (_request.getMethod()==null)
                         throw new IllegalStateException();
-                    handlerRequest();
+                    handleRequest();
                 }
                 else
                 {
                     // If we are not ended then parse available
                     if (!_parser.isState(HttpParser.STATE_END)) 
-                        _parser.parseAvailable();
+                        io=_parser.parseAvailable();
                     
                     // Do we have more writting to do?
                     if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT)) 
-                        _generator.flushBuffers();
+                        io+=_generator.flushBuffers();
+                    
+                    if (io>0)
+                        no_progress=0;
+                    else if (no_progress++>10) // TODO This is a bit arbitrary
+                        return;
                 }
             }
             catch (HttpException e)
@@ -393,7 +401,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    void handlerRequest() throws IOException
+    protected void handleRequest() throws IOException
     {
         if (_server != null)
         {
@@ -667,7 +675,7 @@ public class HttpConnection
 
             // Either handle now or wait for first content
             if (_parser.getContentLength()<=0 && !_parser.isChunking())
-                handlerRequest();
+                handleRequest();
             else
                 _delayedHandling=true;
         }
@@ -681,7 +689,7 @@ public class HttpConnection
             if (_delayedHandling)
             {
                 _delayedHandling=false;
-                handlerRequest();
+                handleRequest();
             }
         }
 
