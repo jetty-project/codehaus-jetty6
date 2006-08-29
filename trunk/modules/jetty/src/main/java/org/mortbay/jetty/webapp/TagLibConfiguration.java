@@ -183,7 +183,7 @@ public class TagLibConfiguration implements Configuration
         for (int i=0;i<jars.size();i++)
         {
             Resource jar=(Resource)jars.get(i);
-            Resource meta=Resource.newResource("jar:"+jar.getURL()+"!/META-INF/");
+            Resource meta=Resource.newResource("jar:"+jar.getURL()+"!/META-INF/",false);
             if (meta.exists())
                 findTLDs(tlds,meta);
         }

@@ -36,12 +36,19 @@ class JarFileResource extends JarResource
     transient String _jarUrl;
     transient String _path;
     transient boolean _exists;
+
     
     /* -------------------------------------------------------- */
     JarFileResource(URL url)
     {
         super(url);
     }
+    
+    JarFileResource(URL url, boolean useCaches)
+    {
+        super(url, useCaches);
+    }
+   
 
     /* ------------------------------------------------------------ */
     public synchronized void release()
@@ -131,9 +138,9 @@ class JarFileResource extends JarResource
                 // No - so lets look if the root entry exists.
                 try
                 {
-                    jarFile=
-                        ((JarURLConnection)
-                         ((new URL(_jarUrl)).openConnection())).getJarFile();
+                    JarURLConnection c=(JarURLConnection)((new URL(_jarUrl)).openConnection());
+                    c.setUseCaches(getUseCaches());
+                    jarFile=c.getJarFile();
                 }
                 catch(Exception e)
                 {
@@ -217,8 +224,9 @@ class JarFileResource extends JarResource
             {
                 try
                 {
-                    jarFile=((JarURLConnection)
-                             ((new URL(_jarUrl)).openConnection())).getJarFile();
+                    JarURLConnection jc=(JarURLConnection)((new URL(_jarUrl)).openConnection());
+                    jc.setUseCaches(getUseCaches());
+                    jarFile=jc.getJarFile();
                 }
                 catch(Exception e)
                 {
@@ -276,6 +284,25 @@ class JarFileResource extends JarResource
     public String encode(String uri)
     {
         return uri;
+    }
+
+    
+    /**
+     * Take a Resource that possibly might use URLConnection caching
+     * and turn it into one that doesn't.
+     * @param resource
+     * @return
+     */
+    public static Resource getNonCachingResource (Resource resource)
+    {
+        if (!(resource instanceof JarFileResource))
+            return resource;
+        
+        JarFileResource oldResource = (JarFileResource)resource;
+        
+        JarFileResource newResource = new JarFileResource(oldResource.getURL(), false);
+        return newResource;
+        
     }
 }
 
