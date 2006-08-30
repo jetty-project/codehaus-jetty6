@@ -26,161 +26,108 @@ import org.mortbay.log.Log;
  */
 public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runnable
 {
+    private static ByteBuffer[] __NO_BUFFERS={};
+    private static ByteBuffer __EMPTY=ByteBuffer.allocate(0);
+    
     private final SSLEngine _engine;
-    private ByteBuffer _handshakeBuffer;
-    private SSLEngineResult.HandshakeStatus _handshakeStatus;
-    private boolean _initialHandshake = false;
-    private final NIOBuffer _outNIOBuffer;
-    private final ByteBuffer _outBuffer;
     private final ByteBuffer _inBuffer;
     private final NIOBuffer _inNIOBuffer;
+    private final ByteBuffer _outBuffer;
+    private final NIOBuffer _outNIOBuffer;
     
+    private final ByteBuffer[] _outBuffers=new ByteBuffer[3];
+
     // ssl
     private final SSLSession _session;
-    private SSLEngineResult.Status _status = null;
 
     /* ------------------------------------------------------------ */
-    public SslHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectSet selectSet, SelectionKey key, SSLEngine engine) throws SSLException, IOException
+    public SslHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectSet selectSet, SelectionKey key, SSLEngine engine)
+            throws SSLException, IOException
     {
-        super(connector, channel, selectSet, key);
+        super(connector,channel,selectSet,key);
 
-        // ssl
-        _engine = engine;
-        _engine.setUseClientMode(false);
-        _session = engine.getSession();
-
-        _outNIOBuffer = new NIOBuffer(_session.getPacketBufferSize(), true);
-        _outBuffer = _outNIOBuffer.getByteBuffer();
-        _outBuffer.limit(_outBuffer.capacity());
-        _outBuffer.position(_outBuffer.capacity());
-
-        _inNIOBuffer = new NIOBuffer(_session.getApplicationBufferSize(), true);
-        _inBuffer = _inNIOBuffer.getByteBuffer();
-        _inBuffer.position(_inBuffer.limit());
         
-        // begin handshake
-        _engine.beginHandshake();
-        _handshakeStatus = _engine.getHandshakeStatus();
-        _initialHandshake = true;
-        _handshakeBuffer = ByteBuffer.allocateDirect(_session.getApplicationBufferSize());
-        doHandshake();
+        // ssl
+        _engine=engine;
+        _engine.setUseClientMode(false);
+        _session=engine.getSession();
+
+        _outNIOBuffer=new NIOBuffer(_session.getPacketBufferSize(),true);
+        _outBuffer=_outNIOBuffer.getByteBuffer();
+        _inNIOBuffer=new NIOBuffer(_session.getPacketBufferSize(),true);
+        _inBuffer=_inNIOBuffer.getByteBuffer();
+        
+        System.err.println("Engine.hsState="+_engine.getHandshakeStatus());
+
     }
 
     /* ------------------------------------------------------------ */
-        private void doHandshake() throws IOException
-        {
-            while (true)
-            {
-                Log.debug("handshake status--------->"+_handshakeStatus);
-                Log.debug("    status--------------->"+_status);
-                SSLEngineResult result;
-                if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.FINISHED))
-                {
-                    if (_initialHandshake)
-                    {
-                        _initialHandshake = false;
-                    }
-                    return;
-                }
-                else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_TASK))
-                {
-                    doTasks();
-                }
-                else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_UNWRAP))
-                {
-                    if (_channel.read(_handshakeBuffer) < 0)
-                    {
-                        _engine.closeInbound();
-                    }
-                    _inBuffer.clear();
-                    _handshakeBuffer.flip();
-                    do
-                    {
-                        result = _engine.unwrap(_handshakeBuffer, _inBuffer);
-                    }
-                    while (result.getStatus() == SSLEngineResult.Status.OK && result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_UNWRAP && result.bytesProduced() == 0);
-
-                    if (result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.FINISHED)
-                    {
-                        _initialHandshake = false;
-                    }
-    
-                    // If no data was produced, and the status is still ok, try to read once more
-                    if (_inBuffer.position() == 0 && result.getStatus() == SSLEngineResult.Status.OK && _handshakeBuffer.hasRemaining())
-                    {
-                        result = _engine.unwrap(_handshakeBuffer, _inBuffer);
-                    }
-    
-                    _status = result.getStatus();
-                    _handshakeStatus = result.getHandshakeStatus();
-    
-                    _handshakeBuffer.compact();
-                    _inBuffer.flip();
-                }
-                else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_WRAP))
-                {
-                    if (!_outBuffer.hasRemaining())
-                    {
-                        // Prepare to write
-                        _outBuffer.clear();
-                        result = _engine.wrap(_handshakeBuffer, _outBuffer);
-                        _handshakeStatus = result.getHandshakeStatus();
-                        _outBuffer.flip();
-                    }
-                    _channel.write(_outBuffer);
-                }
-                else if (_handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING)) { return; }
-            }
-    
-        }
-
-    /* ------------------------------------------------------------ */
-    private void doTasks()
+    public void close() throws IOException
     {
-        Runnable task;
-        while ((task = _engine.getDelegatedTask()) != null)
-        {
-            task.run();
-        }
-        _handshakeStatus = _engine.getHandshakeStatus();
-    }
-
-    /* ------------------------------------------------------------ */
-    private ByteBuffer extractByteBuffer(Buffer buffer)
-    {
-        ByteBuffer src = null;
-        NIOBuffer nBuf = null;
-        synchronized (buffer)
-        {
-            // TODO - expensive to do this all the time - need to reuse this buffer!
-            if (buffer.buffer() instanceof NIOBuffer)
+        _engine.closeOutbound();
+        
+        try
+        {   
+            loop: while (_inBuffer.remaining()>0)
             {
-                nBuf = (NIOBuffer) buffer.buffer();
-                src = nBuf.getByteBuffer();
-            }
-            else
-            {
-                Log.debug("allocate another bytebuffer: " + buffer.getClass().getName());
-                src = ByteBuffer.allocateDirect(buffer.length());
-                for (int i = 0; i < buffer.length(); i++)
+                System.err.println("close loop in Engine.hsState="+_engine.getHandshakeStatus());
+                switch(_engine.getHandshakeStatus())
                 {
-                    src.put(buffer.peek(i));
+                    case FINISHED:
+                    case NOT_HANDSHAKING:
+                        break loop;
+                        
+                    case NEED_UNWRAP:
+                        if(!fill(__EMPTY))
+                            break loop; // TODO may need to reschedule?
+                        break;
+                        
+                    case NEED_TASK:
+                    {
+                        Runnable task;
+                        while ((task=_engine.getDelegatedTask())!=null)
+                        {
+                            System.err.println("delegate task "+task);
+                            task.run();
+                        }
+                        break;
+                    }
+                        
+                    case NEED_WRAP:
+                    {
+                        System.err.println("needs wrapping");
+
+                        flushOutBuffer();
+                        
+                        SSLEngineResult result=null;
+                        try
+                        {
+                            _outBuffer.position(_outNIOBuffer.putIndex());
+                            result=_engine.wrap(__NO_BUFFERS,_outBuffer);
+                        }
+                        finally
+                        {
+                            _outBuffer.position(0);
+                            _outNIOBuffer.setGetIndex(0);
+                            _outNIOBuffer.setPutIndex(result.bytesProduced());
+                        }
+                    
+                        System.err.println("wrap result="+result);
+
+                        flushOutBuffer();
+                        
+                        break;
+                    }
                 }
             }
+            
         }
-
-        if (src != null)
+        finally
         {
-            synchronized (buffer)
-            {
-                // TODO... do you need to reset this buffer afterwards? See ChannelEndPoint flush
-                // I am pretty sure this would be why it is not working 100%
-                src.position(buffer.getIndex());
-                src.limit(buffer.putIndex());
-            }
+            super.close();
         }
-
-        return src;
+        
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -188,206 +135,255 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
      */
     public int fill(Buffer buffer) throws IOException
     {
-        int l;
-        if (_initialHandshake) { return 0; }
-
-        if (_inBuffer.position() == 0)
+        System.err.println("fill");
+        
+        ByteBuffer bbuf=extractInputBuffer(buffer);
+        int size=buffer.length();
+        
+        try
         {
-            _inNIOBuffer.setPutIndex(buffer.putIndex());
-            _inNIOBuffer.setGetIndex(buffer.getIndex());
-            super.fill(_inNIOBuffer);
-        }
-        else if (buffer instanceof NIOBuffer)
-        {
-            NIOBuffer nbuf = (NIOBuffer)buffer;
-            ByteBuffer bbuf = nbuf.getByteBuffer();
-            if (bbuf.remaining() < _inBuffer.remaining())
+            bbuf.position(buffer.putIndex());
+            
+            fill(bbuf);
+            
+            loop: while (_inBuffer.remaining()>0)
             {
-                super.fill(_inNIOBuffer);                
+                System.err.println("loop in Engine.hsState="+_engine.getHandshakeStatus());
+                switch(_engine.getHandshakeStatus())
+                {
+                    case FINISHED:
+                    case NOT_HANDSHAKING:
+                        break loop;
+                        
+                    case NEED_UNWRAP:
+                        if(!fill(bbuf))
+                            break loop;
+                        break;
+                        
+                    case NEED_TASK:
+                    {
+                        Runnable task;
+                        while ((task=_engine.getDelegatedTask())!=null)
+                        {
+                            System.err.println("delegate task "+task);
+                            task.run();
+                        }
+                        break;
+                    }
+                        
+                    case NEED_WRAP:
+                    {
+                        System.err.println("needs wrapping");
+
+                        flushOutBuffer();
+                        
+                        SSLEngineResult result=null;
+                        try
+                        {
+                            _outBuffer.position(_outNIOBuffer.putIndex());
+                            result=_engine.wrap(__NO_BUFFERS,_outBuffer);
+                        }
+                        finally
+                        {
+                            _outBuffer.position(0);
+                            _outNIOBuffer.setGetIndex(0);
+                            _outNIOBuffer.setPutIndex(result.bytesProduced());
+                        }
+                    
+                        System.err.println("wrap result="+result);
+
+                        flushOutBuffer();
+                        
+                        break;
+                    }
+                }
             }
-        }            
-
-        l = unWrap((NIOBuffer)buffer);
-
-        return l;
+            
+        }
+        finally
+        {
+            buffer.setPutIndex(bbuf.position());
+            bbuf.position(0);
+        }
+        
+        System.err.println("filled:"+buffer);
+        return buffer.length()-size;
     }
 
     /* ------------------------------------------------------------ */
     public int flush(Buffer buffer) throws IOException
     {
-        return flush(buffer, null, null);
+        return flush(buffer,null,null);
     }
 
+
+    /* ------------------------------------------------------------ */
+    /*     
+     */
+    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
+    {
+        System.err.println("flush");
+        
+        _outBuffers[0]=extractOutputBuffer(header);
+        _outBuffers[1]=extractOutputBuffer(buffer);
+        _outBuffers[2]=extractOutputBuffer(trailer);
+        
+        SSLEngineResult result=null;
+        try
+        {
+            _outBuffer.position(_outNIOBuffer.putIndex());
+            _outBuffer.limit(_outBuffer.capacity());
+            System.err.println("pos="+_outBuffer.position()+" limit="+_outBuffer.limit());
+            result=_engine.wrap(_outBuffers,_outBuffer);
+            System.err.println("wrap result="+result);
+        }
+        finally
+        {
+            _outBuffer.position(0);
+            _outNIOBuffer.setGetIndex(0);
+            _outNIOBuffer.setPutIndex(result.bytesProduced());
+            
+            int consumed=result.bytesConsumed();
+            if (consumed>0 && header!=null)
+            {
+                int len=consumed<header.length()?consumed:header.length();
+                header.skip(len);
+                consumed-=len;
+                _outBuffers[0].position(0);
+                _outBuffers[0].limit(_outBuffers[0].capacity());
+            }
+            if (consumed>0 && buffer!=null)
+            {
+                int len=consumed<buffer.length()?consumed:buffer.length();
+                buffer.skip(len);
+                consumed-=len;
+                _outBuffers[1].position(0);
+                _outBuffers[1].limit(_outBuffers[1].capacity());
+            }
+            if (consumed>0 && trailer!=null)
+            {
+                int len=consumed<trailer.length()?consumed:trailer.length();
+                trailer.skip(len);
+                consumed-=len;
+                _outBuffers[1].position(0);
+                _outBuffers[1].limit(_outBuffers[1].capacity());
+            }
+            assert consumed==0;
+        }
+    
+        flushOutBuffer();
+        
+        return result.bytesConsumed();
+    }
+
+    
     /* ------------------------------------------------------------ */
     private void flushOutBuffer() throws IOException
     {
-        try
+        System.err.println("flushOutBuffer "+_outNIOBuffer.length());
+        while (_outNIOBuffer.length()>0)
         {
-            _outNIOBuffer.setPutIndex(_outBuffer.limit());
-            _outNIOBuffer.setGetIndex(_outBuffer.position());
-            super.flush(_outNIOBuffer);
-        }
-        finally
-        {
-            _outBuffer.limit(_outNIOBuffer.putIndex());
-            _outBuffer.position(_outNIOBuffer.getIndex());
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /*     */
-    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
-    {
-        if (_initialHandshake) { return 0; }
-
-        if (_outBuffer.hasRemaining())
-        {
-            flushOutBuffer();
-            return 0;
-        }
-
-        int len = 0;
-        _outBuffer.clear();
-
-        try
-        {
-            synchronized (_outBuffer)
+            System.err.println("flushing "+_outNIOBuffer.length());
+            int flushed=super.flush(_outNIOBuffer);
+            if (flushed==0)
             {
-                if (header != null && header.length() > 0)
-                    len += wrap(header);
-                
-                if (_outBuffer.hasRemaining() && buffer != null && buffer.length() > 0)
-                    len += wrap(buffer);
-                
-                if (_outBuffer.hasRemaining() && trailer != null && trailer.length() > 0)
-                    len += wrap(trailer);
+                // TODO schedule WRITE callback!
+                System.err.println("NOT IMPLEMENTED!");
+                assert false;
             }
         }
-        finally
-        {
-            _outBuffer.flip();
-            flushOutBuffer();
-        }
-
-        return len;
+        _outNIOBuffer.compact();
     }
 
-
-
     /* ------------------------------------------------------------ */
-    private int unWrap(NIOBuffer buffer) throws IOException
+    private ByteBuffer extractInputBuffer(Buffer buffer)
     {
-        ByteBuffer bBuf = buffer.getByteBuffer();
-
-        _inBuffer.position(_inNIOBuffer.getIndex());
-        _inBuffer.limit(_inNIOBuffer.putIndex());
-
-        bBuf.clear();
-        SSLEngineResult result;
-
-        result = _engine.unwrap(_inBuffer, bBuf);
-
-        _status = result.getStatus();
-        _handshakeStatus = result.getHandshakeStatus();
+        assert buffer instanceof NIOBuffer;
+        NIOBuffer nbuf=(NIOBuffer)buffer;
+        ByteBuffer bbuf=nbuf.getByteBuffer();
+        bbuf.position(buffer.putIndex());
+        return bbuf;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private ByteBuffer extractOutputBuffer(Buffer buffer)
+    {
+        if(buffer==null)
+            return __EMPTY;
         
-        buffer.setGetIndex(0);
-        buffer.setPutIndex(bBuf.position());
-        bBuf.position(0);
+        ByteBuffer src=null;
+        NIOBuffer nBuf=null;
 
-        if (_handshakeStatus == SSLEngineResult.HandshakeStatus.NEED_TASK || _handshakeStatus == SSLEngineResult.HandshakeStatus.NEED_WRAP || _handshakeStatus == SSLEngineResult.HandshakeStatus.FINISHED)
+        if (buffer.buffer() instanceof NIOBuffer)
         {
-            doHandshake();
-        }
-
-        int bytesConsumed = result.bytesConsumed();
- 
-        if (bytesConsumed == _inBuffer.limit())
-        {
-          _inBuffer.clear();
+            nBuf=(NIOBuffer)buffer.buffer();
+            src=nBuf.getByteBuffer();
         }
         else
         {
-            _inBuffer.position(bytesConsumed);
-            _inBuffer.compact();
+            // TODO - expensive to do this all the time - need to reuse this buffer!
+            src=ByteBuffer.allocateDirect(buffer.length());
+            for (int i=0; i<buffer.length(); i++)
+            {
+                // TODO ouch! a byte at a time?
+                src.put(buffer.peek(i));
+            }
         }
 
-        _inNIOBuffer.setGetIndex(_inBuffer.position());
-        _inNIOBuffer.setPutIndex(_inBuffer.position());            
-        
-        return result.bytesProduced();
+        if (src!=null)
+        {
+            src.position(buffer.getIndex());
+            src.limit(buffer.putIndex());
+        }
+
+        return src;
     }
 
     /* ------------------------------------------------------------ */
-    private int wrap(Buffer buffer) throws SSLException, IOException
+    private boolean fill(ByteBuffer buffer) throws IOException
     {
-        SSLEngineResult result = null;
-        int total_written = 0;
-        ByteBuffer src = extractByteBuffer(buffer);
+        System.err.println("unwrapTo");
+        int in_len=0;
+        _inNIOBuffer.compact();
+        while (_inNIOBuffer.space()>0)
+        {
+            int len=super.fill(_inNIOBuffer);
+            if (len<=0)
+                break;
+            in_len+=len;
+        }
+
+        System.err.println("filled "+in_len+" total "+_inNIOBuffer.length());
+        if (_inNIOBuffer.length()==0)
+            return false;
+        
+        SSLEngineResult result=null;
         try
         {
-            synchronized (_outBuffer)
-            {
-                result = _engine.wrap(src, _outBuffer);
-
-                _status = result.getStatus();
-                _handshakeStatus = result.getHandshakeStatus();
-                if (_status == SSLEngineResult.Status.CLOSED)
-                {
-                    throw new IOException("SSLEngine closed");
-                }
-                else if (_status == SSLEngineResult.Status.OK)
-                {
-                    // TODO: check for rehandshake
-                }
-
-                total_written = result.bytesConsumed();
-            }
+            _inBuffer.position(_inNIOBuffer.getIndex());
+            _inBuffer.limit(_inNIOBuffer.putIndex());
+            result=_engine.unwrap(_inBuffer,buffer);
         }
         finally
         {
-            src.position(0);
-            src.limit(src.capacity());
-
-            // set buffer length to 0
-            buffer.setGetIndex(buffer.getIndex() + total_written);
+            _inBuffer.position(0);
+            _inBuffer.limit(_inBuffer.capacity());
+            _inNIOBuffer.skip(result.bytesConsumed());
         }
-
-        _status = result.getStatus();
-        _handshakeStatus = result.getHandshakeStatus();
         
-        return total_written;
-    }
+        System.err.println("unwrap result="+result);
+        System.err.println("unwrap result.status="+result.getStatus());
+        System.err.println("Engine.hsState="+_engine.getHandshakeStatus());
 
-    public void close() throws IOException
-    {
-        _engine.closeOutbound();
-        if (_outBuffer.hasRemaining())
+        switch(result.getStatus())
         {
-            flushOutBuffer();
-            
-            if(_outBuffer.hasRemaining())
-            {   
-                // TODO - what if all data is not flushed???
-                throw new IllegalStateException("TODO???");
-            }
+            case OK:
+            case CLOSED:
+                break;
+            default:
+                throw new IOException(result.getStatus().toString());
         }
         
-        /*
-         * By RFC 2616, we can "fire and forget" our close_notify message, so that's what we'll do
-         * here.
-         */
-        _outBuffer.clear();
-        SSLEngineResult result = _engine.wrap(_handshakeBuffer, _outBuffer);
-        if (result.getStatus() != SSLEngineResult.Status.CLOSED) { throw new SSLException("Improper closed state."); }
-        _outBuffer.flip();
-        flushOutBuffer();
-        
-        if(_outBuffer.hasRemaining())
-        {   
-            // TODO - what if all data is not flushed???
-            throw new IllegalStateException("TODO???");
-        }
-
-        super.close();
+        return (result.bytesProduced()+result.bytesConsumed())>0;
     }
 }
