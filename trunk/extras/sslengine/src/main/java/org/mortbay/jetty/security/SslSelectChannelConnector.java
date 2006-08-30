@@ -18,9 +18,15 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.DefaultHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.HttpChannelEndPoint;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 
@@ -65,6 +71,12 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
     private int _applicationBufferSize = 16384;
 
+    /* ------------------------------------------------------------ */
+    public SslSelectChannelConnector()
+    {
+        Log.warn("The SslSelectChannelConnector is pre-ALPHA work in progress!!!!");
+    }
+    
     /* ------------------------------------------------------------ */
     public String[] getCipherSuites()
     {
@@ -217,6 +229,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     }
 
     /* ------------------------------------------------------------ */
+    @Override
     public HttpChannelEndPoint newHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectChannelConnector.SelectSet selectSet, SelectionKey sKey) throws IOException
     {
         return new SslHttpChannelEndPoint(connector, channel, selectSet, sKey, createSSLEngine());
@@ -277,20 +290,18 @@ public class SslSelectChannelConnector extends SelectChannelConnector
             
             if (_excludeCipherSuites != null && _excludeCipherSuites.length >0) 
             {
-                List excludedCSList = Arrays.asList(_excludeCipherSuites);
+                List<String> excludedCSList = Arrays.asList(_excludeCipherSuites);
                 String[] enabledCipherSuites = engine.getEnabledCipherSuites();
-                List enabledCSList = new ArrayList(Arrays.asList(enabledCipherSuites));
-                Iterator exIter = excludedCSList.iterator();
-
-                while (exIter.hasNext())
+                List<String> enabledCSList = new ArrayList<String>(Arrays.asList(enabledCipherSuites));
+                
+                for (String cipherName:excludedCSList)
                 {
-                    String cipherName = (String)exIter.next();
                     if (enabledCSList.contains(cipherName))
                     {
                         enabledCSList.remove(cipherName);
                     }
                 }
-                enabledCipherSuites = (String[])enabledCSList.toArray(new String[enabledCSList.size()]);
+                enabledCipherSuites = enabledCSList.toArray(new String[enabledCSList.size()]);
 
                 engine.setEnabledCipherSuites(enabledCipherSuites);
             }
@@ -303,9 +314,39 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         return engine;
     }
 
+    @Override
     protected void doStart() throws Exception
     {
         setHeaderBufferSize(_applicationBufferSize);        
         super.doStart();
     }
+    
+    /* TODO temp main - just to help testing */
+    public static void main(String[] args)
+        throws Exception
+    {
+        Server server = new Server();
+        SslSelectChannelConnector connector=new SslSelectChannelConnector();  
+        connector.setKeystore("etc/keystore");
+        connector.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
+        connector.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
+        
+        connector.setPort(8443);
+        server.setConnectors(new Connector[]{connector});
+        HandlerCollection handlers = new HandlerCollection();
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        handlers.setHandlers(new Handler[]{contexts,new DefaultHandler()});
+        server.setHandler(handlers);
+        
+        HashUserRealm userRealm = new HashUserRealm();
+        userRealm.setName("Test Realm");
+        userRealm.setConfig("./etc/realm.properties");
+        server.setUserRealms(new UserRealm[]{userRealm});
+        
+        WebAppContext.addWebApplications(server,"webapps","etc/webdefault.xml",false,false);
+        
+        server.start();
+        server.join();
+    }
+
 }
