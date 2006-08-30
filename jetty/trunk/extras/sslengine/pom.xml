@@ -18,6 +18,13 @@
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
+       <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
@@ -29,9 +36,8 @@
             </goals>
             <configuration>
               <tasks>
-                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" todir="../../lib" />
+                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" todir="../../lib/ext" />
                 <copy failonerror="false" file="src/main/resources/jetty-sslengine.xml" todir="../../etc" />
-				<patch patchfile="src/main/resources/pom-1.5.diff" dir="../../"/>
               </tasks>
             </configuration>
           </execution>
@@ -43,7 +49,7 @@
             </goals>
             <configuration>
               <tasks>
-                <delete failonerror="false" file="../../lib/${project.artifactId}-${project.version}.${project.packaging}"/>
+                <delete failonerror="false" file="../../lib/ext/${project.artifactId}-${project.version}.${project.packaging}"/>
                 <delete failonerror="false" file="../../etc/jetty-sslengine.xml"/>
               </tasks>
             </configuration>
