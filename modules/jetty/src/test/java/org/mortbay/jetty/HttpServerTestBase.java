@@ -236,7 +236,7 @@ public class HttpServerTestBase
 
         try {
             for (int i = 0; i < LOOPS; i++) {
-                Socket       client = client = new Socket(HOST, port);
+                Socket       client = new Socket(HOST, port);
                 OutputStream os     = client.getOutputStream();
 
                 os.write(bytes);
@@ -285,7 +285,7 @@ public class HttpServerTestBase
                 // Sort the list
                 Arrays.sort(points);
                 
-                Socket       client = client = new Socket(HOST, port);
+                Socket       client = new Socket(HOST, port);
                 OutputStream os     = client.getOutputStream();
                 
                 
@@ -326,7 +326,7 @@ public class HttpServerTestBase
                 // Sort the list
                 Arrays.sort(points);
 
-                Socket       client = client = new Socket(HOST, port);
+                Socket       client = new Socket(HOST, port);
                 OutputStream os     = client.getOutputStream();
 
                 writeFragments(bytes, points, message, os);
@@ -367,7 +367,7 @@ public class HttpServerTestBase
 
         try {
             for (int i = 0; i < badPoints.length; ++i) {
-                Socket       client  = client = new Socket(HOST, port);
+                Socket       client = new Socket(HOST, port);
                 OutputStream os      = client.getOutputStream();
                 StringBuffer message = new StringBuffer();
 

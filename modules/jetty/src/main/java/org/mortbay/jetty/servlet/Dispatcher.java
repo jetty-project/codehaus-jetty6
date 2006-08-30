@@ -62,6 +62,8 @@ public class Dispatcher implements RequestDispatcher
     public final static String __FORWARD_PATH_INFO= "javax.servlet.forward.path_info";
     public final static String __FORWARD_QUERY_STRING= "javax.servlet.forward.query_string";
 
+    /** JSP attributes */
+    public final static String __JSP_FILE="org.apache.catalina.jsp_file";
 
     /* ------------------------------------------------------------ */
     /** Dispatch type from name
@@ -140,6 +142,7 @@ public class Dispatcher implements RequestDispatcher
     public void include(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+        request.removeAttribute(__JSP_FILE); // TODO remove when glassfish 1044 is fixed
         
         // TODO - allow stream or writer????
         
@@ -206,6 +209,7 @@ public class Dispatcher implements RequestDispatcher
     {
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         response.resetBuffer(); 
+        request.removeAttribute(__JSP_FILE); // TODO remove when glassfish 1044 is fixed
         
         String old_uri=base_request.getRequestURI();
         String old_context_path=base_request.getContextPath();
