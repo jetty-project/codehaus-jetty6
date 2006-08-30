@@ -29,22 +29,22 @@ public class JSONDataFilter implements DataFilter
         return filterString(data.toString());
     }
 
-    private Object filterString(String string)
+    protected Object filterString(String string)
     {
         return string;
     }
 
-    private Object filterBoolean(Boolean bool)
+    protected Object filterBoolean(Boolean bool)
     {
         return bool;
     }
 
-    private Object filterNumber(Number number)
+    protected Object filterNumber(Number number)
     {
         return number;
     }
 
-    private Object filterArray(Object array)
+    protected Object filterArray(Object array)
     {
         if (array==null)
             return null;
@@ -57,7 +57,7 @@ public class JSONDataFilter implements DataFilter
         return array;
     }
 
-    private Object filterMap(Map object)
+    protected Object filterMap(Map object)
     {
         if (object==null)
             return null;
