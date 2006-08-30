@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/jsp-2.0/jsp-api-2.0.jar"/>
 	<classpathentry kind="lib" path="modules/jetty/src/main/resources"/>
 	<classpathentry kind="lib" path="modules/jetty/src/test/resources"/>
 	<classpathentry kind="lib" path="modules/management/src/main/resources"/>
@@ -16,32 +15,19 @@
 	<classpathentry output="modules/jetty/target/test-classes" kind="src" path="modules/jetty/src/test/java"/>
 	<classpathentry output="modules/management/target/classes" kind="src" path="modules/management/src/main/java"/>
 	<classpathentry output="modules/management/target/test-classes" kind="src" path="modules/management/src/test/java"/>
-	<classpathentry output="modules/naming/target/classes" kind="src" path="modules/naming/src/main/java"/>
-	<classpathentry output="modules/naming/target/test-classes" kind="src" path="modules/naming/src/test/java"/>
+	<classpathentry excluding="org/mortbay/naming/factories/" output="modules/naming/target/classes" kind="src" path="modules/naming/src/main/java"/>
+	<classpathentry excluding="org/mortbay/naming/factories/" output="modules/naming/target/test-classes" kind="src" path="modules/naming/src/test/java"/>
 	<classpathentry output="modules/servlet-api-2.5/target/classes" kind="src" path="modules/servlet-api-2.5/src/main/java"/>
 	<classpathentry output="modules/start/target/classes" kind="src" path="modules/start/src/main/java"/>
 	<classpathentry output="modules/util/target/classes" kind="src" path="modules/util/src/main/java"/>
 	<classpathentry kind="src" path="modules/util/src/test/java"/>
-	<classpathentry kind="var" path="M2_REPO/ant/ant/1.6.4/ant-1.6.4.jar"/>
-	<classpathentry kind="var" path="M2_REPO/commons-el/commons-el/1.0/commons-el-1.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/geronimo-spec/geronimo-spec-jta/1.0.1B-rc4/geronimo-spec-jta-1.0.1B-rc4.jar"/>
-	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j/3.0.1/mx4j-3.0.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/mx4j/mx4j-tools/3.0.1/mx4j-tools-3.0.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/apache/derby/derby/10.1.1.0/derby-10.1.1.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/eclipse/jdt/core/3.1.0/core-3.1.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring/1.2.6/spring-1.2.6.jar"/>
-	<classpathentry kind="var" path="M2_REPO/xerces/xercesImpl/2.6.2/xercesImpl-2.6.2.jar"/>
-	<classpathentry kind="var" path="M2_REPO/xerces/xmlParserAPIs/2.6.2/xmlParserAPIs-2.6.2.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/core/boot/classworlds-1.1.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-container-default-1.0-alpha-9.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/core/plexus-utils-1.1.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.4.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.4.jar"/>
-	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.4.jar"/>
 	<classpathentry output="extras/cometd/target/classes" kind="src" path="extras/cometd/src/main/java"/>
 	<classpathentry output="extras/cometd/target/test-classes" kind="src" path="extras/cometd/src/test/java"/>
-	<classpathentry output="extras/spring/target/classes" kind="src" path="extras/spring/src/main/java"/>
 	<classpathentry output="examples/test-webapp/target/test-classes" kind="src" path="examples/test-webapp/src/test/java"/>
+	<classpathentry kind="lib" path="lib/jsp-2.1/ant-1.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.1/core-3.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.1/jsp-api-2.1.jar"/>
+	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
