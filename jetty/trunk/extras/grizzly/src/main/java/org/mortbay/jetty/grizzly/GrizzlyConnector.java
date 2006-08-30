@@ -162,7 +162,7 @@ public class GrizzlyConnector extends AbstractNIOConnector
     }
     
 
-    /** temp main - just to help testing */
+    /* TODO temp main - just to help testing */
     public static void main(String[] args)
         throws Exception
     {
