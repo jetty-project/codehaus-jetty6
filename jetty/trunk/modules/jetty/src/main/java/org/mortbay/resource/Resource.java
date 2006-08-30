@@ -39,7 +39,7 @@ import org.mortbay.util.URIUtil;
  */
 public abstract class Resource implements Serializable
 {
-    public static boolean __defaultUseCaches = true;
+    public static boolean __defaultUseCaches = false;
     Object _associate;
     
     /* ------------------------------------------------------------ */
