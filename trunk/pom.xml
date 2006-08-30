@@ -189,6 +189,9 @@
     <module>modules/html</module>
     <module>extras/xbean</module>
     <module>extras/cometd</module>
+    <!-- module>extras/spring</module-->
+    <!-- module>extras/grizzly</module-->
+    <!-- module>extras/sslengine</module-->
     <module>examples/test-webapp</module>
     <module>examples/embedded</module>
   </modules>
