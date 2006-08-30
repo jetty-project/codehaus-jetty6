@@ -310,6 +310,7 @@ public class Response implements HttpServletResponse
 
         setHeader(HttpHeaders.LOCATION,location);
         setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+        complete();
 
     }
 

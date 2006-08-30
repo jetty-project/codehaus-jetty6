@@ -325,7 +325,11 @@ public class HttpGenerator implements HttpTokens
         if (content.isImmutable()) throw new IllegalArgumentException("immutable");
 
         if (_last || _state==STATE_END) 
-            throw new IllegalStateException("Closed");
+        {
+            Log.debug("Ignoring extra content {}",content);
+            content.clear();
+            return;
+        }
         _last = last;
 
         // Handle any unfinished business?

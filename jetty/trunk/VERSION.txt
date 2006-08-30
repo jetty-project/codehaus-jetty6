@@ -5,7 +5,8 @@
     + don't warn for content length on head requests
     + temp fix for JETTY-104 (raised glassfish ISSUE-1044) hide
       JSP forced path attribute
-	+ Transferred the sslengine patch from the patches directory to extras
+    + Fixed JETTY-68. Complete request after sendRedirect
+    + Transferred the sslengine patch from the patches directory to extras
 
 jetty-6.0.0rc2 - 25 August 2006
     + use mvn -Dslf4j=false jetty:run to disable use of slf4j logging with jdk1.4/jsp2.0
