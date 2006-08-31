@@ -39,8 +39,23 @@ import org.mortbay.util.URIUtil;
  */
 public abstract class Resource implements Serializable
 {
-    public static boolean __defaultUseCaches = false;
+    public static boolean __defaultUseCaches = true;
     Object _associate;
+    
+    /**
+     * Change the default setting for url connection caches.
+     * Subsequent URLConnections will use this default.
+     * @param useCaches
+     */
+    public static void setDefaultUseCaches (boolean useCaches)
+    {
+        __defaultUseCaches=useCaches;
+    }
+    
+    public static boolean getDefaultUseCaches ()
+    {
+        return __defaultUseCaches;
+    }
     
     /* ------------------------------------------------------------ */
     /** Construct a resource from a url.
