@@ -28,6 +28,7 @@ import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.resource.Resource;
 
 /**
  * Jetty6PluginServer
@@ -57,6 +58,8 @@ public class Jetty6PluginServer implements JettyPluginServer
     {
         this.server = new Server();
         this.server.setStopAtShutdown(true);
+        //make sure Jetty does not use URLConnection caches with the plugin
+        Resource.setDefaultUseCaches(false);
     }
 
     /**
