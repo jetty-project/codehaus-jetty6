@@ -22,13 +22,22 @@
       <releases><enabled>false</enabled></releases>
       <snapshots><enabled>true</enabled></snapshots>
     </repository>
+    <repository>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>java.net repository</id>
+      <name>Maven 1.x Repository</name>
+      <url>https://maven-repository.dev.java.net/nonav/repository/</url>
+      <layout>legacy</layout>
+    </repository>
   </repositories>
 
   <dependencies>
     <dependency>
-      <groupId>com.sun.enterprise</groupId>
-      <artifactId>appserv-http-engine</artifactId>
-      <version>9.0-SNAPSHOT</version>
+      <groupId>grizzly</groupId>
+      <artifactId>grizzly</artifactId>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
