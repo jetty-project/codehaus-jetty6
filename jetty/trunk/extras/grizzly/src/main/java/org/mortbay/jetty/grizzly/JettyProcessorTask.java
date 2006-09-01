@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.channels.spi.AbstractSelectableChannel;
 
 import com.sun.enterprise.web.connector.grizzly.Handler;
 import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
@@ -186,5 +187,30 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
     public void preProcess(InputStream input, OutputStream output) throws Exception
     {
         System.err.println("preProcess(in,out)");
+    }
+
+
+    
+    // ---------------------------------------------------- Not used ----------//
+    
+    public boolean parseRequest(AbstractSelectableChannel channel, 
+            boolean keptAlive) throws Exception 
+    {
+        throw new IllegalStateException();
+    }
+
+    public void postProcess(AbstractSelectableChannel channel) throws Exception
+    {
+        throw new IllegalStateException();
+    }
+
+    public void preProcess(AbstractSelectableChannel channel) throws Exception
+    {
+        throw new IllegalStateException();
+    }
+
+    public boolean process(AbstractSelectableChannel channel) throws Exception
+    {
+        throw new IllegalStateException();
     }
 }
