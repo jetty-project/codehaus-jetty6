@@ -6,7 +6,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
-  <artifactId>sslengine</artifactId>
+  <artifactId>jetty-sslengine</artifactId>
   <name>Jetty SSLEngine</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
