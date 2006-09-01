@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
   <parent>
-    <artifactId>project</artifactId>
+    <artifactId>project-website</artifactId>
     <groupId>org.mortbay.jetty</groupId>
     <version>6.0-SNAPSHOT</version>
-    <relativePath>./pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -17,7 +17,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1</version>
         <executions>
           <execution>
             <id>exec-plugin-doc</id>
