@@ -159,5 +159,28 @@ public class Context extends ContextHandler
     {
         _servletHandler.addServletWithMapping(servlet, pathSpec);
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a filter
+     */
+    public void addFilter(FilterHolder holder,String pathSpec,int dispatches)
+    {
+        _servletHandler.addFilterWithMapping(holder,pathSpec,dispatches);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a filter
+     */
+    public void addFilter(Class filterClass,String pathSpec,int dispatches)
+    {
+        _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** conveniance method to add a filter
+     */
+    public void addFilter(String filterClass,String pathSpec,int dispatches)
+    {
+        _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
+    }
 }

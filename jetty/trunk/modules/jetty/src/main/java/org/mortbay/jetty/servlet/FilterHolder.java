@@ -18,7 +18,9 @@ import java.util.Enumeration;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.SingleThreadModel;
 
 import org.mortbay.jetty.Handler;
 
@@ -64,6 +66,14 @@ public class FilterHolder
     {
         super (filter);
     }
+
+    /* ---------------------------------------------------------------- */
+    /** Constructor for existing filter.
+     */
+    public FilterHolder(Filter filter)
+    {
+        setFilter(filter);
+    }
     
     /* ------------------------------------------------------------ */
     public void doStart()
@@ -92,6 +102,15 @@ public class FilterHolder
         _filter=null;
         _config=null;
         super.doStop();   
+    }
+
+    /* ------------------------------------------------------------ */
+    public synchronized void setFilter(Filter filter)
+    {
+        _filter=filter;
+        setHeldClass(filter.getClass());
+        if (getName()==null)
+            setName(filter.getClass().getName());
     }
     
     /* ------------------------------------------------------------ */
