@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<document>
+  <properties>
+    <title>Jetty6</title>
+  </properties>
+  <head>
+     <META http-equiv="Cache-Control" content="no-cache,no-store"/>
+  </head>
+  <body>
+<div class="summary">
+<span>Jetty 6</span> is the newest version of Jetty and supports the new 2.5 version of the Servlet Specification. 
+<P>
+Our goal with Jetty 6 was not just to bolt-on support for 2.5, but to take the opportunity to assess the codebase and re-architect and re-implement where necessary to make Jetty as streamlined and efficient as possible without sacrificing features and functionality.
+</P>
+<P>
+A number of other changes were introduced and improvements made in jetty 6:
+</P>
+
+<h2>Embeddability</h2>
+<p>
+As a result of paring down the dependencies and careful design, jetty 6 can deliver a webserver with just 3 jars:  servlet-api-2.5.jar, jetty.jar and jetty-util.jar. We're also vigilant about keeping the size of those jars to the minimum necessary.
+</p>
+
+<h2>Scalability</h2>
+<P>
+One of our big motivators was to address scalability, which has become particularly important with the popularity of 
+<a href="http://en.wikipedia.org/wiki/AJAX">AJAX</a>. In the AJAX model, web browser clients
+continuously poll the server. The server will often delay processing the request until there is data to 
+send or a timeout happens. That means that the server processing thread and resources are being held open for relatively long periods, which is disastrous for heavily loaded sites. Jetty 6 address this by offering a feature called <a href="/apidocs/org/mortbay/util/ajax/package-summary.html">Continuations</a>, which allows a request to be suspended (and therefore the server resources freed) and resumed later.
+</P>
+<h2>Efficiency</h2>
+<P>
+We've also improved efficiency by adding connectors based on Sun's non-blocking IO 
+<a href="http://java.sun.com/j2se/1.4.2/docs/api/java/nio/channels/package-summary.html">(NIO)</a> package. We've also re-designed the buffering to take advantage of NIO, and also to make flushing as efficient as possbile.
+</P>
+</div>
+
+Here's a summary of the new features of jetty6:
+<div class="feature">
+<div class="featureitem">Codebase completely rearchitected and slimlined</div>
+<div class="featureitem"><a href="/apidocs/org/mortbay/util/ajax/package-summary.html">Continuations API</a> for efficient AJAX polling</div>
+<div class="featureitem">Improved dependancy injection and inversion of control design of components</div>
+<div class="featureitem">Improved interceptor design of handlers</div>
+<div class="featureitem">Smart split buffer design for efficient asynchronous flushing and avoiding chunking.</div>
+<div class="featureitem">Optional use of NIO Buffering so that efficient direct buffers and memory mapped files can be used.</div>
+<div class="featureitem">Optional use of NIO non-blocking scheduling so that threads are not allocated per connection.</div>
+<div class="featureitem">Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be sent as a single operation.</div>
+</div>
+
+  </body>
+</document>
