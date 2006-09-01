@@ -110,8 +110,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${jta-spec-groupId}</groupId>
-      <artifactId>${jta-spec-artifactId}</artifactId>
+      <groupId>geronimo-spec</groupId>
+      <artifactId>geronimo-spec-jta</artifactId>
       <version>${jta-spec-version}</version>
     </dependency>
     <dependency>
