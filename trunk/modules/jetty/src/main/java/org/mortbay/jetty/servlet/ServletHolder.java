@@ -97,7 +97,8 @@ public class ServletHolder extends Holder
 
         _servlet=servlet;
         setHeldClass(servlet.getClass());
-        setName(servlet.getClass().getName());
+        if (getName()==null)
+            setName(servlet.getClass().getName());
     }
     
     /* ------------------------------------------------------------ */
