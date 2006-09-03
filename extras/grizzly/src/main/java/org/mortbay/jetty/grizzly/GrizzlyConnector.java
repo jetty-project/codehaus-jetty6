@@ -32,6 +32,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.AbstractNIOConnector;
 import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -49,6 +50,7 @@ public class GrizzlyConnector extends AbstractNIOConnector
      */
     public GrizzlyConnector()
     {
+        Log.warn("The GrizzlyConnector is a pre-ALPHA work in progress!!!!");
         _selectorThread = new JettySelectorThread();
     }
 
