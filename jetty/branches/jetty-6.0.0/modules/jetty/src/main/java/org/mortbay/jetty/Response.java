@@ -246,7 +246,7 @@ public class Response implements HttpServletResponse
             }
             else
             {
-                setContentType(MimeTypes.TEXT_HTML);
+                setContentType(MimeTypes.TEXT_HTML_8859_1);
                 ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
                 HttpConnection connection = HttpConnection.getCurrentConnection();
                 ErrorHandler.writeErrorPage(request, writer, connection.getResponse().getStatus(), connection.getResponse().getReason(),true);
