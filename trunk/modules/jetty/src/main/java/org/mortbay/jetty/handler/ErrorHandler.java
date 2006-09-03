@@ -47,8 +47,8 @@ public class ErrorHandler extends AbstractHandler
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
     {
         HttpConnection.getCurrentConnection().getRequest().setHandled(true);
-        response.setContentType(MimeTypes.TEXT_HTML);
-        ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
+        response.setContentType(MimeTypes.TEXT_HTML_8859_1);
+        ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(4096);
         HttpConnection connection = HttpConnection.getCurrentConnection();
         handleErrorPage(request, writer, connection.getResponse().getStatus(), connection.getResponse().getReason());
         writer.flush();
@@ -72,15 +72,19 @@ public class ErrorHandler extends AbstractHandler
         {
             message=URLDecoder.decode(message,"UTF-8");
             message= StringUtil.replace(message, "<", "&lt;");
+            message= StringUtil.replace(message, "&", "&amp;");
             message= StringUtil.replace(message, ">", "&gt;");
         }
         String uri= request.getRequestURI();
         if (uri!=null)
         {
             uri= StringUtil.replace(uri, "<", "&lt;");
+            uri= StringUtil.replace(uri, "&", "&amp;");
             uri= StringUtil.replace(uri, ">", "&gt;");
         }
-        writer.write("<html>\n<head>\n<title>Error ");
+        
+        writer.write("<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n");
+        writer.write("<title>Error ");
         writer.write(Integer.toString(code));
         writer.write(' ');
         if (message==null)
