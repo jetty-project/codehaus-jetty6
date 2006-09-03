@@ -70,16 +70,15 @@ public class ErrorHandler extends AbstractHandler
     {
         if (message != null)
         {
-            message=URLDecoder.decode(message,"UTF-8");
-            message= StringUtil.replace(message, "<", "&lt;");
             message= StringUtil.replace(message, "&", "&amp;");
+            message= StringUtil.replace(message, "<", "&lt;");
             message= StringUtil.replace(message, ">", "&gt;");
         }
         String uri= request.getRequestURI();
         if (uri!=null)
         {
-            uri= StringUtil.replace(uri, "<", "&lt;");
             uri= StringUtil.replace(uri, "&", "&amp;");
+            uri= StringUtil.replace(uri, "<", "&lt;");
             uri= StringUtil.replace(uri, ">", "&gt;");
         }
         
