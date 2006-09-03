@@ -379,16 +379,8 @@ public class HttpConnection
                         header.skip(header.length());
                     
                     _expectingContinues = false; // TODO do something with this!
-                    _parser.reset(!more_in_buffer); // TODO maybe only release when low on resources
-                    _requestFields.clear();
-                    _request.recycle();
                     
-                    _generator.reset(!more_in_buffer); // TODO maybe only release when low on resources
-                    _responseFields.clear();
-                    _response.recycle();
-                    
-                    _uri.clear();
-                    
+                    reset(!more_in_buffer);
                 }
                 
                 Continuation continuation = _request.getContinuation();
@@ -400,6 +392,20 @@ public class HttpConnection
         }
     }
 
+    /* ------------------------------------------------------------ */
+    protected void reset(boolean returnBuffers)
+    {
+        _parser.reset(returnBuffers); // TODO maybe only release when low on resources
+        _requestFields.clear();
+        _request.recycle();
+        
+        _generator.reset(returnBuffers); // TODO maybe only release when low on resources
+        _responseFields.clear();
+        _response.recycle();
+        
+        _uri.clear();   
+    }
+    
     /* ------------------------------------------------------------ */
     protected void handleRequest() throws IOException
     {
