@@ -1,3 +1,4 @@
+    + Fix for JETTY-107. Poor cast in SessionDump demo.
     + Set charset on error pages
     + Half refactor of HttpConnection for AJP
 
