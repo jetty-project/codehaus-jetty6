@@ -8,6 +8,9 @@ import org.mortbay.io.BufferCache;
  */
 public class Ajp13PacketMethods {
 
+    // TODO - this can probably be replaced by HttpMethods or at least an extension of it.
+    // It is probably most efficient if "GET" ends up as the same instance
+    
     public final static String
         OPTIONS = "OPTIONS",
         GET = "GET",

@@ -1,4 +1,5 @@
     + Set charset on error pages
+    + Half refactor of HttpConnection for AJP
 
 jetty-6.0.0rc3 - 1 September 2006
     + pulled 6.0.0 branch
