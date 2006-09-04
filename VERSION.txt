@@ -1,6 +1,10 @@
+
+jetty-6.1-SNAPSHOT
+    + Half refactor of HttpConnection for AJP
+    
+jetty-6.0.0 - ???
     + Fix for JETTY-107. Poor cast in SessionDump demo.
     + Set charset on error pages
-    + Half refactor of HttpConnection for AJP
 
 jetty-6.0.0rc3 - 1 September 2006
     + pulled 6.0.0 branch
