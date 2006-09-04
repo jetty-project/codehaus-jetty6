@@ -16,7 +16,8 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 
 /**
- * @author Markus Kobler
+ * @author Markus Kobler  markus(at)inquisitive-mind.com
+ * 
  */
 public class Ajp13SocketConnector extends SocketConnector {
 
@@ -40,7 +41,8 @@ public class Ajp13SocketConnector extends SocketConnector {
         super.doStart();
     }
 
-    protected HttpConnection newConnection(EndPoint endpoint) {
+    protected HttpConnection newHttpConnection(EndPoint endpoint) {
+        System.err.println("New HTTP Connection "+endpoint);
         return new Ajp13Connection(this, endpoint, getServer(), _bufferSize);
     }
 
@@ -62,7 +64,7 @@ public class Ajp13SocketConnector extends SocketConnector {
         Server server = new Server();
         Ajp13SocketConnector connector=new Ajp13SocketConnector(); 
         
-        connector.setPort(8443);
+        connector.setPort(8009);
         server.setConnectors(new Connector[]{connector});
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
@@ -71,10 +73,10 @@ public class Ajp13SocketConnector extends SocketConnector {
         
         HashUserRealm userRealm = new HashUserRealm();
         userRealm.setName("Test Realm");
-        userRealm.setConfig("./etc/realm.properties");
+        userRealm.setConfig("../../etc/realm.properties");
         server.setUserRealms(new UserRealm[]{userRealm});
         
-        WebAppContext.addWebApplications(server,"webapps","etc/webdefault.xml",false,false);
+        WebAppContext.addWebApplications(server,"../../webapps","../../etc/webdefault.xml",false,false);
         
         server.start();
         server.join();
