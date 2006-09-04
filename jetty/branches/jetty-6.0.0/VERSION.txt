@@ -1,3 +1,5 @@
+
+jetty-6.0.0 - ???
     + Fix for JETTY-107. Poor cast in SessionDump demo.
     + Set charset on error pages
 
