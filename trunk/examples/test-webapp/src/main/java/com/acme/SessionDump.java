@@ -114,7 +114,7 @@ public class SessionDump extends HttpServlet
                 while(keys.hasMoreElements())
                 {
                     String name=(String)keys.nextElement();
-                    String value=(String)session.getAttribute(name);
+                    String value=""+session.getAttribute(name);
 
                     out.println("<b>"+name+":</b> "+value+"<br/>");
                 }
