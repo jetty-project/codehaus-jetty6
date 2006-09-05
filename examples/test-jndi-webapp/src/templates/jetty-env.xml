@@ -17,7 +17,9 @@
     <Arg type="boolean">true</Arg>
   </New>
 
+
   <!-- Add a DataSource only valid for this webapp                     -->
+@DATASOURCE99-PRE@
   <New id="mydatasource99" class="org.mortbay.jetty.plus.naming.Resource">
     <Arg>jdbc/mydatasource99</Arg>
     <Arg>

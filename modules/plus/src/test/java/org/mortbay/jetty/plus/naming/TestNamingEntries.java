@@ -152,8 +152,8 @@ public class TestNamingEntries extends TestCase
         
         //override webxml
         EnvEntry ee = new EnvEntry ("nameA", someObject, true);
-        assertNotNull(EnvEntry.getEnvEntry("nameA"));
-        assertTrue(EnvEntry.getEnvEntry("nameA") instanceof EnvEntry);
+        assertNotNull(EnvEntry.getEnvEntry(NamingEntry.SCOPE_GLOBAL,"nameA"));
+        assertTrue(EnvEntry.getEnvEntry(NamingEntry.SCOPE_GLOBAL, "nameA") instanceof EnvEntry);
         Object x = icontext.lookup("nameA");
         assertNotNull(x);
         assertEquals(x, someObject);
@@ -165,8 +165,8 @@ public class TestNamingEntries extends TestCase
         InitialContext icontext = new InitialContext();
  
         Resource resource = new Resource ("resourceA", someObject);
-        assertNotNull(Resource.getResource("resourceA"));
-        assertTrue(Resource.getResource("resourceA") instanceof Resource);
+        assertNotNull(Resource.getResource(NamingEntry.SCOPE_GLOBAL, "resourceA"));
+        assertTrue(Resource.getResource(NamingEntry.SCOPE_GLOBAL, "resourceA") instanceof Resource);
         assertEquals(icontext.lookup("resourceA"), someObject);
     }
     
@@ -193,8 +193,8 @@ public class TestNamingEntries extends TestCase
         
         InitialContext icontext = new InitialContext();
         Resource resource = new Resource ("resourceByRef", ref);
-        assertNotNull(Resource.getResource("resourceByRef"));
-        assertTrue (Resource.getResource("resourceByRef") instanceof Resource);
+        assertNotNull(Resource.getResource(NamingEntry.SCOPE_GLOBAL, "resourceByRef"));
+        assertTrue (Resource.getResource(NamingEntry.SCOPE_GLOBAL, "resourceByRef") instanceof Resource);
         Object o = icontext.lookup("resourceByRef");
         assertNotNull (o);
         assertTrue (o instanceof SomeObject);

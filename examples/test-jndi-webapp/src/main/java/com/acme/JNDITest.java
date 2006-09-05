@@ -44,6 +44,7 @@ public class JNDITest extends HttpServlet {
     private DataSource myDS2;
     private Session myMailSession;
     Double wiggle;
+    Integer woggle;
 
     public void init(ServletConfig config) throws ServletException
     {
@@ -53,6 +54,9 @@ public class JNDITest extends HttpServlet {
             InitialContext ic = new InitialContext();
             myDS = (DataSource)ic.lookup("java:comp/env/jdbc/mydatasource");
             myDS2 = (DataSource)ic.lookup("java:comp/env/jdbc/mydatasource2");
+
+            woggle = (Integer)ic.lookup("java:comp/env/woggle");
+            System.err.println("woggle="+woggle);
             
             wiggle = (Double)ic.lookup("java:comp/env/wiggle");          
             System.err.println("wiggle="+wiggle);

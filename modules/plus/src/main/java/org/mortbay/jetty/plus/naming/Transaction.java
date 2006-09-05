@@ -37,10 +37,10 @@ public class Transaction extends NamingEntry
     public static final String USER_TRANSACTION = "UserTransaction";
     
 
-    public static Transaction getTransaction ()
+    public static Transaction getTransaction (int scopeType)
     throws NamingException
     {
-       return (Transaction)lookupNamingEntry(Transaction.class, USER_TRANSACTION);
+       return (Transaction)lookupNamingEntry(scopeType, Transaction.class, USER_TRANSACTION);
     }
     
     
@@ -57,8 +57,8 @@ public class Transaction extends NamingEntry
     {   
         InitialContext ic = new InitialContext();
         Context env = (Context)ic.lookup("java:comp");
-        Log.info("Binding java:comp/"+getJndiName()+" to "+objectNameInNamespace);
-        NamingUtil.bind(env, getJndiName(), new LinkRef(objectNameInNamespace.toString()));
+        Log.info("Binding java:comp/"+getJndiName()+" to "+absoluteObjectNameString);
+        NamingUtil.bind(env, getJndiName(), new LinkRef(absoluteObjectNameString));
     }
     
     /**

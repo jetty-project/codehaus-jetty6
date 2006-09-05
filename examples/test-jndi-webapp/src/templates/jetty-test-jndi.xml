@@ -43,6 +43,9 @@
 
 
   <!-- Configuring <resource-ref> and <resource-env-ref>s          -->
+@DATASOURCE1-PRE@
+
+
   <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
@@ -50,6 +53,8 @@
     </Arg>
    </New>
 
+
+@DATASOURCE2-PRE@
 
   <New id="mydatasource2" class="org.mortbay.jetty.plus.naming.Resource">
     <Arg>jdbc/mydatasource2</Arg>
