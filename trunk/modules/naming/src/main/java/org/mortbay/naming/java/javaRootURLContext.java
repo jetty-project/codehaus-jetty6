@@ -68,11 +68,11 @@ public class javaRootURLContext implements Context
             _javaNameParser = new javaNameParser();       
             _nameRoot = new NamingContext();
             _nameRoot.setNameParser(_javaNameParser);
-            ContextFactory.setNameParser(_javaNameParser);
-            StringRefAddr addr = new StringRefAddr("compCtx",
-                                                   "comp");
+          
+            StringRefAddr parserAddr = new StringRefAddr("parser", _javaNameParser.getClass().getName());
+            
             Reference ref = new Reference ("javax.naming.Context",
-                                           addr,
+                                           parserAddr,
                                            ContextFactory.class.getName(),
                                            (String)null);
 

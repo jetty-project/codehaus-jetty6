@@ -22,6 +22,8 @@ import java.util.WeakHashMap;
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NameParser;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
 
 import org.mortbay.log.Log;
@@ -42,18 +44,13 @@ public class ContextFactory implements ObjectFactory
     //map of classloaders to contexts
     private static WeakHashMap _contextMap;
 
-    private static NameParser _parser;
-
 
     static
     {
         _contextMap = new WeakHashMap();
     }
     
-    public static void setNameParser (NameParser parser)
-    {
-        _parser = parser;
-    }
+  
 
     public Object getObjectInstance (Object obj,
                                      Name name,
@@ -73,10 +70,15 @@ public class ContextFactory implements ObjectFactory
 
             if (ctx == null)
             {
+                Reference ref = (Reference)obj;
+                StringRefAddr parserAddr = (StringRefAddr)ref.get("parser");
+                String parserClassName = (parserAddr==null?null:(String)parserAddr.getContent());
+                NameParser parser = (NameParser)(parserClassName==null?null:loader.loadClass(parserClassName).newInstance());
+                
                 ctx = new NamingContext (env,
                                          name.get(0),
                                          nameCtx,
-                                         _parser);
+                                         parser);
                 if(Log.isDebugEnabled())Log.debug("No entry for classloader: "+loader);
                 _contextMap.put (loader, ctx);
             }
