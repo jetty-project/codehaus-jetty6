@@ -15,81 +15,103 @@
 
 package org.mortbay.jetty.grizzly;
 
+import com.sun.enterprise.web.connector.grizzly.SelectorThread;
 import java.io.IOException;
-import java.nio.channels.ByteChannel;
-import java.util.WeakHashMap;
-
-import com.sun.enterprise.web.connector.grizzly.DefaultReadTask;
-import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
-import com.sun.enterprise.web.connector.grizzly.StreamAlgorithm;
-import com.sun.enterprise.web.connector.grizzly.TaskEvent;
-
+import com.sun.enterprise.web.connector.grizzly.XAReadTask;
+import java.net.Socket;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.AbstractSelectableChannel;
+import java.util.logging.Level;
+        
 /**
  * @author gregw
  *
  */
-public class JettyReadTask extends DefaultReadTask // TODO should just be ReadTask, but algorithm needs defaultReadTask
+public class JettyReadTask extends XAReadTask
 {
-    static WeakHashMap __endpoints = new WeakHashMap();  // Horrid hack to associate key with endpoint!
     
-    public void attachProcessor(ProcessorTask processorTask)
-    {
-        System.err.println(this+" attachProcessor");
-        super.attachProcessor(processorTask);
-    }
+    public void doTask() throws IOException {
+        int count = 0;
+        Socket socket = null;
+        SocketChannel socketChannel = null;
+        boolean keepAlive = false;
+        Exception exception = null;
+        isReturned = false;
 
-    public void detachProcessor()
-    {
-        System.err.println(this+" detachProcessor");
-        super.detachProcessor();
-    }
-
-    public void doTask() throws IOException
-    {
-        try
-        {
-            System.err.println(this+" doTask "+key+" "+key.attachment());
-            GrizzlyEndPoint ep = (GrizzlyEndPoint)key.attachment();
-            if (ep==null)
-            {
-                // TODO perhaps the attachment is being cleared???
-                // this is a horrid hack and need a better way to associate the endpoint
-                ep = (GrizzlyEndPoint)__endpoints.get(key);
-
-                if (ep==null)
-                {
-                    JettySelectorThread selThread=(JettySelectorThread)selectorThread;
-                    GrizzlyConnector grizzlyConnector=selThread.getGrizzlyConnector();
-                    ep=new GrizzlyEndPoint(grizzlyConnector,(ByteChannel)key.channel());
-                    key.attach(ep);
-                    __endpoints.put(key,ep);
+        try {
+            inKeepAliveProcess = true;
+            socketChannel = (SocketChannel)key.channel();
+            socket = socketChannel.socket();
+            
+            if ( algorithm.parse(byteBuffer) ){
+                keepAlive = executeProcessorTask();
+                if (!keepAlive) {
+                    inKeepAliveProcess = false;
                 }
+            } else {
+                // This shoudn't happens by default'
+                keepAlive = true;
+                inKeepAliveProcess = false;
             }
-            ep.handle();
+
+            // Catch IO AND NIO exception
+        } catch (IOException ex) {
+            exception = ex;
+        } catch (RuntimeException ex) {
+            exception = ex;
+        } finally {
+            manageKeepAlive(keepAlive,count,exception);
         }
-        finally
-        {
-            // TODO filthy hack
-            detachProcessor();  
-            registerKey(); 
+    }
+    
+    
+    public boolean executeProcessorTask() throws IOException{
+        boolean registerKey = false;
+        
+        if (SelectorThread.logger().isLoggable(Level.FINEST))
+            SelectorThread.logger().log(Level.FINEST,"executeProcessorTask");
+        
+        /**
+         * TO DO: File caching support?
+        if (  algorithm.getHandler() != null && algorithm.getHandler()
+                .handle(null, Handler.REQUEST_BUFFERED) == Handler.BREAK ){
+            return true;
         }
-    }
+        */
+        
+        // Get a processor task. If the processorTask != null, that means we
+        // failed to load all the bytes in a single channel.read().
+        if (processorTask == null){
+            attachProcessor(selectorThread.getProcessorTask());
+        }
+        
+        try {
+            // The socket might not have been read entirely and the parsing
+            // will fail, so we need to respin another event.
+            registerKey = processorTask.process((AbstractSelectableChannel)
+                key.channel());
+        } catch (Exception e) {
+            SelectorThread.logger().log(Level.SEVERE,"readTask.processException", e);
+            registerKey = true;
+        } finally {
+            // if registerKey, that means we were'nt able to parse the request
+            // properly because the bytes were not all read, so we need to
+            // call again the Selector.
+            if (processorTask.isError()) {
+                inKeepAliveProcess = false;
+                return registerKey;
+            }
+        }
 
-    public void initialize(StreamAlgorithm algorithm, boolean useDirectByteBuffer, boolean useByteBufferView)
-    {
-        System.err.println(this+" initialize");
-        super.initialize(algorithm,useDirectByteBuffer,useByteBufferView);
+        detachProcessor();
+        return registerKey;
     }
-
-    public void recycle()
-    {
-        System.err.println(this+" recycle");
-        super.recycle();
-    }
-
-    public void taskEvent(TaskEvent event)
-    {
-        System.err.println(this+" taskEvent");
-        super.taskEvent(event);
-    }
+    
+    
+    /**
+     * Clear the current state and make this object ready for another request.
+     */
+    public void recycle(){
+        key = null;
+    }     
 }

@@ -15,16 +15,16 @@
 
 package org.mortbay.jetty.grizzly;
 
+import com.sun.enterprise.web.connector.grizzly.OutputWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.bio.StreamEndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
@@ -36,19 +36,20 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     HttpConnection _connection;
     JettyProcessorTask _task;
     
-    public GrizzlyEndPoint(GrizzlyConnector connector, ByteChannel channel)
+    public GrizzlyEndPoint(GrizzlyConnector connector)
         throws IOException
     {
-        super(channel);
-        System.err.println("new GrizzlyEndPoint channel="+channel);
-        _connection = new GrizzlyHttpConnection(connector,this,connector.getServer());
+        // TODO: Needs an empty constructor?
+        super(null);
+        //System.err.println("new GrizzlyEndPoint channel="+channel);
+        _connection = new HttpConnection(connector,this,connector.getServer());
     }
 
     public void handle()
     {
         try
         {
-            System.err.println("handle  "+this);
+            //System.err.println("handle  "+this);
             _connection.handle();
         }
         catch (ClosedChannelException e)
@@ -75,7 +76,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         }
         finally
         {
-            System.err.println("handled "+this);
+            //System.err.println("handled "+this);
             Continuation continuation =  _connection.getRequest().getContinuation();
             if (continuation != null && continuation.isPending())
             {
@@ -93,22 +94,22 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     public void blockReadable(long millisecs)
     {
         // TODO implement
-        System.err.println("blockReadable()");
+        //System.err.println("blockReadable()");
         try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
     }
 
     public void blockWritable(long millisecs)
     {
         // TODO implement
-        System.err.println("blockWritable()");
+        //System.err.println("blockWritable()");
         try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
     }
 
     public int fill(Buffer buffer) throws IOException
     {
-        System.err.println("fill()");
+        //System.err.println("fill()");
         int len= super.fill(buffer);
-        System.err.println("filled: "+buffer);
+        //System.err.println("filled: "+buffer);
         return len;
     }
 
@@ -135,16 +136,70 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         return len;
         
     }
+    
+    
+    public boolean keepAlive()
+    {
+        return true;
+    }
 
+
+    /* (non-Javadoc)
+     * @see org.mortbay.io.EndPoint#flush(org.mortbay.io.Buffer)
+     */
     public int flush(Buffer buffer) throws IOException
     {
-        System.err.println("flush()");
-        return super.flush(buffer);
+        Buffer buf = buffer.buffer();
+        int len=0;
+        if (buf instanceof NIOBuffer)
+        {
+            NIOBuffer nbuf = (NIOBuffer)buf;
+            ByteBuffer bbuf=nbuf.getByteBuffer();
+
+            // TODO synchronize or duplicate?
+            synchronized(nbuf)
+            {
+                try
+                {
+                    bbuf.position(buffer.getIndex());
+                    bbuf.limit(buffer.putIndex());
+                    len = bbuf.limit() - bbuf.position();
+                    OutputWriter.flushChannel((SocketChannel)_channel,bbuf);
+                }
+                finally
+                {
+                    if (!buffer.isImmutable())
+                        buffer.setGetIndex(bbuf.position());
+                    bbuf.position(0);
+                    bbuf.limit(bbuf.capacity());
+                }
+            }
+        }
+        else if (buffer.array()!=null)
+        {
+            ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
+            len=_channel.write(b);
+            if (!buffer.isImmutable())
+                buffer.setGetIndex(b.position());
+        }
+        else
+        {
+            throw new IOException("Not Implemented");
+        }
+        
+        return len;
     }
 
     public boolean isBlocking()
     {
         return false;
+    }
+    
+    
+    public void setChannel(ByteChannel channel){
+        this._channel = channel;
+        if (channel instanceof SocketChannel)
+            _socket=((SocketChannel)channel).socket();        
     }
     
 }
