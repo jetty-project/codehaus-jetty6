@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Server Project</name>
-  <version>6.0.0rc3</version>
+  <version>6.0.0rc4</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -90,9 +90,9 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-6.0.0rc3</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-6.0.0rc3</developerConnection>
-    <url>https://svn.codehaus.org/jetty/jetty/tags/jetty-6.0.0rc3</url>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-6.0.0rc4</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-6.0.0rc4</developerConnection>
+    <url>https://svn.codehaus.org/jetty/jetty/tags/jetty-6.0.0rc4</url>
   </scm>
   <organization>
     <name>Mort Bay Consulting</name>
