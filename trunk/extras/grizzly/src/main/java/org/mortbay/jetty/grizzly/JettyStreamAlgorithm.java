@@ -29,36 +29,20 @@ import com.sun.enterprise.web.connector.grizzly.algorithms.StreamAlgorithmBase;
  */
 public class JettyStreamAlgorithm extends NoParsingAlgorithm
 {
-    public boolean parse(ByteBuffer byteBuffer)
-    {
-        System.err.println(this+" parse(ByteBuffer)");
-        // TODO Auto-generated method stub
-        return super.parse(byteBuffer);
+    
+    /**
+     * Do not do anything since Jetty will internally handle the ByteBuffer 
+     * lifecycle.
+     */
+    public boolean parse(ByteBuffer byteBuffer){
+        return true;
     }
-
-    public Handler getHandler()
-    {
-        System.err.println(this+" getHandler()");
-        // TODO Auto-generated method stub
-        return super.getHandler();
-    }
-
+    
+    
     public Class getReadTask(SelectorThread selectorThread)
     {
         System.err.println(this+" getReadTask()");
         return JettyReadTask.class;
-    }
-
-    public void setPort(int port)
-    {
-        System.err.println(this+" setPort("+port+")");
-        super.setPort(port);
-    }
-
-    public void setSocketChannel(SocketChannel socketChannel)
-    {
-        System.err.println(this+" setSocketChannel("+socketChannel+")");
-        super.setSocketChannel(socketChannel);
     }
 
 }

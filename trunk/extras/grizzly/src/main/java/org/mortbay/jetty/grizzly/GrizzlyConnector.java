@@ -32,7 +32,6 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.AbstractNIOConnector;
 import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -50,7 +49,6 @@ public class GrizzlyConnector extends AbstractNIOConnector
      */
     public GrizzlyConnector()
     {
-        Log.warn("The GrizzlyConnector is a pre-ALPHA work in progress!!!!");
         _selectorThread = new JettySelectorThread();
     }
 
@@ -109,10 +107,11 @@ public class GrizzlyConnector extends AbstractNIOConnector
         try
         {
             _selectorThread.setPort(getPort());
+            _selectorThread.setGrizzlyConnector(this);
+            _selectorThread.setThreadPool(getServer().getThreadPool());            
             if (getHost()!=null)
                 _selectorThread.setAddress(InetAddress.getByName(getHost()));
             _selectorThread.initEndpoint();
-            _selectorThread.setGrizzlyConnector(this);
         } 
         catch (InstantiationException ex)
         {
@@ -164,7 +163,7 @@ public class GrizzlyConnector extends AbstractNIOConnector
     }
     
 
-    /* TODO temp main - just to help testing */
+    /** temp main - just to help testing */
     public static void main(String[] args)
         throws Exception
     {
