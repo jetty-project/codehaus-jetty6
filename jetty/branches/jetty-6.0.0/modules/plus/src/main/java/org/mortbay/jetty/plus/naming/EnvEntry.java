@@ -32,12 +32,13 @@ public class EnvEntry extends NamingEntry
 {
     private boolean overrideWebXml;
     
-    public static EnvEntry getEnvEntry (String jndiName)
+    public static EnvEntry getEnvEntry (int scopeType, String jndiName)
     throws NamingException
     {
-       return (EnvEntry)lookupNamingEntry(EnvEntry.class, jndiName);
+       return (EnvEntry)lookupNamingEntry(scopeType, EnvEntry.class, jndiName);
     }
     
+   
     
     public EnvEntry (String jndiName, Object objToBind)
     throws NamingException
