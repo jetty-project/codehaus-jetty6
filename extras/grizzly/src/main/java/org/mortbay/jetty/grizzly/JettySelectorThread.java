@@ -17,8 +17,15 @@
 
 package org.mortbay.jetty.grizzly;
 
+import com.sun.enterprise.web.connector.grizzly.Pipeline;
 import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
+import com.sun.enterprise.web.connector.grizzly.ReadTask;
 import com.sun.enterprise.web.connector.grizzly.SelectorThread;
+import com.sun.enterprise.web.connector.grizzly.StreamAlgorithm;
+import com.sun.enterprise.web.connector.grizzly.algorithms.NoParsingAlgorithm;
+import java.util.logging.Level;
+import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.ThreadPool;
 
 /**
  *
@@ -28,17 +35,76 @@ public class JettySelectorThread extends SelectorThread{
     
     private GrizzlyConnector grizzlyConnector;
     
+    private ThreadPool _threadPool;
+    
     public JettySelectorThread() 
     {
-        super();
+        super();  
+        maxProcessorWorkerThreads = 8;
+    }
+    
+    
+    /**
+     * Load using reflection the <code>Algorithm</code> class.
+     */
+    protected void initAlgorithm()
+    {
         algorithmClass=JettyStreamAlgorithm.class;
         algorithmClassName=algorithmClass.getName();
+    }    
+    
+    
+    /**
+     * Create a new <code>Pipeline</code> instance using the 
+     * <code>pipelineClassName</code> value.
+     */
+    protected Pipeline newPipeline(int maxThreads,
+                                   int minThreads,
+                                   String name, 
+                                   int port,
+                                   int priority){
         
-        // minimize debugging output
-        minProcessorQueueLength=4;
-        minReadQueueLength=4;
-        maxProcessorWorkerThreads=8;
+        Pipeline pipeline = 
+                super.newPipeline(maxThreads,minThreads,name,port,priority);
+        if ( pipeline instanceof JettyPipeline) {
+            ((JettyPipeline)pipeline).
+                    setThreadPool((BoundedThreadPool)_threadPool);
+        }
+        return pipeline;
     }
+    
+    
+    /**
+     * Return a new <code>ReadTask</code> instance
+     */
+    protected ReadTask newReadTask()
+    {
+        StreamAlgorithm streamAlgorithm = null;
+        
+        try{
+            streamAlgorithm = (StreamAlgorithm)algorithmClass.newInstance();
+        } catch (InstantiationException ex){
+            logger.log(Level.WARNING,
+                       "Unable to instantiate Algorithm: "+ algorithmClassName);
+        } catch (IllegalAccessException ex){
+            logger.log(Level.WARNING,
+                       "Unable to instantiate Algorithm: " + algorithmClassName);
+        } finally {
+            if ( streamAlgorithm == null)
+                streamAlgorithm = new NoParsingAlgorithm();
+        }       
+        streamAlgorithm.setPort(port);
+        
+        // TODO: For now, hardcode the JettyReadTask
+        ReadTask task = new JettyReadTask();        
+        task.initialize(streamAlgorithm, useDirectByteBuffer,useByteBufferView);
+        task.setPipeline(readPipeline);  
+        task.setSelectorThread(this);
+        task.setRecycle(recycleTasks);
+        
+        return task;
+    }
+    
     
     public ProcessorTask newProcessorTask(boolean initialize)
     {
@@ -47,6 +113,7 @@ public class JettySelectorThread extends SelectorThread{
         task.setBufferSize(requestBufferSize);
         task.setSelectorThread(this);              
         task.setRecycle(recycleTasks);
+ 
         
         task.initialize();
  
@@ -69,6 +136,11 @@ public class JettySelectorThread extends SelectorThread{
     public GrizzlyConnector getGrizzlyConnector()
     {
         return grizzlyConnector;
+    }
+    
+    public void setThreadPool(ThreadPool threadPool)
+    {
+        _threadPool = threadPool;
     }
     
 }
