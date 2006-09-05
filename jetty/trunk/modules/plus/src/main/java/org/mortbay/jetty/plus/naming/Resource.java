@@ -30,10 +30,10 @@ import org.mortbay.log.Log;
 public class Resource extends NamingEntry
 {
   
-    public static Resource getResource (String jndiName)
+    public static Resource getResource (int scopeType, String jndiName)
     throws NamingException
     {
-        return (Resource)lookupNamingEntry (Resource.class, jndiName);
+        return (Resource)lookupNamingEntry (scopeType, Resource.class, jndiName);
     }
     
     /**

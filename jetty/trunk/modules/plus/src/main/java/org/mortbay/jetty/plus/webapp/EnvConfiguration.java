@@ -42,9 +42,6 @@ public class EnvConfiguration implements Configuration
 {
     private WebAppContext webAppContext;
     private Context compCtx;
-    private Context envCtx;
-    private Context localContext;
-    private String localContextName;
     private URL jettyEnvXmlUrl;
 
     protected void createEnvContext ()
@@ -52,7 +49,7 @@ public class EnvConfiguration implements Configuration
     {
         Context context = new InitialContext();
         compCtx =  (Context)context.lookup ("java:comp");
-        envCtx = compCtx.createSubcontext("env");
+        Context envCtx = compCtx.createSubcontext("env");
         if (Log.isDebugEnabled())
             Log.debug("Created java:comp/env for webapp "+getWebAppContext().getContextPath());
     }
@@ -108,12 +105,9 @@ public class EnvConfiguration implements Configuration
         //add java:comp/env entries for any globally defined EnvEntries
         bindGlobalEnvEntries();
         
-        //create a special context in the global namespace that is
-        //a place to bind any webapp specific jndi entries so that
-        //they can be found during the parsing of web.xml
-        localContextName = Long.toString(getWebAppContext().hashCode(),36)+getWebAppContext().getContextPath().replace('/','_');
-        localContext = NamingEntry.createContext(localContextName);
-        NamingEntry.setThreadLocalContext(localContext);
+        //set up java:comp/env as the Context in which to bind directly
+        //the entries in jetty-env.xml
+        NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
         
         //check to see if an explicit file has been set, if not,
         //look in WEB-INF/jetty-env.xml
@@ -137,11 +131,7 @@ public class EnvConfiguration implements Configuration
             XmlConfiguration configuration = new XmlConfiguration(jettyEnvXmlUrl);
             configuration.configure(getWebAppContext());
         }
-      
-        
-        
-        //add entries for all webapp-specific EnvEntries loaded from jetty-env.xml
-        bindLocalEnvEntries();
+
     }
 
     /** 
@@ -154,10 +144,10 @@ public class EnvConfiguration implements Configuration
         //get rid of any bindings only defined for the webapp
         ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(webAppContext.getClassLoader());
+        NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
         unbindLocalNamingEntries();
         compCtx.destroySubcontext("env");
-        NamingEntry.destroyContext(localContextName);
-        NamingEntry.setThreadLocalContext(null);
+        NamingEntry.setScope(NamingEntry.SCOPE_GLOBAL);
         Thread.currentThread().setContextClassLoader(oldLoader);
     }
     
@@ -170,34 +160,7 @@ public class EnvConfiguration implements Configuration
     throws NamingException
     {
         Log.debug("Finding global env entries");
-        bindAllEnvEntries(new InitialContext());
-    }
-    
-    /**
-     * Bind all EnvEntries that have been declared as
-     * specific to a webapp
-     * @throws NamingException
-     */
-    public void bindLocalEnvEntries()
-    throws NamingException
-    {
-        Log.debug("Finding webapp specific env entries");
-        bindAllEnvEntries(localContext);
-    }
-    
-  
-    /**
-     * Bind all EnvEntries listed in a particular context
-     * into a webapp's java:comp/env.
-     * TODO look at only binding those that are referenced
-     * in the web.xml instead
-     * @param context
-     * @throws NamingException
-     */
-    public void bindAllEnvEntries (Context context)
-    throws NamingException
-    {
-        List  list = NamingEntry.lookupNamingEntries (context, EnvEntry.class);
+        List  list = NamingEntry.lookupNamingEntries (NamingEntry.SCOPE_GLOBAL, EnvEntry.class);
         Iterator itor = list.iterator();
         
         Log.debug("Finding env entries: size="+list.size());
@@ -209,12 +172,16 @@ public class EnvConfiguration implements Configuration
         }
     }
     
+  
+    
+
+    
     public void unbindLocalNamingEntries ()
     throws NamingException
     {
-        List  list = NamingEntry.lookupNamingEntries (localContext, EnvEntry.class);
-        list.addAll(NamingEntry.lookupNamingEntries(localContext, Resource.class));
-        list.addAll(NamingEntry.lookupNamingEntries(localContext, Transaction.class));
+        List  list = NamingEntry.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, EnvEntry.class);
+        list.addAll(NamingEntry.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, Resource.class));
+        list.addAll(NamingEntry.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, Transaction.class));
         
         Iterator itor = list.iterator();
         

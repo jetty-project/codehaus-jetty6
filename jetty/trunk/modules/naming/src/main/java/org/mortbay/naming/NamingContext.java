@@ -35,6 +35,7 @@ import javax.naming.NamingException;
 import javax.naming.NotContextException;
 import javax.naming.OperationNotSupportedException;
 import javax.naming.Reference;
+import javax.naming.Referenceable;
 import javax.naming.spi.NamingManager;
 
 import org.mortbay.log.Log;
@@ -334,9 +335,18 @@ public class NamingContext implements Context, Cloneable
         //if no subcontexts, just bind it
         if (cname.size() == 1)
         {
+            //get the object to be bound
+            Object objToBind = NamingManager.getStateToBind(obj, name,this, null);
+            // Check for Referenceable
+            if (objToBind instanceof Referenceable) 
+            {
+                objToBind = ((Referenceable)objToBind).getReference();
+            }
+            //anything else we should be able to bind directly
+                           
             Binding binding = getBinding (cname);
             if (binding == null)
-                addBinding (cname, obj);
+                addBinding (cname, objToBind);
             else
                 throw new NameAlreadyBoundException (cname.toString());
         }
@@ -981,7 +991,13 @@ public class NamingContext implements Context, Cloneable
         //if no subcontexts, just bind it
         if (cname.size() == 1)
         {         
-            addBinding (cname, obj);
+            //check if it is a Referenceable
+            Object objToBind = NamingManager.getStateToBind(obj, name, this, null);
+            if (objToBind instanceof Referenceable)
+            {
+                objToBind = ((Referenceable)objToBind).getReference();
+            }
+            addBinding (cname, objToBind);
         }
         else
         { 
