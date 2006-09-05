@@ -2,7 +2,8 @@
 jetty-6.1-SNAPSHOT
     + Half refactor of HttpConnection for AJP
     
-jetty-6.0.0 - ???
+jetty-6.0.0rc4 - 5 September 2006
+    + bind jetty-env.xml entries to java:comp/env
     + Fix for JETTY-107. Poor cast in SessionDump demo.
     + Set charset on error pages
 
