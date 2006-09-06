@@ -36,7 +36,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
 
 /**
- * 
+ * Delegate the processing of the request to a <code>GrizzlyEndPoint</code>
  * @author Jeanfrancois Arcand
  */
 public class JettyProcessorTask extends TaskBase implements ProcessorTask
@@ -104,104 +104,127 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
     }
   
     
-    public int getBufferSize() {
+    public int getBufferSize() 
+    {
         return -1;
     }
 
-    public boolean getDropConnection() {
+    public boolean getDropConnection() 
+    {
         return false;
     }
 
-    public int getMaxPostSize() {
+    public int getMaxPostSize()
+    {
         return -1;
     }
 
-    public void invokeAdapter() {
+    public void invokeAdapter()
+    {
     }
     
     
-    public void setBufferSize(int requestBufferSize) {
+    public void setBufferSize(int requestBufferSize)
+    {
     }
 
-    public void setDropConnection(boolean dropConnection) {
+    public void setDropConnection(boolean dropConnection) 
+    {
     }
 
-    public void setHandler(Handler handler) {
+    public void setHandler(Handler handler) 
+    {
         this.handler = handler;
     }
 
-    public Handler getHandler() {
+    public Handler getHandler() 
+    {
         return handler;
     }
 
-    public void setMaxHttpHeaderSize(int maxHttpHeaderSize) {
+    public void setMaxHttpHeaderSize(int maxHttpHeaderSize) 
+    {
     }
 
-    public void setMaxPostSize(int mps) {
+    public void setMaxPostSize(int mps) 
+    {
     }
 
-    public void setSocket(Socket socket) {
+    public void setSocket(Socket socket) 
+    {
     }
 
-    public void setTimeout(int timeouts) {
+    public void setTimeout(int timeouts) 
+    {
     }
 
-    public void terminateProcess() {
+    public void terminateProcess() 
+    {
     }
 
-    public String getRequestURI() {
+    public String getRequestURI() 
+    {
         return null; 
     }
 
-    public long getWorkerThreadID() {
+    public long getWorkerThreadID() 
+    {
         return -1;
     }
 
-    public boolean isKeepAlive() {
+    public boolean isKeepAlive() 
+    {
         return keepAlive;
     }
 
     // --------------------------------------------------- Grizzly ARP ------//
     
     
-    public void parseRequest() throws Exception {
+    public void parseRequest() throws Exception 
+    {
     }
 
-    public boolean parseRequest(InputStream input, OutputStream output, boolean keptAlive) throws Exception {
+    public boolean parseRequest(InputStream input,
+            OutputStream output, boolean keptAlive) throws Exception 
+    {
         return true;
     }
 
     public void postProcess() throws Exception {
     }
 
-    public void postProcess(InputStream input, OutputStream output) throws Exception {
+    public void postProcess(InputStream input, OutputStream output) 
+        throws Exception 
+    {
     }
 
-    public void postResponse() throws Exception {
+    public void postResponse() throws Exception 
+    {
     }
 
-    public void preProcess() throws Exception {
+    public void preProcess() throws Exception 
+    {
     }
 
-    public void preProcess(InputStream input, OutputStream output) throws Exception {
+    public void preProcess(InputStream input, OutputStream output) 
+        throws Exception 
+    {
     }   
     
     // ------------------------------------------------- Channel support ---//
     
     public boolean parseRequest(AbstractSelectableChannel channel, 
-            boolean keptAlive) throws Exception {
-        
-        
+            boolean keptAlive) throws Exception 
+    {    
         return true;
     }
 
-    public void postProcess(AbstractSelectableChannel channel) throws Exception{
-        
-        
+    public void postProcess(AbstractSelectableChannel channel) throws Exception
+    {
     }
 
-    public void preProcess(AbstractSelectableChannel channel) throws Exception{
-        
+    public void preProcess(AbstractSelectableChannel channel) throws Exception
+    {        
     }
 
     

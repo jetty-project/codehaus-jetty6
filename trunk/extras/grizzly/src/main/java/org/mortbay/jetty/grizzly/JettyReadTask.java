@@ -24,13 +24,17 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.logging.Level;
         
 /**
- * @author gregw
+ * Prepare the <code>SocketChannel</code> for reading, and delegates the
+ * parsing works to the <code>JettyProcessorTask</code>
  *
+ * @author Jeanfrancois Atcand
+ * @author gregw
  */
 public class JettyReadTask extends XAReadTask
 {
     
-    public void doTask() throws IOException {
+    public void doTask() throws IOException 
+    {
         int count = 0;
         Socket socket = null;
         SocketChannel socketChannel = null;
@@ -65,14 +69,15 @@ public class JettyReadTask extends XAReadTask
     }
     
     
-    public boolean executeProcessorTask() throws IOException{
+    public boolean executeProcessorTask() throws IOException
+    {
         boolean registerKey = false;
         
         if (SelectorThread.logger().isLoggable(Level.FINEST))
             SelectorThread.logger().log(Level.FINEST,"executeProcessorTask");
         
         /**
-         * TO DO: File caching support?
+         * TODO: File caching support?
         if (  algorithm.getHandler() != null && algorithm.getHandler()
                 .handle(null, Handler.REQUEST_BUFFERED) == Handler.BREAK ){
             return true;
@@ -111,7 +116,8 @@ public class JettyReadTask extends XAReadTask
     /**
      * Clear the current state and make this object ready for another request.
      */
-    public void recycle(){
+    public void recycle()
+    {
         key = null;
     }     
 }
