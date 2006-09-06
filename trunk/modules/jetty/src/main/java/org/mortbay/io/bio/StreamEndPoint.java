@@ -253,4 +253,31 @@ public class StreamEndPoint implements EndPoint
         _out=out;
     }
 
+
+    /* ------------------------------------------------------------ */
+    public boolean flush()
+        throws IOException
+    {   
+        _out.flush();
+        return true;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferingInput()
+    {
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferingOutput()
+    {
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferred()
+    {
+        return false;
+    }
+
 }

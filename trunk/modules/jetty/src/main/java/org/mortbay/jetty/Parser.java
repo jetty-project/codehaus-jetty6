@@ -30,6 +30,6 @@ public interface Parser
 
     long parseAvailable() throws IOException;
 
-    boolean isMoreInBuffer();
+    boolean isMoreInBuffer() throws IOException;
 
 }
