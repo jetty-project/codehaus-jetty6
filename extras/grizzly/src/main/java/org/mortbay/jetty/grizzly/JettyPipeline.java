@@ -35,98 +35,125 @@ public class JettyPipeline implements Pipeline
     
     private BoundedThreadPool _threadPool;
     
-    public JettyPipeline() {
+    public JettyPipeline()
+    {
     }
 
-    public void setThreadPool(BoundedThreadPool threadPool){
+    public void setThreadPool(BoundedThreadPool threadPool)
+    {
         _threadPool = threadPool;
     }
     
-    public void addTask(Task task) {
+    public void addTask(Task task)
+    {
         _threadPool.dispatch(task);
     }
 
-    public Task getTask() {
+    public Task getTask() 
+    {
         // Not used.
         return null;
     }
 
-    public int getWaitingThread() {
+    public int getWaitingThread() 
+    {
        return  _threadPool.getIdleThreads();
     }
 
-    public int getMaxThreads() {
+    public int getMaxThreads() 
+    {
         return _threadPool.getMaxThreads();
     }
 
-    public int getCurrentThreadCount() {
+    public int getCurrentThreadCount() 
+    {
         return _threadPool.getThreads();
     }
 
-    public int getCurrentThreadsBusy() {
+    public int getCurrentThreadsBusy() 
+    {
         return getMaxThreads() - getWaitingThread();
     }
 
-    public void initPipeline() {
+    public void initPipeline() 
+    {
     }
 
-    public String getName() {
+    public String getName() 
+    {
         return "JettyPipeline";              
     }
 
-    public void startPipeline() {
+    public void startPipeline() 
+    {
     }
 
-    public void stopPipeline() {
+    public void stopPipeline()
+    {
     }
 
-    public void setPriority(int i) {
+    public void setPriority(int i)
+    {
     }
 
-    public void setMaxThreads(int i) {
+    public void setMaxThreads(int i)
+    {
     }
 
-    public void setMinThreads(int i) {
+    public void setMinThreads(int i)
+    {
     }
 
-    public void setPort(int i) {
+    public void setPort(int i)
+    {
     }
 
-    public void setName(String string) {
+    public void setName(String string)
+    {
     }
 
-    public void setQueueSizeInBytes(int i) {
+    public void setQueueSizeInBytes(int i)
+    {
     }
 
-    public void setThreadsIncrement(int i) {
+    public void setThreadsIncrement(int i) 
+    {
     }
 
-    public void setThreadsTimeout(int i) {
+    public void setThreadsTimeout(int i) 
+    {
     }
 
-    public void setPipelineStatistic(PipelineStatistic pipelineStatistic) {
+    public void setPipelineStatistic(PipelineStatistic pipelineStatistic) 
+    {
     }
 
-    public PipelineStatistic getPipelineStatistic() {
+    public PipelineStatistic getPipelineStatistic() 
+    {
         return pipelineStat;
     }
 
-    public int size() {
+    public int size() 
+    {
         return _threadPool.getThreads();
     }
 
-    public int getMaxSpareThreads() {
+    public int getMaxSpareThreads() 
+    {
         return -1;
     }
 
-    public int getMinSpareThreads() {
+    public int getMinSpareThreads()
+    {
         return -1;
     }
 
-    public void setMinSpareThreads(int i) {
+    public void setMinSpareThreads(int i)
+    {
     }
 
-    public boolean interruptThread(long l) {
+    public boolean interruptThread(long l)
+    {
         return false;
     }
     

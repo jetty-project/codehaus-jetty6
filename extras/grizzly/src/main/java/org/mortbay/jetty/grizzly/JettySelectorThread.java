@@ -28,14 +28,24 @@ import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 
 /**
+ * Extend the default Grizzly implementation to allow the customization of 
+ * <code>Task</code> used by the Jetty back-end
  *
  * @author Jeanfrancois Arcand
  */
 public class JettySelectorThread extends SelectorThread{
     
+    /**
+     * The <code>AbstractNIOConnector</code> implementation for Grizzly.
+     */
     private GrizzlyConnector grizzlyConnector;
     
+    
+    /**
+     * The Jetty thread pool implementation.
+     */
     private ThreadPool _threadPool;
+    
     
     public JettySelectorThread() 
     {
@@ -45,7 +55,8 @@ public class JettySelectorThread extends SelectorThread{
     
     
     /**
-     * Load using reflection the <code>Algorithm</code> class.
+     * Force Grizzly to use the <code>JettyStreamAlgorithm</code> 
+     * implementation by default.
      */
     protected void initAlgorithm()
     {
@@ -56,7 +67,9 @@ public class JettySelectorThread extends SelectorThread{
     
     /**
      * Create a new <code>Pipeline</code> instance using the 
-     * <code>pipelineClassName</code> value.
+     * <code>pipelineClassName</code> value. If the pipeline
+     * is an instance of <code>JettyPipeline</code>, use the Jetty
+     * thread pool implementation (wrapped inside a Pipeline).
      */
     protected Pipeline newPipeline(int maxThreads,
                                    int minThreads,
@@ -75,7 +88,7 @@ public class JettySelectorThread extends SelectorThread{
     
     
     /**
-     * Return a new <code>ReadTask</code> instance
+     * Return a new <code>JettyReadTask</code> instance
      */
     protected ReadTask newReadTask()
     {
@@ -106,6 +119,9 @@ public class JettySelectorThread extends SelectorThread{
     }
     
     
+    /**
+     * Return a <code>JettyProcessorTask</code> implementation.
+     */
     public ProcessorTask newProcessorTask(boolean initialize)
     {
         JettyProcessorTask task = new JettyProcessorTask();
@@ -137,6 +153,7 @@ public class JettySelectorThread extends SelectorThread{
     {
         return grizzlyConnector;
     }
+    
     
     public void setThreadPool(ThreadPool threadPool)
     {
