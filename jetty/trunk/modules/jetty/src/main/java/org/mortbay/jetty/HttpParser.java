@@ -164,8 +164,13 @@ public class HttpParser implements Parser
 
     /* ------------------------------------------------------------ */
     public boolean isMoreInBuffer()
+    throws IOException
     {
-        return _header!=null && _header.length()>0;
+        if ( _header!=null && _header.hasContent() ||
+               _body!=null && _body.hasContent())
+            return true;
+
+        return false;
     }
     
     /* ------------------------------------------------------------------------------- */
@@ -297,6 +302,7 @@ public class HttpParser implements Parser
             }
             length=_buffer.length();
         }
+
         
         // EventHandler header
         byte ch;
@@ -405,7 +411,6 @@ public class HttpParser implements Parser
                     break;
 
                 case STATE_HEADER:
-
                     if (ch == HttpTokens.COLON || ch == HttpTokens.SPACE || ch == HttpTokens.TAB)
                     {
                         // header value without name - continuation?
@@ -417,6 +422,7 @@ public class HttpParser implements Parser
                         // handler last header if any
                         if (_cached!=null || _tok0.length() > 0 || _tok1.length() > 0 || _multiLineValue != null)
                         {
+                            
                             Buffer header=_cached!=null?_cached:HttpHeaders.CACHE.lookup(_tok0);
                             _cached=null;
                             Buffer value=_multiLineValue == null ? (Buffer) _tok1 : (Buffer) new ByteArrayBuffer(_multiLineValue);

@@ -343,6 +343,15 @@ public class HttpConnection
                     if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT)) 
                         io+=_generator.flushBuffers();
                     
+                    if (_endp.isBufferingOutput())
+                    {
+                        if (!_endp.flush())
+                        {
+                            // TODO schedule write call back
+                            continue;
+                        }
+                    }
+                    
                     if (io>0)
                         no_progress=0;
                     else if (no_progress++>10) // TODO This is a bit arbitrary
@@ -368,10 +377,10 @@ public class HttpConnection
             {
                 setCurrentConnection(null);
                 
-                more_in_buffer = _parser.isMoreInBuffer();
-                    
-                if (_parser.isComplete() && _generator.isComplete())
-                {
+                more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
+                
+                if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
+                {  
                     _idle=true;
                     if (!_generator.isPersistent())
                     {

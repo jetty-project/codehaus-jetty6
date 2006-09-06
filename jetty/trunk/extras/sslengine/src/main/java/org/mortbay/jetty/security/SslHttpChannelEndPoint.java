@@ -16,6 +16,7 @@ import org.mortbay.jetty.nio.HttpChannelEndPoint;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.nio.SelectChannelConnector.SelectSet;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /**
@@ -56,8 +57,6 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         _outBuffer=_outNIOBuffer.getByteBuffer();
         _inNIOBuffer=new NIOBuffer(_session.getPacketBufferSize(),true);
         _inBuffer=_inNIOBuffer.getByteBuffer();
-        
-        System.err.println("Engine.hsState="+_engine.getHandshakeStatus());
 
     }
 
@@ -70,7 +69,6 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         {   
             loop: while (_inBuffer.remaining()>0)
             {
-                System.err.println("close loop in Engine.hsState="+_engine.getHandshakeStatus());
                 switch(_engine.getHandshakeStatus())
                 {
                     case FINISHED:
@@ -87,7 +85,6 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
                         Runnable task;
                         while ((task=_engine.getDelegatedTask())!=null)
                         {
-                            System.err.println("delegate task "+task);
                             task.run();
                         }
                         break;
@@ -95,9 +92,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
                         
                     case NEED_WRAP:
                     {
-                        System.err.println("needs wrapping");
-
-                        flushOutBuffer();
+                        flush();
                         
                         SSLEngineResult result=null;
                         try
@@ -111,10 +106,8 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
                             _outNIOBuffer.setGetIndex(0);
                             _outNIOBuffer.setPutIndex(result.bytesProduced());
                         }
-                    
-                        System.err.println("wrap result="+result);
-
-                        flushOutBuffer();
+                        
+                        flush();
                         
                         break;
                     }
@@ -135,20 +128,15 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
      */
     public int fill(Buffer buffer) throws IOException
     {
-        System.err.println("fill");
-        
         ByteBuffer bbuf=extractInputBuffer(buffer);
         int size=buffer.length();
         
         try
         {
-            bbuf.position(buffer.putIndex());
-            
             fill(bbuf);
             
             loop: while (_inBuffer.remaining()>0)
             {
-                System.err.println("loop in Engine.hsState="+_engine.getHandshakeStatus());
                 switch(_engine.getHandshakeStatus())
                 {
                     case FINISHED:
@@ -165,7 +153,6 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
                         Runnable task;
                         while ((task=_engine.getDelegatedTask())!=null)
                         {
-                            System.err.println("delegate task "+task);
                             task.run();
                         }
                         break;
@@ -173,9 +160,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
                         
                     case NEED_WRAP:
                     {
-                        System.err.println("needs wrapping");
-
-                        flushOutBuffer();
+                        flush();
                         
                         SSLEngineResult result=null;
                         try
@@ -190,9 +175,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
                             _outNIOBuffer.setPutIndex(result.bytesProduced());
                         }
                     
-                        System.err.println("wrap result="+result);
-
-                        flushOutBuffer();
+                        flush();
                         
                         break;
                     }
@@ -206,7 +189,6 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
             bbuf.position(0);
         }
         
-        System.err.println("filled:"+buffer);
         return buffer.length()-size;
     }
 
@@ -222,8 +204,6 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
      */
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
     {
-        System.err.println("flush");
-        
         _outBuffers[0]=extractOutputBuffer(header);
         _outBuffers[1]=extractOutputBuffer(buffer);
         _outBuffers[2]=extractOutputBuffer(trailer);
@@ -233,9 +213,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         {
             _outBuffer.position(_outNIOBuffer.putIndex());
             _outBuffer.limit(_outBuffer.capacity());
-            System.err.println("pos="+_outBuffer.position()+" limit="+_outBuffer.limit());
             result=_engine.wrap(_outBuffers,_outBuffer);
-            System.err.println("wrap result="+result);
         }
         finally
         {
@@ -271,19 +249,17 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
             assert consumed==0;
         }
     
-        flushOutBuffer();
+        flush();
         
         return result.bytesConsumed();
     }
 
     
     /* ------------------------------------------------------------ */
-    private void flushOutBuffer() throws IOException
+    public boolean flush() throws IOException
     {
-        System.err.println("flushOutBuffer "+_outNIOBuffer.length());
         while (_outNIOBuffer.length()>0)
         {
-            System.err.println("flushing "+_outNIOBuffer.length());
             int flushed=super.flush(_outNIOBuffer);
             if (flushed==0)
             {
@@ -293,6 +269,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
             }
         }
         _outNIOBuffer.compact();
+        return !_outNIOBuffer.hasContent();
     }
 
     /* ------------------------------------------------------------ */
@@ -342,18 +319,20 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
     /* ------------------------------------------------------------ */
     private boolean fill(ByteBuffer buffer) throws IOException
     {
-        System.err.println("unwrapTo");
         int in_len=0;
-        _inNIOBuffer.compact();
-        while (_inNIOBuffer.space()>0)
+        
+        if (!_inNIOBuffer.hasContent())
         {
-            int len=super.fill(_inNIOBuffer);
-            if (len<=0)
-                break;
-            in_len+=len;
+            _inNIOBuffer.clear();
+            while (_inNIOBuffer.space()>0)
+            {
+                int len=super.fill(_inNIOBuffer);
+                if (len<=0)
+                    break;
+                in_len+=len;
+            }
         }
 
-        System.err.println("filled "+in_len+" total "+_inNIOBuffer.length());
         if (_inNIOBuffer.length()==0)
             return false;
         
@@ -371,19 +350,34 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
             _inNIOBuffer.skip(result.bytesConsumed());
         }
         
-        System.err.println("unwrap result="+result);
-        System.err.println("unwrap result.status="+result.getStatus());
-        System.err.println("Engine.hsState="+_engine.getHandshakeStatus());
-
         switch(result.getStatus())
         {
             case OK:
             case CLOSED:
                 break;
             default:
-                throw new IOException(result.getStatus().toString());
+                Log.warn("unwrap "+result);
+                throw new IOException(result.toString());
         }
         
         return (result.bytesProduced()+result.bytesConsumed())>0;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferingInput()
+    {
+        return _inNIOBuffer.hasContent();
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferingOutput()
+    {
+        return _outNIOBuffer.hasContent();
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferred()
+    {
+        return true;
     }
 }
