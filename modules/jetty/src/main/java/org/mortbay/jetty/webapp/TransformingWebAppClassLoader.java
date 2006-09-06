@@ -1,7 +1,11 @@
 package org.mortbay.jetty.webapp;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Enumeration;
 
 import org.mortbay.io.tx.Handler;
 import org.mortbay.io.tx.Transformer;
@@ -68,15 +72,73 @@ public class TransformingWebAppClassLoader extends WebAppClassLoader implements 
         {
             throw new RuntimeException(e);
         }
-        Log.info("transforming "+url);
         
         super.addURL(url);
+        
+        System.err.println("classpath="+Arrays.asList(getURLs()));
     }
     
     public byte[] transform(URL src, byte[] content)
     {
-        System.err.println("tx: "+src);
+        // System.err.println("tx: "+src);
         return content;
+    }
+
+    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException
+    {
+        // TODO Auto-generated method stub
+        return super.loadClass(name,resolve);
+    }
+
+    public synchronized Class loadClass(String name) throws ClassNotFoundException
+    {
+        // TODO Auto-generated method stub
+        return super.loadClass(name);
+    }
+
+    protected Class findClass(String name) throws ClassNotFoundException
+    {
+        // TODO Auto-generated method stub
+        return super.findClass(name);
+    }
+
+    public URL getResource(String name)
+    {
+        System.err.println("getResource "+name);
+        // TODO Auto-generated method stub
+        URL url = super.findResource(name);
+        System.err.println("url="+url);
+        return url;
+    }
+
+    public URL findResource(String name)
+    {
+        // TODO Auto-generated method stub
+        return super.findResource(name);
+    }
+
+    public Enumeration findResources(String name) throws IOException
+    {
+        // TODO Auto-generated method stub
+        return super.findResources(name);
+    }
+
+    public InputStream getResourceAsStream(String name)
+    {
+        System.err.println("getResourceAsStream "+name);
+        // TODO Auto-generated method stub
+        return super.getResourceAsStream(name);
+    }
+
+    public Enumeration getResources(String name) throws IOException
+    {
+        System.err.println("getResources "+name);
+        // TODO Auto-generated method stub
+        Enumeration e=super.getResources(name);
+        while(e!=null && e.hasMoreElements())
+            System.err.println(" + "+e.nextElement());
+        
+        return super.getResources(name);
     }
 
 }

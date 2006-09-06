@@ -69,12 +69,12 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     private String _truststore;
     private String _truststoreType = "JKS"; // type of the key store
 
-    private int _applicationBufferSize = 16384;
-
     /* ------------------------------------------------------------ */
     public SslSelectChannelConnector()
     {
         Log.warn("The SslSelectChannelConnector is pre-ALPHA work in progress!!!!");
+        setHeaderBufferSize(32768);
+        setRequestBufferSize(65536);
     }
     
     /* ------------------------------------------------------------ */
@@ -316,8 +316,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
     @Override
     protected void doStart() throws Exception
-    {
-        setHeaderBufferSize(_applicationBufferSize);        
+    {      
         super.doStart();
     }
     

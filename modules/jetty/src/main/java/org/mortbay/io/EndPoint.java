@@ -114,6 +114,9 @@ public interface EndPoint
     public boolean isBlocking();
     
     /* ------------------------------------------------------------ */
+    public boolean isBufferred();
+    
+    /* ------------------------------------------------------------ */
     public void blockReadable(long millisecs);
 
     /* ------------------------------------------------------------ */
@@ -124,5 +127,25 @@ public interface EndPoint
 
     /* ------------------------------------------------------------ */
     public Object getConnection();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if the endpoint has some buffered input data
+     */
+    public boolean isBufferingInput();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if the endpoint has some buffered output data
+     */
+    public boolean isBufferingOutput();
+    
+    /* ------------------------------------------------------------ */
+    /** Flush any buffered output.
+     * May fail to write all data if endpoint is non-blocking
+     * @throws IOException 
+     * @return true if all data is flushed
+     */
+    public boolean flush() throws IOException;
     
 }
