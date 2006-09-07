@@ -16,6 +16,7 @@
 package org.mortbay.jetty.grizzly;
 
 import com.sun.enterprise.web.connector.grizzly.SelectorThread;
+import com.sun.enterprise.web.connector.grizzly.StreamAlgorithm;
 import java.io.IOException;
 import com.sun.enterprise.web.connector.grizzly.XAReadTask;
 import java.net.Socket;
@@ -32,6 +33,16 @@ import java.util.logging.Level;
  */
 public class JettyReadTask extends XAReadTask
 {
+    
+    public void initialize(StreamAlgorithm algorithm,
+                      boolean useDirectByteBuffer, boolean useByteBufferView){
+        type = READ_TASK;    
+        this.algorithm = algorithm;       
+        
+        this.useDirectByteBuffer = useDirectByteBuffer;
+        this.useByteBufferView = useByteBufferView;
+    }
+    
     
     public void doTask() throws IOException 
     {
