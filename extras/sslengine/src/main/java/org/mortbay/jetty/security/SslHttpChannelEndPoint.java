@@ -130,7 +130,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
     {
         ByteBuffer bbuf=extractInputBuffer(buffer);
         int size=buffer.length();
-        
+		 
         try
         {
             fill(bbuf);
@@ -342,12 +342,13 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
             result=_engine.unwrap(_inBuffer,buffer);
+            if (result != null && result.getStatus() == SSLEngineResult.Status.OK)
+                _inNIOBuffer.skip(result.bytesConsumed());
         }
         finally
         {
             _inBuffer.position(0);
             _inBuffer.limit(_inBuffer.capacity());
-            _inNIOBuffer.skip(result.bytesConsumed());
         }
         
         switch(result.getStatus())
@@ -379,5 +380,10 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
     public boolean isBufferred()
     {
         return true;
+    }
+
+    public SSLEngine getSSLEngine()
+    {
+        return _engine;
     }
 }
