@@ -3,8 +3,10 @@ package org.mortbay.jetty.webapp;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 
 import org.mortbay.io.tx.Handler;
@@ -12,6 +14,7 @@ import org.mortbay.io.tx.Transformer;
 import org.mortbay.log.Log;
 import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.LazyList;
 
 /** Transforming Web Application ClassLoader.
  * 
@@ -105,22 +108,65 @@ public class TransformingWebAppClassLoader extends WebAppClassLoader implements 
     public URL getResource(String name)
     {
         System.err.println("getResource "+name);
-        // TODO Auto-generated method stub
-        URL url = super.findResource(name);
-        System.err.println("url="+url);
+        URL url = super.getResource(name);
+        if (url!=null && url.getProtocol().equals(Handler.PROTOCOL))
+        {
+            try
+            {
+                url=new URL(url.getFile());
+            }
+            catch (MalformedURLException e)
+            {
+                Log.warn(e);
+            }
+        }
+        System.err.println("GET  url="+url);
         return url;
     }
 
     public URL findResource(String name)
     {
-        // TODO Auto-generated method stub
-        return super.findResource(name);
+        System.err.println("findResource "+name);
+        URL url = super.findResource(name);
+        if (url!=null && url.getProtocol().equals(Handler.PROTOCOL))
+        {
+            try
+            {
+                url=new URL(url.getFile());
+            }
+            catch (MalformedURLException e)
+            {
+                Log.warn(e);
+            }
+        }
+        System.err.println("FIND url="+url);
+        return url;
     }
 
     public Enumeration findResources(String name) throws IOException
     {
         // TODO Auto-generated method stub
-        return super.findResources(name);
+        Enumeration en=super.findResources(name);
+        Object list = null;
+        while(en!=null && en.hasMoreElements())
+        {
+            URL url = (URL)en.nextElement();
+            if (url!=null && url.getProtocol().equals(Handler.PROTOCOL))
+            {
+                try
+                {
+                    url=new URL(url.getFile());
+                }
+                catch (MalformedURLException e)
+                {
+                    Log.warn(e);
+                }
+            }
+            System.err.println(" + "+url);
+            list=LazyList.add(list,url);
+        }
+        
+        return Collections.enumeration(LazyList.getList(list));
     }
 
     public InputStream getResourceAsStream(String name)
