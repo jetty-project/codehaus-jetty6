@@ -1,14 +1,15 @@
 package org.mortbay.jetty.security;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.net.ssl.KeyManager;
@@ -16,10 +17,18 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+
+import org.mortbay.io.EndPoint;
+import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
@@ -38,6 +47,11 @@ import org.mortbay.resource.Resource;
  */
 public class SslSelectChannelConnector extends SelectChannelConnector
 {
+    /**
+     * The name of the SSLSession attribute that will contain any cached information.
+     */
+    static final String CACHED_INFO_ATTR = CachedInfo.class.getName();
+
     /** Default value for the keystore location path. */
     public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator
             + ".keystore";
@@ -55,6 +69,9 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     private String _keystore=DEFAULT_KEYSTORE ;
     private String _keystoreType = "JKS"; // type of the key store
 
+    /** Set to true if we require client certificate authentication. */
+    private boolean _needClientAuth = false;
+
     private transient Password _password;
     private transient Password _keyPassword;
     private transient Password _trustPassword;
@@ -68,6 +85,112 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
     private String _truststore;
     private String _truststoreType = "JKS"; // type of the key store
+
+    /**
+     * Return the chain of X509 certificates used to negotiate the SSL Session.
+     * <p>
+     * Note: in order to do this we must convert a javax.security.cert.X509Certificate[], as used by
+     * JSSE to a java.security.cert.X509Certificate[],as required by the Servlet specs.
+     * 
+     * @param sslSession the javax.net.ssl.SSLSession to use as the source of the cert chain.
+     * @return the chain of java.security.cert.X509Certificates used to negotiate the SSL
+     *         connection. <br>
+     *         Will be null if the chain is missing or empty.
+     */
+    private static X509Certificate[] getCertChain(SSLSession sslSession)
+    {
+        try
+        {
+            javax.security.cert.X509Certificate javaxCerts[] = sslSession.getPeerCertificateChain();
+            if (javaxCerts == null || javaxCerts.length == 0)
+                return null;
+
+            int length = javaxCerts.length;
+            X509Certificate[] javaCerts = new X509Certificate[length];
+
+            java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
+            for (int i = 0; i < length; i++)
+            {
+                byte bytes[] = javaxCerts[i].getEncoded();
+                ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+                javaCerts[i] = (X509Certificate) cf.generateCertificate(stream);
+            }
+
+            return javaCerts;
+        }
+        catch (SSLPeerUnverifiedException pue)
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            Log.warn(Log.EXCEPTION, e);
+            return null;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Allow the Listener a chance to customise the request. before the server does its stuff. <br>
+     * This allows the required attributes to be set for SSL requests. <br>
+     * The requirements of the Servlet specs are:
+     * <ul>
+     * <li> an attribute named "javax.servlet.request.cipher_suite" of type String.</li>
+     * <li> an attribute named "javax.servlet.request.key_size" of type Integer.</li>
+     * <li> an attribute named "javax.servlet.request.X509Certificate" of type
+     * java.security.cert.X509Certificate[]. This is an array of objects of type X509Certificate,
+     * the order of this array is defined as being in ascending order of trust. The first
+     * certificate in the chain is the one set by the client, the next is the one used to
+     * authenticate the first, and so on. </li>
+     * </ul>
+     * 
+     * @param endpoint The Socket the request arrived on. 
+     *        This should be a {@link SocketEndPoint} wrapping a {@link SSLSocket}.
+     * @param request HttpRequest to be customised.
+     */
+    public void customize(EndPoint endpoint, Request request)
+        throws IOException
+    {
+        super.customize(endpoint, request);
+        request.setScheme(HttpSchemes.HTTPS);
+        
+        SslHttpChannelEndPoint sslHttpChannelEndpoint = (SslHttpChannelEndPoint)endpoint;
+        SSLEngine sslEngine = sslHttpChannelEndpoint.getSSLEngine();
+        
+        try
+        {
+            SSLSession sslSession = sslEngine.getSession();
+            String cipherSuite = sslSession.getCipherSuite();
+            Integer keySize;
+            X509Certificate[] certs;
+
+            CachedInfo cachedInfo = (CachedInfo) sslSession.getValue(CACHED_INFO_ATTR);
+            if (cachedInfo != null)
+            {
+                keySize = cachedInfo.getKeySize();
+                certs = cachedInfo.getCerts();
+            }
+            else
+            {
+                keySize = new Integer(ServletSSL.deduceKeyLength(cipherSuite));
+                certs = getCertChain(sslSession);
+                cachedInfo = new CachedInfo(keySize, certs);
+                sslSession.putValue(CACHED_INFO_ATTR, cachedInfo);
+            }
+
+            if (certs != null)
+                request.setAttribute("javax.servlet.request.X509Certificate", certs);
+            else if (_needClientAuth) // Sanity check
+                throw new IllegalStateException("no client auth");
+
+            request.setAttribute("javax.servlet.request.cipher_suite", cipherSuite);
+            request.setAttribute("javax.servlet.request.key_size", keySize);
+        }
+        catch (Exception e)
+        {
+            Log.warn(Log.EXCEPTION, e);
+        }
+    }
 
     /* ------------------------------------------------------------ */
     public SslSelectChannelConnector()
@@ -150,6 +273,23 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     public String getKeystoreType()
     {
         return (_keystoreType);
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getNeedClientAuth()
+    {
+        return _needClientAuth;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the value of the needClientAuth property
+     * 
+     * @param needClientAuth true iff we require client certificate authentication.
+     */
+    public void setNeedClientAuth(boolean needClientAuth)
+    {
+        _needClientAuth = needClientAuth;
     }
 
     /* ------------------------------------------------------------ */
@@ -326,7 +466,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     {
         Server server = new Server();
         SslSelectChannelConnector connector=new SslSelectChannelConnector();  
-        connector.setKeystore("etc/keystore");
+        connector.setKeystore("C:/jeprox/jetty_6.0/etc/keystore");
         connector.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
         connector.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
         
@@ -339,13 +479,38 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         
         HashUserRealm userRealm = new HashUserRealm();
         userRealm.setName("Test Realm");
-        userRealm.setConfig("./etc/realm.properties");
+        userRealm.setConfig("C:/jeprox/jetty_6.0/etc/realm.properties");
         server.setUserRealms(new UserRealm[]{userRealm});
         
-        WebAppContext.addWebApplications(server,"webapps","etc/webdefault.xml",false,false);
-        
+        WebAppContext.addWebApplications(server,"C:/jeprox/jetty_6.0/webapps","C:/jeprox/jetty_6.0/etc/webdefault.xml",false,false);
+        System.setProperty("DEBUG","true");
         server.start();
         server.join();
+    }
+    /**
+     * Simple bundle of information that is cached in the SSLSession. Stores the effective keySize
+     * and the client certificate chain.
+     */
+    private class CachedInfo
+    {
+        private X509Certificate[] _certs;
+        private Integer _keySize;
+
+        CachedInfo(Integer keySize, X509Certificate[] certs)
+        {
+            this._keySize = keySize;
+            this._certs = certs;
+        }
+
+        X509Certificate[] getCerts()
+        {
+            return _certs;
+        }
+
+        Integer getKeySize()
+        {
+            return _keySize;
+        }
     }
 
 }
