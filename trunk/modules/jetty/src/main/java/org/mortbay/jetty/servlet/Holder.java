@@ -35,6 +35,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
     protected String _className;
     protected String _displayName;
     protected Map _initParams;
+    protected boolean _extInstance;
 
     /* ---------------------------------------------------------------- */
     protected String _name;
@@ -54,7 +55,6 @@ public class Holder extends AbstractLifeCycle implements Serializable
         }
     }
 
-
     /* ------------------------------------------------------------ */
     public void doStart()
         throws Exception
@@ -63,12 +63,12 @@ public class Holder extends AbstractLifeCycle implements Serializable
             _class=Loader.loadClass(Holder.class, _className);
         if(Log.isDebugEnabled())Log.debug("Holding {}",_class);
     }
-
     
     /* ------------------------------------------------------------ */
     public void doStop()
     {
-        _class=null;
+        if (!_extInstance)
+            _class=null;
     }
     
     /* ------------------------------------------------------------ */
