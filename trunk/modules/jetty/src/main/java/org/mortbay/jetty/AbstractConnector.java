@@ -44,9 +44,9 @@ import org.mortbay.util.ajax.WaitingContinuation;
  */
 public abstract class AbstractConnector extends AbstractLifeCycle implements Connector
 {
-    private int _headerBufferSize=4*1024;
-    private int _requestBufferSize=8*1024;
-    private int _responseBufferSize=32*1024;
+    private int _headerBufferSize=8*1024;
+    private int _requestBufferSize=32*1024;
+    private int _responseBufferSize=64*1024;
 
     private String _name;
     private Server _server;
