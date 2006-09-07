@@ -58,7 +58,7 @@ public class HttpConnection
     protected Request _request;
     protected ServletInputStream _in;
 
-    protected HttpGenerator _generator;
+    protected Generator _generator;
     protected HttpFields _responseFields;
     protected Response _response;
     protected Output _out;
@@ -340,8 +340,8 @@ public class HttpConnection
                         io=_parser.parseAvailable();
                     
                     // Do we have more writting to do?
-                    if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT)) 
-                        io+=_generator.flushBuffers();
+                    if (_generator.isCommitted() && !_generator.isComplete()) 
+                        io+=_generator.flush();
                     
                     if (_endp.isBufferingOutput())
                     {
@@ -523,7 +523,7 @@ public class HttpConnection
         try
         {
             commitResponse(HttpGenerator.MORE);
-            _generator.flushBuffers();
+            _generator.flush();
         }
         catch(IOException e)
         {
@@ -532,7 +532,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    HttpGenerator getGenerator()
+    Generator getGenerator()
     {
         return _generator;
     }
@@ -739,7 +739,7 @@ public class HttpConnection
     {
         Output()
         {
-            super(HttpConnection.this._generator,_connector.getMaxIdleTime());
+            super((HttpGenerator)HttpConnection.this._generator,_connector.getMaxIdleTime());
         }
         
         /* ------------------------------------------------------------ */

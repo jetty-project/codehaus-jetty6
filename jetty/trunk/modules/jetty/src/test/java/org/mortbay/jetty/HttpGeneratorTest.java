@@ -164,7 +164,7 @@ public class HttpGeneratorTest extends TestCase
                     {
                         if (hb.isState(HttpGenerator.STATE_HEADER))
                             hb.completeHeader(fields, HttpGenerator.MORE);
-                        hb.flushBuffers();
+                        hb.flush();
                     }
                 }
                 view.setPutIndex(buf.putIndex());

@@ -49,14 +49,22 @@ public class Ajp13Connection extends HttpConnection
 {
     private boolean _sslSecure=false;
 
-    public Ajp13Connection(Connector connector, EndPoint endPoint, Server server, int bufferSize)
+    public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
+    	
         super(connector,endPoint,server);
         
         // TODO avoid the creation of HttpParsers etc.
         
-        _parser=new Ajp13Parser(_connector,_endp,new RequestHandler(),bufferSize);
-        // _generator=new Ajp13Generator(_connector,_endp,bufferSize);
+        _parser=new Ajp13Parser(_connector,_endp,new RequestHandler());
+        System.out.println("Parser: _parser=new Ajp13Parser(_connector,_endp,new RequestHandler(),bufferSize); ");
+        
+        
+        //_response = new Ajp13Response(this);
+        _generator=new Ajp13Generator(_connector,_endp,_connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
+        _generator.setSendServerVersion(server.getSendServerVersion());
+        _server = server;
+        
     }
 
     public boolean isConfidential(Request request)
@@ -71,6 +79,7 @@ public class Ajp13Connection extends HttpConnection
 
     public ServletInputStream getInputStream()
     {
+    	System.out.println(">>>>>>>>>>>input Stream is requested");
         if (_in==null)
             _in=new Ajp13Parser.Input((Ajp13Parser)_parser,_connector.getMaxIdleTime());
         return _in;
@@ -79,11 +88,12 @@ public class Ajp13Connection extends HttpConnection
     // XXX Implement
     public ServletOutputStream getOutputStream()
     {
+    	System.out.println(">>>>>>>>>>>Output Stream is requested");
         return new ServletOutputStream()
         {
             public void write(int b) throws IOException
-            {
-                System.out.write(b);
+            {   
+                ((Ajp13Generator)_generator).addContent((byte)b);
             }
         };
     }
@@ -91,10 +101,11 @@ public class Ajp13Connection extends HttpConnection
     // XXX Implement
     public PrintWriter getPrintWriter(String encoding)
     {
+    	System.out.println(">>>>>>>>>>>getPrintWriter is requested");
         return new PrintWriter(getOutputStream());
     }
 
-    
+ 
     private class RequestHandler implements Ajp13Parser.EventHandler
     {
         public void startForwardRequest() throws IOException
@@ -134,6 +145,7 @@ public class Ajp13Connection extends HttpConnection
         {
             System.err.println("AJP13 REMOTE ADDR "+addr);
 
+            
             // XXX Is the remote address used anywhere?
         }
 
@@ -179,7 +191,7 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedHeader(Buffer name, Buffer value) throws IOException
         {
-            System.err.println("AJP13 Header "+name+" = "+value);
+            System.err.println("@@@AJP13 Header "+name+" = "+value);
 
             _requestFields.add(name,value);
         }
@@ -197,6 +209,8 @@ public class Ajp13Connection extends HttpConnection
             
             handleRequest();
         }
+        
+        
 
     }
 

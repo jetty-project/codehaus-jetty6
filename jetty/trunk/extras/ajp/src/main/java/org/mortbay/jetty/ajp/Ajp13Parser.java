@@ -59,19 +59,17 @@ public class Ajp13Parser implements Parser
 
     private Buffer _buffer;
     private Buffers _buffers;
-    private int _bufferSize;
     private View _contentView=new View();
     private EndPoint _endp;
 
     private EventHandler _handler;
     private int _state=STATE_START;
 
-    public Ajp13Parser(Buffers buffers, EndPoint endPoint, EventHandler handler, int bufferSize)
+    public Ajp13Parser(Buffers buffers, EndPoint endPoint, EventHandler handler)
     {
         _buffers=buffers;
         _endp=endPoint;
         _handler=handler;
-        _bufferSize=bufferSize;
     }
 
     public boolean inContentState()
@@ -91,7 +89,7 @@ public class Ajp13Parser implements Parser
 
     public boolean isComplete()
     {
-        return _state==STATE_END;
+    	return _state==STATE_END;
     }
 
     public boolean isMoreInBuffer()
@@ -127,7 +125,7 @@ public class Ajp13Parser implements Parser
 
         if (_buffer==null)
         {
-            _buffer=_buffers.getBuffer(_bufferSize);
+            _buffer=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
             _ajpRequestPacket.setBuffer(_buffer);
         }
 
@@ -190,6 +188,7 @@ public class Ajp13Parser implements Parser
         // Parse Header
         while (_state<STATE_END&&length-->0)
         {
+        	
 
             _ajpRequestPacket.next();
 
@@ -215,8 +214,8 @@ public class Ajp13Parser implements Parser
 
                         int packetLength=_ajpRequestPacket.getInt();
 
-                        if (packetLength>_bufferSize)
-                            throw new IOException("AJP13 packet ("+packetLength+"bytes) too large for buffer ("+_bufferSize+" bytes)");
+                        if (packetLength>Ajp13Packet.MAX_PACKET_SIZE)
+                            throw new IOException("AJP13 packet ("+packetLength+"bytes) too large for buffer");
 
                         _state=STATE_PACKET_TYPE;
                     }
@@ -423,6 +422,9 @@ public class Ajp13Parser implements Parser
             }
 
         }
+        
+        // ajp header is complete handle the request here
+        _handler.headerComplete();
 
         return totalFilled;
     }
