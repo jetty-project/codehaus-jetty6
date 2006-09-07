@@ -2,6 +2,7 @@
 jetty-6.1-SNAPSHOT
     + Half refactor of HttpConnection for AJP
     + Added concept of bufferred endpoint
+    + Factored ErrorPageErrorHandler out of WebAppContext
     
 jetty-6.0.0rc4 - 5 September 2006
     + bind jetty-env.xml entries to java:comp/env
