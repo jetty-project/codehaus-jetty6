@@ -24,6 +24,7 @@ import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -36,18 +37,11 @@ import org.mortbay.log.Log;
  */
 public class Ajp13SocketConnector extends SocketConnector {
 
-
-    private int _bufferSize = Ajp13Packet.MAX_DATA_SIZE;
-
-
-    public int getBufferSize() {
-        return _bufferSize;
-    }
-
-    public void setBufferSize(int bufferSize) {
-        _bufferSize = bufferSize;
-        if (_bufferSize > Ajp13Packet.MAX_DATA_SIZE)
-            Log.warn("AJP Data buffer > " + Ajp13Packet.MAX_DATA_SIZE + ": " + bufferSize);
+    public Ajp13SocketConnector()
+    {
+        super.setHeaderBufferSize(Ajp13Packet.MAX_DATA_SIZE);
+        super.setRequestBufferSize(Ajp13Packet.MAX_DATA_SIZE);
+        super.setResponseBufferSize(Ajp13Packet.MAX_DATA_SIZE);
     }
 
     protected void doStart() throws Exception {
@@ -58,7 +52,8 @@ public class Ajp13SocketConnector extends SocketConnector {
 
     protected HttpConnection newHttpConnection(EndPoint endpoint) {
         System.err.println("New HTTP Connection "+endpoint);
-        return new Ajp13Connection(this, endpoint, getServer(), _bufferSize);
+        return new Ajp13Connection(this, endpoint, getServer());
+        
     }
 
     // Secured on a packet by packet bases not by connection
@@ -77,10 +72,14 @@ public class Ajp13SocketConnector extends SocketConnector {
         throws Exception
     {
         Server server = new Server();
+        
+        SocketConnector socketConnector = new SocketConnector();
+        socketConnector.setPort(8080);
+        
         Ajp13SocketConnector connector=new Ajp13SocketConnector(); 
         
         connector.setPort(8009);
-        server.setConnectors(new Connector[]{connector});
+        server.setConnectors(new Connector[]{socketConnector, connector});
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         handlers.setHandlers(new Handler[]{contexts,new DefaultHandler()});
@@ -97,5 +96,20 @@ public class Ajp13SocketConnector extends SocketConnector {
         server.join();
     }
 
+    public void setHeaderBufferSize(int headerBufferSize)
+    {
+        Log.debug(Log.IGNORED);
+    }
 
+    public void setRequestBufferSize(int requestBufferSize)
+    {
+        Log.debug(Log.IGNORED);
+    }
+
+    public void setResponseBufferSize(int responseBufferSize)
+    {
+        Log.debug(Log.IGNORED);
+    }
+
+    
 }
