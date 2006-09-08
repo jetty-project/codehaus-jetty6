@@ -1,11 +1,17 @@
 
-jetty-6.1-SNAPSHOT
-    + wait 500ms when redeploying context with maven-jetty-plugin to allow current requests to finish
+jetty-6.0-SNAPSHOT
+    + Plugin shutdown context before stopping it.
     + Half refactor of HttpConnection for AJP
     + Added concept of bufferred endpoint
     + Factored ErrorPageErrorHandler out of WebAppContext
     + Transforming classloader does not transform resources.
     + SocketConnector closes all connections in doStop
+
+jetty-6.0.0 - 10 September 2006
+    + SocketConnector closes all connections in doStop
+    + Conveniance builder methods for listeners and filters
+    + Transforming classloader does not transform resources.
+    + Plugin shutdown context before stopping it.
     
 jetty-6.0.0rc4 - 5 September 2006
     + bind jetty-env.xml entries to java:comp/env
