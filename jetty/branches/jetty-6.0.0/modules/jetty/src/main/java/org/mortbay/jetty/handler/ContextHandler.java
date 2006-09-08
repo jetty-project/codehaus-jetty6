@@ -358,6 +358,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             if (listener instanceof ServletRequestAttributeListener)
                 _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
         }
+    }     
+
+    /* ------------------------------------------------------------ */
+    public void addEventListener(EventListener listener) 
+    {
+        setEventListeners((EventListener[])LazyList.addToArray(getEventListeners(), listener, EventListener.class));
     }
 
     /* ------------------------------------------------------------ */
