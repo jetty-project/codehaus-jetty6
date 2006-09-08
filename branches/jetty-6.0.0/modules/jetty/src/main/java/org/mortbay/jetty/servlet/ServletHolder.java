@@ -95,6 +95,7 @@ public class ServletHolder extends Holder
         if (servlet==null || servlet instanceof SingleThreadModel)
             throw new IllegalArgumentException();
 
+        _extInstance=true;
         _servlet=servlet;
         setHeldClass(servlet.getClass());
         if (getName()==null)
@@ -281,9 +282,12 @@ public class ServletHolder extends Holder
             if (_runAs!=null && _realm!=null)
                 user=_realm.pushRole(null,_runAs);
                 
-            if (_servlet!=null)
-                _servlet.destroy();
-            _servlet=null;
+            if (!_extInstance)
+            {
+                if (_servlet!=null)
+                    _servlet.destroy();
+                _servlet=null;
+            }
             
             while (_servlets!=null && _servlets.size()>0)
             {

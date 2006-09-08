@@ -89,17 +89,21 @@ public class FilterHolder
             throw new IllegalStateException(msg);
         }
 
-        _filter=(Filter)newInstance();
+        if (_filter==null)
+            _filter=(Filter)newInstance();
         _config=new Config();
         _filter.init(_config);
     }
 
     /* ------------------------------------------------------------ */
     public void doStop()
-    {
-        if (_filter!=null)
-            _filter.destroy();
-        _filter=null;
+    {      
+        if (!_extInstance)
+        {
+            if (_filter!=null)
+                _filter.destroy();
+            _filter=null;
+        }
         _config=null;
         super.doStop();   
     }
@@ -108,6 +112,7 @@ public class FilterHolder
     public synchronized void setFilter(Filter filter)
     {
         _filter=filter;
+        _extInstance=true;
         setHeldClass(filter.getClass());
         if (getName()==null)
             setName(filter.getClass().getName());
