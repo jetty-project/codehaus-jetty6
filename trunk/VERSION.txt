@@ -4,6 +4,7 @@ jetty-6.1-SNAPSHOT
     + Added concept of bufferred endpoint
     + Factored ErrorPageErrorHandler out of WebAppContext
     + Transforming classloader does not transform resources.
+    + SocketConnector closes all connections in doStop
     
 jetty-6.0.0rc4 - 5 September 2006
     + bind jetty-env.xml entries to java:comp/env
