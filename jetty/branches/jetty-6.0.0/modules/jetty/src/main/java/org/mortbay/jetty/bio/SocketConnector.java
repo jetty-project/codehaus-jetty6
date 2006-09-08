@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
@@ -46,6 +49,7 @@ import org.mortbay.log.Log;
 public class SocketConnector extends AbstractConnector
 {
     protected ServerSocket _serverSocket;
+    protected Set _connections;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -85,7 +89,7 @@ public class SocketConnector extends AbstractConnector
             _serverSocket.close();
         _serverSocket=null;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void accept(int acceptorID)
     	throws IOException, InterruptedException
@@ -123,6 +127,26 @@ public class SocketConnector extends AbstractConnector
         if (_serverSocket==null || _serverSocket.isClosed())
             return -1;
         return _serverSocket.getLocalPort();
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    protected void doStart() throws Exception
+    {
+        _connections=new HashSet();
+        super.doStart();
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    protected void doStop() throws Exception
+    {
+        super.doStop();
+        Set set = new HashSet(_connections);
+        Iterator iter=set.iterator();
+        while(iter.hasNext())
+        {
+            Connection connection = (Connection)iter.next();
+            connection.close();
+        }
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -165,6 +189,7 @@ public class SocketConnector extends AbstractConnector
             try
             {
                 connectionOpened(_connection);
+                _connections.add(this);
                 
                 while (isStarted() && !isClosed())
                 {
@@ -204,6 +229,7 @@ public class SocketConnector extends AbstractConnector
             finally
             {
                 connectionClosed(_connection);
+                _connections.remove(this);
             }
         }
     }
