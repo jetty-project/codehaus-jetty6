@@ -134,11 +134,15 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     
     public void start () throws Exception
     {
+        this.context.setShutdown(false);
         this.context.start();
     }
      
     public void stop () throws Exception
     {
+        this.context.setShutdown(true);
+        //just wait a little while to ensure no requests are still being processed
+        Thread.currentThread().sleep(500L);
         this.context.stop();
     }
 
