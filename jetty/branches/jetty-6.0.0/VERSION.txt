@@ -10,6 +10,7 @@ jetty-6.1-SNAPSHOT
 jetty-6.0.0 - 10 September 2006 
     + SocketConnector closes all connections in doStop
     + Conveniance builder methods for listeners and filters
+    + Transforming classloader does not transform resources.
 
 jetty-6.0.0rc4 - 5 September 2006
     + bind jetty-env.xml entries to java:comp/env

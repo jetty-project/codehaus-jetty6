@@ -1,13 +1,19 @@
 package org.mortbay.jetty.webapp;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 
 import org.mortbay.io.tx.Handler;
 import org.mortbay.io.tx.Transformer;
 import org.mortbay.log.Log;
 import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.LazyList;
 
 /** Transforming Web Application ClassLoader.
  * 
@@ -75,8 +81,64 @@ public class TransformingWebAppClassLoader extends WebAppClassLoader implements 
     
     public byte[] transform(URL src, byte[] content)
     {
-        System.err.println("tx: "+src);
         return content;
     }
 
+    public URL getResource(String name)
+    {
+        URL url = super.getResource(name);
+        if (url!=null && url.getProtocol().equals(Handler.PROTOCOL))
+        {
+            try
+            {
+                url=new URL(url.getFile());
+            }
+            catch (MalformedURLException e)
+            {
+                Log.warn(e);
+            }
+        }
+        return url;
+    }
+
+    public URL findResource(String name)
+    {
+        URL url = super.findResource(name);
+        if (url!=null && url.getProtocol().equals(Handler.PROTOCOL))
+        {
+            try
+            {
+                url=new URL(url.getFile());
+            }
+            catch (MalformedURLException e)
+            {
+                Log.warn(e);
+            }
+        }
+        return url;
+    }
+
+    public Enumeration findResources(String name) throws IOException
+    {
+        Enumeration en=super.findResources(name);
+        Object list = null;
+        while(en!=null && en.hasMoreElements())
+        {
+            URL url = (URL)en.nextElement();
+            if (url!=null && url.getProtocol().equals(Handler.PROTOCOL))
+            {
+                try
+                {
+                    url=new URL(url.getFile());
+                }
+                catch (MalformedURLException e)
+                {
+                    Log.warn(e);
+                }
+            }
+            list=LazyList.add(list,url);
+        }
+        
+        return Collections.enumeration(LazyList.getList(list));
+    }
 }
