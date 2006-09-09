@@ -65,6 +65,9 @@
                 <delete failonerror="false" includeemptydirs="true">
                  <fileset dir="src/site/apt/maven-plugin" includes="**/**"/> 
                 </delete>
+                <delete failonerror="false" includeemptydirs="true">
+                 <fileset dir="${basedir}/../../javadoc" includes="**/**"/> 
+                </delete>
               </tasks>
             </configuration>
           </execution>
