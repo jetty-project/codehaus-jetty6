@@ -65,6 +65,9 @@
                 <delete failonerror="false" includeemptydirs="true">
                  <fileset dir="src/site/apt/maven-plugin" includes="**/**"/> 
                 </delete>
+                <delete failonerror="false" includeemptydirs="true">
+                 <fileset dir="${basedir}/../../javadoc" includes="**/**"/> 
+                </delete>
               </tasks>
             </configuration>
           </execution>
@@ -110,6 +113,22 @@
               </tasks>
             </configuration>
           </execution>
+          <execution>
+            <id>javadoc</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy failonerror="false" todir="../../javadoc" >
+                  <fileset dir="${basedir}/target/site/apidocs">
+                    <include name="**"/>
+                  </fileset>
+                </copy>
+              </tasks>
+	    </configuration>
+	  </execution>
         </executions>
       </plugin>
       <plugin>
