@@ -116,7 +116,7 @@
     <New class="org.mortbay.jetty.servlet.Context">
       <Arg><Ref id="contexts"/></Arg>
       <Arg>/javadoc</Arg>
-      <Set name="resourceBase"><SystemProperty name="jetty.home" default="."/>/modules/jetty/target/site/apidocs</Set>
+      <Set name="resourceBase"><SystemProperty name="jetty.home" default="."/>/javadoc/</Set>
       <Call name="addServlet">
         <Arg>org.mortbay.jetty.servlet.DefaultServlet</Arg>
         <Arg>/</Arg>
