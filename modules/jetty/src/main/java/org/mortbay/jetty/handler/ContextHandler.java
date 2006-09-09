@@ -415,7 +415,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             __context.set(_context);
             
             if (_errorHandler==null)
-                setErrorHandler(new ErrorHandler());
+                _errorHandler=new ErrorHandler();
             
             startContext();
             
@@ -438,9 +438,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     {
         super.doStart();
 
-        if (_errorHandler!=null)
-            _errorHandler.start();
-        
         // Context listeners
         if (_contextListeners != null )
         {
@@ -484,9 +481,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                     ((ServletContextListener)LazyList.get(_contextListeners, i)).contextDestroyed(event);
                 }
             }
-
-            if (_errorHandler!=null)
-                _errorHandler.stop();
         }
         finally
         {

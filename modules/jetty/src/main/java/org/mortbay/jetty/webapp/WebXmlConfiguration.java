@@ -36,7 +36,6 @@ import org.mortbay.jetty.security.DigestAuthenticator;
 import org.mortbay.jetty.security.FormAuthenticator;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.Dispatcher;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -218,8 +217,8 @@ public class WebXmlConfiguration implements Configuration
         if (getWebAppContext().getSecurityHandler() != null)
             getWebAppContext().getSecurityHandler().setConstraintMappings(null);
 
-        if (getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler)
-            ((ErrorPageErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(null);
+        if (getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler)
+            ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(null);
 
         // TODO remove classpaths from classloader
     }
@@ -239,8 +238,8 @@ public class WebXmlConfiguration implements Configuration
         _welcomeFiles = LazyList.array2List(getWebAppContext().getWelcomeFiles());
         _constraintMappings = LazyList.array2List(getWebAppContext().getSecurityHandler().getConstraintMappings());
 
-        _errorPages = getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler ?
-                        ((ErrorPageErrorHandler)getWebAppContext().getErrorHandler()).getErrorPages():null;
+        _errorPages = getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler ?
+                        ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).getErrorPages():null;
 
         Iterator iter=config.iterator();
         XmlParser.Node node=null;
@@ -275,8 +274,8 @@ public class WebXmlConfiguration implements Configuration
         getWebAppContext().setWelcomeFiles((String[])LazyList.toArray(_welcomeFiles,String.class));
         getWebAppContext().getSecurityHandler().setConstraintMappings((ConstraintMapping[])LazyList.toArray(_constraintMappings, ConstraintMapping.class));
 
-        if (_errorPages!=null && getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler)
-            ((ErrorPageErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(_errorPages);
+        if (_errorPages!=null && getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler)
+            ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(_errorPages);
 
     }
 

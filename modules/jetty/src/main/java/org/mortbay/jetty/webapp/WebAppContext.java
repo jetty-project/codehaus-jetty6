@@ -23,6 +23,9 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
@@ -38,7 +41,7 @@ import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.Log;
@@ -48,6 +51,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.TypeUtil;
 
 /* ------------------------------------------------------------ */
 /** Web Application Context Handler.
@@ -310,7 +314,7 @@ public class WebAppContext extends Context
         super(null,contextPath,SESSIONS|SECURITY);
         setContextPath(contextPath);
         setWar(webApp);
-        setErrorHandler(new ErrorPageErrorHandler());
+        setErrorHandler(new WebAppErrorHandler());
     }
     
     /* ------------------------------------------------------------ */
@@ -323,7 +327,7 @@ public class WebAppContext extends Context
     {
         super(parent,contextPath,SESSIONS|SECURITY);
         setWar(webApp);
-        setErrorHandler(new ErrorPageErrorHandler());
+        setErrorHandler(new WebAppErrorHandler());
     }
 
     /* ------------------------------------------------------------ */
@@ -337,7 +341,7 @@ public class WebAppContext extends Context
               servletHandler!=null?servletHandler:new ServletHandler(),
               null);
         
-        setErrorHandler(errorHandler!=null?errorHandler:new ErrorPageErrorHandler());
+        setErrorHandler(errorHandler!=null?errorHandler:new WebAppErrorHandler());
     }    
     
     /* ------------------------------------------------------------ */
@@ -1131,6 +1135,97 @@ public class WebAppContext extends Context
         // OK to Initialize servlet handler now
         if (_servletHandler != null && _servletHandler.isStarted())
             _servletHandler.initialize();
+    }
+    
+    public class WebAppErrorHandler extends ErrorHandler
+    {
+        Map _errorPages; // code or exception to URL
+        
+        /* ------------------------------------------------------------ */
+        /**
+         * @return Returns the errorPages.
+         */
+        public Map getErrorPages()
+        {
+            return _errorPages;
+        }
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.jetty.handler.ErrorHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+         */
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
+        {
+            if (_errorPages!=null)
+            {
+                String error_page= null;
+                Class exClass= (Class)request.getAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE);
+                
+                if (ServletException.class.equals(exClass))
+                {
+                    error_page= (String)_errorPages.get(exClass.getName());
+                    if (error_page == null)
+                    {
+                        Throwable th= (Throwable)request.getAttribute(ServletHandler.__J_S_ERROR_EXCEPTION);
+                        while (th instanceof ServletException)
+                            th= ((ServletException)th).getRootCause();
+                        if (th != null)
+                            exClass= th.getClass();
+                    }
+                }
+                
+                while (error_page == null && exClass != null )
+                {
+                    error_page= (String)_errorPages.get(exClass.getName());
+                    exClass= exClass.getSuperclass();
+                }
+                
+                if (error_page == null)
+                {
+                    Integer code=(Integer)request.getAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE);
+                    if (code!=null)
+                        error_page= (String)_errorPages.get(TypeUtil.toString(code.intValue()));
+                }
+                
+                if (error_page!=null)
+                {
+                    String old_error_page=(String)request.getAttribute(ERROR_PAGE);
+                    if (old_error_page==null || !old_error_page.equals(error_page))
+                    {
+                        request.setAttribute(ERROR_PAGE, error_page);
+                        Dispatcher dispatcher = (Dispatcher) getServletHandler().getServletContext().getRequestDispatcher(error_page);
+                        try
+                        {
+                            if(dispatcher!=null)
+                            {    
+                                dispatcher.error(request, response);
+                                return;
+                            }
+                            else
+                            {
+                                Log.warn("No error page "+error_page);
+                            }
+                        }
+                        catch (ServletException e)
+                        {
+                            Log.warn(Log.EXCEPTION, e);
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            super.handle(target, request, response, dispatch);
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @param errorPages The errorPages to set.
+         */
+        public void setErrorPages(Map errorPages)
+        {
+            _errorPages = errorPages;
+        }
     }
     
     /**

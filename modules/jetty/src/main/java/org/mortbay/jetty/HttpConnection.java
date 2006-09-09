@@ -44,26 +44,25 @@ public class HttpConnection
     private long _timeStamp=System.currentTimeMillis();
     private int _requests;
     
-    protected Connector _connector;
-    protected EndPoint _endp;
-    protected Server _server;
-    
+    private Connector _connector;
+    private EndPoint _endp;
+    private Server _server;
     private boolean _expectingContinues;  // TODO use this!
     private boolean _idle=true;
 
-    protected HttpURI _uri=new HttpURI();
+    private HttpURI _uri=new HttpURI();
 
-    protected Parser _parser;
-    protected HttpFields _requestFields;
-    protected Request _request;
-    protected ServletInputStream _in;
+    private HttpParser _parser;
+    private HttpFields _requestFields;
+    private Request _request;
+    private HttpParser.Input _in;
 
-    protected Generator _generator;
-    protected HttpFields _responseFields;
-    protected Response _response;
-    protected Output _out;
-    protected OutputWriter _writer;
-    protected PrintWriter _printWriter;
+    private HttpGenerator _generator;
+    private HttpFields _responseFields;
+    private Response _response;
+    private Output _out;
+    private OutputWriter _writer;
+    private PrintWriter _printWriter;
 
     int _include;
     
@@ -254,7 +253,7 @@ public class HttpConnection
      */
     public ServletInputStream getInputStream()
     {
-        if (_in == null) _in = new HttpParser.Input(((HttpParser)_parser),_connector.getMaxIdleTime());
+        if (_in == null) _in = new HttpParser.Input(_parser,_connector.getMaxIdleTime());
         return _in;
     }
 
@@ -336,21 +335,12 @@ public class HttpConnection
                 else
                 {
                     // If we are not ended then parse available
-                    if (!_parser.isComplete()) 
+                    if (!_parser.isState(HttpParser.STATE_END)) 
                         io=_parser.parseAvailable();
                     
                     // Do we have more writting to do?
-                    if (_generator.isCommitted() && !_generator.isComplete()) 
-                        io+=_generator.flush();
-                    
-                    if (_endp.isBufferingOutput())
-                    {
-                        if (!_endp.flush())
-                        {
-                            // TODO schedule write call back
-                            continue;
-                        }
-                    }
+                    if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT)) 
+                        io+=_generator.flushBuffers();
                     
                     if (io>0)
                         no_progress=0;
@@ -369,28 +359,36 @@ public class HttpConnection
                 _generator.sendError(e.getStatus(), e.getReason(), null, true);
                 // TODO.  Need to consider how to really flush this for non-blocking
                 
-                _parser.reset(true);
-                
+                Buffer header = _parser.getHeaderBuffer();
+                header.skip(header.length());
                 throw e;
             }
             finally
             {
                 setCurrentConnection(null);
                 
-                more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
+                Buffer header = _parser.getHeaderBuffer();
+
+                more_in_buffer = header!=null && (header.length()>0);
                 
-                if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
-                {  
+                if (_parser.isState(HttpParser.STATE_END) && _generator.isComplete())
+                {
                     _idle=true;
+                    
                     if (!_generator.isPersistent())
-                    {
-                        _parser.reset(true);
-                        more_in_buffer=false;
-                    }
+                        header.skip(header.length());
                     
                     _expectingContinues = false; // TODO do something with this!
+                    _parser.reset(!more_in_buffer); // TODO maybe only release when low on resources
+                    _requestFields.clear();
+                    _request.recycle();
                     
-                    reset(!more_in_buffer);
+                    _generator.reset(!more_in_buffer); // TODO maybe only release when low on resources
+                    _responseFields.clear();
+                    _response.recycle();
+                    
+                    _uri.clear();
+                    
                 }
                 
                 Continuation continuation = _request.getContinuation();
@@ -402,20 +400,6 @@ public class HttpConnection
         }
     }
 
-    /* ------------------------------------------------------------ */
-    protected void reset(boolean returnBuffers)
-    {
-        _parser.reset(returnBuffers); // TODO maybe only release when low on resources
-        _requestFields.clear();
-        _request.recycle();
-        
-        _generator.reset(returnBuffers); // TODO maybe only release when low on resources
-        _responseFields.clear();
-        _response.recycle();
-        
-        _uri.clear();   
-    }
-    
     /* ------------------------------------------------------------ */
     protected void handleRequest() throws IOException
     {
@@ -523,7 +507,7 @@ public class HttpConnection
         try
         {
             commitResponse(HttpGenerator.MORE);
-            _generator.flush();
+            _generator.flushBuffers();
         }
         catch(IOException e)
         {
@@ -532,7 +516,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    Generator getGenerator()
+    HttpGenerator getGenerator()
     {
         return _generator;
     }
@@ -671,7 +655,7 @@ public class HttpConnection
                             _expectingContinues = true;
                             
                             // TODO delay sending 100 response until a read is attempted.
-                            if (((HttpParser)_parser).getHeaderBuffer()==null || ((HttpParser)_parser).getHeaderBuffer().length()<2)
+                            if (_parser.getHeaderBuffer()==null || _parser.getHeaderBuffer().length()<2)
                             {
                                 _generator.setResponse(100, null);
                                 _generator.completeHeader(null, true);
@@ -690,7 +674,7 @@ public class HttpConnection
             }
 
             // Either handle now or wait for first content
-            if (((HttpParser)_parser).getContentLength()<=0 && !((HttpParser)_parser).isChunking())
+            if (_parser.getContentLength()<=0 && !_parser.isChunking())
                 handleRequest();
             else
                 _delayedHandling=true;
@@ -739,7 +723,7 @@ public class HttpConnection
     {
         Output()
         {
-            super((HttpGenerator)HttpConnection.this._generator,_connector.getMaxIdleTime());
+            super(HttpConnection.this._generator,_connector.getMaxIdleTime());
         }
         
         /* ------------------------------------------------------------ */
