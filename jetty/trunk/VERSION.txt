@@ -1,5 +1,6 @@
 
 jetty-6.0-SNAPSHOT
+    + (re)make JAAS classes available to webapp classloader
     + CGI example in test webapp
     + Plugin shutdown context before stopping it.
     + Half refactor of HttpConnection for AJP
