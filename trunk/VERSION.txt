@@ -1,5 +1,6 @@
 
 jetty-6.0-SNAPSHOT
+    + CGI example in test webapp
     + Plugin shutdown context before stopping it.
     + Half refactor of HttpConnection for AJP
     + Added concept of bufferred endpoint
