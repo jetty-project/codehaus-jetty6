@@ -26,5 +26,5 @@ svn checkout http://svn.codehaus.org/jetty/jetty/trunk jetty
   Everyone can access the Subversion repository via HTTP, but Committers must checkout the Subversion repository via HTTPS:
 
 +---------------------
-  svn checkout https://svn.codehaus.org/home/projects/jetty/jetty/trunk jetty
+  svn checkout https://svn.codehaus.org/jetty/jetty/trunk jetty
 +---------------------
