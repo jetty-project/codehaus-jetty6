@@ -15,6 +15,7 @@
 package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import org.mortbay.io.Buffer;
@@ -23,31 +24,82 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Generator;
 import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpFields.Field;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.StringUtil;
 
 /**
- * @author  lagdeppa (at) exist.com
+ * @author lagdeppa (at) exist.com
  * @author Greg Wilkins
  */
 public class Ajp13Generator implements Generator
 {
-    private Buffers _buffers;
+    private static HashMap __headerHash=new HashMap();
+
+    static
+    {
+        byte[] xA001=
+        { (byte)0xA0, (byte)0x01 };
+        byte[] xA002=
+        { (byte)0xA0, (byte)0x02 };
+        byte[] xA003=
+        { (byte)0xA0, (byte)0x03 };
+        byte[] xA004=
+        { (byte)0xA0, (byte)0x04 };
+        byte[] xA005=
+        { (byte)0xA0, (byte)0x05 };
+        byte[] xA006=
+        { (byte)0xA0, (byte)0x06 };
+        byte[] xA007=
+        { (byte)0xA0, (byte)0x07 };
+        byte[] xA008=
+        { (byte)0xA0, (byte)0x08 };
+        byte[] xA009=
+        { (byte)0xA0, (byte)0x09 };
+        byte[] xA00A=
+        { (byte)0xA0, (byte)0x0A };
+        byte[] xA00B=
+        { (byte)0xA0, (byte)0x0B };
+        __headerHash.put("Content-Type",xA001);
+        __headerHash.put("Content-Language",xA002);
+        __headerHash.put("Content-Length",xA003);
+        __headerHash.put("Date",xA004);
+        __headerHash.put("Last-Modified",xA005);
+        __headerHash.put("Location",xA006);
+        __headerHash.put("Set-Cookie",xA007);
+        __headerHash.put("Set-Cookie2",xA008);
+        __headerHash.put("Servlet-Engine",xA009);
+        __headerHash.put("Status",xA00A);
+        __headerHash.put("WWW-Authenticate",xA00B);
+
+    }
+
+    private boolean _allContentAdded=false;
+
     private Buffer _buffer;
-    private boolean _done=false;
+
+    private Buffers _buffers;
+
+    private boolean _content=false;
+
     private EndPoint _endp;
+
+    private boolean _headerDone=false;
+
     private int _status;
 
     private String _statusMsg;
 
     public Ajp13Generator(Buffers buffers, EndPoint io, int headerBufferSize, int contentBufferSize)
     {
-        this._status=0;
-        this._statusMsg=null;
-        this._buffers=buffers;
-        this._endp=io;
+        _status=0;
+        _statusMsg=null;
+        _buffers=buffers;
+        _endp=io;
 
-        System.out.println(">>>>>> AJP Generator is instantiated buffers ");
+        _buffer=null;
+
+        _headerDone=false;
+        _allContentAdded=false;
+        _content=false;
+
     }
 
     public void addContent(Buffer content, boolean last) throws IOException
@@ -58,215 +110,28 @@ public class Ajp13Generator implements Generator
 
     public boolean addContent(byte b) throws IOException
     {
-        System.out.write(b);
+        initContent();
+
+        if (_buffer.length()>=_buffer.capacity())
+        {
+            flushContent();
+            initContent();
+        }
+
+        _buffer.put(b);
         return true;
-    }
-
-    public void complete() throws IOException
-    {
-        _done=true;
-        // TODO Auto-generated method stub
-        // System.out.println("AJPGenerator: complete();");
-        // super.complete();
-    }
-
-    public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
-    {
-        // TODO Auto-generated method stub
-        System.out.println("AJPGenerator: completeHeader(fields, allContentAdded);");
-
-        System.out.println(">>>allContentAdded>>>"+allContentAdded);
-        
-        if (_buffer==null)
-            _buffer=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);  // TODO This is a temp buffer!  but with NIO it may not all be flushed!
-        
-        
-        _buffer.put((byte)0x4);
-        addInt(this._status);
-        addString(_statusMsg==null?"unknown":_statusMsg);
-
-        int field_index=_buffer.putIndex();
-        addInt(0); // temp value
-
-        Iterator i=fields.getFields();
-        int num_fields=0;
-
-        while (i.hasNext())
-        {
-            num_fields++;
-            Field f=(Field)i.next();
-
-            if (f.getName().equalsIgnoreCase("Content-Type"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x01);
-            }
-            else if (f.getName().equalsIgnoreCase("Content-Language"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x02);
-            }
-            else if (f.getName().equalsIgnoreCase("Content-Length"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x03);
-            }
-            else if (f.getName().equalsIgnoreCase("Date"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x04);
-            }
-            else if (f.getName().equalsIgnoreCase("Last-Modified"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x05);
-            }
-            else if (f.getName().equalsIgnoreCase("Location"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x06);
-            }
-            else if (f.getName().equalsIgnoreCase("Set-Cookie"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x07);
-            }
-            else if (f.getName().equalsIgnoreCase("Set-Cookie2"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x08);
-            }
-            else if (f.getName().equalsIgnoreCase("Servlet-Engine"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x09);
-            }
-            else if (f.getName().equalsIgnoreCase("Status"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x0A);
-            }
-            else if (f.getName().equalsIgnoreCase("WWW-Authenticate"))
-            {
-                _buffer.put((byte)0xA0);
-                _buffer.put((byte)0x0B);
-            }
-            else
-            {
-                addString(f.getName());
-            }
-            addString(f.getValue());
-
-            System.out.println(">>>Field>>>"+f.getName());
-            System.out.println(">>>Value>>>"+f.getValue());
-            System.out.println(">>>Ordinal>>>"+f.getValueOrdinal());
-        }
-        int tmp = _buffer.putIndex();
-        _buffer.setPutIndex(field_index);
-        addInt(num_fields);
-        _buffer.setPutIndex(tmp);
-        
-        _endp.flush(_buffer);
-        _endp.close();
-
-    }
-
-    public long flush() throws IOException
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public int getContentBufferSize()
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public long getContentWritten()
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public void increaseContentBufferSize(int size)
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public boolean isCommitted()
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean isComplete()
-    {
-        return _done;
-    }
-
-    public boolean isPersistent()
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public void reset(boolean returnBuffers)
-    {
-        // TODO Auto-generated method stub
-        
-        if(returnBuffers && _buffer!=null)
-        {
-            _buffers.returnBuffer(_buffer);
-            _buffer=null;
-        }
-        
-    }
-
-    public void resetBuffer()
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void sendError(int code, String reason, String content, boolean close) throws IOException
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void setHead(boolean head)
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void setResponse(int status, String reason)
-    {
-        // TODO Implement the code here
-        System.out.println("AJPGenerator: setResponse(status, reason)"+status+", "+reason);
-
-        this._status=status;
-        this._statusMsg=reason;
-    }
-
-    public void setSendServerVersion(boolean sendServerVersion)
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void setVersion(int version)
-    {
-        // TODO Auto-generated method stub
-        
     }
 
     public void addInt(int i)
     {
         _buffer.put((byte)((i>>8)&0xFF));
         _buffer.put((byte)(i&0xFF));
+    }
+
+    public void addInt(int startIndex, int i)
+    {
+        _buffer.poke(startIndex,(byte)((i>>8)&0xFF));
+        _buffer.poke((startIndex+1),(byte)(i&0xFF));
     }
 
     public void addString(String str)
@@ -277,12 +142,252 @@ public class Ajp13Generator implements Generator
             return;
         }
 
-        // TODO - need to use a writer to convert, to avoid this hacky conversion and temp buffer
-        byte[] b = str.getBytes();
-        
+        // TODO - need to use a writer to convert, to avoid this hacky
+        // conversion and temp buffer
+        byte[] b=str.getBytes();
+
         addInt(b.length);
-        
+
         _buffer.put(b);
         _buffer.put((byte)0);
     }
+
+    public void complete() throws IOException
+    {
+        flushContent();
+
+        // send closing packet if all contents are added
+        if (_allContentAdded)
+        {
+            reset(true);
+            if (_buffer==null)
+                _buffer=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+
+            addPacketHeader();
+
+            // send closing packet
+            byte[] endByte=
+            { 5, 1 };
+            _buffer.put(endByte);
+
+            addPacketFooter();
+
+            _endp.flush(_buffer);
+            reset(true);
+
+            _endp.close();
+        }
+
+    }
+
+    public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
+    {
+
+        flushContent();
+
+        _allContentAdded=allContentAdded;
+        reset(true);
+        if (_buffer==null)
+            _buffer=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+
+        addPacketHeader();
+
+        _buffer.put((byte)0x4);
+        addInt(_status);
+
+        addString(_statusMsg==null?"status is unknown or no message definetion given...":_statusMsg);
+
+        int field_index=_buffer.putIndex();
+        // allocate 2 bytes for number of headers
+        addInt(0);
+
+        System.out.println("********* Start of Response Headers **********");
+        Iterator i=fields.getFields();
+        int num_fields=0;
+
+        while (i.hasNext())
+        {
+            num_fields++;
+            Field f=(Field)i.next();
+
+            byte[] codes=(byte[])__headerHash.get(f.getName());
+            if (codes!=null)
+            {
+                System.out.println(" >>>>code>>>"+codes[1]);
+                _buffer.put(codes);
+            }
+            else
+            {
+                addString(f.getName());
+            }
+            addString(f.getValue());
+
+            System.out.println(">>>Field>>>"+f.getName());
+            System.out.println(">>>Value>>>"+f.getValue());
+
+        }
+
+        System.out.println("********* Start of Response Headers **********");
+
+        // insert the number of headers
+        int tmp=_buffer.putIndex();
+        _buffer.setPutIndex(field_index);
+        addInt(num_fields);
+        _buffer.setPutIndex(tmp);
+
+        addPacketFooter();
+        _endp.flush(_buffer);
+        reset(true);
+
+    }
+
+    public long flush() throws IOException
+    {
+        System.out.println("Ajp13: flush()");
+        return 0;
+    }
+
+    public int getContentBufferSize()
+    {
+        System.out.println("Ajp13: getContentBufferSize()");
+        return 0;
+    }
+
+    public long getContentWritten()
+    {
+        System.out.println("Ajp13: getContentWritten()");
+        return 0;
+    }
+
+    public void increaseContentBufferSize(int size)
+    {
+        System.out.println("Ajp13: increaseContentBufferSize()");
+        // TODO Auto-generated method stub
+
+    }
+
+    public boolean isCommitted()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isComplete()
+    {
+        return _headerDone;
+    }
+
+    public boolean isPersistent()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public void reset(boolean returnBuffers)
+    {
+
+        if (returnBuffers&&_buffer!=null)
+        {
+            _buffers.returnBuffer(_buffer);
+            _buffer=null;
+        }
+
+    }
+
+    public void resetBuffer()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void sendError(int code, String reason, String content, boolean close) throws IOException
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void setHead(boolean head)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void setResponse(int status, String reason)
+    {
+        System.out.println("AJPGenerator: setResponse(status, reason)"+status+", "+reason);
+
+        this._status=status;
+        this._statusMsg=reason;
+    }
+
+    public void setSendServerVersion(boolean sendServerVersion)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void setVersion(int version)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    private void addPacketFooter()
+    {
+        // get the payload size ( - 4 bytes for the ajp header) excluding the
+        // ajp header
+        int payloadSize=_buffer.length()-4;
+        // insert the total packet size on 2nd and 3rd byte that was previously
+        // allocated
+        addInt(2,payloadSize);
+
+    }
+
+    private void addPacketHeader()
+    {
+        // AJP Header first 2 Response Pockets must contain ascii value AB
+        _buffer.put((byte)'A');
+        _buffer.put((byte)'B');
+        // allocate 2 bytes for AJP Packet size, this will be on byte numbers
+        // 2,3
+        addInt(0);
+
+    }
+
+    private void flushContent() throws IOException
+    {
+        if (_content)
+        {
+            _content=false;
+            // get the content length
+            // -7 bytes
+            // 4 bytes for the ajp header
+            // 1 byte for response type
+            // 2 bytes for the response size
+            int len=_buffer.length()-7;
+
+            // insert the content length in the 5th, and 6th byte
+            addInt(5,len);
+
+            addPacketFooter();
+            _endp.flush(_buffer);
+            reset(true);
+        }
+
+    }
+
+    private void initContent() throws IOException
+    {
+        if (_buffer==null)
+        {
+            _buffer=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+            _content=true;
+            addPacketHeader();
+            _buffer.put((byte)3);
+            addInt(0);
+
+        }
+
+    }
+
 }
