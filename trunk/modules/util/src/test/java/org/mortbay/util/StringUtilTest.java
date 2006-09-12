@@ -51,60 +51,60 @@ public class StringUtilTest extends TestCase
 
     public void testAsciiToLowerCase()
     {
-        String lc="ábc def 1ó3";
-        assertEquals(StringUtil.asciiToLowerCase("áBc DeF 1ó3"), lc);
+        String lc="ï¿½bc def 1ï¿½3";
+        assertEquals(StringUtil.asciiToLowerCase("ï¿½Bc DeF 1ï¿½3"), lc);
         assertTrue(StringUtil.asciiToLowerCase(lc)==lc);
     }
 
     public void testStartsWithIgnoreCase()
     {
         
-        assertTrue(StringUtil.startsWithIgnoreCase("ábádefg", "ábá"));
-        assertTrue(StringUtil.startsWithIgnoreCase("ábcdefg", "ábc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("ábcdefg", "áBc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("áBcdefg", "ábc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("áBcdefg", "áBc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("ábcdefg", ""));
-        assertTrue(StringUtil.startsWithIgnoreCase("ábcdefg", null));
-        assertTrue(StringUtil.startsWithIgnoreCase("ábcdefg", "ábcdefg"));
+        assertTrue(StringUtil.startsWithIgnoreCase("ï¿½bï¿½defg", "ï¿½bï¿½"));
+        assertTrue(StringUtil.startsWithIgnoreCase("ï¿½bcdefg", "ï¿½bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("ï¿½bcdefg", "ï¿½Bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("ï¿½Bcdefg", "ï¿½bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("ï¿½Bcdefg", "ï¿½Bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("ï¿½bcdefg", ""));
+        assertTrue(StringUtil.startsWithIgnoreCase("ï¿½bcdefg", null));
+        assertTrue(StringUtil.startsWithIgnoreCase("ï¿½bcdefg", "ï¿½bcdefg"));
 
         assertFalse(StringUtil.startsWithIgnoreCase(null, "xyz")); 
-        assertFalse(StringUtil.startsWithIgnoreCase("ábcdefg", "xyz"));
-        assertFalse(StringUtil.startsWithIgnoreCase("á", "xyz")); 
+        assertFalse(StringUtil.startsWithIgnoreCase("ï¿½bcdefg", "xyz"));
+        assertFalse(StringUtil.startsWithIgnoreCase("ï¿½", "xyz")); 
     }
 
     public void testEndsWithIgnoreCase()
     {
-        assertTrue(StringUtil.endsWithIgnoreCase("ábcdáfá", "áfá"));
-        assertTrue(StringUtil.endsWithIgnoreCase("ábcdefg", "efg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("ábcdefg", "eFg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("ábcdeFg", "efg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("ábcdeFg", "eFg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("ábcdefg", ""));
-        assertTrue(StringUtil.endsWithIgnoreCase("ábcdefg", null));
-        assertTrue(StringUtil.endsWithIgnoreCase("ábcdefg", "ábcdefg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("ï¿½bcdï¿½fï¿½", "ï¿½fï¿½"));
+        assertTrue(StringUtil.endsWithIgnoreCase("ï¿½bcdefg", "efg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("ï¿½bcdefg", "eFg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("ï¿½bcdeFg", "efg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("ï¿½bcdeFg", "eFg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("ï¿½bcdefg", ""));
+        assertTrue(StringUtil.endsWithIgnoreCase("ï¿½bcdefg", null));
+        assertTrue(StringUtil.endsWithIgnoreCase("ï¿½bcdefg", "ï¿½bcdefg"));
 
         assertFalse(StringUtil.endsWithIgnoreCase(null, "xyz")); 
-        assertFalse(StringUtil.endsWithIgnoreCase("ábcdefg", "xyz"));
-        assertFalse(StringUtil.endsWithIgnoreCase("á", "xyz"));  
+        assertFalse(StringUtil.endsWithIgnoreCase("ï¿½bcdefg", "xyz"));
+        assertFalse(StringUtil.endsWithIgnoreCase("ï¿½", "xyz"));  
     }
 
     public void testIndexFrom()
     {
-        assertEquals(StringUtil.indexFrom("ábcd", "xyz"),-1);
-        assertEquals(StringUtil.indexFrom("ábcd", "ábcz"),0);
-        assertEquals(StringUtil.indexFrom("ábcd", "bcz"),1);
-        assertEquals(StringUtil.indexFrom("ábcd", "dxy"),3);
+        assertEquals(StringUtil.indexFrom("ï¿½bcd", "xyz"),-1);
+        assertEquals(StringUtil.indexFrom("ï¿½bcd", "ï¿½bcz"),0);
+        assertEquals(StringUtil.indexFrom("ï¿½bcd", "bcz"),1);
+        assertEquals(StringUtil.indexFrom("ï¿½bcd", "dxy"),3);
     }
 
     public void testReplace()
     {
-        String s="ábc ábc ábc";
-        assertEquals(StringUtil.replace(s, "ábc", "xyz"),"xyz xyz xyz");
+        String s="ï¿½bc ï¿½bc ï¿½bc";
+        assertEquals(StringUtil.replace(s, "ï¿½bc", "xyz"),"xyz xyz xyz");
         assertTrue(StringUtil.replace(s,"xyz","pqy")==s);
         
-        s=" ábc ";
-        assertEquals(StringUtil.replace(s, "ábc", "xyz")," xyz ");
+        s=" ï¿½bc ";
+        assertEquals(StringUtil.replace(s, "ï¿½bc", "xyz")," xyz ");
         
     }
 
@@ -131,7 +131,7 @@ public class StringUtilTest extends TestCase
      */
     public void testEqualsStringcharArrayintint()
     {
-        assertTrue(StringUtil.equals("ábc", new char[] {'x','á','b','c','z'},1,3));
+        assertTrue(StringUtil.equals("ï¿½bc", new char[] {'x','ï¿½','b','c','z'},1,3));
         assertFalse(StringUtil.equals("axc", new char[] {'x','a','b','c','z'},1,3));
     }
 
@@ -146,5 +146,47 @@ public class StringUtilTest extends TestCase
         StringUtil.append(buf, (byte)-16, 16);
         assertEquals("ab0c10fff0",buf.toString());
         
+    }
+    
+    public static void main(String[] arg) throws Exception
+    {
+        String string = "Now \u0690xxxxxxxx";
+        System.err.println(string);
+        byte[] bytes=string.getBytes("UTF-8");
+        System.err.println(new String(bytes));
+        System.err.println(bytes.length);
+        long calc=0;
+        Utf8StringBuffer strbuf = new Utf8StringBuffer(bytes.length);
+        for (int i=0;i<10;i++)
+        {
+            long s1=System.currentTimeMillis();
+            for (int j=1000000; j-->0;)
+            {
+                calc+=new String(bytes,0,bytes.length,"UTF8").hashCode();
+            }
+            long s2=System.currentTimeMillis();
+            for (int j=1000000; j-->0;)
+            {
+                calc+=StringUtil.toUTF8String(bytes,0,bytes.length).hashCode();
+            }
+            long s3=System.currentTimeMillis();
+            for (int j=1000000; j-->0;)
+            {
+                Utf8StringBuffer buffer = new Utf8StringBuffer(bytes.length);
+                buffer.append(bytes,0,bytes.length);
+                calc+=buffer.toString().hashCode();
+            }
+            long s4=System.currentTimeMillis();
+            for (int j=1000000; j-->0;)
+            {
+                strbuf.reset();
+                strbuf.append(bytes,0,bytes.length);
+                calc+=strbuf.toString().hashCode();
+            }
+            long s5=System.currentTimeMillis();
+            
+            System.err.println((s2-s1)+", "+(s3-s2)+", "+(s4-s3)+", "+(s5-s4));
+        }
+        System.err.println(calc);
     }
 }

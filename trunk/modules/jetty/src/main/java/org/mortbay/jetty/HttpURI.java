@@ -429,7 +429,7 @@ public class HttpURI
         if (_query==_fragment)
             return;
        
-        if (encoding==null || encoding.equalsIgnoreCase(StringUtil.__UTF8))
+        if (StringUtil.isUTF8(encoding))
             UrlEncoded.decodeUtf8To(_raw,_query+1,_fragment-_query-1,parameters);
         else
             UrlEncoded.decodeTo(StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding),parameters,encoding);
