@@ -516,7 +516,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         Thread current_thread=null;
         
         Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        if(_shutdown || (dispatch==REQUEST && base_request.isHandled()))
+        if( !isStarted() || _shutdown || (dispatch==REQUEST && base_request.isHandled()))
             return;
         
         old_context=base_request.getContext();
