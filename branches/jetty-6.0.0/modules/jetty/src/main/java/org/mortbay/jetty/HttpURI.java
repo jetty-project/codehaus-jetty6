@@ -17,6 +17,7 @@ package org.mortbay.jetty;
 import java.io.UnsupportedEncodingException;
 
 import org.mortbay.util.MultiMap;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
@@ -67,8 +68,7 @@ public class HttpURI
     public HttpURI()
     {
         
-    }
-    
+    } 
     
     /* ------------------------------------------------------------ */
     /**
@@ -97,7 +97,6 @@ public class HttpURI
         parse2(b,0,b.length);
         _rawString=raw;
     }
-
     
     public void parse(byte[] raw,int offset, int length)
     {
@@ -386,7 +385,7 @@ public class HttpURI
     {
         if (_path==_param)
             return null;
-        return new String(_raw,_path,_param-_path);
+        return StringUtil.toString(_raw,_path,_param-_path,URIUtil.__CHARSET);
     }
     
     public String getDecodedPath()
@@ -400,21 +399,21 @@ public class HttpURI
     {
         if (_path==_query)
             return null;
-        return new String(_raw,_path,_query-_path);
+        return StringUtil.toString(_raw,_path,_query-_path,URIUtil.__CHARSET);
     }
     
     public String getParam()
     {
         if (_param==_query)
             return null;
-        return new String(_raw,_param+1,_query-_param-1);
+        return StringUtil.toString(_raw,_param+1,_query-_param-1,URIUtil.__CHARSET);
     }
     
     public String getQuery()
     {
         if (_query==_fragment)
             return null;
-        return new String(_raw,_query+1,_fragment-_query-1);
+        return StringUtil.toString(_raw,_query+1,_fragment-_query-1,URIUtil.__CHARSET);
     }
     
     public String getFragment()
