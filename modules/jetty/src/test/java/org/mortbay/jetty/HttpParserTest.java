@@ -14,12 +14,15 @@
 
 package org.mortbay.jetty;
 
+import java.io.UnsupportedEncodingException;
+
 import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.SimpleBuffers;
 import org.mortbay.io.bio.StringEndPoint;
+import org.mortbay.util.StringUtil;
 
 /**
  * @author gregw
@@ -111,6 +114,40 @@ public class HttpParserTest extends TestCase
         assertEquals("POST", f0);
         assertEquals("/222", f1);
         assertEquals(null, f2);
+        assertEquals(-1, h);
+    }
+
+    public void testLineParse3()
+        throws Exception
+    {
+        StringEndPoint io=new StringEndPoint();
+        io.setInput("POST /foó HTTP/1.0\015\012" + "\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
+
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffers,io, handler, buffer.capacity(), 0);
+        parser.parse();
+        assertEquals("POST", f0);
+        assertEquals("/foó", f1);
+        assertEquals("HTTP/1.0", f2);
+        assertEquals(-1, h);
+    }
+
+    public void testLineParse4()
+        throws Exception
+    {
+        StringEndPoint io=new StringEndPoint();
+        io.setInput("POST /foo?param=ó HTTP/1.0\015\012" + "\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
+
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffers,io, handler, buffer.capacity(), 0);
+        parser.parse();
+        assertEquals("POST", f0);
+        assertEquals("/foo?param=ó", f1);
+        assertEquals("HTTP/1.0", f2);
         assertEquals(-1, h);
     }
 
@@ -346,17 +383,25 @@ public class HttpParserTest extends TestCase
 
         public void startRequest(Buffer tok0, Buffer tok1, Buffer tok2)
         {
-            h= -1;
-            hdr= new String[9];
-            val= new String[9];
-            f0= tok0.toString();
-            f1= tok1.toString();
-            if (tok2!=null)
-                f2= tok2.toString();
-            else
-                f2=null;
-            
-            fields=new HttpFields();
+            try
+            {
+                h= -1;
+                hdr= new String[9];
+                val= new String[9];
+                f0= tok0.toString();
+                f1=new String(tok1.array(),tok1.getIndex(),tok1.length(),StringUtil.__ISO_8859_1);
+                if (tok2!=null)
+                    f2= tok2.toString();
+                else
+                    f2=null;
+
+                fields=new HttpFields();
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
         public void parsedHeader(Buffer name, Buffer value)
