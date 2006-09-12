@@ -301,9 +301,25 @@ public class StringUtil
     /* ------------------------------------------------------------ */
     public static String toUTF8String(byte[] b,int offset,int length)
     {
+        // TODO - make this more effecient!
         try
         {
             return new String(b,offset,length,__UTF8);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public static String toString(byte[] b,int offset,int length,String charset)
+    {
+        // TODO - make this more effecient!
+        try
+        {
+            return new String(b,offset,length,charset);
         }
         catch (UnsupportedEncodingException e)
         {

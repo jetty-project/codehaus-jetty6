@@ -9,6 +9,7 @@ jetty-6.0-SNAPSHOT
     + Factored ErrorPageErrorHandler out of WebAppContext
     + Transforming classloader does not transform resources.
     + SocketConnector closes all connections in doStop
+    + Improved charset handling in URLs
 
 jetty-6.0.0 - 10 September 2006
     + SocketConnector closes all connections in doStop

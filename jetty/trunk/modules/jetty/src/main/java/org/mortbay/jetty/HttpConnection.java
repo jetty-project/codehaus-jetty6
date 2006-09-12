@@ -590,10 +590,19 @@ public class HttpConnection
             {
                 _uri.parse(uri.array(), uri.getIndex(), uri.length());
                 _request.setUri(_uri);
-                
-                _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE.getOrdinal(version);
-                if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
-                _request.setProtocol(version.toString());
+
+                if (version==null)
+                {
+                    _request.setProtocol(HttpVersions.HTTP_0_9);
+                    _version=HttpVersions.HTTP_0_9_ORDINAL;
+                }
+                else
+                {
+                    version= HttpVersions.CACHE.get(version);
+                    _version = HttpVersions.CACHE.getOrdinal(version);
+                    if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
+                    _request.setProtocol(version.toString());
+                }
 
                 _head = method == HttpMethods.HEAD_BUFFER; // depends on method being decached.
             }
