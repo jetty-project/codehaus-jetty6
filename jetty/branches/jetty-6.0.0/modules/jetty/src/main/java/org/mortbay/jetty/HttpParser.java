@@ -305,7 +305,7 @@ public class HttpParser implements HttpTokens
                 case STATE_START:
                     _contentLength=UNKNOWN_CONTENT;
                     _cached=null;
-                    if (ch > SPACE)
+                    if (ch > HttpTokens.SPACE || ch<0)
                     {
                         _buffer.mark();
                         _state=STATE_FIELD0;
@@ -319,14 +319,14 @@ public class HttpParser implements HttpTokens
                         _state=STATE_SPACE1;
                         continue;
                     }
-                    else if (ch < SPACE)
+                    else if (ch < HttpTokens.SPACE && ch>=0)
                     {
                         throw new HttpException(HttpServletResponse.SC_BAD_REQUEST);
                     }
                     break;
 
                 case STATE_SPACE1:
-                    if (ch > SPACE)
+                    if (ch > HttpTokens.SPACE || ch<0)
                     {
                         _buffer.mark();
                         _state=STATE_FIELD1;
@@ -345,7 +345,7 @@ public class HttpParser implements HttpTokens
                         _state=STATE_SPACE2;
                         continue;
                     }
-                    else if (ch < SPACE)
+                    else if (ch < HttpTokens.SPACE && ch>=0)
                     {
                         // HTTP/0.9
                         _handler.startRequest(HttpMethods.CACHE.lookup(_tok0), _buffer
@@ -358,7 +358,7 @@ public class HttpParser implements HttpTokens
                     break;
 
                 case STATE_SPACE2:
-                    if (ch > SPACE)
+                    if (ch > HttpTokens.SPACE || ch<0)
                     {
                         _buffer.mark();
                         _state=STATE_FIELD2;
