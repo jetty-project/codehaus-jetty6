@@ -416,6 +416,13 @@ public class HttpURI
         return StringUtil.toString(_raw,_query+1,_fragment-_query-1,URIUtil.__CHARSET);
     }
     
+    public String getQuery(String encoding)
+    {
+        if (_query==_fragment)
+            return null;
+        return StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding);
+    }
+    
     public String getFragment()
     {
         if (_fragment==_end)
