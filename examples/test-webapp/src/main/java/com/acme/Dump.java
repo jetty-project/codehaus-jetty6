@@ -59,6 +59,8 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+        request.setCharacterEncoding("utf8");
+        
         if (request.getParameter("empty")!=null)
         {
             response.setStatus(200);
@@ -179,7 +181,6 @@ public class Dump extends HttpServlet
         if (buffer != null && buffer.length() > 0)
             response.setBufferSize(Integer.parseInt(buffer));
 
-        request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html");
 
