@@ -69,6 +69,7 @@
         <version>${project.version}</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
+          <contextPath>/test</contextPath>
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
               <name>Test Realm</name>
