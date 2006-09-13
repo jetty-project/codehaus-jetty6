@@ -20,18 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-
-import com.sun.enterprise.web.connector.grizzly.ByteBufferInputStream;
 import com.sun.enterprise.web.connector.grizzly.Handler;
 import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
 import com.sun.enterprise.web.connector.grizzly.TaskBase;
 import com.sun.enterprise.web.connector.grizzly.TaskEvent;
-import com.sun.enterprise.web.connector.grizzly.OutputWriter;
-import com.sun.enterprise.web.connector.grizzly.SelectorFactory;
-import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
 
@@ -46,6 +39,9 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
     private boolean keepAlive = true;
     
     private GrizzlyEndPoint endPoint;
+    
+    private GrizzlySocketChannel socketChannel;
+    
 
     public void initialize()
     {
@@ -56,26 +52,52 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         } catch (IOException ex){
             throw new RuntimeException(ex);
         }
+        
+        socketChannel = new GrizzlySocketChannel();
     }
     
 
     public boolean process(AbstractSelectableChannel channel) throws Exception
     {
-        endPoint.setChannel((ByteChannel)channel);
-        // We are already using a Grizzly WorkerThread, so no need to 
-        // invoke Jetty Thread Pool
-        endPoint.handle();
+
+        boolean blockReading = 
+            ((JettySelectorThread)selectorThread).isUseTemporarySelector();
         
-        // How to find the keepAlive flag?
+        if (blockReading) {   
+            socketChannel.setSelectionKey(key);
+            socketChannel.setSocketChannel((SocketChannel)channel);        
+            endPoint.setChannel(socketChannel);
+
+            while ( continueBlocking() ) {
+                // We are already using a Grizzly WorkerThread, so no need to 
+                // invoke Jetty Thread Pool
+                endPoint.handle();
+            }
+
+            socketChannel.setSelectionKey(null);
+            socketChannel.setSocketChannel(null);
+        } else {
+            endPoint.setChannel((ByteChannel)channel);
+            endPoint.handle();
+        }
+        
+        return endPoint.keepAlive();
+    }    
+
+    private boolean continueBlocking(){
+        return !endPoint.isComplete() && endPoint.isOpen();
+    }
+    
+    public boolean isKeepAlive() 
+    {
         return endPoint.keepAlive();
     }    
     
-    
     public boolean isError()
     {
-        return false;
+        return !endPoint.isComplete() && endPoint.isOpen();
     }
-    
+   
 
     // ---------------------------------------------------- Not Used for now ---//
 
@@ -171,10 +193,6 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         return -1;
     }
 
-    public boolean isKeepAlive() 
-    {
-        return keepAlive;
-    }
 
     // --------------------------------------------------- Grizzly ARP ------//
     
