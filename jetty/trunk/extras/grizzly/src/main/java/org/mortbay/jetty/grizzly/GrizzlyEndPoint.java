@@ -105,92 +105,10 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         //System.err.println("blockWritable()");
         try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
     }
-
-    public int fill(Buffer buffer) throws IOException
-    {
-        int len= super.fill(buffer);
-        return len;
-    }
-
-    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
-    {
-        int len=0;
-        
-        // TODO This should be done in a gather operation.
-        
-        
-        if (header!=null && header.hasContent())
-            len+=flush(header);
-        
-        if (header==null || !header.hasContent())
-        {
-            if (buffer!=null && buffer.hasContent())
-                len+=flush(buffer);
-        }
-
-        if (buffer==null || !buffer.hasContent())
-        {
-            if (trailer!=null && trailer.hasContent())
-                len+=flush(trailer);
-        }
-        
-        return len;
-        
-    }
-    
     
     public boolean keepAlive()
     {
         return _connection.getGenerator().isPersistent();
-    }
-
-
-    /* (non-Javadoc)
-     * @see org.mortbay.io.EndPoint#flush(org.mortbay.io.Buffer)
-     */
-    public int flush(Buffer buffer) throws IOException
-    {
-        Buffer buf = buffer.buffer();
-        int len=0;
-        if (buf instanceof NIOBuffer)
-        {
-            NIOBuffer nbuf = (NIOBuffer)buf;
-            ByteBuffer bbuf=nbuf.getByteBuffer();
-
-            // TODO synchronize or duplicate?
-            synchronized(nbuf)
-            {
-                try
-                {
-                    bbuf.position(buffer.getIndex());
-                    bbuf.limit(buffer.putIndex());
-                    len = bbuf.limit() - bbuf.position();
-                    
-                    // TODO - does this block?  it would be best if it didn't
-                    OutputWriter.flushChannel((SocketChannel)_channel,bbuf);
-                }
-                finally
-                {
-                    if (!buffer.isImmutable())
-                        buffer.setGetIndex(bbuf.position());
-                    bbuf.position(0);
-                    bbuf.limit(bbuf.capacity());
-                }
-            }
-        }
-        else if (buffer.array()!=null)
-        {
-            ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
-            len=_channel.write(b);
-            if (!buffer.isImmutable())
-                buffer.setGetIndex(b.position());
-        }
-        else
-        {
-            throw new IOException("Not Implemented");
-        }
-        
-        return len;
     }
 
     public boolean isBlocking()
