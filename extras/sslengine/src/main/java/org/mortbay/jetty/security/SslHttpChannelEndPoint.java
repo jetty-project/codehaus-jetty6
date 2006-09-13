@@ -264,8 +264,8 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
             if (flushed==0)
             {
                 // TODO schedule WRITE callback!
-                System.err.println("NOT IMPLEMENTED!");
-                assert false;
+                updateKey();
+                return false;
             }
         }
         _outNIOBuffer.compact();
@@ -362,6 +362,28 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         }
         
         return (result.bytesProduced()+result.bytesConsumed())>0;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Updates selection key. Adds operations types to the selection key as needed. No operations
+     * are removed as this is only done during dispatch. This method records the new key and
+     * schedules a call to syncKey to do the keyChange
+     */
+    protected void updateKey()
+    {
+        synchronized (this)
+        {
+            int ops = _key == null ? 0 : _key.interestOps();
+            _interestOps = ops | ((!_dispatched || _readBlocked > 0) ? SelectionKey.OP_READ : 0) | (_writable && _writeBlocked == 0 && !isBufferingOutput() ? 0 : SelectionKey.OP_WRITE);
+            _writable = true; // Once writable is in ops, only removed with dispatch.
+
+            if (_interestOps != ops)
+            {
+                _selectSet.addChange(this);
+                _selectSet.wakeup();
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
