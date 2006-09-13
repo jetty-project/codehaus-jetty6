@@ -21,6 +21,9 @@ import com.sun.enterprise.web.connector.grizzly.ReadTask;
 import com.sun.enterprise.web.connector.grizzly.SelectorThread;
 import com.sun.enterprise.web.connector.grizzly.StreamAlgorithm;
 import com.sun.enterprise.web.connector.grizzly.algorithms.NoParsingAlgorithm;
+import java.nio.channels.SelectionKey;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
@@ -43,11 +46,25 @@ public class JettySelectorThread extends SelectorThread
      * The Jetty thread pool implementation.
      */
     private ThreadPool _threadPool;
+    
+    private static String JETTY_GRIZZLY_STRATEGY =
+            "org.mortbay.jetty.grizzly.useTemporarySelector";
+    
+    
+    private boolean useTemporarySelector = false;
 
+    
     public JettySelectorThread()
     {
         super();
-        maxProcessorWorkerThreads=8;
+        
+        if (System.getProperty(JETTY_GRIZZLY_STRATEGY) != null){
+            useTemporarySelector =
+                 Boolean.valueOf
+                    (System.getProperty(JETTY_GRIZZLY_STRATEGY)).booleanValue();
+        }
+        System.out.println("Using temporary Selectors strategy: " 
+                    + useTemporarySelector );        
     }
 
     /**
@@ -58,6 +75,11 @@ public class JettySelectorThread extends SelectorThread
     {
         algorithmClass=JettyStreamAlgorithm.class;
         algorithmClassName=algorithmClass.getName();
+        
+        // Tell the Selector to not clear the SelectionKey.attach(..)
+        if ( !useTemporarySelector){
+            defaultAlgorithmInstalled = false;
+        }
     }
 
     /**
@@ -90,11 +112,13 @@ public class JettySelectorThread extends SelectorThread
         }
         catch (InstantiationException ex)
         {
-            logger.log(Level.WARNING,"Unable to instantiate Algorithm: "+algorithmClassName);
+            logger.log(Level.WARNING,"Unable to instantiate Algorithm: "
+                    +algorithmClassName);
         }
         catch (IllegalAccessException ex)
         {
-            logger.log(Level.WARNING,"Unable to instantiate Algorithm: "+algorithmClassName);
+            logger.log(Level.WARNING,"Unable to instantiate Algorithm: "
+                    +algorithmClassName);
         }
         finally
         {
@@ -134,7 +158,70 @@ public class JettySelectorThread extends SelectorThread
         task.setPipeline(processorPipeline);
         return task;
     }
+    
+    /**
+     * Enable all registered interestOps. Due a a NIO bug, all interestOps
+     * invokation needs to occurs on the same thread as the selector thread.
+     */
+    public void enableSelectionKeys()
+    {
+        SelectionKey selectionKey;
+        int size = getKeysToEnable().size();
+        long currentTime = System.currentTimeMillis();
+        for (int i=0; i < size; i++) {
+            selectionKey = (SelectionKey)getKeysToEnable().poll();
 
+            selectionKey.interestOps(
+                    selectionKey.interestOps() | SelectionKey.OP_READ);
+
+            if ( selectionKey.attachment() == null){
+                ((JettyReadTask)selectionKey
+                        .attachment()).setIdleTime(currentTime);
+            }
+            keepAlivePipeline.trap(selectionKey);   
+        } 
+    }     
+    
+    /**
+     * Cancel keep-alive connections.
+     */
+    protected void expireIdleKeys()
+    {
+        if ( keepAliveTimeoutInSeconds <= 0 || !selector.isOpen()) return;
+        long current = System.currentTimeMillis();
+
+        if (current < getNextKeysExpiration()) {
+            return;
+        }
+        setNextKeysExpiration(current + getKaTimeout());
+        
+        Set readyKeys = selector.keys();
+        if (readyKeys.isEmpty()){
+            return;
+        }
+        Iterator iterator = readyKeys.iterator();
+        SelectionKey key;
+        while (iterator.hasNext()) {
+            key = (SelectionKey)iterator.next();
+            if ( !key.isValid() ) {
+                keepAlivePipeline.untrap(key); 
+                continue;
+            }  
+                        
+            // Keep-alive expired
+            if ( key.attachment() != null ) {
+                  
+                long expire = ((JettyReadTask)key.attachment()).getIdleTime();
+                if (current - expire >= getKaTimeout()) {                   
+                    cancelKey(key);
+                } else if (expire + getKaTimeout() < getNextKeysExpiration()){
+                    setNextKeysExpiration(expire + getKaTimeout());
+                }
+            }
+        }                    
+    }
+    
+    
     public void setGrizzlyConnector(GrizzlyConnector grizzlyConnector)
     {
         this.grizzlyConnector=grizzlyConnector;
@@ -148,6 +235,16 @@ public class JettySelectorThread extends SelectorThread
     public void setThreadPool(ThreadPool threadPool)
     {
         _threadPool=threadPool;
+    }
+
+    public boolean isUseTemporarySelector()
+    {
+        return useTemporarySelector;
+    }
+
+    public void setUseTemporarySelector(boolean useTemporarySelector)
+    {
+        this.useTemporarySelector = useTemporarySelector;
     }
 
 }
