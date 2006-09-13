@@ -15,16 +15,12 @@
 
 package org.mortbay.jetty.grizzly;
 
-import com.sun.enterprise.web.connector.grizzly.OutputWriter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 
-import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.ChannelEndPoint;
-import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
