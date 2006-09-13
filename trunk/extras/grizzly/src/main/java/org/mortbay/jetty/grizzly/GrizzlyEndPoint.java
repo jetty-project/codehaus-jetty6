@@ -106,6 +106,11 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     {
         return _connection.getGenerator().isPersistent();
     }
+    
+    public boolean isComplete()
+    {
+        return _connection.getGenerator().isComplete();       
+    }
 
     public boolean isBlocking()
     {
@@ -115,8 +120,12 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     public void setChannel(ByteChannel channel)
     {
         this._channel = channel;
-        if (channel instanceof SocketChannel)
-            _socket=((SocketChannel)channel).socket();        
+        if ( channel instanceof GrizzlySocketChannel)
+            _socket=((GrizzlySocketChannel)channel).getSocketChannel().socket();        
+    }
+    
+    public void recycle(){
+        _connection.destroy();
     }
     
 }

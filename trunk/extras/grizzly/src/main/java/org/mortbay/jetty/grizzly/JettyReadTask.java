@@ -51,7 +51,7 @@ public class JettyReadTask extends XAReadTask
         boolean keepAlive=false;
         Exception exception=null;
         isReturned=false;
-
+       
         try
         {
             inKeepAliveProcess=true;
@@ -89,6 +89,58 @@ public class JettyReadTask extends XAReadTask
         }
     }
 
+    
+    /*
+     * Two scenarios:
+     *  - inKeepAliveProcess = false
+     *    the bytes aren't fully read, so we must register again
+     *  - inKeepAliveProcess = true
+     *    we keep-alive the key, but unattach this object from
+     *    the SelectionKey so it can be resused.
+     */
+    protected void manageKeepAlive(boolean keepAlive,int count,
+            Exception exception){
+        
+        // The key is invalid when the Task has been cancelled.
+        if ( count == -1 || !key.isValid() || exception != null ){
+            inKeepAliveProcess = false;
+            keepAlive = false;
+            // Make sure we have detached the processorTask
+            detachProcessor();
+              
+            if ( exception != null){
+               SelectorThread.logger().log(Level.INFO, 
+                        "SocketChannel Read Exception: ",exception);
+            }
+        }
+        
+        final boolean attached = !inKeepAliveProcess;
+        if (keepAlive) {
+            // (1) First remove the attachement.
+            if ( inKeepAliveProcess ) {
+                key.attach(null);
+            } else {
+                key.attach(this);
+            }
+            
+            // (2) Register the key
+            registerKey();
+            
+            // We must return since the key has been registered and this
+            // task can be reused.
+            if ( attached ) return;
+          
+            // (3) Return that task to the pool.
+            if ( inKeepAliveProcess ) {
+                terminate(keepAlive);
+            }
+        } else {
+            terminate(keepAlive);
+        }
+    }
+    
+    
+    
     public boolean executeProcessorTask() throws IOException
     {
         boolean registerKey=false;
@@ -128,7 +180,8 @@ public class JettyReadTask extends XAReadTask
             if (processorTask.isError())
             {
                 inKeepAliveProcess=false;
-                return registerKey;
+                // force keep-alive
+                return true;
             }
         }
 
@@ -143,4 +196,6 @@ public class JettyReadTask extends XAReadTask
     {
         key=null;
     }
+    
+    
 }
