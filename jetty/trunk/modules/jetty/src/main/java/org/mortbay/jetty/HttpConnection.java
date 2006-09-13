@@ -532,7 +532,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    Generator getGenerator()
+    public Generator getGenerator()
     {
         return _generator;
     }

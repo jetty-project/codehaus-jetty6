@@ -28,10 +28,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.NCSARequestLog;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.DefaultHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.AbstractNIOConnector;
+import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.thread.BoundedThreadPool;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -163,6 +174,7 @@ public class GrizzlyConnector extends AbstractNIOConnector
     }
     
 
+    /* ------------------------------------------------------------------------------- */
     /** temp main - just to help testing */
     public static void main(String[] args)
         throws Exception
@@ -172,23 +184,23 @@ public class GrizzlyConnector extends AbstractNIOConnector
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
         
-        ServletHandler handler=new ServletHandler();
-        server.setHandler(handler);
+        HandlerCollection handlers = new HandlerCollection();
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        handlers.setHandlers(new Handler[]{contexts,new DefaultHandler()});
+        server.setHandler(handlers);
         
-        handler.addServletWithMapping("org.mortbay.jetty.grizzly.GrizzlyConnector$HelloServlet", "/");
+        // TODO add javadoc context to contexts
+        
+        WebAppContext.addWebApplications(server, "../../webapps", "org/mortbay/jetty/webapp/webdefault.xml", true, false);
+        
+        HashUserRealm userRealm = new HashUserRealm();
+        userRealm.setName("Test Realm");
+        userRealm.setConfig("../../etc/realm.properties");
+        server.setUserRealms(new UserRealm[]{userRealm});
+        
         
         server.start();
         server.join();
+        
     }
-
-    public static class HelloServlet extends HttpServlet
-    {
-        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-        {
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("<h1>Hello SimpleServlet</h1>");
-        }
-    }
-    
 }
