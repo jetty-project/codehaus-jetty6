@@ -67,7 +67,6 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         endPoint.handle();
         
         // How to find the keepAlive flag?
-        
         return endPoint.keepAlive();
     }    
     
