@@ -41,6 +41,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     {
         // TODO: Needs an empty constructor?
         super(null);
+        
         //System.err.println("new GrizzlyEndPoint channel="+channel);
         _connection = new HttpConnection(connector,this,connector.getServer());
     }
@@ -107,9 +108,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
 
     public int fill(Buffer buffer) throws IOException
     {
-        //System.err.println("fill()");
         int len= super.fill(buffer);
-        //System.err.println("filled: "+buffer);
         return len;
     }
 
@@ -117,7 +116,9 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     {
         int len=0;
         
-        // TODO gather operation.
+        // TODO This should be done in a gather operation.
+        
+        
         if (header!=null && header.hasContent())
             len+=flush(header);
         
@@ -140,7 +141,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     
     public boolean keepAlive()
     {
-        return true;
+        return _connection.getGenerator().isPersistent();
     }
 
 
@@ -164,6 +165,8 @@ public class GrizzlyEndPoint extends ChannelEndPoint
                     bbuf.position(buffer.getIndex());
                     bbuf.limit(buffer.putIndex());
                     len = bbuf.limit() - bbuf.position();
+                    
+                    // TODO - does this block?  it would be best if it didn't
                     OutputWriter.flushChannel((SocketChannel)_channel,bbuf);
                 }
                 finally
@@ -195,8 +198,8 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         return false;
     }
     
-    
-    public void setChannel(ByteChannel channel){
+    public void setChannel(ByteChannel channel)
+    {
         this._channel = channel;
         if (channel instanceof SocketChannel)
             _socket=((SocketChannel)channel).socket();        
