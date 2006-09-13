@@ -13,8 +13,6 @@
 // limitations under the License.
 //========================================================================
 
-
-
 package org.mortbay.jetty.grizzly;
 
 import com.sun.enterprise.web.connector.grizzly.Pipeline;
@@ -28,136 +26,128 @@ import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 
 /**
- * Extend the default Grizzly implementation to allow the customization of 
+ * Extend the default Grizzly implementation to allow the customization of
  * <code>Task</code> used by the Jetty back-end
- *
+ * 
  * @author Jeanfrancois Arcand
  */
-public class JettySelectorThread extends SelectorThread{
-    
+public class JettySelectorThread extends SelectorThread
+{
+
     /**
      * The <code>AbstractNIOConnector</code> implementation for Grizzly.
      */
     private GrizzlyConnector grizzlyConnector;
-    
-    
+
     /**
      * The Jetty thread pool implementation.
      */
     private ThreadPool _threadPool;
-    
-    
-    public JettySelectorThread() 
+
+    public JettySelectorThread()
     {
-        super();  
-        maxProcessorWorkerThreads = 8;
+        super();
+        maxProcessorWorkerThreads=8;
     }
-    
-    
+
     /**
-     * Force Grizzly to use the <code>JettyStreamAlgorithm</code> 
+     * Force Grizzly to use the <code>JettyStreamAlgorithm</code>
      * implementation by default.
      */
     protected void initAlgorithm()
     {
         algorithmClass=JettyStreamAlgorithm.class;
         algorithmClassName=algorithmClass.getName();
-    }    
-    
-    
+    }
+
     /**
-     * Create a new <code>Pipeline</code> instance using the 
-     * <code>pipelineClassName</code> value. If the pipeline
-     * is an instance of <code>JettyPipeline</code>, use the Jetty
-     * thread pool implementation (wrapped inside a Pipeline).
+     * Create a new <code>Pipeline</code> instance using the
+     * <code>pipelineClassName</code> value. If the pipeline is an instance of
+     * <code>JettyPipeline</code>, use the Jetty thread pool implementation
+     * (wrapped inside a Pipeline).
      */
-    protected Pipeline newPipeline(int maxThreads,
-                                   int minThreads,
-                                   String name, 
-                                   int port,
-                                   int priority){
-        
-        Pipeline pipeline = 
-                super.newPipeline(maxThreads,minThreads,name,port,priority);
-        if ( pipeline instanceof JettyPipeline) {
-            ((JettyPipeline)pipeline).
-                    setThreadPool((BoundedThreadPool)_threadPool);
+    protected Pipeline newPipeline(int maxThreads, int minThreads, String name, int port, int priority)
+    {
+
+        Pipeline pipeline=super.newPipeline(maxThreads,minThreads,name,port,priority);
+        if (pipeline instanceof JettyPipeline)
+        {
+            ((JettyPipeline)pipeline).setThreadPool((BoundedThreadPool)_threadPool);
         }
         return pipeline;
     }
-    
-    
+
     /**
      * Return a new <code>JettyReadTask</code> instance
      */
     protected ReadTask newReadTask()
     {
-        StreamAlgorithm streamAlgorithm = null;
-        
-        try{
-            streamAlgorithm = (StreamAlgorithm)algorithmClass.newInstance();
-        } catch (InstantiationException ex){
-            logger.log(Level.WARNING,
-                       "Unable to instantiate Algorithm: "+ algorithmClassName);
-        } catch (IllegalAccessException ex){
-            logger.log(Level.WARNING,
-                       "Unable to instantiate Algorithm: " + algorithmClassName);
-        } finally {
-            if ( streamAlgorithm == null)
-                streamAlgorithm = new NoParsingAlgorithm();
-        }       
+        StreamAlgorithm streamAlgorithm=null;
+
+        try
+        {
+            streamAlgorithm=(StreamAlgorithm)algorithmClass.newInstance();
+        }
+        catch (InstantiationException ex)
+        {
+            logger.log(Level.WARNING,"Unable to instantiate Algorithm: "+algorithmClassName);
+        }
+        catch (IllegalAccessException ex)
+        {
+            logger.log(Level.WARNING,"Unable to instantiate Algorithm: "+algorithmClassName);
+        }
+        finally
+        {
+            if (streamAlgorithm==null)
+                streamAlgorithm=new NoParsingAlgorithm();
+        }
         streamAlgorithm.setPort(port);
-        
+
         // TODO: For now, hardcode the JettyReadTask
-        ReadTask task = new JettyReadTask();        
-        task.initialize(streamAlgorithm, useDirectByteBuffer,useByteBufferView);
-        task.setPipeline(readPipeline);  
+        ReadTask task=new JettyReadTask();
+        task.initialize(streamAlgorithm,useDirectByteBuffer,useByteBufferView);
+        task.setPipeline(readPipeline);
         task.setSelectorThread(this);
         task.setRecycle(recycleTasks);
-        
+
         return task;
     }
-    
-    
+
     /**
      * Return a <code>JettyProcessorTask</code> implementation.
      */
     public ProcessorTask newProcessorTask(boolean initialize)
     {
-        JettyProcessorTask task = new JettyProcessorTask();
+        JettyProcessorTask task=new JettyProcessorTask();
         task.setMaxHttpHeaderSize(maxHttpHeaderSize);
         task.setBufferSize(requestBufferSize);
-        task.setSelectorThread(this);              
+        task.setSelectorThread(this);
         task.setRecycle(recycleTasks);
- 
-        
+
         task.initialize();
- 
-        if ( keepAlivePipeline.dropConnection() ) 
+
+        if (keepAlivePipeline.dropConnection())
         {
             task.setDropConnection(true);
-        }    
-        
-        task.setPipeline(processorPipeline); 
+        }
+
+        task.setPipeline(processorPipeline);
         return task;
     }
-    
-    
+
     public void setGrizzlyConnector(GrizzlyConnector grizzlyConnector)
     {
-        this.grizzlyConnector = grizzlyConnector;
+        this.grizzlyConnector=grizzlyConnector;
     }
-    
-    
+
     public GrizzlyConnector getGrizzlyConnector()
     {
         return grizzlyConnector;
     }
-    
-    
+
     public void setThreadPool(ThreadPool threadPool)
     {
-        _threadPool = threadPool;
+        _threadPool=threadPool;
     }
-    
+
 }
