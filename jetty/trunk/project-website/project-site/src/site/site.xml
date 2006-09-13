@@ -5,7 +5,7 @@
   <skin>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-skin</artifactId>
-    <version>6.0.0rc3</version>
+    <version>6.0.0rc4</version>
   </skin>
   <bannerLeft>
     <name>Jetty</name>
@@ -51,6 +51,12 @@
       <item name="Intro" href="maven-plugin/index.html"/>
       <item name="Installation" href="maven-plugin/install.html"/>
       <item name="Configuration" href="maven-plugin/howto.html"/>
+    </menu>
+    <menu name="Jetty Jspc Maven Plugin">
+      <item name="Intro" href="jspc-maven-plugin/index.html"/>
+      <item name="Usage" href="jspc-maven-plugin/howto.html"/>
+      <item name="Config" href="jspc-maven-plugin/jspc-mojo.html"/>
+      <item name="Installation" href="jspc-maven-plugin/install.html"/>
     </menu>
     <menu name="Commercial Services">
       <item name="Support" href="http://www.webtide.com/support.jsp"/>
