@@ -91,14 +91,14 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     public void blockReadable(long millisecs)
     {
         // TODO implement
-        //System.err.println("blockReadable()");
+        System.err.println("blockReadable()");
         try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
     }
 
     public void blockWritable(long millisecs)
     {
         // TODO implement
-        //System.err.println("blockWritable()");
+        System.err.println("blockWritable()");
         try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
     }
     
