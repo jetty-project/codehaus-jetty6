@@ -18,12 +18,12 @@ import org.mortbay.thread.Timeout;
 public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnable
 {
     public SelectSet _selectSet;
-    private boolean _dispatched = false;
+    protected boolean _dispatched = false;
     protected boolean _writable = true; // TODO - get rid of this bad side effect
     protected SelectionKey _key;
-    private int _interestOps;
-    private int _readBlocked;
-    private int _writeBlocked;
+    protected int _interestOps;
+    protected int _readBlocked;
+    protected int _writeBlocked;
 
     private HttpChannelEndPoint.IdleTask _timeoutTask = new IdleTask();
 
