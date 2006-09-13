@@ -184,6 +184,7 @@
     <module>modules/management</module>
     <module>modules/start</module>
     <module>modules/maven-plugin</module>
+    <module>modules/jspc-maven-plugin</module>
     <module>modules/naming</module>
     <module>modules/plus</module>
     <module>modules/html</module>

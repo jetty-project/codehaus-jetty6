@@ -3,10 +3,10 @@
   <skin>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-skin</artifactId>
-    <version>6.0.0rc4</version>
+    <version>6.1-SNAPSHOT</version>
   </skin>
   <bannerLeft>
-    <name>Maven2 Jetty Plugin</name>
+    <name>Maven2 Jetty JSPC Plugin</name>
     <src>http://jetty.mortbay.org/jetty/images/jetty_banner_still.gif</src>
     <href>http://jetty.mortbay.org/jetty6</href>
   </bannerLeft>
@@ -19,19 +19,11 @@
       <item name="Maven2" href="http://maven.apache.org/maven2/"/>
       <item name="Jetty6" href="http://jetty.mortbay.org/jetty6"/>
     </links>
-
-    <menu name="Home">
-      <item name="Home" href="index.html"/>
-    </menu>
-    <menu name="General Guides">
-      <item name="Installation" href="install.html"/>
-      <item name="Configuration" href="howto.html"/>
-      <item name="FAQ" href="http://docs.codehaus.org/display/JETTY/FAQ"/>
-    </menu>
-    <menu name="Parameter Guides">
-      <item name="jetty:run" href="run-mojo.html"/>
-      <item name="jetty:run-war" href="run-war-mojo.html"/>
-      <item name="jetty:run-exploded" href="run-exploded-mojo.html"/>
+    <menu name="Usage Guides">
+      <item name="Intro" href="index.html"/>
+      <item name="Usage" href="howto.html"/>
+      <item name="Configuration" href="jspc-mojo.html"/>
     </menu>
   </body>
 </project>
+
