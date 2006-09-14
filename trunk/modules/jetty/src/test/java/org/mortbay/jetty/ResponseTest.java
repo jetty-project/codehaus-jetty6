@@ -16,6 +16,8 @@
 package org.mortbay.jetty;
 
 
+import java.util.Enumeration;
+
 import junit.framework.TestCase;
 
 /**
@@ -74,6 +76,15 @@ public class ResponseTest extends TestCase
         assertEquals("foo/bar; charset=ISO-8859-1",response.getContentType());
         response.setContentType("foo2/bar2");
         assertEquals("foo2/bar2; charset=ISO-8859-1",response.getContentType());
+        response.setHeader("name","foo");
+        Enumeration en=response.getHeaders("name");
+        assertEquals("foo",en.nextElement());
+        assertFalse(en.hasMoreElements());
+        response.addHeader("name","bar");
+        en=response.getHeaders("name");
+        assertEquals("foo",en.nextElement());
+        assertEquals("bar",en.nextElement());
+        assertFalse(en.hasMoreElements());
         
         response.recycle();
         
