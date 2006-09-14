@@ -51,60 +51,60 @@ public class StringUtilTest extends TestCase
 
     public void testAsciiToLowerCase()
     {
-        String lc="�bc def 1�3";
-        assertEquals(StringUtil.asciiToLowerCase("�Bc DeF 1�3"), lc);
+        String lc="\u0690bc def 1\u06903";
+        assertEquals(StringUtil.asciiToLowerCase("\u0690Bc DeF 1\u06903"), lc);
         assertTrue(StringUtil.asciiToLowerCase(lc)==lc);
     }
 
     public void testStartsWithIgnoreCase()
     {
         
-        assertTrue(StringUtil.startsWithIgnoreCase("�b�defg", "�b�"));
-        assertTrue(StringUtil.startsWithIgnoreCase("�bcdefg", "�bc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("�bcdefg", "�Bc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("�Bcdefg", "�bc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("�Bcdefg", "�Bc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("�bcdefg", ""));
-        assertTrue(StringUtil.startsWithIgnoreCase("�bcdefg", null));
-        assertTrue(StringUtil.startsWithIgnoreCase("�bcdefg", "�bcdefg"));
+        assertTrue(StringUtil.startsWithIgnoreCase("\u0690b\u0690defg", "\u0690b\u0690"));
+        assertTrue(StringUtil.startsWithIgnoreCase("\u0690bcdefg", "\u0690bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("\u0690bcdefg", "\u0690Bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("\u0690Bcdefg", "\u0690bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("\u0690Bcdefg", "\u0690Bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("\u0690bcdefg", ""));
+        assertTrue(StringUtil.startsWithIgnoreCase("\u0690bcdefg", null));
+        assertTrue(StringUtil.startsWithIgnoreCase("\u0690bcdefg", "\u0690bcdefg"));
 
         assertFalse(StringUtil.startsWithIgnoreCase(null, "xyz")); 
-        assertFalse(StringUtil.startsWithIgnoreCase("�bcdefg", "xyz"));
-        assertFalse(StringUtil.startsWithIgnoreCase("�", "xyz")); 
+        assertFalse(StringUtil.startsWithIgnoreCase("\u0690bcdefg", "xyz"));
+        assertFalse(StringUtil.startsWithIgnoreCase("\u0690", "xyz")); 
     }
 
     public void testEndsWithIgnoreCase()
     {
-        assertTrue(StringUtil.endsWithIgnoreCase("�bcd�f�", "�f�"));
-        assertTrue(StringUtil.endsWithIgnoreCase("�bcdefg", "efg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("�bcdefg", "eFg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("�bcdeFg", "efg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("�bcdeFg", "eFg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("�bcdefg", ""));
-        assertTrue(StringUtil.endsWithIgnoreCase("�bcdefg", null));
-        assertTrue(StringUtil.endsWithIgnoreCase("�bcdefg", "�bcdefg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("\u0690bcd\u0690f\u0690", "\u0690f\u0690"));
+        assertTrue(StringUtil.endsWithIgnoreCase("\u0690bcdefg", "efg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("\u0690bcdefg", "eFg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("\u0690bcdeFg", "efg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("\u0690bcdeFg", "eFg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("\u0690bcdefg", ""));
+        assertTrue(StringUtil.endsWithIgnoreCase("\u0690bcdefg", null));
+        assertTrue(StringUtil.endsWithIgnoreCase("\u0690bcdefg", "\u0690bcdefg"));
 
         assertFalse(StringUtil.endsWithIgnoreCase(null, "xyz")); 
-        assertFalse(StringUtil.endsWithIgnoreCase("�bcdefg", "xyz"));
-        assertFalse(StringUtil.endsWithIgnoreCase("�", "xyz"));  
+        assertFalse(StringUtil.endsWithIgnoreCase("\u0690bcdefg", "xyz"));
+        assertFalse(StringUtil.endsWithIgnoreCase("\u0690", "xyz"));  
     }
 
     public void testIndexFrom()
     {
-        assertEquals(StringUtil.indexFrom("�bcd", "xyz"),-1);
-        assertEquals(StringUtil.indexFrom("�bcd", "�bcz"),0);
-        assertEquals(StringUtil.indexFrom("�bcd", "bcz"),1);
-        assertEquals(StringUtil.indexFrom("�bcd", "dxy"),3);
+        assertEquals(StringUtil.indexFrom("\u0690bcd", "xyz"),-1);
+        assertEquals(StringUtil.indexFrom("\u0690bcd", "\u0690bcz"),0);
+        assertEquals(StringUtil.indexFrom("\u0690bcd", "bcz"),1);
+        assertEquals(StringUtil.indexFrom("\u0690bcd", "dxy"),3);
     }
 
     public void testReplace()
     {
-        String s="�bc �bc �bc";
-        assertEquals(StringUtil.replace(s, "�bc", "xyz"),"xyz xyz xyz");
+        String s="\u0690bc \u0690bc \u0690bc";
+        assertEquals(StringUtil.replace(s, "\u0690bc", "xyz"),"xyz xyz xyz");
         assertTrue(StringUtil.replace(s,"xyz","pqy")==s);
         
-        s=" �bc ";
-        assertEquals(StringUtil.replace(s, "�bc", "xyz")," xyz ");
+        s=" \u0690bc ";
+        assertEquals(StringUtil.replace(s, "\u0690bc", "xyz")," xyz ");
         
     }
 
@@ -131,7 +131,7 @@ public class StringUtilTest extends TestCase
      */
     public void testEqualsStringcharArrayintint()
     {
-        assertTrue(StringUtil.equals("�bc", new char[] {'x','�','b','c','z'},1,3));
+        assertTrue(StringUtil.equals("\u0690bc", new char[] {'x','\u0690','b','c','z'},1,3));
         assertFalse(StringUtil.equals("axc", new char[] {'x','a','b','c','z'},1,3));
     }
 
