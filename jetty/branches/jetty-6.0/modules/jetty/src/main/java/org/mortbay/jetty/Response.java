@@ -370,7 +370,7 @@ public class Response implements HttpServletResponse
     public void addHeader(String name, String value)
     {
         if (!_connection.isIncluding())
-            _connection.getResponseFields().put(name, value);
+            _connection.getResponseFields().add(name, value);
     }
 
     /* ------------------------------------------------------------ */
