@@ -13,12 +13,14 @@ jetty-6.1-SNAPSHOT
     + Improved charset handling in URLs
     + request.setCharacterEncoding effects query string parameters
     + minor optimization of bytes to UTF8 strings
-    + JETTY-113 support optional query char encoding on requests
     + JETTY-112 ContextHandler checks if started
+    + JETTY-113 support optional query char encoding on requests
+    + JETTY-115 Fixed addHeader
 
 jetty-6.0-SNAPSHOT
     + Improved charset handling in URLs
     + JETTY-112 ContextHandler checks if started
+    + JETTY-115 Fixed addHeader
 
 jetty-6.0.0 - 10 September 2006
     + SocketConnector closes all connections in doStop
