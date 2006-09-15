@@ -24,7 +24,7 @@ import java.io.UnsupportedEncodingException;
  * It differs from the java.net.URL class as it does not provide
  * communications ability, but it does assist with query string
  * formatting.
- * <P>ISO_8859_1 encoding is used by default for % encoded characters. This
+ * <P>UTF-8 encoding is used by default for % encoded characters. This
  * may be overridden with the org.mortbay.util.URI.charset system property.
  * @see UrlEncoded
  * @author Greg Wilkins (gregw)
