@@ -75,7 +75,7 @@ public class Server extends HandlerWrapper implements Attributes
     private SessionIdManager _sessionIdManager;
     private boolean _sendServerVersion = true; //send Server: header by default
     private AttributesMap _attributes = new AttributesMap();
-    private String _version = "6.0.x";
+    private String _version = "6.1.x";
     
     /* ------------------------------------------------------------ */
     public Server()
