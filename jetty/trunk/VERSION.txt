@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
     + Half refactor of HttpConnection for AJP
     + Added concept of bufferred endpoint
     + Factored ErrorPageErrorHandler out of WebAppContext
+    + Refactored ErrorHandler to avoid statics
     + Transforming classloader does not transform resources.
     + SocketConnector closes all connections in doStop
     + Improved charset handling in URLs
@@ -21,6 +22,8 @@ jetty-6.1-SNAPSHOT
 
 jetty-6.0-SNAPSHOT
     + Improved charset handling in URLs
+    + Factored ErrorPageErrorHandler out of WebAppContext
+    + Refactored ErrorHandler to avoid statics
     + JETTY-112 ContextHandler checks if started
     + JETTY-114 removed utf8 characters from code
     + JETTY-115 Fixed addHeader
