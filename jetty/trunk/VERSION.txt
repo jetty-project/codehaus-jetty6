@@ -17,6 +17,7 @@ jetty-6.1-SNAPSHOT
     + JETTY-113 support optional query char encoding on requests
     + JETTY-114 removed utf8 characters from code
     + JETTY-115 Fixed addHeader
+    + added cometd chat demo
 
 jetty-6.0-SNAPSHOT
     + Improved charset handling in URLs
