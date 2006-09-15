@@ -18,7 +18,7 @@ public class HttpConnectionTest extends TestCase
     LocalConnector connector = new LocalConnector();
     
     /**
-     * Constructor for RFC2616Test.
+     * Constructor 
      * @param arg0
      */
     public HttpConnectionTest(String arg0)
