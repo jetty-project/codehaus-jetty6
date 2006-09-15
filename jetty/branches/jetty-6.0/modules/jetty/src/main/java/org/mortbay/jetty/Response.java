@@ -17,6 +17,7 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -248,8 +249,39 @@ public class Response implements HttpServletResponse
             {
                 setContentType(MimeTypes.TEXT_HTML_8859_1);
                 ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
-                HttpConnection connection = HttpConnection.getCurrentConnection();
-                ErrorHandler.writeErrorPage(request, writer, connection.getResponse().getStatus(), connection.getResponse().getReason(),true);
+                if (message != null)
+                {
+                    message= StringUtil.replace(message, "&", "&amp;");
+                    message= StringUtil.replace(message, "<", "&lt;");
+                    message= StringUtil.replace(message, ">", "&gt;");
+                }
+                String uri= request.getRequestURI();
+                if (uri!=null)
+                {
+                    uri= StringUtil.replace(uri, "&", "&amp;");
+                    uri= StringUtil.replace(uri, "<", "&lt;");
+                    uri= StringUtil.replace(uri, ">", "&gt;");
+                }
+                
+                writer.write("<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n");
+                writer.write("<title>Error ");
+                writer.write(Integer.toString(code));
+                writer.write(' ');
+                if (message==null)
+                    message=HttpGenerator.getReason(code);
+                writer.write(message);
+                writer.write("</title>\n</head>\n<body>\n<h2>HTTP ERROR: ");
+                writer.write(Integer.toString(code));
+                writer.write("</h2><pre>");
+                writer.write(message);
+                writer.write("</pre>\n<p>RequestURI=");
+                writer.write(uri);
+                writer.write("</p>\n<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by jetty://</a></small></i></p>");
+                
+                for (int i= 0; i < 20; i++)
+                    writer.write("\n                                                ");
+                writer.write("\n</body>\n</html>\n");
+                
                 writer.flush();
                 setContentLength(writer.size());
                 writer.writeTo(getOutputStream());

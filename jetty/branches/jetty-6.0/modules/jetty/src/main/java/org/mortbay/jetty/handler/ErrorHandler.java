@@ -65,15 +65,42 @@ public class ErrorHandler extends AbstractHandler
     }
     
     /* ------------------------------------------------------------ */
-    public static void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message, boolean showStacks)
+    protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message, boolean showStacks)
         throws IOException
     {
-        if (message != null)
+        if (message == null)
+            message=HttpGenerator.getReason(code);
+        else
         {
             message= StringUtil.replace(message, "&", "&amp;");
             message= StringUtil.replace(message, "<", "&lt;");
             message= StringUtil.replace(message, ">", "&gt;");
         }
+
+        writer.write("<html>\n<head>\n");
+        writeErrorPageHead(request,writer,code,message);
+        writer.write("</head>\n<body>");
+        writeErrorPageBody(request,writer,code,message,showStacks);
+        writer.write("\n</body>\n</html>\n");
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void writeErrorPageHead(HttpServletRequest request, Writer writer, int code, String message)
+        throws IOException
+    {
+        writer.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n");
+        writer.write("<title>Error ");
+        writer.write(Integer.toString(code));
+        writer.write(' ');
+        if (message==null)
+        writer.write(message);
+        writer.write("</title>\n");    
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void writeErrorPageBody(HttpServletRequest request, Writer writer, int code, String message, boolean showStacks)
+        throws IOException
+    {
         String uri= request.getRequestURI();
         if (uri!=null)
         {
@@ -82,44 +109,50 @@ public class ErrorHandler extends AbstractHandler
             uri= StringUtil.replace(uri, ">", "&gt;");
         }
         
-        writer.write("<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n");
-        writer.write("<title>Error ");
-        writer.write(Integer.toString(code));
-        writer.write(' ');
-        if (message==null)
-            message=HttpGenerator.getReason(code);
-        writer.write(message);
-        writer.write("</title>\n</head>\n<body>\n<h2>HTTP ERROR: ");
+        writeErrorPageMessage(request,writer,code,message,uri);
+        if (showStacks)
+            writeErrorPageStacks(request,writer);
+            
+        {
+        }
+
+        writer.write("<p><i><small><a href=\"http://jetty.mortbay.org/\">Powered by Jetty://</a></small></i></p>");
+        for (int i= 0; i < 20; i++)
+            writer.write("<br/>                                                \n");
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void writeErrorPageMessage(HttpServletRequest request, Writer writer, int code, String message,String uri)
+    throws IOException
+    {
+        writer.write("<h2>HTTP ERROR: ");
         writer.write(Integer.toString(code));
         writer.write("</h2><pre>");
         writer.write(message);
-        writer.write("</pre>\n");
-        writer.write("<p>RequestURI=");
+        writer.write("</pre>\n<p>RequestURI=");
         writer.write(uri);
-        writer.write(
-            "</p>\n<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by Jetty://</a></small></i></p>");
-        
-        if (showStacks)
-        {
-            Throwable th = (Throwable)request.getAttribute("javax.servlet.error.exception");
-            while(th!=null)
-            {
-                writer.write("<h3>Caused by:</h3><pre>");
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                th.printStackTrace(pw);
-                pw.flush();
-                writer.write(sw.getBuffer().toString());
-                writer.write("</pre>\n");
-                
-                th =th.getCause();
-            }
-        }
-        
-        for (int i= 0; i < 20; i++)
-            writer.write("\n                                                ");
-        writer.write("\n</body>\n</html>\n");
+        writer.write("</p>");
     }
+
+    /* ------------------------------------------------------------ */
+    protected void writeErrorPageStacks(HttpServletRequest request, Writer writer)
+        throws IOException
+    {
+        Throwable th = (Throwable)request.getAttribute("javax.servlet.error.exception");
+        while(th!=null)
+        {
+            writer.write("<h3>Caused by:</h3><pre>");
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            th.printStackTrace(pw);
+            pw.flush();
+            writer.write(sw.getBuffer().toString());
+            writer.write("</pre>\n");
+
+            th =th.getCause();
+        }
+    }
+        
 
     /* ------------------------------------------------------------ */
     /**
