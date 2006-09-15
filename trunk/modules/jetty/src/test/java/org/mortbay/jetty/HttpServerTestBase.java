@@ -43,7 +43,7 @@ public class HttpServerTestBase
     /** The expected response. */
     private static final String RESPONSE1 = "HTTP/1.1 200 OK\n"
         + "Connection: close\n"
-        + "Server: Jetty(6.0.x)\n"
+        + "Server: Jetty(6.1.x)\n"
         + "\n"
         + "Hello world\n";
 
@@ -98,7 +98,7 @@ public class HttpServerTestBase
     private static final String RESPONSE2 = 
           "HTTP/1.1 200 OK\n"
         + "Content-Length: "+RESPONSE2_CONTENT.getBytes().length+"\n"
-        + "Server: Jetty(6.0.x)\n"
+        + "Server: Jetty(6.1.x)\n"
         + "\n" +
         RESPONSE2_CONTENT;
 
