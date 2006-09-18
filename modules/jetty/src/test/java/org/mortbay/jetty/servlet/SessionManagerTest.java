@@ -36,7 +36,6 @@ public class SessionManagerTest extends TestCase
     SessionHandler handler = new SessionHandler(sessionManager);
     Server server = new Server();
     
-    
     protected void setUp() throws Exception
     {
         sessionManager.setMetaManager(new TestSessionIdManager());
@@ -45,14 +44,10 @@ public class SessionManagerTest extends TestCase
         server.start();
     }
 
-
-
     protected void tearDown() throws Exception
     {
         server.stop();
     }
-
-
 
     public void testSetAttributeToNullIsTheSameAsRemoveAttribute() throws Exception
     {
@@ -95,6 +90,11 @@ public class SessionManagerTest extends TestCase
         public String newSessionId(HttpServletRequest request, long created)
         {
             return "xyzzy";
+        }
+
+        public void removeSession(HttpSession session)
+        {
+            // ignore
         }
 
     }

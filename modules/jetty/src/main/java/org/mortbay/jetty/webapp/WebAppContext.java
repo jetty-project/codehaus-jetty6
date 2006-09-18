@@ -1119,7 +1119,7 @@ public class WebAppContext extends Context
         _servletHandler.setInitializeAtStart(false);
 
         // bypass security handler if not used.
-        if (!_securityHandler.hasConstraints())
+        if (!_securityHandler.hasConstraints() && _securityHandler.getHandler()==_servletHandler)
         {
             _securityHandler.setHandler(null);
             _sessionHandler.setHandler(_servletHandler);

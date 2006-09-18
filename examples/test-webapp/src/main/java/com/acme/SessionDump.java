@@ -46,48 +46,63 @@ public class SessionDump extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void doPost(HttpServletRequest request,
-                       HttpServletResponse response) 
-        throws ServletException, IOException
+    protected void handleForm(HttpServletRequest request,
+                          HttpServletResponse response) 
     {
         HttpSession session = request.getSession(false);
         String action = request.getParameter("Action");
         String name =  request.getParameter("Name");
         String value =  request.getParameter("Value");
 
-        String nextUrl = getURI(request)+"?R="+redirectCount++;
-        if (action.equals("New Session"))
-        {   
-            session = request.getSession(true);
-            session.setAttribute("test","value");
-        }
-        else 
-        if (session!=null)
+        if (action!=null)
         {
-            if (action.equals("Invalidate"))
-                session.invalidate();
-            else if (action.equals("Set") && name!=null && name.length()>0)
+            if(action.equals("New Session"))
             {   
-                session.setAttribute(name,value);
+                session = request.getSession(true);
+                session.setAttribute("test","value");
             }
-            else if (action.equals("Remove"))
-                session.removeAttribute(name);
+            else if (session!=null)
+            {
+                if (action.equals("Invalidate"))
+                    session.invalidate();
+                else if (action.equals("Set") && name!=null && name.length()>0)
+                    session.setAttribute(name,value);
+                else if (action.equals("Remove"))
+                    session.removeAttribute(name);
+            }       
         }
-
-        String encodedUrl=response.encodeRedirectURL(nextUrl);
-        response.sendRedirect(encodedUrl);
-        
     }
     
+    /* ------------------------------------------------------------ */
+    public void doPost(HttpServletRequest request,
+                       HttpServletResponse response) 
+        throws ServletException, IOException
+    {
+        handleForm(request,response);
+        String nextUrl = getURI(request)+"?R="+redirectCount++;
+        String encodedUrl=response.encodeRedirectURL(nextUrl);
+        response.sendRedirect(encodedUrl);
+    }
         
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) 
         throws ServletException, IOException
     {
+        handleForm(request,response);
+        
         response.setContentType("text/html");
 
         HttpSession session = request.getSession(getURI(request).indexOf("new")>0);
+        try
+        {
+            if (session!=null) 
+                session.isNew();
+        }
+        catch(IllegalStateException e)
+        {
+            session=null;
+        }
         
         PrintWriter out = response.getWriter();
         out.println("<h1>Session Dump Servlet:</h1>"); 

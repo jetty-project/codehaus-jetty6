@@ -12,7 +12,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.servlet.webapp;
+package org.mortbay.jetty;
 
 import java.io.File;
 import java.io.FileNotFoundException;
