@@ -88,7 +88,7 @@ public class Channel
     /**
      * @param data
      */
-    public void publish(Object data)
+    public void send(Object data)
     {
         for (int f=0;data!=null && f<LazyList.size(_dataFilters);f++)
             data=((DataFilter)LazyList.get(_dataFilters,f)).filter(data);
