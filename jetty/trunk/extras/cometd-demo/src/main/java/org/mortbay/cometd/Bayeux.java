@@ -52,7 +52,7 @@ public class Bayeux
     SecurityPolicy _securityPolicy=new DefaultPolicy();
 
     {
-        _handlers.put("*",new PublishHandler());
+        _handlers.put("*",new DefaultHandler());
         _handlers.put(META_HANDSHAKE,new HandshakeHandler());
         _handlers.put(META_CONNECT,new ConnectHandler());
         _handlers.put(META_RECONNECT,new ReconnectHandler());
@@ -253,7 +253,7 @@ public class Bayeux
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class PublishHandler implements Handler
+    private class DefaultHandler implements Handler
     {
         public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
@@ -264,7 +264,7 @@ public class Bayeux
 
             if (channel!=null&&data!=null && _securityPolicy.canSend(client,channel,message))
             {
-                channel.publish(data);
+                channel.send(data);
                 reply.put("successful",Boolean.TRUE);
                 reply.put("error","");
             }
