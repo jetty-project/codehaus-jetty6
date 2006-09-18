@@ -128,6 +128,12 @@ public class SecurityHandler extends HandlerWrapper
     }
 
     /* ------------------------------------------------------------ */
+    public boolean hasConstraints() 
+    {
+        return _constraintMappings != null && _constraintMappings.length > 0;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void doStart()
         throws Exception
     {
