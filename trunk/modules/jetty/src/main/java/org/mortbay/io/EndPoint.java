@@ -144,8 +144,7 @@ public interface EndPoint
     /** Flush any buffered output.
      * May fail to write all data if endpoint is non-blocking
      * @throws IOException 
-     * @return true if all data is flushed
      */
-    public boolean flush() throws IOException;
+    public void flush() throws IOException;
     
 }

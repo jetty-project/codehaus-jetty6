@@ -262,9 +262,8 @@ public class ByteArrayEndPoint implements EndPoint
     }
 
     /* ------------------------------------------------------------ */
-    public boolean flush()
+    public void flush() throws IOException
     {   
-        return true;
     }
 
     /* ------------------------------------------------------------ */

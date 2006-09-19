@@ -345,16 +345,14 @@ public class HttpConnection
                     
                     if (_endp.isBufferingOutput())
                     {
-                        if (!_endp.flush())
-                        {
-                            // TODO schedule write call back
-                            continue;
-                        }
+                        _endp.flush();
+                        if (_endp.isBufferingOutput())
+                            no_progress=0;
                     }
                     
                     if (io>0)
                         no_progress=0;
-                    else if (no_progress++>10) // TODO This is a bit arbitrary
+                    else if (no_progress++>=2) 
                         return;
                 }
             }
