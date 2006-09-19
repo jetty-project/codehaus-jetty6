@@ -204,6 +204,13 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
      */
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
     {
+        if (_outNIOBuffer.length()>0)
+        {
+            flush();
+            if (_outNIOBuffer.length()>0)
+                return 0;
+        }
+        
         _outBuffers[0]=extractOutputBuffer(header);
         _outBuffers[1]=extractOutputBuffer(buffer);
         _outBuffers[2]=extractOutputBuffer(trailer);
@@ -211,7 +218,8 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         SSLEngineResult result=null;
         try
         {
-            _outBuffer.position(_outNIOBuffer.putIndex());
+            _outNIOBuffer.clear();
+            _outBuffer.position(0);
             _outBuffer.limit(_outBuffer.capacity());
             result=_engine.wrap(_outBuffers,_outBuffer);
         }
@@ -256,20 +264,19 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
 
     
     /* ------------------------------------------------------------ */
-    public boolean flush() throws IOException
+    public void flush() throws IOException
     {
         while (_outNIOBuffer.length()>0)
         {
             int flushed=super.flush(_outNIOBuffer);
             if (flushed==0)
             {
-                // TODO schedule WRITE callback!
-                updateKey();
-                return false;
+                Thread.yield();
+                flushed=super.flush(_outNIOBuffer);
+                if (flushed==0)
+                    return;
             }
         }
-        _outNIOBuffer.compact();
-        return !_outNIOBuffer.hasContent();
     }
 
     /* ------------------------------------------------------------ */

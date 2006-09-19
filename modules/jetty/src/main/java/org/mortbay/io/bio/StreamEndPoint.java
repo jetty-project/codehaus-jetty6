@@ -255,11 +255,10 @@ public class StreamEndPoint implements EndPoint
 
 
     /* ------------------------------------------------------------ */
-    public boolean flush()
+    public void flush()
         throws IOException
     {   
         _out.flush();
-        return true;
     }
 
     /* ------------------------------------------------------------ */
