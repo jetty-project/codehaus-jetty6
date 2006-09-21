@@ -141,7 +141,7 @@ public class ServletHandler extends AbstractHandler
         if (isInitializeAtStart())
             initialize();
 
-        if(_filterChainsCached && _filters!=null && _filters.length>0)
+        if(_filterChainsCached)
         {
             _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
             _namedChainCache=new HashMap[]{null,null,new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
