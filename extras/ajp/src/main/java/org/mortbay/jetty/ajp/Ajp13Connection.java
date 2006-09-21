@@ -88,21 +88,21 @@ public class Ajp13Connection extends HttpConnection
     // XXX Implement
     public ServletOutputStream getOutputStream()
     {
-    	System.out.println(">>>>>>>>>>>Output Stream is requested");
-        return new ServletOutputStream()
+    	return new ServletOutputStream()
         {
             public void write(int b) throws IOException
             {   
                 ((Ajp13Generator)_generator).addContent((byte)b);
             }
+            
+            
         };
     }
 
     // XXX Implement
     public PrintWriter getPrintWriter(String encoding)
     {
-    	System.out.println(">>>>>>>>>>>getPrintWriter is requested");
-        return new PrintWriter(getOutputStream());
+    	return new Ajp13PrintWriter(getOutputStream(),(Ajp13Generator) _generator);
     }
 
  
