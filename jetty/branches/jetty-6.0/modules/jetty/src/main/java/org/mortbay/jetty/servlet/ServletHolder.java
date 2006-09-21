@@ -245,7 +245,7 @@ public class ServletHolder extends Holder
             .isAssignableFrom(_class))
             _servlets=new Stack();
 
-        if (_initOnStartup)
+        if (_extInstance || _initOnStartup)
         {
             if (_servlet==null)
                 _servlet=(Servlet)newInstance();
@@ -282,12 +282,10 @@ public class ServletHolder extends Holder
             if (_runAs!=null && _realm!=null)
                 user=_realm.pushRole(null,_runAs);
                 
+            if (_servlet!=null)
+                _servlet.destroy();
             if (!_extInstance)
-            {
-                if (_servlet!=null)
-                    _servlet.destroy();
                 _servlet=null;
-            }
             
             while (_servlets!=null && _servlets.size()>0)
             {
