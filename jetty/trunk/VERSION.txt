@@ -34,6 +34,7 @@ jetty-6.0-SNAPSHOT
     + Improved charset handling in URLs
     + minor optimization of bytes to UTF8 strings
     + JETTY-113 support optional query char encoding on requests
+    + JETTY-124 always initialize filter caches
 
 jetty-6.0.0 - 10 September 2006
     + SocketConnector closes all connections in doStop
