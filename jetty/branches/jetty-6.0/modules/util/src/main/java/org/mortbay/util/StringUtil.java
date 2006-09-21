@@ -301,9 +301,15 @@ public class StringUtil
     /* ------------------------------------------------------------ */
     public static String toUTF8String(byte[] b,int offset,int length)
     {
-        // TODO - make this more effecient!
         try
         {
+            if (length<32)
+            {
+                Utf8StringBuffer buffer = new Utf8StringBuffer(length);
+                buffer.append(b,offset,length);
+                return buffer.toString();
+            }
+            
             return new String(b,offset,length,__UTF8);
         }
         catch (UnsupportedEncodingException e)
@@ -316,7 +322,9 @@ public class StringUtil
     /* ------------------------------------------------------------ */
     public static String toString(byte[] b,int offset,int length,String charset)
     {
-        // TODO - make this more effecient!
+        if (charset==null || StringUtil.isUTF8(charset))
+            return toUTF8String(b,offset,length);
+        
         try
         {
             return new String(b,offset,length,charset);
@@ -326,6 +334,13 @@ public class StringUtil
             e.printStackTrace();
             return null;
         }
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public static boolean isUTF8(String charset)
+    {
+        return charset==__UTF8 || __UTF8.equalsIgnoreCase(charset);
     }
     
     

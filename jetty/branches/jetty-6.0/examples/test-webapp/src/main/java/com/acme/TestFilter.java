@@ -60,7 +60,8 @@ public class TestFilter implements Filter
                         
             request.setAttribute("testFilter", value);
             
-            if (((HttpServletRequest)request).getParameter("wrap")!=null)
+            String qString = ((HttpServletRequest)request).getQueryString();
+            if (qString != null && qString.indexOf("wrap")>0)
             {
                 request=new HttpServletRequestWrapper((HttpServletRequest)request);
             }

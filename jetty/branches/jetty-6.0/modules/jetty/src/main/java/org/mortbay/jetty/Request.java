@@ -87,6 +87,7 @@ public class Request implements HttpServletRequest
     private Attributes _attributes;
     private String _authType;
     private String _characterEncoding;
+    private String _queryEncoding;
     private String _serverName;
     private String _method;
     private String _pathInfo;
@@ -144,6 +145,7 @@ public class Request implements HttpServletRequest
             _attributes.clearAttributes();
         _authType=null;
         _characterEncoding=null;
+        _queryEncoding=null;
         _context=null;
         _serverName=null;
         _method=null;
@@ -1009,7 +1011,7 @@ public class Request implements HttpServletRequest
     public String getQueryString()
     {
         if (_queryString==null && _uri!=null)
-            _queryString=_uri.getQuery();
+            _queryString=_uri.getQuery(_queryEncoding);
         return _queryString;
     }
     
@@ -1163,7 +1165,7 @@ public class Request implements HttpServletRequest
         {
             try
             {
-                _uri.decodeQueryTo(_baseParameters,encoding);
+                _uri.decodeQueryTo(_baseParameters,_queryEncoding);
             }
             catch (UnsupportedEncodingException e)
             {
@@ -1596,6 +1598,16 @@ public class Request implements HttpServletRequest
     public void setUserRealm(UserRealm userRealm)
     {
         _userRealm = userRealm;
+    }
+
+    public String getQueryEncoding()
+    {
+        return _queryEncoding;
+    }
+
+    public void setQueryEncoding(String queryEncoding)
+    {
+        _queryEncoding=queryEncoding;
     }
 }
 

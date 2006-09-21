@@ -42,6 +42,13 @@ public class Utf8StringBuffer
     {
         _buffer=new StringBuffer(capacity);
     }
+
+    public void append(byte[] b,int offset, int length)
+    {
+        int end=offset+length;
+        for (int i=offset; i<end;i++)
+            append(b[i]);
+    }
     
     public void append(byte b)
     {
