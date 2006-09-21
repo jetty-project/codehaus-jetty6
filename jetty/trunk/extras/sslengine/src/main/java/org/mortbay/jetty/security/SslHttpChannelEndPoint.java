@@ -305,13 +305,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         }
         else
         {
-            // TODO - expensive to do this all the time - need to reuse this buffer!
-            src=ByteBuffer.allocateDirect(buffer.length());
-            for (int i=0; i<buffer.length(); i++)
-            {
-                // TODO ouch! a byte at a time?
-                src.put(buffer.peek(i));
-            }
+            src=ByteBuffer.wrap(buffer.asArray());
         }
 
         if (src!=null)
