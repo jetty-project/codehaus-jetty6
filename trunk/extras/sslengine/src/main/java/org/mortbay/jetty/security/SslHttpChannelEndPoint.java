@@ -305,6 +305,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         }
         else
         {
+	    // TODO This still allocates an array.
             src=ByteBuffer.wrap(buffer.asArray());
         }
 
