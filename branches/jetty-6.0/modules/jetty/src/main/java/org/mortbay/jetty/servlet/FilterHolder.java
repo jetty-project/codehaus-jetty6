@@ -98,12 +98,11 @@ public class FilterHolder
     /* ------------------------------------------------------------ */
     public void doStop()
     {      
+        if (_filter!=null)
+            _filter.destroy();
         if (!_extInstance)
-        {
-            if (_filter!=null)
-                _filter.destroy();
             _filter=null;
-        }
+        
         _config=null;
         super.doStop();   
     }

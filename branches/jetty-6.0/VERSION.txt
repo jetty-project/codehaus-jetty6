@@ -1,3 +1,4 @@
+
 jetty-6.0-SNAPSHOT
     + Improved charset handling in URLs
     + Factored ErrorPageErrorHandler out of WebAppContext
@@ -5,6 +6,7 @@ jetty-6.0-SNAPSHOT
     + JETTY-112 ContextHandler checks if started
     + JETTY-114 removed utf8 characters from code
     + JETTY-115 Fixed addHeader
+    + JETTY-121 init not called on externally constructed servlets
 
 jetty-6.0.0 - 10 September 2006
     + SocketConnector closes all connections in doStop
