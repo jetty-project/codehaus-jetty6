@@ -416,6 +416,13 @@ public class HttpURI
         return StringUtil.toString(_raw,_query+1,_fragment-_query-1,URIUtil.__CHARSET);
     }
     
+    public String getQuery(String encoding)
+    {
+        if (_query==_fragment)
+            return null;
+        return StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding);
+    }
+    
     public String getFragment()
     {
         if (_fragment==_end)
@@ -428,7 +435,14 @@ public class HttpURI
     {
         if (_query==_fragment)
             return;
-        UrlEncoded.decodeUtf8To(_raw,_query+1,_fragment-_query-1,parameters);
+       
+        if (encoding==null)
+            encoding=URIUtil.__CHARSET;
+        
+        if (StringUtil.isUTF8(encoding))
+            UrlEncoded.decodeUtf8To(_raw,_query+1,_fragment-_query-1,parameters);
+        else
+            UrlEncoded.decodeTo(StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding),parameters,encoding);
     }
 
     public void clear()
