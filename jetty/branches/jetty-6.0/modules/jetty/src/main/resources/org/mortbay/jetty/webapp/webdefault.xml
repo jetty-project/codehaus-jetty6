@@ -159,7 +159,7 @@
   <!--                       [clsid:8AD9C840-044E-11D1-B3E9-00805F499D93]   -->
   <!--                                                                      -->
   <!--   javaEncoding        Java file encoding to use for generating java  -->
-  <!--                       source files. [UTF8]                           -->
+  <!--                       source files. [UTF-8]                          -->
   <!--                                                                      -->
   <!--   keepgenerated       Should we keep the generated Java source code  -->
   <!--                       for each page instead of deleting it? [true]   -->
@@ -198,7 +198,7 @@
   <!--   the property "-Dbuild.compiler.emacs=true" when starting Jetty     -->
   <!--   to cause Jikes to emit error messages in a format compatible with  -->
   <!--   Jasper.                                                            -->
-  <!--   If you get an error reporting that jikes can't use UTF8 encoding,  -->
+  <!--   If you get an error reporting that jikes can't use UTF-8 encoding, -->
   <!--   try setting the init parameter "javaEncoding" to "ISO-8859-1".     -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet id="jsp">

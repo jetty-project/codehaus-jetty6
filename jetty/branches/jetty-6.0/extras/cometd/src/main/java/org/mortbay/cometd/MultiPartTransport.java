@@ -18,7 +18,7 @@ public class MultiPartTransport implements Transport
     
     public void preample(HttpServletResponse response) throws IOException
     {
-        response.setCharacterEncoding("utf8");
+        response.setCharacterEncoding("utf-8");
         _writer = new MultiPartWriter(response.getWriter());
         response.setContentType(MultiPartWriter.MULTIPART_X_MIXED_REPLACE+"; boundary="+_writer.getBoundary());
     }
@@ -27,7 +27,7 @@ public class MultiPartTransport implements Transport
     {
         if (reply!=null)
         {
-            _writer.startPart("text/plain; charset=utf8");
+            _writer.startPart("text/plain; charset=utf-8");
             _writer.write(JSON.toString(reply));
             _writer.flush();
         }
@@ -37,7 +37,7 @@ public class MultiPartTransport implements Transport
     {
         if (replies!=null)
         {
-            _writer.startPart("text/plain; charset=utf8");
+            _writer.startPart("text/plain; charset=utf-8");
             _writer.write(JSON.toString(replies));
             _writer.endPart();
             _writer.flush();
@@ -61,7 +61,7 @@ public class MultiPartTransport implements Transport
 
     public boolean keepAlive() throws IOException
     {
-        _writer.startPart("text/plain; charset=utf8");
+        _writer.startPart("text/plain; charset=utf-8");
         _writer.write("{}");
         _writer.flush();
         return false;
