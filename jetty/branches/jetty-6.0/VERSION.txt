@@ -1,5 +1,6 @@
 
 jetty-6.0-SNAPSHOT
+    + fixed ClassCastException in JAASUserRealm.setRoleClassNames(String[])
     + Improved charset handling in URLs
     + Factored ErrorPageErrorHandler out of WebAppContext
     + Refactored ErrorHandler to avoid statics
