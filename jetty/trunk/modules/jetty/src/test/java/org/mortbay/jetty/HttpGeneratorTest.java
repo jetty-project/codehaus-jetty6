@@ -264,7 +264,7 @@ public class HttpGeneratorTest extends TestCase
             content= null;
         }
 
-        public void messageComplete(int contentLength)
+        public void messageComplete(long contentLength)
         {
         }
 
