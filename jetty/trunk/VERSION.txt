@@ -23,6 +23,7 @@ jetty-6.1-SNAPSHOT
     + JETTY-121 init not called on externally constructed servlets
     + JETTY-124 always initialize filter caches
     + JETTY-126 handle content > Integer.MAX_VALUE
+    + JETTY-123 handle windows UNC paths
 
 jetty-6.0-SNAPSHOT
     + Improved charset handling in URLs
