@@ -85,9 +85,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     private boolean _usingCookies=true;
     protected ClassLoader _loader;
     protected ContextHandler.Context _context;
-    protected String _sessionCookie;
-    protected String _sessionURL;
-    protected String _sessionURLPrefix;
+    protected String _sessionCookie=__DefaultSessionCookie;
+    protected String _sessionURL=__DefaultSessionURL;
+    protected String _sessionURLPrefix=";"+_sessionURL+"=";
     protected String _sessionDomain;
     protected String _sessionPath;
     protected int _maxSessionCookieAge=Integer.parseInt(SessionManager.__DefaultMaxAge);
@@ -527,27 +527,17 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         if (!_sessionIdManager.isStarted())
             _sessionIdManager.start();
 
-        // set up the cookie name if it isn't already
-        if (_sessionCookie==null)
+        // Look for a session cookie name
+        String tmp=_context.getInitParameter(SessionManager.__SessionCookieProperty);
+        if (tmp!=null)
+            _sessionCookie=tmp;
+        
+        tmp=_context.getInitParameter(SessionManager.__SessionURLProperty);
+        if (tmp!=null)
         {
-            // try the context initParams then the system properties using the
-            // defaults
-            String str=null;
-            if (_context!=null)
-                str=_context.getInitParameter(SessionManager.__SessionCookieProperty);
-            _sessionCookie=(str==null?SessionManager.__SessionCookieSystemProperty:str);
+            _sessionURL=tmp;
+            _sessionURLPrefix=";"+_sessionURL+"=";
         }
-
-        // set up the parameter name of the session for urls
-        if (_sessionURL==null)
-        {
-            String str=null;
-            if (_context!=null)
-                str=_context.getInitParameter(SessionManager.__SessionURLProperty);
-            _sessionURL=(str==null?SessionManager.__SessionURLSystemProperty:str);
-        }
-        // set up the whole session url
-        _sessionURLPrefix=";"+_sessionURL+"=";
 
         // set up the max session cookie age if it isn't already
         if (!_maxAgeSet)
