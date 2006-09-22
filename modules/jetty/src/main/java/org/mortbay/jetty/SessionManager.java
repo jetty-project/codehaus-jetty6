@@ -41,11 +41,7 @@ public interface SessionManager extends LifeCycle, Serializable
      * org.mortbay.jetty.servlet.SessionCookie system property.
      */
     public final static String __SessionCookieProperty = "org.mortbay.jetty.servlet.SessionCookie";
-    
     public final static String __DefaultSessionCookie = "JSESSIONID";   
-
-    public final static String __SessionCookieSystemProperty=
-        System.getProperty(__SessionCookieProperty,__DefaultSessionCookie);
     
     
     /* ------------------------------------------------------------ */
@@ -54,12 +50,8 @@ public interface SessionManager extends LifeCycle, Serializable
      * org.mortbay.jetty.servlet.SessionURL system property.
      */
     public final static String __SessionURLProperty = "org.mortbay.jetty.servlet.SessionURL";
-    
     public final static String __DefaultSessionURL = "jsessionid";
     
-    public final static String __SessionURLSystemProperty = 
-        System.getProperty(__SessionURLProperty,__DefaultSessionURL);
-
   
 
     /* ------------------------------------------------------------ */
@@ -69,7 +61,6 @@ public interface SessionManager extends LifeCycle, Serializable
      * no domain is specified for the session cookie.
      */
     public final static String __SessionDomainProperty="org.mortbay.jetty.servlet.SessionDomain";
-    
     public final static String __DefaultSessionDomain = null;
     
     

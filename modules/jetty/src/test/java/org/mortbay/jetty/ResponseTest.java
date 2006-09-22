@@ -16,7 +16,15 @@
 package org.mortbay.jetty;
 
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Enumeration;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionContext;
+
+import org.mortbay.jetty.servlet.HashSessionManager;
 
 import junit.framework.TestCase;
 
@@ -263,6 +271,105 @@ public class ResponseTest extends TestCase
         response.sendError(406, "Super Nanny");
         assertEquals(406, response.getStatus());
         assertEquals("Super Nanny", response.getReason());
+    }
+    
+    public void testEncodeRedirect()
+        throws Exception
+    {
+        HttpConnection connection=new HttpConnection(connector,connector.endp,connector.server);
+        Response response = new Response(connection);
+        Request request = connection.getRequest();
+        
+        assertEquals("http://host:port/path/info;param?query=0&more=1#target",response.encodeRedirectUrl("http://host:port/path/info;param?query=0&more=1#target"));
+       
+        request.setRequestedSessionId("12345");
+        request.setRequestedSessionIdFromCookie(false);
+        request.setSessionManager(new HashSessionManager());
+        request.setSession(new HttpSession(){
+
+            public Object getAttribute(String name) 
+            {
+                return null;
+            }
+
+            public Enumeration getAttributeNames()
+            {
+
+                return null;
+            }
+
+            public long getCreationTime()
+            {
+
+                return 0;
+            }
+
+            public String getId()
+            {
+                return "12345";
+            }
+
+            public long getLastAccessedTime()
+            {
+                return 0;
+            }
+
+            public int getMaxInactiveInterval()
+            {
+                return 0;
+            }
+
+            public ServletContext getServletContext()
+            {
+                return null;
+            }
+
+            public HttpSessionContext getSessionContext()
+            {
+                return null;
+            }
+
+            public Object getValue(String name)
+            {
+                return null;
+            }
+
+            public String[] getValueNames()
+            {
+                return null;
+            }
+
+            public void invalidate()
+            {
+            }
+
+            public boolean isNew()
+            {
+                return false;
+            }
+
+            public void putValue(String name, Object value)
+            {
+            }
+
+            public void removeAttribute(String name)
+            {
+            }
+
+            public void removeValue(String name)
+            {   
+            }
+
+            public void setAttribute(String name, Object value)
+            {
+            }
+
+            public void setMaxInactiveInterval(int interval)
+            {
+            }});
+        
+        assertEquals("http://host:port/path/info;param;jsessionid=12345?query=0&more=1#target",response.encodeRedirectUrl("http://host:port/path/info;param?query=0&more=1#target"));
+              
     }
 
     private Response newResponse()
