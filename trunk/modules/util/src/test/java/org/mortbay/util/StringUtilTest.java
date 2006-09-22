@@ -162,7 +162,7 @@ public class StringUtilTest extends TestCase
             long s1=System.currentTimeMillis();
             for (int j=1000000; j-->0;)
             {
-                calc+=new String(bytes,0,bytes.length,"UTF8").hashCode();
+                calc+=new String(bytes,0,bytes.length,"UTF-8").hashCode();
             }
             long s2=System.currentTimeMillis();
             for (int j=1000000; j-->0;)

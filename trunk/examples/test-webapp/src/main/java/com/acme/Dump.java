@@ -59,7 +59,7 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        request.setCharacterEncoding("utf8");
+        request.setCharacterEncoding("UTF-8");
         
         if (request.getParameter("empty")!=null)
         {
@@ -506,7 +506,7 @@ public class Dump extends HttpServlet
             }
             
             pout.write("<br/>");
-            pout.write("<h2>International Characters (utf8)</h2>");
+            pout.write("<h2>International Characters (UTF-8)</h2>");
             pout.write("MODIFIER LETTER CAPITAL AE<br/>\n");
             pout.write("Directly uni encoded(\\u1d2d): \u1d2d<br/>");
             pout.write("HTML reference (&amp;AElig;): &AElig;<br/>");

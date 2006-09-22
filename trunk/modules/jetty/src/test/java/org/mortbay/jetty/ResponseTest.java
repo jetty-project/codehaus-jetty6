@@ -111,19 +111,19 @@ public class ResponseTest extends TestCase
         Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
         
         response.setContentType("foo/bar");
-        response.setCharacterEncoding("utf8");
-        assertEquals("foo/bar; charset=utf8",response.getContentType());
+        response.setCharacterEncoding("utf-8");
+        assertEquals("foo/bar; charset=utf-8",response.getContentType());
         response.getWriter();
-        assertEquals("foo/bar; charset=utf8",response.getContentType());
+        assertEquals("foo/bar; charset=utf-8",response.getContentType());
         response.setContentType("foo2/bar2");
-        assertEquals("foo2/bar2; charset=utf8",response.getContentType());
+        assertEquals("foo2/bar2; charset=utf-8",response.getContentType());
         response.setCharacterEncoding("ISO-8859-1");
-        assertEquals("foo2/bar2; charset=utf8",response.getContentType());
+        assertEquals("foo2/bar2; charset=utf-8",response.getContentType());
 
         response.recycle();
         
         response.setContentType("text/html");
-        response.setCharacterEncoding("utf8");
+        response.setCharacterEncoding("utf-8");
         assertEquals("text/html; charset=UTF-8",response.getContentType());
         response.getWriter();
         assertEquals("text/html; charset=UTF-8",response.getContentType());
@@ -139,19 +139,19 @@ public class ResponseTest extends TestCase
     {
         Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
         
-        response.setCharacterEncoding("utf8");
+        response.setCharacterEncoding("utf-8");
         response.setContentType("foo/bar");
-        assertEquals("foo/bar; charset=utf8",response.getContentType());
+        assertEquals("foo/bar; charset=utf-8",response.getContentType());
         response.getWriter();
-        assertEquals("foo/bar; charset=utf8",response.getContentType());
+        assertEquals("foo/bar; charset=utf-8",response.getContentType());
         response.setContentType("foo2/bar2");
-        assertEquals("foo2/bar2; charset=utf8",response.getContentType());
+        assertEquals("foo2/bar2; charset=utf-8",response.getContentType());
         response.setCharacterEncoding("ISO-8859-1");
-        assertEquals("foo2/bar2; charset=utf8",response.getContentType());
+        assertEquals("foo2/bar2; charset=utf-8",response.getContentType());
         
         response.recycle();
         
-        response.setCharacterEncoding("utf8");
+        response.setCharacterEncoding("utf-8");
         response.setContentType("text/html");
         assertEquals("text/html; charset=UTF-8",response.getContentType());
         response.getWriter();
@@ -169,19 +169,19 @@ public class ResponseTest extends TestCase
         Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
         
         response.setCharacterEncoding("utf16");
-        response.setContentType("foo/bar; charset=utf8");
-        assertEquals("foo/bar; charset=utf8",response.getContentType());
+        response.setContentType("foo/bar; charset=utf-8");
+        assertEquals("foo/bar; charset=utf-8",response.getContentType());
         response.getWriter();
-        assertEquals("foo/bar; charset=utf8",response.getContentType());
+        assertEquals("foo/bar; charset=utf-8",response.getContentType());
         response.setContentType("foo2/bar2");
-        assertEquals("foo2/bar2; charset=utf8",response.getContentType());
+        assertEquals("foo2/bar2; charset=utf-8",response.getContentType());
         response.setCharacterEncoding("ISO-8859-1");
-        assertEquals("foo2/bar2; charset=utf8",response.getContentType());
+        assertEquals("foo2/bar2; charset=utf-8",response.getContentType());
 
         response.recycle();
 
         response.setCharacterEncoding("utf16");
-        response.setContentType("text/html; charset=utf8");
+        response.setContentType("text/html; charset=utf-8");
         assertEquals("text/html; charset=UTF-8",response.getContentType());
         response.getWriter();
         assertEquals("text/html; charset=UTF-8",response.getContentType());
@@ -223,10 +223,10 @@ public class ResponseTest extends TestCase
         Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
 
         response.setCharacterEncoding("utf16");
-        response.setContentType("foo/bar; charset=utf8 other=xyz");
-        assertEquals("foo/bar; charset=utf8 other=xyz",response.getContentType());
+        response.setContentType("foo/bar; charset=utf-8 other=xyz");
+        assertEquals("foo/bar; charset=utf-8 other=xyz",response.getContentType());
         response.getWriter();
-        assertEquals("foo/bar; charset=utf8 other=xyz",response.getContentType());
+        assertEquals("foo/bar; charset=utf-8 other=xyz",response.getContentType());
 
         response.recycle();
 
@@ -239,10 +239,10 @@ public class ResponseTest extends TestCase
         response.recycle();
         
         response.setCharacterEncoding("utf16");
-        response.setContentType("foo/bar; other=pq charset=utf8 other=xyz");
-        assertEquals("foo/bar; other=pq charset=utf8 other=xyz",response.getContentType());
+        response.setContentType("foo/bar; other=pq charset=utf-8 other=xyz");
+        assertEquals("foo/bar; other=pq charset=utf-8 other=xyz",response.getContentType());
         response.getWriter();
-        assertEquals("foo/bar; other=pq charset=utf8 other=xyz",response.getContentType());
+        assertEquals("foo/bar; other=pq charset=utf-8 other=xyz",response.getContentType());
 
     }
     
