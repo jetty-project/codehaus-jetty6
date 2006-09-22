@@ -46,7 +46,7 @@ public class PlainTextJSONTransport implements Transport
                 
             case 1:
             {
-                _response.setContentType("text/plain; charset=utf8");
+                _response.setContentType("text/plain; charset=utf-8");
                 String s = JSON.toString(LazyList.get(_responses,0));
                 System.err.println(s);
                 _response.getWriter().write(s);
@@ -55,7 +55,7 @@ public class PlainTextJSONTransport implements Transport
                 
             default:
             {
-                _response.setContentType("text/plain; charset=utf8");
+                _response.setContentType("text/plain; charset=utf-8");
                 String s = JSON.toString(LazyList.getList(_responses));
                 System.err.println(s);
                 _response.getWriter().write(s); 
