@@ -37,6 +37,7 @@ public class URIUtil
     public static final String HTTPS="https";
     public static final String HTTPS_COLON="https:";
 
+    // Use UTF-8 as per http://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars
     public static final String __CHARSET=System.getProperty("org.mortbay.util.URI.charset",StringUtil.__UTF8);
     
     private URIUtil()
