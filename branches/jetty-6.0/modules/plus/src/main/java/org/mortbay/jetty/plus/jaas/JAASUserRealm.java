@@ -138,7 +138,7 @@ public class JAASUserRealm implements UserRealm
          
         if (!tmp.contains(DEFAULT_ROLE_CLASS_NAME))
             tmp.add(DEFAULT_ROLE_CLASS_NAME);
-        roleClassNames = (String[])tmp.toArray();
+        roleClassNames = (String[])tmp.toArray(new String[tmp.size()]);
     }
 
     public String[] getRoleClassNames()
