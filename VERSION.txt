@@ -22,6 +22,7 @@ jetty-6.1-SNAPSHOT
     + Refactored session lifecycle and additional tests
     + JETTY-121 init not called on externally constructed servlets
     + JETTY-124 always initialize filter caches
+    + JETTY-126 handle content > Integer.MAX_VALUE
 
 jetty-6.0-SNAPSHOT
     + Improved charset handling in URLs

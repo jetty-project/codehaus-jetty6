@@ -59,8 +59,8 @@ public class HttpParser implements Parser
     protected int _state=STATE_START;
     protected byte _eol;
     protected int _length;
-    protected int _contentLength;
-    protected int _contentPosition;
+    protected long _contentLength;
+    protected long _contentPosition;
     protected int _chunkLength;
     protected int _chunkPosition;
 
@@ -145,7 +145,7 @@ public class HttpParser implements Parser
     }
 
     /* ------------------------------------------------------------------------------- */
-    public int getContentLength()
+    public long getContentLength()
     {
         return _contentLength;
     }
@@ -437,7 +437,7 @@ public class HttpParser implements Parser
                                     case HttpHeaders.CONTENT_LENGTH_ORDINAL:
                                         if (_contentLength != HttpTokens.CHUNKED_CONTENT)
                                         {
-                                            _contentLength=BufferUtil.toInt(value);
+                                            _contentLength=BufferUtil.toLong(value);
                                             if (_contentLength <= 0)
                                                 _contentLength=HttpTokens.NO_CONTENT;
                                         }
@@ -488,7 +488,9 @@ public class HttpParser implements Parser
 
                             _contentPosition=0;
                             _eol=ch;
-                            switch (_contentLength)
+                            // We convert _contentLength to an int for this switch statement because
+                            // we don't care about the amount of data available just whether there is some.
+                            switch (_contentLength > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _contentLength)
                             {
                                 case HttpTokens.EOF_CONTENT:
                                     _state=STATE_EOF_CONTENT;
@@ -617,7 +619,7 @@ public class HttpParser implements Parser
 
                 case STATE_CONTENT: 
                 {
-                    int remaining=_contentLength - _contentPosition;
+                    long remaining=_contentLength - _contentPosition;
                     if (remaining == 0)
                     {
                         _state=STATE_END;
@@ -626,7 +628,9 @@ public class HttpParser implements Parser
                     }
                     else if (length >= remaining) 
                     {
-                        length=remaining;
+                        // We can cast reamining to an int as we know that it is smaller than
+                        // or equal to length which is already an int. 
+                        length=(int)remaining;
                         _state=STATE_END;
                     }
                     chunk=_buffer.get(length);
@@ -821,7 +825,7 @@ public class HttpParser implements Parser
 
         public abstract void content(Buffer ref) throws IOException;
         
-        public void messageComplete(int contextLength) throws IOException
+        public void messageComplete(long contextLength) throws IOException
         {
         }
     }
