@@ -143,7 +143,7 @@ public class JAASUserPrincipal implements Principal
             roleCheckPolicy = new StrictRoleCheckPolicy();
         
 
-        return roleCheckPolicy.checkRole (new JAASRole(roleName),
+        return roleCheckPolicy.checkRole (roleName,
                                           runAsRoles.peek(),
                                           getRoles());
     }

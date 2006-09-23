@@ -319,14 +319,15 @@ public class JAASUserRealm implements UserRealm
             if (thePrincipal == null)
                 thePrincipal = defaultUser;
             
-            
             for (int i=0; i<roleClassNames.length;i++)
             {
                 Class load_class=Thread.currentThread().getContextClassLoader().loadClass(roleClassNames[i]);
                 Set rolesForType = thePrincipal.getSubject().getPrincipals (load_class);
                 Iterator itor = rolesForType.iterator();
                 while (itor.hasNext())
+                {
                     roleGroup.addMember((Principal) itor.next());
+                }
             }
             
             return roleGroup;
