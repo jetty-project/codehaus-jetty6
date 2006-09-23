@@ -28,6 +28,7 @@ jetty-6.1-SNAPSHOT
     + JETTY-123 handle windows UNC paths
 
 jetty-6.0-SNAPSHOT
+    + fixed isUserInRole checking for JAASUserRealm
     + fixed ClassCastException in JAASUserRealm.setRoleClassNames(String[])
     + Improved charset handling in URLs
     + Factored ErrorPageErrorHandler out of WebAppContext
