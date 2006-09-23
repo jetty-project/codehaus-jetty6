@@ -17,6 +17,7 @@ package org.mortbay.jetty.plus.jaas;
 
 import java.security.Principal;
 import java.security.acl.Group;
+import java.util.Enumeration;
 
 
 /* ---------------------------------------------------- */
@@ -32,20 +33,26 @@ import java.security.acl.Group;
 public class StrictRoleCheckPolicy implements RoleCheckPolicy
 {
 
-    public boolean checkRole (Principal role, Principal runAsRole, Group roles)
+    public boolean checkRole (String roleName, Principal runAsRole, Group roles)
     {
         //check if this user has had any temporary role pushed onto
         //them. If so, then only check if the user has that role.
         if (runAsRole != null)
         {
-            return (role.equals(runAsRole));
+            return (roleName.equals(runAsRole.getName()));
         }
         else
         {
             if (roles == null)
                 return false;
-            
-            return roles.isMember (role);
+            Enumeration rolesEnum = roles.members();
+            boolean found = false;
+            while (rolesEnum.hasMoreElements() && !found)
+            {
+                Principal p = (Principal)rolesEnum.nextElement();
+                found = roleName.equals(p.getName());
+            }
+            return found;
         }
         
     }
