@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + fixed ClassCastException in JAASUserRealm.setRoleClassNames(String[])
     + add a maven-jetty-jspc-plugin to do jspc precompilation
     + added examples/test-jaas-webapp
     + (re)make JAAS classes available to webapp classloader
@@ -26,6 +27,7 @@ jetty-6.1-SNAPSHOT
     + JETTY-123 handle windows UNC paths
 
 jetty-6.0-SNAPSHOT
+    + fixed ClassCastException in JAASUserRealm.setRoleClassNames(String[])
     + Improved charset handling in URLs
     + Factored ErrorPageErrorHandler out of WebAppContext
     + Refactored ErrorHandler to avoid statics
