@@ -74,6 +74,22 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <mode>stable</mode>
+              <url>${pom.url}</url>
+	      <implementation-vendor>JCP</implementation-vendor>
+	      <implementation-version>${pom.version}</implementation-version>
+	      <specification-version>2.1</specification-version>
+	      <package>javax.servlet.jsp</package>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
