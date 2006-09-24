@@ -235,6 +235,15 @@ public class SelectChannelConnector extends AbstractNIOConnector
         {
             synchronized(this)
             {
+                Iterator iter = new ArrayList(_selector.keys()).iterator();
+                while (iter.hasNext())
+                {
+                    SelectionKey key = (SelectionKey)iter.next();
+                    HttpChannelEndPoint endpoint = (HttpChannelEndPoint)key.attachment();
+                    if (endpoint!=null)
+                        endpoint.close();
+                }
+                
                 _idleTimeout.cancelAll();
                 _retryTimeout.cancelAll();
                 try
