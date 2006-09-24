@@ -154,6 +154,21 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <mode>development</mode>
+              <url>${pom.url}</url>
+	      <implementation-version>${pom.version}</implementation-version>
+	      <package>org.mortbay</package>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
       <!-- plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clover-plugin</artifactId>
