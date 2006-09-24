@@ -26,6 +26,7 @@ jetty-6.1-SNAPSHOT
     + JETTY-124 always initialize filter caches
     + JETTY-126 handle content > Integer.MAX_VALUE
     + JETTY-123 handle windows UNC paths
+    + JETYY-120 SelectChannelConnector closes all connections on stop
 
 jetty-6.0-SNAPSHOT
     + fixed isUserInRole checking for JAASUserRealm
