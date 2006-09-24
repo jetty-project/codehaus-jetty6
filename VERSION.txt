@@ -29,6 +29,8 @@ jetty-6.1-SNAPSHOT
     + JETYY-120 SelectChannelConnector closes all connections on stop
 
 jetty-6.0-SNAPSHOT
+
+jetty-6.0.1 - 24 September 2006
     + fixed isUserInRole checking for JAASUserRealm
     + fixed ClassCastException in JAASUserRealm.setRoleClassNames(String[])
     + Improved charset handling in URLs
