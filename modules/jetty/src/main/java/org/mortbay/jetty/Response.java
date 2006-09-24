@@ -94,7 +94,7 @@ public class Response implements HttpServletResponse
     /*
      * @see javax.servlet.ServletResponse#reset()
      */
-    protected void recycle()
+    void recycle()
     {
         _status=SC_OK;
         _reason=null;

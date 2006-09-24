@@ -261,28 +261,5 @@ public class ByteArrayEndPoint implements EndPoint
         return _inBytes;
     }
 
-    /* ------------------------------------------------------------ */
-    public void flush() throws IOException
-    {   
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isBufferingInput()
-    {
-        return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isBufferingOutput()
-    {
-        return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isBufferred()
-    {
-        return false;
-    }
-
 
 }

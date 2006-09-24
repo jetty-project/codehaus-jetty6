@@ -2,7 +2,6 @@ package org.mortbay.jetty.webapp;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -75,39 +74,18 @@ public class TransformingWebAppClassLoader extends WebAppClassLoader implements 
         {
             throw new RuntimeException(e);
         }
+        Log.info("transforming "+url);
         
         super.addURL(url);
-        
-        System.err.println("classpath="+Arrays.asList(getURLs()));
     }
     
     public byte[] transform(URL src, byte[] content)
     {
-        // System.err.println("tx: "+src);
         return content;
-    }
-
-    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException
-    {
-        // TODO Auto-generated method stub
-        return super.loadClass(name,resolve);
-    }
-
-    public synchronized Class loadClass(String name) throws ClassNotFoundException
-    {
-        // TODO Auto-generated method stub
-        return super.loadClass(name);
-    }
-
-    protected Class findClass(String name) throws ClassNotFoundException
-    {
-        // TODO Auto-generated method stub
-        return super.findClass(name);
     }
 
     public URL getResource(String name)
     {
-        System.err.println("getResource "+name);
         URL url = super.getResource(name);
         if (url!=null && url.getProtocol().equals(Handler.PROTOCOL))
         {
@@ -120,13 +98,11 @@ public class TransformingWebAppClassLoader extends WebAppClassLoader implements 
                 Log.warn(e);
             }
         }
-        System.err.println("GET  url="+url);
         return url;
     }
 
     public URL findResource(String name)
     {
-        System.err.println("findResource "+name);
         URL url = super.findResource(name);
         if (url!=null && url.getProtocol().equals(Handler.PROTOCOL))
         {
@@ -139,13 +115,11 @@ public class TransformingWebAppClassLoader extends WebAppClassLoader implements 
                 Log.warn(e);
             }
         }
-        System.err.println("FIND url="+url);
         return url;
     }
 
     public Enumeration findResources(String name) throws IOException
     {
-        // TODO Auto-generated method stub
         Enumeration en=super.findResources(name);
         Object list = null;
         while(en!=null && en.hasMoreElements())
@@ -162,29 +136,9 @@ public class TransformingWebAppClassLoader extends WebAppClassLoader implements 
                     Log.warn(e);
                 }
             }
-            System.err.println(" + "+url);
             list=LazyList.add(list,url);
         }
         
         return Collections.enumeration(LazyList.getList(list));
     }
-
-    public InputStream getResourceAsStream(String name)
-    {
-        System.err.println("getResourceAsStream "+name);
-        // TODO Auto-generated method stub
-        return super.getResourceAsStream(name);
-    }
-
-    public Enumeration getResources(String name) throws IOException
-    {
-        System.err.println("getResources "+name);
-        // TODO Auto-generated method stub
-        Enumeration e=super.getResources(name);
-        while(e!=null && e.hasMoreElements())
-            System.err.println(" + "+e.nextElement());
-        
-        return super.getResources(name);
-    }
-
 }

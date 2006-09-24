@@ -45,7 +45,7 @@ import org.mortbay.util.UrlEncoded;
  * @author gregw
  * 
  */
-public class HttpGenerator implements Generator
+public class HttpGenerator implements HttpTokens
 {
     // states
     public final static int STATE_HEADER = 0;
@@ -109,7 +109,7 @@ public class HttpGenerator implements Generator
     private String _reason;
 
     private long _contentWritten = 0;
-    private long _contentLength = HttpTokens.UNKNOWN_CONTENT;
+    private long _contentLength = UNKNOWN_CONTENT;
     private boolean _last = false;
     private boolean _head = false;
     private boolean _noContent = false;
@@ -157,7 +157,7 @@ public class HttpGenerator implements Generator
         _noContent=false;
         _close = false;
         _contentWritten = 0;
-        _contentLength = HttpTokens.UNKNOWN_CONTENT;
+        _contentLength = UNKNOWN_CONTENT;
 
         if (returnBuffers)
         {
@@ -194,7 +194,7 @@ public class HttpGenerator implements Generator
         _last = false;
         _close = false;
         _contentWritten = 0;
-        _contentLength = HttpTokens.UNKNOWN_CONTENT;
+        _contentLength = UNKNOWN_CONTENT;
         _bypass=false;
         _content=null;
         if (_buffer!=null)
@@ -335,7 +335,7 @@ public class HttpGenerator implements Generator
         // Handle any unfinished business?
         if (_content!=null && _content.length()>0 || _bufferChunked)
         {
-            flush();
+            flushBuffers();
             if (_content != null && _content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
@@ -387,7 +387,7 @@ public class HttpGenerator implements Generator
         // Handle any unfinished business?
         if (_content != null && _content.length()>0 || _bufferChunked)
         {
-            flush();
+            flushBuffers();
             if (_content != null && _content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
@@ -405,7 +405,7 @@ public class HttpGenerator implements Generator
         // Copy _content to buffer;
         _buffer.put(b);
         
-        return _buffer.space()<=(_contentLength == HttpTokens.CHUNKED_CONTENT?CHUNK_SPACE:0);
+        return _buffer.space()<=(_contentLength == CHUNKED_CONTENT?CHUNK_SPACE:0);
     }
 
 
@@ -427,7 +427,7 @@ public class HttpGenerator implements Generator
         Buffer content = _content;
         if (content != null && content.length()>0 || _bufferChunked)
         {
-            flush();
+            flushBuffers();
             if (content != null && content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
         }
@@ -442,7 +442,7 @@ public class HttpGenerator implements Generator
         if (_head)
             return Integer.MAX_VALUE;
         
-        return _buffer.space()-(_contentLength == HttpTokens.CHUNKED_CONTENT?CHUNK_SPACE:0);
+        return _buffer.space()-(_contentLength == CHUNKED_CONTENT?CHUNK_SPACE:0);
     }
 
     /* ------------------------------------------------------------ */
@@ -472,7 +472,7 @@ public class HttpGenerator implements Generator
     public boolean isBufferFull()
     {
         // Should we flush the buffers?
-        boolean full = (_state == STATE_FLUSHING || _bypass || (_buffer != null && _buffer.space() == 0) || (_contentLength == HttpTokens.CHUNKED_CONTENT && _buffer != null && _buffer.space() < CHUNK_SPACE));
+        boolean full = (_state == STATE_FLUSHING || _bypass || (_buffer != null && _buffer.space() == 0) || (_contentLength == CHUNKED_CONTENT && _buffer != null && _buffer.space() < CHUNK_SPACE));
         return full;
     }
     
@@ -487,7 +487,7 @@ public class HttpGenerator implements Generator
         if (_version == HttpVersions.HTTP_0_9_ORDINAL)
         {
             _close = true;
-            _contentLength = HttpTokens.EOF_CONTENT;
+            _contentLength = EOF_CONTENT;
         }
         else
         {
@@ -528,14 +528,14 @@ public class HttpGenerator implements Generator
                     _header.put((byte) ' ');
                     byte[] r = Portable.getBytes(_reason == null ? "Unknown" : _reason);
                     _header.put(r, 0, r.length);
-                    _header.put(HttpTokens.CRLF);
+                    _header.put(CRLF);
                 }
                 else if (_reason != null)
                 {
                     _header.put(line.array(), 0, HttpVersions.HTTP_1_1_BUFFER.length() + 5);
                     byte[] r = Portable.getBytes(_reason);
                     _header.put(r, 0, r.length);
-                    _header.put(HttpTokens.CRLF);
+                    _header.put(CRLF);
                 }
                 else
                     _reason=getReason(_status);
@@ -580,7 +580,7 @@ public class HttpGenerator implements Generator
                             break;
 
                         case HttpHeaders.CONTENT_TYPE_ORDINAL:
-                            if (BufferUtil.isPrefix(MimeTypes.MULTIPART_BYTERANGES_BUFFER, field.getValueBuffer())) _contentLength = HttpTokens.SELF_DEFINING_CONTENT;
+                            if (BufferUtil.isPrefix(MimeTypes.MULTIPART_BYTERANGES_BUFFER, field.getValueBuffer())) _contentLength = SELF_DEFINING_CONTENT;
 
                             // write the field to the header buffer
                             field.put(_header);
@@ -601,7 +601,7 @@ public class HttpGenerator implements Generator
                             keep_alive = HttpHeaderValues.KEEP_ALIVE_ORDINAL == connection_value;
                             if (keep_alive && _version == HttpVersions.HTTP_1_0_ORDINAL) _close = false;
 
-                            if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) _contentLength = HttpTokens.EOF_CONTENT;
+                            if (_close && _contentLength == UNKNOWN_CONTENT) _contentLength = EOF_CONTENT;
 
                             // Do NOT add yet!
                             break;
@@ -633,13 +633,13 @@ public class HttpGenerator implements Generator
 
             switch ((int) _contentLength)
             {
-                case HttpTokens.UNKNOWN_CONTENT:
+                case UNKNOWN_CONTENT:
                     // It may be that we have no _content, or perhaps _content just has not been
                     // written yet?
 
                     // Response known not to have a body
                     if (_contentWritten == 0 && (_status < 200 || _status == 204 || _status == 304))
-                        _contentLength = HttpTokens.NO_CONTENT;
+                        _contentLength = NO_CONTENT;
                     else if (_last)
                     {
                         // we have seen all the _content there is
@@ -648,26 +648,26 @@ public class HttpGenerator implements Generator
                         {
                             // known length but not actually set.
                             _header.put(HttpHeaders.CONTENT_LENGTH_BUFFER);
-                            _header.put(HttpTokens.COLON);
+                            _header.put(COLON);
                             _header.put((byte) ' ');
                             BufferUtil.putDecLong(_header, _contentLength);
-                            _header.put(HttpTokens.CRLF);
+                            _header.put(CRLF);
                         }
                     }
                     else
                         // No idea, so we must assume that a body is coming
-                        _contentLength = (_close || _version < HttpVersions.HTTP_1_1_ORDINAL) ? HttpTokens.EOF_CONTENT : HttpTokens.CHUNKED_CONTENT;
+                        _contentLength = (_close || _version < HttpVersions.HTTP_1_1_ORDINAL) ? EOF_CONTENT : CHUNKED_CONTENT;
                     break;
 
-                case HttpTokens.NO_CONTENT:
+                case NO_CONTENT:
                     if (content_length == null && _status >= 200 && _status != 204 && _status != 304) _header.put(CONTENT_LENGTH_0);
                     break;
 
-                case HttpTokens.EOF_CONTENT:
+                case EOF_CONTENT:
                     _close = true;
                     break;
 
-                case HttpTokens.CHUNKED_CONTENT:
+                case CHUNKED_CONTENT:
                     break;
 
                 default:
@@ -676,7 +676,7 @@ public class HttpGenerator implements Generator
             }
 
             // Add transfer_encoding if needed
-            if (_contentLength == HttpTokens.CHUNKED_CONTENT)
+            if (_contentLength == CHUNKED_CONTENT)
             {
                 // try to use user supplied encoding as it may have other values.
                 if (transfer_encoding != null && HttpHeaderValues.CHUNKED_ORDINAL != transfer_encoding.getValueOrdinal())
@@ -693,7 +693,7 @@ public class HttpGenerator implements Generator
             }
 
             // Handle connection if need be
-            if ((_close || _contentLength==HttpTokens.EOF_CONTENT))
+            if ((_close || _contentLength==EOF_CONTENT))
             {
                 if (_version>HttpVersions.HTTP_1_0_ORDINAL || connection!=null)
                     _header.put(CONNECTION_CLOSE);
@@ -707,7 +707,7 @@ public class HttpGenerator implements Generator
                 _header.put(SERVER);
 
             // end the header.
-            _header.put(HttpTokens.CRLF);
+            _header.put(CRLF);
 
         }
 
@@ -740,14 +740,14 @@ public class HttpGenerator implements Generator
         if (_state != STATE_FLUSHING)
         {
             _state = STATE_FLUSHING;
-            if (_contentLength == HttpTokens.CHUNKED_CONTENT) _needEOC = true;
+            if (_contentLength == CHUNKED_CONTENT) _needEOC = true;
         }
         
-        flush();
+        flushBuffers();
     }
 
     /* ------------------------------------------------------------ */
-    public long flush() throws IOException
+    public long flushBuffers() throws IOException
     {
         try
         {   
@@ -757,7 +757,7 @@ public class HttpGenerator implements Generator
             
             if (_endp == null)
             {
-                if (_needCRLF && _buffer != null) _buffer.put(HttpTokens.CRLF);
+                if (_needCRLF && _buffer != null) _buffer.put(CRLF);
                 if (_needEOC && _buffer != null) _buffer.put(LAST_CHUNK);
                 return 0;
             }
@@ -803,7 +803,7 @@ public class HttpGenerator implements Generator
                         if (_buffer != null)
                         {
                             _buffer.clear();
-                            if (_contentLength == HttpTokens.CHUNKED_CONTENT)
+                            if (_contentLength == CHUNKED_CONTENT)
                             {
                                 // reserve some space for the chunk header
                                 _buffer.setPutIndex(CHUNK_SPACE);
@@ -873,7 +873,7 @@ public class HttpGenerator implements Generator
             }
 
             // Chunk buffer if need be
-            if (_contentLength == HttpTokens.CHUNKED_CONTENT)
+            if (_contentLength == CHUNKED_CONTENT)
             {
                 int size = _buffer == null ? 0 : _buffer.length();
                 if (size > 0)
@@ -885,13 +885,13 @@ public class HttpGenerator implements Generator
                     if (_buffer.getIndex() == CHUNK_SPACE)
                     {
                         // Oh yes, goodie! let's use it then!
-                        _buffer.poke(_buffer.getIndex() - 2, HttpTokens.CRLF, 0, 2);
+                        _buffer.poke(_buffer.getIndex() - 2, CRLF, 0, 2);
                         _buffer.setGetIndex(_buffer.getIndex() - 2);
                         BufferUtil.prependHexInt(_buffer, size);
 
                         if (_needCRLF)
                         {
-                            _buffer.poke(_buffer.getIndex() - 2, HttpTokens.CRLF, 0, 2);
+                            _buffer.poke(_buffer.getIndex() - 2, CRLF, 0, 2);
                             _buffer.setGetIndex(_buffer.getIndex() - 2);
                             _needCRLF = false;
                         }
@@ -902,16 +902,16 @@ public class HttpGenerator implements Generator
                         if (_needCRLF)
                         {
                             if (_header.length() > 0) throw new IllegalStateException("EOC");
-                            _header.put(HttpTokens.CRLF);
+                            _header.put(CRLF);
                             _needCRLF = false;
                         }
                         BufferUtil.putHexInt(_header, size);
-                        _header.put(HttpTokens.CRLF);
+                        _header.put(CRLF);
                     }
 
                     // Add end chunk trailer.
                     if (_buffer.space() >= 2)
-                        _buffer.put(HttpTokens.CRLF);
+                        _buffer.put(CRLF);
                     else
                         _needCRLF = true;
                 }
@@ -923,12 +923,12 @@ public class HttpGenerator implements Generator
                     {
                         if (_buffer == null && _header.space() >= 2)
                         {
-                            _header.put(HttpTokens.CRLF);
+                            _header.put(CRLF);
                             _needCRLF = false;
                         }
                         else if (_buffer.space() >= 2)
                         {
-                            _buffer.put(HttpTokens.CRLF);
+                            _buffer.put(CRLF);
                             _needCRLF = false;
                         }
                     }
@@ -1066,12 +1066,12 @@ public class HttpGenerator implements Generator
             Buffer buffer = _generator._buffer;
             if (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
             {
-                _generator.flush();
+                _generator.flushBuffers();
                 while (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
                 {
                     if (!_generator._endp.isBlocking())
                         _generator._endp.blockWritable(_maxIdleTime);
-                    _generator.flush();
+                    _generator.flushBuffers();
                 }
             }
         }

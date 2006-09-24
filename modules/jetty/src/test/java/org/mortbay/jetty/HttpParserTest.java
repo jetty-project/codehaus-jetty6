@@ -424,7 +424,7 @@ public class HttpParserTest extends TestCase
             }
         }
 
-        public void messageComplete(long contentLength)
+        public void messageComplete(int contentLength)
         {
         }
 

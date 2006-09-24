@@ -26,7 +26,6 @@ import junit.framework.TestCase;
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
-import org.mortbay.jetty.handler.ContextHandler;
 
 /**
  * @version $Revision$
@@ -37,20 +36,23 @@ public class SessionManagerTest extends TestCase
     SessionHandler handler = new SessionHandler(sessionManager);
     Server server = new Server();
     
+    
     protected void setUp() throws Exception
     {
         sessionManager.setMetaManager(new TestSessionIdManager());
-        ContextHandler context=new ContextHandler();
         sessionManager.setSessionHandler(handler);
-        server.setHandler(context);
-        context.setHandler(handler);
+        server.setHandler(handler);
         server.start();
     }
+
+
 
     protected void tearDown() throws Exception
     {
         server.stop();
     }
+
+
 
     public void testSetAttributeToNullIsTheSameAsRemoveAttribute() throws Exception
     {
@@ -93,11 +95,6 @@ public class SessionManagerTest extends TestCase
         public String newSessionId(HttpServletRequest request, long created)
         {
             return "xyzzy";
-        }
-
-        public void removeSession(HttpSession session)
-        {
-            // ignore
         }
 
     }

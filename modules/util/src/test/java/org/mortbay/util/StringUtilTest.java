@@ -105,7 +105,6 @@ public class StringUtilTest extends TestCase
         
         s=" \u0690bc ";
         assertEquals(StringUtil.replace(s, "\u0690bc", "xyz")," xyz ");
-        
     }
 
     public void testUnquote()

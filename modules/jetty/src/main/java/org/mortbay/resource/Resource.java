@@ -80,8 +80,8 @@ public abstract class Resource implements Serializable
         if (url==null)
             return null;
 
-        String url_string=url.toExternalForm();
-        if( url_string.startsWith( "file:"))
+        String urls=url.toExternalForm();
+        if( urls.startsWith( "file:"))
         {
             try
             {
@@ -94,11 +94,11 @@ public abstract class Resource implements Serializable
                 return new BadResource(url,e.toString());
             }
         }
-        else if( url_string.startsWith( "jar:file:"))
+        else if( urls.startsWith( "jar:file:"))
         {
             return new JarFileResource(url, useCaches);
         }
-        else if( url_string.startsWith( "jar:"))
+        else if( urls.startsWith( "jar:"))
         {
             return new JarResource(url, useCaches);
         }

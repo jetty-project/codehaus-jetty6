@@ -429,27 +429,4 @@ public class ChannelEndPoint implements EndPoint
         return _channel;
     }
 
-    /* ------------------------------------------------------------ */
-    public void flush()
-        throws IOException
-    {   
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isBufferingInput()
-    {
-        return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isBufferingOutput()
-    {
-        return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isBufferred()
-    {
-        return false;
-    }
 }

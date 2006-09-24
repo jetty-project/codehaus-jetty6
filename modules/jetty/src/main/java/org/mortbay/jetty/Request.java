@@ -136,7 +136,7 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    protected void recycle()
+    void recycle()
     {
         _handled=false;
         if (_context!=null)

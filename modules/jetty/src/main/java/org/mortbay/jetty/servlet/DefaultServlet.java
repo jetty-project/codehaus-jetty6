@@ -50,7 +50,6 @@ import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 import org.mortbay.util.IO;
 import org.mortbay.util.MultiPartOutputStream;
-import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URIUtil;
 
 
@@ -700,7 +699,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             else if (count<Integer.MAX_VALUE)
                 response.setContentLength((int)count);
             else 
-                response.setHeader(HttpHeaders.CONTENT_LENGTH,TypeUtil.toString(count));
+                response.setHeader(HttpHeaders.CONTENT_LENGTH,""+count);
         }
         
         if (_acceptRanges)

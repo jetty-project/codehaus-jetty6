@@ -36,7 +36,7 @@ public class HttpException extends IOException
     }
 
     /* ------------------------------------------------------------ */
-    protected HttpException(int status,String reason, Throwable rootCause)
+    HttpException(int status,String reason, Throwable rootCause)
     {
         _status=status;
         _reason=reason;
