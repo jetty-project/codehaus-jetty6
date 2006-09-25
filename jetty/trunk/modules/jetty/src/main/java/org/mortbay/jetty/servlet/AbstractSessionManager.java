@@ -654,6 +654,16 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 _maxIdleMs=_dftMaxIdleSecs*1000;
         }
 
+        /* ------------------------------------------------------------- */
+        protected Session(HttpServletRequest request,String id)
+        {
+            _id=id;
+            _created=System.currentTimeMillis();
+            _accessed=_created;
+            if (_dftMaxIdleSecs>=0)
+                _maxIdleMs=_dftMaxIdleSecs*1000;
+        }
+
         /* ------------------------------------------------------------ */
         void access()
         {
