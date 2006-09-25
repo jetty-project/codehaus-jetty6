@@ -307,7 +307,7 @@ public class Bayeux
             // TODO actually do authentication
 
             reply.put("supportedConnectionTypes",new String[]
-            { "iframe",/* "long-polling"*/ });
+            { "long-polling", "iframe" });
             reply.put("authSuccessful",Boolean.TRUE);
             reply.put("clientId",client.getId());
             reply.put("version",new Double(0.1));
