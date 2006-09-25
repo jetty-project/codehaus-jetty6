@@ -24,19 +24,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.util.LazyList;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
 public class CometdServlet extends HttpServlet
 {
     public static final String ORG_MORTBAY_BAYEUX="org.mortbay.bayeux";
-    
+
     private static final String TUNNEL_INIT_ATTR="tunnelInit";
     private static final String MESSAGE_ATTR="message";
     private static final String TRANSPORT_ATTR="transport";
     private static final String CLIENT_ATTR="client";
     private Bayeux _bayeux;
-    
+
     public void init() throws ServletException
     {
         synchronized (CometdServlet.class)
@@ -49,33 +50,50 @@ public class CometdServlet extends HttpServlet
             }
         }
     }
-    
+
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    {
+        String init=req.getParameter("tunnelInit");
+        if ("iframe".equals(init))
+        {
+            Transport transport=new IFrameTransport();
+            ((IFrameTransport)transport).initTunnel(resp);
+        }
+        else
+        {
+            super.service(req,resp);
+        }
+    }
+
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
         int message_count=0;
-        Client client=(Client)req.getAttribute(CLIENT_ATTR);;
-        Transport transport=(Transport)req.getAttribute(TRANSPORT_ATTR);
+        Client client=(Client)req.getAttribute(CLIENT_ATTR);
         
+        Transport transport=(Transport)req.getAttribute(TRANSPORT_ATTR);
+
         if (client==null)
         {
-            // This is the first time we have seen this request - so handle all the messages
-            // We may see this request again if a continuation retries the request.
-            
+            // This is the first time we have seen this request - so handle all
+            // the messages
+            // We may see this request again if a continuation retries the
+            // request.
+
             // handle all messages (before any polling)
             String[] messages=req.getParameterValues(MESSAGE_ATTR);
             Object objects=null;
             int index=0;
-            for (int m=0;m<messages.length;m++)
+            for (int m=0; m<messages.length; m++)
             {
                 if (objects==null)
                 {
                     index=0;
                     objects=JSON.parse(messages[m]);
                 }
-                
+
                 if (objects==null)
                     continue;
-                
+
                 Object object=objects;
                 if (objects.getClass().isArray())
                 {
@@ -88,15 +106,17 @@ public class CometdServlet extends HttpServlet
                 }
                 else
                     objects=null;
-                
+
                 System.err.println(req.hashCode()+" message ==> "+object);
                 message_count++;
                 Map message=(Map)object;
-                
+
+                System.out.println("msg on: "+message.get("channel"));
+
                 // Get a client if possible
                 if (client==null)
                 {
-                    client = _bayeux.getClient(message);
+                    client=_bayeux.getClient(message);
                     req.setAttribute(CLIENT_ATTR,client);
                 }
 
@@ -104,35 +124,35 @@ public class CometdServlet extends HttpServlet
                 {
                     transport=_bayeux.newTransport(client,message);
                     req.setAttribute(TRANSPORT_ATTR,transport);
-                    
-                    if (req.getParameter(TUNNEL_INIT_ATTR)!=null)
-                    {
-                        transport.initTunnel(resp);
-                        return;
-                    }
-                    
-                    transport.preample(resp);
+                    System.err.println("Transport="+transport);
                 }
-              
-                Map reply=_bayeux.handle(client,transport, message);
+
+                Map reply=_bayeux.handle(client,transport,message);
                 
-                transport.encode(reply); 
+                if (!transport.isInitialized())
+                {
+                    if (transport.preample(resp,reply))
+                        reply=null;
+                }
+                
+                if (reply!=null)
+                    transport.encode(reply);
+                    
             }
         }
-        
-        
+
         // handle polling for additinal messages
-        while (client!=null && transport!=null && transport.isPolling())
+        while (client!=null&&transport!=null&&transport.isPolling())
         {
             synchronized (client)
-            {      
-                Continuation continuation=ContinuationSupport.getContinuation(req, client);
+            {
+                Continuation continuation=ContinuationSupport.getContinuation(req,client);
                 client.addContinuation(continuation);
                 if (!client.hasMessages())
                     continuation.suspend(25000);
                 client.removeContinuation(continuation);
                 continuation.reset();
-                
+
                 if (client.hasMessages())
                 {
                     List messages=client.takeMessages();
@@ -140,13 +160,13 @@ public class CometdServlet extends HttpServlet
                 }
                 else
                     transport.setPolling(false);
-                
+
                 // Only a simple poll if the transport does not flush
                 if (!transport.keepAlive())
                     transport.setPolling(false);
             }
         }
-        
+
         // complete
         if (transport!=null)
         {
@@ -154,8 +174,11 @@ public class CometdServlet extends HttpServlet
             transport.complete();
             transport.setPolling(false);
         }
-        
+
+    }
+
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    {
+        doPost(req,resp);
     }
 }
-
-
