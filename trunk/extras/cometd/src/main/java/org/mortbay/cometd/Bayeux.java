@@ -26,7 +26,7 @@ import org.mortbay.util.DateCache;
 /* ------------------------------------------------------------ */
 /**
  * @author gregw
- *
+ * 
  */
 public class Bayeux
 {
@@ -61,7 +61,7 @@ public class Bayeux
         _handlers.put(META_UNSUBSCRIBE,new UnsubscribeHandler());
         _handlers.put(META_STATUS,new StatusHandler());
         _handlers.put(META_PING,new PingHandler());
-        
+
         _transports.put("iframe",IFrameTransport.class);
         _transports.put("http-polling",PlainTextJSONTransport.class);
         _transports.put("long-polling",PlainTextJSONTransport.class);
@@ -106,7 +106,7 @@ public class Bayeux
     {
         return _channels.keySet();
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param message
@@ -116,7 +116,7 @@ public class Bayeux
     {
         return getClient((String)message.get("clientId"));
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param client_id
@@ -135,7 +135,7 @@ public class Bayeux
     {
         return _clients.keySet();
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return
@@ -213,7 +213,7 @@ public class Bayeux
     {
         _securityPolicy=securityPolicy;
     }
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private interface Handler
@@ -262,7 +262,7 @@ public class Bayeux
             Channel channel=getChannel(channel_id);
             Object data=message.get("data");
 
-            if (channel!=null&&data!=null && _securityPolicy.canSend(client,channel,message))
+            if (channel!=null&&data!=null&&_securityPolicy.canSend(client,channel,message))
             {
                 channel.publish(data);
                 reply.put("successful",Boolean.TRUE);
@@ -307,7 +307,7 @@ public class Bayeux
             // TODO actually do authentication
 
             reply.put("supportedConnectionTypes",new String[]
-            { "long-polling" });
+            { "iframe",/* "long-polling"*/ });
             reply.put("authSuccessful",Boolean.TRUE);
             reply.put("clientId",client.getId());
             reply.put("version",new Double(0.1));
@@ -337,7 +337,9 @@ public class Bayeux
             if (client==null)
                 throw new IllegalStateException("No client");
             String type=(String)message.get("connectionType");
-            client.setConnectionType(type);
+            if (type!=null)
+                client.setConnectionType(type); // kmh only set connection type
+                                                // if it's in message
             String channel_id="/meta/connections/"+client.getId();
             reply.put("successful",Boolean.TRUE);
             reply.put("error","");
@@ -345,7 +347,7 @@ public class Bayeux
             reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
             transport.setPolling(true);
             return true; // TODO - this should be true... once JSON arrays
-                            // can be handled by javascript.
+            // can be handled by javascript.
         }
     }
 
@@ -369,21 +371,21 @@ public class Bayeux
                 throw new IllegalStateException("No client");
 
             String channel_id=(String)message.get("subscription");
-            
+
             // select a random channel ID if none specifified
             if (channel_id==null)
             {
                 channel_id=Long.toString(getRandom(),36);
-                while(getChannel(channel_id)!=null)
-                    channel_id=Long.toString(getRandom(),36);          
+                while (getChannel(channel_id)!=null)
+                    channel_id=Long.toString(getRandom(),36);
             }
-            
+
             // get the channel (or create if permitted)
             Channel channel=getChannel(channel_id);
-            if (channel==null && _securityPolicy.canCreate(client,channel,message))
+            if (channel==null&&_securityPolicy.canCreate(client,channel,message))
                 channel=newChannel(channel_id);
-            
-            if (channel!=null && _securityPolicy.canSubscribe(client,channel,message))
+
+            if (channel!=null&&_securityPolicy.canSubscribe(client,channel,message))
             {
                 channel.addSubscriber(client);
                 reply.put("subscription",channel.getId());
@@ -435,11 +437,11 @@ public class Bayeux
         {
             return true;
         }
-        
+
         public boolean canSend(Client client, Channel channel, Map message)
         {
             return true;
         }
-        
+
     }
 }
