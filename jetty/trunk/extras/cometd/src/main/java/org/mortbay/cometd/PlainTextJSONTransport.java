@@ -11,16 +11,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.util.LazyList;
 
-public class PlainTextJSONTransport implements Transport
+public class PlainTextJSONTransport extends AbstractTransport
 {
     HttpServletResponse _response;
     Object _responses=null;
-    boolean _polling;
     
-    public void preample(HttpServletResponse response)
+    public boolean preample(HttpServletResponse response, Map reply) throws IOException
     {
         _response=response;
         _responses=null;
+        setInitialized(true);
+        if (reply!=null)
+            encode(reply);
+        return reply!=null;
     }
     
     public void encode(Map reply)
@@ -64,16 +67,6 @@ public class PlainTextJSONTransport implements Transport
         }
         _response.getWriter().close();
         _response=null;
-    }
-
-    public boolean isPolling()
-    {
-        return _polling;
-    }
-
-    public void setPolling(boolean polling)
-    {
-        _polling=polling;
     }
 
     public boolean keepAlive() throws IOException

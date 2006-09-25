@@ -11,16 +11,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.util.MultiPartWriter;
 
-public class MultiPartTransport implements Transport
+public class MultiPartTransport extends AbstractTransport
 {
     MultiPartWriter _writer;
-    boolean _polling;
     
-    public void preample(HttpServletResponse response) throws IOException
+    public boolean preample(HttpServletResponse response, Map reply) throws IOException
     {
         response.setCharacterEncoding("utf-8");
         _writer = new MultiPartWriter(response.getWriter());
         response.setContentType(MultiPartWriter.MULTIPART_X_MIXED_REPLACE+"; boundary="+_writer.getBoundary());
+        setInitialized(true);
+        if (reply!=null)
+            encode(reply);
+        return reply!=null;
     }
     
     public void encode(Map reply) throws IOException
@@ -47,16 +50,6 @@ public class MultiPartTransport implements Transport
     public void complete() throws IOException
     {
         _writer.close();
-    }
-
-    public boolean isPolling()
-    {
-        return _polling;
-    }
-
-    public void setPolling(boolean polling)
-    {
-        _polling=polling;
     }
 
     public boolean keepAlive() throws IOException
