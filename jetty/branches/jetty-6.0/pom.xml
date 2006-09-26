@@ -209,6 +209,7 @@
     <!-- module>extras/sslengine</module-->
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
+    <module>examples/test-jndi-webapp</module>
     <module>examples/embedded</module>
   </modules>
 

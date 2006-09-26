@@ -31,38 +31,7 @@
     <Arg type="boolean">true</Arg>
   </New>
 
-  <!-- Configuring Transactions                                    -->
-
-  @TRANSACTIONMANAGER@
-
-  <New id="tx" class="org.mortbay.jetty.plus.naming.Transaction">
-   <Arg>
-     @USERTRANSACTION@
-   </Arg>
-  </New>
-
-
-  <!-- Configuring <resource-ref> and <resource-env-ref>s          -->
-@DATASOURCE1-PRE@
-
-
-  <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
-    <Arg>jdbc/mydatasource</Arg>
-    <Arg>
-     @DATASOURCE1@
-    </Arg>
-   </New>
-
-
-@DATASOURCE2-PRE@
-
-  <New id="mydatasource2" class="org.mortbay.jetty.plus.naming.Resource">
-    <Arg>jdbc/mydatasource2</Arg>
-    <Arg>
-       @DATASOURCE2@
-    </Arg>
-   </New>
-
+ <!-- Mail Session setup                                          -->
  <New id="xxxmail" class="org.mortbay.jetty.plus.naming.Resource">
      <Arg>mail/Session</Arg>
      <Arg>
@@ -79,12 +48,73 @@
        </New>
      </Arg>
  </New>
+
+  <!-- =============================================================== -->
+  <!-- Configuring Transactions and XA Datasources                     -->
+  <!-- Uncomment EITHER the setup for Atomikos OR for Jotm             -->
+  <!-- =============================================================== -->
+
+
+  <!-- Atomikos        
+  @ATOMIKOS-TRANSACTIONMANAGER@
+
+  <New id="tx" class="org.mortbay.jetty.plus.naming.Transaction">
+   <Arg>
+     @ATOMIKOS-USERTRANSACTION@
+   </Arg>
+  </New>
+
+
+  @ATOMIKOS-DATASOURCE1-PRE@
+
+
+  <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg>jdbc/mydatasource</Arg>
+    <Arg>
+     @ATOMIKOS-DATASOURCE1@
+    </Arg>
+   </New>
+
+
+  @ATOMIKOS-DATASOURCE2-PRE@
+
+  <New id="mydatasource2" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg>jdbc/mydatasource2</Arg>
+    <Arg>
+       @ATOMIKOS-DATASOURCE2@
+    </Arg>
+   </New>
+   END OF ATOMIKOS -->
+
+  <!-- JOTM
+  @JOTM-TRANSACTIONMANAGER@
+
+  <New id="tx" class="org.mortbay.jetty.plus.naming.Transaction">
+   <Arg>
+     @JOTM-USERTRANSACTION@
+   </Arg>
+  </New>
+
+
+  @JOTM-DATASOURCE1-PRE@
+
+
+  <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg>jdbc/mydatasource</Arg>
+    <Arg>
+     @JOTM-DATASOURCE1@
+    </Arg>
+   </New>
+
+
+  @JOTM-DATASOURCE2-PRE@
+
+  <New id="mydatasource2" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg>jdbc/mydatasource2</Arg>
+    <Arg>
+       @JOTM-DATASOURCE2@
+    </Arg>
+   </New>
+  END OF JOTM -->
+
 </Configure>
-
-
-
-
-
-
-
-
