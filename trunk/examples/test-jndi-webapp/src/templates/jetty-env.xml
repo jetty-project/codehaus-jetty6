@@ -18,14 +18,30 @@
   </New>
 
 
+  <!-- ==============================================================  -->
   <!-- Add a DataSource only valid for this webapp                     -->
-@DATASOURCE99-PRE@
+  <!-- Uncomment one of the following options.                         -->
+  <!-- ==============================================================  -->
+
+  <!-- Atomikos datasource                                             
+@ATOMIKOS-DATASOURCE99-PRE@
   <New id="mydatasource99" class="org.mortbay.jetty.plus.naming.Resource">
     <Arg>jdbc/mydatasource99</Arg>
     <Arg>
-     @DATASOURCE99@
+     @ATOMIKOS-DATASOURCE99@
     </Arg>
    </New>
+  -->
+
+  <!-- JOTM datasource
+@JOTM-DATASOURCE99-PRE@
+  <New id="mydatasource99" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg>jdbc/mydatasource99</Arg>
+    <Arg>
+     @JOTM-DATASOURCE99@
+    </Arg>
+   </New>
+  -->
 
 
 </Configure>
