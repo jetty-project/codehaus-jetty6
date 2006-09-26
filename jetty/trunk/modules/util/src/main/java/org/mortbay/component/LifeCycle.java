@@ -3,7 +3,7 @@
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
+// You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,60 +15,79 @@
 package org.mortbay.component;
 
 /* ------------------------------------------------------------ */
-/** A component LifeCycle.
- * Represents the life cycle interface for an abstract
- * software component. 
+/**
+ * The lifecycle interface for generic components.
+ * <br />
+ * Classes implementing this interface have a defined life cycle
+ * defined by the methods of this interface.
  *
  * @author Greg Wilkins (gregw)
  */
 public interface LifeCycle
 {
     /* ------------------------------------------------------------ */
-    /** Start the LifeCycle.
-     * @exception Exception An arbitrary exception may be thrown.
+    /**
+     * Starts the component.
+     * @throws Exception If the component fails to start
+     * @see #isStarted()
+     * @see #stop()
+     * @see #isFailed()
      */
     public void start()
         throws Exception;
-    
+
     /* ------------------------------------------------------------ */
-    /** Stop the LifeCycle.
-     * The LifeCycle may wait for current activities to complete
+    /**
+     * Stops the component.
+     * The component may wait for current activities to complete
      * normally, but it can be interrupted.
-     * @exception Exception An arbitrary exception may be thrown.
+     * @exception Exception If the component fails to stop
+     * @see #isStopped()
+     * @see #start()
+     * @see #isFailed()
      */
     public void stop()
         throws Exception;
-   
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the LifeCycle is starting or has been started. 
+    /**
+     * @return true if the component is starting or has been started.
      */
     public boolean isRunning();
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the LifeCycle has been started. 
+    /**
+     * @return true if the component has been started.
+     * @see #start()
+     * @see #isStarting()
      */
     public boolean isStarted();
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the LifeCycle is starting. 
+    /**
+     * @return true if the component is starting.
+     * @see #isStarted()
      */
     public boolean isStarting();
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the LifeCycle is stopping 
+    /**
+     * @return true if the component is stopping.
+     * @see #isStopped()
      */
     public boolean isStopping();
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the LifeCycle is failed
+    /**
+     * @return true if the component has been stopped.
+     * @see #stop()
+     * @see #isStopping()
+     */
+    public boolean isStopped();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return true if the component has failed to start or has failed to stop.
      */
     public boolean isFailed();
-
-
 }
-

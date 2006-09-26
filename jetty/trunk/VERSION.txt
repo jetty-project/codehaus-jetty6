@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + added isStopped() in LifeCycle and AbstractLifeCycle
     + fixed isUserInRole checking for JAASUserRealm
     + fixed ClassCastException in JAASUserRealm.setRoleClassNames(String[])
     + add a maven-jetty-jspc-plugin to do jspc precompilation
@@ -53,7 +54,7 @@ jetty-6.0.0 - 10 September 2006
     + Conveniance builder methods for listeners and filters
     + Transforming classloader does not transform resources.
     + Plugin shutdown context before stopping it.
-    
+
 jetty-6.0.0rc4 - 5 September 2006
     + bind jetty-env.xml entries to java:comp/env
     + Fix for JETTY-107. Poor cast in SessionDump demo.
@@ -102,7 +103,7 @@ jetty-6.0.0rc1 - 16 August 2006
     + -DSTOP.PORT must be specified.
     + moved optional modules to extras
     + fixed bug that caused Response.setStatus to ignore the provided message
-    + refactored resource cache 
+    + refactored resource cache
     + Allow direct filling of buffers for uncached static content.
     + Added simple ResourceHandler and FileServer example
 
@@ -121,14 +122,14 @@ jetty-6.0.0rc0 - 7 July 2006
     + Ssl algorithm taken from system property
     + Added 8 random letters&digits to Jetty-generated tmp work dir name to ensure uniqueness
     + Simplify runtime resolution of JSP library for plugin
-    + Ensure mvn clean cleans the build 
+    + Ensure mvn clean cleans the build
     + Do not wrap EofException with EofException
     + reverse order for destroy event listeners
     + added StatisticsHandler and statistics on Connector.
     + Simplified Servlet Context API
     + Added maximum limit to filter chain cache.
     + refactor HttpChannelEndPoint in preparation for SslEngine
-    + ContextHandlerCollection addContext and setContextClass 
+    + ContextHandlerCollection addContext and setContextClass
     + Discard excess bytes in header buffer if connection is closing
     + Updated javax code from http://svn.apache.org/repos/asf/tomcat/tc6.0.x/trunk/java/javax@417727
     + Threadpool does not need to be a LifeCycle
@@ -169,13 +170,13 @@ jetty-6.0.0beta15 - 11/5/2006
     + setSendServerVersion method added to Server to control sending of Server: http header
     + removed SelectBlockingChannelConnector (unmaintained)
     + Improved HttpException
-    + Moved more resources to resources 
+    + Moved more resources to resources
     + Added ThrottlingFilter and fixed race in Continuations
     + Added taglib resources to 2.1 jsp api jar
     + Reset of timer task clears expiry
     + improved MBeanContainer object removal
     + ContextHandler.setContextPath can be called after start.
-    + Fixed handling of params after forward 
+    + Fixed handling of params after forward
     + Added --version to start.jar
     + Added embedded examples
     + Simplified DefaultServlet static content buffering
@@ -209,8 +210,8 @@ jetty-6.0.0beta14 - 9/4/2006
     + fixed HttpField iterator
     + added jetty-util.jar module
     + added reset to Continuation
-  
- 
+
+
 jetty-6.0.0beta12 - 16/3/2006
     + Fixed maven plugin JNDI for redeploys
     + Fixed tld discovery for plugin (search dependencies)
@@ -247,7 +248,7 @@ jetty-6.0.0beta10 25/2/2006
     + Fix sf1431936 don't chunk the chunk
     + Fix http://jira.codehaus.org/browse/JETTY-6. hi byte reader
     + Updates javax to MR2 release
-   
+
 jetty-6.0.0beta9 9/2/2006
     + PathMap for direct context mapping.
     + Refactored chat demo and upgraded prototype.js
@@ -259,7 +260,7 @@ jetty-6.0.0beta9 9/2/2006
     + Added CGI servlet.
     + Force a tempdir to be set.
     + Force jasper scratch dir.
-    + fixed setLocale bug sf1426940 
+    + fixed setLocale bug sf1426940
     + Added TLD tag listener handling.
 
 jetty-6.0.0beta8 24/1/2006
