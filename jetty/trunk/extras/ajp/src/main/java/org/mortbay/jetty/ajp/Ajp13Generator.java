@@ -184,7 +184,7 @@ public class Ajp13Generator implements Generator
 
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
-        // flushContent();
+        flushContent();
 
         _allContentAdded=allContentAdded;
         reset(true);
