@@ -80,13 +80,6 @@ public interface SessionManager extends LifeCycle, Serializable
      */
     public final static String __MaxAgeProperty="org.mortbay.jetty.servlet.MaxAge";
     
-    public final static String __DefaultMaxAge =  "-1";
-    
-    public final static String __MaxAgeSystemProperty =
-        System.getProperty(__MaxAgeProperty,__DefaultMaxAge);
-    
-    
-    
     /* ------------------------------------------------------------ */
     public HttpSession getHttpSession(String id);
     
@@ -152,16 +145,17 @@ public interface SessionManager extends LifeCycle, Serializable
     /**
      * @param meta the cross context session meta manager.
      */
-    public void setMetaManager(SessionIdManager meta);
+    public void setIdManager(SessionIdManager meta);
     
     /* ------------------------------------------------------------ */
     public boolean isValid(HttpSession session);
     
     /* ------------------------------------------------------------ */
     /** Called by the {@link SessionHandler} when a session is access by a request
-     * 
+     * @return Cookie If non null, this cookie should be set on the response to either migrate 
+     * the session or to refresh a cookie that may expire.
      */
-    public void access(HttpSession session);
+    public Cookie access(HttpSession session);
     
     /* ------------------------------------------------------------ */
     /** Called by the {@link SessionHandler} when a reqeuest is not longer 
@@ -190,8 +184,8 @@ public interface SessionManager extends LifeCycle, Serializable
     
     public String getSessionPath ();
     
-    public void setMaxSessionCookieAge (int maxCookieAge);
+    public void setMaxCookieAge (int maxCookieAgeInSeconds);
     
-    public int getMaxCookieAge ();
+    public int getMaxCookieAge();
     
 }

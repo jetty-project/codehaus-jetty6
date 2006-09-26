@@ -39,7 +39,7 @@ public class SessionManagerTest extends TestCase
     
     protected void setUp() throws Exception
     {
-        sessionManager.setMetaManager(new TestSessionIdManager());
+        sessionManager.setIdManager(new TestSessionIdManager());
         ContextHandler context=new ContextHandler();
         sessionManager.setSessionHandler(handler);
         server.setHandler(context);

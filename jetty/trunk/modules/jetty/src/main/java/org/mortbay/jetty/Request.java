@@ -960,7 +960,7 @@ public class Request implements HttpServletRequest
                 return null;
         }
         
-        if (_session == null && _sessionManager!=null && create)
+        if (_session == null && _sessionManager!=null && create )
         {
             _session=_sessionManager.newHttpSession(this);
             Cookie cookie=_sessionManager.getSessionCookie(_session,getContextPath(),isSecure());
