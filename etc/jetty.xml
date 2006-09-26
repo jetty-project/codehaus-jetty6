@@ -56,7 +56,16 @@
     <!-- java -jar start.jar etc/jetty.xml etc/jetty-ssl.xml             -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     
-
+    <!-- =========================================================== -->
+    <!-- Set up global session ID manager                            -->
+    <!-- =========================================================== -->
+    <!--
+    <Set name="sessionIdManager">
+      <New class="org.mortbay.jetty.servlet.HashSessionIdManager">
+        <Set name="workerName">node1</Set>
+      </New>
+    </Set>
+    -->
 
     <!-- =========================================================== -->
     <!-- Set handler Collection Structure                            --> 
@@ -87,23 +96,19 @@
     <New id="TestContext" class="org.mortbay.jetty.webapp.WebAppContext">
       <Arg><Ref id="contexts"/></Arg>
       <Arg><SystemProperty name="jetty.home" default="."/>/webapps/test</Arg>
-      <Arg>/</Arg>
-      <Set name="classLoader">
-        <New class="org.mortbay.jetty.webapp.TransformingWebAppClassLoader">
-          <Arg><Ref id="TestContext"/></Arg>
-        </New>
-      </Set>
+      <Arg>/test</Arg>
       <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
       <Set name="virtualHosts">
         <Array type="java.lang.String">
           <Item>localhost</Item>
         </Array>
       </Set>
-      
       <Get name="SessionHandler">
         <Set name="SessionManager">
           <New class="org.mortbay.jetty.servlet.HashSessionManager">
             <Set name="maxInactiveInterval">600</Set>
+            <Set name="maxCookieAge">30</Set>
+            <Set name="refreshCookieAge">10</Set>
           </New>
         </Set>
       </Get>

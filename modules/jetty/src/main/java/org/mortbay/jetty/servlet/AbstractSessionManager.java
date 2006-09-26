@@ -90,8 +90,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     protected String _sessionURLPrefix=";"+_sessionURL+"=";
     protected String _sessionDomain;
     protected String _sessionPath;
-    protected int _maxSessionCookieAge=Integer.parseInt(SessionManager.__DefaultMaxAge);
-    protected boolean _maxAgeSet=false;
+    protected int _maxCookieAge=-1;
+    protected int _refreshCookieAge;
 
     /* ------------------------------------------------------------ */
     public AbstractSessionManager()
@@ -138,20 +138,38 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _sessionPath=path;
     }
 
+    /* ------------------------------------------------------------ */
     public String getSessionPath()
     {
         return _sessionPath;
     }
 
-    public void setMaxSessionCookieAge(int maxCookieAge)
+    /* ------------------------------------------------------------ */
+    public void setMaxCookieAge(int maxCookieAgeInSeconds)
     {
-        _maxSessionCookieAge=maxCookieAge;
-        _maxAgeSet=true;
+        _maxCookieAge=maxCookieAgeInSeconds;
+        
+        if (_maxCookieAge>0 && _refreshCookieAge==0)
+            _refreshCookieAge=_maxCookieAge/3;
+            
     }
 
+    /* ------------------------------------------------------------ */
     public int getMaxCookieAge()
     {
-        return _maxSessionCookieAge;
+        return _maxCookieAge;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int getRefreshCookieAge()
+    {
+        return _refreshCookieAge;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setRefreshCookieAge(int ageInSeconds)
+    {
+        _refreshCookieAge=ageInSeconds;
     }
 
     /* ------------------------------------------------------------ */
@@ -172,19 +190,36 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
 
     /* ------------------------------------------------------------ */
     /**
-     * @return Returns the metaManager used for cross context session management
+     * @deprecated use {@link #getIdManager()}
      */
     public SessionIdManager getMetaManager()
+    {
+        return getIdManager();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated use {@link #setIdManager(SessionIdManager)}
+     */
+    public void setMetaManager(SessionIdManager metaManager)
+    {
+        setIdManager(metaManager);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the metaManager used for cross context session management
+     */
+    public SessionIdManager getIdManager()
     {
         return _sessionIdManager;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @param metaManager
-     *            The metaManager used for cross context session management.
+     * @param metaManager The metaManager used for cross context session management.
      */
-    public void setMetaManager(SessionIdManager metaManager)
+    public void setIdManager(SessionIdManager metaManager)
     {
         _sessionIdManager=metaManager;
     }
@@ -254,7 +289,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             Cookie cookie=getHttpOnly()?new HttpOnlyCookie(_sessionCookie,session.getId()):new Cookie(_sessionCookie,session.getId());
 
             cookie.setPath((contextPath==null||contextPath.length()==0)?"/":contextPath);
-            cookie.setMaxAge(_maxSessionCookieAge);
+            cookie.setMaxAge(getMaxCookieAge());
             cookie.setSecure(requestIsSecure&&getSecureCookies());
 
             // set up the overrides
@@ -263,6 +298,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             if (_sessionPath!=null)
                 cookie.setPath(_sessionPath);
 
+            if (getMaxCookieAge()>0)
+                ((Session)session).setCookie(cookie);
             return cookie;
         }
         return null;
@@ -540,16 +577,15 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         // set up the max session cookie age if it isn't already
-        if (!_maxAgeSet)
+        if (_maxCookieAge==-1)
         {
-            String str=null;
             if (_context!=null)
-                str=_context.getInitParameter(SessionManager.__MaxAgeProperty);
-            str=(str==null?SessionManager.__MaxAgeSystemProperty:str);
-            _maxSessionCookieAge=Integer.parseInt(str.trim());
-            _maxAgeSet=true;
+            {
+                String str=_context.getInitParameter(SessionManager.__MaxAgeProperty);
+                if (str!=null)
+                    _maxCookieAge=Integer.parseInt(str.trim());
+            }
         }
-
         // set up the session domain if it isn't already
         if (_sessionDomain==null)
         {
@@ -596,9 +632,21 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    public void access(HttpSession session)
+    public Cookie access(HttpSession session)
     {
-        ((Session)session).access();
+        long now=System.currentTimeMillis();
+
+        Session s =(Session)session;
+        s.access(now);
+        
+        if (getMaxCookieAge()>0 && getRefreshCookieAge()>0 && isUsingCookies() &&  ((now-s.getCookieSetTime())/1000>getRefreshCookieAge()))
+        {
+            Cookie cookie=s.getCookie();
+            s.setCookie(cookie);
+            return cookie;
+        }
+        
+        return null;
     }
 
     /* ------------------------------------------------------------ */
@@ -638,10 +686,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         String _id;
         long _created;
+        long _cookieSet;
         long _accessed;
         boolean _invalid=false;
         long _maxIdleMs=_dftMaxIdleSecs*1000;
         boolean _newSession=true;
+        Cookie _cookie;
         Map _values;
 
         /* ------------------------------------------------------------- */
@@ -655,20 +705,34 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
+        protected void setCookie(Cookie cookie)
+        {
+            _cookieSet=_accessed;
+            _cookie=cookie;
+        }
+
+        /* ------------------------------------------------------------- */
+        protected Cookie getCookie()
+        {
+            return _cookie;
+        }
+
+        /* ------------------------------------------------------------- */
         protected Session(HttpServletRequest request,String id)
         {
             _id=id;
             _created=System.currentTimeMillis();
             _accessed=_created;
+            _cookieSet=_created;
             if (_dftMaxIdleSecs>=0)
                 _maxIdleMs=_dftMaxIdleSecs*1000;
         }
 
         /* ------------------------------------------------------------ */
-        void access()
+        void access(long time)
         {
             _newSession=false;
-            _accessed=System.currentTimeMillis();
+            _accessed=time;
         }
 
         /* ------------------------------------------------------------- */
@@ -704,6 +768,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             if (_invalid)
                 throw new IllegalStateException();
             return _created;
+        }
+
+        /* ------------------------------------------------------------- */
+        public long getCookieSetTime() 
+        {
+            return _cookieSet;
         }
 
         /* ------------------------------------------------------------- */
