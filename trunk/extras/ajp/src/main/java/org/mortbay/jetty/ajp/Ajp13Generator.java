@@ -23,7 +23,9 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Generator;
 import org.mortbay.jetty.HttpFields;
+import org.mortbay.jetty.HttpStatus;
 import org.mortbay.jetty.HttpFields.Field;
+import org.mortbay.util.TypeUtil;
 
 /**
  * @author lagdeppa (at) exist.com
@@ -182,8 +184,7 @@ public class Ajp13Generator implements Generator
 
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
-
-        flushContent();
+        // flushContent();
 
         _allContentAdded=allContentAdded;
         reset(true);
@@ -195,6 +196,11 @@ public class Ajp13Generator implements Generator
         _buffer.put((byte)0x4);
         addInt(_status);
 
+        if (_statusMsg==null)
+        {
+            Buffer tmp=HttpStatus.CACHE.get(_status);
+            _statusMsg=tmp==null?TypeUtil.toString(_status):tmp.toString();
+        }
         addString(_statusMsg==null?"status is unknown or no message definetion given...":_statusMsg);
 
         int field_index=_buffer.putIndex();
@@ -213,21 +219,20 @@ public class Ajp13Generator implements Generator
             byte[] codes=(byte[])__headerHash.get(f.getName());
             if (codes!=null)
             {
-                System.out.println(" >>>>code>>>"+codes[1]);
+                System.out.println("0x"+TypeUtil.toHexString(codes)+":"+f.getName()+": "+f.getValue());
                 _buffer.put(codes);
             }
             else
             {
+                System.out.println(f.getName()+": "+f.getValue());
                 addString(f.getName());
             }
             addString(f.getValue());
 
-            System.out.println(">>>Field>>>"+f.getName());
-            System.out.println(">>>Value>>>"+f.getValue());
 
         }
 
-        System.out.println("********* Start of Response Headers **********");
+        System.out.println("********* END of Response Headers **********");
 
         // insert the number of headers
         int tmp=_buffer.putIndex();
@@ -360,12 +365,13 @@ public class Ajp13Generator implements Generator
         {
             _content=false;
             // get the content length
-            // -7 bytes
+            // -8 bytes
             // 4 bytes for the ajp header
             // 1 byte for response type
             // 2 bytes for the response size
-            int len=_buffer.length()-7;
-
+            // 1 byte because we count from zero??
+            int len=_buffer.length()-8;
+            
             // insert the content length in the 5th, and 6th byte
             addInt(5,len);
 
