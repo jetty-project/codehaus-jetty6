@@ -28,6 +28,7 @@ jetty-6.1-SNAPSHOT
     + JETTY-123 handle windows UNC paths
     + JETYY-120 SelectChannelConnector closes all connections on stop
     + Added ID constructor to AbstractSessionManager.Session
+    + Allow session cookie to be refreshed
 
 jetty-6.0-SNAPSHOT
 

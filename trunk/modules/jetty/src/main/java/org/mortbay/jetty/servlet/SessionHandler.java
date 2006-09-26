@@ -207,7 +207,11 @@ public class SessionHandler extends HandlerWrapper
                 if (session!=null)
                 {
                     if(session!=old_session)
-                        _sessionManager.access(session);
+                    {
+                        Cookie cookie = _sessionManager.access(session);
+                        if (cookie!=null )
+                            response.addCookie(cookie);
+                    }
                 }
                 else 
                 {
@@ -237,7 +241,6 @@ public class SessionHandler extends HandlerWrapper
             HttpSession session=request.getSession(false);
             if (session!=null&& session!=old_session)
                 getSessionManager().complete(session);
-            
             base_request.setSessionManager(old_session_manager);
             base_request.setSession(old_session);
         }
