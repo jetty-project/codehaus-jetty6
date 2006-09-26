@@ -1,43 +1,41 @@
-Building the demo jndi webapp
-----------------------------
+After Building
+--------------
+After you have built the example, you will need to edit a couple
+of files to uncomment the appropriate  configuration for the
+transaction manager you are using.
 
-You must supply the name of a transaction manger on the command line.
-eg
++ edit etc/jetty-test-jndi.xml and uncomment one of the transaction
+  manager setups.
 
-  mvn -Dtxmgr=blah install
-
-
-The names of the currently supported transaction managers for the demo are:
-
-  atomikos
-  jotm
++ edit webapps-plus/test-jndi/WEB-INF/jetty-env.xml and uncomment
+  one of the transaction manager setups.
 
 
-Running the demo
+Running the Demo
 ----------------
 You will need to copy a derby.jar to the jetty lib/ directory, as well
 as copy all the necessary jars for the flavour of transaction manager
 you are using. There are instructions for some of the popular 
 transaction managers on the wiki at:
+
 http://docs.codehaus.org/display/JETTY/Jetty+User+Guides
 
-After it is built, you run the demo like so:
+You run the demo like so:
    
    java -jar start.jar etc/jetty.xml etc/jetty-plus.xml etc/jetty-test-jndi.xml
 
 
-To add support for a different transaction manager to the demo
---------------------------------------------------------------
+Adding Support for a Different Transaction Manager
+--------------------------------------------------
 
-You need to create a new properties file in src/templates of the
-same name as you want to be supplied on the command line as the
-value of the -Dtxmgr property.
+1. Edit the src/etc/templates/filter.properties file and add
+   a new set of token and replacement strings following the
+   pattern established for ATOMIKOS and JOTM.
 
-For example, suppose you are adding support for a new transaction
-manager called "blah":
+2. Edit the src/etc/templates/jetty-env.xml file and add
+   configuration for new transaction manager following the
+   pattern established for the other transaction managers.
 
-  * create a src/templates/blah.properties file using the others
-    as a guide
-
-  * edit pom.xml and change the <fail> error message to include
-   "blah" as one of the options
+3. Edit the src/etc/templates/jetty-test-jndi.xml file and
+   add configuration for the new transaction manager following
+   the pattern established for the other transaction managers.
