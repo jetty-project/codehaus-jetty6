@@ -28,6 +28,24 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
+/** Cometd Filter
+ * Servlet implementing the {@link Bayeux} protocol.
+ * 
+ * The Servlet can be initialized with a json file mapping channels to {@link DataFilter} definitions.
+ * The servlet init parameter "filters" should point to a webapplication resource containing a JSON 
+ * array of filter definitions. For example: <pre>
+ * [
+ *   { 
+ *     "channels": "/**",
+ *     "class"   : "org.mortbay.cometd.filter.NoMarkupFilter",
+ *     "init"    : {}
+ *   }
+ * ]
+ * </pre>
+ * @author gregw
+ * @see {@link Bayeux}
+ * @see {@link ChannelPattern}
+ */
 public class CometdServlet extends HttpServlet
 {
     public static final String ORG_MORTBAY_BAYEUX="org.mortbay.bayeux";
@@ -47,6 +65,32 @@ public class CometdServlet extends HttpServlet
             {
                 _bayeux=new Bayeux(getServletContext());
                 getServletContext().setAttribute(ORG_MORTBAY_BAYEUX,_bayeux);
+            }
+        }
+        
+        String filters=getInitParameter("filters");
+        if (filters!=null)
+        {
+            try
+            {
+                Object[] objects = (Object[])JSON.parse(getServletContext().getResourceAsStream(filters));
+                for (int i=0;i<objects.length;i++)
+                {
+                    Map filter_def=(Map)objects[i];
+                    
+                    Class c = Thread.currentThread().getContextClassLoader().loadClass((String)filter_def.get("class"));
+                    DataFilter filter = (DataFilter)c.newInstance();
+                    filter.init(filter_def.get("init"));
+                    _bayeux.addFilter((String)filter_def.get("channels"),filter);
+                }
+            
+            
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                getServletContext().log("Could not parse: "+filters,e);
+                throw new ServletException(e);
             }
         }
     }
@@ -111,8 +155,6 @@ public class CometdServlet extends HttpServlet
                 message_count++;
                 Map message=(Map)object;
 
-                System.out.println("msg on: "+message.get("channel"));
-
                 // Get a client if possible
                 if (client==null)
                 {
@@ -124,7 +166,6 @@ public class CometdServlet extends HttpServlet
                 {
                     transport=_bayeux.newTransport(client,message);
                     req.setAttribute(TRANSPORT_ATTR,transport);
-                    System.err.println("Transport="+transport);
                 }
 
                 Map reply=_bayeux.handle(client,transport,message);

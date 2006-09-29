@@ -16,6 +16,7 @@ package org.mortbay.cometd;
 
 import java.util.HashMap;
 
+import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 public class Channel
@@ -88,10 +89,22 @@ public class Channel
     /**
      * @param data
      */
-    public void publish(Object data)
+    public void publish(Object data, Client from)
     {
-        for (int f=0;data!=null && f<LazyList.size(_dataFilters);f++)
-            data=((DataFilter)LazyList.get(_dataFilters,f)).filter(data);
+        try
+        {
+            for (int f=0;f<LazyList.size(_dataFilters);f++)
+            {
+                data=((DataFilter)LazyList.get(_dataFilters,f)).filter(data, from);
+                if (data==null)
+                    return;
+            }
+        }
+        catch (IllegalStateException e)
+        {
+            Log.debug(e);
+            return;
+        }
         
         HashMap msg = new HashMap();
         msg.put(Bayeux.CHANNEL_ATTR,_id);
@@ -105,7 +118,7 @@ public class Channel
             msg.put("id",Long.toString(id,36)+Long.toString(_nextMsgId++,36));
             int subscribers=LazyList.size(_subscribers);
             for (int i=0;i<subscribers;i++)
-                ((Client)LazyList.get(_subscribers,i)).send(msg);
+                ((Client)LazyList.get(_subscribers,i)).deliver(msg);
         }
     }
     

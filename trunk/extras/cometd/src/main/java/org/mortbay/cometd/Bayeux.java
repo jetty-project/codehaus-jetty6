@@ -14,7 +14,10 @@
 
 package org.mortbay.cometd;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -49,6 +52,8 @@ public class Bayeux
     Random _random=new Random(System.currentTimeMillis());
     HashMap _handlers=new HashMap();
     HashMap _transports=new HashMap();
+    HashMap _filters=new java.util.HashMap();
+    ArrayList _filterOrder= new ArrayList();
     SecurityPolicy _securityPolicy=new DefaultPolicy();
 
     {
@@ -82,6 +87,23 @@ public class Bayeux
         return (Channel)_channels.get(id);
     }
 
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param channels A {@link ChannelPattern}
+     * @param filter The filter instance to apply to new channels matching the pattern
+     */
+    public void addFilter(String channels, DataFilter filter)
+    {
+        synchronized (_filters)
+        {
+            ChannelPattern pattern=new ChannelPattern(channels);
+            _filters.put(pattern,filter);
+            _filterOrder.remove(pattern);
+            _filterOrder.add(pattern);
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param id
@@ -93,6 +115,15 @@ public class Bayeux
         if (channel==null)
         {
             channel=new Channel(id,this);
+            
+            Iterator p = _filterOrder.iterator();
+            while(p.hasNext())
+            {
+                ChannelPattern pattern = (ChannelPattern)p.next();
+                if (pattern.matches(id))
+                    channel.addDataFilter((DataFilter)_filters.get(pattern));
+            }
+            
             _channels.put(id,channel);
         }
         return channel;
@@ -264,7 +295,7 @@ public class Bayeux
 
             if (channel!=null&&data!=null&&_securityPolicy.canSend(client,channel,message))
             {
-                channel.publish(data);
+                channel.publish(data,client);
                 reply.put("successful",Boolean.TRUE);
                 reply.put("error","");
             }
