@@ -12,5 +12,13 @@ package org.mortbay.cometd;
  */
 public interface DataFilter
 {
-    Object filter(Object data);
+    void init (Object init);
+    
+    /**
+     * @param data
+     * @param from
+     * @return The filtered data.
+     * @throws IllegalStateException If the message should be aborted
+     */
+    Object filter(Object data, Client from) throws IllegalStateException;
 }
