@@ -34,6 +34,7 @@ jetty-6.1-SNAPSHOT
     + JETYY-120 SelectChannelConnector closes all connections on stop
     + Added ID constructor to AbstractSessionManager.Session
     + Allow session cookie to be refreshed
+    + Added DataFilter configuration to cometd
 
 jetty-6.0-SNAPSHOT
 
