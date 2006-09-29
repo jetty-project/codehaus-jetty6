@@ -190,38 +190,38 @@ public class ObjectMBean implements DynamicMBean
                 Object constructors=null;
                 Object operations=null;
                 Object notifications=null;
-                
+
                 // Find list of classes that can influence the mbean
                 Class o_class=_managed.getClass();
                 Object influences = findInfluences(null, _managed.getClass());
-                
+
                 // Set to record defined items
                 Set defined=new HashSet();
-                
+
                 // For each influence
                 for (int i=0;i<LazyList.size(influences);i++)
                 {
                     Class oClass = (Class)LazyList.get(influences, i);
-                    
+
                     // look for a bundle defining methods
                     if (Object.class.equals(oClass))
                         oClass=ObjectMBean.class;
                     String pName = oClass.getPackage().getName();
                     String cName = oClass.getName().substring(pName.length() + 1);
                     String rName = pName.replace('.', '/') + "/management/" + cName+"-mbean";
-                    
+
                     try
                     {
                         Log.debug(rName);
                         ResourceBundle bundle = Loader.getResourceBundle(o_class, rName,true,Locale.getDefault());
-                        
+
                         // Extract meta data from bundle
                         Enumeration e = bundle.getKeys();
                         while (e.hasMoreElements())
                         {
                             String key = (String)e.nextElement();
                             String value = bundle.getString(key);
-                            
+
                             // Determin if key is for mbean , attribute or for operation
                             if (key.equals(cName))
                             {
@@ -248,14 +248,14 @@ public class ObjectMBean implements DynamicMBean
                                 }
                             }
                         }
-                        
+
                     }
                     catch(MissingResourceException e)
                     {
                         Log.ignore(e);
                     }
                 }
-                
+
                 _info = new MBeanInfo(o_class.getName(),
                                 desc,
                                 (MBeanAttributeInfo[])LazyList.toArray(attributes, MBeanAttributeInfo.class),
@@ -491,19 +491,33 @@ public class ObjectMBean implements DynamicMBean
      */
     public MBeanAttributeInfo defineAttribute(String name, String metaData)
     {
-        String[] tokens=metaData.split(":",3);
-        int i=tokens.length-1;
-        String description=tokens[i--];
-        boolean writable= i<0 || "RW".equalsIgnoreCase(tokens[i--]);
-        boolean onMBean= i==0 && "MBean".equalsIgnoreCase(tokens[0]);
-        boolean convert= i==0 && "MObject".equalsIgnoreCase(tokens[0]);
+        String description = "";
+        boolean writable = false;
+        boolean onMBean = false;
+        boolean convert = false;
+
+        String[] tokens = metaData.split(":", 3);
+        if (tokens.length > 0)
+        {
+            int index = tokens.length - 1;
+            description = tokens[index--];
+            if (index >= 0)
+            {
+                writable = "RW".equalsIgnoreCase(tokens[index--]);
+                if (index >= 0)
+                {
+                    onMBean = "MMBean".equalsIgnoreCase(tokens[index]) || "MBean".equalsIgnoreCase(tokens[index]);
+                    convert = "MMBean".equalsIgnoreCase(tokens[index]) || "MObject".equalsIgnoreCase(tokens[index]);
+                }
+            }
+        }
 
         String uName = name.substring(0, 1).toUpperCase() + name.substring(1);
         Class oClass = onMBean ? this.getClass() : _managed.getClass();
 
         if (Log.isDebugEnabled())
             Log.debug("defineAttribute "+name+" "+onMBean+":"+writable+":"+oClass+":"+description);
-        
+
         Class type = null;
         Method getter = null;
         Method setter = null;
@@ -546,7 +560,7 @@ public class ObjectMBean implements DynamicMBean
                 type = methods[m].getParameterTypes()[0];
             }
         }
-        
+
         if (convert && type.isPrimitive() && !type.isArray())
             throw new IllegalArgumentException("Cannot convert primative " + name);
 
@@ -559,9 +573,9 @@ public class ObjectMBean implements DynamicMBean
             // Remember the methods
             _getters.put(name, getter);
             _setters.put(name, setter);
-            
 
-            
+
+
             MBeanAttributeInfo info=null;
             if (convert)
             {

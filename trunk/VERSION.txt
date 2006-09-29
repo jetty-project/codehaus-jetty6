@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + Added conversion Object -> ObjectName for the result of method calls made on MBeans
     + JETTY-129 ServletContextListeners called after servlets are initialized
     + change examples/test-jndi-webapp so it can be regularly built
     + added isStopped() in LifeCycle and AbstractLifeCycle
