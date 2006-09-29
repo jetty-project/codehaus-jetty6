@@ -15,6 +15,8 @@
 
 package org.mortbay.jetty.servlet;
 
+import javax.servlet.ServletContext;
+
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
@@ -27,6 +29,9 @@ import org.mortbay.jetty.security.SecurityHandler;
  * session and security handlers, et.<pre>
  *   new ServletContext("/context",Context.SESSIONS|Context.NO_SECURITY);
  * </pre>
+ * <p/>
+ * This class should have been called ServletContext, but this would have
+ * cause confusion with {@link ServletContext}.
  */
 public class Context extends ContextHandler
 {   
@@ -109,6 +114,20 @@ public class Context extends ContextHandler
         
     }    
     
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.jetty.handler.ContextHandler#startContext()
+     */
+    protected void startContext() throws Exception
+    {
+        super.startContext();
+        
+        // OK to Initialize servlet handler now
+        if (_servletHandler != null && _servletHandler.isStarted())
+            _servletHandler.initialize();
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the securityHandler.
