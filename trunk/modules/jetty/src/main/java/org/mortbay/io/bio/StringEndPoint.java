@@ -19,6 +19,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.mortbay.util.StringUtil;
+
 /**
  * @author gregw
  *
@@ -27,7 +29,7 @@ import java.io.IOException;
  */
 public class StringEndPoint extends StreamEndPoint
 {
-    String _encoding="ISO8859_1";
+    String _encoding=StringUtil.__UTF8;
     ByteArrayInputStream _bin = new ByteArrayInputStream(new byte[0]);
     ByteArrayOutputStream _bout = new ByteArrayOutputStream();
     
