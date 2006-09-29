@@ -57,6 +57,10 @@ var room =
   {
     if (text != null && text.length>0 )
     {
+    	// lame attempt to prevent markup    
+    	text=text.replace(/</g,'&lt;');
+    	text=text.replace(/>/g,'&gt;');
+    	
         // XXX ajax.sendMessage('chat',text);
 	    cometd.publish("/chat/demo", { user: room._username, chat: text});
     }
@@ -68,22 +72,25 @@ var room =
      var from=message.data.user;
      var special=message.data.join || message.data.leave;
      var text=message.data.chat;
-     if ( !special && from == room._last )
-         from="...";
-     else
+     if (text!=null)
      {
+       if ( !special && from == room._last )
+         from="...";
+       else
+       {
          room._last=from;
          from+=":";
-     }
+       }
      
-     if (special)
-     {
-       chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span></span><br/>";
-       room._last="";
-     }
-     else
-       chat.innerHTML += "<span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span><br/>";
-     chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
+       if (special)
+       {
+         chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span></span><br/>";
+         room._last="";
+       }
+       else
+         chat.innerHTML += "<span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span><br/>";
+       chat.scrollTop = chat.scrollHeight - chat.clientHeight;    
+     } 
   },
   
   _init: function()

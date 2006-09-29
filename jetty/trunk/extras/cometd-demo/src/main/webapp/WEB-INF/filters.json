@@ -1,0 +1,18 @@
+[
+  { 
+    "channels": "/chat/**",
+    "class"   : "org.mortbay.cometd.filter.NoMarkupFilter",
+    "init"    : {}
+  },
+  
+  { 
+    "channels": "/chat/demo",
+	"class"   : "org.mortbay.cometd.filter.RegexFilter",
+	"init"    : [ 
+	              [ "[fF].ck","dang" ],
+	              [ "teh ","the "],
+	              [ "[Mm]icrosoft", "Micro\\$oft" ],
+	              [ ".*tomcat.*", null ] 
+	            ]
+  }
+]

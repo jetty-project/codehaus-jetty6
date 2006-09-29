@@ -11,6 +11,10 @@
   <servlet>
     <servlet-name>cometd</servlet-name>
     <servlet-class>org.mortbay.cometd.CometdServlet</servlet-class>
+    <init-param>
+      <param-name>filters</param-name>
+      <param-value>/WEB-INF/filters.json</param-value>
+    </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
 
