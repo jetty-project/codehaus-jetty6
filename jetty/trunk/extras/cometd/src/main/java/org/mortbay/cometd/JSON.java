@@ -14,6 +14,8 @@
 
 package org.mortbay.cometd;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.TypeUtil;
@@ -85,6 +88,16 @@ public class JSON
      */
     public static Object parse(String s)
     {
+        return parse(new Source(s));
+    }
+
+    /**
+     * @param s Stream containing JSON object or array.
+     * @return A Map, Object array or primitive array parsed from the JSON.
+     */
+    public static Object parse(InputStream in) throws IOException
+    {
+        String s=IO.toString(in);
         return parse(new Source(s));
     }
     
@@ -194,7 +207,7 @@ public class JSON
         QuotedStringTokenizer.quote(buffer,string);
     }
     
-    public static Object parse(Source source)
+    private static Object parse(Source source)
     {
         int comment_state=0;
         
@@ -288,7 +301,7 @@ public class JSON
         throw new IllegalStateException("No value");
     }
     
-    public static Map parseObject(Source source)
+    private static Map parseObject(Source source)
     {
         if (source.next()!='{')
             throw new IllegalStateException();
@@ -322,7 +335,7 @@ public class JSON
         return map;
     }
     
-    public static Object parseArray(Source source)
+    private static Object parseArray(Source source)
     {
         if (source.next()!='[')
             throw new IllegalStateException();
@@ -338,27 +351,29 @@ public class JSON
                 case ']':
                     source.next();
                     return list.toArray(new Object[list.size()]);
-                    
+
                 case ',':
                     if (coma)
                         throw new IllegalStateException();
                     coma=true;
                     source.next();
-                    
+
                 default:
-                    if (!Character.isWhitespace(c))
+                    if (Character.isWhitespace(c))
+                        source.next();
+                    else
                     {
                         coma=false;
                         list.add(parse(source));
                     }
             }
-                    
+
         }
 
         throw new IllegalStateException("unexpected end of array");
     }
     
-    public static String parseString(Source source)
+    private static String parseString(Source source)
     {
         if (source.next()!='"')
             throw new IllegalStateException();
@@ -416,7 +431,7 @@ public class JSON
         return b.toString();
     }
     
-    public static Number parseNumber(Source source)
+    private static Number parseNumber(Source source)
     {
         int start=source.index();
         int end=-1;
