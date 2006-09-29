@@ -1115,8 +1115,6 @@ public class WebAppContext extends Context
         // Configure webapp
         for (int i=0;i<_configurations.length;i++)
             _configurations[i].configureWebApp();
-        
-        _servletHandler.setInitializeAtStart(false);
 
         // bypass security handler if not used.
         if (_securityHandler.getConstraintMappings()==null ||
@@ -1127,10 +1125,6 @@ public class WebAppContext extends Context
         }
         
         super.startContext();
-
-        // OK to Initialize servlet handler now
-        if (_servletHandler != null && _servletHandler.isStarted())
-            _servletHandler.initialize();
     }
     
     /**
