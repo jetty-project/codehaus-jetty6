@@ -57,6 +57,9 @@ import org.mortbay.util.URIUtil;
  * be used when a full web application is not required.  Specifically filters
  * and request wrapping are not supported.
  * 
+ * Unless run as part of a {@link Context} or derivative, the {@link #initialize()}
+ * method must be called manually after start().
+ * 
  * @see org.mortbay.jetty.webapp.WebAppContext
  * @author Greg Wilkins
  */
@@ -84,8 +87,6 @@ public class ServletHandler extends AbstractHandler
     
     private ServletHolder[] _servlets;
     private ServletMapping[] _servletMappings;
-    
-    private boolean _initializeAtStart=true;
     
     private transient Map _filterNameMap;
     private transient List _filterPathMappings;
@@ -138,9 +139,6 @@ public class ServletHandler extends AbstractHandler
         
         updateMappings();
         
-        if (isInitializeAtStart())
-            initialize();
-
         if(_filterChainsCached)
         {
             _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
@@ -514,19 +512,20 @@ public class ServletHandler extends AbstractHandler
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the initializeAtStart.
+     * @deprecated
      */
     public boolean isInitializeAtStart()
     {
-        return _initializeAtStart;
+        return false;
     }
     
     /* ------------------------------------------------------------ */
     /**
      * @param initializeAtStart The initializeAtStart to set.
+     * @deprecated
      */
     public void setInitializeAtStart(boolean initializeAtStart)
     {
-        _initializeAtStart = initializeAtStart;
     }
     
     /* ------------------------------------------------------------ */

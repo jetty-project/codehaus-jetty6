@@ -53,7 +53,7 @@ public class ServletTest extends TestCase
         
         context.setHandler(handler);
         handler.addServletWithMapping("org.mortbay.jetty.servlet.ServletTest$TestServlet", "/servlet/*");
-        
+        handler.initialize();
         server.start();
         
     }
