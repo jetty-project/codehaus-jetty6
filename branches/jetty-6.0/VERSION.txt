@@ -1,4 +1,5 @@
 jetty-6.0-SNAPSHOT
+    + JETTY-129 ServletContextListeners called after servlets are initialized
     + change examples/test-jndi-webapp so it can be regularly built
     + added examples/test-jaas-webapp
     + (re)make JAAS classes available to webapp classloader
