@@ -61,6 +61,5 @@ public class JSONTest extends TestCase
         
         test="{\"data\":{\"source\":\"15831407eqdaawf7\",\"widgetId\":\"Magnet_8\"},\"channel\":\"/magnets/moveStart\",\"connectionId\":null,\"clientId\":\"15831407eqdaawf7\"}";
         map = (Map)JSON.parse(test);
-        
     }
 }
