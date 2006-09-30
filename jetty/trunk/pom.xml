@@ -196,6 +196,7 @@
     <module>extras/grizzly</module>
     <module>extras/sslengine</module>
     <module>extras/ajp</module>
+    <module>extras/setuid</module>
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
     <module>examples/test-jndi-webapp</module>
