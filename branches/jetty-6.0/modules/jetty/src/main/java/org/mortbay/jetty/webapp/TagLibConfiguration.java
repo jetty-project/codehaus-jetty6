@@ -106,16 +106,24 @@ public class TagLibConfiguration implements Configuration
             }
         }
         
+        list.addAll(getServerJarResourceList());
+        
+        Log.debug("TLD search {}",list);
+        return list;
+        
+    }
+    
+    protected List getServerJarResourceList () throws MalformedURLException, IOException
+    {
+        List list = new ArrayList();
+        
         for (int i=0;_serverTagLibClasses!=null && i<_serverTagLibClasses.length;i++)
         {
             URL jar = TypeUtil.jarFor(_serverTagLibClasses[i]);
             if (jar!=null)
                 list.add(Resource.newResource(jar));       
         }
-        
-        Log.debug("TLD search {}",list);
         return list;
-        
     }
 
     /* ------------------------------------------------------------ */
