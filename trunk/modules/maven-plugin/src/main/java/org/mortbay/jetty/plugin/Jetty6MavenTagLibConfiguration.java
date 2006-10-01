@@ -17,12 +17,14 @@ package org.mortbay.jetty.plugin;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.mortbay.jetty.webapp.TagLibConfiguration;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.TypeUtil;
 
 /**
  * @author janb
@@ -54,6 +56,7 @@ public class Jetty6MavenTagLibConfiguration extends TagLibConfiguration
             if (f.getName().toLowerCase().endsWith(".jar"))
                 list.add(Resource.newResource(f.toURL()));
         }
+        list.addAll(getServerJarResourceList());
 
         return list;
     }
