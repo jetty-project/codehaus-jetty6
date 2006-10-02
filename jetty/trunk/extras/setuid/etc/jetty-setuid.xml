@@ -10,5 +10,6 @@
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.setuid.SetUIDServer">
   <Set name="uid">2001</Set>
+  <Set name="umask">2</Set>
 </Configure>
 
