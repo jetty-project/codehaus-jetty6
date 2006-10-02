@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + add ability to setuid and setumask
     + Fixed tld parsing for maven plugin
     + Improved *-mbean.properties files and specialized some MBean
     + Added conversion Object -> ObjectName for the result of method calls made on MBeans
