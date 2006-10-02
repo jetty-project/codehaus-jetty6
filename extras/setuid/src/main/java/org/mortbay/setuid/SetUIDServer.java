@@ -15,6 +15,7 @@ import org.mortbay.log.Log;
 public class SetUIDServer extends Server
 {
     int _uid=0;
+    int _umask=22;
 
     public int getUid()
     {
@@ -26,8 +27,19 @@ public class SetUIDServer extends Server
         _uid=uid;
     }
     
+    public void setUmask (int umask)
+    {
+        _umask=umask;
+    }
+    
+    public int getUmask ()
+    {
+        return _umask;
+    }
     protected void doStart() throws Exception
     {
+        Log.info("Setting umask="+_umask);
+        SetUmask.setumask(_umask);
         super.doStart();
         if (_uid!=0)
         {
