@@ -287,6 +287,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes
      */
     public String getContextPath()
     {
+        if ((_contextPath != null) && _contextPath.equals("/"))
+            return "";
+        
         return _contextPath;
     }
    
