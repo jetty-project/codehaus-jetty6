@@ -9,7 +9,6 @@ In this directory do:
   mvn install
 
   gcc -I$JDK_HOME/include/ -I$JDK_HOME/include/linux/ -shared src/main/native/org_mortbay_setuid_SetUID.c -o ../../lib/ext/libsetuid.so
-  gcc -I$JDK_HOME/include/ -I$JDK_HOME/include/linux/ -shared src/main/native/org_mortbay_setuid_SetUmask.c -o ../../lib/ext/libsetumask.so
 
 Where $JDK_HOME is same as $JAVA_HOME and where linux should be replaced by the name of your operating system.
 

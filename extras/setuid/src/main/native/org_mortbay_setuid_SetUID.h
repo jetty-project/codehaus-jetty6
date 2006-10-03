@@ -11,12 +11,11 @@ extern "C" {
 #define org_mortbay_setuid_SetUID_OK 0L
 #undef org_mortbay_setuid_SetUID_ERROR
 #define org_mortbay_setuid_SetUID_ERROR -1L
-/*
- * Class:     org_mortbay_setuid_SetUID
- * Method:    setuid
- * Signature: (I)I
- */
+
 JNIEXPORT jint JNICALL Java_org_mortbay_setuid_SetUID_setuid
+  (JNIEnv *, jclass, jint);
+
+JNIEXPORT jint JNICALL Java_org_mortbay_setuid_SetUID_setumask
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus

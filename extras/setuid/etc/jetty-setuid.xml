@@ -9,7 +9,7 @@
 <!--    java -jar start.jar etc/jetty-setuid.xml etc/jetty.xml       -->
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.setuid.SetUIDServer">
-  <Set name="uid">2001</Set>
   <Set name="umask">2</Set>
+  <Set name="uid">2001</Set>
 </Configure>
 
