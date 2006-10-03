@@ -115,6 +115,7 @@ public class WebAppTest extends TestCase
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/d.txt");
         assertTrue(IO.toString(url.openStream()).startsWith("0000"));
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/data.txt");
+        System.err.println("9999 3333333333333333333333333333333333333333333333333333333\n");
         assertTrue(IO.toString(url.openStream()).endsWith("9999 3333333333333333333333333333333333333333333333333333333\n"));
         
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dispatch/forward/dump/info?query=foo");
