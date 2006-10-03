@@ -779,6 +779,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         /* ------------------------------------------------------------- */
         public String getId() throws IllegalStateException
         {
+            if (_invalid)
+                return null;
             return _id;
         }
 
