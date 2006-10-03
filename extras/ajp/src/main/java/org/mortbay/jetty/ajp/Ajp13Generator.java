@@ -156,6 +156,14 @@ public class Ajp13Generator extends AbstractGenerator
             
             // Copy _content to buffer;
             int len=_buffer.put(_content);
+            // TODO HORRID HACK!
+            if (len>0)
+            {
+                len--;
+                _buffer.setPutIndex(_buffer.putIndex()-1);
+                _content.setGetIndex(_buffer.getIndex()-1);
+            }
+            
             _content.skip(len);
             if (_content.length() == 0) 
                 _content = null;
@@ -198,7 +206,7 @@ public class Ajp13Generator extends AbstractGenerator
         // Copy _content to buffer;
         _buffer.put(b);
         
-        return _buffer.space()<=0;
+        return _buffer.space()<=1;
     }
 
 
@@ -234,7 +242,7 @@ public class Ajp13Generator extends AbstractGenerator
         if (_head)
             return Integer.MAX_VALUE;
         
-        return _buffer.space();
+        return _buffer.space()-1;
     }
 
     
@@ -488,6 +496,14 @@ public class Ajp13Generator extends AbstractGenerator
             if (_content != null && _content.length() > 0 && _buffer != null && _buffer.space() > 0)
             {
                 int len = _buffer.put(_content);
+                
+                // TODO HORRID HACK!
+                if (len>0)
+                {
+                    len--;
+                    _buffer.setPutIndex(_buffer.putIndex()-1);
+                    _content.setGetIndex(_buffer.getIndex()-1);
+                }
                 _content.skip(len);
                 if (_content.length() == 0) 
                     _content = null;
@@ -510,12 +526,13 @@ public class Ajp13Generator extends AbstractGenerator
                 {
                     _bufferPrepared=true;
 
+                    _buffer.put((byte)0);
                     int put=_buffer.putIndex();
                     _buffer.setGetIndex(0);
                     _buffer.setPutIndex(0);
                     _buffer.put((byte)'A');
                     _buffer.put((byte)'B');
-                    addInt(payloadSize+3);
+                    addInt(payloadSize+4);
                     _buffer.put((byte)3);
                     addInt(payloadSize);
                     _buffer.setPutIndex(put);
