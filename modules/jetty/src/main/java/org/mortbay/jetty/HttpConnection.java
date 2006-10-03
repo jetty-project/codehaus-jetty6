@@ -742,11 +742,11 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class Output extends HttpGenerator.Output 
+    public class Output extends AbstractGenerator.Output 
     {
         Output()
         {
-            super((HttpGenerator)HttpConnection.this._generator,_connector.getMaxIdleTime());
+            super((AbstractGenerator)HttpConnection.this._generator,_connector.getMaxIdleTime());
         }
         
         /* ------------------------------------------------------------ */
@@ -845,7 +845,7 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class OutputWriter extends HttpGenerator.OutputWriter
+    public class OutputWriter extends AbstractGenerator.OutputWriter
     {
         OutputWriter()
         {

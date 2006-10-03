@@ -1394,7 +1394,7 @@ public class HttpFields
         }
 
         /* ------------------------------------------------------------ */
-        Buffer getValueBuffer()
+        public Buffer getValueBuffer()
         {
             return _value;
         }
