@@ -51,7 +51,6 @@ public class Ajp13Connection extends HttpConnection
 
     public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
-    	
         super(connector,endPoint,server);
         
         // TODO avoid the creation of HttpParsers etc.
@@ -84,27 +83,6 @@ public class Ajp13Connection extends HttpConnection
             _in=new Ajp13Parser.Input((Ajp13Parser)_parser,_connector.getMaxIdleTime());
         return _in;
     }
-
-    // XXX Implement
-    public ServletOutputStream getOutputStream()
-    {
-    	return new ServletOutputStream()
-        {
-            public void write(int b) throws IOException
-            {   
-                ((Ajp13Generator)_generator).addContent((byte)b);
-            }
-            
-            
-        };
-    }
-
-    // XXX Implement
-    public PrintWriter getPrintWriter(String encoding)
-    {
-    	return new Ajp13PrintWriter(getOutputStream(),(Ajp13Generator) _generator);
-    }
-
  
     private class RequestHandler implements Ajp13Parser.EventHandler
     {
