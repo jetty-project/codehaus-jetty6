@@ -384,8 +384,6 @@ public abstract class AbstractGenerator implements Generator
      */
     public void complete() throws IOException
     {
-        if (_state == STATE_END) return;
-
         if (_state == STATE_HEADER)
         {
             throw new IllegalStateException("State==HEADER");

@@ -483,9 +483,12 @@ public class HttpGenerator extends AbstractGenerator
      */
     public void complete() throws IOException
     {
+        if (_state == STATE_END) 
+            return;
+        
         super.complete();
         
-        if (_state != STATE_FLUSHING)
+        if (_state < STATE_FLUSHING)
         {
             _state = STATE_FLUSHING;
             if (_contentLength == HttpTokens.CHUNKED_CONTENT) 
