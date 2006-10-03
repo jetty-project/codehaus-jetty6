@@ -517,7 +517,7 @@ public class Ajp13Generator extends AbstractGenerator
                     _buffer.put((byte)'B');
                     addInt(payloadSize+3);
                     _buffer.put((byte)3);
-                    addInt(payloadSize-1);
+                    addInt(payloadSize);
                     _buffer.setPutIndex(put);
                 }
             }
