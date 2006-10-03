@@ -74,20 +74,34 @@ public class Ajp13Generator implements Generator
     }
 
     private boolean _allContentAdded=false;
+
     private Buffer _buffer;
-    private Buffer _header;
+
     private Buffers _buffers;
-    private boolean _hasContent=false;
-    
+
+    private boolean _content=false;
+
     private EndPoint _endp;
+
     private boolean _headerDone=false;
+
     private int _status;
-    private String _reason;
+
+    private String _statusMsg;
 
     public Ajp13Generator(Buffers buffers, EndPoint io, int headerBufferSize, int contentBufferSize)
     {
+        _status=0;
+        _statusMsg=null;
         _buffers=buffers;
         _endp=io;
+
+        _buffer=null;
+
+        _headerDone=false;
+        _allContentAdded=false;
+        _content=false;
+
     }
 
     public void addContent(Buffer content, boolean last) throws IOException
@@ -102,7 +116,7 @@ public class Ajp13Generator implements Generator
 
         if (_buffer.length()>=_buffer.capacity())
         {
-            flush();
+            flushContent();
             initContent();
         }
 
@@ -142,7 +156,7 @@ public class Ajp13Generator implements Generator
 
     public void complete() throws IOException
     {
-        flush();
+        flushContent();
 
         // send closing packet if all contents are added
         if (_allContentAdded)
@@ -170,13 +184,7 @@ public class Ajp13Generator implements Generator
 
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
-        
-
-        // get a header buffer
-        if (_header == null) 
-            _header = _buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
-
-        flush();
+        flushContent();
 
         _allContentAdded=allContentAdded;
         reset(true);
@@ -188,12 +196,12 @@ public class Ajp13Generator implements Generator
         _buffer.put((byte)0x4);
         addInt(_status);
 
-        if (_reason==null)
+        if (_statusMsg==null)
         {
             Buffer tmp=HttpStatus.CACHE.get(_status);
-            _reason=tmp==null?TypeUtil.toString(_status):tmp.toString();
+            _statusMsg=tmp==null?TypeUtil.toString(_status):tmp.toString();
         }
-        addString(_reason==null?"status is unknown or no message definetion given...":_reason);
+        addString(_statusMsg==null?"status is unknown or no message definetion given...":_statusMsg);
 
         int field_index=_buffer.putIndex();
         // allocate 2 bytes for number of headers
@@ -236,6 +244,12 @@ public class Ajp13Generator implements Generator
         _endp.flush(_buffer);
         reset(true);
 
+    }
+
+    public long flush() throws IOException
+    {
+        System.out.println("Ajp13: flush()");
+        return 0;
     }
 
     public int getContentBufferSize()
@@ -308,7 +322,7 @@ public class Ajp13Generator implements Generator
         System.out.println("AJPGenerator: setResponse(status, reason)"+status+", "+reason);
 
         this._status=status;
-        this._reason=reason;
+        this._statusMsg=reason;
     }
 
     public void setSendServerVersion(boolean sendServerVersion)
@@ -344,12 +358,12 @@ public class Ajp13Generator implements Generator
         addInt(0);
 
     }
-    
-    public long flush() throws IOException
+
+    private void flushContent() throws IOException
     {
-        if (_hasContent)
+        if (_content)
         {
-            _hasContent=false;
+            _content=false;
             // get the content length
             // -8 bytes
             // 4 bytes for the ajp header
@@ -362,9 +376,10 @@ public class Ajp13Generator implements Generator
             addInt(5,len);
 
             addPacketFooter();
-            return _endp.flush(_buffer);
+            _endp.flush(_buffer);
+            reset(true);
         }
-        return 0;
+
     }
 
     private void initContent() throws IOException
@@ -372,7 +387,7 @@ public class Ajp13Generator implements Generator
         if (_buffer==null)
         {
             _buffer=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
-            _hasContent=true;
+            _content=true;
             addPacketHeader();
             _buffer.put((byte)3);
             addInt(0);
