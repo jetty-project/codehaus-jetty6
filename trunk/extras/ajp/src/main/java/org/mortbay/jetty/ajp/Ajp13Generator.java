@@ -293,7 +293,6 @@ public class Ajp13Generator extends AbstractGenerator
             addInt(0);
 
             // Add headers
-            System.out.println("********* Start of Response Headers **********");
             Iterator i=fields.getFields();
             int num_fields=0;
 
@@ -305,12 +304,10 @@ public class Ajp13Generator extends AbstractGenerator
                 byte[] codes=(byte[])__headerHash.get(f.getName());
                 if (codes!=null)
                 {
-                    System.out.println("0x"+TypeUtil.toHexString(codes)+":"+f.getName()+": "+f.getValue());
                     _buffer.put(codes);
                 }
                 else
                 {
-                    System.out.println(f.getName()+": "+f.getValue());
                     addString(f.getName());
                 }
                 addString(f.getValue());
@@ -325,7 +322,6 @@ public class Ajp13Generator extends AbstractGenerator
 
             // TODO Add content length if last content known.
 
-            System.out.println("********* END of Response Headers **********");
 
 
             // insert the number of headers
@@ -361,9 +357,11 @@ public class Ajp13Generator extends AbstractGenerator
      */
     public void complete() throws IOException
     {
+        if (_state == STATE_END) return;
+        
         super.complete();
         
-        if (_state != STATE_FLUSHING)
+        if (_state < STATE_FLUSHING)
         {
             _state = STATE_FLUSHING;
             _needEOC = true;
@@ -386,6 +384,7 @@ public class Ajp13Generator extends AbstractGenerator
             {
                 if (_needEOC && _buffer != null) 
                     _buffer.put(END_PACKET);
+                _needEOC=false;
                 return 0;
             }
             
@@ -396,10 +395,6 @@ public class Ajp13Generator extends AbstractGenerator
             {
                 int len = -1;
                 int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) ;
-                
-                System.err.print("flush type="+to_flush);
-                System.err.print(" header="+(_header==null?"null":(""+_header.length())));
-                System.err.println(" buffer="+(_buffer==null?"null":(""+_buffer.length())));
                 
                 switch (to_flush)
                 {
