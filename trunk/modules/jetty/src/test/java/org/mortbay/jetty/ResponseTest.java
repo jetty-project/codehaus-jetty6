@@ -19,11 +19,13 @@ package org.mortbay.jetty;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Enumeration;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
 
+import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.servlet.HashSessionManager;
 
 import junit.framework.TestCase;
@@ -284,89 +286,9 @@ public class ResponseTest extends TestCase
        
         request.setRequestedSessionId("12345");
         request.setRequestedSessionIdFromCookie(false);
-        request.setSessionManager(new HashSessionManager());
-        request.setSession(new HttpSession(){
-
-            public Object getAttribute(String name) 
-            {
-                return null;
-            }
-
-            public Enumeration getAttributeNames()
-            {
-
-                return null;
-            }
-
-            public long getCreationTime()
-            {
-
-                return 0;
-            }
-
-            public String getId()
-            {
-                return "12345";
-            }
-
-            public long getLastAccessedTime()
-            {
-                return 0;
-            }
-
-            public int getMaxInactiveInterval()
-            {
-                return 0;
-            }
-
-            public ServletContext getServletContext()
-            {
-                return null;
-            }
-
-            public HttpSessionContext getSessionContext()
-            {
-                return null;
-            }
-
-            public Object getValue(String name)
-            {
-                return null;
-            }
-
-            public String[] getValueNames()
-            {
-                return null;
-            }
-
-            public void invalidate()
-            {
-            }
-
-            public boolean isNew()
-            {
-                return false;
-            }
-
-            public void putValue(String name, Object value)
-            {
-            }
-
-            public void removeAttribute(String name)
-            {
-            }
-
-            public void removeValue(String name)
-            {   
-            }
-
-            public void setAttribute(String name, Object value)
-            {
-            }
-
-            public void setMaxInactiveInterval(int interval)
-            {
-            }});
+        AbstractSessionManager manager=new HashSessionManager();
+        request.setSessionManager(manager);
+        request.setSession(new TestSession(manager,"12345"));
         
         assertEquals("http://host:port/path/info;param;jsessionid=12345?query=0&more=1#target",response.encodeRedirectUrl("http://host:port/path/info;param?query=0&more=1#target"));
               
@@ -381,5 +303,99 @@ public class ResponseTest extends TestCase
         connection.getRequest().setRequestURI("/test");
         return response;
     }
+    
+    class TestSession extends AbstractSessionManager.Session
+    {
+        public TestSession(AbstractSessionManager abstractSessionManager, String id)
+        {
+            abstractSessionManager.super(id);
+        }
 
+        public Object getAttribute(String name) 
+        {
+            return null;
+        }
+
+        public Enumeration getAttributeNames()
+        {
+
+            return null;
+        }
+
+        public long getCreationTime()
+        {
+
+            return 0;
+        }
+
+        public String getId()
+        {
+            return "12345";
+        }
+
+        public long getLastAccessedTime()
+        {
+            return 0;
+        }
+
+        public int getMaxInactiveInterval()
+        {
+            return 0;
+        }
+
+        public ServletContext getServletContext()
+        {
+            return null;
+        }
+
+        public HttpSessionContext getSessionContext()
+        {
+            return null;
+        }
+
+        public Object getValue(String name)
+        {
+            return null;
+        }
+
+        public String[] getValueNames()
+        {
+            return null;
+        }
+
+        public void invalidate()
+        {
+        }
+
+        public boolean isNew()
+        {
+            return false;
+        }
+
+        public void putValue(String name, Object value)
+        {
+        }
+
+        public void removeAttribute(String name)
+        {
+        }
+
+        public void removeValue(String name)
+        {   
+        }
+
+        public void setAttribute(String name, Object value)
+        {
+        }
+
+        public void setMaxInactiveInterval(int interval)
+        {
+        }
+
+        protected Map newAttributeMap()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    }
 }
