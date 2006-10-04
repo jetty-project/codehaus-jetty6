@@ -287,9 +287,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes
      */
     public String getContextPath()
     {
-        if ((_contextPath != null) && _contextPath.equals("/"))
-            return "";
-        
         return _contextPath;
     }
    
@@ -1360,6 +1357,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes
          */
         public String getContextPath()
         {
+            if ((_contextPath != null) && _contextPath.equals("/"))
+                return "";
+            
             return _contextPath;
         }
 
@@ -1367,7 +1367,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            return "ServletContext@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getBaseResource()+"}";
+            return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?"/":getContextPath())+","+getBaseResource()+"}";
         }
 
     }
