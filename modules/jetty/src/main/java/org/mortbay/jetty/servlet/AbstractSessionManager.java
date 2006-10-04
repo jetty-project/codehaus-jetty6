@@ -705,6 +705,16 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
+        protected Session(String id)
+        {
+            _id=id;
+            _created=System.currentTimeMillis();
+            _accessed=_created;
+            if (_dftMaxIdleSecs>=0)
+                _maxIdleMs=_dftMaxIdleSecs*1000;
+        }
+
+        /* ------------------------------------------------------------- */
         protected void setCookie(Cookie cookie)
         {
             _cookieSet=_accessed;
@@ -779,8 +789,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         /* ------------------------------------------------------------- */
         public String getId() throws IllegalStateException
         {
-            if (_invalid)
-                return null;
             return _id;
         }
 
