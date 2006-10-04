@@ -1,4 +1,5 @@
 jetty-6.0-SNAPSHOT
+    + ensure "" returned for ServletContext.getContextPath() for root context
     + Fixed tld parsing for maven plugin
     + JETTY-129 ServletContextListeners called after servlets are initialized
     + change examples/test-jndi-webapp so it can be regularly built
