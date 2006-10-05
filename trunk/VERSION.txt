@@ -39,6 +39,7 @@ jetty-6.1-SNAPSHOT
     + Allow session cookie to be refreshed
     + Added DataFilter configuration to cometd
     + Added extras/setuid to support start as root
+    + Apply queryEncoding to getQueryString 
 
 jetty-6.0-SNAPSHOT
 
