@@ -1106,6 +1106,9 @@ public class Request implements HttpServletRequest
     {
         Object old_value=_attributes==null?null:_attributes.getAttribute(name);
         
+        if ("org.mortbay.jetty.Request.queryEncoding".equals(name))
+            setQueryEncoding(value==null?null:value.toString());
+        
         if (_attributes==null)
             _attributes=new AttributesMap();
         _attributes.setAttribute(name, value);
@@ -1601,14 +1604,26 @@ public class Request implements HttpServletRequest
         _userRealm = userRealm;
     }
 
+    /* ------------------------------------------------------------ */
     public String getQueryEncoding()
     {
         return _queryEncoding;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set the character encoding used for the query string.
+     * This call will effect the return of getQueryString and getParamaters.
+     * It must be called before any geParameter methods.
+     * 
+     * The request attribute "org.mortbay.jetty.Request.queryEncoding"
+     * may be set as an alternate method of calling setQueryEncoding.
+     * 
+     * @param queryEncoding
+     */
     public void setQueryEncoding(String queryEncoding)
     {
         _queryEncoding=queryEncoding;
+        _queryString=null;
     }
 }
 
