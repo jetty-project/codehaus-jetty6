@@ -15,18 +15,16 @@ public class MultiPartTransport extends AbstractTransport
 {
     MultiPartWriter _writer;
     
-    public boolean preample(HttpServletResponse response, Map reply) throws IOException
+    public void setResponse(HttpServletResponse response) throws IOException
     {
+        super.setResponse(response);
         response.setCharacterEncoding("utf-8");
         _writer = new MultiPartWriter(response.getWriter());
         response.setContentType(MultiPartWriter.MULTIPART_X_MIXED_REPLACE+"; boundary="+_writer.getBoundary());
-        setInitialized(true);
-        if (reply!=null)
-            encode(reply);
-        return reply!=null;
+        
     }
     
-    public void encode(Map reply) throws IOException
+    public void send(Map reply) throws IOException
     {
         if (reply!=null)
         {
@@ -36,7 +34,7 @@ public class MultiPartTransport extends AbstractTransport
         }
     }
     
-    public void encode(List replies) throws IOException
+    public void send(List replies) throws IOException
     {
         if (replies!=null)
         {
@@ -58,11 +56,5 @@ public class MultiPartTransport extends AbstractTransport
         _writer.write("{}");
         _writer.flush();
         return false;
-    }
-
-    public void initTunnel(HttpServletResponse response) throws IOException
-    {
-        // TODO Auto-generated method stub
-        
     }
 }

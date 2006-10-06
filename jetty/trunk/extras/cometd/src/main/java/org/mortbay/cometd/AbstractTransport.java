@@ -1,11 +1,31 @@
 package org.mortbay.cometd;
 
+import java.io.IOException;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
 
 public abstract class AbstractTransport implements Transport
 {
-    boolean _polling;
-    boolean _initialized;
+    private HttpServletResponse _response;
+    private boolean _polling;
+    
+    public void setResponse(HttpServletResponse response) throws IOException
+    {
+        _response=response;
+    }
+    
+    public HttpServletResponse getResponse()
+    {
+        return _response;
+    }
 
+    public void preample(HttpServletResponse resp, Map reply) throws IOException
+    {
+        // TODO REMOVE ME
+    }
+    
     public boolean isPolling()
     {
         return _polling;
@@ -14,15 +34,5 @@ public abstract class AbstractTransport implements Transport
     public void setPolling(boolean polling)
     {
         _polling=polling;
-    }
-
-    public boolean isInitialized()
-    {
-        return _initialized;
-    }
-    
-    public void setInitialized(boolean initialized)
-    {
-        _initialized=initialized;
     }
 }

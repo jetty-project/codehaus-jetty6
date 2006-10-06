@@ -11,11 +11,12 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface Transport 
 {
-    public boolean preample(HttpServletResponse resp, Map reply) throws IOException; 
-    public boolean isInitialized();
-    public void encode(Map reply) throws IOException;
-    public void encode(List replies) throws IOException;
+    public void setResponse(HttpServletResponse response) throws IOException;
+    
+    public void send(Map reply) throws IOException;
+    public void send(List replies) throws IOException;
     public void complete() throws IOException;
+    
     public boolean isPolling();
     public void setPolling(boolean polling);
     public boolean keepAlive() throws IOException;
