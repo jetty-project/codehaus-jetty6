@@ -730,7 +730,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         if (contextPath!=null && contextPath.length()>1 && contextPath.endsWith("/"))
             throw new IllegalArgumentException("ends with /");
         _contextPath = contextPath;
-        if (getServer()!=null && getServer().isStarted())
+        
+        if (getServer()!=null && (getServer().isStarting() || getServer().isStarted()))
         {
             Handler[] contextCollections = getServer().getChildHandlersByClass(ContextHandlerCollection.class);
             for (int h=0;contextCollections!=null&& h<contextCollections.length;h++)
