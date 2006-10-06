@@ -15,21 +15,59 @@
 
 package org.mortbay.jetty.deployer;
 
-import org.mortbay.component.LifeCycle;
+
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.log.Log;
 
 /**
- * Deployer
+ * AbstractDeployer
  *
- * Type for a deployer that is able to deploy or undeploy webapps
- * to a jetty server instance.
+ * Base class for all types of webapp deployer.
+ * 
+ * @see HotFileDeployer
  */
-public interface Deployer extends LifeCycle
+public class Deployer extends AbstractLifeCycle
 {
-    
-    public void deploy (Server server, WebAppContext webapp) throws Exception;
-    
-    public void undeploy (Server server, WebAppContext webapp) throws Exception;
+    /** 
+     * Perform a deployment of the webapp to the server instance
+     * @see org.mortbay.jetty.deployer.Deployer#deploy(org.mortbay.jetty.webapp.WebAppContext)
+     */
+    public void deploy(Server server, WebAppContext webapp) throws Exception
+    {
+        if (!isStarted())
+            throw new IllegalStateException ("Deployer is not started");
+        if (server == null)
+            throw new IllegalStateException ("No server set for deployer");
+        if (webapp != null)
+        {
+            ContextHandlerCollection contexts = (ContextHandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+            contexts.addHandler(webapp);
+        }
+        
+        Log.info("Webapp at "+webapp.getContextPath()+" deployed.");
+    }
 
+    /** 
+     * Perform an undeployment of the webapp.
+     * 
+     * @see org.mortbay.jetty.deployer.Deployer#undeploy(org.mortbay.jetty.webapp.WebAppContext)
+     */
+    public void undeploy(Server server, WebAppContext webapp) throws Exception
+    {
+        if (!isStarted())
+            throw new IllegalStateException ("Deployer is not started");       
+        if (server == null)
+            throw new IllegalStateException ("No server set for deployer");
+        if (webapp != null)
+        {
+            webapp.stop();
+            ContextHandlerCollection contexts = (ContextHandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+            contexts.removeHandler(webapp);
+        }
+        
+        Log.info ("Webapp at "+webapp.getContextPath()+" undeployed");
+    }
 }
