@@ -35,7 +35,8 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
     private final NIOBuffer _inNIOBuffer;
     private final ByteBuffer _outBuffer;
     private final NIOBuffer _outNIOBuffer;
-    
+
+    private ByteBuffer _reuseBuffer;    
     private final ByteBuffer[] _outBuffers=new ByteBuffer[3];
 
     // ssl
@@ -305,8 +306,12 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         }
         else
         {
-	    // TODO This still allocates an array.
-            src=ByteBuffer.wrap(buffer.asArray());
+        	if (_reuseBuffer == null)
+        	{
+        		_reuseBuffer = ByteBuffer.allocateDirect(_session.getPacketBufferSize());
+        	}
+            _reuseBuffer.put(buffer.asArray());
+            src = _reuseBuffer;
         }
 
         if (src!=null)
