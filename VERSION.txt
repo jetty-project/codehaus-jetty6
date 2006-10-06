@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + add hot deployment capability
     + ensure setContextPath() works when invoked from jetty-web.xml
     + ensure sessions nulled out on request recycle; ensure session null after invalidate
     + ensure "" returned for ServletContext.getContextPath() for root context
