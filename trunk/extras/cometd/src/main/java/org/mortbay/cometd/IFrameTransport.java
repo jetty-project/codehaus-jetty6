@@ -10,20 +10,26 @@ import javax.servlet.http.HttpServletResponse;
 public class IFrameTransport extends AbstractTransport
 {
     PrintWriter _writer;
+    boolean _initialized=false;
 
-    public void preample(HttpServletResponse response) throws IOException
+    public void setResponse(HttpServletResponse response) throws IOException
     {
-        preample(response,null);
+        _initialized=false;
+        super.setResponse(response);
     }
 
-    public boolean preample(HttpServletResponse response, Map reply) throws IOException
+    private void init(Map reply) throws IOException
     {
+        if (_initialized)
+            return;
+        _initialized=true;
+        
         String channel=(String)reply.get("channel");
         if (!"/meta/connect".equals(channel)&&!"/meta/reconnect".equals(channel))
             reply=null;
 
-        response.setContentType("text/html; charset=UTF-8");
-        _writer=response.getWriter();
+        getResponse().setContentType("text/html; charset=UTF-8");
+        _writer=getResponse().getWriter();
 
         _writer.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
         _writer.println("<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">");
@@ -42,35 +48,50 @@ public class IFrameTransport extends AbstractTransport
         _writer.println("</head>");
         _writer.println("<body onload=\"window.parent.cometd.tunnelCollapse();\">");
         _writer.flush();
-
-        return reply!=null;
     }
 
-    public void encode(Map reply) throws IOException
+    public void send(Map reply) throws IOException
     {
-        _writer.write("<br /><script type=\"text/javascript\">");
-        _writer.write("window.parent.cometd.deliver([");
-        _writer.write(JSON.toString(reply));
-        _writer.write("]);");
-        _writer.write("</script><br/>");
-        for (int i=0; i<16; i++)
-            _writer.write("                                                                                                                                ");
-        _writer.write("<br/>");
-        _writer.flush();
+        if (!_initialized)
+            init(reply);
+        else
+        {
+            _writer.write("<br /><script type=\"text/javascript\">");
+            _writer.write("window.parent.cometd.deliver([");
+            _writer.write(JSON.toString(reply));
+            _writer.write("]);");
+            _writer.write("</script><br/>");
+            for (int i=0; i<16; i++)
+                _writer.write("                                                                                                                                ");
+            _writer.write("<br/>");
+            _writer.flush();
+        }
     }
 
-    public void encode(List replies) throws IOException
+    public void send(List replies) throws IOException
     {
         if (replies==null)
             return;
-
-        try
+        
+        int m=0;
+        
+        if (!_initialized)
+        {
+            if (replies.size()>0)
+                init((Map)replies.get(m++));
+            else
+                init(null);
+        }
+        
+        if (replies.size()>m)
         {
             _writer.write("<br /><script type=\"text/javascript\">");
             _writer.write("window.parent.cometd.deliver([");
 
-            for (int i=0; i<replies.size(); i++)
+            for (int i=m; i<replies.size(); i++)
             {
+                
+                
                 // encode((Map)replies.get(i));
                 // do multiple messages in one deliver
                 _writer.write(JSON.toString(replies.get(i)));
@@ -84,15 +105,6 @@ public class IFrameTransport extends AbstractTransport
                         .write("                                                                                                                                ");
             _writer.write("<br/>");
             _writer.flush();
-        }
-        catch (Exception e)
-        {
-            System.err.println("exception encoding, messages lost?");
-            for (int i=0; i<replies.size(); i++)
-            {
-                System.err.println(JSON.toString(replies.get(i)));
-            }
-            e.printStackTrace();
         }
     }
 

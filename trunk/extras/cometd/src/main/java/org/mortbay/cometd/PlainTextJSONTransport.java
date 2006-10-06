@@ -13,26 +13,16 @@ import org.mortbay.util.LazyList;
 
 public class PlainTextJSONTransport extends AbstractTransport
 {
-    HttpServletResponse _response;
     Object _responses=null;
     
-    public boolean preample(HttpServletResponse response, Map reply) throws IOException
-    {
-        _response=response;
-        _responses=null;
-        setInitialized(true);
-        if (reply!=null)
-            encode(reply);
-        return reply!=null;
-    }
     
-    public void encode(Map reply)
+    public void send(Map reply)
     {
         if (reply!=null)
             _responses=LazyList.add(_responses,reply);
     }
     
-    public void encode(List replies)
+    public void send(List replies)
     {
         if (replies!=null)
             _responses=LazyList.addCollection(_responses,replies);
@@ -40,43 +30,38 @@ public class PlainTextJSONTransport extends AbstractTransport
     
     public void complete() throws IOException
     {
-        _response.setStatus(200);
+        HttpServletResponse response=getResponse();
+        response.setStatus(200);
         switch (LazyList.size(_responses))
         {
             case 0:
-                _response.setContentLength(0);
+                response.setContentLength(0);
                 break;
                 
             case 1:
             {
-                _response.setContentType("text/plain; charset=utf-8");
-                String s = JSON.toString(LazyList.get(_responses,0));
-                System.err.println(s);
-                _response.getWriter().write(s);
+                response.setContentType("text/plain; charset=utf-8");
+                String s = "["+JSON.toString(LazyList.get(_responses,0))+"]";
+                System.err.println("<=1="+s);
+                response.getWriter().println(s);
                 break;
             }
                 
             default:
             {
-                _response.setContentType("text/plain; charset=utf-8");
+                response.setContentType("text/plain; charset=utf-8");
                 String s = JSON.toString(LazyList.getList(_responses));
-                System.err.println(s);
-                _response.getWriter().write(s); 
+                System.err.println("<=*="+s);
+                response.getWriter().println(s); 
                 break;   
             }
         }
-        _response.getWriter().close();
-        _response=null;
+        response.getWriter().close();
+        response=null;
     }
 
     public boolean keepAlive() throws IOException
     {
         return false;
-    }
-
-    public void initTunnel(HttpServletResponse response) throws IOException
-    {
-        // TODO Auto-generated method stub
-        
     }
 }
