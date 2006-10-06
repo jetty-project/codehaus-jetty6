@@ -78,7 +78,7 @@ import org.mortbay.util.Scanner;
  *   
  *   You can of course change the hot deploy directory if you wish.
  */
-public class HotFileDeployer extends AbstractDeployer
+public class HotFileDeployer extends Deployer
        implements Scanner.FileAddedListener, Scanner.FileChangedListener, Scanner.FileRemovedListener
 {
     private int _scanInterval = 10;
