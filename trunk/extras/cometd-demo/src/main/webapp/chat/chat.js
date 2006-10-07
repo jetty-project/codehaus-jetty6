@@ -1,4 +1,6 @@
 
+dojo.require("dojo.io.cometd");
+
 
 var EvUtil =
 {

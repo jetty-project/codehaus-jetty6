@@ -4665,6 +4665,7 @@ dojo.lang.mixin(_3f8,_3f7);
 return dojo.io.bind(_3f8);
 };
 this.finishInit=function(type,data,evt,_403){
+data=data[0];
 this.handshakeReturn=data;
 if(data["authSuccessful"]==false){
 dojo.debug("cometd authentication failed");
