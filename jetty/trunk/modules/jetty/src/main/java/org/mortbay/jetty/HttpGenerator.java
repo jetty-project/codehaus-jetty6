@@ -164,7 +164,10 @@ public class HttpGenerator extends AbstractGenerator
             return false;
         
         if (_last || _state==STATE_END) 
-            throw new IllegalStateException("Closed");
+        {
+            Log.debug("Ignoring extra content {}",new Byte(b);
+            return false;
+        }
 
         // Handle any unfinished business?
         if (_content != null && _content.length()>0 || _bufferChunked)
@@ -203,7 +206,10 @@ public class HttpGenerator extends AbstractGenerator
             return -1;
         
         if (_last || _state==STATE_END) 
-            throw new IllegalStateException("Closed");
+        {
+            Log.debug("Ignoring extra content {}");
+            return -1;
+        }
 
         // Handle any unfinished business?
         Buffer content = _content;
