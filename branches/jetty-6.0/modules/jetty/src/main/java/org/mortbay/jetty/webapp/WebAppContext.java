@@ -274,23 +274,33 @@ public class WebAppContext extends Context
                     continue files;
             }
             
-            // add it
-            WebAppContext wah = null;
-            
+            // create a webapp
+            WebAppContext wah = null;           
             if (contexts instanceof ContextHandlerCollection && WebAppContext.class.isAssignableFrom(((ContextHandlerCollection)contexts).getContextClass()))
-                wah=(WebAppContext)((ContextHandlerCollection)contexts).addContext(context, null);
+            {
+                try
+                {
+                    wah = (WebAppContext)((ContextHandlerCollection)contexts).getContextClass().newInstance();
+                }
+                catch (Exception e)
+                {
+                    throw new Error(e);
+                }
+            }
             else
             {
-                wah=new WebAppContext();
-                wah.setContextPath(context);
-                contexts.addHandler(wah);
+                wah=new WebAppContext();       
             }
+            //configure it
+            wah.setContextPath(context);
             wah.setConfigurationClasses(configurations);
             if (defaults!=null)
                 wah.setDefaultsDescriptor(defaults);
             wah.setExtractWAR(extract);
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(java2CompliantClassLoader);
+            //add it
+            contexts.addHandler(wah);
         }
     }
     
