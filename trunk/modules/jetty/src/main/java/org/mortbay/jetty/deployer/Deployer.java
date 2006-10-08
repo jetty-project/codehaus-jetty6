@@ -16,6 +16,9 @@
 package org.mortbay.jetty.deployer;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -23,51 +26,109 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 
 /**
- * AbstractDeployer
+ * Deployer
  *
- * Base class for all types of webapp deployer.
+ * Deployers can deploy webapps to running Servers.
  * 
  * @see HotFileDeployer
  */
-public class Deployer extends AbstractLifeCycle
-{
+public class Deployer
+{    
+    private Map _deploymentMap = new HashMap();
+    private Server _server;
+    
+    
+    /**
+     * @return the server
+     */
+    public Server getServer()
+    {
+        return _server;
+    }
+
+
+    /**
+     * @param server the server to set
+     */
+    public void setServer(Server server)
+    {
+        _server = server;
+    }
+    
     /** 
      * Perform a deployment of the webapp to the server instance
      * @see org.mortbay.jetty.deployer.Deployer#deploy(org.mortbay.jetty.webapp.WebAppContext)
      */
-    public void deploy(Server server, WebAppContext webapp) throws Exception
+    public void deploy(WebAppContext webapp) throws Exception
     {
-        if (!isStarted())
-            throw new IllegalStateException ("Deployer is not started");
-        if (server == null)
+        if (_server == null)
             throw new IllegalStateException ("No server set for deployer");
         if (webapp != null)
         {
-            ContextHandlerCollection contexts = (ContextHandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
+            ContextHandlerCollection contexts = (ContextHandlerCollection)_server.getChildHandlerByClass(ContextHandlerCollection.class);
             contexts.addHandler(webapp);
         }
-        
+        _deploymentMap.put(webapp.getContextPath(), webapp);
         Log.info("Webapp at "+webapp.getContextPath()+" deployed.");
     }
+    
+    
+    /** Perform a deployment of a webapp to a server
+     * @param location the dir or war of the webapp
+     * @param contextPath the context path for the webapp
+     * @param defaults the webdefaults.xml
+     * @param configurationClasses configurations to be applied
+     * @param extract if true, explode a war
+     * @param java2CompliantClassLoader use parent-first a la j2se or child-first a la servlet spec
+     * @throws Exception
+     */
+    public void deploy (String location, String contextPath, String defaults, String[] configurationClasses, boolean extract, boolean java2CompliantClassLoader)
+    throws Exception
+    {
+        WebAppContext webapp = new WebAppContext();
+        webapp.setContextPath(contextPath);
+        webapp.setConfigurationClasses(configurationClasses);
+        if (defaults!=null)
+            webapp.setDefaultsDescriptor(defaults);
+        webapp.setExtractWAR(extract);
+        webapp.setWar(location);
+        webapp.setParentLoaderPriority(java2CompliantClassLoader);
+        deploy (webapp);
+    }
+    
 
     /** 
      * Perform an undeployment of the webapp.
      * 
      * @see org.mortbay.jetty.deployer.Deployer#undeploy(org.mortbay.jetty.webapp.WebAppContext)
      */
-    public void undeploy(Server server, WebAppContext webapp) throws Exception
+    public void undeploy(WebAppContext webapp) throws Exception
     {
-        if (!isStarted())
-            throw new IllegalStateException ("Deployer is not started");       
-        if (server == null)
+        if (_server == null)
             throw new IllegalStateException ("No server set for deployer");
-        if (webapp != null)
-        {
-            webapp.stop();
-            ContextHandlerCollection contexts = (ContextHandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
-            contexts.removeHandler(webapp);
-        }
-        
+        if (webapp == null)
+            return;
+
+        if (_deploymentMap.containsValue(webapp))
+            throw new IllegalArgumentException("Webapp at "+webapp.getContextPath()+" not hot deployed");
+
+        webapp.stop();
+        ContextHandlerCollection contexts = (ContextHandlerCollection)_server.getChildHandlerByClass(ContextHandlerCollection.class);
+        contexts.removeHandler(webapp);
+
         Log.info ("Webapp at "+webapp.getContextPath()+" undeployed");
+    }
+    
+    
+    
+    public void undeploy(String contextPath) throws Exception
+    {      
+        if (_server == null)
+            throw new IllegalStateException ("No server set for deployer");
+        WebAppContext webapp = (WebAppContext)_deploymentMap.get(contextPath);
+        if (webapp == null)
+            Log.info("No webapp hot deployed at context path "+contextPath);
+        else
+            undeploy(webapp);
     }
 }
