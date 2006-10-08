@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
@@ -78,16 +79,52 @@ import org.mortbay.util.Scanner;
  *   
  *   You can of course change the hot deploy directory if you wish.
  */
-public class HotFileDeployer extends Deployer
-       implements Scanner.FileAddedListener, Scanner.FileChangedListener, Scanner.FileRemovedListener
+public class HotFileDeployer extends AbstractLifeCycle
+       
 {
     private int _scanInterval = 10;
     private Scanner _scanner = new Scanner();
     private Resource _hotDeployDir;
     private Map _currentDeployments = new HashMap();
+    private Deployer _deployer;
     private Server _server;
+ 
 
-    
+    protected class ScannerListener implements Scanner.FileAddedListener, Scanner.FileChangedListener, Scanner.FileRemovedListener
+    {
+
+        /** 
+         * Handle a new deployment
+         * @see org.mortbay.util.Scanner.FileAddedListener#fileAdded(java.lang.String)
+         */
+        public void fileAdded(String filename)
+        throws Exception
+        {
+            deploy(filename);
+        }
+
+
+        /** 
+         * Handle a change to an existing deployment.
+         * Undeploy then redeploy.
+         * @see org.mortbay.util.Scanner.FileChangedListener#fileChanged(java.lang.String)
+         */
+        public void fileChanged(String filename)
+        throws Exception
+        {
+            redeploy(filename); 
+        }
+
+        /** 
+         * Handle an undeploy.
+         * @see org.mortbay.util.Scanner.FileRemovedListener#fileRemoved(java.lang.String)
+         */
+        public void fileRemoved(String filename)
+        throws Exception
+        {
+            undeploy(filename);
+        }
+    }
     
     /**
      * Constructor
@@ -101,8 +138,9 @@ public class HotFileDeployer extends Deployer
         Log.debug("jetty.home="+jettyHome);
         setHotDeployDir(Resource.newResource(jettyHome).addPath("webapps"));
         Log.debug("hot deploy dir="+_hotDeployDir.getFile().getCanonicalPath());
+        _deployer = new Deployer();
     }
-
+    
     /**
      * @return the server
      */
@@ -119,6 +157,7 @@ public class HotFileDeployer extends Deployer
     {
         _server = server;
     }
+ 
     
     public void setScanInterval (int seconds)
     {
@@ -151,20 +190,47 @@ public class HotFileDeployer extends Deployer
     {
         return _hotDeployDir;
     }
+  
+    public void deploy (String filename)
+    throws Exception
+    {
+        WebAppContext webapp = createWebApp (filename);
+        _deployer.deploy(webapp);
+        _currentDeployments.put(filename, webapp);
+    }
+
+    public void undeploy (String filename)
+    throws Exception
+    {
+        WebAppContext webapp = (WebAppContext)_currentDeployments.get(filename);
+        _deployer.undeploy(webapp);
+        _currentDeployments.remove(filename);
+    }
     
+    public void redeploy (String filename)
+    throws Exception
+    {
+        undeploy(filename);
+        deploy(filename);
+    }
+ 
+    
+  
     
     /** 
      * Start the hot deployer looking for webapps to deploy/undeploy
      * 
      * @see org.mortbay.component.AbstractLifeCycle#doStart()
      */
-    public void doStart() throws Exception
+    protected void doStart() throws Exception
     {
         if (_hotDeployDir==null)
             throw new IllegalStateException("No hot deploy dir specified");
         
         if (_server==null)
             throw new IllegalStateException("No server specified for deployer");
+        
+        _deployer.setServer(_server);
         
         _scanner.setScanDir(_hotDeployDir.getFile());
         _scanner.setScanInterval(getScanInterval());
@@ -187,57 +253,19 @@ public class HotFileDeployer extends Deployer
                 }
             }
         });
-        _scanner.addListener(this);
+        _scanner.addListener(new ScannerListener());
         _scanner.start();
     }
     
-    
-
     /** Stop the hot deployer.
      * 
      * @see org.mortbay.component.AbstractLifeCycle#doStop()
      */
-    public void doStop() throws Exception
+    protected void doStop() throws Exception
     {
         _scanner.stop();    
     }
 
-
-    /** 
-     * Handle a new deployment
-     * @see org.mortbay.util.Scanner.FileAddedListener#fileAdded(java.lang.String)
-     */
-    public void fileAdded(String filename)
-    throws Exception
-    {
-        WebAppContext webapp = createWebApp (filename);
-        deploy(_server, webapp);
-        _currentDeployments.put(filename, webapp);
-    }
-
-    /** 
-     * Handle a change to an existing deployment.
-     * Undeploy then redeploy.
-     * @see org.mortbay.util.Scanner.FileChangedListener#fileChanged(java.lang.String)
-     */
-    public void fileChanged(String filename)
-    throws Exception
-    {
-       fileRemoved(filename);
-       fileAdded(filename);  
-    }
-
-    /** 
-     * Handle an undeploy.
-     * @see org.mortbay.util.Scanner.FileRemovedListener#fileRemoved(java.lang.String)
-     */
-    public void fileRemoved(String filename)
-    throws Exception
-    {
-        WebAppContext webapp = (WebAppContext)_currentDeployments.get(filename);
-        undeploy(_server, webapp);
-        _currentDeployments.remove(filename);
-    }
     
     
     /**
