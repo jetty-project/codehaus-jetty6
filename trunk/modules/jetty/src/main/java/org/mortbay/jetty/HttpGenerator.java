@@ -165,7 +165,7 @@ public class HttpGenerator extends AbstractGenerator
         
         if (_last || _state==STATE_END) 
         {
-            Log.debug("Ignoring extra content {}",new Byte(b);
+            Log.debug("Ignoring extra content {}",new Byte(b));
             return false;
         }
 
