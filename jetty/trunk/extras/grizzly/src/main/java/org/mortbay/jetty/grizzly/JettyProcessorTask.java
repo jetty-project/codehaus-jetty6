@@ -13,7 +13,6 @@
 // limitations under the License.
 //========================================================================
 
-
 package org.mortbay.jetty.grizzly;
 
 import java.io.IOException;
@@ -30,85 +29,91 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 
 /**
  * Delegate the processing of the request to a <code>GrizzlyEndPoint</code>
+ * 
  * @author Jeanfrancois Arcand
  */
 public class JettyProcessorTask extends TaskBase implements ProcessorTask
-{    
+{
     private Handler handler;
-    
-    private boolean keepAlive = true;
-    
+
+    private boolean keepAlive=true;
     private GrizzlyEndPoint endPoint;
-    
     private GrizzlySocketChannel socketChannel;
-    
 
     public void initialize()
     {
-        GrizzlyConnector grizzlyConnector = 
-               ((JettySelectorThread)selectorThread).getGrizzlyConnector();   
-        try{
-            endPoint =  new GrizzlyEndPoint(grizzlyConnector);
-        } catch (IOException ex){
+        GrizzlyConnector grizzlyConnector=((JettySelectorThread)selectorThread).getGrizzlyConnector();
+        try
+        {
+            endPoint=new GrizzlyEndPoint(grizzlyConnector,null);
+        }
+        catch (IOException ex)
+        {
             throw new RuntimeException(ex);
         }
-        
-        socketChannel = new GrizzlySocketChannel();
+
+        socketChannel=new GrizzlySocketChannel();
     }
-    
 
     public boolean process(AbstractSelectableChannel channel) throws Exception
     {
-
-        boolean blockReading = 
-            ((JettySelectorThread)selectorThread).isUseTemporarySelector();
+        System.err.println("JettyProcessorTask.process "+this+" "+channel);
         
-        if (blockReading) {   
+        boolean blockReading=((JettySelectorThread)selectorThread).isUseTemporarySelector();
+
+        System.err.println("key was "+key.attachment());
+        key.attach("ATTACHED");
+        
+        if (blockReading)
+        {
             socketChannel.setSelectionKey(key);
-            socketChannel.setSocketChannel((SocketChannel)channel);        
+            socketChannel.setSocketChannel((SocketChannel)channel);
             endPoint.setChannel(socketChannel);
 
-            while ( continueBlocking() ) {
-                // We are already using a Grizzly WorkerThread, so no need to 
+            while (continueBlocking())
+            {
+                // We are already using a Grizzly WorkerThread, so no need to
                 // invoke Jetty Thread Pool
                 endPoint.handle();
             }
 
             socketChannel.setSelectionKey(null);
             socketChannel.setSocketChannel(null);
-        } else {
+        }
+        else
+        {
             endPoint.setChannel((ByteChannel)channel);
             endPoint.handle();
         }
-        
-        return endPoint.keepAlive();
-    }    
 
-    private boolean continueBlocking(){
-        return !endPoint.isComplete() && endPoint.isOpen();
+        return endPoint.keepAlive();
     }
-    
-    public boolean isKeepAlive() 
+
+    private boolean continueBlocking()
+    {
+        return !endPoint.isComplete()&&endPoint.isOpen();
+    }
+
+    public boolean isKeepAlive()
     {
         return endPoint.keepAlive();
-    }    
-    
+    }
+
     public boolean isError()
     {
-        return !endPoint.isComplete() && endPoint.isOpen();
+        return !endPoint.isComplete()&&endPoint.isOpen();
     }
-   
 
-    // ---------------------------------------------------- Not Used for now ---//
+    // ---------------------------------------------------- Not Used for now
+    // ---//
 
-    
-    public JettyProcessorTask() 
+    public JettyProcessorTask()
     {
     }
 
-    public void doTask() throws IOException 
+    public void doTask() throws IOException
     {
-        
+
     }
 
     public void taskEvent(TaskEvent event)
@@ -118,19 +123,18 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
     /**
      * The Default ReadTask will invoke that method.
      */
-    public boolean process(InputStream input, OutputStream output) 
-        throws Exception {
+    public boolean process(InputStream input, OutputStream output) throws Exception
+    {
 
         return keepAlive;
     }
-  
-    
-    public int getBufferSize() 
+
+    public int getBufferSize()
     {
         return -1;
     }
 
-    public boolean getDropConnection() 
+    public boolean getDropConnection()
     {
         return false;
     }
@@ -143,96 +147,90 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
     public void invokeAdapter()
     {
     }
-    
-    
+
     public void setBufferSize(int requestBufferSize)
     {
     }
 
-    public void setDropConnection(boolean dropConnection) 
+    public void setDropConnection(boolean dropConnection)
     {
     }
 
-    public void setHandler(Handler handler) 
+    public void setHandler(Handler handler)
     {
-        this.handler = handler;
+        this.handler=handler;
     }
 
-    public Handler getHandler() 
+    public Handler getHandler()
     {
         return handler;
     }
 
-    public void setMaxHttpHeaderSize(int maxHttpHeaderSize) 
+    public void setMaxHttpHeaderSize(int maxHttpHeaderSize)
     {
     }
 
-    public void setMaxPostSize(int mps) 
+    public void setMaxPostSize(int mps)
     {
     }
 
-    public void setSocket(Socket socket) 
+    public void setSocket(Socket socket)
     {
     }
 
-    public void setTimeout(int timeouts) 
+    public void setTimeout(int timeouts)
     {
     }
 
-    public void terminateProcess() 
+    public void terminateProcess()
     {
     }
 
-    public String getRequestURI() 
+    public String getRequestURI()
     {
-        return null; 
+        return null;
     }
 
-    public long getWorkerThreadID() 
+    public long getWorkerThreadID()
     {
         return -1;
     }
 
-
     // --------------------------------------------------- Grizzly ARP ------//
-    
-    
-    public void parseRequest() throws Exception 
+
+    public void parseRequest() throws Exception
     {
     }
 
-    public boolean parseRequest(InputStream input,
-            OutputStream output, boolean keptAlive) throws Exception 
+    public boolean parseRequest(InputStream input, OutputStream output, boolean keptAlive) throws Exception
     {
         return true;
     }
 
-    public void postProcess() throws Exception {
-    }
-
-    public void postProcess(InputStream input, OutputStream output) 
-        throws Exception 
+    public void postProcess() throws Exception
     {
     }
 
-    public void postResponse() throws Exception 
+    public void postProcess(InputStream input, OutputStream output) throws Exception
     {
     }
 
-    public void preProcess() throws Exception 
+    public void postResponse() throws Exception
     {
     }
 
-    public void preProcess(InputStream input, OutputStream output) 
-        throws Exception 
+    public void preProcess() throws Exception
     {
-    }   
-    
+    }
+
+    public void preProcess(InputStream input, OutputStream output) throws Exception
+    {
+    }
+
     // ------------------------------------------------- Channel support ---//
-    
-    public boolean parseRequest(AbstractSelectableChannel channel, 
-            boolean keptAlive) throws Exception 
-    {    
+
+    public boolean parseRequest(AbstractSelectableChannel channel, boolean keptAlive) throws Exception
+    {
         return true;
     }
 
@@ -241,8 +239,7 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
     }
 
     public void preProcess(AbstractSelectableChannel channel) throws Exception
-    {        
+    {
     }
 
-    
 }
