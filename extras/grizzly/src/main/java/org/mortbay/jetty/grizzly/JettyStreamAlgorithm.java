@@ -25,20 +25,26 @@ import com.sun.enterprise.web.connector.grizzly.algorithms.StreamAlgorithmBase;
 
 /**
  * @author gregw
- *
+ * 
  */
 public class JettyStreamAlgorithm extends NoParsingAlgorithm
 {
-    
+
+    public JettyStreamAlgorithm()
+    {
+        System.err.println("JettyStreamAlgorithm");
+    }
+
     /**
-     * Do not do anything since Jetty will internally handle the ByteBuffer 
+     * Do not do anything since Jetty will internally handle the ByteBuffer
      * lifecycle.
      */
-    public boolean parse(ByteBuffer byteBuffer){
+    public boolean parse(ByteBuffer byteBuffer)
+    {
+        System.err.println("JettyStreamAlgorithm.parse");
         return true;
     }
-    
-    
+
     public Class getReadTask(SelectorThread selectorThread)
     {
         System.err.println(this+" getReadTask()");
