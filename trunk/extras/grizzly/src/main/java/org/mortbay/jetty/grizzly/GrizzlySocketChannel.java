@@ -13,7 +13,6 @@
 // limitations under the License.
 //========================================================================
 
-
 package org.mortbay.jetty.grizzly;
 
 import com.sun.enterprise.web.connector.grizzly.OutputWriter;
@@ -26,127 +25,143 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 /**
- *
+ * 
  * @author Jeanfrancois Arcand
  */
-public class GrizzlySocketChannel implements ByteChannel{
-    
+public class GrizzlySocketChannel implements ByteChannel
+{
+
     private SocketChannel socketChannel;
-   
+
     private SelectionKey key;
-    
-    private long readTimeout = 30 * 1000;
-    
-    
-    public GrizzlySocketChannel() 
+
+    private long readTimeout=30*1000;
+
+    public GrizzlySocketChannel()
     {
-    }    
-    
-    public GrizzlySocketChannel(SocketChannel socketChannel, 
-                                SelectionKey key) 
-    {
-        this.socketChannel = socketChannel;
-        this.key = key;
     }
 
-    public int read(ByteBuffer dst) throws IOException {
-        if ( key == null ) return -1;
+    public int read(ByteBuffer dst) throws IOException
+    {
+        System.err.println("GrizzlySocketChannel.read");
         
-        int count = 1;
-        int byteRead = 0;
-        Selector readSelector = null;
-        SelectionKey tmpKey = null;
+        if (key==null)
+            return -1;
 
-        try{
-            SocketChannel socketChannel = (SocketChannel)key.channel();
-            while (count > 0){
-                count = socketChannel.read(dst);
-                if ( count > -1 )
-                    byteRead += count;
+        int count=1;
+        int byteRead=0;
+        Selector readSelector=null;
+        SelectionKey tmpKey=null;
+
+        try
+        {
+            SocketChannel socketChannel=(SocketChannel)key.channel();
+            while (count>0)
+            {
+                count=socketChannel.read(dst);
+                if (count>-1)
+                    byteRead+=count;
                 else
-                    byteRead = count;
-            }            
-            
-            if ( byteRead == 0 ){
-                readSelector = SelectorFactory.getSelector();
+                    byteRead=count;
+            }
 
-                if ( readSelector == null ){
+            if (byteRead==0)
+            {
+                readSelector=SelectorFactory.getSelector();
+
+                if (readSelector==null)
+                {
                     return 0;
                 }
-                count = 1;
-                tmpKey = socketChannel
-                        .register(readSelector,SelectionKey.OP_READ);               
-                tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
-                int code = readSelector.select(readTimeout);
-                tmpKey.interestOps(
-                    tmpKey.interestOps() & (~SelectionKey.OP_READ));
+                count=1;
+                tmpKey=socketChannel.register(readSelector,SelectionKey.OP_READ);
+                tmpKey.interestOps(tmpKey.interestOps()|SelectionKey.OP_READ);
+                int code=readSelector.select(readTimeout);
+                tmpKey.interestOps(tmpKey.interestOps()&(~SelectionKey.OP_READ));
 
-                if ( code == 0 ){
+                if (code==0)
+                {
                     throw new IOException("timing out");
                 }
 
-                while (count > 0){
-                    count = socketChannel.read(dst);
-                    if ( count > -1 )
-                        byteRead += count;
+                while (count>0)
+                {
+                    count=socketChannel.read(dst);
+                    if (count>-1)
+                        byteRead+=count;
                     else
-                        byteRead = count;                    
+                        byteRead=count;
                 }
             }
-        } finally {
-            if (tmpKey != null)
+        }
+        finally
+        {
+            if (tmpKey!=null)
                 tmpKey.cancel();
 
-            if ( readSelector != null){
+            if (readSelector!=null)
+            {
                 // Bug 6403933
-                try{
+                try
+                {
                     readSelector.selectNow();
-                } catch (IOException ex){
+                }
+                catch (IOException ex)
+                {
                     ;
                 }
                 SelectorFactory.returnSelector(readSelector);
             }
         }
-        return byteRead;        
+        return byteRead;
     }
 
-    public boolean isOpen() {
-       
-        return (socketChannel != null ? socketChannel.isOpen(): false);
+    public boolean isOpen()
+    {
+        return (socketChannel!=null?socketChannel.isOpen():false);
     }
 
-    public void close() throws IOException {
+    public void close() throws IOException
+    {
         socketChannel.close();
     }
 
-    public int write(ByteBuffer src) throws IOException {
-        int len = src.remaining();
+    public int write(ByteBuffer src) throws IOException
+    {
+        System.err.println("GrizzlySocketChannel.write");
+        int len=src.remaining();
         OutputWriter.flushChannel(socketChannel,src);
         return len;
     }
 
-    public SocketChannel getSocketChannel() {
+    public SocketChannel getSocketChannel()
+    {
         return socketChannel;
     }
 
-    public void setSocketChannel(SocketChannel socketChannel) {
-        this.socketChannel = socketChannel;
+    public void setSocketChannel(SocketChannel socketChannel)
+    {
+        this.socketChannel=socketChannel;
     }
 
-    public SelectionKey getSelectionKey() {
+    public SelectionKey getSelectionKey()
+    {
         return key;
     }
 
-    public void setSelectionKey(SelectionKey key) {
-        this.key = key;
+    public void setSelectionKey(SelectionKey key)
+    {
+        this.key=key;
     }
 
-    public long getReadTimeout() {
+    public long getReadTimeout()
+    {
         return readTimeout;
     }
 
-    public void setReadTimeout(long readTimeout) {
-        this.readTimeout = readTimeout;
+    public void setReadTimeout(long readTimeout)
+    {
+        this.readTimeout=readTimeout;
     }
-    
+
 }

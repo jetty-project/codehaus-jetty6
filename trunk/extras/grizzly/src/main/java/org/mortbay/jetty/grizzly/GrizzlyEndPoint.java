@@ -32,18 +32,21 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     HttpConnection _connection;
     JettyProcessorTask _task;
     
-    public GrizzlyEndPoint(GrizzlyConnector connector)
+    public GrizzlyEndPoint(GrizzlyConnector connector,ByteChannel channel)
         throws IOException
     {
         // TODO: Needs an empty constructor?
-        super(null);
+        super(channel);
         
-        //System.err.println("new GrizzlyEndPoint channel="+channel);
+        System.err.println("\nnew GrizzlyEndPoint channel="+channel);
         _connection = new HttpConnection(connector,this,connector.getServer());
     }
 
     public void handle()
     {
+        System.err.println("GrizzlyEndPoint.handle "+this);
+        
+        
         try
         {
             //System.err.println("handle  "+this);
@@ -119,12 +122,15 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     
     public void setChannel(ByteChannel channel)
     {
-        this._channel = channel;
+        if (_channel!=null && _channel!=channel)
+            System.err.println("GrizzlyEndPoint.setChannel "+channel+" was "+_channel+" in "+this);
+        _channel = channel;
         if ( channel instanceof GrizzlySocketChannel)
             _socket=((GrizzlySocketChannel)channel).getSocketChannel().socket();        
     }
     
-    public void recycle(){
+    public void recycle()
+    {
         _connection.destroy();
     }
     

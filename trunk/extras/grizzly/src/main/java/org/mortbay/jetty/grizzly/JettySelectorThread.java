@@ -57,6 +57,7 @@ public class JettySelectorThread extends SelectorThread
     public JettySelectorThread()
     {
         super();
+        System.err.println("JettySelectorThread");
         
         if (System.getProperty(JETTY_GRIZZLY_STRATEGY) != null){
             useTemporarySelector =
@@ -90,7 +91,7 @@ public class JettySelectorThread extends SelectorThread
      */
     protected Pipeline newPipeline(int maxThreads, int minThreads, String name, int port, int priority)
     {
-
+        System.err.println("JettySelectorThread.newPipeline");
         Pipeline pipeline=super.newPipeline(maxThreads,minThreads,name,port,priority);
         if (pipeline instanceof JettyPipeline)
         {
@@ -104,6 +105,7 @@ public class JettySelectorThread extends SelectorThread
      */
     protected ReadTask newReadTask()
     {
+        System.err.println("JettySelectorThread.newReadTask");
         StreamAlgorithm streamAlgorithm=null;
 
         try
