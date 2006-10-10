@@ -114,7 +114,6 @@ class JarFileResource extends JarResource
         {
             
             String file_url=_urlString.substring(4,_urlString.length()-2);
-            System.err.println("In exists() file_url="+file_url);
             try{return newResource(file_url).exists();}
             catch(Exception e) {Log.ignore(e); return false;}
         }
