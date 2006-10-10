@@ -44,6 +44,7 @@ jetty-6.1-SNAPSHOT
     + Added extras/setuid to support start as root
     + Apply queryEncoding to getQueryString 
     + JETTY-118 ignore extra content after close.
+    + HttpGenerator can generate requests
 
 jetty-6.0-SNAPSHOT
 

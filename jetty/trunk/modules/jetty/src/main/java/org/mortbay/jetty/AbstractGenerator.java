@@ -20,23 +20,19 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Iterator;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
 import org.mortbay.io.View;
 import org.mortbay.log.Log;
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
-import org.mortbay.util.UrlEncoded;
 
 /* ------------------------------------------------------------ */
 /**
@@ -57,7 +53,7 @@ public abstract class AbstractGenerator implements Generator
     public final static boolean LAST = true;
     public final static boolean MORE = false;
 
-    private static String[] __reasons = new String[505];
+    private static Buffer[] __reasons = new Buffer[505];
     static
     {
         Field[] fields = HttpServletResponse.class.getDeclaredFields();
@@ -70,7 +66,7 @@ public abstract class AbstractGenerator implements Generator
                 {
                     int code = fields[i].getInt(null);
                     if (code<__reasons.length)
-                        __reasons[code]=fields[i].getName().substring(3);
+                        __reasons[code]=new ByteArrayBuffer(fields[i].getName().substring(3));
                 }
                 catch(IllegalAccessException e)
                 {}
@@ -78,11 +74,16 @@ public abstract class AbstractGenerator implements Generator
         }
     }
     
+    protected static Buffer getReasonBuffer(int code)
+    {
+        Buffer reason=(code<__reasons.length)?__reasons[code]:null;
+        return reason==null?null:reason;
+    }
+    
     public static String getReason(int code)
     {
-        if (code<__reasons.length)
-            return __reasons[code];
-        return TypeUtil.toString(code);
+        Buffer reason=(code<__reasons.length)?__reasons[code]:null;
+        return reason==null?TypeUtil.toString(code):reason.toString();
     }
 
     // data
@@ -90,7 +91,9 @@ public abstract class AbstractGenerator implements Generator
     
     protected int _status = HttpStatus.ORDINAL_200_OK;
     protected int _version = HttpVersions.HTTP_1_1_ORDINAL;
-    protected  String _reason;
+    protected  Buffer _reason;
+    protected  Buffer _method;
+    protected  String _uri;
 
     protected long _contentWritten = 0;
     protected long _contentLength = HttpTokens.UNKNOWN_CONTENT;
@@ -285,14 +288,19 @@ public abstract class AbstractGenerator implements Generator
     {
         if (_state != STATE_HEADER) throw new IllegalStateException("STATE!=START");
         _version = version;
+        if (_version==HttpVersions.HTTP_0_9_ORDINAL && _method!=null)
+            _noContent=true;
     }
 
     /* ------------------------------------------------------------ */
     /**
      */
-    public void setRequest(Buffer method, Buffer uri)
+    public void setRequest(Buffer method, String uri)
     {
-        Portable.throwNotSupported();
+        _method=method;
+        _uri=uri;
+        if (_version==HttpVersions.HTTP_0_9_ORDINAL)
+            _noContent=true;
     }
 
     /* ------------------------------------------------------------ */
@@ -305,7 +313,21 @@ public abstract class AbstractGenerator implements Generator
         if (_state != STATE_HEADER) throw new IllegalStateException("STATE!=START");
 
         _status = status;
-        _reason = reason==null?reason:UrlEncoded.encodeString(reason); // encode user supplied reasons!
+        if (reason!=null)
+        {
+            int len=reason.length();
+            if (len>_headerBufferSize/2)
+                len=_headerBufferSize/2;
+            _reason=new ByteArrayBuffer(len);
+            for (int i=0;i<len;i++)
+            {
+                char ch = reason.charAt(i);
+                if (Character.isWhitespace(ch))
+                    _reason.put((byte)'_');
+                else if (Character.isJavaIdentifierPart(ch))
+                    _reason.put((byte)ch);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -391,8 +413,8 @@ public abstract class AbstractGenerator implements Generator
 
         if (_contentLength >= 0 && _contentLength != _contentWritten && !_head)
         {
-            if (_endp.isOpen())
-                Log.warn("ContentLength written=="+_contentWritten+" != contentLength=="+_contentLength);
+            if (Log.isDebugEnabled())
+                Log.debug("ContentLength written=="+_contentWritten+" != contentLength=="+_contentLength);
             _close = true;
         }
     }

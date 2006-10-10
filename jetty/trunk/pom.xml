@@ -317,12 +317,12 @@
     <repository>
       <id>MortBayRelease</id>
       <name>Mort Bay Maven2 Release Repository</name>
-      <url>scpexe://jetty.mortbay.org/home/ftp/pub/maven2/release</url>
+      <url>scpexe://jetty4.inetu.net/home/ftp/pub/maven2/release</url>
     </repository>
     <snapshotRepository>
       <id>MortBaySnapshot</id>
       <name>Mort Bay Maven2 Snapshot Repository</name>
-      <url>scpexe://jetty.mortbay.org/home/ftp/pub/maven2/snapshot</url>
+      <url>scpexe://jetty4.inetu.net/home/ftp/pub/maven2/snapshot</url>
     </snapshotRepository>
   </distributionManagement>
   <properties>
