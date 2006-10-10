@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + make .tag files work in packed wars
     + add hot deployment capability
     + ensure setContextPath() works when invoked from jetty-web.xml
     + ensure sessions nulled out on request recycle; ensure session null after invalidate
