@@ -61,7 +61,7 @@ public class SimpleBuffers implements Buffers
      */
     public void returnBuffer(Buffer buffer)
     {
-
+        buffer.clear();
         if (_buffers!=null)
         {
             for (int i=0;i<_buffers.length;i++)
