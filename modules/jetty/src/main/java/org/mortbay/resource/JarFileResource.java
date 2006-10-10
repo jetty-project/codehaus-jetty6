@@ -112,7 +112,9 @@ class JarFileResource extends JarResource
 
         if (_urlString.endsWith("!/"))
         {
+            
             String file_url=_urlString.substring(4,_urlString.length()-2);
+            System.err.println("In exists() file_url="+file_url);
             try{return newResource(file_url).exists();}
             catch(Exception e) {Log.ignore(e); return false;}
         }
@@ -213,6 +215,7 @@ class JarFileResource extends JarResource
     /* ------------------------------------------------------------ */
     public synchronized String[] list()
     {
+        
         if(isDirectory() && _list==null)
         {
             ArrayList list = new ArrayList(32);
@@ -238,15 +241,28 @@ class JarFileResource extends JarResource
             String dir=_urlString.substring(_urlString.indexOf("!/")+2);
             while(e.hasMoreElements())
             {
-                JarEntry entry = (JarEntry) e.nextElement();
-                String name=entry.getName().replace('\\','/');
+                
+                JarEntry entry = (JarEntry) e.nextElement();               
+                String name=entry.getName().replace('\\','/');               
                 if(!name.startsWith(dir) || name.length()==dir.length())
+                {
                     continue;
-                String listName=name.substring(dir.length());
+                }
+                String listName=name.substring(dir.length());               
                 int dash=listName.indexOf('/');
                 if (dash>=0)
                 {
-                    listName=listName.substring(0,dash+1);
+                    //when listing jar:file urls, you get back one
+                    //entry for the dir itself, which we ignore
+                    if (dash==0 && listName.length()==1)
+                        continue;
+                    //when listing jar:file urls, all files and
+                    //subdirs have a leading /, which we remove
+                    if (dash==0)
+                        listName=listName.substring(dash+1, listName.length());
+                    else
+                        listName=listName.substring(0,dash+1);
+                    
                     if (list.contains(listName))
                         continue;
                 }
