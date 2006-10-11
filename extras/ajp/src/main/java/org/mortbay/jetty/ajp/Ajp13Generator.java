@@ -20,6 +20,7 @@ import java.util.Iterator;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.AbstractGenerator;
 import org.mortbay.jetty.EofException;
@@ -274,10 +275,10 @@ public class Ajp13Generator extends AbstractGenerator
             _buffer.put((byte)0x4);
             addInt(_status);
             if (_reason==null)
-                _reason=getReason(_status);
+                _reason=getReasonBuffer(_status);
             if (_reason==null)
-                _reason=TypeUtil.toString(_status);
-            addString(_reason);
+                _reason=new ByteArrayBuffer(TypeUtil.toString(_status));
+            addBuffer(_reason);
 
             if (_status==100 || _status==204 || _status==304)
             {
@@ -596,6 +597,19 @@ public class Ajp13Generator extends AbstractGenerator
 
         addInt(b.length);
 
+        _buffer.put(b);
+        _buffer.put((byte)0);
+    }
+
+    private void addBuffer(Buffer b)
+    {
+        if (b==null)
+        {
+            addInt(0xFFFF);
+            return;
+        }
+
+        addInt(b.length());
         _buffer.put(b);
         _buffer.put((byte)0);
     }
