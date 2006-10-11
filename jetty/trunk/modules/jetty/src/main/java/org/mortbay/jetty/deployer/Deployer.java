@@ -109,7 +109,7 @@ public class Deployer
         if (webapp == null)
             return;
 
-        if (_deploymentMap.containsValue(webapp))
+        if (!_deploymentMap.containsValue(webapp))
             throw new IllegalArgumentException("Webapp at "+webapp.getContextPath()+" not hot deployed");
 
         webapp.stop();

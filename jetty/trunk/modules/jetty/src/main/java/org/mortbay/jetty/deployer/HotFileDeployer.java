@@ -90,7 +90,7 @@ public class HotFileDeployer extends AbstractLifeCycle
     private Server _server;
  
 
-    protected class ScannerListener implements Scanner.FileAddedListener, Scanner.FileChangedListener, Scanner.FileRemovedListener
+    protected class ScannerListener implements Scanner.Listener
     {
 
         /** 
