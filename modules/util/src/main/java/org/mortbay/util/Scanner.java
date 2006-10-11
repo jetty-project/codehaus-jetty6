@@ -45,54 +45,29 @@ public class Scanner implements Runnable
 {
     private int _scanInterval;
 
-    private List _fileAddedListeners = Collections.synchronizedList(new ArrayList());
-    private List _fileRemovedListeners = Collections.synchronizedList(new ArrayList());
-    private List _fileChangedListeners = Collections.synchronizedList(new ArrayList());
+    
+    private List _listeners = Collections.synchronizedList(new ArrayList());
     private Map _prevScan = Collections.EMPTY_MAP;
     private FilenameFilter _filter;
     private File _scanDir;
     private Thread _thread;
-    private boolean _running = false;
+    private volatile boolean _running = false;
     private boolean _reportExisting = true;
 
 
     /**
      * Listener
-     * Marker interface for all Scanner listener types
+     * 
+     * Signature of notifications re file changes.
      */
     public interface Listener
     {
-    }
-
-    /**
-     * FileChangedListener
-     *
-     * Listener to report changes to existing files
-     */
-    public interface FileChangedListener extends Listener
-    {
         public void fileChanged (String filename) throws Exception;
-    }
-
-    /**
-     * FileAddedListener
-     *
-     * Listener to report addition of a file
-     */
-    public interface FileAddedListener extends Listener
-    { 
         public void fileAdded (String filename) throws Exception;
-    }
-
-    /**
-     * FileRemovedListener
-     *
-     * Listener to report removal of a file
-     */
-    public interface FileRemovedListener extends Listener
-    {
         public void fileRemoved (String filename) throws Exception;
     }
+
+    
 
 
     /**
@@ -177,20 +152,7 @@ public class Scanner implements Runnable
         if (listener == null)
             return;
 
-        if (listener instanceof FileAddedListener)
-        {
-            _fileAddedListeners.add(listener);
-        }
-
-        if (listener instanceof FileRemovedListener)
-        {
-            _fileRemovedListeners.add(listener);
-        }
-
-        if (listener instanceof FileChangedListener)
-        {
-            _fileChangedListeners.add(listener);
-        }   
+        _listeners.add(listener);   
     }
 
 
@@ -203,20 +165,7 @@ public class Scanner implements Runnable
     {
         if (listener == null)
             return;
-        if (listener instanceof FileAddedListener)
-        {
-            _fileAddedListeners.remove(listener);    
-        }  
-
-        if (listener instanceof FileRemovedListener)
-        {
-            _fileRemovedListeners.remove(listener);    
-        }       
-
-        if (listener instanceof FileChangedListener)
-        {
-            _fileChangedListeners.remove(listener);    
-        }
+        _listeners.remove(listener);    
     }
 
 
@@ -405,12 +354,12 @@ public class Scanner implements Runnable
      */
     private void reportAddition (String filename)
     {
-        Iterator itor = _fileAddedListeners.iterator();
+        Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
             try
             {
-                ((FileAddedListener)itor.next()).fileAdded(filename);
+                ((Listener)itor.next()).fileAdded(filename);
             }
             catch (Exception e)
             {
@@ -426,12 +375,12 @@ public class Scanner implements Runnable
      */
     private void reportRemoval (String filename)
     {
-        Iterator itor = _fileRemovedListeners.iterator();
+        Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
             try
             {
-                ((FileRemovedListener)itor.next()).fileRemoved(filename);
+                ((Listener)itor.next()).fileRemoved(filename);
             }
             catch (Exception e)
             {
@@ -447,12 +396,12 @@ public class Scanner implements Runnable
      */
     private void reportChange (String filename)
     {
-        Iterator itor = _fileChangedListeners.iterator();
+        Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
             try
             {
-                ((FileChangedListener)itor.next()).fileChanged(filename);
+                ((Listener)itor.next()).fileChanged(filename);
             }
             catch (Exception e)
             {
