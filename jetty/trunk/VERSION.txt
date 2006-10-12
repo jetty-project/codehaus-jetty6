@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + add <Property> replacement in jetty xml config files
     + make .tag files work in packed wars
     + add hot deployment capability
     + ensure setContextPath() works when invoked from jetty-web.xml

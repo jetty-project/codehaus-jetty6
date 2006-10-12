@@ -20,7 +20,7 @@ $Id: configure_1_3.dtd,v 1.2 2005/10/26 20:48:48 gregwilkins Exp $
 -->
 
 <!ENTITY % CONFIG "Get|Set|Put|Call|New|Ref|Array">
-<!ENTITY % VALUE "#PCDATA|Call|New|Get|SystemProperty|Array|Ref">
+<!ENTITY % VALUE "#PCDATA|Call|New|Get|SystemProperty|Array|Ref|Property">
 
 <!ENTITY % TYPEATTR "type CDATA #IMPLIED " > <!-- String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort| #classname -->
 <!ENTITY % IMPLIEDCLASSATTR "class NMTOKEN #IMPLIED" >
@@ -241,6 +241,18 @@ This is equivalent to:
 -->
 <!ELEMENT SystemProperty EMPTY>
 <!ATTLIST SystemProperty %NAMEATTR; %DEFAULTATTR; %IDATTR;>
+
+<!--
+Property Element.
+This element allows arbitrary properties to be retrieved as
+part of the value of a Set, Put or Arg element.
+The name attribute specifies the property name and the optional
+default argument provides a default value.
+
+   <Property name="Test" default="value"/>
+-->
+<!ELEMENT Property EMPTY>
+<!ATTLIST Property %NAMEATTR; %DEFAULTATTR; %IDATTR;>
 
 
 

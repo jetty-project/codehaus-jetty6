@@ -60,6 +60,7 @@ public class XmlConfiguration
     private static XmlParser __parser;
     private XmlParser.Node _config;
     private Map _idMap = new HashMap();
+    private Map _propertyMap = new HashMap();
 
     /* ------------------------------------------------------------ */
     private synchronized static void initParser() throws IOException
@@ -149,6 +150,16 @@ public class XmlConfiguration
     public void setIdMap(Map map)
     {
         _idMap=map;
+    }
+    
+    public void setProperties (Map map)
+    {
+        _propertyMap = map;
+    }
+    
+    public Map getProperties ()
+    {
+        return _propertyMap;
     }
     
     /* ------------------------------------------------------------ */
@@ -872,6 +883,16 @@ public class XmlConfiguration
             String name = node.getAttribute("name");
             String defaultValue = node.getAttribute("default");
             return System.getProperty(name, defaultValue);
+        }
+        if ("Property".equals(tag))
+        {
+            String name = node.getAttribute("name");
+            Object val = node.getAttribute("default");
+            if (_propertyMap != null)
+            {
+                val = _propertyMap.get(name);
+            }
+            return val;
         }
 
         Log.warn("Unknown value tag: " + node, new Throwable());
