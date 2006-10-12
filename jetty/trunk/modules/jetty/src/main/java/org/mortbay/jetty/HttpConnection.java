@@ -838,8 +838,7 @@ public class HttpConnection
             }
             else
                 throw new IllegalArgumentException("unknown content type?");
-        }
-        
+        }     
     }
 
     /* ------------------------------------------------------------ */

@@ -49,10 +49,6 @@ public abstract class AbstractGenerator implements Generator
     public final static int STATE_FLUSHING = 3;
     public final static int STATE_END = 4;
 
-    // Last Content
-    public final static boolean LAST = true;
-    public final static boolean MORE = false;
-
     private static Buffer[] __reasons = new Buffer[505];
     static
     {
@@ -295,9 +291,12 @@ public abstract class AbstractGenerator implements Generator
     /* ------------------------------------------------------------ */
     /**
      */
-    public void setRequest(Buffer method, String uri)
+    public void setRequest(String method, String uri)
     {
-        _method=method;
+        if (method==null || HttpMethods.GET.equals(method) )
+            _method=HttpMethods.GET_BUFFER;
+        else
+            _method=HttpMethods.CACHE.lookup(method);
         _uri=uri;
         if (_version==HttpVersions.HTTP_0_9_ORDINAL)
             _noContent=true;
@@ -329,30 +328,6 @@ public abstract class AbstractGenerator implements Generator
             }
         }
     }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Add content.
-     * 
-     * @param content
-     * @param last
-     * @throws IllegalArgumentException if <code>content</code> is {@link Buffer#isImmutable immutable}.
-     * @throws IllegalStateException If the request is not expecting any more content,
-     *   or if the buffers are full and cannot be flushed.
-     * @throws IOException if there is a problem flushing the buffers.
-     */
-    public abstract void addContent(Buffer content, boolean last) throws IOException;
- 
-    /* ------------------------------------------------------------ */
-    /**
-     * Add content.
-     * 
-     * @param b byte
-     * @return true if the buffers are full
-     * @throws IOException
-     */
-    public abstract  boolean addContent(byte b) throws IOException;
-
 
     /* ------------------------------------------------------------ */
     /** Prepare buffer for unchecked writes.
@@ -443,7 +418,7 @@ public abstract class AbstractGenerator implements Generator
             completeHeader(null, false);
             // TODO something better than this!
             if (content != null) 
-                addContent(new View(new ByteArrayBuffer(content)), AbstractGenerator.LAST);
+                addContent(new View(new ByteArrayBuffer(content)), Generator.LAST);
             complete();
         }
     }
@@ -577,7 +552,7 @@ public abstract class AbstractGenerator implements Generator
             }
 
             // Add the _content
-            _generator.addContent(buffer, AbstractGenerator.MORE);
+            _generator.addContent(buffer, Generator.MORE);
 
             // Have to flush and complete headers?
             if (_generator.isBufferFull())

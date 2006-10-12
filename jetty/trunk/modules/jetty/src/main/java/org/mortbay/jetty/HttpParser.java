@@ -929,10 +929,6 @@ public class HttpParser implements Parser
             return l;
         }       
     }
-
-
-
-
     
     
 }
