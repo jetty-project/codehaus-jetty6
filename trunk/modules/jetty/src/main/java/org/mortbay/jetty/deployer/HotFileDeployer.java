@@ -88,6 +88,7 @@ public class HotFileDeployer extends AbstractLifeCycle
     private Map _currentDeployments = new HashMap();
     private Deployer _deployer;
     private Server _server;
+    private ConfigurationManager _configMgr;
  
 
     protected class ScannerListener implements Scanner.Listener
@@ -190,6 +191,16 @@ public class HotFileDeployer extends AbstractLifeCycle
     {
         return _hotDeployDir;
     }
+    
+    public void setConfigurationManager (ConfigurationManager configMgr)
+    {
+        _configMgr = configMgr;
+    }
+    
+    public ConfigurationManager getConfigurationManager ()
+    {
+        return _configMgr;
+    }
   
     public void deploy (String filename)
     throws Exception
@@ -287,6 +298,8 @@ public class HotFileDeployer extends AbstractLifeCycle
         
         WebAppContext context = new WebAppContext();      
         XmlConfiguration xmlConfiguration = new XmlConfiguration(hotDeployXmlFile.toURL());
+        if (_configMgr != null)
+            xmlConfiguration.setProperties(_configMgr.getProperties());
         xmlConfiguration.configure(context); 
         return context;
     }

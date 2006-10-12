@@ -179,21 +179,11 @@
     <!-- =========================================================== -->
     <!-- Hot Deployer                                                -->
     <!-- =========================================================== -->
-    <!--
+    <!-- 
     <New id="hotdeployer" class="org.mortbay.jetty.deployer.HotFileDeployer">
       <Set name="server"><Ref id="Server"/></Set>
       <Set name="scanInterval">10</Set>
       <Call name="start"/>
     </New>
     -->
-
 </Configure>
-
-
-
-
-
-
-
-
-

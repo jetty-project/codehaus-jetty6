@@ -74,7 +74,9 @@
       <Arg>String</Arg>
   </New></Put>
 
-  <Put name="Property" ><SystemProperty name="user.dir"/>/stuff</Put>
+  <Put name="SystemProperty" ><SystemProperty name="user.dir"/>/stuff</Put>
+  <Put name="Property"><Property name="whatever" default="xxx"/></Put>
+  <Put name="SomethingElse"><SystemProperty name="floople" default="xxx"/></Put>
   <Put name="Boolean" type="Boolean">True</Put>
   <Put name="Float" type="Float">2.3</Put>
 
