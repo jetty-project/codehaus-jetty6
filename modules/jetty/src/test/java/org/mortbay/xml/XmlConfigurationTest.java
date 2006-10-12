@@ -15,6 +15,8 @@
 package org.mortbay.xml;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -56,10 +58,14 @@ public class XmlConfigurationTest extends TestCase
     /* ------------------------------------------------------------ */
     public static void testXmlConfiguration() throws Exception
     {
+        Map properties = new HashMap();
+        properties.put("whatever", "xxx");
+        
         URL url = XmlConfigurationTest.class.getClassLoader().getResource("org/mortbay/xml/configure.xml");
         XmlConfiguration configuration =
             new XmlConfiguration(url);
         TestConfiguration tc = new TestConfiguration();
+        configuration.setProperties(properties);
         configuration.configure(tc);
         
         assertEquals("Set String","SetValue",tc.testObject);
@@ -83,8 +89,10 @@ public class XmlConfigurationTest extends TestCase
         assertEquals( "ObjectsString", "-1String",tc.get("ObjectsString"));
         assertEquals( "ObjectsWhiteString", "-1\n  String",tc.get("ObjectsWhiteString"));
         
-        assertEquals( "Property", System.getProperty("user.dir")+"/stuff",tc.get("Property"));
+        assertEquals( "SystemProperty", System.getProperty("user.dir")+"/stuff",tc.get("SystemProperty"));
+        assertEquals( "Property", "xxx", tc.get("Property"));
         
+       
         assertEquals( "Called", "Yes",tc.get("Called"));
         
         assertTrue(TestConfiguration.called);
