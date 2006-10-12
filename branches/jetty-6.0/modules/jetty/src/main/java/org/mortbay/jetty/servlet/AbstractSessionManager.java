@@ -616,7 +616,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             if (_dftMaxIdleSecs>=0)
                 _maxIdleMs=_dftMaxIdleSecs*1000;
         }
-        
+
         /* ------------------------------------------------------------ */
         void access()
         {
@@ -659,7 +659,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         
         /* ------------------------------------------------------------- */
         public String getId()
-        throws IllegalStateException
         {
             return _id;
         }

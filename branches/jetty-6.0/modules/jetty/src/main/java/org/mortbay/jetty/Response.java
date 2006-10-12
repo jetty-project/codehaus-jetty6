@@ -145,14 +145,15 @@ public class Response implements HttpServletResponse
         if (session == null)
             return url;
 
+        SessionManager sessionManager = request.getSessionManager();
+        
         // invalid session
-        String id = session.getId();
-        if (id == null)
+        if (!sessionManager.isValid(session))
             return url;
-
+        String id=session.getId();
+        
         // TODO Check host and port are for this server
 
-        SessionManager sessionManager = request.getSessionManager();
         String sessionURLPrefix = sessionManager.getSessionURLPrefix();
         // Already encoded
         int prefix=url.indexOf(sessionURLPrefix);
