@@ -17,8 +17,36 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 
+import org.mortbay.io.Buffer;
+
 public interface Generator
 {
+    public static final boolean LAST=true;
+    public static final boolean MORE=false;
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Add content.
+     * 
+     * @param content
+     * @param last
+     * @throws IllegalArgumentException if <code>content</code> is {@link Buffer#isImmutable immutable}.
+     * @throws IllegalStateException If the request is not expecting any more content,
+     *   or if the buffers are full and cannot be flushed.
+     * @throws IOException if there is a problem flushing the buffers.
+     */
+    void addContent(Buffer content, boolean last) throws IOException;
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Add content.
+     * 
+     * @param b byte
+     * @return true if the buffers are full
+     * @throws IOException
+     */
+    boolean addContent(byte b) throws IOException;
+
     void complete() throws IOException;
 
     void completeHeader(HttpFields responseFields, boolean last) throws IOException;
@@ -30,6 +58,8 @@ public interface Generator
     long getContentWritten();
 
     void increaseContentBufferSize(int size);
+    
+    boolean isBufferFull();
 
     boolean isCommitted();
 
@@ -42,13 +72,16 @@ public interface Generator
     void resetBuffer();
 
     void sendError(int code, String reason, String content, boolean close) throws IOException;
-
+    
     void setHead(boolean head);
+
+    void setRequest(String method, String uri);
 
     void setResponse(int status, String reason);
 
-    void setSendServerVersion(boolean sendServerVersion);
 
+    void setSendServerVersion(boolean sendServerVersion);
+ 
     void setVersion(int version);
 
 }

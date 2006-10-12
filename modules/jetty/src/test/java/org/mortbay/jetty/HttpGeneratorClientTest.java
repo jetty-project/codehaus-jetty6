@@ -55,7 +55,7 @@ public class HttpGeneratorClientTest extends TestCase
                         endp.reset();
                         fields.clear();
 
-                        System.out.println("TEST: "+t);
+                        // System.out.println("TEST: "+t);
                         
                         try
                         {
@@ -68,7 +68,7 @@ public class HttpGeneratorClientTest extends TestCase
                             throw e;
                         }
                         String request=endp.getOut().toString();
-                        System.out.println(request+(hb.isPersistent()?"...\n":"---\n"));
+                        // System.out.println(request+(hb.isPersistent()?"...\n":"---\n"));
                         
                         assertTrue(t,hb.isPersistent());
                         
@@ -126,7 +126,7 @@ public class HttpGeneratorClientTest extends TestCase
             values[2]=connection;
             values[3]=te;
 
-            hb.setRequest(HttpMethods.GET_BUFFER,"/context/path/info");
+            hb.setRequest(HttpMethods.GET,"/context/path/info");
             hb.setVersion(version);
             
             for (int i=0;i<headers.length;i++)
