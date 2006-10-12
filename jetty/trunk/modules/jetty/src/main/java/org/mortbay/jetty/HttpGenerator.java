@@ -23,7 +23,6 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
-import org.mortbay.jetty.client.Exchange;
 import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
