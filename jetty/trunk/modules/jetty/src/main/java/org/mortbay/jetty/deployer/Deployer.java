@@ -16,10 +16,6 @@
 package org.mortbay.jetty.deployer;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -34,7 +30,6 @@ import org.mortbay.log.Log;
  */
 public class Deployer
 {    
-    private Map _deploymentMap = new HashMap();
     private Server _server;
     
     
@@ -68,8 +63,7 @@ public class Deployer
             ContextHandlerCollection contexts = (ContextHandlerCollection)_server.getChildHandlerByClass(ContextHandlerCollection.class);
             contexts.addHandler(webapp);
         }
-        _deploymentMap.put(webapp.getContextPath(), webapp);
-        Log.info("Webapp at "+webapp.getContextPath()+" deployed.");
+        Log.info("Webapp "+webapp+" deployed.");
     }
     
     
@@ -109,26 +103,10 @@ public class Deployer
         if (webapp == null)
             return;
 
-        if (!_deploymentMap.containsValue(webapp))
-            throw new IllegalArgumentException("Webapp at "+webapp.getContextPath()+" not hot deployed");
-
         webapp.stop();
         ContextHandlerCollection contexts = (ContextHandlerCollection)_server.getChildHandlerByClass(ContextHandlerCollection.class);
         contexts.removeHandler(webapp);
 
-        Log.info ("Webapp at "+webapp.getContextPath()+" undeployed");
-    }
-    
-    
-    
-    public void undeploy(String contextPath) throws Exception
-    {      
-        if (_server == null)
-            throw new IllegalStateException ("No server set for deployer");
-        WebAppContext webapp = (WebAppContext)_deploymentMap.get(contextPath);
-        if (webapp == null)
-            Log.info("No webapp hot deployed at context path "+contextPath);
-        else
-            undeploy(webapp);
+        Log.info ("Webapp "+webapp+" undeployed");
     }
 }
