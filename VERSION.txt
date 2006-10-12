@@ -47,6 +47,14 @@ jetty-6.1-SNAPSHOT
     + HttpGenerator can generate requests
 
 jetty-6.0-SNAPSHOT
+    + ensure setContextPath() works when invoked from jetty-web.xml
+    + ensure sessions nulled out on request recycle; ensure session null after invalidate
+    + ensure "" returned for ServletContext.getContextPath() for root context
+    + Fixed tld parsing for maven plugin
+    + JETTY-129 ServletContextListeners called after servlets are initialized
+    + change examples/test-jndi-webapp so it can be regularly built
+    + added examples/test-jaas-webapp
+    + (re)make JAAS classes available to webapp classloader
 
 jetty-6.0.1 - 24 September 2006
     + fixed isUserInRole checking for JAASUserRealm
