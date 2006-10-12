@@ -789,7 +789,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     /* ------------------------------------------------------------ */
     class NIOResourceCache extends ResourceCache
     {
-
         /* ------------------------------------------------------------ */
         public NIOResourceCache(MimeTypes mimeTypes)
         {
@@ -799,14 +798,13 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         /* ------------------------------------------------------------ */
         protected void fill(Content content) throws IOException
         {
-            super.fill(content);
-            
             Connector connector = HttpConnection.getCurrentConnection().getConnector();
-            Buffer buffer=null;
-            Resource resource=content.getResource();
-            long length=resource.length();
             if (connector instanceof NIOConnector) 
             {
+                Buffer buffer=null;
+                Resource resource=content.getResource();
+                long length=resource.length();
+                
                 if (_useFileMappedBuffer) 
                 {    
                     File file = resource.getFile();
@@ -820,13 +818,13 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     buffer.readFrom(fis,(int)length);
                     fis.close();
                 }
+                content.setBuffer(buffer);
             } 
             else 
             {
                 super.fill(content);
             }   
             
-            content.setBuffer(buffer);
         }
     }
 }
