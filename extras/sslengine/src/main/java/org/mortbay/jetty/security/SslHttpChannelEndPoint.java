@@ -29,6 +29,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
 {
     private static ByteBuffer[] __NO_BUFFERS={};
     private static ByteBuffer __EMPTY=ByteBuffer.allocate(0);
+    private static SSLEngineResult _result;
     
     private final SSLEngine _engine;
     private final ByteBuffer _inBuffer;
@@ -328,7 +329,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
     {
         int in_len=0;
         
-        if (!_inNIOBuffer.hasContent())
+        if (!_inNIOBuffer.hasContent() || (_result != null && _result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW))
         {
             _inNIOBuffer.clear();
             while (_inNIOBuffer.space()>0)
@@ -343,14 +344,13 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         if (_inNIOBuffer.length()==0)
             return false;
         
-        SSLEngineResult result=null;
         try
         {
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
-            result=_engine.unwrap(_inBuffer,buffer);
-            if (result != null && result.getStatus() == SSLEngineResult.Status.OK)
-                _inNIOBuffer.skip(result.bytesConsumed());
+            _result=_engine.unwrap(_inBuffer,buffer);
+            if (_result != null && _result.getStatus() == SSLEngineResult.Status.OK)
+                _inNIOBuffer.skip(_result.bytesConsumed());
         }
         finally
         {
@@ -358,17 +358,19 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
             _inBuffer.limit(_inBuffer.capacity());
         }
         
-        switch(result.getStatus())
+        switch(_result.getStatus())
         {
             case OK:
             case CLOSED:
                 break;
+            case BUFFER_UNDERFLOW:
+            	break;
             default:
-                Log.warn("unwrap "+result);
-                throw new IOException(result.toString());
+                Log.warn("unwrap "+_result);
+                throw new IOException(_result.toString());
         }
         
-        return (result.bytesProduced()+result.bytesConsumed())>0;
+        return (_result.bytesProduced()+_result.bytesConsumed())>0;
     }
 
     /* ------------------------------------------------------------ */
