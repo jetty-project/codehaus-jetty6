@@ -47,6 +47,7 @@ jetty-6.1-SNAPSHOT
     + JETTY-118 ignore extra content after close.
     + HttpGenerator can generate requests
     + Ported HtAccessHandler
+    + Start of a client API
 
 jetty-6.0-SNAPSHOT
     + ensure setContextPath() works when invoked from jetty-web.xml
