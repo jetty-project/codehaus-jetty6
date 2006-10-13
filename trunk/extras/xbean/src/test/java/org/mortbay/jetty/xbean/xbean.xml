@@ -1,4 +1,5 @@
 <beans xmlns="http://mortbay.com/schemas/jetty/1.0">
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
   <jetty>
       <connectors>
         <nioConnector port="8181" />
@@ -7,14 +8,14 @@
       <contexts>
         <handlers>
           <webAppContext contextPath="/test" 
-                         resourceBase="/tmp/webapp" 
+                         resourceBase="${java.io.tmpdir}/webapp" 
                          parentLoaderPriority="false" />
        </handlers>
       </contexts>
       <defaultHandler serveIcon="true"/>
       <requestLogHandler>
         <requestLog>
-          <ncsaLog filename="/tmp/foo" 
+          <ncsaLog filename="${java.io.tmpdir}/foo" 
                    retainDays="90" 
                    append="true" 
                    extended="false" 
