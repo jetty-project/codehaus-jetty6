@@ -236,9 +236,16 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public HttpSession getHttpSession(String id)
     {
+        int dot=id.lastIndexOf('.');
+        String cluster_id=(dot>0)?id.substring(0,dot):id;
+        
         synchronized (this)
         {
-            return (HttpSession)_sessions.get(id);
+            Session session = (Session)_sessions.get(cluster_id);
+            
+            if (session!=null && !session.getId().equals(id))
+                session.setIdChanged(true);
+            return session;
         }
     }
 
@@ -298,7 +305,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             if (_sessionPath!=null)
                 cookie.setPath(_sessionPath);
 
-            if (getMaxCookieAge()>0)
+            if (getMaxCookieAge()>0 || getIdManager().getWorkerName()!=null )
                 ((Session)session).setCookie(cookie);
             return cookie;
         }
@@ -350,7 +357,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             _sessionIdManager.addSession(session);
             synchronized (this)
             {
-                _sessions.put(session.getId(),session);
+                _sessions.put(session.getClusterId(),session);
                 if (_sessions.size()>this._maxSessions)
                     this._maxSessions=_sessions.size();
             }
@@ -383,7 +390,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         // Remove session from context and global maps
         synchronized (_sessionIdManager)
         {
-            String id=session.getId();
+            String id=session.getClusterId();
             _sessionIdManager.removeSession(session);
             
             synchronized (this)
@@ -639,10 +646,16 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         Session s =(Session)session;
         s.access(now);
         
-        if (getMaxCookieAge()>0 && getRefreshCookieAge()>0 && isUsingCookies() &&  ((now-s.getCookieSetTime())/1000>getRefreshCookieAge()))
+        // Do we need to refresh the cookie?
+        if (isUsingCookies() &&
+            (s.isIdChanged() ||
+             (getMaxCookieAge()>0 && getRefreshCookieAge()>0 && ((now-s.getCookieSetTime())/1000>getRefreshCookieAge()))
+            )
+           )
         {
             Cookie cookie=s.getCookie();
             s.setCookie(cookie);
+            s.setIdChanged(false);
             return cookie;
         }
         
@@ -684,7 +697,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public abstract class Session implements HttpSession
     {
+        String _clusterId;
         String _id;
+        boolean _idChanged;
         long _created;
         long _cookieSet;
         long _accessed;
@@ -697,7 +712,16 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         /* ------------------------------------------------------------- */
         protected Session(HttpServletRequest request)
         {
-            _id=_sessionIdManager.newSessionId(request,_created);
+            _clusterId=_sessionIdManager.newSessionId(request,_created);
+            
+            String worker=request==null?null:(String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
+            if (worker!=null)
+                _id=_clusterId+'.'+worker;
+            else if (_sessionIdManager.getWorkerName()!=null)
+                _id=_clusterId+'.'+_sessionIdManager.getWorkerName();
+            else
+                _id=_clusterId;
+            
             _created=System.currentTimeMillis();
             _accessed=_created;
             if (_dftMaxIdleSecs>=0)
@@ -705,15 +729,33 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
+        public void setIdChanged(boolean changed)
+        {
+            _idChanged=changed;
+        }
+
+        /* ------------------------------------------------------------- */
+        public boolean isIdChanged()
+        {
+            return _idChanged;
+        }
+
+        /* ------------------------------------------------------------- */
         protected Session(String id)
         {
+            int dot=id.lastIndexOf('.');
+            if (dot>0)
+                id=id.substring(0,dot);
+            
             _id=id;
+                 
             _created=System.currentTimeMillis();
             _accessed=_created;
+            _cookieSet=_created;
             if (_dftMaxIdleSecs>=0)
                 _maxIdleMs=_dftMaxIdleSecs*1000;
         }
-
+        
         /* ------------------------------------------------------------- */
         protected void setCookie(Cookie cookie)
         {
@@ -728,14 +770,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
-        protected Session(HttpServletRequest request,String id)
+        protected String getClusterId()
         {
-            _id=id;
-            _created=System.currentTimeMillis();
-            _accessed=_created;
-            _cookieSet=_created;
-            if (_dftMaxIdleSecs>=0)
-                _maxIdleMs=_dftMaxIdleSecs*1000;
+            return _clusterId;
         }
 
         /* ------------------------------------------------------------ */

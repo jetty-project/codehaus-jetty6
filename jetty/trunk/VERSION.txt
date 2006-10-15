@@ -48,6 +48,7 @@ jetty-6.1-SNAPSHOT
     + HttpGenerator can generate requests
     + Ported HtAccessHandler
     + Start of a client API
+    + Session IDs can change worker ID
 
 jetty-6.0-SNAPSHOT
     + ensure setContextPath() works when invoked from jetty-web.xml

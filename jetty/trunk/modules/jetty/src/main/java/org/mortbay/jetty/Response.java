@@ -153,7 +153,6 @@ public class Response implements HttpServletResponse
         String id=session.getId();
         
         // TODO Check host and port are for this server
-
         String sessionURLPrefix = sessionManager.getSessionURLPrefix();
         // Already encoded
         int prefix=url.indexOf(sessionURLPrefix);

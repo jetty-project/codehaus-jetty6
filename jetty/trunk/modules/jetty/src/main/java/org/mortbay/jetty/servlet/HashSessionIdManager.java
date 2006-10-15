@@ -173,11 +173,6 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
                 if (r<0)
                     r=-r;
                 id=Long.toString(r,30+(int)(created%7));
-                String worker=(String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
-                if (worker!=null)
-                    id+="."+worker;
-                else if (_workerName!=null)
-                    id+="."+_workerName;
             }
 
             request.setAttribute(__NEW_SESSION_ID,id);

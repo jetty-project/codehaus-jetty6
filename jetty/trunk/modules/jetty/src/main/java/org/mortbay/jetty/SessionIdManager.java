@@ -42,4 +42,7 @@ public interface SessionIdManager extends LifeCycle
      * @return
      */
     public String newSessionId(HttpServletRequest request,long created);
+    
+    
+    public String getWorkerName();
 }
