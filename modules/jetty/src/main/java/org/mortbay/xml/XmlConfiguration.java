@@ -887,12 +887,13 @@ public class XmlConfiguration
         if ("Property".equals(tag))
         {
             String name = node.getAttribute("name");
-            Object val = node.getAttribute("default");
-            if (_propertyMap != null)
+            Object defval = node.getAttribute("default");
+            if (_propertyMap!=null && _propertyMap.containsKey(name))
             {
-                val = _propertyMap.get(name);
+                return _propertyMap.get(name);
             }
-            return val;
+            else if (defval != null)
+                return defval;
         }
 
         Log.warn("Unknown value tag: " + node, new Throwable());
