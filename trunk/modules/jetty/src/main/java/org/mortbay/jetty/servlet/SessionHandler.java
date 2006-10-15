@@ -209,7 +209,7 @@ public class SessionHandler extends HandlerWrapper
                     if(session!=old_session)
                     {
                         Cookie cookie = _sessionManager.access(session);
-                        if (cookie!=null )
+                        if (cookie!=null ) // Handle changed ID or max-age refresh
                             response.addCookie(cookie);
                     }
                 }

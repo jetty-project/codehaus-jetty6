@@ -148,6 +148,7 @@ public class SessionDump extends HttpServlet
                 
                 if (request.isRequestedSessionIdFromURL())
                     out.println("<P>Turn on cookies in your browser to try cookie encoding<BR>");
+                out.println("<a href=\""+response.encodeURL(request.getRequestURI())+"\">Encoded Link</a><BR>");
                 
             }
             catch (IllegalStateException e)
