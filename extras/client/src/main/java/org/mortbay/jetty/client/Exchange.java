@@ -125,6 +125,7 @@ public class Exchange
         // this will be done by the connection pool.
         connection.sendExchange(ex);
         
+        
         // something else will call this
         connection.handle();
         System.err.println(endp.getOutput());

@@ -33,13 +33,14 @@ import org.mortbay.jetty.handler.ContextHandler;
  */
 public class SessionManagerTest extends TestCase
 {
+    TestSessionIdManager idManager = new TestSessionIdManager();
     HashSessionManager sessionManager = new HashSessionManager();
     SessionHandler handler = new SessionHandler(sessionManager);
     Server server = new Server();
     
     protected void setUp() throws Exception
     {
-        sessionManager.setIdManager(new TestSessionIdManager());
+        sessionManager.setIdManager(idManager);
         ContextHandler context=new ContextHandler();
         sessionManager.setSessionHandler(handler);
         server.setHandler(context);
@@ -72,9 +73,38 @@ public class SessionManagerTest extends TestCase
         assertFalse(session.getAttributeNames().hasMoreElements());
     }
     
+    public void testWorker() throws Exception
+    {
+        try
+        {
+            idManager._worker="node0";
+            HttpSession session = sessionManager.newHttpSession(null);
+            
+            assertTrue(session.getId().endsWith("node0"));
+            String id0=session.getId();
+            String clusterId=id0.substring(0,id0.lastIndexOf('.'));
+            String id1=clusterId+".node1";
+            
+            assertTrue(sessionManager.getSessionCookie(session,"/context",false)!=null);
+            
+            assertEquals(session,sessionManager.getHttpSession(session.getId()));
+            assertTrue(sessionManager.access(session)==null);
+            
+            assertEquals(session,sessionManager.getHttpSession(id1));
+            assertTrue(sessionManager.access(session)!=null);
+            
+        }
+        finally
+        {
+            idManager._worker=null;
+        }
+    }
+    
     
     class TestSessionIdManager extends AbstractLifeCycle implements SessionIdManager
     {
+        String _worker;
+        
         public boolean idInUse(String id)
         {
             return false;
@@ -98,6 +128,11 @@ public class SessionManagerTest extends TestCase
         public void removeSession(HttpSession session)
         {
             // ignore
+        }
+
+        public String getWorkerName()
+        {
+            return _worker;
         }
 
     }
