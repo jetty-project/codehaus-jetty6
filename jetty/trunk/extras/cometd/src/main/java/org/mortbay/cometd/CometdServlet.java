@@ -16,14 +16,17 @@ package org.mortbay.cometd;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.util.TypeUtil;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
@@ -41,6 +44,11 @@ import org.mortbay.util.ajax.ContinuationSupport;
  *   }
  * ]
  * </pre>
+ * 
+ * The init parameter "timeout" specifies the poll timeout in milliseconds (default 45000).
+ * The init parameter "multiTimeout" specifies the poll timeout if multiple polls are detected from the 
+ * same browser (default 0 - disable browser detection).
+ * 
  * @author gregw
  * @see {@link Bayeux}
  * @see {@link ChannelPattern}
@@ -51,8 +59,12 @@ public class CometdServlet extends HttpServlet
     public static final String CLIENT_ATTR="org.mortbay.cometd.client";
     public static final String MESSAGE_PARAM="message";
     public static final String TUNNEL_INIT_PARAM="tunnelInit";
+    public static final String BROWSER_ID="bayeuxBID";
     
     private Bayeux _bayeux;
+    private long _timeout=45000;
+    private long _multiTimeout=0;
+    private Map _bidCount=new HashMap();
 
     public void init() throws ServletException
     {
@@ -89,6 +101,14 @@ public class CometdServlet extends HttpServlet
                 throw new ServletException(e);
             }
         }
+        
+        String timeout=getInitParameter("timeout");
+        if (timeout!=null)
+            _timeout=Long.parseLong(timeout);
+        
+        String multiTimeout=getInitParameter("multi-timeout");
+        if (multiTimeout!=null)
+            _multiTimeout=Long.parseLong(multiTimeout);
     }
 
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
@@ -107,6 +127,24 @@ public class CometdServlet extends HttpServlet
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
+        String bid=null;
+        if (_multiTimeout>0)
+        {
+            Cookie[] cookies=req.getCookies();
+            for (int i=0;cookies!=null && i<cookies.length;i++)
+            {
+                if (cookies[i].getName().equals(BROWSER_ID))
+                    bid=cookies[i].getValue();
+            }
+            if (bid==null)
+            {
+                bid=Long.toString(_bayeux._random.nextLong(),16)+Long.toString(_bayeux._random.nextLong(),16);
+                Cookie cookie = new Cookie(BROWSER_ID,bid);
+                cookie.setPath("/");
+                resp.addCookie(cookie);
+            }
+        }
+        
         int message_count=0;
         Client client=(Client)req.getAttribute(CLIENT_ATTR);
         
@@ -172,38 +210,92 @@ public class CometdServlet extends HttpServlet
         }
 
         // handle polling for additinal messages
-        while (client!=null&&transport!=null&&transport.isPolling())
+        Continuation continuation=null;
+        try
         {
-            synchronized (client)
-            {
-                Continuation continuation=ContinuationSupport.getContinuation(req,client);
-                client.addContinuation(continuation);
-                if (!client.hasMessages())
-                    continuation.suspend(25000);
-                client.removeContinuation(continuation);
-                continuation.reset();
-
-                if (client.hasMessages())
+            while (client!=null && transport!=null && transport.isPolling())
+            {   
+                long timeout=_timeout;
+                continuation=ContinuationSupport.getContinuation(req,client);
+                try
                 {
-                    List messages=client.takeMessages();
-                    transport.send(messages);
-                }
-                else
-                    transport.setPolling(false);
+                    if (bid!=null && !continuation.isPending() && incBID(bid)>1)
+                        timeout=_multiTimeout;
 
-                // Only a simple poll if the transport does not flush
-                if (!transport.keepAlive())
-                    transport.setPolling(false);
+                    synchronized (client)
+                    {
+                        client.addContinuation(continuation);
+                        if (!client.hasMessages())
+                            continuation.suspend(timeout);
+                        client.removeContinuation(continuation);
+                        continuation.reset();
+
+                        if (client.hasMessages())
+                        {
+                            List messages=client.takeMessages();
+                            transport.send(messages);
+                        }
+                        else
+                            transport.setPolling(false);
+
+                        // Only a simple poll if the transport does not flush
+                        if (!transport.keepAlive())
+                            transport.setPolling(false);
+                    } 
+                }
+                finally
+                {
+                    // Are we really finished polling?
+                    if (bid!=null && (continuation==null || !continuation.isPending()))
+                    {
+                        decBID(bid);
+                    }
+                }
             }
         }
-
-        // complete
-        if (transport!=null)
+        finally
         {
-            transport.complete();
-            transport.setPolling(false);
+            // Are we really finished polling?
+            if (continuation==null || !continuation.isPending())
+            {
+                // complete transport
+                if (transport!=null)
+                {
+                    transport.complete();
+                    transport.setPolling(false);
+                }
+            }
         }
+    }
 
+    private int incBID(String bid)
+    {
+        synchronized (_bidCount)
+        {
+            Integer count = (Integer)_bidCount.get(bid);
+            count=TypeUtil.newInteger(count==null?1:count.intValue()+1);
+            _bidCount.put(bid,count);
+            System.err.println("^BID "+bid+" == "+count);
+            return count.intValue();
+        }
+    }
+
+    private int decBID(String bid)
+    {
+        synchronized (_bidCount)
+        {
+            Integer count = (Integer)_bidCount.get(bid);
+            count=(count==null || count.intValue()<=1)?null:TypeUtil.newInteger(count.intValue()-1);
+            if (count==null)
+            {
+                _bidCount.remove(bid);
+                System.err.println("vBID "+bid+" == 0");
+                return 0;
+            }
+            _bidCount.put(bid,count);
+            System.err.println("vBID "+bid+" == "+count);
+            return count.intValue();
+        }
     }
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException

@@ -4,16 +4,22 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
    version="2.5"> 
-
-  <display-name>Test WebApp</display-name>
+  <display-name>Cometd Test WebApp</display-name>
   
-
   <servlet>
     <servlet-name>cometd</servlet-name>
     <servlet-class>org.mortbay.cometd.CometdServlet</servlet-class>
     <init-param>
       <param-name>filters</param-name>
       <param-value>/WEB-INF/filters.json</param-value>
+    </init-param>
+    <init-param>
+      <param-name>timeout</param-name>
+      <param-value>15000</param-value>
+    </init-param>
+    <init-param>
+      <param-name>multiTimeout</param-name>
+      <param-value>0</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
