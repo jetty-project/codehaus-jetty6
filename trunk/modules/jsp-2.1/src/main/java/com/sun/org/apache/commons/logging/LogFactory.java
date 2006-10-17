@@ -12,6 +12,8 @@
 package com.sun.org.apache.commons.logging;
 
 import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -23,24 +25,32 @@ import java.net.URLClassLoader;
  */
 public class LogFactory
 {
-    private static final Log log = new JettyLog();
+    private static Map _logs = new HashMap();
     
     public static Log getLog (Class c)
     {
+        Log log = (Log)_logs.get(c.getName());
+        if (log == null)
+        {
+            log = new JettyLog(c.getName());
+            _logs.put(c.getName(), log);
+        }
+            
         return log;
     }
     
     public static Log getLog (String str)
     {
-        return log;
+        return (Log)_logs.get(str);
     }
+    
     public static void release (URLClassLoader cl)
     {
-        //noop;
+        releaseAll ();
     }
     
     public static void releaseAll ()
     {
-        //noop;
+        _logs.clear();
     }
 }
