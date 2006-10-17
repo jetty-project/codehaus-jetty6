@@ -51,7 +51,13 @@ public class Ajp13Connection extends HttpConnection
 
     public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
+            
+            
+            
+       
         super(connector,endPoint,server);
+        
+        System.out.println("new AJP13Connection");
         
         // TODO avoid the creation of HttpParsers etc.
         
@@ -76,16 +82,17 @@ public class Ajp13Connection extends HttpConnection
 
     public ServletInputStream getInputStream()
     {
-    	System.out.println(">>>>>>>>>>>input Stream is requested");
-        if (_in==null)
+    	if (_in==null)
             _in=new Ajp13Parser.Input((Ajp13Parser)_parser,_connector.getMaxIdleTime());
         return _in;
     }
  
     private class RequestHandler implements Ajp13Parser.EventHandler
     {
+        boolean _delayedHandling = false;
         public void startForwardRequest() throws IOException
         {
+            _delayedHandling = false;
             // TODO - note that I tend to use println instead of debug for stuff that you do
             // not want to stay in the code long term.
             
@@ -157,9 +164,31 @@ public class Ajp13Connection extends HttpConnection
 
         public void headerComplete() throws IOException
         {
-            handleRequest();
+                if (((Ajp13Parser)_parser).getContentLength()<=0 && !((Ajp13Parser)_parser).isChunking())
+                        handleRequest();
+                    else
+                    {
+                        System.out.println("delaying............ for content");
+                        _delayedHandling=true;
+                    }
         }
         
+        
+        public void messageComplete(long contextLength) throws IOException
+        {
+                
+                
+        }
+        
+        public void content(Buffer ref) throws IOException
+        {
+            if (_delayedHandling)
+            {
+                _delayedHandling=false;
+                System.out.println("delaying............ handled");
+                handleRequest();
+            }
+        }
         
 
     }

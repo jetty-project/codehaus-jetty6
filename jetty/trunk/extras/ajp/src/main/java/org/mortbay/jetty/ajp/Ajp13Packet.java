@@ -21,7 +21,7 @@ import org.mortbay.io.BufferCache;
  */
 public class Ajp13Packet {
 
-    public final static int MAX_PACKET_SIZE = 8 * 1024;
+    public final static int MAX_PACKET_SIZE = (8 * 1024);
     public final static int HDR_SIZE = 4;
 
     // Used in writing response...
