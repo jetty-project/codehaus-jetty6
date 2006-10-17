@@ -24,69 +24,71 @@ package com.sun.org.apache.commons.logging;
  **/
 public class JettyLog implements Log
 {
-
+    private String _name;
+    private org.mortbay.log.Logger _logger;
+    
     /**
      * 
      */
-    public JettyLog()
+    public JettyLog(String name)
     {
-        super();
-       
+        _name = name;
+        _logger = org.mortbay.log.Log.getLogger(name);
     }
     public  void fatal (Object message)
     {
-        org.mortbay.log.Log.warn(message.toString());
+        _logger.warn(message.toString(), null, null);
     }
     
     public  void fatal (Object message, Throwable t)
     {
-        org.mortbay.log.Log.warn(message.toString(), t);
+        _logger.warn(message.toString(), t);
     }
     
     public  void debug(Object message)
     {
-        org.mortbay.log.Log.debug(message.toString());
+        _logger.debug(message.toString(), null);
     }
     
     public  void debug (Object message, Throwable t)
     {
-        org.mortbay.log.Log.debug(message.toString(), t);
+        _logger.debug(message.toString(), t);
     }
     
     public  void trace (Object message)
     {
-        org.mortbay.log.Log.debug(message.toString());
+        _logger.debug(message.toString(), null);
     }
     
   
     public  void info(Object message)
     {
-       org.mortbay.log.Log.info(message.toString());
+       _logger.info(message.toString(), null, null);
     }
 
     public  void error(Object message)
     {
-       org.mortbay.log.Log.warn(message.toString());
+       _logger.warn(message.toString(), null);
     }
     
     public  void error(Object message, Throwable cause)
     {
-        org.mortbay.log.Log.warn(message.toString(), cause);
+        _logger.warn(message.toString(), cause);
     }
 
     public  void warn(Object message)
     {
-        org.mortbay.log.Log.warn(message.toString());
+        _logger.warn(message.toString(), null);
     }
     
     public  boolean isDebugEnabled ()
     {
-        return org.mortbay.log.Log.isDebugEnabled();
+        return _logger.isDebugEnabled();
     }
     
     public  boolean isWarnEnabled ()
     {
-        return org.mortbay.log.Log.isDebugEnabled();
+        return _logger.isDebugEnabled();
     }
     
     public  boolean isInfoEnabled ()
@@ -103,7 +105,7 @@ public class JettyLog implements Log
   
     public  boolean isTraceEnabled ()
     {
-        return org.mortbay.log.Log.isDebugEnabled();
+        return _logger.isDebugEnabled();
     }
     
 }
