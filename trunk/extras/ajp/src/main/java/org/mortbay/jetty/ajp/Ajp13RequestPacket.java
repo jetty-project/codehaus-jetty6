@@ -36,6 +36,8 @@ public class Ajp13RequestPacket
     private Buffer _headerName;
     private byte _attrType;
     private String _attrKey;
+    private byte _requestedMethod;
+   
 
     public void setBuffer(Buffer buffer)
     {
@@ -80,7 +82,13 @@ public class Ajp13RequestPacket
 
     public Buffer getMethod()
     {
+        _requestedMethod = _ch;
         return Ajp13PacketMethods.CACHE.get(_ch);
+    }
+    
+    public byte getRequestedMethod()
+    {
+            return _requestedMethod;
     }
 
     public Buffer getHeaderName()
@@ -194,5 +202,20 @@ public class Ajp13RequestPacket
         _headerCount=-1;
         _headerName=null;
     }
+    
+    public Buffer get(int length)
+    {
+            System.out.println("Buffer Class = " + _buffer.getClass().getName());
+            _buffer.setGetIndex(_buffer.getIndex()-1);
+            return _buffer.get(length);
+    }
+    
+    public Buffer peek(int length)
+    {
+            return _buffer.peek(_buffer.getIndex()-1, length);
+    }
+    
+    
+   
 
 }

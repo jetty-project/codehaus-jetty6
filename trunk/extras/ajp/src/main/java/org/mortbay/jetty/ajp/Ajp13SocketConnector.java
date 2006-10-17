@@ -45,7 +45,6 @@ public class Ajp13SocketConnector extends SocketConnector {
     }
 
     protected void doStart() throws Exception {
-        Log.warn("The Ajp13SocketConnector is a pre-ALPHA work in progress!!!!");
         Log.info("AJP13 is not a secure protocol. Please protect port {}", Integer.toString(getPort()));
         super.doStart();
     }
