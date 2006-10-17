@@ -217,21 +217,20 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         _outBuffers[1]=extractOutputBuffer(buffer);
         _outBuffers[2]=extractOutputBuffer(trailer);
         
-        SSLEngineResult result=null;
         try
         {
             _outNIOBuffer.clear();
             _outBuffer.position(0);
             _outBuffer.limit(_outBuffer.capacity());
-            result=_engine.wrap(_outBuffers,_outBuffer);
+            _result=_engine.wrap(_outBuffers,_outBuffer);
         }
         finally
         {
             _outBuffer.position(0);
             _outNIOBuffer.setGetIndex(0);
-            _outNIOBuffer.setPutIndex(result.bytesProduced());
+            _outNIOBuffer.setPutIndex(_result.bytesProduced());
             
-            int consumed=result.bytesConsumed();
+            int consumed=_result.bytesConsumed();
             if (consumed>0 && header!=null)
             {
                 int len=consumed<header.length()?consumed:header.length();
@@ -261,7 +260,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
     
         flush();
         
-        return result.bytesConsumed();
+        return _result.bytesConsumed();
     }
 
     
@@ -349,8 +348,14 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
             _result=_engine.unwrap(_inBuffer,buffer);
-            if (_result != null && _result.getStatus() == SSLEngineResult.Status.OK)
-                _inNIOBuffer.skip(_result.bytesConsumed());
+            if (_result != null)
+            {
+            	if (_result.getStatus() == SSLEngineResult.Status.OK)	
+            		_inNIOBuffer.skip(_result.bytesConsumed());
+            	else if (_result.getStatus() == SSLEngineResult.Status.CLOSED)
+            		throw new IOException("sslEngine closed");
+            }
+            
         }
         finally
         {
