@@ -36,7 +36,7 @@ import org.mortbay.util.TypeUtil;
  */
 public class Ajp13Generator extends AbstractGenerator
 {
-    
+
     private static HashMap __headerHash=new HashMap();
 
     static
@@ -77,24 +77,26 @@ public class Ajp13Generator extends AbstractGenerator
 
     }
 
-    private static final byte[] AJP13_END_RESPONSE= {'A', 'B', 0, 2, 5, 1 };
-    
-    //  AB ajp respose
+    private static final byte[] AJP13_END_RESPONSE=
+    { 'A', 'B', 0, 2, 5, 1 };
+
+    // AB ajp respose
     // 0, 3 int = 3 packets in length
     // 6, send signal to get more data
     // 31, -7 byte values for int 8185 = (8 * 1024) - 7 MAX_DATA
-    private static final byte[] MORE_CONTENT= {'A', 'B', 0, 3, 6, 31, -7 };
-    
+    private static final byte[] MORE_CONTENT=
+    { 'A', 'B', 0, 3, 6, 31, -7 };
+
     private static String SERVER="Server: Jetty(6.0.x)";
+
     public static void setServerVersion(String version)
     {
         SERVER="Jetty("+version+")";
     }
-    
-    
-    private boolean _needEOC = false;
-    private boolean _bufferPrepared = false;
 
+    private boolean _needEOC=false;
+
+    private boolean _bufferPrepared=false;
 
     public Ajp13Generator(Buffers buffers, EndPoint io, int headerBufferSize, int contentBufferSize)
     {
@@ -105,10 +107,9 @@ public class Ajp13Generator extends AbstractGenerator
     public void reset(boolean returnBuffers)
     {
         super.reset(returnBuffers);
-        _needEOC = false;
+        _needEOC=false;
         _bufferPrepared=false;
     }
-    
 
     /* ------------------------------------------------------------ */
     /**
@@ -116,49 +117,52 @@ public class Ajp13Generator extends AbstractGenerator
      * 
      * @param content
      * @param last
-     * @throws IllegalArgumentException if <code>content</code> is {@link Buffer#isImmutable immutable}.
-     * @throws IllegalStateException If the request is not expecting any more content,
-     *   or if the buffers are full and cannot be flushed.
-     * @throws IOException if there is a problem flushing the buffers.
+     * @throws IllegalArgumentException
+     *             if <code>content</code> is
+     *             {@link Buffer#isImmutable immutable}.
+     * @throws IllegalStateException
+     *             If the request is not expecting any more content, or if the
+     *             buffers are full and cannot be flushed.
+     * @throws IOException
+     *             if there is a problem flushing the buffers.
      */
     public void addContent(Buffer content, boolean last) throws IOException
     {
-            
-            
+
         if (_noContent)
         {
             content.clear();
             return;
         }
-        
-        if (content.isImmutable()) throw new IllegalArgumentException("immutable");
 
-        if (_last || _state==STATE_END) 
+        if (content.isImmutable())
+            throw new IllegalArgumentException("immutable");
+
+        if (_last||_state==STATE_END)
         {
             Log.debug("Ignoring extra content {}",content);
             content.clear();
             return;
         }
-        _last = last;
+        _last=last;
 
         // Handle any unfinished business?
-        if (_content!=null && _content.length()>0)
+        if (_content!=null&&_content.length()>0)
         {
-               
+
             flush();
-            if (_content != null && _content.length()>0) 
+            if (_content!=null&&_content.length()>0)
                 throw new IllegalStateException("FULL");
         }
 
-        _content = content;
-        
-        int len = 0;
-//        _contentWritten += content.length();
+        _content=content;
+
+        _contentWritten+=content.length();
 
         // Handle the _content
         if (_head)
         {
-                
+
             content.clear();
             _content=null;
         }
@@ -167,36 +171,30 @@ public class Ajp13Generator extends AbstractGenerator
             // Yes - so we better check we have a buffer
             initContent();
             // Copy _content to buffer;
+            int len=0;
             len=_buffer.put(_content);
-            
+
             // TODO HORRID HACK!
-            if (_buffer.length() >_contentLength-1)
+            if (len>0&&_buffer.space()==0)
             {
                 len--;
                 _buffer.setPutIndex(_buffer.putIndex()-1);
-                //_content.setGetIndex(_content.getIndex() +  len);
-                //_content.setGetIndex(_buffer.getIndex()-1);
+
             }
-            
+
             _content.skip(len);
-            
-            if (_content.length() == 0) 
-                _content = null;
-            
-            
-            
-            
-            
+
+            if (_content.length()==0)
+                _content=null;
         }
-       
-        _contentWritten += len;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Add content.
      * 
-     * @param b byte
+     * @param b
+     *            byte
      * @return true if the buffers are full
      * @throws IOException
      */
@@ -204,15 +202,15 @@ public class Ajp13Generator extends AbstractGenerator
     {
         if (_noContent)
             return false;
-        
-        if (_last || _state==STATE_END) 
+
+        if (_last||_state==STATE_END)
             throw new IllegalStateException("Closed");
 
         // Handle any unfinished business?
-        if (_content != null && _content.length()>0)
+        if (_content!=null&&_content.length()>0)
         {
             flush();
-            if (_content != null && _content.length()>0) 
+            if (_content!=null&&_content.length()>0)
                 throw new IllegalStateException("FULL");
         }
 
@@ -221,21 +219,22 @@ public class Ajp13Generator extends AbstractGenerator
         // Handle the _content
         if (_head)
             return false;
-        
+
         // we better check we have a buffer
         initContent();
-        
+
         // Copy _content to buffer;
-        
+
         _buffer.put(b);
-        
+
         return _buffer.space()<=1;
     }
 
-
     /* ------------------------------------------------------------ */
-    /** Prepare buffer for unchecked writes.
-     * Prepare the generator buffer to receive unchecked writes
+    /**
+     * Prepare buffer for unchecked writes. Prepare the generator buffer to
+     * receive unchecked writes
+     * 
      * @return the available space in the buffer.
      * @throws IOException
      */
@@ -243,16 +242,16 @@ public class Ajp13Generator extends AbstractGenerator
     {
         if (_noContent)
             return -1;
-        
-        if (_last || _state==STATE_END) 
+
+        if (_last||_state==STATE_END)
             throw new IllegalStateException("Closed");
 
         // Handle any unfinished business?
-        Buffer content = _content;
-        if (content != null && content.length()>0 )
+        Buffer content=_content;
+        if (content!=null&&content.length()>0)
         {
             flush();
-            if (content != null && content.length()>0 ) 
+            if (content!=null&&content.length()>0)
                 throw new IllegalStateException("FULL");
         }
 
@@ -260,34 +259,35 @@ public class Ajp13Generator extends AbstractGenerator
         initContent();
 
         _contentWritten-=_buffer.length();
-        
+
         // Handle the _content
         if (_head)
             return Integer.MAX_VALUE;
-        
+
         return _buffer.space()-1;
     }
 
-    
     /* ------------------------------------------------------------ */
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
-        if (_state != STATE_HEADER) return;
+        if (_state!=STATE_HEADER)
+            return;
 
-        if (_last && !allContentAdded) throw new IllegalStateException("last?");
-        _last = _last | allContentAdded;
+        if (_last&&!allContentAdded)
+            throw new IllegalStateException("last?");
+        _last=_last|allContentAdded;
 
-        boolean has_server = false;    
-        if (_version == HttpVersions.HTTP_1_0_ORDINAL) 
-            _close = true;
+        boolean has_server=false;
+        if (_version==HttpVersions.HTTP_1_0_ORDINAL)
+            _close=true;
 
         // get a header buffer
-        if (_header == null) 
-            _header = _buffers.getBuffer(_headerBufferSize);
+        if (_header==null)
+            _header=_buffers.getBuffer(_headerBufferSize);
 
         Buffer tmpbuf=_buffer;
         _buffer=_header;
-        
+
         try
         {
             // start the header
@@ -302,14 +302,11 @@ public class Ajp13Generator extends AbstractGenerator
                 _reason=new ByteArrayBuffer(TypeUtil.toString(_status));
             addBuffer(_reason);
 
-            if (_status==100 || _status==204 || _status==304)
+            if (_status==100||_status==204||_status==304)
             {
                 _noContent=true;
-                //_content=null;
-                if (tmpbuf!=null)
-                        tmpbuf.clear();
+                _content=null;
             }
-
 
             // allocate 2 bytes for number of headers
             int field_index=_buffer.putIndex();
@@ -336,7 +333,7 @@ public class Ajp13Generator extends AbstractGenerator
                 addString(f.getValue());
             }
 
-            if (!has_server && _status>100 && getSendServerVersion())
+            if (!has_server&&_status>100&&getSendServerVersion())
             {
                 num_fields++;
                 addString("Server");
@@ -345,18 +342,18 @@ public class Ajp13Generator extends AbstractGenerator
 
             // TODO Add content length if last content known.
 
-
-
             // insert the number of headers
             int tmp=_buffer.putIndex();
             _buffer.setPutIndex(field_index);
             addInt(num_fields);
             _buffer.setPutIndex(tmp);
 
-            // get the payload size ( - 4 bytes for the ajp header) excluding the
+            // get the payload size ( - 4 bytes for the ajp header)
+            // excluding the
             // ajp header
             int payloadSize=_buffer.length()-4;
-            // insert the total packet size on 2nd and 3rd byte that was previously
+            // insert the total packet size on 2nd and 3rd byte that
+            // was previously
             // allocated
             addInt(2,payloadSize);
         }
@@ -365,12 +362,9 @@ public class Ajp13Generator extends AbstractGenerator
             _buffer=tmpbuf;
         }
 
-        _state = STATE_CONTENT;
+        _state=STATE_CONTENT;
 
     }
-
-    
-    
 
     /* ------------------------------------------------------------ */
     /**
@@ -380,193 +374,184 @@ public class Ajp13Generator extends AbstractGenerator
      */
     public void complete() throws IOException
     {
-        if (_state == STATE_END) return;
-        
+        if (_state==STATE_END)
+            return;
+
         super.complete();
-        
-        if (_state < STATE_FLUSHING)
+
+        if (_state<STATE_FLUSHING)
         {
-            _state = STATE_FLUSHING;
-            _needEOC = true;
+            _state=STATE_FLUSHING;
+            _needEOC=true;
         }
-        
+
         flush();
     }
 
-    
     public long flush() throws IOException
     {
         try
-        {   
-            if (_state == STATE_HEADER) 
+        {
+            if (_state==STATE_HEADER)
                 throw new IllegalStateException("State==HEADER");
-            
+
             prepareBuffers();
-            
-            if (_endp == null)
+
+            if (_endp==null)
             {
-                if (_needEOC && _buffer != null) 
+                if (_needEOC&&_buffer!=null)
                     _buffer.put(AJP13_END_RESPONSE);
                 _needEOC=false;
                 return 0;
             }
-            
-            // Keep flushing while there is something to flush (except break below)
-            int total= 0;
-            long last_len = -1;
+
+            // Keep flushing while there is something to flush
+            // (except break below)
+            int total=0;
+            long last_len=-1;
             Flushing: while (true)
             {
-                int len = -1;
-                int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) ;
-                
+                int len=-1;
+                int to_flush=((_header!=null&&_header.length()>0)?4:0)|((_buffer!=null&&_buffer.length()>0)?2:0);
+
                 switch (to_flush)
                 {
                     case 7:
-                        throw new IllegalStateException(); // should never happen!
+                        throw new IllegalStateException(); // should
+                        // never
+                        // happen!
                     case 6:
-                        len = _endp.flush(_header, _buffer, null);
-                      
+                        len=_endp.flush(_header,_buffer,null);
+
                         break;
                     case 5:
-                        throw new IllegalStateException(); // should never happen!
+                        throw new IllegalStateException(); // should
+                        // never
+                        // happen!
                     case 4:
-                        len = _endp.flush(_header);
+                        len=_endp.flush(_header);
                         break;
                     case 3:
-                        throw new IllegalStateException(); // should never happen!
+                        throw new IllegalStateException(); // should
+                        // never
+                        // happen!
                     case 2:
-                        len = _endp.flush(_buffer);
-                       
+                        len=_endp.flush(_buffer);
+
                         break;
                     case 1:
-                        throw new IllegalStateException(); // should never happen!
+                        throw new IllegalStateException(); // should
+                        // never
+                        // happen!
                     case 0:
                     {
                         // Nothing more we can write now.
-                        if (_header != null) 
+                        if (_header!=null)
                             _header.clear();
-                        
-                        _bufferPrepared = false;
-                        
-                        if (_buffer != null)
+
+                        _bufferPrepared=false;
+
+                        if (_buffer!=null)
                         {
                             _buffer.clear();
-                            
-                            // reserve some space for the header
+
+                            // reserve some space for the
+                            // header
                             _buffer.setPutIndex(7);
                             _buffer.setGetIndex(7);
 
-                            // Special case handling for small left over buffer from
-                            // an addContent that caused a buffer flush.
-                            if (_content != null && _content.length() < _buffer.space() && _state != STATE_FLUSHING)
+                            // Special case handling for
+                            // small left over buffer from
+                            // an addContent that caused a
+                            // buffer flush.
+                            if (_content!=null&&_content.length()<_buffer.space()&&_state!=STATE_FLUSHING)
                             {
-                                
+
                                 _buffer.put(_content);
                                 _content.clear();
-                                _content = null;
+                                _content=null;
                                 break Flushing;
                             }
-                            
+
                         }
-                        
+
                         // Are we completely finished for now?
-                        if (!_needEOC && (_content == null || _content.length() == 0))
+                        if (!_needEOC&&(_content==null||_content.length()==0))
                         {
-                            if (_state == STATE_FLUSHING)
-                                _state = STATE_END;
-                            if (_state==STATE_END && _close) 
+                            if (_state==STATE_FLUSHING)
+                                _state=STATE_END;
+                            if (_state==STATE_END&&_close)
                                 _endp.close();
-                            
+
                             break Flushing;
                         }
-                        
+
                         // Try to prepare more to write.
                         prepareBuffers();
                     }
                 }
-                
-               
-                
-                // If we failed to flush anything twice in a row break
-                if (len <= 0)
+
+                // If we failed to flush anything twice in a row
+                // break
+                if (len<=0)
                 {
-                    if (last_len <= 0) 
+                    if (last_len<=0)
                         break Flushing;
                     break;
                 }
-                last_len = len;
+                last_len=len;
                 total+=len;
             }
-            
+
             return total;
         }
         catch (IOException e)
         {
             Log.ignore(e);
-            throw (e instanceof EofException) ? e:new EofException(e);
+            throw (e instanceof EofException)?e:new EofException(e);
         }
-        
-        
+
     }
-    
 
     private void prepareBuffers()
     {
         if (!_bufferPrepared)
         {
-                
-           
 
             // Refill buffer if possible
-            if (_content != null && _content.length() > 0 && _buffer != null && _buffer.space() > 0)
+            if (_content!=null&&_content.length()>0&&_buffer!=null&&_buffer.space()>0)
             {
-               
-//                try
-//                {
-//                        initContent();
-//                }
-//                catch (IOException e)
-//                {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                }
-                int len = _buffer.put(_content);
-                
-                
+
+                int len=_buffer.put(_content);
+
                 // TODO HORRID HACK!
-                if (_buffer.length() >_contentLength)
+                if (len>0&&_buffer.space()==0)
                 {
                     len--;
                     _buffer.setPutIndex(_buffer.putIndex()-1);
-                    //_content.setGetIndex(_content.getIndex() +  len);
-                    //_content.setGetIndex(_buffer.getIndex()-1);
                 }
-               
-                
+
                 _content.skip(len);
-               
-                
-                if (_content.length() == 0) 
-                    _content = null;
-                
-                if(_buffer.length() == 0)
+
+                if (_content.length()==0)
+                    _content=null;
+
+                if (_buffer.length()==0)
                 {
-                        _content = null;
+                    _content=null;
                 }
             }
-            
-            
+
             // add header if needed
             if (_buffer!=null)
             {
 
                 int payloadSize=_buffer.length();
-                
+
                 // 4 bytes for the ajp header
                 // 1 byte for response type
                 // 2 bytes for the response size
                 // 1 byte because we count from zero??
-
 
                 if (payloadSize>0)
                 {
@@ -584,18 +569,18 @@ public class Ajp13Generator extends AbstractGenerator
                     _buffer.setPutIndex(put);
                 }
             }
-        
 
             if (_needEOC)
             {
-                if (_buffer == null && _header.space() >= AJP13_END_RESPONSE.length)
+                if (_buffer==null&&_header.space()>=AJP13_END_RESPONSE.length)
                 {
                     _header.put(AJP13_END_RESPONSE);
-                    _needEOC = false;
+                    _needEOC=false;
                 }
-                else if (_buffer!=null && _buffer.space()>=AJP13_END_RESPONSE.length)
+                else if (_buffer!=null&&_buffer.space()>=AJP13_END_RESPONSE.length)
                 {
-                    // send closing packet if all contents are added
+                    // send closing packet if all contents
+                    // are added
                     _buffer.put(AJP13_END_RESPONSE);
                     _needEOC=false;
                     _bufferPrepared=true;
@@ -604,23 +589,16 @@ public class Ajp13Generator extends AbstractGenerator
         }
     }
 
-    
-
-
-   
-    
-    
     private void initContent() throws IOException
     {
         if (_buffer==null)
-        {    
+        {
             _buffer=_buffers.getBuffer(_contentBufferSize);
             _buffer.setPutIndex(7);
             _buffer.setGetIndex(7);
         }
     }
 
-    
     private void addInt(int i)
     {
         _buffer.put((byte)((i>>8)&0xFF));
@@ -650,15 +628,14 @@ public class Ajp13Generator extends AbstractGenerator
         _buffer.put(b);
         _buffer.put((byte)0);
     }
-    
+
     public void getMoreContentPackets() throws IOException
     {
-            Buffer moreContent = _buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
-            moreContent.put(MORE_CONTENT);
-            _endp.flush(moreContent);
-            _buffers.returnBuffer(moreContent);
+        Buffer moreContent=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+        moreContent.put(MORE_CONTENT);
+        _endp.flush(moreContent);
+        _buffers.returnBuffer(moreContent);
     }
-    
 
     private void addBuffer(Buffer b)
     {
@@ -672,9 +649,5 @@ public class Ajp13Generator extends AbstractGenerator
         _buffer.put(b);
         _buffer.put((byte)0);
     }
-    
-   
-    
-
 
 }
