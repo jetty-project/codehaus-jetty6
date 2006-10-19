@@ -65,6 +65,20 @@ public class Ajp13SocketConnector extends SocketConnector {
         throw new UnsupportedOperationException();
     }
 
+    public void setHeaderBufferSize(int headerBufferSize)
+    {
+        Log.debug(Log.IGNORED);
+    }
+
+    public void setRequestBufferSize(int requestBufferSize)
+    {
+        Log.debug(Log.IGNORED);
+    }
+
+    public void setResponseBufferSize(int responseBufferSize)
+    {
+        Log.debug(Log.IGNORED);
+    }
     
     /* TODO temp main - just to help testing */
     public static void main(String[] args)
@@ -94,21 +108,4 @@ public class Ajp13SocketConnector extends SocketConnector {
         server.start();
         server.join();
     }
-
-    public void setHeaderBufferSize(int headerBufferSize)
-    {
-        Log.debug(Log.IGNORED);
-    }
-
-    public void setRequestBufferSize(int requestBufferSize)
-    {
-        Log.debug(Log.IGNORED);
-    }
-
-    public void setResponseBufferSize(int responseBufferSize)
-    {
-        Log.debug(Log.IGNORED);
-    }
-
-    
 }

@@ -20,199 +20,147 @@ import java.io.InterruptedIOException;
 import javax.servlet.ServletInputStream;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.View;
 import org.mortbay.jetty.EofException;
-import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpTokens;
 import org.mortbay.jetty.Parser;
 import org.mortbay.log.Log;
-import org.omg.CORBA.portable.RemarshalException;
-import org.omg.stub.java.rmi._Remote_Stub;
 
 /**
  * @author Markus Kobler
  */
 public class Ajp13Parser implements Parser
 {
-
-    private final static int STATE_AJP13HEADER_MAGIC=-17;
-
+    private final static int STATE_START=-17;
     private final static int STATE_AJP13HEADER_PACKET_LENGTH=-16;
-
     private final static int STATE_AJP13HEADER_PACKET_TYPE=-15;
-
     private final static int STATE_AJP13HEADER_REQUEST_ATTR=-14;
-
     private final static int STATE_AJP13HEADER_REQUEST_ATTR_VALUE=-13;
-
     private final static int STATE_AJP13HEADER_REQUEST_ATTR_VALUE2=-12;
-
     private final static int STATE_AJP13HEADER_REQUEST_HEADER_NAME=-11;
-
     private final static int STATE_AJP13HEADER_REQUEST_HEADER_VALUE=-10;
-
     private final static int STATE_AJP13HEADER_REQUEST_HEADERS=-9;
-
     private final static int STATE_AJP13HEADER_REQUEST_METHOD=-8;
-
     private final static int STATE_AJP13HEADER_REQUEST_PROTOCOL=-7;
-
     private final static int STATE_AJP13HEADER_REQUEST_REMOTE_ADDR=-6;
-
     private final static int STATE_AJP13HEADER_REQUEST_REMOTE_HOST=-5;
-
     private final static int STATE_AJP13HEADER_REQUEST_SERVER_NAME=-4;
-
     private final static int STATE_AJP13HEADER_REQUEST_SERVER_PORT=-3;
-
     private final static int STATE_AJP13HEADER_REQUEST_SSL_SECURE=-2;
-
     private final static int STATE_AJP13HEADER_REQUEST_URI=-1;
-
     private final static int STATE_END=0;
-
+    
     private final static int STATE_CONTENT_AJP13_PACKET_LENGTH=1;
-
     private final static int STATE_CONTENT_AJP13_MAGIC=2;
-
     private final static int STATE_CONTENT_LENGTH=3;
-
-    public static final int STATE_EOF_CONTENT=4;
-
-    public static final int STATE_CONTENT=5;
-
-    public static final int STATE_CHUNKED_CONTENT=6;
-
-    public static final int STATE_CHUNK_SIZE=7;
-
-    public static final int STATE_CHUNK_PARAMS=8;
-
-    public static final int STATE_CHUNK=9;
-
-    private final static int STATE_CONTENT_PACKET_EOF=10;
-
-    protected byte _eol;
-
-    protected long _contentPosition;
-
-    protected int _chunkLength;
-
-    protected int _chunkPosition;
-
-    private boolean _contentChunked=false;
+    private final static int STATE_CONTENT=4;
 
     // AB ajp respose
     // 0, 3 int = 3 packets in length
     // 6, send signal to get more data
     // 31, -7 byte values for int 8185 = (8 * 1024) - 7 MAX_DATA
-    private static final byte[] AJP13_GET_BODY_CHUNK=
-    { 'A', 'B', 0, 3, 6, 31, -7 };
+    private static final byte[] AJP13_GET_BODY_CHUNK=     { 'A', 'B', 0, 3, 6, 31, -7 };
+
+    
+    private int _state=STATE_START;
+    private long _contentLength;
+    private long _contentPosition;
+    
+    private int _chunkLength;
+    private int _chunkPosition;
+
+    private Buffers _buffers;
+    private EndPoint _endp;
+    private Buffer _buffer;
+    
+    private View _contentView=new View();
+    private EventHandler _handler;
 
     private Ajp13RequestPacket _ajpRequestPacket=new Ajp13RequestPacket();
 
-    private Buffer _buffer;
-
-    private Buffers _buffers;
-
-    private View _contentView=new View();
-
-    private EndPoint _endp;
-
-    private EventHandler _handler;
-
-    private int _state=STATE_AJP13HEADER_MAGIC;
-
-    protected long _contentLength;
-
-    boolean _signaledHeaderComplete=false;
-
-    int _contentPacketLength=0;
-
-    long _remaining=10000000;
-
-    public boolean isState(int state)
-    {
-        return _state==state;
-    }
 
     public Ajp13Parser(Buffers buffers, EndPoint endPoint, EventHandler handler)
     {
         _buffers=buffers;
         _endp=endPoint;
         _handler=handler;
-        _signaledHeaderComplete=false;
     }
-
+    
+    /* ------------------------------------------------------------------------------- */
     public long getContentLength()
     {
-        if (_contentChunked)
-            return HttpTokens.CHUNKED_CONTENT;
         return _contentLength;
     }
 
-    public boolean isChunking()
+    /* ------------------------------------------------------------------------------- */
+    public int getState()
     {
-        if (_state==STATE_END)
-            return false;
-        return _contentChunked;
-
+        return _state;
     }
 
-    Buffer getHeaderBuffer()
-    {
-        return _buffer;
-    }
-
+    /* ------------------------------------------------------------------------------- */
     public boolean inContentState()
     {
-        return _state>STATE_END;
+        return _state > 0;
     }
 
-    public boolean inEndState()
-    {
-        return _state==STATE_END;
-    }
-
+    /* ------------------------------------------------------------------------------- */
     public boolean inHeaderState()
     {
-        return _state<STATE_END;
+        return _state < 0;
     }
-
+    
+    /* ------------------------------------------------------------------------------- */
     public boolean isComplete()
     {
         return _state==STATE_END;
     }
 
+    /* ------------------------------------------------------------------------------- */
     public boolean isMoreInBuffer()
     {
-        return _buffer!=null&&_buffer.length()>0;
+        return _buffer!=null && _buffer.hasContent();
     }
 
+    /* ------------------------------------------------------------------------------- */
+    public boolean isState(int state)
+    {
+        return _state==state;
+    }
+
+    /* ------------------------------------------------------------------------------- */
     public void parse() throws IOException
     {
-        throw new UnsupportedOperationException();
+        if (_state==STATE_END)
+            reset(false);
+        if (_state!=STATE_START)
+            throw new IllegalStateException("!START");
+
+        // continue parsing
+        while (_state != STATE_END)
+            parseNext();
     }
 
+    /* ------------------------------------------------------------------------------- */
     public long parseAvailable() throws IOException
     {
         long len=parseNext();
         long total=len>0?len:0;
 
-        while (!inEndState()&&_buffer!=null&&_buffer.length()>0)
+        while (!isComplete() && _buffer!=null && _buffer.length()>0)
         {
             len=parseNext();
             if (len>0)
                 total+=len;
         }
-
         return total;
     }
 
-    long parseNext() throws IOException
+    public long parseNext() throws IOException
     {
-
         long total_filled=-1;
 
         if (_buffer==null)
@@ -223,37 +171,37 @@ public class Ajp13Parser implements Parser
 
         if (_state==STATE_END)
             throw new IllegalStateException("STATE_END");
+        if (_state == STATE_CONTENT && _contentPosition == _contentLength)
+        {
+            _state=STATE_END;
+            _handler.messageComplete(_contentPosition);
+            return total_filled;
+        }
 
         int length=_buffer.length();
-        if (length<=0 /* && _remaining !=0 */)
-        {
 
+        // Fill buffer if we can
+        if (length == 0)
+        {
             int filled=-1;
             if (_buffer.markIndex()==0&&_buffer.putIndex()==_buffer.capacity())
                 throw new IOException("FULL");
 
             if (_endp!=null&&filled<=0)
             {
-
                 // if (_buffer.space()==0)
                 // throw new IOException("FULL");
 
                 try
                 {
-
                     if (total_filled<0)
                         total_filled=0;
-
                     filled=_endp.fill(_buffer);
-                    _ajpRequestPacket.setBuffer(_buffer);
-
                     if (filled>0)
                         total_filled+=filled;
-
                 }
                 catch (IOException ioe)
                 {
-
                     Log.debug(ioe);
                     reset(true);
                     throw (ioe instanceof EofException)?ioe:new EofException(ioe);
@@ -262,37 +210,23 @@ public class Ajp13Parser implements Parser
 
             if (filled<0)
             {
-
-                if (_state==STATE_CONTENT_PACKET_EOF)
-                {
-
-                    _state=STATE_END;
-                    return total_filled;
-
-                }
-                else
-                {
-                    reset(true);
-                    throw new EofException();
-                }
+                reset(true);
+                throw new EofException();
             }
 
             length=_buffer.length();
-
         }
 
         _ajpRequestPacket.setBuffer(_buffer);
 
         // Parse Header
-        while (_state<STATE_END&&length-->0)
+        while (_state<STATE_END && length-->0)
         {
-
             _ajpRequestPacket.next();
 
             switch (_state)
             {
-
-                case STATE_AJP13HEADER_MAGIC:
+                case STATE_START:
 
                     _contentLength=HttpTokens.UNKNOWN_CONTENT;
                     if (_ajpRequestPacket.parsedInt())
@@ -417,6 +351,7 @@ public class Ajp13Parser implements Parser
                         _state=STATE_AJP13HEADER_REQUEST_HEADER_VALUE;
                     }
                     break;
+                    
                 case STATE_AJP13HEADER_REQUEST_HEADER_VALUE:
                     if (_ajpRequestPacket.parsedString())
                     {
@@ -425,25 +360,18 @@ public class Ajp13Parser implements Parser
 
                         if (bufHeaderName!=null&&bufHeaderName.toString().equals(Ajp13RequestHeaders.CONTENT_LENGTH))
                         {
-
-                            try
-                            {
-                                _contentLength=Long.parseLong(bufHeaderValue.toString());
-                                _contentLength=_contentLength>Integer.MAX_VALUE?Integer.MAX_VALUE:_contentLength;
-                                _remaining=_contentLength;
-
-                            }
-                            catch (NumberFormatException e)
-                            {
-                                e.printStackTrace();
-                            }
-
+                            _contentLength=BufferUtil.toLong(bufHeaderValue);   
+                            if (_contentLength <= 0)
+                                _contentLength=HttpTokens.NO_CONTENT;
                         }
 
+                        System.err.println(bufHeaderName+": "+bufHeaderValue);
                         _handler.parsedHeader(bufHeaderName,bufHeaderValue);
+                        
                         _state=_ajpRequestPacket.parsedHeaders()?STATE_AJP13HEADER_REQUEST_ATTR:STATE_AJP13HEADER_REQUEST_HEADER_NAME;
                     }
                     break;
+                    
                 case STATE_AJP13HEADER_REQUEST_ATTR:
                     if ((0xFF&_ajpRequestPacket.parsedAttributeType())!=0xFF)
                     {
@@ -451,46 +379,22 @@ public class Ajp13Parser implements Parser
                     }
                     else
                     {
-
                         _contentPosition=0;
                         switch ((int)_contentLength)
                         {
-                            case HttpTokens.CHUNKED_CONTENT:
-                                System.out.println("Content is Chuncked!!!");
-                                _contentChunked=true;
-                                _state=STATE_CONTENT_AJP13_MAGIC;
-                                break;
-
+                            case HttpTokens.UNKNOWN_CONTENT:
                             case HttpTokens.NO_CONTENT:
                                 System.out.println("No Content!!!");
                                 _state=STATE_END;
-                                _contentChunked=false;
                                 _handler.headerComplete();
                                 _handler.messageComplete(_contentPosition);
                                 break;
 
                             default:
-
-                                if (_contentLength>(Ajp13Packet.MAX_PACKET_SIZE-4))
-                                {
-                                    System.out.println("Content is too large so we are chunking it!!!");
-                                    _contentChunked=true;
-
-                                }
-                                else
-                                {
-                                    System.out.println("We have A content but not chunked!!!");
-                                    _contentChunked=false;
-                                }
-
                                 _state=STATE_CONTENT_AJP13_MAGIC;
-                                _handler.headerComplete(); // May
-                                // recurse
-                                // here
-                                // !
+                                _handler.headerComplete(); // May recurse here!
                                 break;
                         }
-
                     }
                     break;
 
@@ -591,11 +495,10 @@ public class Ajp13Parser implements Parser
                     throw new IllegalStateException("State not regonised {"+_state+"}");
             }
 
-        }
+        } // end of HEADER states loop
 
         length=_buffer.length();
         Buffer chunk;
-        byte ch;
 
         while (_state>STATE_END&&length>0)
         {
@@ -603,19 +506,18 @@ public class Ajp13Parser implements Parser
 
             switch (_state)
             {
-
                 case STATE_CONTENT_AJP13_MAGIC:
                 {
-                    _contentPacketLength=0;
                     if (_ajpRequestPacket.parsedInt())
                     {
-
                         int _magic=_ajpRequestPacket.getInt();
                         if (_magic!=Ajp13RequestHeaders.MAGIC)
                         {
                             throw new IOException("Bad AJP13 rcv packet: "+"0x"+Integer.toHexString(_magic)+" expected "+"0x"
                                     +Integer.toHexString(Ajp13RequestHeaders.MAGIC)+" "+this);
                         }
+                        _chunkLength=0;
+                        _chunkPosition=0;
                         _state=STATE_CONTENT_AJP13_PACKET_LENGTH;
                     }
                     break;
@@ -625,116 +527,46 @@ public class Ajp13Parser implements Parser
                 {
                     if (_ajpRequestPacket.parsedInt())
                     {
+                        _chunkLength=_ajpRequestPacket.getInt();
 
-                        int ajp13PacketLength=_ajpRequestPacket.getInt();
+                        System.out.println("ajp13PacketLength="+_chunkLength);
 
-                        System.out.println("ajp13PacketLength="+ajp13PacketLength);
-
-                        if (ajp13PacketLength==0)
+                        if (_chunkLength==0)
                         {
 
                             _buffer.clear();
                             _state=STATE_END;
-
-                            _handler.content(null);
-
-                            break;
-
+                            _handler.messageComplete(_contentPosition);
+                            return total_filled;
                         }
                         else
                         {
-                            // if(!_contentChunked)
-                            // {
-                            _state=STATE_CONTENT_LENGTH;
-                            // }
-                            // else
-                            // {
-                            // _state = STATE_END;
-                            // throw new
-                            // IllegalStateException("Content
-                            // is chuncked implementation is
-                            // needed");
-                            // }
+                            _state=STATE_CONTENT;
                             break;
                         }
-
                     }
 
                     break;
                 }
-
-                case STATE_CONTENT_LENGTH:
-                {
-                    if (_ajpRequestPacket.parsedInt())
-                    {
-
-                        _contentPacketLength=_ajpRequestPacket.getInt();
-
-                        System.out.println("contentPacketLength="+_contentPacketLength);
-
-                        if (_contentPacketLength==0)
-                        {
-                            _buffer.clear();
-                            _state=STATE_END;
-                            _handler.content(null);
-                            break;
-
-                        }
-                        else
-                        {
-                            if (_contentChunked)
-                                _state=STATE_CHUNKED_CONTENT;
-                            else
-                                _state=STATE_CONTENT;
-                            break;
-                        }
-
-                    }
-
-                    break;
-                }
-
                 case STATE_CONTENT:
                 {
                     System.out.println("STATE CONTENT");
 
-                    _remaining=_contentLength-_contentPosition;
-                    if (_remaining<=0)
+                    int remaining=_chunkLength - _chunkPosition;
+                    if (remaining==0)
                     {
-                        System.out.println("Step2 CONTENT length="+length+" remaining="+_remaining);
-                        _state=STATE_END;
-
-                        return total_filled;
-
+                        _state=STATE_CONTENT_AJP13_MAGIC;
+                        break;
                     }
 
-                    chunk=_ajpRequestPacket.get((int)_remaining);
-
+                    chunk=_ajpRequestPacket.get((int)remaining);
                     _contentPosition+=chunk.length();
+                    _chunkPosition += chunk.length();
                     _contentView.update(chunk);
-                    _remaining=_contentLength-_contentPosition;
-                    if (_remaining==0)
-                    {
-                        _state=STATE_END;
-                    }
-
                     _handler.content(chunk);
-                    // _buffer.clear();
+                    
+                    return total_filled;
 
-                    // _buffer.clear();
-                    // _endp.fill(_buffer);
-                    // _ajpRequestPacket.setBuffer(_buffer);
-                    // System.out.println("Handle the remaining
-                    // packets");
-
-                    break;
-
-                }
-
-                case STATE_CHUNKED_CONTENT:
-                {
-                    // TODO: chunked content
-                    throw new IllegalStateException("No implementation of Chunked content yet");
                 }
 
                 default:
@@ -749,28 +581,11 @@ public class Ajp13Parser implements Parser
         return total_filled;
     }
 
-    public void sendAjp13GetMoreContent() throws IOException
-    {
-
-        if (_endp==null)
-            throw new IOException("_endp is null");
-
-        if (_buffers==null)
-            throw new IOException("_buffers is null");
-
-        Buffer moreContent=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
-        moreContent.put(AJP13_GET_BODY_CHUNK);
-        _endp.flush(moreContent);
-        moreContent.clear();
-        _buffers.returnBuffer(moreContent);
-
-    }
-
+    /* ------------------------------------------------------------------------------- */
     public void reset(boolean returnBuffers)
     {
-        _state=STATE_AJP13HEADER_MAGIC;
+        _state=STATE_START;
         _contentPosition=0;
-        _signaledHeaderComplete=false;
 
         if (_buffer!=null)
         {
@@ -794,9 +609,30 @@ public class Ajp13Parser implements Parser
         }
     }
 
+    public void sendAjp13GetMoreContent() throws IOException
+    {
+        if (_endp==null)
+            throw new IOException("_endp is null");
+
+        if (_buffers==null)
+            throw new IOException("_buffers is null");
+
+        Buffer moreContent=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+        moreContent.put(AJP13_GET_BODY_CHUNK);
+        _endp.flush(moreContent);
+        moreContent.clear();
+        _buffers.returnBuffer(moreContent);
+
+    }
+
     public void skipBuffer()
     {
         _buffer.skip(_buffer.length());
+    }
+
+    Buffer getHeaderBuffer()
+    {
+        return _buffer;
     }
 
     public interface EventHandler
@@ -805,7 +641,11 @@ public class Ajp13Parser implements Parser
         // public void shutdownRequest() throws IOException;
         // public void cpingRequest() throws IOException;
 
+        public void content(Buffer ref) throws IOException;
+
         public void headerComplete() throws IOException;
+
+        public void messageComplete(long contextLength) throws IOException;
 
         public void parsedHeader(Buffer name, Buffer value) throws IOException;
 
@@ -830,10 +670,6 @@ public class Ajp13Parser implements Parser
         public void parsedUri(Buffer uri) throws IOException;
 
         public void startForwardRequest() throws IOException;
-
-        public void messageComplete(long contextLength) throws IOException;
-
-        public void content(Buffer ref) throws IOException;
 
     }
 
@@ -933,29 +769,40 @@ public class Ajp13Parser implements Parser
         // return _content.length()>0;
         // }
 
+        public int read() throws IOException
+        {
+            int c=-1;
+            if (blockForContent())
+                c=0xff&_content.get();
+            return c;
+        }
+
+        /* ------------------------------------------------------------ */
+        /*
+         * @see java.io.InputStream#read(byte[], int, int)
+         */
+        public int read(byte[] b, int off, int len) throws IOException
+        {
+            int l=-1;
+            if (blockForContent())
+                l=_content.get(b,off,len);
+            return l;
+        }
+
         private boolean blockForContent() throws IOException
         {
             if (_content.length()>0)
-            {
                 return true;
-            }
             if (_parser.isState(Ajp13Parser.STATE_END))
-            {
-
                 return false;
-            }
 
             // Handle simple end points.
             if (_endp==null)
-            {
-
                 _parser.parseNext();
-            }
 
             // Handle blocking end points
             else if (_endp.isBlocking())
             {
-
                 long filled=_parser.parseNext();
 
                 // parse until some progress is made (or
@@ -997,26 +844,6 @@ public class Ajp13Parser implements Parser
             }
 
             return _content.length()>0;
-        }
-
-        public int read() throws IOException
-        {
-            int c=-1;
-            if (blockForContent())
-                c=0xff&_content.get();
-            return c;
-        }
-
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.InputStream#read(byte[], int, int)
-         */
-        public int read(byte[] b, int off, int len) throws IOException
-        {
-            int l=-1;
-            if (blockForContent())
-                l=_content.get(b,off,len);
-            return l;
         }
 
     }
