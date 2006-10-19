@@ -55,6 +55,21 @@ public class HttpParser implements Parser
     public static final int STATE_CHUNK_PARAMS=5;
     public static final int STATE_CHUNK=6;
 
+    private Buffers _buffers; // source of buffers
+    private EndPoint _endp;
+    private Buffer _header; // Buffer for header data (and small _content)
+    private Buffer _body; // Buffer for large content
+    private Buffer _buffer; // The current buffer in use (either _header or _content)
+    private View _contentView=new View(); // View of the content in the buffer for {@link Input}
+    private int _headerBufferSize;
+
+    private int _contentBufferSize;
+    private EventHandler _handler;
+    private CachedBuffer _cached;
+    private View _tok0; // Saved token: header name, request method or response version
+    private View _tok1; // Saved token: header value, request URI or response code
+    private String _multiLineValue;
+    private boolean _response=false; // true if parsing a HTTP response
     /* ------------------------------------------------------------------------------- */
     protected int _state=STATE_START;
     protected byte _eol;
@@ -63,21 +78,6 @@ public class HttpParser implements Parser
     protected long _contentPosition;
     protected int _chunkLength;
     protected int _chunkPosition;
-
-    private Buffers _buffers; // source of buffers
-    private EndPoint _endp;
-    private Buffer _header; // Buffer for header data (and small _content)
-    private Buffer _body; // Buffer for large content
-    private Buffer _buffer; // The current buffer in use (either _header or _content)
-    private View _contentView=new View(); // View of the content in the buffer for {@link Input}
-    private int _headerBufferSize;
-    private int _contentBufferSize;
-    private EventHandler _handler;
-    private CachedBuffer _cached;
-    private View _tok0; // Saved token: header name, request method or response version
-    private View _tok1; // Saved token: header value, request URI or response code
-    private String _multiLineValue;
-    private boolean _response=false; // true if parsing a HTTP response
     
     /* ------------------------------------------------------------------------------- */
     /**
@@ -114,28 +114,15 @@ public class HttpParser implements Parser
     }
 
     /* ------------------------------------------------------------------------------- */
+    public long getContentLength()
+    {
+        return _contentLength;
+    }
+
+    /* ------------------------------------------------------------------------------- */
     public int getState()
     {
         return _state;
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public boolean isState(int state)
-    {
-        return _state == state;
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public void setState(int state)
-    {
-        this._state=state;
-        _contentLength=HttpTokens.UNKNOWN_CONTENT;
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public boolean inHeaderState()
-    {
-        return _state < 0;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -145,11 +132,11 @@ public class HttpParser implements Parser
     }
 
     /* ------------------------------------------------------------------------------- */
-    public long getContentLength()
+    public boolean inHeaderState()
     {
-        return _contentLength;
+        return _state < 0;
     }
-    
+
     /* ------------------------------------------------------------------------------- */
     public boolean isChunking()
     {
@@ -161,7 +148,7 @@ public class HttpParser implements Parser
     {
         return isState(STATE_END);
     }
-
+    
     /* ------------------------------------------------------------ */
     public boolean isMoreInBuffer()
     throws IOException
@@ -172,11 +159,11 @@ public class HttpParser implements Parser
 
         return false;
     }
-    
+
     /* ------------------------------------------------------------------------------- */
-    public String toString(Buffer buf)
+    public boolean isState(int state)
     {
-        return "state=" + _state + " length=" + _length + " buf=" + buf.hashCode();
+        return _state == state;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -196,7 +183,7 @@ public class HttpParser implements Parser
         while (_state != STATE_END)
             parseNext();
     }
-
+    
     /* ------------------------------------------------------------------------------- */
     /**
      * Parse until END state.
@@ -211,7 +198,7 @@ public class HttpParser implements Parser
         long total=len>0?len:0;
         
         // continue parsing
-        while (_state != STATE_END && _buffer!=null && _buffer.length() > 0)
+        while (!isComplete() && _buffer!=null && _buffer.length()>0)
         {
             len = parseNext();
             if (len>0)
@@ -239,7 +226,8 @@ public class HttpParser implements Parser
             _tok1.setPutIndex(_tok1.getIndex());
         }
         
-        if (_state == STATE_END) throw new IllegalStateException("STATE_END");
+        if (_state == STATE_END) 
+            throw new IllegalStateException("STATE_END");
         if (_state == STATE_CONTENT && _contentPosition == _contentLength)
         {
             _state=STATE_END;
@@ -288,15 +276,15 @@ public class HttpParser implements Parser
                     throw (e instanceof EofException) ? e:new EofException(e);
                 }
             }
-            
-            if (filled < 0 && _state == STATE_EOF_CONTENT)
-            {
-                _state=STATE_END;
-                _handler.messageComplete(_contentPosition);
-                return total_filled;
-            }
+
             if (filled < 0) 
             {
+                if ( _state == STATE_EOF_CONTENT)
+                {
+                    _state=STATE_END;
+                    _handler.messageComplete(_contentPosition);
+                    return total_filled;
+                }
                 reset(true);
                 throw new EofException();
             }
@@ -308,7 +296,7 @@ public class HttpParser implements Parser
         byte ch;
         byte[] array=_buffer.array();
         
-        while (_state < STATE_END && length-->0)
+        while (_state<STATE_END && length-->0)
         {
             ch=_buffer.get();
             
@@ -509,7 +497,7 @@ public class HttpParser implements Parser
                                     
                                 case HttpTokens.NO_CONTENT:
                                     _state=STATE_END;
-                                    _handler.headerComplete(); // May recurse here !
+                                    _handler.headerComplete(); 
                                     _handler.messageComplete(_contentPosition);
                                     break;
                                     
@@ -790,6 +778,19 @@ public class HttpParser implements Parser
         _buffer=_header;
     }
 
+    /* ------------------------------------------------------------------------------- */
+    public void setState(int state)
+    {
+        this._state=state;
+        _contentLength=HttpTokens.UNKNOWN_CONTENT;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public String toString(Buffer buf)
+    {
+        return "state=" + _state + " length=" + _length + " buf=" + buf.hashCode();
+    }
+
     Buffer getHeaderBuffer()
     {
         return _header;
@@ -800,17 +801,15 @@ public class HttpParser implements Parser
     /* ------------------------------------------------------------ */
     public static abstract class EventHandler
     {
-        /**
-         * This is the method called by parser when the HTTP request line is parsed
-         */
-        public abstract void startRequest(Buffer method, Buffer url, Buffer version)
-                throws IOException;
+        public abstract void content(Buffer ref) throws IOException;
 
-        /**
-         * This is the method called by parser when the HTTP request line is parsed
-         */
-        public abstract void startResponse(Buffer version, int status, Buffer reason)
-                throws IOException;
+        public void headerComplete() throws IOException
+        {
+        }
+
+        public void messageComplete(long contextLength) throws IOException
+        {
+        }
 
         /**
          * This is the method called by parser when a HTTP Header name and value is found
@@ -819,15 +818,17 @@ public class HttpParser implements Parser
         {
         }
 
-        public void headerComplete() throws IOException
-        {
-        }
-
-        public abstract void content(Buffer ref) throws IOException;
+        /**
+         * This is the method called by parser when the HTTP request line is parsed
+         */
+        public abstract void startRequest(Buffer method, Buffer url, Buffer version)
+                throws IOException;
         
-        public void messageComplete(long contextLength) throws IOException
-        {
-        }
+        /**
+         * This is the method called by parser when the HTTP request line is parsed
+         */
+        public abstract void startResponse(Buffer version, int status, Buffer reason)
+                throws IOException;
     }
     
     
@@ -850,6 +851,30 @@ public class HttpParser implements Parser
             _content=_parser._contentView;
         }
         
+        /* ------------------------------------------------------------ */
+        /*
+         * @see java.io.InputStream#read()
+         */
+        public int read() throws IOException
+        {
+            int c=-1;
+            if (blockForContent())
+                c= 0xff & _content.get();
+            return c;
+        }
+        
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see java.io.InputStream#read(byte[], int, int)
+         */
+        public int read(byte[] b, int off, int len) throws IOException
+        {
+            int l=-1;
+            if (blockForContent())
+                l= _content.get(b, off, len);
+            return l;
+        }
+        
         private boolean blockForContent() throws IOException
         {
             if (_content.length()>0)
@@ -859,9 +884,7 @@ public class HttpParser implements Parser
             
             // Handle simple end points.
             if (_endp==null)
-            {
                 _parser.parseNext();
-            }
             
             // Handle blocking end points
             else if (_endp.isBlocking())
@@ -903,30 +926,6 @@ public class HttpParser implements Parser
             }
             
             return _content.length()>0; 
-        }
-        
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.InputStream#read()
-         */
-        public int read() throws IOException
-        {
-            int c=-1;
-            if (blockForContent())
-                c= 0xff & _content.get();
-            return c;
-        }
-        
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see java.io.InputStream#read(byte[], int, int)
-         */
-        public int read(byte[] b, int off, int len) throws IOException
-        {
-            int l=-1;
-            if (blockForContent())
-                l= _content.get(b, off, len);
-            return l;
         }       
     }
     

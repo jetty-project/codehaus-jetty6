@@ -174,12 +174,11 @@ public class Ajp13Generator extends AbstractGenerator
             int len=0;
             len=_buffer.put(_content);
 
-            // TODO HORRID HACK!
+            // make sure there is space for a trailing null
             if (len>0&&_buffer.space()==0)
             {
                 len--;
                 _buffer.setPutIndex(_buffer.putIndex()-1);
-
             }
 
             _content.skip(len);
@@ -524,13 +523,12 @@ public class Ajp13Generator extends AbstractGenerator
 
                 int len=_buffer.put(_content);
 
-                // TODO HORRID HACK!
+                // Make sure there is space for a trailing null
                 if (len>0&&_buffer.space()==0)
                 {
                     len--;
                     _buffer.setPutIndex(_buffer.putIndex()-1);
                 }
-
                 _content.skip(len);
 
                 if (_content.length()==0)
