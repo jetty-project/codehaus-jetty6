@@ -80,10 +80,11 @@ import org.mortbay.util.Scanner;
  *   You can of course change the hot deploy directory if you wish.
  */
 public class HotFileDeployer extends AbstractLifeCycle
-       
 {
+    public final static String HOTDEPLOYER = "HotDeployer";
     private int _scanInterval = 10;
-    private Scanner _scanner = new Scanner();
+    private Scanner _scanner;
+    private ScannerListener _scannerListener;
     private Resource _hotDeployDir;
     private Map _currentDeployments = new HashMap();
     private Deployer _deployer;
@@ -140,6 +141,7 @@ public class HotFileDeployer extends AbstractLifeCycle
         setHotDeployDir(Resource.newResource(jettyHome).addPath("webapps"));
         Log.debug("hot deploy dir="+_hotDeployDir.getFile().getCanonicalPath());
         _deployer = new Deployer();
+        _scanner = new Scanner();
     }
     
     /**
@@ -152,16 +154,21 @@ public class HotFileDeployer extends AbstractLifeCycle
 
 
     /**
+     * Associate with a server.
      * @param server the server to set
      */
     public void setServer(Server server)
-    {
+    {        
+        if (isStarted() || isStarting())
+            throw new IllegalStateException("Cannot set Server after deployer start");
         _server = server;
     }
  
     
     public void setScanInterval (int seconds)
     {
+        if (isStarted() || isStarting())
+            throw new IllegalStateException("Cannot change scan interval after deployer start");
         _scanInterval = seconds;
     }
     
@@ -183,7 +190,9 @@ public class HotFileDeployer extends AbstractLifeCycle
     }
     
     public void setHotDeployDir (Resource resource)
-    {
+    {        
+        if (isStarted() || isStarting())
+            throw new IllegalStateException("Cannot change hot deploy dir after deployer start");
         _hotDeployDir=resource;
     }
 
@@ -241,8 +250,7 @@ public class HotFileDeployer extends AbstractLifeCycle
         if (_server==null)
             throw new IllegalStateException("No server specified for deployer");
         
-        _deployer.setServer(_server);
-        
+        _deployer.setServer(_server);       
         _scanner.setScanDir(_hotDeployDir.getFile());
         _scanner.setScanInterval(getScanInterval());
         //Accept changes only in files that could be the equivalent of jetty-web.xml files.
@@ -264,7 +272,8 @@ public class HotFileDeployer extends AbstractLifeCycle
                 }
             }
         });
-        _scanner.addListener(new ScannerListener());
+        _scannerListener = new ScannerListener();
+        _scanner.addListener(_scannerListener);
         _scanner.start();
     }
     
@@ -274,6 +283,7 @@ public class HotFileDeployer extends AbstractLifeCycle
      */
     protected void doStop() throws Exception
     {
+        _scanner.removeListener(_scannerListener);
         _scanner.stop();    
     }
 

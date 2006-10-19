@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<Configure id="Server" class="org.mortbay.jetty.Server">
+
+    <!-- =========================================================== -->
+    <!-- Hot Deployer                                                -->
+    <!-- Watch a directory for the appearance/disappearance of       -->
+    <!-- jetty-web formatted xml files describing webapps to deploy. -->
+    <!-- =========================================================== -->
+    <Call name="addLifeCycle">
+      <Arg>
+        <New id="hotdeployer" class="org.mortbay.jetty.deployer.HotFileDeployer">
+          <Set name="server"><Ref id="Server"/></Set>
+          <Set name="scanInterval">10</Set>
+          <Set name="hotDeployDir"><SystemProperty name="jetty.home" default="."/>/webapps</Set>
+          <Set name="configurationManager">
+            <!-- Optional properties for runtime resolution of <Property> elements -->
+            <!--
+            <New class="org.mortbay.jetty.deployer.FileConfigurationManager">
+              <Set name="file"><SystemProperty name="jetty.home" default="."/>/etc/deployment.properties</Set>
+            </New>
+            -->
+          </Set>
+        </New>
+      </Arg>
+    </Call>
+
+    <!-- =========================================================== -->
+    <!-- Deployer for convenient deployment of WebAppContexts        -->
+    <!-- =========================================================== -->
+    <!--
+     <Get name="container">
+       <Call name="addBean">
+         <Arg>
+           <New id="deployer" class="org.mortbay.jetty.deployer.Deployer">
+             <Set name="server"><Ref id="Server"/></Set>
+           </New>
+         </Arg>
+       </Call>
+     </Get>
+     -->
+</Configure>
