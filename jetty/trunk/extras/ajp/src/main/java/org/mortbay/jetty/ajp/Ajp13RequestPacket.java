@@ -202,20 +202,13 @@ public class Ajp13RequestPacket
         _headerCount=-1;
         _headerName=null;
     }
-    
+
     public Buffer get(int length)
     {
-            System.out.println("Buffer Class = " + _buffer.getClass().getName());
-            _buffer.setGetIndex(_buffer.getIndex()-1);
-            return _buffer.get(length);
+        _buffer.skip(-1);
+        return _buffer.get(length);
     }
-    
-    public Buffer peek(int length)
-    {
-            return _buffer.peek(_buffer.getIndex()-1, length);
-    }
-    
-    
-   
 
+
+ 
 }

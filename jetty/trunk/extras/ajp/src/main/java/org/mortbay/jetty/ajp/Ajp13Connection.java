@@ -164,7 +164,7 @@ public class Ajp13Connection extends HttpConnection
             }
             else
             {
-                System.out.println("delaying............ for content");
+                System.err.println("delaying............ for content");
                 _delayedHandling=true;
             }
         }
@@ -181,7 +181,7 @@ public class Ajp13Connection extends HttpConnection
             if (_delayedHandling)
             {
                 _delayedHandling=false;
-                System.out.println("delaying............ handled");
+                System.err.println("delaying............ handled");
                 handleRequest();
             }
         }
