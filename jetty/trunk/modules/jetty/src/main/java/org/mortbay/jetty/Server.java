@@ -20,11 +20,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import javax.servlet.ServletException;
 
 import org.mortbay.component.Container;
 import org.mortbay.component.LifeCycle;
+import org.mortbay.component.Container.Relationship;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
@@ -76,11 +79,13 @@ public class Server extends HandlerWrapper implements Attributes
     private boolean _sendServerVersion = true; //send Server: header by default
     private AttributesMap _attributes = new AttributesMap();
     private String _version = "6.1.x";
+    private List _dependentLifeCycles=new ArrayList();
+    
     
     /* ------------------------------------------------------------ */
     public Server()
     {
-        setServer(this);
+        setServer(this); 
     }
     
     /* ------------------------------------------------------------ */
@@ -190,6 +195,12 @@ public class Server extends HandlerWrapper implements Attributes
         Log.info("jetty-"+_version);
         HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
+      
+        try
+        {
+            startLifeCycles();
+        }
+        catch (Throwable e) {mex.add(e);}
         
         if (_threadPool==null)
         {
@@ -248,6 +259,12 @@ public class Server extends HandlerWrapper implements Attributes
         }
         catch(Throwable e){mex.add(e);}
         
+        try
+        {
+            stopLifeCycles();
+        }
+        catch (Throwable e) {mex.add(e);}
+ 
         mex.ifExceptionThrow();
     }
 
@@ -342,6 +359,75 @@ public class Server extends HandlerWrapper implements Attributes
     {
         return _version;
     }
+    
+    
+    /**
+     * Add a LifeCycle object to be started/stopped
+     * along with the Server.
+     * @param c
+     */
+    public void addLifeCycle (LifeCycle c)
+    {
+        if (c == null)
+            return;
+        if (!_dependentLifeCycles.contains(c)) 
+        {
+            _dependentLifeCycles.add(c);
+            _container.addBean(c);
+        }
+        try
+        {
+            if (isStarted())
+                ((LifeCycle)c).start();
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException (e);
+        }
+    }
+    
+    /**
+     * Remove a LifeCycle object to be started/stopped 
+     * along with the Server
+     * @param c
+     */
+    public void removeLifeCycle (LifeCycle c)
+    {
+        if (c == null)
+            return;
+        _dependentLifeCycles.remove(c);
+        _container.removeBean(c);
+    }
+    
+    /**
+     * start dependent LifeCycles
+     * @throws Exception
+     */
+    protected void startLifeCycles ()
+    throws Exception
+    {  
+        Iterator itor = _dependentLifeCycles.iterator();
+        while (itor.hasNext())
+            ((LifeCycle)itor.next()).start();    
+    }
+    
+    /**
+     * Stop all dependent lifecycles in reverse start order
+     * @throws Exception
+     */
+    protected void stopLifeCycles ()
+    throws Exception
+    {
+        if (_dependentLifeCycles.isEmpty())
+            return;
+        
+        ListIterator itor = _dependentLifeCycles.listIterator(_dependentLifeCycles.size()-1);
+        while (itor.hasPrevious())
+            ((LifeCycle)itor.previous()).stop();
+    }
+    
+    
+ 
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
