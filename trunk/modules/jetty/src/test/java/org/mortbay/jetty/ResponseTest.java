@@ -16,13 +16,10 @@
 package org.mortbay.jetty;
 
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
 
 import org.mortbay.jetty.servlet.AbstractSessionManager;
@@ -294,6 +291,23 @@ public class ResponseTest extends TestCase
               
     }
 
+    public void testSetBufferSize ()
+    throws Exception
+    {
+        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+        response.setBufferSize(20*1024);
+        response.getWriter().print("hello");
+        try
+        {
+            response.setBufferSize(21*1024);
+            fail("Expected IllegalStateException on Request.setBufferSize");
+        }
+        catch (Exception e)
+        {
+            assertTrue(e instanceof IllegalStateException);
+        }
+    }
+    
     private Response newResponse()
     {
         HttpConnection connection=new HttpConnection(connector,connector.endp,connector.server);
