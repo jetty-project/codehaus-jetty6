@@ -802,6 +802,8 @@ public class Response implements HttpServletResponse
      */
     public void setBufferSize(int size)
     {
+        if (isCommitted() || getContentCount()>0)
+            throw new IllegalStateException("Committed or content written");
         _connection.getGenerator().increaseContentBufferSize(size);
     }
 
