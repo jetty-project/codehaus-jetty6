@@ -51,16 +51,9 @@ public class Ajp13Connection extends HttpConnection
 
     public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
-            
-            
-            
-       
         super(connector,endPoint,server);
         
-        System.out.println("new AJP13Connection");
-        
         // TODO avoid the creation of HttpParsers etc.
-        
         _parser=new Ajp13Parser(_connector,_endp,new RequestHandler());
         
         //_response = new Ajp13Response(this);
@@ -164,15 +157,18 @@ public class Ajp13Connection extends HttpConnection
 
         public void headerComplete() throws IOException
         {
-                if (((Ajp13Parser)_parser).getContentLength()<=0 && !((Ajp13Parser)_parser).isChunking())
-                        handleRequest();
-                    else
-                    {
-                        System.out.println("delaying............ for content");
-                        _delayedHandling=true;
-                    }
+            if (((Ajp13Parser)_parser).getContentLength()<=0)
+            {
+                System.out.println("handle request");
+                handleRequest();
+            }
+            else
+            {
+                System.out.println("delaying............ for content");
+                _delayedHandling=true;
+            }
         }
-        
+
         
         public void messageComplete(long contextLength) throws IOException
         {
