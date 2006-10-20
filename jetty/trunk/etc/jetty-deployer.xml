@@ -9,7 +9,7 @@
     <!-- =========================================================== -->
     <Call name="addLifeCycle">
       <Arg>
-        <New id="hotdeployer" class="org.mortbay.jetty.deployer.HotFileDeployer">
+        <New id="hotdeployer" class="org.mortbay.jetty.deployer.HotDeployer">
           <Set name="server"><Ref id="Server"/></Set>
           <Set name="scanInterval">10</Set>
           <Set name="hotDeployDir"><SystemProperty name="jetty.home" default="."/>/webapps</Set>
@@ -25,8 +25,10 @@
       </Arg>
     </Call>
 
+
     <!-- =========================================================== -->
-    <!-- Deployer for convenient deployment of WebAppContexts        -->
+    <!-- Deployer                                                    -->
+    <!-- Convenient API for deployment of WebAppContexts.            -->
     <!-- =========================================================== -->
     <!--
      <Get name="container">
