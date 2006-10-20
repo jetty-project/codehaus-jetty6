@@ -50,9 +50,7 @@ public class Ajp13SocketConnector extends SocketConnector {
     }
 
     protected HttpConnection newHttpConnection(EndPoint endpoint) {
-        System.err.println("New HTTP Connection "+endpoint);
         return new Ajp13Connection(this, endpoint, getServer());
-        
     }
 
     // Secured on a packet by packet bases not by connection

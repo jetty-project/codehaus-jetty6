@@ -26,187 +26,77 @@ public class Ajp13RequestPacket
 {
     private Buffer _buffer;
     private View _tok0=new View();
-    private View _tok1=new View();
-    private byte _ch;
-    private int _int;
-    private boolean _parsedHiByte=false;
-    private Buffer _str;
-    private int _strStart=-1;
-    private int _headerCount=-1;
-    private Buffer _headerName;
-    private byte _attrType;
-    private String _attrKey;
-    private byte _requestedMethod;
    
-
     public void setBuffer(Buffer buffer)
     {
         _buffer=buffer;
         reset();
     }
 
-    public void next()
+    public boolean isEmpty()
     {
-        _ch=_buffer.get();
+        return _buffer.length()==0;
     }
-
-    public byte getByte()
-    {
-        return _ch;
-    }
-
-    public boolean getBool()
-    {
-        return _ch>0;
-    }
-
+    
     public int getInt()
     {
-        return _int;
+        return ((_buffer.get()&0xFF)<<8)|(_buffer.get()&0xFF);
     }
 
     public Buffer getString()
     {
-        return _str;
+        int len= ((_buffer.peek()&0xFF)<<8)|(_buffer.peek(_buffer.getIndex()+1)&0xFF);
+        if (len==0xffff)
+        {
+            _buffer.skip(2);
+            return null;
+        }
+        int start =_buffer.getIndex();
+        _tok0.update(start+2,start+len+2);
+        _buffer.skip(len+3);
+        return _tok0;
+    }
+    
+    public byte getByte()
+    {
+        return _buffer.get();
     }
 
-    public byte getAttributeType()
+    public boolean getBool()
     {
-        return _attrType;
-    }
-
-    public String getAttributeKey()
-    {
-        return _attrKey;
+        return _buffer.get()>0;
     }
 
     public Buffer getMethod()
     {
-        _requestedMethod = _ch;
-        return Ajp13PacketMethods.CACHE.get(_ch);
-    }
-    
-    public byte getRequestedMethod()
-    {
-            return _requestedMethod;
+        return Ajp13PacketMethods.CACHE.get(_buffer.get());
     }
 
     public Buffer getHeaderName()
     {
-        return _headerName;
-    }
-
-    public boolean parsedInt()
-    {
-        if (_parsedHiByte=!_parsedHiByte)
+        int len= ((_buffer.peek()&0xFF)<<8)|(_buffer.peek(_buffer.getIndex()+1)&0xFF);
+        if ((0xFF00&len)==0xA000)
         {
-            _int=(_ch&0xFF)<<8;
-            return false;
+            _buffer.skip(1);
+            return Ajp13RequestHeaders.CACHE.get(_buffer.get());
         }
-        else
-        {
-            _int+=_ch&0xFF;
-            return true;
-        }
+        int start =_buffer.getIndex();
+        _tok0.update(start+2,start+len+2);
+        _buffer.skip(len+3);
+        return _tok0;
+        
     }
+    
 
-    public boolean parsedString()
+    public Buffer get(int length)
     {
-        if (_strStart<0)
-        {
-            if (parsedInt())
-            {
-                if (_int==0xFFFF||_int<0)
-                {
-                    _str=null;
-                    return true;
-                }
-                _strStart=_buffer.getIndex();
-            }
-        }
-        else
-        {
-            if (_ch==0)
-            {
-                _tok0.update(_strStart,_buffer.getIndex()-1);
-                _str=_tok0;
-                _strStart=-1;
-                return true;
-            }
-        }
-        return false;
+        return _buffer.get(length);
     }
-
-    public boolean parsedHeaderName()
-    {
-        if (_strStart<0)
-        {
-            if (parsedInt())
-            {
-                if ((0xFF00&_int)==0xA000)
-                {
-                    _headerName=Ajp13RequestHeaders.CACHE.get(_ch);
-                    return true;
-                }
-                else
-                {
-                    _strStart=_buffer.getIndex();
-                }
-            }
-        }
-        else if (_ch==0)
-        {
-            _tok1.update(_strStart,_buffer.getIndex()-1);
-            _headerName=_tok1;
-            _strStart=-1;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean parsedHeaderCount()
-    {
-        if (parsedInt())
-        {
-            _headerCount=_int;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean parsedHeaders()
-    {
-        return --_headerCount<0;
-    }
-
-    public byte parsedAttributeType()
-    {
-        return _attrType=_ch;
-    }
-
-    public void setAttributeKey()
-    {
-        _attrKey=_str.toString();
-    }
-
+    
     public void reset()
     {
         _tok0.update(_buffer);
         _tok0.update(0,0);
-        _tok1.update(_buffer);
-        _tok1.update(0,0);
-        _ch=0;
-        _parsedHiByte=false;
-        _strStart=-1;
-        _str=null;
-        _headerCount=-1;
-        _headerName=null;
-    }
-
-    public Buffer get(int length)
-    {
-        _buffer.skip(-1);
-        return _buffer.get(length);
     }
 
 
