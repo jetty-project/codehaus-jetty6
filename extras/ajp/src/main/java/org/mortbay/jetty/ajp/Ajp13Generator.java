@@ -84,9 +84,9 @@ public class Ajp13Generator extends AbstractGenerator
     // 0, 3 int = 3 packets in length
     // 6, send signal to get more data
     // 31, -7 byte values for int 8185 = (8 * 1024) - 7 MAX_DATA
-    private static final byte[] MORE_CONTENT=
+    private static final byte[] AJP13_MORE_CONTENT=
     { 'A', 'B', 0, 3, 6, 31, -7 };
-
+    
     private static String SERVER="Server: Jetty(6.0.x)";
 
     public static void setServerVersion(String version)
@@ -94,20 +94,23 @@ public class Ajp13Generator extends AbstractGenerator
         SERVER="Jetty("+version+")";
     }
 
+    /* ------------------------------------------------------------ */
+    private boolean _needMore=false;
     private boolean _needEOC=false;
-
     private boolean _bufferPrepared=false;
 
+    /* ------------------------------------------------------------ */
     public Ajp13Generator(Buffers buffers, EndPoint io, int headerBufferSize, int contentBufferSize)
     {
         super(buffers,io,headerBufferSize,contentBufferSize);
     }
 
-    /* ------------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
     public void reset(boolean returnBuffers)
     {
         super.reset(returnBuffers);
         _needEOC=false;
+        _needMore=false;
         _bufferPrepared=false;
     }
 
@@ -387,6 +390,7 @@ public class Ajp13Generator extends AbstractGenerator
         flush();
     }
 
+    /* ------------------------------------------------------------ */
     public long flush() throws IOException
     {
         try
@@ -398,6 +402,8 @@ public class Ajp13Generator extends AbstractGenerator
 
             if (_endp==null)
             {
+                if (_needMore && _buffer != null) 
+                    _buffer.put(AJP13_MORE_CONTENT);
                 if (_needEOC&&_buffer!=null)
                     _buffer.put(AJP13_END_RESPONSE);
                 _needEOC=false;
@@ -475,7 +481,7 @@ public class Ajp13Generator extends AbstractGenerator
                         }
 
                         // Are we completely finished for now?
-                        if (!_needEOC&&(_content==null||_content.length()==0))
+                        if (!_needMore && !_needEOC && (_content==null||_content.length()==0))
                         {
                             if (_state==STATE_FLUSHING)
                                 _state=STATE_END;
@@ -512,11 +518,11 @@ public class Ajp13Generator extends AbstractGenerator
 
     }
 
+    /* ------------------------------------------------------------ */
     private void prepareBuffers()
     {
         if (!_bufferPrepared)
         {
-
             // Refill buffer if possible
             if (_content!=null&&_content.length()>0&&_buffer!=null&&_buffer.space()>0)
             {
@@ -568,6 +574,23 @@ public class Ajp13Generator extends AbstractGenerator
                 }
             }
 
+            if (_needMore)
+            {
+                if (_buffer==null&&_header.space()>=AJP13_MORE_CONTENT.length)
+                {
+                    _header.put(AJP13_MORE_CONTENT);
+                    _needMore=false;
+                }
+                else if (_buffer!=null&&_buffer.space()>=AJP13_MORE_CONTENT.length)
+                {
+                    // send closing packet if all contents
+                    // are added
+                    _buffer.put(AJP13_MORE_CONTENT);
+                    _needMore=false;
+                    _bufferPrepared=true;
+                }
+            }
+
             if (_needEOC)
             {
                 if (_buffer==null&&_header.space()>=AJP13_END_RESPONSE.length)
@@ -587,6 +610,13 @@ public class Ajp13Generator extends AbstractGenerator
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isComplete()
+    {
+        return !_needMore && super.isComplete();
+    }
+
+    /* ------------------------------------------------------------ */
     private void initContent() throws IOException
     {
         if (_buffer==null)
@@ -597,18 +627,21 @@ public class Ajp13Generator extends AbstractGenerator
         }
     }
 
+    /* ------------------------------------------------------------ */
     private void addInt(int i)
     {
         _buffer.put((byte)((i>>8)&0xFF));
         _buffer.put((byte)(i&0xFF));
     }
 
+    /* ------------------------------------------------------------ */
     private void addInt(int startIndex, int i)
     {
         _buffer.poke(startIndex,(byte)((i>>8)&0xFF));
         _buffer.poke((startIndex+1),(byte)(i&0xFF));
     }
 
+    /* ------------------------------------------------------------ */
     private void addString(String str)
     {
         if (str==null)
@@ -627,14 +660,7 @@ public class Ajp13Generator extends AbstractGenerator
         _buffer.put((byte)0);
     }
 
-    public void getMoreContentPackets() throws IOException
-    {
-        Buffer moreContent=_buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
-        moreContent.put(MORE_CONTENT);
-        _endp.flush(moreContent);
-        _buffers.returnBuffer(moreContent);
-    }
-
+    /* ------------------------------------------------------------ */
     private void addBuffer(Buffer b)
     {
         if (b==null)
@@ -646,6 +672,16 @@ public class Ajp13Generator extends AbstractGenerator
         addInt(b.length());
         _buffer.put(b);
         _buffer.put((byte)0);
+    }
+
+    public boolean isNeedMore()
+    {
+        return _needMore;
+    }
+
+    public void setNeedMore(boolean needMore)
+    {
+        _needMore=needMore;
     }
 
 }

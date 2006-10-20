@@ -52,12 +52,9 @@ public class Ajp13Connection extends HttpConnection
     public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
         super(connector,endPoint,server);
-        
-        // TODO avoid the creation of HttpParsers etc.
-        _parser=new Ajp13Parser(_connector,_endp,new RequestHandler());
-        
-        //_response = new Ajp13Response(this);
+
         _generator=new Ajp13Generator(_connector,_endp,_connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
+        _parser=new Ajp13Parser(_connector,_endp,new RequestHandler(),(Ajp13Generator)_generator);
         _generator.setSendServerVersion(server.getSendServerVersion());
         _server = server;
         
@@ -86,9 +83,6 @@ public class Ajp13Connection extends HttpConnection
         public void startForwardRequest() throws IOException
         {
             _delayedHandling = false;
-            // TODO - note that I tend to use println instead of debug for stuff that you do
-            // not want to stay in the code long term.
-            
             _uri.clear();
             _sslSecure=false;
             _request.setTimeStamp(System.currentTimeMillis());
@@ -102,7 +96,8 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedUri(Buffer uri) throws IOException
         {
-            _uri.parse(uri.array(), uri.getIndex(), uri.length());
+            // TODO avoid this copy.
+            _uri.parse(uri.asArray(), 0, uri.length());
         }
 
         public void parsedProtocol(Buffer protocol) throws IOException
@@ -159,12 +154,10 @@ public class Ajp13Connection extends HttpConnection
         {
             if (((Ajp13Parser)_parser).getContentLength()<=0)
             {
-                System.out.println("handle request");
                 handleRequest();
             }
             else
             {
-                System.err.println("delaying............ for content");
                 _delayedHandling=true;
             }
         }
@@ -172,8 +165,6 @@ public class Ajp13Connection extends HttpConnection
         
         public void messageComplete(long contextLength) throws IOException
         {
-                
-                
         }
         
         public void content(Buffer ref) throws IOException
@@ -181,7 +172,6 @@ public class Ajp13Connection extends HttpConnection
             if (_delayedHandling)
             {
                 _delayedHandling=false;
-                System.err.println("delaying............ handled");
                 handleRequest();
             }
         }
