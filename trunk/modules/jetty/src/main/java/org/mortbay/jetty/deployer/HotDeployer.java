@@ -34,7 +34,7 @@ import org.mortbay.util.Scanner;
 
 
 /**
- * HotFileDeployer
+ * HotDeployer
  *
  * This deployer watches a designated directory for the
  * appearance/disappearance or changes to xml
@@ -79,7 +79,7 @@ import org.mortbay.util.Scanner;
  *   
  *   You can of course change the hot deploy directory if you wish.
  */
-public class HotFileDeployer extends AbstractLifeCycle
+public class HotDeployer extends AbstractLifeCycle
 {
     public final static String HOTDEPLOYER = "HotDeployer";
     private int _scanInterval = 10;
@@ -132,7 +132,7 @@ public class HotFileDeployer extends AbstractLifeCycle
      * Constructor
      * @throws Exception
      */
-    public HotFileDeployer ()
+    public HotDeployer ()
     throws Exception
     {
         //set up the default scan location to be $jetty.home/webapps

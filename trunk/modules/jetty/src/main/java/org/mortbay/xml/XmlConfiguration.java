@@ -894,6 +894,8 @@ public class XmlConfiguration
             }
             else if (defval != null)
                 return defval;
+            else
+                throw new Exception ("Unresolved property name="+name);
         }
 
         Log.warn("Unknown value tag: " + node, new Throwable());
