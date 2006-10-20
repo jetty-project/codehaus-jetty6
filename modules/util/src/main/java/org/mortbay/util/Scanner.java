@@ -253,13 +253,13 @@ public class Scanner implements Runnable
     {
         File dir = getScanDir();
 
-        Log.info("Scanning directory "+getScanDir());
+        Log.debug("Scanning directory "+getScanDir());
         HashMap scanInfo = new HashMap();
 
         if ((dir != null) && (dir.exists()))
             scanFile(dir, scanInfo);
 
-        Log.info("Scan complete at "+new Date());
+        Log.debug("Scan complete at "+new Date());
         return scanInfo;
     }
 
