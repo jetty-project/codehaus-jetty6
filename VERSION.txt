@@ -1,5 +1,7 @@
 
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.0pre0 - 21 Oct 2006
     + add <Property> replacement in jetty xml config files
     + make .tag files work in packed wars
     + add hot deployment capability
