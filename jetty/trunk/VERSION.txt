@@ -19,7 +19,6 @@ jetty-6.1-SNAPSHOT
     + (re)make JAAS classes available to webapp classloader
     + CGI example in test webapp
     + Plugin shutdown context before stopping it.
-    + Half refactor of HttpConnection for AJP
     + Added concept of bufferred endpoint
     + Factored ErrorPageErrorHandler out of WebAppContext
     + Refactored ErrorHandler to avoid statics
@@ -50,6 +49,7 @@ jetty-6.1-SNAPSHOT
     + Start of a client API
     + Session IDs can change worker ID
     + Default soLinger is -1 (disabled)
+    + AJP Connector 
 
 jetty-6.0-SNAPSHOT
     + ensure setContextPath() works when invoked from jetty-web.xml

@@ -176,6 +176,9 @@ public class Ajp13Parser implements Parser
         if (length<4 || length<packet_length+4)
         {
             _buffer.compact();
+            if (_generator.isNeedMore())
+                _generator.flush();
+            
             int filled=-1;
             
             if (_endp!=null&&filled<=0)

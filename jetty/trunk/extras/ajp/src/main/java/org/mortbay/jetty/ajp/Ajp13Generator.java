@@ -395,7 +395,7 @@ public class Ajp13Generator extends AbstractGenerator
     {
         try
         {
-            if (_state==STATE_HEADER)
+            if (!_needMore && _state==STATE_HEADER)
                 throw new IllegalStateException("State==HEADER");
 
             prepareBuffers();
@@ -576,12 +576,15 @@ public class Ajp13Generator extends AbstractGenerator
 
             if (_needMore)
             {
-                if (_buffer==null&&_header.space()>=AJP13_MORE_CONTENT.length)
+                if (_header==null)
+                    _header=_buffers.getBuffer(_headerBufferSize);
+                
+                if (_buffer==null&&_header!=null && _header.space()>=AJP13_MORE_CONTENT.length)
                 {
                     _header.put(AJP13_MORE_CONTENT);
                     _needMore=false;
                 }
-                else if (_buffer!=null&&_buffer.space()>=AJP13_MORE_CONTENT.length)
+                else if (_buffer!=null && _buffer.space()>=AJP13_MORE_CONTENT.length)
                 {
                     // send closing packet if all contents
                     // are added
@@ -674,11 +677,13 @@ public class Ajp13Generator extends AbstractGenerator
         _buffer.put((byte)0);
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isNeedMore()
     {
         return _needMore;
     }
 
+    /* ------------------------------------------------------------ */
     public void setNeedMore(boolean needMore)
     {
         _needMore=needMore;
