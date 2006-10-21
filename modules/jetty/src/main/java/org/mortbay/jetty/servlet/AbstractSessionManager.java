@@ -1008,7 +1008,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 _values=newAttributeMap();
             Object oldValue=_values.put(name,value);
 
-            if (value==null||!value.equals(oldValue))
+            if (value==null || (oldValue!=null && !value.equals(oldValue)))
             {
                 unbindValue(name,oldValue);
                 bindValue(name,value);
