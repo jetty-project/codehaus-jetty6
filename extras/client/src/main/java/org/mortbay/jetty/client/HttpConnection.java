@@ -23,7 +23,7 @@ public class HttpConnection
     private Generator _generator;
     private HttpParser _parser;
     private EndPoint _endp;
-    private Exchange _exchange;
+    private HttpExchange _exchange;
     private LinkedList _exchanges=new LinkedList();
 
     /* ------------------------------------------------------------ */
@@ -35,7 +35,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    public void sendExchange(Exchange ex) 
+    public void sendExchange(HttpExchange ex) 
         throws IOException
     {
         _exchanges.add(ex);
@@ -47,7 +47,7 @@ public class HttpConnection
         if (_exchange!=null || _exchanges.size()==0)
             return;
         
-        _exchange=(Exchange)_exchanges.remove(0);
+        _exchange=(HttpExchange)_exchanges.remove(0);
         System.err.println("EX:"+_exchange.getUri());
 
         _generator.setVersion(11); // TODO
