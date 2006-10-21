@@ -49,6 +49,7 @@ jetty-6.1-SNAPSHOT
     + Ported HtAccessHandler
     + Start of a client API
     + Session IDs can change worker ID
+    + Default soLinger is -1 (disabled)
 
 jetty-6.0-SNAPSHOT
     + ensure setContextPath() works when invoked from jetty-web.xml
