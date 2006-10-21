@@ -843,6 +843,7 @@ public class HttpParser implements Parser
         protected long _maxIdleTime;
         protected View _content;
         
+        /* ------------------------------------------------------------ */
         public Input(HttpParser parser, long maxIdleTime)
         {
             _parser=parser;
@@ -875,6 +876,7 @@ public class HttpParser implements Parser
             return l;
         }
         
+        /* ------------------------------------------------------------ */
         private boolean blockForContent() throws IOException
         {
             if (_content.length()>0)
@@ -927,7 +929,5 @@ public class HttpParser implements Parser
             
             return _content.length()>0; 
         }       
-    }
-    
-    
+    } 
 }
