@@ -63,7 +63,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     
     protected int _maxIdleTime=30000; 
     protected int _lowResourceMaxIdleTime=-1; 
-    protected int _soLingerTime=1000; 
+    protected int _soLingerTime=-1; 
     
     private transient ArrayList _headerBuffers;
     private transient ArrayList _requestBuffers;
@@ -297,7 +297,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     
     /* ------------------------------------------------------------ */
     /**
-     * @param soLingerTime The soLingerTime to set.
+     * @param soLingerTime The soLingerTime to set or -1 to disable.
      */
     public void setSoLingerTime(int soLingerTime)
     {
