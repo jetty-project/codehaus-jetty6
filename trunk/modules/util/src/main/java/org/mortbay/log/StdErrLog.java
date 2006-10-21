@@ -25,20 +25,25 @@ import org.mortbay.util.DateCache;
  */
 public class StdErrLog implements Logger
 {    
+    private static DateCache _dateCache;
     private static boolean debug = System.getProperty("DEBUG",null)!=null;
     private String name;
-    private DateCache _dateCache;
     
-    StdErrLog()
+    static
     {
-        this(null);
         try
         {
-        _dateCache=new DateCache("yyyy-MM-dd HH:mm:ss.SSS");
+            _dateCache=new DateCache("yyyy-MM-dd HH:mm:ss.SSS");
         }catch(Exception e)
         {
             e.printStackTrace();
         }
+        
+    }
+    
+    StdErrLog()
+    {
+        this(null);
     }
     
     StdErrLog(String name)
