@@ -245,9 +245,11 @@ public class HttpGenerator extends AbstractGenerator
     /* ------------------------------------------------------------ */
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
-        if (_state != STATE_HEADER) return;
+        if (_state != STATE_HEADER) 
+            return;
 
-        if (_last && !allContentAdded) throw new IllegalStateException("last?");
+        if (_last && !allContentAdded) 
+            throw new IllegalStateException("last?");
         _last = _last | allContentAdded;
 
         // get a header buffer
