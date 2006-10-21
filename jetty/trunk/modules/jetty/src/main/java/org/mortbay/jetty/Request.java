@@ -947,6 +947,9 @@ public class Request implements HttpServletRequest
      */
     public HttpSession getSession(boolean create)
     {
+        if (_sessionManager==null && create)
+            throw new IllegalStateException("No SessionHandler or SessionManager");
+        
         if (_session != null && _sessionManager!=null && _sessionManager.isValid(_session))
             return _session;
         
