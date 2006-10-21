@@ -402,6 +402,13 @@ public class HttpURI
         return StringUtil.toString(_raw,_path,_query-_path,URIUtil.__CHARSET);
     }
     
+    public String getCompletePath()
+    {
+        if (_path==_end)
+            return null;
+        return StringUtil.toString(_raw,_path,_end-_path,URIUtil.__CHARSET);
+    }
+    
     public String getParam()
     {
         if (_param==_query)
