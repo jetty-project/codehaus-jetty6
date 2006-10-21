@@ -48,10 +48,10 @@ public class HttpConnection
             return;
         
         _exchange=(HttpExchange)_exchanges.remove(0);
-        System.err.println("EX:"+_exchange.getUri());
+        System.err.println("EX:"+_exchange.getURI());
 
         _generator.setVersion(11); // TODO
-        _generator.setRequest(_exchange.getMethod(),_exchange.getUri());
+        _generator.setRequest(_exchange.getMethod(),_exchange.getURI());
         
         if (_exchange.getRequestContent()!=null)
         {
