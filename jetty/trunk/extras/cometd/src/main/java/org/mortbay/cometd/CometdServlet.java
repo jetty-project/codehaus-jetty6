@@ -84,7 +84,7 @@ public class CometdServlet extends HttpServlet
             try
             {
                 Object[] objects = (Object[])JSON.parse(getServletContext().getResourceAsStream(filters));
-                for (int i=0;i<objects.length;i++)
+                for (int i=0;objects!=null && i<objects.length;i++)
                 {
                     Map filter_def=(Map)objects[i];
                     
