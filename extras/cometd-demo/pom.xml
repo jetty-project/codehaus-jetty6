@@ -25,8 +25,11 @@
         <artifactId>maven-jetty-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
-          <scanIntervalSeconds>2</scanIntervalSeconds>
-	  <contextPath>/</contextPath>
+        <scanIntervalSeconds>2</scanIntervalSeconds>
+	    <contextPath>/</contextPath>         
+	      <scanTargets>
+            <scanTarget>src/main/webapp/WEB-INF/filters.json</scanTarget>  
+	      </scanTargets>
         </configuration>
       </plugin>
     </plugins>

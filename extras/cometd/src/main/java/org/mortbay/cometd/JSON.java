@@ -298,7 +298,7 @@ public class JSON
             source.next();
         }
         
-        throw new IllegalStateException("No value");
+        return null;
     }
     
     private static Map parseObject(Source source)

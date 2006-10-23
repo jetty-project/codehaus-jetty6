@@ -1,10 +1,11 @@
 [
+
   { 
     "channels": "/chat/**",
     "class"   : "org.mortbay.cometd.filter.NoMarkupFilter",
     "init"    : {}
   },
-  
+ 
   { 
     "channels": "/chat/demo",
 	"class"   : "org.mortbay.cometd.filter.RegexFilter",
@@ -15,4 +16,5 @@
 	              [ ".*tomcat.*", null ] 
 	            ]
   }
+  
 ]
