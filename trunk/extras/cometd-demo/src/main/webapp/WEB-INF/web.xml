@@ -2,7 +2,7 @@
 <web-app 
    xmlns="http://java.sun.com/xml/ns/javaee" 
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
    version="2.5"> 
   <display-name>Cometd Test WebApp</display-name>
   
@@ -18,8 +18,8 @@
       <param-value>15000</param-value>
     </init-param>
     <init-param>
-      <param-name>multiTimeout</param-name>
-      <param-value>0</param-value>
+      <param-name>multi-timeout</param-name>
+      <param-value>1500</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>

@@ -136,9 +136,12 @@ public class CometdServlet extends HttpServlet
                 if (cookies[i].getName().equals(BROWSER_ID))
                     bid=cookies[i].getValue();
             }
+            System.err.println("bid="+bid);
             if (bid==null)
             {
-                bid=Long.toString(_bayeux._random.nextLong(),16)+Long.toString(_bayeux._random.nextLong(),16);
+                long l1=_bayeux._random.nextLong();
+                long l2=_bayeux._random.nextLong();
+                bid=Long.toString(l1<0?-l1:l1,16)+Long.toString(l2<0?-l2:l2,16);
                 Cookie cookie = new Cookie(BROWSER_ID,bid);
                 cookie.setPath("/");
                 resp.addCookie(cookie);
@@ -146,9 +149,10 @@ public class CometdServlet extends HttpServlet
         }
         
         int message_count=0;
-        Client client=(Client)req.getAttribute(CLIENT_ATTR);
-        
-        Transport transport=(Transport)req.getAttribute(Bayeux.TRANSPORT_ATTR);
+        // Look for an existing client and protect from context restarts
+        Object clientObj=req.getAttribute(CLIENT_ATTR);
+        Client client=(clientObj instanceof Client)?(Client)clientObj:null;
+        Transport transport=client==null?null:(Transport)req.getAttribute(Bayeux.TRANSPORT_ATTR);
 
         if (client==null)
         {
@@ -275,7 +279,7 @@ public class CometdServlet extends HttpServlet
             Integer count = (Integer)_bidCount.get(bid);
             count=TypeUtil.newInteger(count==null?1:count.intValue()+1);
             _bidCount.put(bid,count);
-            System.err.println("^BID "+bid+" == "+count);
+            // System.err.println("^BID "+bid+" == "+count);
             return count.intValue();
         }
     }
@@ -293,7 +297,7 @@ public class CometdServlet extends HttpServlet
                 return 0;
             }
             _bidCount.put(bid,count);
-            System.err.println("vBID "+bid+" == "+count);
+            // System.err.println("vBID "+bid+" == "+count);
             return count.intValue();
         }
     }
