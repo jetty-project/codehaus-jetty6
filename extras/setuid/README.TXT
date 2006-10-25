@@ -12,6 +12,8 @@ In this directory do:
 
 Where $JDK_HOME is same as $JAVA_HOME and where linux should be replaced by the name of your operating system.
 
+NOTE: if you are compiling on Solaris, you may need to leave out the -shared argument.
+
 Install
 -------
 
