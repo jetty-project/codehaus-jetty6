@@ -3,7 +3,13 @@
 
 <!-- =============================================================== -->
 <!-- Configure the Jetty Server                                      -->
+<!--                                                                 -->
+<!-- Documentation of this file format can be found at:              -->
+<!-- http://docs.codehaus.org/display/JETTY/jetty.xml                -->
+<!--                                                                 -->
 <!-- =============================================================== -->
+
+
 <Configure id="Server" class="org.mortbay.jetty.Server">
 
     <!-- =========================================================== -->
@@ -92,36 +98,25 @@
     <!-- ======================================================= -->
     <!-- Configure a WebApp                                      -->
     <!-- ======================================================= -->
-    <!--
     <New id="TestContext" class="org.mortbay.jetty.webapp.WebAppContext">
       <Arg><Ref id="contexts"/></Arg>
       <Arg><SystemProperty name="jetty.home" default="."/>/webapps/test</Arg>
       <Arg>/test</Arg>
-      <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
-      <Set name="virtualHosts">
-        <Array type="java.lang.String">
-          <Item>localhost</Item>
-        </Array>
-      </Set>
-      <Get name="SessionHandler">
-        <Set name="SessionManager">
-          <New class="org.mortbay.jetty.servlet.HashSessionManager">
-            <Set name="maxInactiveInterval">600</Set>
-            <Set name="maxCookieAge">30</Set>
-            <Set name="refreshCookieAge">10</Set>
-          </New>
-        </Set>
-      </Get>
     </New>
-    -->
 
     <!-- ======================================================= -->
-    <!-- Configure a Context                                     -->
+    <!-- Configure a simple Context for javadoc                  -->
     <!-- ======================================================= -->
     <New class="org.mortbay.jetty.servlet.Context">
       <Arg><Ref id="contexts"/></Arg>
       <Arg>/javadoc</Arg>
       <Set name="resourceBase"><SystemProperty name="jetty.home" default="."/>/javadoc/</Set>
+      <Set name="welcomeFiles">
+	<Array type="String">
+	  <Item>index.html</Item>
+	  <Item>contents.html</Item>
+	</Array>
+      </Set>
       <Call name="addServlet">
         <Arg>org.mortbay.jetty.servlet.DefaultServlet</Arg>
         <Arg>/</Arg>
