@@ -49,6 +49,7 @@ public class Bayeux
     public static final String TRANSPORT_ATTR="transport";
     public static final String ADVICE_ATTR="advice";
 
+    private static final JSON.Literal __NO_ADVICE = new JSON.Literal("{}");
     HashMap _channels=new HashMap();
     HashMap _clients=new HashMap();
     ServletContext _context;
@@ -59,7 +60,7 @@ public class Bayeux
     HashMap _filters=new java.util.HashMap();
     ArrayList _filterOrder= new ArrayList();
     SecurityPolicy _securityPolicy=new DefaultPolicy();
-    Object _advice = JSON.parse("{ \"reconnect\" : \"retry\", \"interval\": 500, \"transport\" : { \"long-polling\": { \"interval\" : 0 } } }");
+    Object _advice = new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":0,\"transport\":{\"long-polling\":{}}}");
 
     {
         _handlers.put("*",new PublishHandler());
@@ -222,14 +223,29 @@ public class Bayeux
         throws IOException
     {
         String channel_id=(String)message.get(CHANNEL_ATTR);
-        Map reply=new HashMap();
-        reply.put(CHANNEL_ATTR,channel_id);
         
         Handler handler=(Handler)_handlers.get(channel_id);
         if (handler==null)
             handler=(Handler)_handlers.get("*");
 
         handler.handle(client,transport,message);
+    }
+    
+    /* ------------------------------------------------------------ */
+    void advise(Client client, Transport transport, Object advice) throws IOException
+    {
+        if (advice==null)
+            advice=_advice;
+        if (advice==null)
+            advice=__NO_ADVICE;
+        String connection_id="/meta/connections/"+client.getId();
+        Map reply=new HashMap();
+        reply.put(CHANNEL_ATTR,connection_id);
+        reply.put("connectionId",connection_id);
+        reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
+        reply.put("successful",Boolean.TRUE);
+        reply.put(ADVICE_ATTR,advice);
+        transport.send(reply);
     }
 
     /* ------------------------------------------------------------ */
@@ -267,13 +283,14 @@ public class Bayeux
            throws IOException
         {
             Map reply=new HashMap();
+            reply.put(CHANNEL_ATTR,META_CONNECT);
             
             if (client==null)
                 throw new IllegalStateException("No client");
             String type=(String)message.get("connectionType");
             client.setConnectionType(type);
-            String channel_id="/meta/connections/"+client.getId();
-            Channel channel=getChannel(channel_id);
+            String connection_id="/meta/connections/"+client.getId();
+            Channel channel=getChannel(connection_id);
             if (channel!=null)
             {
                 channel.addSubscriber(client);
@@ -285,7 +302,7 @@ public class Bayeux
                 reply.put("successful",Boolean.FALSE);
                 reply.put("error","unknown client ID");
             }
-            reply.put("connectionId",channel_id);
+            reply.put("connectionId",connection_id);
             reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
             transport.send(reply);
             transport.setPolling(true);
@@ -349,25 +366,27 @@ public class Bayeux
             client=getClient((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken"));
 
             Map reply=new HashMap();
+            reply.put(CHANNEL_ATTR,META_HANDSHAKE);
+            reply.put("version",new Double(0.1));
+            reply.put("minimumVersion",new Double(0.1));
+            
             if (client!=null)
             {
-                String channel_id="/meta/connections/"+client.getId();
-                Channel channel=new Channel(channel_id,Bayeux.this);
-                _channels.put(channel_id,channel);
-
-                reply.put(CHANNEL_ATTR,META_HANDSHAKE);
+                String connection_id="/meta/connections/"+client.getId();
+                Channel channel=new Channel(connection_id,Bayeux.this);
+                _channels.put(connection_id,channel);
 
                 reply.put("supportedConnectionTypes",new String[] { "long-polling", "iframe" });
                 reply.put("authSuccessful",Boolean.TRUE);
                 reply.put(CLIENT_ATTR,client.getId());
-                reply.put("version",new Double(0.1));
-                reply.put("minimumVersion",new Double(0.1));
                 if (_advice!=null)
                     reply.put(ADVICE_ATTR,_advice);
             }
             else
             {
-                // TODO FAIL
+                reply.put("authSuccessful",Boolean.FALSE);
+                if (_advice!=null)
+                    reply.put(ADVICE_ATTR,_advice);
             }
 
             transport.send(reply);
@@ -393,20 +412,20 @@ public class Bayeux
         {
             // TODO check other parameters.
 
-            String channel_id="/meta/connections/"+message.get(CLIENT_ATTR);
+            String connection_id="/meta/connections/"+message.get(CLIENT_ATTR);
             Map reply=new HashMap();
-            reply.put(CHANNEL_ATTR,channel_id);
-            reply.put("connectionId",channel_id);
+            reply.put(CHANNEL_ATTR,META_RECONNECT);
+            reply.put("connectionId",connection_id);
             reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
             
             if (client==null)
             {
                 reply.put("successful",Boolean.FALSE);
                 reply.put("error","unknown clientID");
-                transport.setPolling(false);
-                transport.send(reply);
                 if (_advice!=null)
                     reply.put(ADVICE_ATTR,_advice);
+                transport.setPolling(false);
+                transport.send(reply);
             }
             else
             {

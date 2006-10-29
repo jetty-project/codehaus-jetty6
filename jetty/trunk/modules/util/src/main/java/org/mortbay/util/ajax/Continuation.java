@@ -46,7 +46,7 @@ public interface Continuation
     /** Suspend handling.
      * This method will suspend the request for the timeout or until resume is
      * called.
-     * @param timeout
+     * @param timeout. A timeout of < 0 will cause an immediate return. I timeout of 0 will wait indefinitely.
      * @return True if resume called or false if timeout.
      */
     public boolean suspend(long timeout);

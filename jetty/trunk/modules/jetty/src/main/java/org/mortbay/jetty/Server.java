@@ -196,11 +196,16 @@ public class Server extends HandlerWrapper implements Attributes
         HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
       
-        try
-        {
-            startLifeCycles();
+
+        Iterator itor = _dependentLifeCycles.iterator();
+        while (itor.hasNext())
+        {   
+            try
+            {
+                ((LifeCycle)itor.next()).start(); 
+            }
+            catch (Throwable e) {mex.add(e);}
         }
-        catch (Throwable e) {mex.add(e);}
         
         if (_threadPool==null)
         {
@@ -259,12 +264,20 @@ public class Server extends HandlerWrapper implements Attributes
         }
         catch(Throwable e){mex.add(e);}
         
-        try
+
+        if (!_dependentLifeCycles.isEmpty())
         {
-            stopLifeCycles();
+            ListIterator itor = _dependentLifeCycles.listIterator(_dependentLifeCycles.size()-1);
+            while (itor.hasPrevious())
+            {
+                try
+                {
+                    ((LifeCycle)itor.previous()).stop(); 
+                }
+                catch (Throwable e) {mex.add(e);}
+            }
         }
-        catch (Throwable e) {mex.add(e);}
- 
+       
         mex.ifExceptionThrow();
     }
 
@@ -398,34 +411,6 @@ public class Server extends HandlerWrapper implements Attributes
         _dependentLifeCycles.remove(c);
         _container.removeBean(c);
     }
-    
-    /**
-     * start dependent LifeCycles
-     * @throws Exception
-     */
-    protected void startLifeCycles ()
-    throws Exception
-    {  
-        Iterator itor = _dependentLifeCycles.iterator();
-        while (itor.hasNext())
-            ((LifeCycle)itor.next()).start();    
-    }
-    
-    /**
-     * Stop all dependent lifecycles in reverse start order
-     * @throws Exception
-     */
-    protected void stopLifeCycles ()
-    throws Exception
-    {
-        if (_dependentLifeCycles.isEmpty())
-            return;
-        
-        ListIterator itor = _dependentLifeCycles.listIterator(_dependentLifeCycles.size()-1);
-        while (itor.hasPrevious())
-            ((LifeCycle)itor.previous()).stop();
-    }
-    
     
  
     
