@@ -21,6 +21,7 @@ public class JSONTest extends TestCase
         map.put("n6",obj6);
         map.put("n7",obj7);
         map.put("n8",new int[]{1,2,3,4});
+        map.put("n9",new JSON.Literal("[{},  [],  {}]"));
         
         obj7.put("x","value");
         
@@ -34,7 +35,7 @@ public class JSONTest extends TestCase
         assertTrue(s.indexOf("\"n6\":{}")>=0);
         assertTrue(s.indexOf("\"n7\":{\"x\":\"value\"}")>=0);
         assertTrue(s.indexOf("\"n8\":[1,2,3,4]")>=0);
-        
+        assertTrue(s.indexOf("\"n9\":[{},  [],  {}]")>=0);
         
     }
     
