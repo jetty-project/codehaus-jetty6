@@ -606,7 +606,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 resumed=_resumed;
                 _resumed=false;
                 _new = false;
-                if (!_pending && !resumed && timeout > 0)
+                if (!_pending && !resumed && timeout >= 0)
                 {
                     _pending=true;
                     _scheduled = false;

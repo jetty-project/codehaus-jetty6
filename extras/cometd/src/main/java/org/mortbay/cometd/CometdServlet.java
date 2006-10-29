@@ -223,8 +223,19 @@ public class CometdServlet extends HttpServlet
                 continuation=ContinuationSupport.getContinuation(req,client);
                 try
                 {
-                    if (bid!=null && !continuation.isPending() && incBID(bid)>1)
-                        timeout=_multiTimeout;
+                    // Are there multiple windows from the same browser?
+                    if (bid!=null && !continuation.isPending())
+                    {
+                        if (incBID(bid)>1)
+                        {
+                            // Advise that there are multiple windows
+                            // fall back to traditional polling
+                            timeout=_multiTimeout;       
+                            _bayeux.advise(client,
+                                    transport,
+                                    new JSON.Literal("{\"status\":\"multipleconnections\",\"reconnect\":\"retry\",\"interval\":"+_multiTimeout+",\"transport\":{\"long-polling\":{}}}"));
+                        }
+                    }
 
                     synchronized (client)
                     {
@@ -252,7 +263,10 @@ public class CometdServlet extends HttpServlet
                     // Are we really finished polling?
                     if (bid!=null && (continuation==null || !continuation.isPending()))
                     {
-                        decBID(bid);
+                        if (decBID(bid)==0)
+                        {
+                            _bayeux.advise(client,transport,null);
+                        }
                     }
                 }
             }
@@ -279,7 +293,6 @@ public class CometdServlet extends HttpServlet
             Integer count = (Integer)_bidCount.get(bid);
             count=TypeUtil.newInteger(count==null?1:count.intValue()+1);
             _bidCount.put(bid,count);
-            // System.err.println("^BID "+bid+" == "+count);
             return count.intValue();
         }
     }
@@ -293,11 +306,9 @@ public class CometdServlet extends HttpServlet
             if (count==null)
             {
                 _bidCount.remove(bid);
-                System.err.println("vBID "+bid+" == 0");
                 return 0;
             }
             _bidCount.put(bid,count);
-            // System.err.println("vBID "+bid+" == "+count);
             return count.intValue();
         }
     }

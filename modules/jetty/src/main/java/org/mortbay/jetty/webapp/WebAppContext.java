@@ -32,6 +32,8 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.deployer.ContextDeployer;
+import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.ErrorHandler;
@@ -119,6 +121,7 @@ public class WebAppContext extends Context
      * @param extract If true, extract war files
      * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
      * @exception IOException 
+     * @deprecated use {@link WebAppDeployer} or {@link ContextDeployer}
      */
     public static void addWebApplications(Server server,
                                           String webapps,
@@ -148,6 +151,7 @@ public class WebAppContext extends Context
      * @exception IOException 
      * @throws IllegalAccessException 
      * @throws InstantiationException 
+     * @deprecated use {@link WebAppDeployer} or {@link ContextDeployer}
      */
     public static void addWebApplications(Server server,
                                           String webapps,
@@ -182,6 +186,7 @@ public class WebAppContext extends Context
      * @exception IOException 
      * @throws IllegalAccessException 
      * @throws InstantiationException 
+     * @deprecated use {@link WebAppDeployer} or {@link ContextDeployer}
      */
     public static void addWebApplications(HandlerContainer contexts,
                                           String webapps,
@@ -211,6 +216,7 @@ public class WebAppContext extends Context
      * @exception IOException 
      * @throws IllegalAccessException 
      * @throws InstantiationException 
+     * @deprecated use {@link WebAppDeployer} or {@link ContextDeployer}
      */
     public static void addWebApplications(HandlerContainer contexts,
                                           String webapps,
@@ -218,89 +224,26 @@ public class WebAppContext extends Context
                                           String[] configurations,
                                           boolean extract,
                                           boolean java2CompliantClassLoader)
-    throws IOException
+        throws IOException
     {
-        
-        if (contexts==null)
-            throw new IllegalArgumentException("No HandlerContainer");
-        
-        if (configurations==null)
-            configurations=__dftConfigurationClasses;
-        
-        Resource r=Resource.newResource(webapps);
-        if (!r.exists())
-            throw new IllegalArgumentException("No such webapps resource "+r);
-        
-        if (!r.isDirectory())
-            throw new IllegalArgumentException("Not directory webapps resource "+r);
-        
-        String[] files=r.list();
-        
-        files: for (int f=0;files!=null && f<files.length;f++)
+        Log.warn("Deprecated configuration used for "+webapps);
+        WebAppDeployer deployer = new WebAppDeployer();
+        deployer.setContexts(contexts);
+        deployer.setWebAppDir(webapps);
+        deployer.setConfigurationClasses(configurations);
+        deployer.setExtract(extract);
+        deployer.setParentLoaderPriority(java2CompliantClassLoader);
+        try
         {
-            String context=files[f];
-            
-            if (context.equalsIgnoreCase("CVS/") ||
-                    context.equalsIgnoreCase("CVS") ||
-                    context.startsWith("."))
-                continue;
-            
-            Resource app = r.addPath(r.encode(context));
-            
-            if (context.toLowerCase().endsWith(".war") ||
-                    context.toLowerCase().endsWith(".jar"))
-            {
-                context=context.substring(0,context.length()-4);
-                Resource unpacked=r.addPath(context);
-                if (unpacked!=null && unpacked.exists() && unpacked.isDirectory())
-                    continue;
-            }
-            else if (!app.isDirectory())
-                continue;
-            
-            if (context.equalsIgnoreCase("root")||context.equalsIgnoreCase("root/"))
-                context="/";
-            else
-                context="/"+context;
-            if (context.endsWith("/") && context.length()>0)
-                context=context.substring(0,context.length()-1);
-            
-            // Check the webapp has not already been added.
-            Handler[] installed = contexts.getChildHandlersByClass(WebAppContext.class);
-            for (int i=0;i<installed.length;i++)
-            {
-                WebAppContext w = (WebAppContext)installed[i];
-                if (app.equals(Resource.newResource(w.getWar())))
-                    continue files;
-            }
-            
-            // create a webapp
-            WebAppContext wah = null;           
-            if (contexts instanceof ContextHandlerCollection && WebAppContext.class.isAssignableFrom(((ContextHandlerCollection)contexts).getContextClass()))
-            {
-                try
-                {
-                    wah = (WebAppContext)((ContextHandlerCollection)contexts).getContextClass().newInstance();
-                }
-                catch (Exception e)
-                {
-                    throw new Error(e);
-                }
-            }
-            else
-            {
-                wah=new WebAppContext();       
-            }
-            //configure it
-            wah.setContextPath(context);
-            wah.setConfigurationClasses(configurations);
-            if (defaults!=null)
-                wah.setDefaultsDescriptor(defaults);
-            wah.setExtractWAR(extract);
-            wah.setWar(app.toString());
-            wah.setParentLoaderPriority(java2CompliantClassLoader);
-            //add it
-            contexts.addHandler(wah);
+            deployer.start();
+        }
+        catch(IOException e)
+        {
+            throw e;
+        }
+        catch(Exception e)
+        {
+            throw new RuntimeException(e);
         }
     }
     

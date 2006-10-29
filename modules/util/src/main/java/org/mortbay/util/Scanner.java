@@ -32,14 +32,13 @@ import java.util.Set;
 import org.mortbay.log.Log;
 
 
-
-
 /**
  * Scanner
  * 
  * Utility for scanning a directory for added, removed and changed
  * files and reporting these events via registered Listeners.
  *
+ * TODO AbstractLifeCycle
  */
 public class Scanner implements Runnable
 {

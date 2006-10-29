@@ -59,9 +59,6 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
 
     public boolean suspend(long timeout)
     {
-        if (timeout < 0)
-            throw new IllegalArgumentException();
-        
         synchronized (_mutex)
         {
             _new=false;
@@ -69,7 +66,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             boolean result;
             try
             {
-                if (!_resumed && timeout>0)
+                if (!_resumed && timeout>=0)
                 {
                     _mutex.wait(timeout);
                 }

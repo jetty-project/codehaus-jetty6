@@ -30,6 +30,7 @@ import org.mortbay.util.TypeUtil;
 
 
 /** JSON Parser and Generator.
+ * 
  * <p>This class provides some static methods to convert POJOs to and from JSON
  * notation.  The mapping from JSON to java is:<pre>
  *   object ==> Map
@@ -51,8 +52,9 @@ import org.mortbay.util.TypeUtil;
  *   Object --> string (dubious!)
  * </pre>
  * </p><p>
- * Note that this class has minimal dependencies on org.mortbay.util classes.  
- * If there is demand, these dependencies can be removed so this class stands on it's own.
+ * The interface {@link JSON.Generator} may be implemented by classes that know how to render themselves as JSON and
+ * the {@link #toString(Object)} method will use {@link JSON.Generator#addJSON(StringBuffer)} to generate the JSON.
+ * The class {@link JSON.Literal} may be used to hold pre-gnerated JSON object. 
  * </p>
  * @author gregw
  *
@@ -110,6 +112,8 @@ public class JSON
     {
         if (object==null)
             buffer.append("null");
+        else if (object instanceof Generator)
+            appendJSON(buffer, (Generator)object);
         else if (object instanceof Map)
             appendMap(buffer, (Map)object);
         else if (object instanceof List)
@@ -130,6 +134,11 @@ public class JSON
     private static void appendNull(StringBuffer buffer)
     {
         buffer.append("null");
+    }
+
+    private static void appendJSON(StringBuffer buffer, Generator generator)
+    {
+        generator.addJSON(buffer);
     }
     
     private static void appendMap(StringBuffer buffer, Map object)
@@ -561,7 +570,38 @@ public class JSON
         {
             return string.substring(mark,end);
         }
+    }
+    
+    public interface Generator
+    {
+        public void addJSON(StringBuffer buffer);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** A Literal JSON generator
+     * A utility instance of {@link JSON.Generator} that holds a pre-generated string on JSON text.
+     */
+    public static class Literal implements Generator
+    {
+        private String _json;
+        /* ------------------------------------------------------------ */
+        /** Construct a literal JSON instance for use by {@link JSON#toString(Object)}.
+         * @param json A literal JSON string that will be parsed to check validity.
+         */
+        public Literal(String json)
+        {
+            parse(json);
+            _json=json;
+        }
         
-       
+        public String toString()
+        {
+            return _json;
+        }
+        
+        public void addJSON(StringBuffer buffer)
+        {
+            buffer.append(_json);
+        }
     }
 }

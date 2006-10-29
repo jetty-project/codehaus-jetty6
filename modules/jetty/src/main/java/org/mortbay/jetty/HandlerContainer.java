@@ -14,7 +14,9 @@
 
 package org.mortbay.jetty;
 
-public interface HandlerContainer
+import org.mortbay.component.LifeCycle;
+
+public interface HandlerContainer extends LifeCycle
 {
     public void addHandler(Handler handler);
 
