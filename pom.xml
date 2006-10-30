@@ -219,17 +219,6 @@
     <module>extras/tests</module>
   </modules>
 
-  <repositories>
-    <repository>
-      <id>mergere-public-repository</id>
-      <url>http://repo.mergere.com/maven2</url>
-    </repository>
-    <repository>
-      <id>ibiblio-public-repository</id>
-      <url>http://www.ibiblio.org/maven2</url>
-    </repository>
-  </repositories>
-
   <reporting>
     <outputDirectory>target/site</outputDirectory>
     <plugins>
