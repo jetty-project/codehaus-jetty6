@@ -125,12 +125,12 @@
         </exclusion>
       </exclusions>
     </dependency>
-    <!--dependency>
+    <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss</artifactId>
       <version>5.0-SNAPSHOT</version>
       <scope>provided</scope>
-    </dependency-->
+    </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-common</artifactId>
