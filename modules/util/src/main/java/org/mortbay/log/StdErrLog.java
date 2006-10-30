@@ -71,7 +71,7 @@ public class StdErrLog implements Logger
         if (debug)
         {
             System.err.println(_dateCache.now()+":"+name+":DEBUG: "+msg);
-            th.printStackTrace();
+            if (th!=null) th.printStackTrace();
         }
     }
     
