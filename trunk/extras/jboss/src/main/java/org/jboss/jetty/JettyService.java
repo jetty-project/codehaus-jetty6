@@ -15,14 +15,11 @@ package org.jboss.jetty;
 
 import java.lang.reflect.Method;
 import java.util.Iterator;
-import java.util.Set;
 
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.QueryExp;
 
-import org.jboss.Version;
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
 import org.jboss.web.AbstractWebContainer;
@@ -324,7 +321,7 @@ public class JettyService
    */
 
   public Element
-    getConfigurationElement()
+    getConfig()
   {
     //return _jetty.getConfigurationElement();
      return _jettyConfig;
@@ -335,7 +332,7 @@ public class JettyService
    * @jmx:managed-attribute
    */
   public void
-    setConfigurationElement(Element configElement)
+    setConfig(Element configElement)
   {
     log.debug("Saving Configuration to xml fragment");
     this._jettyConfig = configElement;

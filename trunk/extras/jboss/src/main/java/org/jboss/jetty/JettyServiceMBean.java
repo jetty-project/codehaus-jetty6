@@ -30,13 +30,13 @@ public interface JettyServiceMBean extends org.jboss.web.AbstractWebContainerMBe
    /**
     * Get the extended Jetty configuration XML fragment
     * @return Jetty XML fragment embedded in jboss-service.xml    */
-  org.w3c.dom.Element getConfigurationElement() ;
+  org.w3c.dom.Element getConfig() ;
 
    /**
     * Configure Jetty
     * @param configElement XML fragment from jboss-service.xml
     */
-  void setConfigurationElement(org.w3c.dom.Element configElement) ;
+  void setConfig(org.w3c.dom.Element configElement) ;
 
   java.lang.String getSubjectAttributeName() ;
 
