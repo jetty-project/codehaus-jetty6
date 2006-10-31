@@ -211,16 +211,16 @@ public class JBossWebApplicationContext extends WebAppContext
         return path.substring("jar:file:".length(),path.length()-(resource.length()+2));
     }
 
-//    protected void startHandlers() throws Exception
-//    {
-//        ClassLoader loader=Thread.currentThread().getContextClassLoader();
+    protected void startContext() throws Exception
+    {
+        ClassLoader loader=Thread.currentThread().getContextClassLoader();
 //        if(getDistributable()&&getDistributableSessionManager()!=null)
 //            setUpDistributableSessionManager(loader);
-//        setUpENC(loader);
-//        if(_realm!=null)
-//            _realm.init();
-//        super.startHandlers();
-//    }
+        setUpENC(loader);
+        if(_realm!=null)
+            _realm.init();
+        super.startContext();
+    }
 
 //    protected void setUpDistributableSessionManager(ClassLoader loader)
 //    {
