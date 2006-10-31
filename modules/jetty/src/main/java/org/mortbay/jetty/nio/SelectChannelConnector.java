@@ -239,6 +239,8 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 while (iter.hasNext())
                 {
                     SelectionKey key = (SelectionKey)iter.next();
+                    if (key==null)
+                        continue;
                     HttpChannelEndPoint endpoint = (HttpChannelEndPoint)key.attachment();
                     if (endpoint!=null)
                     {
