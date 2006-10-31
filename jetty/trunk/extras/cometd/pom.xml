@@ -47,11 +47,11 @@
       <version>${project.version}</version>
        <scope>provided</scope>
      </dependency>
-    <dependency> 
+    <!-- dependency> 
       <groupId>incubator-activemq</groupId> 
       <artifactId>activemq-core</artifactId> 
       <version>4.0.1</version>
-    </dependency> 
+    </dependency --> 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
