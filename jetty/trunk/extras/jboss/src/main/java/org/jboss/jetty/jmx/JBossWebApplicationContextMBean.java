@@ -15,17 +15,10 @@
 
 package org.jboss.jetty.jmx;
 
-import java.util.Map;
-import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
-import javax.management.ObjectName;
-import javax.management.RuntimeOperationsException;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
 
 import org.jboss.jetty.JBossWebApplicationContext;
-import org.jboss.jetty.JettyMBean;
 import org.mortbay.jetty.webapp.management.WebAppContextMBean;;
 
 /* ------------------------------------------------------------ */

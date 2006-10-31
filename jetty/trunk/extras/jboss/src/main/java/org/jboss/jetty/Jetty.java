@@ -311,6 +311,8 @@ public class Jetty extends org.mortbay.jetty.Server
             // the WAR or not
             app.setExtractWAR(getUnpackWars());
 
+            app.setParentLoaderPriority(getJava2ClassLoadingCompliance());
+            
             // if a different webdefault.xml file has been provided, use it
             if (getWebDefaultResource() != null)
                     app.setDefaultsDescriptor(getWebDefaultResource());
