@@ -148,7 +148,7 @@ public class Bayeux
      * @param client_id
      * @return
      */
-    public Client getClient(String client_id)
+    public synchronized Client getClient(String client_id)
     {
         return (Client)_clients.get(client_id);
     }
@@ -158,11 +158,10 @@ public class Bayeux
      * @param client_id
      * @return
      */
-    public Client getClient(String scheme,String user, String token)
+    public synchronized Client newClient()
     {
-        // TODO acutally authenticate
-        Client client = new Client();  
-        _clients.put(client.getId(),client);
+        Client client = new Client(); 
+        _clients.put(client.getId(),client); 
         return client;
     }
 
@@ -323,8 +322,8 @@ public class Bayeux
 
             if (client==null)
             {
-                client=getClient((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken"));
-                // TODO no client
+               if (_securityPolicy.authenticate((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken")))
+                   client=newClient();
             }
             
             Map reply=new HashMap();
@@ -363,7 +362,8 @@ public class Bayeux
             if (client!=null)
                 throw new IllegalStateException();
 
-            client=getClient((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken"));
+            if (_securityPolicy.authenticate((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken")))
+                client=newClient();
 
             Map reply=new HashMap();
             reply.put(CHANNEL_ATTR,META_HANDSHAKE);
@@ -539,6 +539,12 @@ public class Bayeux
         {
             return client!=null;
             //TODO return !channel.getId().startsWith("/meta/");
+        }
+
+        public boolean authenticate(String scheme, String user, String credentials)
+        {
+            // TODO Auto-generated method stub
+            return true;
         }
 
     }
