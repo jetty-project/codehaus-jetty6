@@ -3,7 +3,6 @@
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
     <version>6.1-SNAPSHOT</version>
-    <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
@@ -22,14 +21,17 @@
     <plugins>
     </plugins>
   </build>
+
   <repositories>
     <repository>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
+      <snapshots><enabled>true</enabled></snapshots>
       <id>apache-snapshot-repo</id>
       <name>apache-snapshot-repo</name>
       <url>http://people.apache.org/maven-snapshot-repository</url>
+    </repository>
+    <repository>
+      <id>jetty-snapshot-repository</id>
+      <url>http://jetty4.inetu.net/home/ftp/pub/maven2/snapshot</url>
     </repository>
   </repositories>
 
