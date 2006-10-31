@@ -15,4 +15,5 @@ public interface SecurityPolicy
     boolean canCreate(Client client,Channel channel,Map message);
     boolean canSubscribe(Client client,Channel channel,Map messsage);
     boolean canSend(Client client,Channel channel,Map message);
+    boolean authenticate(String scheme, String user, String credentials);
 }
