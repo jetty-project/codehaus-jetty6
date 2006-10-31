@@ -311,7 +311,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    public void handle() throws IOException
+    public synchronized void handle() throws IOException
     {
         // Loop while more in buffer
         boolean more_in_buffer =true; // assume true until proven otherwise
