@@ -136,7 +136,6 @@ public class CometdServlet extends HttpServlet
                 if (cookies[i].getName().equals(BROWSER_ID))
                     bid=cookies[i].getValue();
             }
-            System.err.println("bid="+bid);
             if (bid==null)
             {
                 long l1=_bayeux._random.nextLong();
