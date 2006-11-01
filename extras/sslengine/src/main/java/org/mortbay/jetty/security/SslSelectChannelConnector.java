@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,9 +80,9 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     private String _algorithm = "SunX509"; // cert algorithm
     private String _provider;
     private String _secureRandomAlgorithm; // cert algorithm
-    private String _sslKeyManagerFactoryAlgorithm = System.getProperty("ssl.KeyManagerFactory.algorithm","SunX509"); // cert algorithm
+    private String _sslKeyManagerFactoryAlgorithm = (Security.getProperty("ssl.KeyManagerFactory.algorithm")==null?"SunX509":Security.getProperty("ssl.KeyManagerFactory.algorithm")); // cert algorithm
     
-    private String _sslTrustManagerFactoryAlgorithm = System.getProperty("ssl.TrustManagerFactory.algorithm","SunX509"); // cert algorithm
+    private String _sslTrustManagerFactoryAlgorithm = (Security.getProperty("ssl.TrustManagerFactory.algorithm")==null?"SunX509":Security.getProperty("ssl.TrustManagerFactory.algorithm")); // cert algorithm
 
     private String _truststore;
     private String _truststoreType = "JKS"; // type of the key store
