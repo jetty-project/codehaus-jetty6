@@ -108,6 +108,11 @@ public class JettyService
     }
     catch (Throwable e)
     {
+      StackTraceElement[] ste = e.getStackTrace();
+      for (int i = 0; i < ste.length; i++)
+      {
+    	  log.error(ste[i].toString());
+      }
       log.error("could not create MBean peers", e);
     }
 
@@ -321,7 +326,7 @@ public class JettyService
    */
 
   public Element
-    getConfig()
+    getConfigurationElement()
   {
     //return _jetty.getConfigurationElement();
      return _jettyConfig;
@@ -332,7 +337,7 @@ public class JettyService
    * @jmx:managed-attribute
    */
   public void
-    setConfig(Element configElement)
+    setConfigurationElement(Element configElement)
   {
     log.debug("Saving Configuration to xml fragment");
     this._jettyConfig = configElement;
