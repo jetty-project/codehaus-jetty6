@@ -37,6 +37,7 @@ import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
@@ -285,11 +286,12 @@ public class Jetty extends org.mortbay.jetty.Server
 
             // check whether the context already exists... - a bit hacky,
             // could be nicer...
-            WebAppContext[] contexts = (WebAppContext[])getChildHandlersByClass(WebAppContext.class);
+            Handler[] contexts = getChildHandlersByClass(WebAppContext.class);
             
             for (int i=0; i<contexts.length;i++)
             {
-                if (contexts[i].getContextPath().equals(contextPath))
+            	WebAppContext context = (WebAppContext)contexts[i];
+                if (context.getContextPath().equals(contextPath))
                     _log.warn("A WebApplication is already deployed in context '" + contextPath
                             + "' - proceed at your own risk.");
             	
