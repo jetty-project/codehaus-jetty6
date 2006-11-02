@@ -38,14 +38,13 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         // TODO: Needs an empty constructor?
         super(channel);
         
-        System.err.println("\nnew GrizzlyEndPoint channel="+channel);
+        //System.err.println("\nnew GrizzlyEndPoint channel="+channel);
         _connection = new HttpConnection(connector,this,connector.getServer());
     }
 
     public void handle()
     {
-        System.err.println("GrizzlyEndPoint.handle "+this);
-        
+        //System.err.println("GrizzlyEndPoint.handle "+this);
         
         try
         {
@@ -94,14 +93,14 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     public void blockReadable(long millisecs)
     {
         // TODO implement
-        System.err.println("blockReadable()");
+        //System.err.println("blockReadable()");
         try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
     }
 
     public void blockWritable(long millisecs)
     {
         // TODO implement
-        System.err.println("blockWritable()");
+        //System.err.println("blockWritable()");
         try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
     }
     
@@ -122,9 +121,11 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     
     public void setChannel(ByteChannel channel)
     {
-        if (_channel!=null && _channel!=channel)
-            System.err.println("GrizzlyEndPoint.setChannel "+channel+" was "+_channel+" in "+this);
+        //if (_channel!=null && _channel!=channel)
+            //System.err.println("GrizzlyEndPoint.setChannel "+channel+" was "+_channel+" in "+this);
         _channel = channel;
+        
+        // TO DO: Needs a way to avoid calling instanceof
         if ( channel instanceof GrizzlySocketChannel)
             _socket=((GrizzlySocketChannel)channel).getSocketChannel().socket();        
     }
