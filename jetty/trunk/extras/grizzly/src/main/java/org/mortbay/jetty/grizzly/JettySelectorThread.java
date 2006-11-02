@@ -174,7 +174,7 @@ public class JettySelectorThread extends SelectorThread
             selectionKey.interestOps(
                     selectionKey.interestOps() | SelectionKey.OP_READ);
 
-            if ( selectionKey.attachment() == null){
+            if ( selectionKey.attachment() != null){
                 ((JettyReadTask)selectionKey
                         .attachment()).setIdleTime(currentTime);
             }
