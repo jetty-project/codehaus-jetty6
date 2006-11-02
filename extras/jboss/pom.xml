@@ -113,6 +113,11 @@
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+    <!-- dependency>
+      <groupId>org.slf4j</groupId>
       <artifactId>jcl104-over-slf4j</artifactId>
       <version>1.0.1</version>
     </dependency>
@@ -130,45 +135,45 @@
           <artifactId>xercesImpl</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
+    </dependency -->
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>4.0.5</version>
       <systemPath>${jboss-home}/server/all/lib/jboss.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-common</artifactId>
-      <version>4.0.4</version>
+      <version>4.0.5</version>
       <systemPath>${jboss-home}/lib/jboss-common.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-system</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>4.0.5</version>
       <systemPath>${jboss-home}/lib/jboss-system.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-jmx</artifactId>
-      <version>4.0.2</version>
+      <version>4.0.5</version>
       <systemPath>${jboss-home}/lib/jboss-jmx.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jbosssx</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>4.0.5</version>
       <systemPath>${jboss-home}/server/all/lib/jbosssx.jar</systemPath>
       <scope>system</scope>
     </dependency>
   </dependencies>
   <properties>
-    <jboss-home>C:/latest/jboss-4.0.5.GA(1)/jboss-4.0.5.GA</jboss-home>
+    <!-- jboss-home>C:/latest/jboss-4.0.5.GA(1)/jboss-4.0.5.GA</jboss-home -->
     <!-- jboss-server value = default, all, minimal -->
     <jboss-server>default</jboss-server>
   </properties>

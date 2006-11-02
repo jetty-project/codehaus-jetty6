@@ -35,6 +35,7 @@ import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 //import org.mortbay.j2ee.session.Store;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -73,7 +74,7 @@ public class JBossWebApplicationContext extends WebAppContext
 //        if(_jetty.getSupportJSR77())
 //            setConfigurationClasses (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration","org.mortbay.jetty.servlet.jsr77.Configuration"});
 //        else
-            setConfigurationClasses (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration"});
+            setConfigurationClasses (new String[]{ "org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"});
             
         MultiException e=null;
         try
@@ -111,22 +112,7 @@ public class JBossWebApplicationContext extends WebAppContext
     protected boolean _timeOutPresent=false;
     protected int _timeOutMinutes=0;
 
-    // hack our class loader to be Java2 compliant - i.e. always
-    // delegate upwards before looking locally. This will be changed to
-    // a non-compliant strategy later when JBoss' new ClassLoader is
-    // ready.
-//    protected void initClassLoader(boolean forceContextLoader) throws java.net.MalformedURLException,IOException
-//    {
-//        // force the creation of a context class loader for JBoss
-//        // web apps
-//        super.initClassLoader(true);
-//        ClassLoader loader=getClassLoader();
-//        if(loader instanceof org.mortbay.util.ContextLoader)
-//        {
-//            boolean java2ClassLoadingCompliance=this._webApp.getMetaData().getJava2ClassLoadingCompliance();
-//            ((org.mortbay.http.ContextLoader)loader).setJava2Compliant(java2ClassLoadingCompliance);
-//        }
-//    }
+/*
     String _separator=System.getProperty("path.separator");
 
     public String getFileClassPath()
@@ -210,7 +196,7 @@ public class JBossWebApplicationContext extends WebAppContext
         // lose initial "jar:file:" and final "!/..."
         return path.substring("jar:file:".length(),path.length()-(resource.length()+2));
     }
-
+*/
     protected void startContext() throws Exception
     {
         ClassLoader loader=Thread.currentThread().getContextClassLoader();
@@ -330,13 +316,14 @@ public class JBossWebApplicationContext extends WebAppContext
             }
             else if("login-config".equals(element))
             {
-                // get Jetty to parse the realm-name element
-                super.initWebXmlElement(element,node); 
-                
                 // if the realm-name element is set in web.xml use it as the realm name 
                 // otherwise, use the security domain name from jboss-web.xml
+                // check if a realm has been explicitly set
+                String realmName=null;
+                UserRealm userRealm = ((SecurityHandler)getJBossWebApplicationContext().getChildHandlerByClass(SecurityHandler.class)).getUserRealm();
+                if (userRealm!= null)
+                    realmName=userRealm.getName();
                 
-                String realmName=((SecurityHandler)getJBossWebApplicationContext().getChildHandlerByClass(SecurityHandler.class)).getUserRealm().getName();
                 if (null==realmName)
                 {
                     WebMetaData metaData = getJBossWebApplicationContext()._webApp.getMetaData();
@@ -358,6 +345,8 @@ public class JBossWebApplicationContext extends WebAppContext
                                                                                                                                 // it
                                                                                                                                 // later
                 ((SecurityHandler)getJBossWebApplicationContext().getChildHandlerByClass(SecurityHandler.class)).setUserRealm(getJBossWebApplicationContext()._realm); // cache and reuse ? - TODO
+                // get Jetty to parse the realm-name element
+                super.initWebXmlElement(element,node); 
             }
             // these are handled by Jetty
             else
