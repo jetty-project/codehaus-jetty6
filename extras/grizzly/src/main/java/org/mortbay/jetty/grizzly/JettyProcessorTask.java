@@ -57,11 +57,11 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
 
     public boolean process(AbstractSelectableChannel channel) throws Exception
     {
-        System.err.println("JettyProcessorTask.process "+this+" "+channel);
+        //System.err.println("JettyProcessorTask.process "+this+" "+channel);
         
         boolean blockReading=((JettySelectorThread)selectorThread).isUseTemporarySelector();
 
-        System.err.println("key was "+key.attachment());
+        //System.err.println("key was "+key.attachment());
         key.attach("ATTACHED");
         
         if (blockReading)

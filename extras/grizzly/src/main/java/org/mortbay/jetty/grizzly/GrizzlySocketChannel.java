@@ -43,7 +43,7 @@ public class GrizzlySocketChannel implements ByteChannel
 
     public int read(ByteBuffer dst) throws IOException
     {
-        System.err.println("GrizzlySocketChannel.read");
+        //System.err.println("GrizzlySocketChannel.read");
         
         if (key==null)
             return -1;
@@ -128,7 +128,7 @@ public class GrizzlySocketChannel implements ByteChannel
 
     public int write(ByteBuffer src) throws IOException
     {
-        System.err.println("GrizzlySocketChannel.write");
+        //System.err.println("GrizzlySocketChannel.write");
         int len=src.remaining();
         OutputWriter.flushChannel(socketChannel,src);
         return len;
