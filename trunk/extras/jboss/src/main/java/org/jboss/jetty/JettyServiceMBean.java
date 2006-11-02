@@ -36,7 +36,7 @@ public interface JettyServiceMBean extends org.jboss.web.AbstractWebContainerMBe
     * Configure Jetty
     * @param configElement XML fragment from jboss-service.xml
     */
-  void setConfig(org.w3c.dom.Element configElement) ;
+  void setConfigurationElement(org.w3c.dom.Element configElement) ;
 
   java.lang.String getSubjectAttributeName() ;
 
