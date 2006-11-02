@@ -70,10 +70,10 @@ public class JBossWebApplicationContext extends WebAppContext
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
-        if(_jetty.getSupportJSR77())
-            setConfigurationClasses (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.servlet.JettyWebConfiguration","org.mortbay.jetty.servlet.jsr77.Configuration"});
-        else
-            setConfigurationClasses (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.servlet.JettyWebConfiguration"});
+//        if(_jetty.getSupportJSR77())
+//            setConfigurationClasses (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration","org.mortbay.jetty.servlet.jsr77.Configuration"});
+//        else
+            setConfigurationClasses (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration"});
             
         MultiException e=null;
         try
