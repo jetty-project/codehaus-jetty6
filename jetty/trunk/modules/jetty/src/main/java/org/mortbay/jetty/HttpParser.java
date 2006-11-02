@@ -218,7 +218,10 @@ public class HttpParser implements Parser
         
         if (_buffer==null)
         {
-            _header=_buffers.getBuffer(_headerBufferSize);
+            if (_header == null)
+            {
+                _header=_buffers.getBuffer(_headerBufferSize);
+            }
             _buffer=_header;
             _tok0=new View(_header);
             _tok1=new View(_header);
@@ -791,8 +794,12 @@ public class HttpParser implements Parser
         return "state=" + _state + " length=" + _length + " buf=" + buf.hashCode();
     }
 
-    Buffer getHeaderBuffer()
+    public Buffer getHeaderBuffer()
     {
+        if (_header == null)
+        {
+            _header=_buffers.getBuffer(_headerBufferSize);
+        }
         return _header;
     }
 
@@ -930,4 +937,6 @@ public class HttpParser implements Parser
             return _content.length()>0; 
         }       
     } 
+    
+    
 }
