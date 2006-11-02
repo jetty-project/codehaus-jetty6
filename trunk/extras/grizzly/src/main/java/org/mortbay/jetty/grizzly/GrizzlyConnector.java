@@ -21,28 +21,21 @@ package org.mortbay.jetty.grizzly;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.NCSARequestLog;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.AbstractNIOConnector;
-import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.ThreadPool;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -119,7 +112,20 @@ public class GrizzlyConnector extends AbstractNIOConnector
         {
             _selectorThread.setPort(getPort());
             _selectorThread.setGrizzlyConnector(this);
-            _selectorThread.setThreadPool(getServer().getThreadPool());            
+            
+            ThreadPool threadPool = getServer().getThreadPool();
+            _selectorThread.setThreadPool(threadPool);  
+            
+            //TO DO: Needs to find a way to get this information from the 
+            // config file directly.
+            if ( threadPool instanceof BoundedThreadPool) {
+                _selectorThread.setMaxThreads(
+                        ((BoundedThreadPool)threadPool).getMaxThreads());
+                _selectorThread.setMinThreads(
+                        ((BoundedThreadPool)threadPool).getMinThreads());                   
+            }
+            _selectorThread.setDisplayConfiguration(true);
+            
             if (getHost()!=null)
                 _selectorThread.setAddress(InetAddress.getByName(getHost()));
             _selectorThread.initEndpoint();
@@ -148,13 +154,13 @@ public class GrizzlyConnector extends AbstractNIOConnector
             // maybe we just set acceptors to zero and don't need to bother here as
             // grizzly has it's own accepting threads.
             _selectorThread.isAlive();
-                Thread.sleep(5000);
+            Thread.sleep(5000);
             
         } 
         catch (Throwable e) 
         {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.ignore(e);
         }
         
     }

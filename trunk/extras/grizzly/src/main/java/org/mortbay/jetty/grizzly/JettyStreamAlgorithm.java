@@ -32,7 +32,7 @@ public class JettyStreamAlgorithm extends NoParsingAlgorithm
 
     public JettyStreamAlgorithm()
     {
-        System.err.println("JettyStreamAlgorithm");
+        //System.err.println("JettyStreamAlgorithm");
     }
 
     /**
@@ -41,13 +41,13 @@ public class JettyStreamAlgorithm extends NoParsingAlgorithm
      */
     public boolean parse(ByteBuffer byteBuffer)
     {
-        System.err.println("JettyStreamAlgorithm.parse");
+        //System.err.println("JettyStreamAlgorithm.parse");
         return true;
     }
 
     public Class getReadTask(SelectorThread selectorThread)
     {
-        System.err.println(this+" getReadTask()");
+        //System.err.println(this+" getReadTask()");
         return JettyReadTask.class;
     }
 
