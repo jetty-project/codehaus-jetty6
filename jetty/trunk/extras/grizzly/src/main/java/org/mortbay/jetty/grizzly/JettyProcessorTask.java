@@ -15,6 +15,7 @@
 
 package org.mortbay.jetty.grizzly;
 
+import com.sun.enterprise.web.connector.grizzly.ByteBufferInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,9 +24,13 @@ import com.sun.enterprise.web.connector.grizzly.Handler;
 import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
 import com.sun.enterprise.web.connector.grizzly.TaskBase;
 import com.sun.enterprise.web.connector.grizzly.TaskEvent;
+import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
+import org.mortbay.io.nio.NIOBuffer;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpParser;
 
 /**
  * Delegate the processing of the request to a <code>GrizzlyEndPoint</code>
@@ -55,14 +60,17 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         socketChannel=new GrizzlySocketChannel();
     }
 
-    public boolean process(AbstractSelectableChannel channel) throws Exception
+    public boolean process(InputStream input, OutputStream output) throws Exception
     {
-        //System.err.println("JettyProcessorTask.process "+this+" "+channel);
-        
         boolean blockReading=((JettySelectorThread)selectorThread).isUseTemporarySelector();
-
-        //System.err.println("key was "+key.attachment());
-        key.attach("ATTACHED");
+        ByteBuffer bb = ((ByteBufferInputStream)input).getByteBuffer();
+        HttpParser parser =
+              (HttpParser)((HttpConnection)endPoint.getHttpConnection()).getParser();
+        NIOBuffer buffer = (NIOBuffer)parser.getHeaderBuffer();
+        buffer.setPutIndex(bb.limit());
+        buffer.setGetIndex(bb.position());
+        buffer.setByteBuffer(bb);
+        SocketChannel channel = (SocketChannel)key.channel();
         
         if (blockReading)
         {
@@ -82,7 +90,7 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         }
         else
         {
-            endPoint.setChannel((ByteChannel)channel);
+            endPoint.setChannel(channel);
             endPoint.handle();
         }
 
@@ -104,8 +112,7 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         return !endPoint.isComplete()&&endPoint.isOpen();
     }
 
-    // ---------------------------------------------------- Not Used for now
-    // ---//
+    // ----------------------------------------------- Not Used for now ---//
 
     public JettyProcessorTask()
     {
@@ -123,7 +130,7 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
     /**
      * The Default ReadTask will invoke that method.
      */
-    public boolean process(InputStream input, OutputStream output) throws Exception
+    public boolean process(AbstractSelectableChannel channel) throws Exception
     {
 
         return keepAlive;
