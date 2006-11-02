@@ -27,6 +27,12 @@
 	    </includes>
         <targetPath>META-INF</targetPath>
       </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+	    <includes>
+	      <include>webdefault.xml</include>
+	    </includes>
+      </resource>
     </resources>
     <plugins>
       <plugin>
