@@ -125,6 +125,15 @@ public class HttpConnection
     
     /* ------------------------------------------------------------ */
     /**
+     * @return the parser used by this connection
+     */        
+    public Parser getParser()
+    {
+        return _parser;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
      * @return the number of requests handled by this connection
      */
     public int getRequests()
