@@ -19,7 +19,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 
 import org.jboss.jetty.JBossWebApplicationContext;
-import org.mortbay.management.ObjectMBean;;
+import org.mortbay.management.ObjectMBean;
 
 /* ------------------------------------------------------------ */
 /** JBoss Web Application MBean.
