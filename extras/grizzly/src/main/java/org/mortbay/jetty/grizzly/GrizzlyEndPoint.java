@@ -1,6 +1,5 @@
 //========================================================================
 // Parts Copyright 2006 Mort Bay Consulting Pty. Ltd.
-// Parts Copyright 2006 Jeanfrancois Arcand
 //------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +14,17 @@
 
 package org.mortbay.jetty.grizzly;
 
+import com.sun.enterprise.web.connector.grizzly.OutputWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.SocketChannel;
+import org.mortbay.io.Buffer;
 
 import org.mortbay.io.nio.ChannelEndPoint;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
@@ -29,8 +33,8 @@ import org.mortbay.util.ajax.Continuation;
 
 public class GrizzlyEndPoint extends ChannelEndPoint
 {
-    HttpConnection _connection;
-    JettyProcessorTask _task;
+    protected HttpConnection _connection;
+    
     
     public GrizzlyEndPoint(GrizzlyConnector connector,ByteChannel channel)
         throws IOException
@@ -90,6 +94,215 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     
     }
 
+    
+    /* (non-Javadoc)
+     * @see org.mortbay.io.EndPoint#fill(org.mortbay.io.Buffer)
+     */
+    public int fill(Buffer buffer) throws IOException
+    {
+        Buffer buf = buffer.buffer();
+        int len=0;
+        if (buf instanceof NIOBuffer)
+        {
+            NIOBuffer nbuf = (NIOBuffer)buf;
+            ByteBuffer bbuf=nbuf.getByteBuffer();
+            synchronized(nbuf)
+            {
+                try
+                {
+                    bbuf.position(buffer.putIndex());
+                    len=_channel.read(bbuf);
+                }
+                finally
+                {
+                    buffer.setPutIndex(bbuf.position());
+                    bbuf.position(0);
+                }
+            }
+        }
+        else
+        {
+            throw new IOException("Not Implemented");
+        }
+        
+        return len;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.mortbay.io.EndPoint#flush(org.mortbay.io.Buffer)
+     */
+    public int flush(Buffer buffer) throws IOException
+    {
+        Buffer buf = buffer.buffer();
+        int len=0;
+        if (buf instanceof NIOBuffer)
+        {
+            NIOBuffer nbuf = (NIOBuffer)buf;
+            ByteBuffer bbuf=nbuf.getByteBuffer();
+
+            // TODO synchronize or duplicate?
+            synchronized(nbuf)
+            {
+                try
+                {
+                    bbuf.position(buffer.getIndex());
+                    bbuf.limit(buffer.putIndex());
+                    len = bbuf.remaining();
+                    OutputWriter.flushChannel((SocketChannel)_channel,bbuf);
+                }
+                finally
+                {
+                    if (!buffer.isImmutable())
+                        buffer.setGetIndex(bbuf.position());
+                    bbuf.position(0);
+                    bbuf.limit(bbuf.capacity());
+                }
+            }
+        }
+        else if (buffer.array()!=null)
+        {
+            ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
+            len = b.remaining();
+            OutputWriter.flushChannel((SocketChannel)_channel,b);
+            if (!buffer.isImmutable())
+                buffer.setGetIndex(b.position());
+        }
+        else
+        {
+            throw new IOException("Not Implemented");
+        }
+        
+        return len;
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see org.mortbay.io.EndPoint#flush(org.mortbay.io.Buffer, org.mortbay.io.Buffer, org.mortbay.io.Buffer)
+     */
+    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
+    {
+        int length=0;
+
+        Buffer buf0 = header==null?null:header.buffer();
+        Buffer buf1 = buffer==null?null:buffer.buffer();
+        Buffer buf2 = trailer==null?null:trailer.buffer();
+        if (_channel instanceof GatheringByteChannel &&
+            header!=null && header.length()!=0 && header instanceof NIOBuffer && 
+            buffer!=null && buffer.length()!=0 && buffer instanceof NIOBuffer)
+        {
+            NIOBuffer nbuf0 = (NIOBuffer)buf0;
+            NIOBuffer nbuf1 = (NIOBuffer)buf1;
+            NIOBuffer nbuf2 = buf2==null?null:(NIOBuffer)buf2;
+            
+            // Get the underlying NIO buffers
+            ByteBuffer bbuf0=nbuf0.getByteBuffer();
+            ByteBuffer bbuf1=nbuf1.getByteBuffer();
+            ByteBuffer bbuf2=nbuf2==null?null:nbuf2.getByteBuffer();
+            
+            
+            // We must sync because buffers may be shared (eg nbuf1 is likely to be cached content).
+            synchronized(nbuf0)
+            {
+                synchronized(nbuf1)
+                {
+                    try
+                    {
+                        // Adjust position indexs of buf0 and buf1
+                        bbuf0.position(header.getIndex());
+                        bbuf0.limit(header.putIndex());
+                        bbuf1.position(buffer.getIndex());
+                        bbuf1.limit(buffer.putIndex());
+                        
+                        // if we don't have a buf2
+                        if (bbuf2==null)
+                        {
+                            synchronized(this)
+                            {
+                                // create a gether array for 2 buffers
+                                if (_gather2==null)
+                                    _gather2=new ByteBuffer[2];
+                                _gather2[0]=bbuf0;
+                                _gather2[1]=bbuf1;
+
+                                // do the gathering write.
+                                length = (int)OutputWriter.flushChannel((SocketChannel)_channel,_gather2);
+                            }
+                        }
+                        else
+                        {
+                            // we have a third buffer, so sync on it as well
+                            synchronized(nbuf2)
+                            {
+                                try
+                                {
+                                    // Adjust position indexs of buf2
+                                    bbuf2.position(trailer.getIndex());
+                                    bbuf2.limit(trailer.putIndex());
+
+                                    synchronized(this)
+                                    {
+                                        // create a gether array for 3 buffers
+                                        if (_gather3==null)
+                                            _gather3=new ByteBuffer[3];
+                                        _gather3[0]=bbuf0;
+                                        _gather3[1]=bbuf1;
+                                        _gather3[2]=bbuf2;
+                                        // do the gathering write.
+                                        length = (int)OutputWriter.flushChannel((SocketChannel)_channel,_gather3);
+                                    }
+                                }
+                                finally
+                                {
+                                    // adjust buffer 2.
+                                    if (!trailer.isImmutable())
+                                        trailer.setGetIndex(bbuf2.position());
+                                    bbuf2.position(0);
+                                    bbuf2.limit(bbuf2.capacity());
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        // adjust buffer 0 and 1
+                        if (!header.isImmutable())
+                            header.setGetIndex(bbuf0.position());
+                        if (!buffer.isImmutable())
+                            buffer.setGetIndex(bbuf1.position());
+                       
+                        bbuf0.position(0);
+                        bbuf1.position(0);
+                        bbuf0.limit(bbuf0.capacity());
+                        bbuf1.limit(bbuf1.capacity());
+                    }
+                }
+            }
+        }
+        else
+        {
+            // TODO - consider copying buffers buffer and trailer into header if there is space!
+            
+            
+            // flush header
+            if (header!=null && header.length()>0)
+                length=flush(header);
+            
+            // flush buffer
+            if ((header==null || header.length()==0) &&
+                            buffer!=null && buffer.length()>0)
+                length+=flush(buffer);
+            
+            // flush trailer
+            if ((header==null || header.length()==0) &&
+                            (buffer==null || buffer.length()==0) &&
+                            trailer!=null && trailer.length()>0)
+                length+=flush(trailer);
+        }
+        
+        return length;
+    }
+    
+    
     public void blockReadable(long millisecs)
     {
         // TODO implement
@@ -97,6 +310,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
     }
 
+    
     public void blockWritable(long millisecs)
     {
         // TODO implement
@@ -133,6 +347,11 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     public void recycle()
     {
         _connection.destroy();
+    }    
+    
+    public HttpConnection getHttpConnection(){
+        return _connection;
     }
+    
     
 }

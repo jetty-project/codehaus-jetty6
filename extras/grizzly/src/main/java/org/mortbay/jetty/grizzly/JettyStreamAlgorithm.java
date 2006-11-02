@@ -16,12 +16,9 @@
 package org.mortbay.jetty.grizzly;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-
-import com.sun.enterprise.web.connector.grizzly.Handler;
 import com.sun.enterprise.web.connector.grizzly.SelectorThread;
+import com.sun.enterprise.web.connector.grizzly.XAReadTask;
 import com.sun.enterprise.web.connector.grizzly.algorithms.NoParsingAlgorithm;
-import com.sun.enterprise.web.connector.grizzly.algorithms.StreamAlgorithmBase;
 
 /**
  * @author gregw
@@ -41,14 +38,16 @@ public class JettyStreamAlgorithm extends NoParsingAlgorithm
      */
     public boolean parse(ByteBuffer byteBuffer)
     {
-        //System.err.println("JettyStreamAlgorithm.parse");
+        curLimit = byteBuffer.limit();
+        curPosition = byteBuffer.position();
+        byteBuffer.flip();
         return true;
     }
 
     public Class getReadTask(SelectorThread selectorThread)
     {
         //System.err.println(this+" getReadTask()");
-        return JettyReadTask.class;
+        return XAReadTask.class;
     }
 
 }

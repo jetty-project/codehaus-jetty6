@@ -17,14 +17,11 @@ package org.mortbay.jetty.grizzly;
 
 import com.sun.enterprise.web.connector.grizzly.Pipeline;
 import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
-import com.sun.enterprise.web.connector.grizzly.ReadTask;
 import com.sun.enterprise.web.connector.grizzly.SelectorThread;
-import com.sun.enterprise.web.connector.grizzly.StreamAlgorithm;
-import com.sun.enterprise.web.connector.grizzly.algorithms.NoParsingAlgorithm;
+import com.sun.enterprise.web.connector.grizzly.XAReadTask;
 import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 
@@ -98,44 +95,6 @@ public class JettySelectorThread extends SelectorThread
         return pipeline;
     }
 
-    /**
-     * Return a new <code>JettyReadTask</code> instance
-     */
-    protected ReadTask newReadTask()
-    {
-        //System.err.println("JettySelectorThread.newReadTask");
-        StreamAlgorithm streamAlgorithm=null;
-
-        try
-        {
-            streamAlgorithm=(StreamAlgorithm)algorithmClass.newInstance();
-        }
-        catch (InstantiationException ex)
-        {
-            logger.log(Level.WARNING,"Unable to instantiate Algorithm: "
-                    +algorithmClassName);
-        }
-        catch (IllegalAccessException ex)
-        {
-            logger.log(Level.WARNING,"Unable to instantiate Algorithm: "
-                    +algorithmClassName);
-        }
-        finally
-        {
-            if (streamAlgorithm==null)
-                streamAlgorithm=new NoParsingAlgorithm();
-        }
-        streamAlgorithm.setPort(port);
-
-        // TODO: For now, hardcode the JettyReadTask
-        ReadTask task=new JettyReadTask();
-        task.initialize(streamAlgorithm,useDirectByteBuffer,useByteBufferView);
-        task.setPipeline(readPipeline);
-        task.setSelectorThread(this);
-        task.setRecycle(recycleTasks);
-
-        return task;
-    }
 
     /**
      * Return a <code>JettyProcessorTask</code> implementation.
@@ -175,7 +134,7 @@ public class JettySelectorThread extends SelectorThread
                     selectionKey.interestOps() | SelectionKey.OP_READ);
 
             if ( selectionKey.attachment() != null){
-                ((JettyReadTask)selectionKey
+                ((XAReadTask)selectionKey
                         .attachment()).setIdleTime(currentTime);
             }
             keepAlivePipeline.trap(selectionKey);   
@@ -211,7 +170,7 @@ public class JettySelectorThread extends SelectorThread
             // Keep-alive expired
             if ( key.attachment() != null ) {
                   
-                long expire = ((JettyReadTask)key.attachment()).getIdleTime();
+                long expire = ((XAReadTask)key.attachment()).getIdleTime();
                 if (current - expire >= getKaTimeout()) {                   
                     cancelKey(key);
                 } else if (expire + getKaTimeout() < getNextKeysExpiration()){
