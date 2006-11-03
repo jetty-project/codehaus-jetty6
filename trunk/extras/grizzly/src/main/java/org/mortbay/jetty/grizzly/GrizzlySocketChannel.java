@@ -37,6 +37,8 @@ public class GrizzlySocketChannel implements ByteChannel
 
     private long readTimeout=30*1000;
 
+    private long writeTimeout=30*1000;
+    
     public GrizzlySocketChannel()
     {
     }
@@ -128,10 +130,7 @@ public class GrizzlySocketChannel implements ByteChannel
 
     public int write(ByteBuffer src) throws IOException
     {
-        //System.err.println("GrizzlySocketChannel.write");
-        int len=src.remaining();
-        OutputWriter.flushChannel(socketChannel,src);
-        return len;
+        return (int)OutputWriter.flushChannel(socketChannel,src, writeTimeout);
     }
 
     public SocketChannel getSocketChannel()
@@ -162,6 +161,14 @@ public class GrizzlySocketChannel implements ByteChannel
     public void setReadTimeout(long readTimeout)
     {
         this.readTimeout=readTimeout;
+    }
+
+    public long getWriteTimeout() {
+        return writeTimeout;
+    }
+
+    public void setWriteTimeout(long writeTimeout) {
+        this.writeTimeout = writeTimeout;
     }
 
 }
