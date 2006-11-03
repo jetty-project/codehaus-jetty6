@@ -38,6 +38,8 @@ public class MBeanContainer implements Container.Listener
     private volatile int _managementPort;
     private final WeakHashMap _beans = new WeakHashMap();
     private final HashMap _unique = new HashMap();
+    private String _domain = null;
+    
 
     public synchronized ObjectName findMBean(Object object)
     {
@@ -63,6 +65,22 @@ public class MBeanContainer implements Container.Listener
         Logger log = Log.getLog();
         if (log!=null)
             addBean(log);
+    }
+    
+    public MBeanServer getMBeanServer()
+    {
+        return _server;
+    }
+    
+    
+    public void setDomain (String domain)
+    {
+        _domain =domain;
+    }
+    
+    public String getDomain()
+    {
+        return _domain;
     }
     
     public void setManagementPort(int port)
@@ -160,7 +178,11 @@ public class MBeanContainer implements Container.Listener
             count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
             _unique.put(name, count);
 
-            String domain=obj.getClass().getPackage().getName();
+            //if no explicit domain, create one
+            String domain = _domain;
+            if (domain==null)
+                domain = obj.getClass().getPackage().getName();
+            
             ObjectName oname = ObjectName.getInstance(domain+":type="+name+",id="+count);
             
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
