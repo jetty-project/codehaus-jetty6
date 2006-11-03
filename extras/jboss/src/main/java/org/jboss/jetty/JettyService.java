@@ -104,7 +104,7 @@ public class JettyService
     try
     {
       _jettyBean    = new JettyMBean(_jetty);
-      _server.registerMBean(_jettyBean, null);
+      _jetty.getContainer().addEventListener(new JBossMBeanContainer(_server));
     }
     catch (Throwable e)
     {
