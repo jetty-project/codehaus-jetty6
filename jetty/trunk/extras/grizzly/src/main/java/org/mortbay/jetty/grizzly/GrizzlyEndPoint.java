@@ -18,22 +18,22 @@ import com.sun.enterprise.web.connector.grizzly.OutputWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.SocketChannel;
 import org.mortbay.io.Buffer;
 
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpException;
+import org.mortbay.jetty.HttpParser;
 import org.mortbay.log.Log;
 import org.mortbay.util.ajax.Continuation;
 
 public class GrizzlyEndPoint extends ChannelEndPoint
 {
     protected HttpConnection _connection;
+    
+    private GrizzlySocketChannel _blockingChannel;
     
     
     public GrizzlyEndPoint(GrizzlyConnector connector,ByteChannel channel)
@@ -83,7 +83,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
      */
     public int fill(Buffer buffer) throws IOException
     {
-        return 0;
+        return 0; // Always filled way before by Grizzly.
     }
     
     /* (non-Javadoc)
@@ -263,17 +263,35 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     
     public void blockReadable(long millisecs)
     {
-        // TODO implement
-        //System.err.println("blockReadable()");
-        try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+        Buffer buffer = ((HttpParser)_connection.getParser()).getHeaderBuffer();
+        if (buffer instanceof NIOBuffer){
+            ByteBuffer byteBuffer = ((NIOBuffer)buffer).getByteBuffer();
+            _blockingChannel.setReadTimeout(millisecs);
+            try{
+                _blockingChannel.read(byteBuffer);
+            } catch (IOException ex){
+                ; // TODO: Rethrow in case the client closed the connection.
+            }
+        } else {
+            ; //TODO: How to handle this case.
+        }
     }
 
     
     public void blockWritable(long millisecs)
     {
-        // TODO implement
-        //System.err.println("blockWritable()");
-        try {Thread.sleep(1000);} catch (InterruptedException e) {e.printStackTrace();}
+        Buffer buffer = ((HttpParser)_connection.getParser()).getHeaderBuffer();
+        if (buffer instanceof NIOBuffer){
+            ByteBuffer byteBuffer = ((NIOBuffer)buffer).getByteBuffer();
+            _blockingChannel.setWriteTimeout(millisecs);
+            try{
+                _blockingChannel.write(byteBuffer);
+            } catch (IOException ex){
+                ; // TODO: Rethrow in case the client closed the connection.
+            }
+        } else {
+            ; //TODO: How to handle this case.
+        }       
     }
     
     public boolean keepAlive()
@@ -293,13 +311,8 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     
     public void setChannel(ByteChannel channel)
     {
-        //if (_channel!=null && _channel!=channel)
-            //System.err.println("GrizzlyEndPoint.setChannel "+channel+" was "+_channel+" in "+this);
         _channel = channel;
-        
-        // TO DO: Needs a way to avoid calling instanceof
-        if ( channel instanceof GrizzlySocketChannel)
-            _socket=((GrizzlySocketChannel)channel).getSocketChannel().socket();        
+        _blockingChannel=new GrizzlySocketChannel(); 
     }
     
     public void recycle()
