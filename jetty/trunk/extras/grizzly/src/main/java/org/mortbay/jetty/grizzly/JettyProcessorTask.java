@@ -22,12 +22,13 @@ import java.io.OutputStream;
 import java.net.Socket;
 import com.sun.enterprise.web.connector.grizzly.Handler;
 import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
+import com.sun.enterprise.web.connector.grizzly.SelectorThread;
 import com.sun.enterprise.web.connector.grizzly.TaskBase;
 import com.sun.enterprise.web.connector.grizzly.TaskEvent;
 import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
+import java.util.logging.Level;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpParser;
@@ -44,6 +45,9 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
     private boolean keepAlive=true;
     private GrizzlyEndPoint endPoint;
     private GrizzlySocketChannel socketChannel;
+    private ByteBuffer jettyByteBuffer;
+    HttpParser parser;
+    boolean isError = false;
 
     public void initialize()
     {
@@ -51,27 +55,29 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         try
         {
             endPoint=new GrizzlyEndPoint(grizzlyConnector,null);
+            parser=(HttpParser)((HttpConnection)endPoint.getHttpConnection()).getParser();
         }
         catch (IOException ex)
         {
             throw new RuntimeException(ex);
         }
 
-        socketChannel=new GrizzlySocketChannel();
+        if (((JettySelectorThread)selectorThread).isUseTemporarySelector()){
+            socketChannel=new GrizzlySocketChannel();
+        }
     }
 
     public boolean process(InputStream input, OutputStream output) throws Exception
     {
         boolean blockReading=((JettySelectorThread)selectorThread).isUseTemporarySelector();
-        ByteBuffer bb = ((ByteBufferInputStream)input).getByteBuffer();
-        HttpParser parser =
-              (HttpParser)((HttpConnection)endPoint.getHttpConnection()).getParser();
+        ByteBuffer bb = ((ByteBufferInputStream)input).getByteBuffer();   
         NIOBuffer buffer = (NIOBuffer)parser.getHeaderBuffer();
+        jettyByteBuffer = buffer.getByteBuffer();
         buffer.setPutIndex(bb.limit());
         buffer.setGetIndex(bb.position());
         buffer.setByteBuffer(bb);
         SocketChannel channel = (SocketChannel)key.channel();
-        
+
         if (blockReading)
         {
             socketChannel.setSelectionKey(key);
@@ -91,9 +97,16 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         else
         {
             endPoint.setChannel(channel);
-            endPoint.handle();
-        }
-
+            try{
+                endPoint.handle();
+            }catch(Throwable t){
+                isError = true;
+                SelectorThread.logger().log(Level.FINE,"endPoint.handler");
+                return false;
+            } finally{
+                buffer.setByteBuffer(jettyByteBuffer);
+            }
+        }      
         return endPoint.keepAlive();
     }
 
@@ -109,7 +122,7 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
 
     public boolean isError()
     {
-        return !endPoint.isComplete()&&endPoint.isOpen();
+        return !(parser.getState() == HttpParser.STATE_START) && isError;
     }
 
     // ----------------------------------------------- Not Used for now ---//

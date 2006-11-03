@@ -112,6 +112,7 @@ public class GrizzlyConnector extends AbstractNIOConnector
         {
             _selectorThread.setPort(getPort());
             _selectorThread.setGrizzlyConnector(this);
+            _selectorThread.setBufferSize(4 * 1024);
             
             ThreadPool threadPool = getServer().getThreadPool();
             _selectorThread.setThreadPool(threadPool);  

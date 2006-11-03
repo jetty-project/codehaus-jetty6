@@ -55,27 +55,10 @@ public class GrizzlyEndPoint extends ChannelEndPoint
             //System.err.println("handle  "+this);
             _connection.handle();
         }
-        catch (ClosedChannelException e)
-        {
-            Log.ignore(e);
-        }
-        catch (EofException e)
-        {
-            Log.debug("EOF", e);
-            try{close();}
-            catch(IOException e2){Log.ignore(e2);}
-        }
-        catch (HttpException e)
-        {
-            Log.debug("BAD", e);
-            try{close();}
-            catch(IOException e2){Log.ignore(e2);}
-        }
         catch (Throwable e)
         {
             Log.warn("handle failed", e);
-            try{close();}
-            catch(IOException e2){Log.ignore(e2);}
+            throw new RuntimeException(e);
         }
         finally
         {
@@ -100,32 +83,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
      */
     public int fill(Buffer buffer) throws IOException
     {
-        Buffer buf = buffer.buffer();
-        int len=0;
-        if (buf instanceof NIOBuffer)
-        {
-            NIOBuffer nbuf = (NIOBuffer)buf;
-            ByteBuffer bbuf=nbuf.getByteBuffer();
-            synchronized(nbuf)
-            {
-                try
-                {
-                    bbuf.position(buffer.putIndex());
-                    len=_channel.read(bbuf);
-                }
-                finally
-                {
-                    buffer.setPutIndex(bbuf.position());
-                    bbuf.position(0);
-                }
-            }
-        }
-        else
-        {
-            throw new IOException("Not Implemented");
-        }
-        
-        return len;
+        return 0;
     }
     
     /* (non-Javadoc)
@@ -352,6 +310,12 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     public HttpConnection getHttpConnection(){
         return _connection;
     }
-    
-    
+
+    /* (non-Javadoc)
+     * @see org.mortbay.io.EndPoint#close()
+     */
+    public void close() throws IOException
+    {
+        ; // Do nothing as this will be handled by Grizzly.
+    }    
 }
