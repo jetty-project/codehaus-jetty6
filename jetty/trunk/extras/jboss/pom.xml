@@ -82,6 +82,17 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jsp-2.0</artifactId>
+      <version>6.1-SNAPSHOT</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jsp-api-2.0</artifactId>
+      <version>6.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
       <version>6.1-SNAPSHOT</version>
       <exclusions>
@@ -173,7 +184,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <!-- jboss-home>C:/latest/jboss-4.0.5.GA(1)/jboss-4.0.5.GA</jboss-home -->
+    <jboss-home>C:/latest/jboss-4.0.5.GA(1)/jboss-4.0.5.GA</jboss-home>
     <!-- jboss-server value = default, all, minimal -->
     <jboss-server>default</jboss-server>
   </properties>
