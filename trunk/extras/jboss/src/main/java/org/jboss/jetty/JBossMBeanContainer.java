@@ -7,53 +7,21 @@ import javax.management.ObjectName;
 
 import org.mortbay.component.Container.Listener;
 import org.mortbay.component.Container.Relationship;
+import org.mortbay.management.MBeanContainer;
 import org.mortbay.management.ObjectMBean;
 import org.mortbay.util.TypeUtil;
 
-public class JBossMBeanContainer implements Listener {
-
-	private MBeanServer _server;
-	private static String _domain = "org.jboss";
-    private final HashMap _unique = new HashMap();
-
+public class JBossMBeanContainer extends MBeanContainer
+{
 	public JBossMBeanContainer(MBeanServer server)
 	{
-		this._server = server;
+		super(server);
+        setDomain("org.jboss.web");
 	}
 	
-	public void addBean(Object bean) 
-	{
-        try {
-			Object mbean = ObjectMBean.mbeanFor(bean);
-			String name = bean.getClass().getName().toLowerCase();
-			int dot = name.lastIndexOf('.');
-			if (dot >= 0)
-			    name = name.substring(dot + 1);
-			Integer count = (Integer) _unique.get(name);
-			count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
-			_unique.put(name, count);
-
-			ObjectName oname = ObjectName.getInstance(_domain+":type="+name+",id="+count);
-			_server.registerMBean(mbean, oname);
-		} catch (Exception e) 
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public void removeBean(Object bean) 
-	{
-		
-	}
-
-	public void add(Relationship relationship) 
-	{
-	
-	}
-
-	public void remove(Relationship relationship) 
-	{
-	
-	}
+	public void start ()
+    {
+     //do nothing - the superclass does initialization of stuff we don't want 
+    }
 
 }
