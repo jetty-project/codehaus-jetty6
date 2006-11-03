@@ -17,11 +17,15 @@ package org.mortbay.jetty.grizzly;
 
 import com.sun.enterprise.web.connector.grizzly.Pipeline;
 import com.sun.enterprise.web.connector.grizzly.ProcessorTask;
+import com.sun.enterprise.web.connector.grizzly.ReadTask;
 import com.sun.enterprise.web.connector.grizzly.SelectorThread;
+import com.sun.enterprise.web.connector.grizzly.StreamAlgorithm;
 import com.sun.enterprise.web.connector.grizzly.XAReadTask;
+import com.sun.enterprise.web.connector.grizzly.algorithms.NoParsingAlgorithm;
 import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Level;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 
@@ -180,6 +184,23 @@ public class JettySelectorThread extends SelectorThread
         }                    
     }
     
+    /**
+     * Return a new <code>JettyReadTask</code> instance
+     */
+    protected ReadTask newReadTask()
+    {
+        StreamAlgorithm streamAlgorithm= new JettyStreamAlgorithm();
+        streamAlgorithm.setPort(port);
+
+        // TODO: For now, hardcode the JettyReadTask
+        ReadTask task=new JettyReadTask();
+        task.initialize(streamAlgorithm,useDirectByteBuffer,useByteBufferView);
+        task.setPipeline(readPipeline);
+        task.setSelectorThread(this);
+        task.setRecycle(recycleTasks);
+
+        return task;
+    }  
     
     public void setGrizzlyConnector(GrizzlyConnector grizzlyConnector)
     {

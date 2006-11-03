@@ -47,7 +47,7 @@ public class JettyStreamAlgorithm extends NoParsingAlgorithm
     public Class getReadTask(SelectorThread selectorThread)
     {
         //System.err.println(this+" getReadTask()");
-        return XAReadTask.class;
+        return JettyReadTask.class;
     }
 
 }
