@@ -42,12 +42,8 @@ import org.mortbay.util.ajax.WaitingContinuation;
  *
  * TODO - allow multiple Acceptor threads
  */
-public abstract class AbstractConnector extends AbstractLifeCycle implements Connector
+public abstract class AbstractConnector extends AbstractBuffers implements Connector
 {
-    private int _headerBufferSize=8*1024;
-    private int _requestBufferSize=32*1024;
-    private int _responseBufferSize=64*1024;
-
     private String _name;
     private Server _server;
     private ThreadPool _threadPool;
@@ -65,9 +61,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     protected int _lowResourceMaxIdleTime=-1; 
     protected int _soLingerTime=-1; 
     
-    private transient ArrayList _headerBuffers;
-    private transient ArrayList _requestBuffers;
-    private transient ArrayList _responseBuffers;
     private transient Thread[] _acceptorThread;
     
     Object _statsLock = new Object();
@@ -160,23 +153,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         return _port;
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the headerBufferSize.
-     */
-    public int getHeaderBufferSize()
-    {
-        return _headerBufferSize;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param headerBufferSize The headerBufferSize to set.
-     */
-    public void setHeaderBufferSize(int headerBufferSize)
-    {
-        _headerBufferSize = headerBufferSize;
-    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -212,42 +188,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     public void setLowResourceMaxIdleTime(int maxIdleTime)
     {
         _lowResourceMaxIdleTime = maxIdleTime;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the requestBufferSize.
-     */
-    public int getRequestBufferSize()
-    {
-        return _requestBufferSize;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param requestBufferSize The requestBufferSize to set.
-     */
-    public void setRequestBufferSize(int requestBufferSize)
-    {
-        _requestBufferSize = requestBufferSize;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the responseBufferSize.
-     */
-    public int getResponseBufferSize()
-    {
-        return _responseBufferSize;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param responseBufferSize The responseBufferSize to set.
-     */
-    public void setResponseBufferSize(int responseBufferSize)
-    {
-        _responseBufferSize = responseBufferSize;
     }
     
     /* ------------------------------------------------------------ */
@@ -307,23 +247,10 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
-        super.doStart();
-        
         // open listener port
         open();
         
-        if (_headerBuffers!=null)
-            _headerBuffers.clear();
-        else
-            _headerBuffers=new ArrayList();
-        if (_requestBuffers!=null)
-            _requestBuffers.clear();
-        else
-            _requestBuffers=new ArrayList();
-        if (_responseBuffers!=null)
-            _responseBuffers.clear();
-        else
-            _responseBuffers=new ArrayList(); 
+        super.doStart();
         
         if (_threadPool==null)
             _threadPool=_server.getThreadPool();
@@ -404,76 +331,6 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     {      
     }
     
-    /* ------------------------------------------------------------ */
-    protected abstract Buffer newBuffer(int size);
-
-    
-    /* ------------------------------------------------------------ */
-    public Buffer getBuffer(int size)
-    {
-        if (size==_headerBufferSize)
-        {
-            synchronized(_headerBuffers)
-            {
-                if (_headerBuffers.size()==0)
-                    return newBuffer(size);
-                return (Buffer) _headerBuffers.remove(_headerBuffers.size()-1);
-            }
-        }
-        else if (size==_responseBufferSize)
-        {
-            synchronized(_responseBuffers)
-            {
-                if (_responseBuffers.size()==0)
-                    return newBuffer(size);
-                return (Buffer) _responseBuffers.remove(_responseBuffers.size()-1);
-            }
-        }
-        else if (size==_requestBufferSize)
-        {
-            synchronized(_requestBuffers)
-            {
-                if (_requestBuffers.size()==0)
-                    return newBuffer(size);
-                return (Buffer) _requestBuffers.remove(_requestBuffers.size()-1);
-            }   
-        }
-        
-        return newBuffer(size);    
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    public void returnBuffer(Buffer buffer)
-    {
-        buffer.clear();
-        if (!buffer.isVolatile() && !buffer.isImmutable())
-        {
-            int c=buffer.capacity();
-            if (c==_headerBufferSize)
-            {
-                synchronized(_headerBuffers)
-                {
-                    _headerBuffers.add(buffer);
-                }
-            }
-            else if (c==_responseBufferSize)
-            {
-                synchronized(_responseBuffers)
-                {
-                    _responseBuffers.add(buffer);
-                }
-            }
-            else if (c==_requestBufferSize)
-            {
-                synchronized(_requestBuffers)
-                {
-                    _requestBuffers.add(buffer);
-                }
-            }
-        }
-    }
-
     
     /* ------------------------------------------------------------ */
     /* 

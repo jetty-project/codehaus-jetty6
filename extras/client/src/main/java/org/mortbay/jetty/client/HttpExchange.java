@@ -1,15 +1,10 @@
 package org.mortbay.jetty.client;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
+import java.net.InetSocketAddress;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.SimpleBuffers;
-import org.mortbay.io.bio.StringEndPoint;
 import org.mortbay.jetty.HttpFields;
-import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpURI;
@@ -31,12 +26,14 @@ public class HttpExchange
         // this is the API that will be used.
         HttpExchange ex=new HttpExchange()
         {
+            @Override
             protected void onProgress(Buffer content, boolean last)
             {
                 System.err.println("Response content="+content);
                 super.onProgress(content,last);
             }
 
+            @Override
             protected void onSuccess(int status)
             {
                 System.err.println("Response status="+status);
@@ -48,8 +45,7 @@ public class HttpExchange
         ex.setURL("http://localhost:8080/test/dump/info");
 
         ex.setMethod("GET"); // Optional. GET by default
-        ex.setHost("localhost"); // May use setURL instead
-        ex.setPort(8080); // Optional. 80 by default
+        ex.setAddress(new InetSocketAddress("localhost",8080)); // May use setURL instead
         ex.setURI("/test/dump/info");
         ex.setRequestContentType(MimeTypes.FORM_ENCODED);
         ex.addRequestHeader("arbitrary","value");
@@ -60,35 +56,35 @@ public class HttpExchange
 
     }
 
-    String _host;
+    InetSocketAddress _address;
+    HttpConnectionPool _connectionPool;
     String _method;
-    int _port;
     Buffer _requestContent;
-    HttpFields _requestFields=new HttpFields();
 
+    HttpFields _requestFields=new HttpFields();
     Buffer _responseContent;
     HttpFields _responseFields=new HttpFields();
     String _scheme;
     String _uri;
-
+    
     public void addRequestHeader(String name, String value)
     {
         getRequestFields().add(name,value);
     }
 
-    public String getHost()
+    public InetSocketAddress getAddress()
     {
-        return _host;
+        return _address;
+    }
+
+    public HttpConnectionPool getConnectionPool()
+    {
+        return _connectionPool;
     }
 
     public String getMethod()
     {
         return _method;
-    }
-
-    public int getPort()
-    {
-        return _port;
     }
 
     public Buffer getRequestContent()
@@ -126,42 +122,31 @@ public class HttpExchange
         return false;
     }
 
-    public void send()
+    public void send() throws IOException
     {
-        // TODO Auto-generated method stub
-
+        // TODO add to destination queue
+        getConnectionPool().getConnection(getAddress(),"https".equalsIgnoreCase(getScheme()),true).send(this);
     }
 
-    public void send(boolean b)
+    public void send(boolean pipeline) throws IOException
     {
-        // TODO Auto-generated method stub
-
+        // TODO add to destination queue
+        getConnectionPool().getConnection(getAddress(),"https".equalsIgnoreCase(getScheme()),!pipeline).send(this);
     }
 
-    public void setHost(String host)
+    public void setAddress(InetSocketAddress address)
     {
-        _host=host;
-        if (_host!=null)
-        {
-            if (_port>0)
-                _requestFields.put(HttpHeaders.HOST_BUFFER,_host+":"+_port);
-            else
-                _requestFields.put(HttpHeaders.HOST_BUFFER,host);
-        }
-        else
-            _requestFields.remove(HttpHeaders.HOST_BUFFER);
+        _address=address;
+    }
+
+    public void setConnectionPool(HttpConnectionPool connectionPool)
+    {
+        _connectionPool=connectionPool;
     }
 
     public void setMethod(String method)
     {
         _method=method;
-    }
-
-    public void setPort(int port)
-    {
-        _port=port;
-        if (_host!=null&&_port>0)
-            _requestFields.put(HttpHeaders.HOST_BUFFER,_host+":"+port);
     }
 
     public void setRequestContent(Buffer requestContent)
@@ -195,12 +180,13 @@ public class HttpExchange
         String scheme=uri.getScheme();
         if (scheme!=null)
             setScheme(scheme);
-        String host=uri.getHost();
-        if (host!=null)
-            setHost(host);
+        
         int port=uri.getPort();
-        if (port>0)
-            setPort(port);
+        if (port<=0)
+            port="https".equalsIgnoreCase(scheme)?443:80;
+        
+        setAddress(new InetSocketAddress(uri.getHost(),port));
+        
         String completePath=uri.getCompletePath();
         if (completePath!=null)
             setURI(completePath);
@@ -209,18 +195,17 @@ public class HttpExchange
     protected void onProgress(Buffer content, boolean last)
     {
         // TODO Auto-generated method stub
-
     }
 
     protected void onSuccess(int status)
     {
         // TODO Auto-generated method stub
-
     }
 
     protected boolean refillRequestContent()
     {
         return _requestContent!=null&&_requestContent.hasContent();
     }
+
 
 }
