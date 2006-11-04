@@ -59,6 +59,9 @@ public class Holder extends AbstractLifeCycle implements Serializable
     public void doStart()
         throws Exception
     {
+        if (_class==null && _className==null)
+            throw new IllegalStateException("No class for Servlet or Filter");
+        
         if (_class==null)
             _class=Loader.loadClass(Holder.class, _className);
         if(Log.isDebugEnabled())Log.debug("Holding {}",_class);

@@ -567,7 +567,7 @@ public class ServletHandler extends AbstractHandler
                     
                     servlets[i].start();
                 }
-                catch(Exception e)
+                catch(Throwable e)
                 {
                     Log.debug(Log.EXCEPTION,e);
                     mx.add(e);

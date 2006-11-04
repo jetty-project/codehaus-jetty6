@@ -16,6 +16,7 @@
 package org.mortbay.component;
 
 import org.mortbay.log.Log;
+import org.mortbay.util.MultiException;
 
 /**
  * Basic implementation of the life cycle interface for components.
@@ -31,6 +32,7 @@ public abstract class AbstractLifeCycle implements LifeCycle
 
     public final void start() throws Exception
     {
+        MultiException me = new MultiException();
         try
         {
             if (_state==STARTED)
@@ -42,9 +44,19 @@ public abstract class AbstractLifeCycle implements LifeCycle
         }
         catch (Exception e)
         {
+            me.add(e);
             Log.warn("failed "+this,e);
+            try
+            {
+                stop();
+            }
+            catch (Exception x)
+            {
+                Log.warn("error stopping failed context", x);
+                me.add(x);
+            }
             _state=FAILED;
-            throw e;
+            throw me;
         }
         catch(Error e)
         {
