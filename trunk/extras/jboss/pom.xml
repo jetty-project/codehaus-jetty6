@@ -131,8 +131,8 @@
     </dependency>
   </dependencies>
   <properties>
-    <jboss.home>C:/latest/jboss-4.0.5.GA(1)/jboss-4.0.5.GA</jboss.home>
-    <!-- jboss-server value = default, all, minimal -->
+    <!-- jboss.home must be provided on the command line -->
+    <jboss.version>4.0.5.GA</jboss.version>
     <jboss.server>default</jboss.server>
   </properties>
   <profiles>
@@ -142,7 +142,7 @@
         <jdk>1.4</jdk>
       </activation>
       <build>
-        <finalName>${artifactId}-${version}-jsp2.0</finalName>
+        <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.0</finalName>
       </build>
       <dependencies>
         <dependency>
@@ -200,7 +200,7 @@
         <jdk>!1.4</jdk>
       </activation>
       <build>
-        <finalName>${artifactId}-${version}-jsp2.1</finalName>
+        <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.1</finalName>
       </build>
       <dependencies>
         <dependency>
