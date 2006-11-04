@@ -223,8 +223,14 @@ public class Server extends HandlerWrapper implements Attributes
         } 
         catch(Throwable e) { mex.add(e);}
         
-        try { super.doStart(); } 
-        catch(Throwable e) { mex.add(e);}
+        try 
+        { 
+            super.doStart(); 
+        } 
+        catch(Throwable e) 
+        { 
+            Log.warn("Error starting handlers",e);
+        }
         
         if (_connectors!=null)
         {
@@ -237,7 +243,6 @@ public class Server extends HandlerWrapper implements Attributes
                 }
             }
         }
-
         mex.ifExceptionThrow();
     }
 
@@ -252,7 +257,7 @@ public class Server extends HandlerWrapper implements Attributes
                 try{_connectors[i].stop();}catch(Throwable e){mex.add(e);}
         }
 
-        try { super.doStop(); } catch(Throwable e) { mex.add(e);}
+        try {super.doStop(); } catch(Throwable e) { mex.add(e);}
         
         if (_sessionIdManager!=null)
             _sessionIdManager.stop();
@@ -264,7 +269,6 @@ public class Server extends HandlerWrapper implements Attributes
         }
         catch(Throwable e){mex.add(e);}
         
-
         if (!_dependentLifeCycles.isEmpty())
         {
             ListIterator itor = _dependentLifeCycles.listIterator(_dependentLifeCycles.size()-1);

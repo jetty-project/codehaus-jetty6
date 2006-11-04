@@ -72,7 +72,7 @@ public class DefaultHandler extends AbstractHandler
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
-    {
+    {      
         Request base_request = request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest();
         
         if (response.isCommitted() || base_request.isHandled())
@@ -141,7 +141,10 @@ public class DefaultHandler extends AbstractHandler
                 writer.write(context.getContextPath());
                 writer.write("&nbsp;--->&nbsp;");
                 writer.write(context.toString());
-                writer.write(" [stopped]");
+                if (context.isFailed())
+                    writer.write(" [failed]");
+                if (context.isStopped())
+                    writer.write(" [stopped]");
                 writer.write("</li>\n");
             }
         }
