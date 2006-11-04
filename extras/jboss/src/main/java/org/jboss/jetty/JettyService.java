@@ -11,7 +11,6 @@
 
 package org.jboss.jetty;
 
-//------------------------------------------------------------------------------
 
 import java.lang.reflect.Method;
 import java.util.Iterator;
@@ -30,6 +29,7 @@ import org.w3c.dom.Element;
 
 //------------------------------------------------------------------------------
 /**
+ * JettyService
  * A service to launch jetty from JMX.
  *
  *
@@ -47,7 +47,6 @@ public class JettyService extends AbstractWebContainer implements
 {
     public static final String NAME = "Jetty";
 
-    // delegate to Jetty
     protected MBeanServer _server = null;
     protected Jetty _jetty = null;
     protected Element _jettyConfig = null;
@@ -55,6 +54,13 @@ public class JettyService extends AbstractWebContainer implements
     protected String _webDefaultResource;
     
     
+    /**
+     * ConfigurationData
+     *
+     * Holds info that the jboss API sets on the
+     * AbstractWebContainer but is needed by the
+     * AbstractWebDeployer.
+     */
     public static class ConfigurationData
     {
         private boolean _loaderCompliance;
@@ -174,18 +180,21 @@ public class JettyService extends AbstractWebContainer implements
         }
     }
 
+    
+    
+    /** 
+     * Constructor
+     */
     public JettyService()
     {
         super();
         _jetty = new Jetty(this);
     }
 
-    // ----------------------------------------------------------------------------
-    // utils...
-    // ----------------------------------------------------------------------------
+
 
     /**
-     * mex should implement a better printStackTrace...
+     * Log a jetty MultiException 
      */
     protected void log(MultiException e)
     {
@@ -195,7 +204,7 @@ public class JettyService extends AbstractWebContainer implements
             log.error("exception", (Exception) iter.next());
     }
 
-    // ----------------------------------------------------------------------------
+
 
     public ObjectName preRegister(MBeanServer server, ObjectName name)
             throws Exception
@@ -303,10 +312,17 @@ public class JettyService extends AbstractWebContainer implements
 
     }
 
-    // ----------------------------------------------------------------------------
-    // 'deploy' interface
-    // ----------------------------------------------------------------------------
 
+
+    /**
+     * Old deployment method from AbstractWebContainer.
+     * 
+     * TODO remove this?
+     * @param webApp
+     * @param warUrl
+     * @param parser
+     * @throws DeploymentException
+     */
     public void performDeploy(WebApplication webApp, String warUrl,
             WebDescriptorParser parser) throws DeploymentException
     {
@@ -314,6 +330,13 @@ public class JettyService extends AbstractWebContainer implements
         throw new UnsupportedOperationException("Backward compatibility not implemented");
     }
 
+    /**
+     * Old undeploy method from AbstractWebContainer.
+     * 
+     * TODO remove?
+     * @param warUrl
+     * @throws DeploymentException
+     */
     public void performUndeploy(String warUrl) throws DeploymentException
     {
         //TODO backwards compatibility
@@ -339,9 +362,8 @@ public class JettyService extends AbstractWebContainer implements
         _supportJSR77=supportJSR77;
     }
 
-    // ----------------------------------------------------------------------------
-
     /**
+     * Get the custom webdefault.xml file.
      * @jmx:managed-attribute
      */
     public String getWebDefaultResource()
@@ -350,6 +372,7 @@ public class JettyService extends AbstractWebContainer implements
     }
 
     /**
+     * Set a custom webdefault.xml file.
      * @jmx:managed-attribute
      */
     public void setWebDefaultResource(String webDefaultResource)
@@ -360,7 +383,7 @@ public class JettyService extends AbstractWebContainer implements
         _webDefaultResource=webDefaultResource;
     }
 
-    // ----------------------------------------------------------------------------
+
     /**
      * Get the extended Jetty configuration XML fragment
      * 
@@ -387,11 +410,10 @@ public class JettyService extends AbstractWebContainer implements
         // _jetty.setConfigurationElement (configElement);
     }
 
-    // ----------------------------------------------------------------------------
-
-
-
     
+    /** 
+     * @see org.jboss.web.AbstractWebContainer#getDeployer(org.jboss.deployment.DeploymentInfo)
+     */
     public AbstractWebDeployer getDeployer(DeploymentInfo di) throws Exception
     {
         JettyDeployer deployer = new JettyDeployer(di);

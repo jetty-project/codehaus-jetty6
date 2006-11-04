@@ -10,26 +10,31 @@
 //------------------------------------------------------------------------------
 package org.jboss.jetty;
 
-//------------------------------------------------------------------------------
 
 import java.io.IOException;
 
 
-import org.jboss.deployment.DeploymentInfo;
+
 import org.jboss.jetty.security.JBossUserRealm;
 import org.jboss.logging.Logger;
-import org.jboss.metadata.WebMetaData;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 //import org.mortbay.j2ee.J2EEWebApplicationContext;
 //import org.mortbay.j2ee.session.AbstractReplicatedStore;
 //import org.mortbay.j2ee.session.Manager;
 //import org.mortbay.j2ee.session.Store;
-
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.util.MultiException;
 
-//------------------------------------------------------------------------------
+
+/**
+ * JBossWebApplicationContext
+ *
+ * Customize the jetty WebAppContext to jboss environment.
+ * 
+ * TODO jsr77 support, distributable session support
+ *
+ */
 public class JBossWebApplicationContext extends WebAppContext
 {
     protected static Logger __log=Logger.getLogger(JBossWebApplicationContext.class);
