@@ -14,8 +14,6 @@ package org.jboss.jetty;
 //------------------------------------------------------------------------------
 
 import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.net.URL;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;

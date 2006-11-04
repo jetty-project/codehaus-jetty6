@@ -18,7 +18,6 @@ package org.jboss.jetty;
 import org.jboss.jetty.security.JBossUserRealm;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.WebMetaData;
-import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.xml.XmlParser;
@@ -26,7 +25,8 @@ import org.mortbay.xml.XmlParser;
 /**
  * JBossWebXmlConfiguration
  *
- *
+ * Extends the jetty WebXmlConfiguration to provide jboss
+ * handling of various elements in the web.xml
  */
 public class JBossWebXmlConfiguration extends WebXmlConfiguration
 {
