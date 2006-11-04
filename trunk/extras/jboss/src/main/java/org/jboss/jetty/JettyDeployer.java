@@ -36,7 +36,8 @@ import org.mortbay.util.MultiException;
 /**
  * JettyDeployer
  *
- *
+ * Implementation of the jboss AbstractWebDeployer
+ * for deploying webapps to jetty.
  */
 public class JettyDeployer extends AbstractWebDeployer
 {
