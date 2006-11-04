@@ -22,6 +22,7 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.security.SecurityHandler;
 
+
 /* ------------------------------------------------------------ */
 /** Servlet Context.
  * This conveniance extention to the ContextHandler allows for
@@ -113,7 +114,6 @@ public class Context extends ContextHandler
         }
         
     }    
-    
     
     /* ------------------------------------------------------------ */
     /**
