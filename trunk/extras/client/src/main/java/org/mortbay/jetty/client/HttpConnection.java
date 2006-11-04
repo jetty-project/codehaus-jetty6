@@ -5,63 +5,34 @@ import java.util.LinkedList;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
-import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.SimpleBuffers;
-import org.mortbay.io.bio.StringEndPoint;
 import org.mortbay.jetty.Generator;
-import org.mortbay.jetty.HttpException;
-import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpParser;
-import org.mortbay.jetty.Parser;
-import org.mortbay.log.Log;
-import org.mortbay.util.ajax.Continuation;
 
 public class HttpConnection
 {
-    private Generator _generator;
-    private HttpParser _parser;
+    private HttpDestination _destination;
     private EndPoint _endp;
     private HttpExchange _exchange;
-    private LinkedList _exchanges=new LinkedList();
+    private LinkedList<HttpExchange> _exchanges=new LinkedList<HttpExchange>();
+    private Generator _generator;
+    private HttpParser _parser;
 
     /* ------------------------------------------------------------ */
-    HttpConnection(Buffers buffers,EndPoint endp,int hbs,int cbs)
+    HttpConnection(HttpDestination destination, Buffers buffers,EndPoint endp,int hbs,int cbs)
     {
+        _destination=destination;
         _endp=endp;
         _generator=new HttpGenerator(buffers,endp,hbs,cbs);
         _parser=new HttpParser(buffers,endp,new Handler(),hbs,cbs);
     }
 
-    /* ------------------------------------------------------------ */
-    public void sendExchange(HttpExchange ex) 
-        throws IOException
+    public HttpDestination getDestination()
     {
-        _exchanges.add(ex);
+        return _destination;
     }
 
-    /* ------------------------------------------------------------ */
-    private void nextExchange() throws IOException
-    {
-        if (_exchange!=null || _exchanges.size()==0)
-            return;
-        
-        _exchange=(HttpExchange)_exchanges.remove(0);
-        System.err.println("EX:"+_exchange.getURI());
-
-        _generator.setVersion(11); // TODO
-        _generator.setRequest(_exchange.getMethod(),_exchange.getURI());
-        
-        if (_exchange.getRequestContent()!=null)
-        {
-            _generator.addContent(_exchange.getRequestContent(),Generator.LAST);
-            _generator.completeHeader(_exchange.getRequestFields(),Generator.LAST);
-            _generator.complete();
-        }
-        
-    }
-    
     /* ------------------------------------------------------------ */
     public void handle() throws IOException
     {
@@ -112,7 +83,38 @@ public class HttpConnection
             }
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    public void send(HttpExchange ex) 
+        throws IOException
+    {
+        _exchanges.add(ex);
+        
+        // TODO schedule stuff
+        
+    }
 
+
+    /* ------------------------------------------------------------ */
+    private void nextExchange() throws IOException
+    {
+        if (_exchange!=null || _exchanges.size()==0)
+            return;
+        
+        _exchange=_exchanges.remove(0);
+        System.err.println("EX:"+_exchange.getURI());
+
+        _generator.setVersion(11); // TODO
+        _generator.setRequest(_exchange.getMethod(),_exchange.getURI());
+        
+        if (_exchange.getRequestContent()!=null)
+        {
+            _generator.addContent(_exchange.getRequestContent(),Generator.LAST);
+            _generator.completeHeader(_exchange.getRequestFields(),Generator.LAST);
+            _generator.complete();
+        }
+        
+    }
 
     /* ------------------------------------------------------------ */
     protected void reset(boolean returnBuffers)
@@ -124,16 +126,19 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     private class Handler extends HttpParser.EventHandler
     {
+        @Override
         public void content(Buffer ref) throws IOException
         {
             System.err.println(ref);
         }
 
+        @Override
         public void startRequest(Buffer method, Buffer url, Buffer version) throws IOException
         {
             throw new IllegalStateException();
         }
 
+        @Override
         public void startResponse(Buffer version, int status, Buffer reason) throws IOException
         {
             System.err.println(version+" "+status+" "+reason);
