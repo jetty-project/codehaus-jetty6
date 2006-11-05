@@ -124,7 +124,7 @@ public class SocketConnector extends AbstractConnector
         if (connection._sotimeout!=_maxIdleTime)
         {
             connection._sotimeout=_maxIdleTime;
-            ((Socket)endpoint.getConnection()).setSoTimeout(_maxIdleTime);
+            ((Socket)endpoint.getTransport()).setSoTimeout(_maxIdleTime);
         }
               
         super.customize(endpoint, request);

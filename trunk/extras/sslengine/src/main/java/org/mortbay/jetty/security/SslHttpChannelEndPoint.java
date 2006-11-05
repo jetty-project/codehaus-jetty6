@@ -12,11 +12,9 @@ import javax.net.ssl.SSLSession;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.jetty.nio.HttpChannelEndPoint;
+import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.nio.SelectChannelConnector.SelectSet;
 import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /**
@@ -25,7 +23,7 @@ import org.mortbay.util.StringUtil;
  * @author Nik Gonzalez <ngonzalez@exist.com>
  * @author Greg Wilkins <gregw@mortbay.com>
  */
-public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runnable
+public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndPoint implements Runnable
 {
     private static ByteBuffer[] __NO_BUFFERS={};
     private static ByteBuffer __EMPTY=ByteBuffer.allocate(0);
@@ -44,10 +42,10 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
     private final SSLSession _session;
 
     /* ------------------------------------------------------------ */
-    public SslHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectSet selectSet, SelectionKey key, SSLEngine engine)
+    public SslHttpChannelEndPoint(SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
             throws SSLException, IOException
     {
-        super(connector,channel,selectSet,key);
+        super(channel,selectSet,key);
 
         
         // ssl
@@ -389,7 +387,7 @@ public class SslHttpChannelEndPoint extends HttpChannelEndPoint implements Runna
         synchronized (this)
         {
             int ops = _key == null ? 0 : _key.interestOps();
-            _interestOps = ops | ((!_dispatched || _readBlocked > 0) ? SelectionKey.OP_READ : 0) | (_writable && _writeBlocked == 0 && !isBufferingOutput() ? 0 : SelectionKey.OP_WRITE);
+            _interestOps = ops | ((!_dispatched || _readBlocked) ? SelectionKey.OP_READ : 0) | (_writable && !_writeBlocked && !isBufferingOutput() ? 0 : SelectionKey.OP_WRITE);
             _writable = true; // Once writable is in ops, only removed with dispatch.
 
             if (_interestOps != ops)

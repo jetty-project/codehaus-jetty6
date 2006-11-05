@@ -143,7 +143,7 @@ public class SocketEndPoint extends StreamEndPoint
     /* 
      * @see org.mortbay.io.EndPoint#getConnection()
      */
-    public Object getConnection()
+    public Object getTransport()
     {
         return _socket;
     }

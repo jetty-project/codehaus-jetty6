@@ -26,6 +26,8 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
+import org.mortbay.io.nio.SelectChannelEndPoint;
+import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpSchemes;
@@ -34,7 +36,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.nio.HttpChannelEndPoint;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
@@ -357,23 +358,19 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         this._sslTrustManagerFactoryAlgorithm = algorithm;
     }
 
-
     public void setTruststore(String truststore)
     {
         _truststore = truststore;
-    }
-    
+    } 
 
     public void setTruststoreType(String truststoreType)
     {
         _truststoreType = truststoreType;
     }
 
-    /* ------------------------------------------------------------ */
-    @Override
-    public HttpChannelEndPoint newHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectChannelConnector.SelectSet selectSet, SelectionKey sKey) throws IOException
+    protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SslHttpChannelEndPoint(connector, channel, selectSet, sKey, createSSLEngine());
+        return new SslHttpChannelEndPoint(channel, selectSet, key, createSSLEngine());
     }
 
     /* ------------------------------------------------------------ */
