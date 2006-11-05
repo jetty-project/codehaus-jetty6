@@ -49,12 +49,14 @@ public class StreamEndPoint implements EndPoint
         return true;
     }
 
-    public void blockReadable(long millisecs)
+    public boolean blockReadable(long millisecs)
     {
+        return true;
     }
     
-    public void blockWritable(long millisecs)
+    public boolean blockWritable(long millisecs)
     {
+        return true;
     }
 
     /* 
@@ -224,7 +226,7 @@ public class StreamEndPoint implements EndPoint
     /* 
      * @see org.mortbay.io.EndPoint#getConnection()
      */
-    public Object getConnection()
+    public Object getTransport()
     {
         return null;
     }

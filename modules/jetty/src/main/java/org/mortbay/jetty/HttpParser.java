@@ -911,26 +911,16 @@ public class HttpParser implements Parser
             // Handle non-blocking end point
             else
             {
-                long filled=_parser.parseNext();
-                boolean blocked=false;
+                _parser.parseNext();
                 
                 // parse until some progress is made (or IOException thrown for timeout)
                 while(_content.length() == 0 && !_parser.isState(HttpParser.STATE_END))
                 {
-                    // if fill called, but no bytes read, then block
-                    if (filled>0)
-                        blocked=false;
-                    else if (filled==0)
-                    {
-                        if (blocked)
-                            throw new InterruptedIOException("timeout");
-                        
-                        blocked=true;
-                        _endp.blockReadable(_maxIdleTime); 
-                    }
-                    
+                    if (!_endp.blockReadable(_maxIdleTime))
+                        throw new InterruptedIOException("timeout");
+
                     // Try to get more _parser._content
-                    filled=_parser.parseNext();
+                    _parser.parseNext();
                 }
             }
             

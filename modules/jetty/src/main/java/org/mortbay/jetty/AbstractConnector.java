@@ -293,7 +293,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
 
         super.doStop();
     }
-
+    
     /* ------------------------------------------------------------ */
     public void join() throws InterruptedException
     {
@@ -431,7 +431,11 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     protected abstract void accept(int acceptorID) throws IOException, InterruptedException;
 
-
+    /* ------------------------------------------------------------ */
+    public void stopAccept(int acceptorID) throws Exception
+    {
+    }
+    
     /* ------------------------------------------------------------ */
     public boolean getResolveNames()
     {
@@ -479,8 +483,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
             try
             {
                 current.setPriority(current.getPriority()-1);
-                while (isRunning() && 
-                       (!(getThreadPool() instanceof LifeCycle) || ((LifeCycle)getThreadPool()).isRunning()))
+                while (isRunning())
                 {
                     try
                     {
@@ -675,7 +678,6 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         return (_statsStartedAt!=-1)?(System.currentTimeMillis()-_statsStartedAt):0;
     }
     
-
     /* ------------------------------------------------------------ */
     protected void connectionOpened(HttpConnection connection)
     {

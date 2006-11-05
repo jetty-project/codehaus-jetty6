@@ -117,16 +117,19 @@ public interface EndPoint
     public boolean isBufferred();
     
     /* ------------------------------------------------------------ */
-    public void blockReadable(long millisecs);
+    public boolean blockReadable(long millisecs);
 
     /* ------------------------------------------------------------ */
-    public void blockWritable(long millisecs);
+    public boolean blockWritable(long millisecs);
 
     /* ------------------------------------------------------------ */
     public boolean isOpen();
 
     /* ------------------------------------------------------------ */
-    public Object getConnection();
+    /**
+     * @return The underlying transport object (socket, channel, etc.)
+     */
+    public Object getTransport();
     
     /* ------------------------------------------------------------ */
     /**
