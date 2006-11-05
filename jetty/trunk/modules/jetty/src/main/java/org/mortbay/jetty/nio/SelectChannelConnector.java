@@ -17,18 +17,14 @@ package org.mortbay.jetty.nio;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.channels.ByteChannel;
-import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.nio.ChannelEndPoint;
+import org.mortbay.io.Connection;
+import org.mortbay.io.nio.SelectChannelEndPoint;
+import org.mortbay.io.nio.SelectorManager;
+import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
@@ -68,11 +64,46 @@ import org.mortbay.util.ajax.Continuation;
 public class SelectChannelConnector extends AbstractNIOConnector 
 {
     private transient ServerSocketChannel _acceptChannel;
-    private transient SelectionKey _acceptKey;
-    private transient SelectSet[] _selectSets;
-    private boolean _delaySelectKeyUpdate=false;
 
+    private SelectorManager _manager = new SelectorManager()
+    {
+        protected SocketChannel acceptChannel(SelectionKey key) throws IOException
+        {
+            SocketChannel channel = ((ServerSocketChannel)key.channel()).accept();
+            if (channel==null)
+                return null;
+            channel.configureBlocking(false);
+            Socket socket = channel.socket();
+            configure(socket);
+            return channel;
+        }
 
+        protected boolean dispatch(Runnable task) throws IOException
+        {
+            return getThreadPool().dispatch(task);
+        }
+
+        protected void endPointClosed(SelectChannelEndPoint endpoint)
+        {
+            connectionClosed((HttpConnection)endpoint.getConnection());
+        }
+
+        protected void endPointOpened(SelectChannelEndPoint endpoint)
+        {
+            connectionOpened((HttpConnection)endpoint.getConnection());
+        }
+
+        protected Connection newConnection(SocketChannel channel,SelectChannelEndPoint endpoint)
+        {
+            return new HttpConnection(SelectChannelConnector.this,endpoint,getServer());
+        }
+
+        protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey sKey) throws IOException
+        {
+            return SelectChannelConnector.this.newEndPoint(channel,selectSet,sKey);
+        }
+    };
+    
     /* ------------------------------------------------------------------------------- */
     /**
      * Constructor.
@@ -80,6 +111,33 @@ public class SelectChannelConnector extends AbstractNIOConnector
      */
     public SelectChannelConnector()
     {
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void accept(int acceptorID) throws IOException
+    {
+        _manager.doSelect(acceptorID);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void stopAccept(int acceptorID) throws Exception
+    {
+        _manager.doStop(acceptorID);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void close() throws IOException
+    {
+        if (_acceptChannel != null)
+            _acceptChannel.close();
+        _acceptChannel = null;
+
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
+    {
+        super.customize(endpoint, request);
     }
 
     /* ------------------------------------------------------------ */
@@ -97,46 +155,25 @@ public class SelectChannelConnector extends AbstractNIOConnector
      */
     public boolean getDelaySelectKeyUpdate()
     {
-        return _delaySelectKeyUpdate;
+        return _manager.isDelaySelectKeyUpdate();
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param delay If true, updating a {@link SelectionKey} is delayed until a redundant event is 
-     * schedules.  This is an optimization that assumes event handling can be completed before the next select
-     * completes.
-     */
-    public void setDelaySelectKeyUpdate(boolean delay)
+    /* ------------------------------------------------------------------------------- */
+    public int getLocalPort()
     {
-        _delaySelectKeyUpdate = delay;
+        if (_acceptChannel==null || !_acceptChannel.isOpen())
+            return -1;
+        return _acceptChannel.socket().getLocalPort();
     }
 
     /* ------------------------------------------------------------ */
     /*
-     * @see org.mortbay.jetty.AbstractConnector#doStart()
+     * @see org.mortbay.jetty.Connector#newContinuation()
      */
-    protected void doStart() throws Exception
+    public Continuation newContinuation()
     {
-        _selectSets = new SelectSet[getAcceptors()];
-        for (int i=0;i<_selectSets.length;i++)
-            _selectSets[i]= new SelectSet(i);
-
-        super.doStart();
-        
+        return new RetryContinuation();
     }
-
-    /* ------------------------------------------------------------ */
-    /*
-     * @see org.mortbay.jetty.AbstractConnector#doStop()
-     */
-    protected void doStop() throws Exception
-    {
-        super.doStop();
-        for (int i=0;i<_selectSets.length;i++)
-            _selectSets[i].stop();
-        _selectSets=null;
-    }
-
 
     /* ------------------------------------------------------------ */
     public void open() throws IOException
@@ -152,401 +189,188 @@ public class SelectChannelConnector extends AbstractNIOConnector
             _acceptChannel.socket().bind(addr,getAcceptQueueSize());
 
             // Register accepts on the server socket with the selector.
-            synchronized (_selectSets[0])
-            {
-                _acceptKey = _acceptChannel.register(_selectSets[0].getSelector(), SelectionKey.OP_ACCEPT);
-            }
+            _manager.register(_acceptChannel,SelectionKey.OP_ACCEPT);
         }
     }
+
 
     /* ------------------------------------------------------------ */
-    public void close() throws IOException
+    /**
+     * @param delay If true, updating a {@link SelectionKey} is delayed until a redundant event is 
+     * schedules.  This is an optimization that assumes event handling can be completed before the next select
+     * completes.
+     */
+    public void setDelaySelectKeyUpdate(boolean delay)
     {
-        if (_acceptChannel != null)
-            _acceptChannel.close();
-        _acceptChannel = null;
-
+        _manager.setDelaySelectKeyUpdate(delay);
     }
 
-    /* ------------------------------------------------------------ */
-    public void accept(int acceptorID) throws IOException
+    public void setMaxIdleTime(int maxIdleTime)
     {
-        if (_selectSets!=null && _selectSets.length>acceptorID && _selectSets[acceptorID]!=null)
-            _selectSets[acceptorID].accept();
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public void customize(EndPoint endpoint, Request request) throws IOException
-    {
-        super.customize(endpoint, request);
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public HttpChannelEndPoint newHttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectChannelConnector.SelectSet selectSet, SelectionKey sKey) throws IOException
-    {
-        return new HttpChannelEndPoint(connector, channel, selectSet, sKey);
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public int getLocalPort()
-    {
-        if (_acceptChannel==null || !_acceptChannel.isOpen())
-            return -1;
-        return _acceptChannel.socket().getLocalPort();
-    }
-    
-    /* ------------------------------------------------------------------------------- */
-    /* ------------------------------------------------------------------------------- */
-    /* ------------------------------------------------------------------------------- */
-    public class SelectSet 
-    {
-        private transient int _setID;
-        private transient Timeout _idleTimeout;
-        private transient Timeout _retryTimeout;
-        private transient Selector _selector;
-        private transient List[] _changes;
-        private transient int _change;
-        private transient int _nextSet;
-
-        /* ------------------------------------------------------------ */
-        SelectSet(int acceptorID) throws Exception
-        {
-            _setID=acceptorID;
-            
-            _idleTimeout = new Timeout();
-            _idleTimeout.setDuration(getMaxIdleTime());
-            _retryTimeout = new Timeout();
-            _retryTimeout.setDuration(0L);
-
-            // create a selector;
-            _selector = Selector.open();
-            _changes = new ArrayList[] {new ArrayList(),new ArrayList()};
-            _change=0;
-        }
-
-        /* ------------------------------------------------------------ */
-        Selector getSelector()
-        {
-            return _selector;
-        }
-
-        /* ------------------------------------------------------------ */
-        void stop() throws Exception
-        {
-            synchronized(this)
-            {
-                Iterator iter = new ArrayList(_selector.keys()).iterator();
-                while (iter.hasNext())
-                {
-                    SelectionKey key = (SelectionKey)iter.next();
-                    if (key==null)
-                        continue;
-                    HttpChannelEndPoint endpoint = (HttpChannelEndPoint)key.attachment();
-                    if (endpoint!=null)
-                    {
-                        try
-                        {
-                            endpoint.close();
-                        }
-                        catch(IOException e)
-                        {
-                            Log.ignore(e);
-                        }
-                    }
-                }
-                
-                _idleTimeout.cancelAll();
-                _retryTimeout.cancelAll();
-                try
-                {
-                    if (_selector != null)
-                        _selector.close();
-                }
-                catch (IOException e)
-                {
-                    Log.ignore(e);
-                } 
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        public void accept() throws IOException
-        {
-            long idle_next = 0;
-            long retry_next = 0;
-            
-            List changes;
-            synchronized (_changes)
-            {
-                changes=_changes[_change];
-                _change=_change==0?1:0;
-            }
-            
-            // Make any key changes required
-            for (int i = 0; i < changes.size(); i++)
-            {
-                try
-                {
-                    Object o = changes.get(i);
-                    if (o instanceof HttpChannelEndPoint)
-                    {
-                        // Update the operatios for a key.
-                        HttpChannelEndPoint endpoint = (HttpChannelEndPoint)o;
-                        endpoint.syncKey();
-                    }
-                    else if (o instanceof SocketChannel)
-                    {
-                        // finish accepting this connection
-                        SocketChannel channel=(SocketChannel)o;
-                        SelectionKey cKey = channel.register(_selector, SelectionKey.OP_READ);
-                        HttpChannelEndPoint endpoint = newHttpChannelEndPoint(SelectChannelConnector.this,channel,this,cKey);
-                        
-                        if (_delaySelectKeyUpdate && endpoint.dispatch(_delaySelectKeyUpdate))
-                            dispatch(endpoint);
-                            
-                    }
-                    else if (o instanceof RetryContinuation)
-                    {
-                        dispatch(((RetryContinuation)o)._endPoint);
-                    }
-                    else
-                        throw new IllegalStateException();
-                }
-                catch (CancelledKeyException e)
-                {
-                    if (isRunning())
-                        Log.warn(e);
-                    else
-                        Log.debug(e);
-                }
-            }
-            changes.clear();
-            
-            synchronized (this)
-            {
-                _idleTimeout.setDuration(getMaxIdleTime());
-                idle_next=_idleTimeout.getTimeToNext();
-                retry_next=_retryTimeout.getTimeToNext();
-            }
-                        
-            // workout how low to wait in select
-            long wait = getMaxIdleTime();
-            if (wait < 0 || idle_next >= 0 && wait > idle_next)
-                wait = idle_next;
-            if (wait < 0 || retry_next >= 0 && wait > retry_next)
-                wait = retry_next;
-            
-            
-            // Do the select.
-            if (wait > 0)
-                _selector.select(wait);
-            else if (wait == 0)
-                _selector.selectNow();
-            else
-                _selector.select();
-            
-            long now=-1;
-            
-            // have we been destroyed while sleeping
-            if (!_selector.isOpen())
-                return;
-            
-            // update the timers for task schedule in this loop
-            now = System.currentTimeMillis();
-            _idleTimeout.setNow(now);
-            _retryTimeout.setNow(now);
-            
-            // Look for things to do
-            Iterator iter = _selector.selectedKeys().iterator();
-            while (iter.hasNext())
-            {
-                SelectionKey key = (SelectionKey) iter.next();
-                iter.remove();
-
-                try
-                {
-                    if (!key.isValid())
-                    {
-                        key.cancel();
-                        HttpChannelEndPoint endpoint = (HttpChannelEndPoint)key.attachment();
-                        if (endpoint != null)
-                        {
-                            endpoint.close();
-                            if (endpoint._connection!=null)
-                                connectionClosed(endpoint._connection);
-                        }
-                        continue;
-                    }
-
-                    if (key.equals(_acceptKey))
-                    {
-                        if (key.isAcceptable())
-                        {
-                            // Accept a new connection.
-                            SocketChannel channel = _acceptChannel.accept();
-                            if (channel==null)
-                                continue;
-                            channel.configureBlocking(false);
-                            Socket socket = channel.socket();
-                            configure(socket);
-                            
-                            // TODO make it reluctant to leave 0
-                            _nextSet=++_nextSet%_selectSets.length;
-                            
-                            // Is this for this selectset
-                            if (_nextSet!=_setID)
-                            {
-                                // nope - give it to another.
-                                _selectSets[_nextSet].addChange(channel);
-                                _selectSets[_nextSet].wakeup();
-                            }
-                            else
-                            {
-                                // bind connections to this select set.
-                                SelectionKey cKey = channel.register(_selectSets[_nextSet].getSelector(), SelectionKey.OP_READ);
-                                newHttpChannelEndPoint(SelectChannelConnector.this,channel,_selectSets[_nextSet],cKey);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        HttpChannelEndPoint endpoint = (HttpChannelEndPoint)key.attachment();
-                        if (endpoint != null && endpoint.dispatch(_delaySelectKeyUpdate))
-                            dispatch(endpoint);
-                    }
-
-                    key = null;
-                }
-                catch (CancelledKeyException e)
-                {
-                    // TODO investigate if this actually is a problem?
-                    if (isRunning())
-                        Log.warn(e);
-                    else
-                        Log.ignore(e);
-                }
-                catch (Exception e)
-                {
-                    if (isRunning())
-                        Log.warn(e);
-                    else
-                        Log.ignore(e);
-                    if (key != null && key != _acceptKey)
-                        key.interestOps(0);
-                }
-            }
-
-
-            // tick over the timer
-            synchronized (this)
-            {
-                now = System.currentTimeMillis();
-                _retryTimeout.setNow(now);
-                _idleTimeout.setNow(now);
-            }
-            
-            while (_selector!=null)
-            {
-                Timeout.Task task=null;
-                synchronized(this)
-                {
-                    task=_idleTimeout.expired();
-                    if (task==null)
-                        task=_retryTimeout.expired();
-                }
-                if (task==null)
-                    break;
-                else
-                    task.expire();
-            }
-
-        }
-        
-        /* ------------------------------------------------------------------------------- */
-        private void dispatch(HttpChannelEndPoint endpoint)
-        {
-            boolean dispatch_done = false;
-            try
-            {
-                dispatch_done = getThreadPool().dispatch(endpoint);
-            }
-            finally
-            {
-                if (!dispatch_done)
-                {
-                    Log.warn("dispatch failed! threads="+SelectChannelConnector.this.getThreadPool().getThreads()+" idle="+SelectChannelConnector.this.getThreadPool().getIdleThreads());
-                    endpoint.undispatch();
-                }
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        public void scheduleIdle(HttpChannelEndPoint.IdleTask task, boolean idle)
-        {
-            synchronized (this)
-            {
-            	task.schedule(_idleTimeout);
-            }
-        }
-        
-        /* ------------------------------------------------------------ */
-        public void cancelIdle(HttpChannelEndPoint.IdleTask task)
-        {
-            synchronized (this)
-            {
-                task.cancel();
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        public void scheduleTimeout(Timeout.Task task, long timeout)
-        {
-            synchronized (this)
-            {
-                _retryTimeout.schedule(task, timeout);
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        public void addChange(Object point)
-        {
-            synchronized (_changes)
-            {
-                _changes[_change].add(point);
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        public void wakeup()
-        {
-            Selector selector = _selector;
-            if (selector!=null)
-                selector.wakeup();
-        }
+        _manager.setMaxIdleTime(maxIdleTime);
+        super.setMaxIdleTime(maxIdleTime);
     }
 
     /* ------------------------------------------------------------ */
     /*
-     * @see org.mortbay.jetty.Connector#newContinuation()
+     * @see org.mortbay.jetty.AbstractConnector#doStart()
      */
-    public Continuation newContinuation()
+    protected void doStart() throws Exception
     {
-        return new RetryContinuation();
+        _manager.setSelectSets(getAcceptors());
+        _manager.setMaxIdleTime(getMaxIdleTime());
+        _manager.start();
+        super.doStart();
+    }
+
+    /* ------------------------------------------------------------ */
+    /*
+     * @see org.mortbay.jetty.AbstractConnector#doStop()
+     */
+    protected void doStop() throws Exception
+    {
+        _manager.stop();
+        super.doStop();
+    }
+
+    /* ------------------------------------------------------------ */
+    protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
+    {
+        return new ConnectorEndPoint(channel,selectSet,key);
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static class ConnectorEndPoint extends SelectChannelEndPoint
+    {
+        public ConnectorEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
+        {
+            super(channel,selectSet,key);
+        }
+
+        public void close() throws IOException
+        {
+            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+            if (continuation != null && continuation.isPending())
+                continuation.reset();
+
+            super.close();
+        }
+
+        public void undispatch()
+        {
+            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+
+            if (continuation != null)
+            {
+                // We have a continuation
+                Log.debug("continuation {}", continuation);
+                if (!continuation.schedule())
+                    super.undispatch();
+            }
+            else
+            {
+                super.undispatch();
+            }
+        }
+
     }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public static class RetryContinuation extends Timeout.Task implements Continuation
+    public static class RetryContinuation extends Timeout.Task implements Continuation, Runnable
     {
-        Object _object;
-        HttpChannelEndPoint _endPoint=(HttpChannelEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
-        long _timeout;
+        SelectChannelEndPoint _endPoint=(SelectChannelEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
         boolean _new = true;
+        Object _object;
         boolean _pending = false;
         boolean _resumed = false;
-        boolean _scheduled =false;
         RetryRequest _retry;
+        boolean _scheduled =false;
+        long _timeout;
+        
+        public void expire()
+        {
+            boolean redispatch=false;
+            synchronized (this)
+            {
+                redispatch=_scheduled && _pending && !_resumed;
+            }
+            if (redispatch)
+            {
+                _endPoint.getSelectSet().addChange(this);
+                _endPoint.getSelectSet().wakeup();
+            }
+        }
+        
+        public Object getObject()
+        {
+            return _object;
+        }
+
+        public long getTimeout()
+        {
+            return _timeout;
+        }
+
+        public boolean isNew()
+        {
+            return _new;
+        }
+
+        public boolean isPending()
+        {
+            return _pending;
+        }
+
+        public void reset()
+        {
+            synchronized (this)
+            {
+                _resumed = false;
+                _pending = false;
+                _scheduled = false;
+            }
+            
+            synchronized (_endPoint.getSelectSet())
+            {
+                this.cancel();   
+            }
+        } 
+        
+        public void resume()
+        {
+            boolean redispatch=false;
+            synchronized (this)
+            {
+                if (_pending && !isExpired())
+                {
+                    _resumed = true;
+                    redispatch=_scheduled;
+                }
+            }
+
+            if (redispatch)
+            {
+                SelectSet selectSet = _endPoint.getSelectSet();
+                
+                synchronized (selectSet)
+                {
+                    this.cancel();   
+                }
+
+                selectSet.addChange(this);
+                selectSet.wakeup();
+            }
+        }
+        
+        public void run()
+        {
+            _endPoint.run();
+        }
         
         /* Called when a run exits */
         public boolean schedule()
@@ -563,41 +387,18 @@ public class SelectChannelConnector extends AbstractNIOConnector
             }
             
             if (redispatch)
-                _endPoint._selectSet.addChange(this);
-            else
-                _endPoint._selectSet.scheduleTimeout(this,_timeout);
+                _endPoint.getSelectSet().addChange(this);
             
-            _endPoint._selectSet.wakeup();
+            else
+                _endPoint.getSelectSet().scheduleTimeout(this,_timeout);
+            
+            _endPoint.getSelectSet().wakeup();
             return true;
         }
-        
-        public long getTimeout()
-        {
-            return _timeout;
-        }
 
-        public boolean isNew()
+        public void setObject(Object object)
         {
-            return _new;
-        }
-
-        public boolean isPending()
-        {
-            return _pending;
-        }
-
-        public void expire()
-        {
-            boolean redispatch=false;
-            synchronized (this)
-            {
-                redispatch=_scheduled && _pending && !_resumed;
-            }
-            if (redispatch)
-            {
-                _endPoint._selectSet.addChange(this);
-                _endPoint._selectSet.wakeup();
-            }
+            _object = object;
         }
 
         public boolean suspend(long timeout)
@@ -624,98 +425,13 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 _pending = false;
             }
 
-            synchronized (_endPoint._selectSet)
+            synchronized (_endPoint.getSelectSet())
             {
                 this.cancel();   
             }
 
             return resumed;
-        } 
-        
-        public void resume()
-        {
-            boolean redispatch=false;
-            synchronized (this)
-            {
-                if (_pending && !isExpired())
-                {
-                    _resumed = true;
-                    redispatch=_scheduled;
-                }
-            }
-
-            if (redispatch)
-            {
-                synchronized (_endPoint._selectSet)
-                {
-                    this.cancel();   
-                }
-
-                _endPoint._selectSet.addChange(this);
-                _endPoint._selectSet.wakeup();
-            }
-        }
-        
-        public void reset()
-        {
-            synchronized (this)
-            {
-                _resumed = false;
-                _pending = false;
-                _scheduled = false;
-            }
-            
-            synchronized (_endPoint._selectSet)
-            {
-                this.cancel();   
-            }
-        }
-        
-        public Object getObject()
-        {
-            return _object;
-        }
-
-        public void setObject(Object object)
-        {
-            _object = object;
-        }
-
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static class SelectChannelEndPoint extends ChannelEndPoint
-    {
-        protected SelectChannelConnector _connector;
-        protected HttpConnection _connection;
-
-        /* ------------------------------------------------------------ */
-        public SelectChannelEndPoint(SelectChannelConnector connector, ByteChannel channel)
-        {
-            super(channel);
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void connectionOpened()
-        {
-            _connector.connectionOpened(_connection);
-        }
-        
-        /* ------------------------------------------------------------ */
-        protected void connectionClosed()
-        {
-            _connector.connectionClosed(_connection);
-        }
-        
-        /* ------------------------------------------------------------ */
-        /*
-         * @see org.mortbay.io.nio.ChannelEndPoint#close()
-         */
-        public void close() throws IOException
-        {
-            super.close();
         }
     }
+
 }

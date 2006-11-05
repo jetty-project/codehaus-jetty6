@@ -86,7 +86,7 @@ public class ClientCertAuthenticator implements Authenticator
             if (!connection.getConnector().isConfidential(request))
                 return null;
             
-            Object s = connection.getEndPoint().getConnection();
+            Object s = connection.getEndPoint().getTransport();
             if (!(s instanceof SSLSocket))
                 return null;
             SSLSocket socket = (SSLSocket)s;

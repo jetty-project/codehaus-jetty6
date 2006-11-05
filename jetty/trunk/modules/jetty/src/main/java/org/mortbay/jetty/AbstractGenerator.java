@@ -483,7 +483,8 @@ public abstract class AbstractGenerator implements Generator
                 while (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
                 {
                     if (!_generator._endp.isBlocking())
-                        _generator._endp.blockWritable(_maxIdleTime);
+                        if (!_generator._endp.blockWritable(_maxIdleTime))
+                            throw new IOException("timeout");
                     _generator.flush();
                 }
             }
@@ -525,7 +526,8 @@ public abstract class AbstractGenerator implements Generator
             while (_generator.isBufferFull() && _generator._endp.isOpen())
             {
                 if (!_generator._endp.isBlocking())
-                    _generator._endp.blockWritable(_maxIdleTime);
+                    if(!_generator._endp.blockWritable(_maxIdleTime))
+                        throw new IOException("timeout");
                 flush();
             }
 
@@ -547,7 +549,8 @@ public abstract class AbstractGenerator implements Generator
             while (_generator.isBufferFull() && _generator._endp.isOpen())
             {
                 if (!_generator._endp.isBlocking())
-                    _generator._endp.blockWritable(_maxIdleTime);
+                    if(!_generator._endp.blockWritable(_maxIdleTime))
+                        throw new IOException("timeout");
                 flush();
             }
 
@@ -562,7 +565,8 @@ public abstract class AbstractGenerator implements Generator
             while (buffer.length() > 0 && _generator._endp.isOpen())
             {
                 if (!_generator._endp.isBlocking())
-                    _generator._endp.blockWritable(_maxIdleTime); 
+                    if(!_generator._endp.blockWritable(_maxIdleTime))
+                        throw new IOException("timeout"); 
                 flush();
             }
         }

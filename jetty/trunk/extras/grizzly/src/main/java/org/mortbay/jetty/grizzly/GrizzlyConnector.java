@@ -146,7 +146,6 @@ public class GrizzlyConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     public void accept(int acceptorID) throws IOException
     {
-        
         try
         {
             // TODO - this may not exactly be right.  accept is called in a loop, so we
@@ -165,6 +164,13 @@ public class GrizzlyConnector extends AbstractNIOConnector
         
     }
 
+    /* ------------------------------------------------------------ */
+    public void stopAccept(int acceptorID) throws Exception
+    {
+        // TODO 
+    }
+    
+    
     /* ------------------------------------------------------------------------------- */
     public void customize(EndPoint endpoint, Request request) throws IOException
     {

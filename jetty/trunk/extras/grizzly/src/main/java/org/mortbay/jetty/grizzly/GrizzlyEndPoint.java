@@ -261,37 +261,52 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     }
     
     
-    public void blockReadable(long millisecs)
+    public boolean blockReadable(long millisecs)
     {
-        Buffer buffer = ((HttpParser)_connection.getParser()).getHeaderBuffer();
-        if (buffer instanceof NIOBuffer){
-            ByteBuffer byteBuffer = ((NIOBuffer)buffer).getByteBuffer();
+        Buffer buffer=((HttpParser)_connection.getParser()).getHeaderBuffer();
+        if (buffer instanceof NIOBuffer)
+        {
+            ByteBuffer byteBuffer=((NIOBuffer)buffer).getByteBuffer();
             _blockingChannel.setReadTimeout(millisecs);
-            try{
+            try
+            {
                 _blockingChannel.read(byteBuffer);
-            } catch (IOException ex){
-                ; // TODO: Rethrow in case the client closed the connection.
             }
-        } else {
-            ; //TODO: How to handle this case.
+            catch (IOException ex)
+            {
+                ; // TODO: Rethrow in case the client closed the connection.
+                return false;
+            }
         }
+        else
+        {
+            ; // TODO: How to handle this case.
+        }
+        return true;
     }
 
-    
-    public void blockWritable(long millisecs)
+    public boolean blockWritable(long millisecs)
     {
-        Buffer buffer = ((HttpParser)_connection.getParser()).getHeaderBuffer();
-        if (buffer instanceof NIOBuffer){
-            ByteBuffer byteBuffer = ((NIOBuffer)buffer).getByteBuffer();
+        Buffer buffer=((HttpParser)_connection.getParser()).getHeaderBuffer();
+        if (buffer instanceof NIOBuffer)
+        {
+            ByteBuffer byteBuffer=((NIOBuffer)buffer).getByteBuffer();
             _blockingChannel.setWriteTimeout(millisecs);
-            try{
+            try
+            {
                 _blockingChannel.write(byteBuffer);
-            } catch (IOException ex){
-                ; // TODO: Rethrow in case the client closed the connection.
             }
-        } else {
+            catch (IOException ex)
+            {
+                // TODO: Rethrow in case the client closed the connection.
+                return false;
+            }
+        }
+        else
+        {
             ; //TODO: How to handle this case.
-        }       
+        }
+        return true;
     }
     
     public boolean keepAlive()

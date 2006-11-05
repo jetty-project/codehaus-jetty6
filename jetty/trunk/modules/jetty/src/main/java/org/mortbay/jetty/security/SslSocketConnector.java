@@ -235,7 +235,7 @@ public class SslSocketConnector extends SocketConnector
         request.setScheme(HttpSchemes.HTTPS);
         
         SocketEndPoint socket_end_point = (SocketEndPoint)endpoint;
-        SSLSocket sslSocket = (SSLSocket)socket_end_point.getConnection();
+        SSLSocket sslSocket = (SSLSocket)socket_end_point.getTransport();
         
         try
         {

@@ -25,6 +25,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.util.URIUtil;
@@ -36,7 +37,7 @@ import org.mortbay.util.ajax.Continuation;
  * To change the template for this generated type comment go to Window - Preferences - Java - Code
  * Generation - Code and Comments
  */
-public class HttpConnection
+public class HttpConnection implements org.mortbay.io.Connection
 {
     private static int UNKNOWN = -2;
     private static ThreadLocal __currentConnection = new ThreadLocal();

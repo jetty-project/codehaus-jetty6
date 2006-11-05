@@ -100,13 +100,15 @@ public class ByteArrayEndPoint implements EndPoint
     }
 
     /* ------------------------------------------------------------ */
-    public void blockReadable(long millisecs)
+    public boolean blockReadable(long millisecs)
     {
+        return true;
     }
 
     /* ------------------------------------------------------------ */
-    public void blockWritable(long millisecs)
+    public boolean blockWritable(long millisecs)
     {
+        return true;
     }
 
     /* ------------------------------------------------------------ */
@@ -256,7 +258,7 @@ public class ByteArrayEndPoint implements EndPoint
     /* 
      * @see org.mortbay.io.EndPoint#getConnection()
      */
-    public Object getConnection()
+    public Object getTransport()
     {
         return _inBytes;
     }
