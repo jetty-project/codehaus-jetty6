@@ -1,7 +1,6 @@
 
 dojo.require("dojo.io.cometd");
 
-
 var EvUtil =
 {
     getKeyCode : function(ev)
@@ -43,8 +42,8 @@ var room =
   
   leave: function()
   {
-	   cometd.unsubscribe("/chat/demo", false, room, "_chat");
-	   cometd.publish("/chat/demo", { user: room._username, leave: true, chat : room._username+" has left"});
+       cometd.unsubscribe("/chat/demo", false, room, "_chat");
+       cometd.publish("/chat/demo", { user: room._username, leave: true, chat : room._username+" has left"});
 	   
        // switch the input form
        $('join').className='';
@@ -64,7 +63,7 @@ var room =
     	text=text.replace(/>/g,'&gt;');
     	
         // XXX ajax.sendMessage('chat',text);
-	    cometd.publish("/chat/demo", { user: room._username, chat: text});
+        cometd.publish("/chat/demo", { user: room._username, chat: text});
     }
   },
   
@@ -97,9 +96,7 @@ var room =
   
   _init: function()
   {
-	   cometd.init({}, "/cometd");
 				
-	   
        // XXX ajax.addListener('chat',room._chat);
        // XXX ajax.addListener('joined',room._joined);
        // XXX ajax.addListener('left',room._left);
