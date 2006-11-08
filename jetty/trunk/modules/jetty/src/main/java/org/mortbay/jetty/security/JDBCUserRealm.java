@@ -215,7 +215,7 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
             long now = System.currentTimeMillis();
             if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
             {
-                //super.clear();
+                _users.clear();
                 _roles.clear();
                 _lastHashPurge = now;
             }
