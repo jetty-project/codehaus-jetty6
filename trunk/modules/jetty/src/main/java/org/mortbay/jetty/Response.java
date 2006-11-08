@@ -962,7 +962,7 @@ public class Response implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "HTTP/1.1 "+_status+" "+ _reason +"\n"+
+        return "HTTP/1.1 "+_status+" "+ (_reason==null?"":_reason) +System.getProperty("line.separator")+
         _connection.getResponseFields().toString();
     }
 
