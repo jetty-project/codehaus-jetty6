@@ -97,6 +97,7 @@ public class Ajp13Generator extends AbstractGenerator
     /* ------------------------------------------------------------ */
     private boolean _needMore=false;
     private boolean _needEOC=false;
+    private boolean _hasSentEOC=false;
     private boolean _bufferPrepared=false;
 
     /* ------------------------------------------------------------ */
@@ -402,10 +403,16 @@ public class Ajp13Generator extends AbstractGenerator
 
             if (_endp==null)
             {
-                if (_needMore && _buffer != null) 
-                    _buffer.put(AJP13_MORE_CONTENT);
+                if (_needMore && _buffer != null)
+                {
+                        if(!_hasSentEOC)
+                                _buffer.put(AJP13_MORE_CONTENT);
+                }
                 if (_needEOC&&_buffer!=null)
+                {
+                     _hasSentEOC = true;
                     _buffer.put(AJP13_END_RESPONSE);
+                }
                 _needEOC=false;
                 return 0;
             }
@@ -576,19 +583,22 @@ public class Ajp13Generator extends AbstractGenerator
 
             if (_needMore)
             {
+                    
                 if (_header==null)
                     _header=_buffers.getBuffer(_headerBufferSize);
                 
                 if (_buffer==null&&_header!=null && _header.space()>=AJP13_MORE_CONTENT.length)
                 {
-                    _header.put(AJP13_MORE_CONTENT);
+                        if(!_hasSentEOC)
+                                _header.put(AJP13_MORE_CONTENT);
                     _needMore=false;
                 }
                 else if (_buffer!=null && _buffer.space()>=AJP13_MORE_CONTENT.length)
                 {
                     // send closing packet if all contents
                     // are added
-                    _buffer.put(AJP13_MORE_CONTENT);
+                if(!_hasSentEOC)
+                        _buffer.put(AJP13_MORE_CONTENT);
                     _needMore=false;
                     _bufferPrepared=true;
                 }
@@ -598,6 +608,7 @@ public class Ajp13Generator extends AbstractGenerator
             {
                 if (_buffer==null&&_header.space()>=AJP13_END_RESPONSE.length)
                 {
+                    _hasSentEOC = true;
                     _header.put(AJP13_END_RESPONSE);
                     _needEOC=false;
                 }
@@ -605,6 +616,7 @@ public class Ajp13Generator extends AbstractGenerator
                 {
                     // send closing packet if all contents
                     // are added
+                    _hasSentEOC = true;
                     _buffer.put(AJP13_END_RESPONSE);
                     _needEOC=false;
                     _bufferPrepared=true;
@@ -688,5 +700,10 @@ public class Ajp13Generator extends AbstractGenerator
     {
         _needMore=needMore;
     }
+    
+    
+    
+    
+    
 
 }
