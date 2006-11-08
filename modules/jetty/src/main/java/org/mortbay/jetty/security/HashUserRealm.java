@@ -65,7 +65,7 @@ public class HashUserRealm implements UserRealm, SSORealm
     /* ------------------------------------------------------------ */
     private String _realmName;
     private String _config;
-    private HashMap _users=new HashMap();
+    protected HashMap _users=new HashMap();
     protected HashMap _roles=new HashMap(7);
     private SSORealm _ssoRealm;
     
