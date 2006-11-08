@@ -181,7 +181,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /* ------------------------------------------------------------ */
     public boolean isOpen()
     {
-        return super.isOpen() && _key.isValid();
+        SelectionKey key=_key;
+        return super.isOpen() && key!=null && key.isValid();
     }
 
     /* ------------------------------------------------------------ */
