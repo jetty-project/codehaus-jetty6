@@ -91,7 +91,8 @@ public class StdErrLog implements Logger
     public void warn(String msg, Throwable th)
     {
         System.err.println(_dateCache.now()+":"+name+":WARN:  "+msg);
-        th.printStackTrace();
+        if (th!=null)
+            th.printStackTrace();
     }
 
     private String format(String msg, Object arg0, Object arg1)
