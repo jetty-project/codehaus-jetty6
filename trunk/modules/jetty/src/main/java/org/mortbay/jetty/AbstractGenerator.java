@@ -697,9 +697,14 @@ public abstract class AbstractGenerator implements Generator
                             _converter.flush();
                         }
                     }
-                    
-                    _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                    _bytes.reset();
+                    try
+                    {
+                        _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                    }
+                    finally 
+                    {
+                        _bytes.reset();
+                    }
                 }
             }
             else
@@ -735,9 +740,14 @@ public abstract class AbstractGenerator implements Generator
                                 _converter.flush();
                             }
                         }
-                        
-                        _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                        _bytes.reset();
+                        try
+                        {
+                            _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                        }
+                        finally
+                        {
+                            _bytes.reset();
+                        }
                     }
                 } 
             }
@@ -785,10 +795,15 @@ public abstract class AbstractGenerator implements Generator
                                 _converter.flush();
                             }
                         }
-                        
-                        byte[] b=_bytes.getBuf();
-                        _out.write(b,0,_bytes.getCount());
-                        _bytes.reset();
+                        try
+                        {
+                            byte[] b=_bytes.getBuf();
+                            _out.write(b,0,_bytes.getCount());
+                        }
+                        finally
+                        {
+                            _bytes.reset();
+                        }
                     }
                 }
             }
