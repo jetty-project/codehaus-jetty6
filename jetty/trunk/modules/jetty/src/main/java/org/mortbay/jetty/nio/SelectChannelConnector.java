@@ -21,6 +21,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
@@ -205,6 +206,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
         _manager.setDelaySelectKeyUpdate(delay);
     }
 
+    /* ------------------------------------------------------------ */
     public void setMaxIdleTime(int maxIdleTime)
     {
         _manager.setMaxIdleTime(maxIdleTime);
@@ -274,6 +276,19 @@ public class SelectChannelConnector extends AbstractNIOConnector
             {
                 super.undispatch();
             }
+        }
+
+        public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
+        {
+            // TODO - is this really expensive? 
+            scheduleIdle(); 
+            return super.flush(header,buffer,trailer);
+        }
+
+        public int flush(Buffer buffer) throws IOException
+        {
+            scheduleIdle();
+            return super.flush(buffer);
         }
 
     }

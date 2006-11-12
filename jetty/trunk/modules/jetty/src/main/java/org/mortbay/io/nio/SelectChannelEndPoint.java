@@ -54,7 +54,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         _key = key;
         _key.attach(this); // TODO not here!
         
-        _selectSet.scheduleIdle(_timeoutTask, _connection.isIdle());
+        scheduleIdle();
     }
 
     
@@ -69,7 +69,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
      */
     public boolean dispatch(boolean assumeShortDispatch) throws IOException
     {
-        _selectSet.scheduleIdle(_timeoutTask, _connection.isIdle());
+        scheduleIdle();
 
         // If threads are blocked on this
         synchronized (this)
@@ -118,6 +118,12 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
 
     /* ------------------------------------------------------------ */
+    protected void scheduleIdle()
+    {
+        _selectSet.scheduleIdle(_timeoutTask);
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * Called when a dispatched thread is no longer handling the endpoint. The selection key
      * operations are updated.
@@ -133,8 +139,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 if (getChannel().isOpen())
                 {
                     updateKey();
-                    if (_connection.isIdle())
-                        _selectSet.scheduleIdle(_timeoutTask, true);
+                    scheduleIdle();
                 }
             }
             catch (Exception e)
