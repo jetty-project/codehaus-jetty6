@@ -112,6 +112,7 @@ public class ObjectMBean implements DynamicMBean
                 String pName = oClass.getPackage().getName();
                 String cName = oClass.getName().substring(pName.length() + 1);
                 String mName = pName + ".management." + cName + "MBean";
+                
 
                 try
                 {
@@ -172,12 +173,23 @@ public class ObjectMBean implements DynamicMBean
         _managed = managedObject;
         _loader = Thread.currentThread().getContextClassLoader();
     }
+    
+    public ObjectName getObjectName()
+    {
+        return null;
+    }
 
     protected void setMBeanContainer(MBeanContainer container)
     {
        this._mbeanContainer = container;
     }
 
+    public MBeanContainer getMBeanContainer ()
+    {
+        return this._mbeanContainer;
+    }
+    
+    
     public MBeanInfo getMBeanInfo()
     {
         try
@@ -215,6 +227,7 @@ public class ObjectMBean implements DynamicMBean
                         Log.debug(rName);
                         ResourceBundle bundle = Loader.getResourceBundle(o_class, rName,true,Locale.getDefault());
 
+                        
                         // Extract meta data from bundle
                         Enumeration e = bundle.getKeys();
                         while (e.hasMoreElements())

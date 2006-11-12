@@ -167,23 +167,32 @@ public class MBeanContainer implements Container.Listener
             if (mbean == null)
                 return;
 
+            ObjectName oname = null;
             if (mbean instanceof ObjectMBean)
+            {
                 ((ObjectMBean) mbean).setMBeanContainer(this);
+                oname = ((ObjectMBean)mbean).getObjectName();
+            }
             
-            String name = obj.getClass().getName().toLowerCase();
-            int dot = name.lastIndexOf('.');
-            if (dot >= 0)
-                name = name.substring(dot + 1);
-            Integer count = (Integer) _unique.get(name);
-            count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
-            _unique.put(name, count);
+            //no override mbean object name, so make a generic one
+            if (oname == null)
+            {
+                String name = obj.getClass().getName().toLowerCase();
+                int dot = name.lastIndexOf('.');
+                if (dot >= 0)
+                    name = name.substring(dot + 1);
+                Integer count = (Integer) _unique.get(name);
+                count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
+                _unique.put(name, count);
 
-            //if no explicit domain, create one
-            String domain = _domain;
-            if (domain==null)
-                domain = obj.getClass().getPackage().getName();
+                //if no explicit domain, create one
+                String domain = _domain;
+                if (domain==null)
+                    domain = obj.getClass().getPackage().getName();
+
+                oname = ObjectName.getInstance(domain+":type="+name+",id="+count);
+            }
             
-            ObjectName oname = ObjectName.getInstance(domain+":type="+name+",id="+count);
             
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
             Log.debug("Registered {}" , oinstance.getObjectName());

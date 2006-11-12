@@ -31,6 +31,7 @@
         <directory>src/main/resources</directory>
 	    <includes>
 	      <include>webdefault.xml</include>
+	      <include>**/*.properties</include>
 	    </includes>
       </resource>
     </resources>
@@ -127,6 +128,13 @@
       <artifactId>jbosssx</artifactId>
       <version>4.0.5</version>
       <systemPath>${jboss.home}/server/all/lib/jbosssx.jar</systemPath>
+      <scope>system</scope>
+    </dependency>
+    <dependency>
+      <groupId>jboss</groupId>
+      <artifactId>jboss-jsr77</artifactId>
+      <version>4.0.5</version>
+      <systemPath>${jboss.home}/server/all/lib/jboss-jsr77.jar</systemPath>
       <scope>system</scope>
     </dependency>
   </dependencies>

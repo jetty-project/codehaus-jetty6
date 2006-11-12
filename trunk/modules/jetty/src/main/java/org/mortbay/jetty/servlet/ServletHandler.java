@@ -587,11 +587,11 @@ public class ServletHandler extends AbstractHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated use {@link #newServletHolder(Class)}
+     * @see also newServletHolder(Class)
      */
-    protected final ServletHolder newServletHolder()
+    public ServletHolder newServletHolder()
     {
-        return null;
+        return new ServletHolder();
     }
     
     /* ------------------------------------------------------------ */
@@ -699,11 +699,11 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /** 
-     * @deprecated use {@link #newFilterHolder(Class)}
+     * @see {@link #newFilterHolder(Class)}
      */
-    protected FilterHolder newFilterHolder()
+    public FilterHolder newFilterHolder()
     {
-        return null;
+        return new FilterHolder();
     }
     
     /* ------------------------------------------------------------ */
