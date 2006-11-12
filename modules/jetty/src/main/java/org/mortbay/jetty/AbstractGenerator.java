@@ -480,7 +480,8 @@ public abstract class AbstractGenerator implements Generator
             if (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
             {
                 _generator.flush();
-                while (content!=null && content.length()>0 ||buffer!=null && buffer.length()>0)
+                
+                while ((content!=null && content.length()>0 ||buffer!=null && buffer.length()>0) && _generator._endp.isOpen())
                 {
                     if (!_generator._endp.isBlocking())
                         if (!_generator._endp.blockWritable(_maxIdleTime))

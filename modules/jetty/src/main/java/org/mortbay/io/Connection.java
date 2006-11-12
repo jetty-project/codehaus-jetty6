@@ -18,6 +18,5 @@ import java.io.IOException;
 
 public interface Connection
 {
-    boolean isIdle();
     void handle() throws IOException;
 }
