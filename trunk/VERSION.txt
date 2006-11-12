@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
     + Use ContextDeployer as main deployer in jetty.xml
     + Added extras/jboss
     + Major refactor of SelectChannel EndPoint for client selector 
+    + Fixed NPE in bio.SocketEndPoint.getRemoteAddr()
 
 jetty-6.1.0pre0 - 21 Oct 2006
     + add <Property> replacement in jetty xml config files
