@@ -196,7 +196,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
      */
     public boolean blockReadable(long timeoutMs)
     {
-        long start=System.currentTimeMillis();
+        long start=_selectSet.getNow();
         synchronized (this)
         {
             try
@@ -208,7 +208,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                         updateKey();
                         this.wait(timeoutMs);
 
-                        if (_readBlocked && timeoutMs<(System.currentTimeMillis()-start))
+                        if (_readBlocked && timeoutMs<(_selectSet.getNow()-start))
                             return false;
                     }
                     catch (InterruptedException e)
@@ -231,7 +231,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
      */
     public boolean blockWritable(long timeoutMs)
     {
-        long start=System.currentTimeMillis();
+        long start=_selectSet.getNow();
         synchronized (this)
         {
             try
@@ -243,7 +243,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                         updateKey();
                         this.wait(timeoutMs);
 
-                        if (_writeBlocked && timeoutMs<(System.currentTimeMillis()-start))
+                        if (_writeBlocked && timeoutMs<(_selectSet.getNow()-start))
                             return false;
                     }
                     catch (InterruptedException e)
