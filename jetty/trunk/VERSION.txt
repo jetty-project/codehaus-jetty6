@@ -67,6 +67,7 @@ jetty-6.0-SNAPSHOT
     + change examples/test-jndi-webapp so it can be regularly built
     + added examples/test-jaas-webapp
     + (re)make JAAS classes available to webapp classloader
+    + Reverted UnixCrypt to use coersions (that effected results)
 
 jetty-6.0.1 - 24 September 2006
     + fixed isUserInRole checking for JAASUserRealm
