@@ -24,6 +24,7 @@ import org.jboss.deployment.DeploymentInfo;
 import org.jboss.web.AbstractWebContainer;
 import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;
+import org.mortbay.management.MBeanContainer;
 import org.mortbay.util.MultiException;
 import org.w3c.dom.Element;
 
