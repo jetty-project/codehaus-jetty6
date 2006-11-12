@@ -68,6 +68,7 @@ public class WebXmlConfiguration implements Configuration
     protected boolean _hasJSP;
     protected String _jspServletName;
     protected boolean _defaultWelcomeFileList;
+    private ServletHandler _servlet_handler;
 
     public WebXmlConfiguration()
     {
@@ -206,12 +207,12 @@ public class WebXmlConfiguration implements Configuration
     {
         // TODO preserve any configuration that pre-existed.
 
-        ServletHandler servlet_handler = getWebAppContext().getServletHandler();
+        _servlet_handler = getWebAppContext().getServletHandler();
 
-        servlet_handler.setFilters(null);
-        servlet_handler.setFilterMappings(null);
-        servlet_handler.setServlets(null);
-        servlet_handler.setServletMappings(null);
+        _servlet_handler.setFilters(null);
+        _servlet_handler.setFilterMappings(null);
+        _servlet_handler.setServlets(null);
+        _servlet_handler.setServletMappings(null);
 
         getWebAppContext().setEventListeners(null);
         getWebAppContext().setWelcomeFiles(null);
@@ -227,13 +228,12 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initialize(XmlParser.Node config) throws ClassNotFoundException,UnavailableException
     {
-        ServletHandler servlet_handler = getWebAppContext().getServletHandler();
-
+        _servlet_handler = getWebAppContext().getServletHandler();
         // Get any existing servlets and mappings.
-        _filters=LazyList.array2List(servlet_handler.getFilters());
-        _filterMappings=LazyList.array2List(servlet_handler.getFilterMappings());
-        _servlets=LazyList.array2List(servlet_handler.getServlets());
-        _servletMappings=LazyList.array2List(servlet_handler.getServletMappings());
+        _filters=LazyList.array2List(_servlet_handler.getFilters());
+        _filterMappings=LazyList.array2List(_servlet_handler.getFilterMappings());
+        _servlets=LazyList.array2List(_servlet_handler.getServlets());
+        _servletMappings=LazyList.array2List(_servlet_handler.getServletMappings());
 
         _listeners = LazyList.array2List(getWebAppContext().getEventListeners());
         _welcomeFiles = LazyList.array2List(getWebAppContext().getWelcomeFiles());
@@ -266,10 +266,10 @@ public class WebXmlConfiguration implements Configuration
             }
         }
 
-        servlet_handler.setFilters((FilterHolder[])LazyList.toArray(_filters,FilterHolder.class));
-        servlet_handler.setFilterMappings((FilterMapping[])LazyList.toArray(_filterMappings,FilterMapping.class));
-        servlet_handler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
-        servlet_handler.setServletMappings((ServletMapping[])LazyList.toArray(_servletMappings,ServletMapping.class));
+        _servlet_handler.setFilters((FilterHolder[])LazyList.toArray(_filters,FilterHolder.class));
+        _servlet_handler.setFilterMappings((FilterMapping[])LazyList.toArray(_filterMappings,FilterMapping.class));
+        _servlet_handler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
+        _servlet_handler.setServletMappings((ServletMapping[])LazyList.toArray(_servletMappings,ServletMapping.class));
 
         getWebAppContext().setEventListeners((EventListener[])LazyList.toArray(_listeners,EventListener.class));
         getWebAppContext().setWelcomeFiles((String[])LazyList.toArray(_welcomeFiles,String.class));
@@ -363,7 +363,7 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initFilter(XmlParser.Node node)
     {
-        FilterHolder holder= newFilterHolder();
+        FilterHolder holder= _servlet_handler.newFilterHolder();
         holder.setName(node.getString("filter-name",false,true));
         holder.setClassName(node.getString("filter-class",false,true));
 
@@ -429,7 +429,7 @@ public class WebXmlConfiguration implements Configuration
         // initialize holder
         String servlet_name=node.getString("servlet-name",false,true);
         String servlet_class=node.getString("servlet-class",false,true);
-        ServletHolder holder = newServletHolder();
+        ServletHolder holder = _servlet_handler.newServletHolder();
         holder.setName(servlet_name);
 
         // init params
@@ -846,15 +846,7 @@ public class WebXmlConfiguration implements Configuration
     protected void initSecurityRole(XmlParser.Node node)
     {}
 
-    /* ------------------------------------------------------------ */
-    protected ServletHolder newServletHolder() {
-        return new ServletHolder();
-    }
-
-    /* ------------------------------------------------------------ */
-    protected FilterHolder newFilterHolder() {
-        return new FilterHolder();
-    }
+ 
     
 
     /* ------------------------------------------------------------ */

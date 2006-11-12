@@ -28,15 +28,24 @@ import org.mortbay.management.MBeanContainer;
  */
 public class JBossMBeanContainer extends MBeanContainer
 {
+    
+    public static final String JBOSS_DOMAIN = "jboss.jetty";
+    public static final String JSR77_DOMAIN = "jboss.management.local";
+    
 	public JBossMBeanContainer(MBeanServer server)
 	{
 		super(server);
-        setDomain("jboss.jetty");
+        setDomain(JBOSS_DOMAIN);
 	}
 	
 	public void start ()
     {
      //do nothing - the superclass does initialization of stuff we don't want 
+    }
+    
+    public String getJsr77Domain()
+    {
+        return JSR77_DOMAIN;
     }
 
 }

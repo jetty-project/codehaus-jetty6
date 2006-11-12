@@ -23,6 +23,11 @@ import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 //import org.mortbay.j2ee.session.AbstractReplicatedStore;
 //import org.mortbay.j2ee.session.Manager;
 //import org.mortbay.j2ee.session.Store;
+import org.mortbay.jetty.handler.ErrorHandler;
+import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.SessionHandler;
+import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.util.MultiException;
 
@@ -51,7 +56,8 @@ public class JBossWebApplicationContext extends WebAppContext
     public JBossWebApplicationContext(WebDescriptorParser descriptorParser,WebApplication webApp,
             String warUrl) throws IOException
     {
-        super(warUrl, "");
+        super(null,null, new Jsr77ServletHandler(), null);
+        setWar(warUrl);
         _descriptorParser=descriptorParser;
         _webApp=webApp;
     }
