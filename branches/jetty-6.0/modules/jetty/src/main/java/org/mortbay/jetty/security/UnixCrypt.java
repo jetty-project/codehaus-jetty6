@@ -28,6 +28,7 @@ package org.mortbay.jetty.security;
  * Implements the one way cryptography used by Unix systems for
  * simple password protection.
  * @version $Id: UnixCrypt.java,v 1.1 2005/10/05 14:09:14 janb Exp $
+ * @author Greg Wilkins (gregw)
  */
 public class UnixCrypt extends Object
 {
@@ -186,10 +187,10 @@ public class UnixCrypt extends Object
         for (int i=0; i<64; i++) perm[i] = (byte)0;;
         for (int i=0; i<64; i++) {
             int k;
-            if ((k = PC2[i]) == 0) continue;
+            if ((k = (int)PC2[i]) == 0) continue;
             k += Rotates[0]-1;
             if ((k%28) < Rotates[0]) k -= 28;
-            k = PC1[k];
+            k = (int)PC1[k];
             if (k > 0) {
                 k--;
                 k = (k|0x07) - (k&0x07);
@@ -204,11 +205,11 @@ public class UnixCrypt extends Object
             int k;
             for (int i=0; i<64; i++) perm[i] = temp[i] = 0;
             for (int i=0; i<64; i++) {
-                if ((k = PC2[i]) == 0) continue;
+                if ((k = (int)PC2[i]) == 0) continue;
                 temp[k-1] = (byte)(i+1);
             }
             for (int i=0; i<64; i++) {
-                if ((k = PC2[i]) == 0) continue;
+                if ((k = (int)PC2[i]) == 0) continue;
                 k += j;
                 if ((k%28) <= j) k -= 28;
                 perm[i] = temp[k];
@@ -261,8 +262,10 @@ public class UnixCrypt extends Object
                 for (int i=0; i<32; i++) temp[i] = 0;
                 for (int i=0; i<4; i++) temp[4*t+i] = (byte)((k >> i) & 0x01);
                 long kk = 0;
-                for (int i=24; --i>=0; ) 
-                    kk = ((kk<<1) | (temp[perm[i]-1])<<32 | (temp[perm[i+24]-1]));
+                for (int i=24; --i>=0; ) kk = ((kk<<1) |
+                                               ((long)temp[perm[i]-1])<<32 |
+                                               ((long)temp[perm[i+24]-1]));
+
                 SPE[t][j] = to_six_bit(kk);
             }
         }
@@ -453,7 +456,7 @@ public class UnixCrypt extends Object
             rsltblock >>= 6;
         }
 
-        return new String(cryptresult,0,13);
+        return new String(cryptresult, 0x00, 0, 13);
     }
 
     public static void main(String[] arg)
