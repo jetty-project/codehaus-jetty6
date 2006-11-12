@@ -425,6 +425,12 @@ public abstract class SelectorManager extends AbstractLifeCycle
         }
 
         /* ------------------------------------------------------------ */
+        public long getNow()
+        {
+            return _idleTimeout.getNow();
+        }
+        
+        /* ------------------------------------------------------------ */
         public void scheduleIdle(Timeout.Task task)
         {
             synchronized (this)

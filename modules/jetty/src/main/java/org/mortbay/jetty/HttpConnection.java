@@ -329,7 +329,7 @@ public class HttpConnection implements org.mortbay.io.Connection
         
         while (more_in_buffer && _endp.isOpen())
         {
-            _idle=false;
+            _idle=false; // TODO not always true!
             try
             {
                 setCurrentConnection(this);
