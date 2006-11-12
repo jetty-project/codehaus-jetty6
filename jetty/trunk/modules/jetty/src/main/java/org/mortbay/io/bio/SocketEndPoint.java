@@ -16,6 +16,7 @@
 package org.mortbay.io.bio;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -112,7 +113,8 @@ public class SocketEndPoint extends StreamEndPoint
         if (_remote==null)
             _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
         
-        return _remote.getAddress().getHostAddress();
+        InetAddress addr = _remote.getAddress();
+        return ( addr == null ? null : addr.getHostAddress() );
     }
 
     /* ------------------------------------------------------------ */
