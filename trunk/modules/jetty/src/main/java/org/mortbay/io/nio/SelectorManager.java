@@ -116,6 +116,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
     }
 
 
+    /* ------------------------------------------------------------------------------- */
     protected void doStop() throws Exception
     {
         for (int i=0;i<_selectSet.length;i++)
@@ -124,11 +125,13 @@ public abstract class SelectorManager extends AbstractLifeCycle
         _selectSet=null;
     }
 
+    /* ------------------------------------------------------------------------------- */
     public void doStop(int i) throws Exception
     {
         _selectSet[i].stop();
     }
 
+    /* ------------------------------------------------------------------------------- */
     private void doDispatch(SelectChannelEndPoint endpoint) throws IOException
     {
         boolean dispatch_done = true;
@@ -161,6 +164,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
      */
     protected abstract void endPointOpened(SelectChannelEndPoint endpoint);
 
+    /* ------------------------------------------------------------------------------- */
     protected abstract Connection newConnection(SocketChannel channel, SelectChannelEndPoint endpoint);
 
     /* ------------------------------------------------------------ */
@@ -280,7 +284,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
 
             // workout how low to wait in select
-            long wait = getMaxIdleTime();
+            long wait = 1000L;  // not getMaxIdleTime() as the now value of the idle timers needs to be updated.
             if (wait < 0 || idle_next >= 0 && wait > idle_next)
                 wait = idle_next;
             if (wait < 0 || retry_next >= 0 && wait > retry_next)
@@ -414,13 +418,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
         }
 
+        /* ------------------------------------------------------------ */
         public SelectorManager getManager()
         {
             return SelectorManager.this;
         }
 
         /* ------------------------------------------------------------ */
-        public void scheduleIdle(Timeout.Task task, boolean idle)
+        public void scheduleIdle(Timeout.Task task)
         {
             synchronized (this)
             {

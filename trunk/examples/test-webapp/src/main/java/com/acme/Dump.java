@@ -104,6 +104,7 @@ public class Dump extends HttpServlet
         // Handle a dump of data
         String data= request.getParameter("data");
         String block= request.getParameter("block");
+        String dribble= request.getParameter("dribble");
         if (data != null && data.length() > 0)
         {
             int d=Integer.parseInt(data);
@@ -136,6 +137,22 @@ public class Dump extends HttpServlet
                     out.write(buf,0,d);
                     d=0;
                 }
+                
+                if (dribble!=null)
+                {
+                    System.err.println("dribble="+dribble);
+                    out.flush();
+                    try
+                    {
+                        Thread.sleep(Long.parseLong(dribble));
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        break;
+                    }
+                }
+                
             }
             
             return;
