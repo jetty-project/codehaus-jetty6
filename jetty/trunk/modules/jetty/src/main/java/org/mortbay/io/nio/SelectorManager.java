@@ -470,23 +470,39 @@ public abstract class SelectorManager extends AbstractLifeCycle
             
             synchronized (this)
             {
-                Iterator iter =_selector.keys().iterator();
-                while (iter.hasNext())
-                {
-                    SelectionKey key = (SelectionKey)iter.next();
-                    if (key==null)
-                        continue;
-                    EndPoint endpoint = (EndPoint)key.attachment();
-                    if (endpoint!=null)
+                // horrid hack until I find a better way
+            
+                stopchanging:
+                while (_selector.keys().size()>0)
+                {   
+                    try
                     {
-                        try
+                        Iterator iter =_selector.keys().iterator();
+                        while (iter.hasNext())
                         {
-                            endpoint.close();
+                            SelectionKey key = (SelectionKey)iter.next();
+                            if (key==null)
+                                continue;
+                            EndPoint endpoint = (EndPoint)key.attachment();
+                            if (endpoint!=null)
+                            {
+                                try
+                                {
+                                    endpoint.close();
+                                }
+                                catch(IOException e)
+                                {
+                                    Log.ignore(e);
+                                }
+                            }
                         }
-                        catch(IOException e)
-                        {
-                            Log.ignore(e);
-                        }
+                        break stopchanging;
+                    }
+                    catch(ConcurrentModificationException e)
+                    {
+                        Log.ignore(e);
+                        wakeup();
+                        Thread.yield();
                     }
                 }
 
