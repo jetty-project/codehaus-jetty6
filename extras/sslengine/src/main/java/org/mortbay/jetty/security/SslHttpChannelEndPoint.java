@@ -368,6 +368,9 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                 break;
             case BUFFER_UNDERFLOW:
             	break;
+            case BUFFER_OVERFLOW:
+            	buffer.clear();
+            	break;
             default:
                 Log.warn("unwrap "+_result);
                 throw new IOException(_result.toString());
