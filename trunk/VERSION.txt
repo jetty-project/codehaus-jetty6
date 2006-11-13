@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
     + Reverted UnixCrypt to use coersions (that effected results)
     + JETTY-151 Idle timeout only applies to blocking operations
     + alternate optimizations of writer (use -Dbuffer.writers=true)
+    + JETTY-172 use getName() instead of toString
 
 jetty-6.1.0pre0 - 21 Oct 2006
     + add <Property> replacement in jetty xml config files
