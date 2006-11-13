@@ -5,7 +5,7 @@ jetty-6.1-SNAPSHOT
     + Major refactor of SelectChannel EndPoint for client selector 
     + Fixed NPE in bio.SocketEndPoint.getRemoteAddr()
     + Reverted UnixCrypt to use coersions (that effected results)
-    + Idle timeout reset by writes
+    + JETTY-151 Idle timeout only applies to blocking operations
 
 jetty-6.1.0pre0 - 21 Oct 2006
     + add <Property> replacement in jetty xml config files

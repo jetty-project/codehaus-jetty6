@@ -62,12 +62,12 @@ public class ChannelEndPoint implements EndPoint
         return true;
     }
     
-    public boolean blockReadable(long millisecs)
+    public boolean blockReadable(long millisecs) throws IOException
     {
         return true;
     }
     
-    public boolean blockWritable(long millisecs)
+    public boolean blockWritable(long millisecs) throws IOException
     {
         return true;
     }

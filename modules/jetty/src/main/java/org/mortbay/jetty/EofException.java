@@ -22,6 +22,11 @@ public class EofException extends IOException
     {
     }
     
+    public EofException(String reason)
+    {
+        super(reason);
+    }
+    
     public EofException(Throwable th)
     {
         initCause(th);
