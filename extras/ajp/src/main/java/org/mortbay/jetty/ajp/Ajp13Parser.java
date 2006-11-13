@@ -101,6 +101,12 @@ public class Ajp13Parser implements Parser
     }
     
     /* ------------------------------------------------------------------------------- */
+    public boolean isIdle()
+    {
+        return _state==STATE_START;
+    }
+    
+    /* ------------------------------------------------------------------------------- */
     public boolean isComplete()
     {
         return _state==STATE_END;
