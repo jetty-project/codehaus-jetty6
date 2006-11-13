@@ -668,6 +668,8 @@ public abstract class AbstractGenerator implements Generator
             
             if (_bytes==null)
                 _bytes=new ByteArrayOutputStream2(_writeChunk*2);
+            else
+                _bytes.reset();
             
             if (_converter==null)
                 _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
@@ -717,14 +719,8 @@ public abstract class AbstractGenerator implements Generator
                             _converter.flush();
                         }
                     }
-                    try
-                    {
-                        _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                    }
-                    finally 
-                    {
-                        _bytes.reset();
-                    }
+                    
+                    _out.write(_bytes.getBuf(),0,_bytes.getCount());
                 }
             }
             else
@@ -760,14 +756,8 @@ public abstract class AbstractGenerator implements Generator
                                 _converter.flush();
                             }
                         }
-                        try
-                        {
-                            _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                        }
-                        finally
-                        {
-                            _bytes.reset();
-                        }
+                        
+                        _out.write(_bytes.getBuf(),0,_bytes.getCount());
                     }
                 } 
             }
@@ -782,6 +772,8 @@ public abstract class AbstractGenerator implements Generator
             {
                 if (_bytes==null)
                     _bytes=new ByteArrayOutputStream2(_writeChunk*2);
+                else
+                    _bytes.reset();
                 
                 synchronized (_bytes)
                 {
@@ -815,15 +807,9 @@ public abstract class AbstractGenerator implements Generator
                                 _converter.flush();
                             }
                         }
-                        try
-                        {
-                            byte[] b=_bytes.getBuf();
-                            _out.write(b,0,_bytes.getCount());
-                        }
-                        finally
-                        {
-                            _bytes.reset();
-                        }
+                        
+                        byte[] b=_bytes.getBuf();
+                        _out.write(b,0,_bytes.getCount());
                     }
                 }
             }
