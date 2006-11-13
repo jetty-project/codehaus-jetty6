@@ -9,6 +9,7 @@ jetty-6.0-SNAPSHOT
     + (re)make JAAS classes available to webapp classloader
     + Port NPE fix in SocketEndPoint from trunk
     + Reverted UnixCrypt to use coersions (that effected results)
+    + JETTY-151 avoid byte array overflows when endp is closed
 
 jetty-6.0.1 - 24 September 2006
     + fixed isUserInRole checking for JAASUserRealm

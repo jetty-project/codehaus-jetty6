@@ -1231,6 +1231,8 @@ public class HttpGenerator implements HttpTokens
             
             if (_bytes==null)
                 _bytes=new ByteArrayOutputStream2(_writeChunk*2);
+	    else
+		_bytes.reset();
             
             if (_converter==null)
                 _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
@@ -1282,7 +1284,6 @@ public class HttpGenerator implements HttpTokens
                     }
                     
                     _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                    _bytes.reset();
                 }
             }
             else
@@ -1320,7 +1321,6 @@ public class HttpGenerator implements HttpTokens
                         }
                         
                         _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                        _bytes.reset();
                     }
                 } 
             }
@@ -1335,6 +1335,8 @@ public class HttpGenerator implements HttpTokens
             {
                 if (_bytes==null)
                     _bytes=new ByteArrayOutputStream2(_writeChunk*2);
+		else
+	            _bytes.reset();
                 
                 synchronized (_bytes)
                 {
@@ -1371,7 +1373,6 @@ public class HttpGenerator implements HttpTokens
                         
                         byte[] b=_bytes.getBuf();
                         _out.write(b,0,_bytes.getCount());
-                        _bytes.reset();
                     }
                 }
             }
