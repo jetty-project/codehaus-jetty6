@@ -20,7 +20,10 @@ import javax.management.ObjectName;
 import javax.management.j2ee.statistics.ServletStats;
 
 import org.jboss.jetty.JBossMBeanContainer;
+import org.jboss.jetty.JBossWebAppContext;
 import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHolder;
+import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.management.ObjectMBean;
 import org.mortbay.log.Log;
 
@@ -152,25 +155,21 @@ public class Jsr77ServletHolderMBean extends ObjectMBean
     
    public ObjectName getObjectName()
    {
+       
        if (getMBeanContainer() == null)
            return null; //not possible to make a name
-       String jsr77Domain = null;
-       if (getMBeanContainer() instanceof JBossMBeanContainer)
-           jsr77Domain = ((JBossMBeanContainer)getMBeanContainer()).getJsr77Domain();
-
-       String context=_servletHolder.getServletHandler().getServletContext().getContextPath();
-       if (context.length()==0)
-           context="/";
+      
+       String name = _servletHolder.getName();
        ObjectName oname = null;
-
        try
        {
-           oname = new ObjectName(jsr77Domain+":J2EEServer=null,J2EEApplication=null,J2EEWebModule="+context+",j2EEType=Servlet,name="+_servletHolder.getName());    
+           oname = new ObjectName(getMBeanContainer().getDomain()+":J2EEServer=none,J2EEApplication=none,J2EEWebModule="+((JBossWebAppContext)_servletHolder.getWebAppContext()).getUniqueName()+",j2eeType=Servlet,name="+name);    
        }
        catch (Exception e)
        {
            Log.warn(e);
        }
        return oname;
+       
    }
 }

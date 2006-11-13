@@ -2,15 +2,20 @@
 //$Id$
 //Copyright 2006 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
-//Licensed under the Apache License, Version 2.0 (the "License");
-//you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
-//http://www.apache.org/licenses/LICENSE-2.0
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
+// This is free software; you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation; either version 2.1 of
+// the License, or (at your option) any later version.
+//
+// This software is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this software; if not, write to the Free
+// Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+// 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 //========================================================================
 
 package org.jboss.jetty;
@@ -20,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
@@ -101,7 +109,7 @@ public class JettyDeployer extends AbstractWebDeployer
         	log.debug("before deploy webapp="+webApp);
 
             // deploy the WebApp
-            WebAppContext app = new JBossWebApplicationContext(parser, webApp, warUrl);
+            JBossWebAppContext app = new JBossWebAppContext(parser, webApp, warUrl);
             app.setContextPath(contextPath);
             if (_configData.getSupportJSR77())
                 app.setConfigurationClasses (new String[]{"org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"/*,"org.mortbay.jetty.servlet.jsr77.Configuration"*/});
@@ -157,6 +165,26 @@ public class JettyDeployer extends AbstractWebDeployer
             {
                 // finally start the app
                 app.start();
+                
+                //get all the jsr77 mbeans
+                
+                //first check that there is an mbean for the webapp itself
+                ObjectName webAppMBean = new ObjectName(_configData.getMBeanDomain() + ":J2EEServer=none,J2EEApplication=none,J2EEWebModule="+app.getUniqueName());
+                if (server.isRegistered(webAppMBean))
+                    _deploymentInfo.deployedObject = webAppMBean;
+                else
+                    throw new IllegalStateException("No mbean registered for webapp at "+app.getUniqueName());
+                
+                //now get all the mbeans that represent servlets and set them on the 
+                //deployment info so they will be found by the jsr77 management system
+                ObjectName servletQuery = new ObjectName
+                (_configData.getMBeanDomain() + ":J2EEServer=none,J2EEApplication=none,J2EEWebModule="+app.getUniqueName()+ ",j2eeType=Servlet,*");
+                Iterator iterator = server.queryNames(servletQuery, null).iterator();
+                while (iterator.hasNext())
+                {
+                    _deploymentInfo.mbeans.add((ObjectName) iterator.next());
+                }
+
                 _log.info("successfully deployed " + warUrl + " to " + contextPath);
             }
             catch (MultiException me)
@@ -188,7 +216,7 @@ public class JettyDeployer extends AbstractWebDeployer
     public void performUndeploy(String warUrl, WebApplication wa) throws DeploymentException
     {
         // find the WebApp Context in the repository
-        JBossWebApplicationContext app = (JBossWebApplicationContext) _deployed.get(warUrl);
+        JBossWebAppContext app = (JBossWebAppContext) _deployed.get(warUrl);
 
         if (app == null)
         {

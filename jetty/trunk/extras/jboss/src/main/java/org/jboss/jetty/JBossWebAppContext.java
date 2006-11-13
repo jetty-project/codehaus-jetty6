@@ -1,13 +1,17 @@
-/*
- * jBoss, the OpenSource EJB server
- *
- * Distributable under GPL license.
- * See terms of license at gnu.org.
- */
-// $Id: JBossWebApplicationContext.java,v 1.10 2004/10/03 01:35:42 gregwilkins Exp $
-// A Jetty HttpServer with the interface expected by JBoss'
-// J2EEDeployer...
-//------------------------------------------------------------------------------
+//========================================================================
+//$Id: $
+//Copyright 2006 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
 package org.jboss.jetty;
 
 
@@ -15,6 +19,7 @@ import java.io.IOException;
 
 
 
+import org.jboss.deployment.DeploymentInfo;
 import org.jboss.jetty.security.JBossUserRealm;
 import org.jboss.logging.Logger;
 import org.jboss.web.WebApplication;
@@ -40,9 +45,9 @@ import org.mortbay.util.MultiException;
  * TODO jsr77 support, distributable session support
  *
  */
-public class JBossWebApplicationContext extends WebAppContext
+public class JBossWebAppContext extends WebAppContext
 {
-    protected static Logger __log=Logger.getLogger(JBossWebApplicationContext.class);
+    protected static Logger __log=Logger.getLogger(JBossWebAppContext.class);
 
     protected WebDescriptorParser _descriptorParser;
     protected WebApplication _webApp;
@@ -53,11 +58,12 @@ public class JBossWebApplicationContext extends WebAppContext
     protected boolean _timeOutPresent=false;
     protected int _timeOutMinutes=0;
 
-    public JBossWebApplicationContext(WebDescriptorParser descriptorParser,WebApplication webApp,
-            String warUrl) throws IOException
+    public JBossWebAppContext(WebDescriptorParser descriptorParser,WebApplication webApp, String warUrl) 
+    throws IOException
     {
         super(null,null, new Jsr77ServletHandler(), null);
         setWar(warUrl);
+        ((Jsr77ServletHandler)getServletHandler()).setWebAppContext(this);
         _descriptorParser=descriptorParser;
         _webApp=webApp;
     }
@@ -74,8 +80,6 @@ public class JBossWebApplicationContext extends WebAppContext
         {
             e=me;
         }
-         // when jsr77 support is ready, figure out how to do it
-         // setUpDeploymentInfo();
         if(e!=null)
             throw e;
     }
@@ -84,19 +88,18 @@ public class JBossWebApplicationContext extends WebAppContext
     public void doStop() throws Exception
     {
         super.doStop();
-        _descriptorParser=null;
-        _webApp=null;
-        _subjAttrName=null;
+        //_descriptorParser=null;
+        //_webApp=null;
+        //_subjAttrName=null;
     }
 
-    /* ------------------------------------------------------------ */
-    public void setContextPath(String contextPathSpec)
+
+
+    public String getUniqueName ()
     {
-        __log=Logger.getLogger(getClass().getName()+"#"+contextPathSpec);
-        super.setContextPath(contextPathSpec);
+        return _descriptorParser.getDeploymentInfo().getCanonicalName();
     }
-
-
+    
     
     protected void startContext() throws Exception
     {
@@ -137,45 +140,4 @@ public class JBossWebApplicationContext extends WebAppContext
         _descriptorParser.parseWebAppDescriptors(_webApp.getClassLoader(),_webApp.getMetaData());
         __log.debug("setting up ENC succeeded");
     }
-
-    //TODO sort out jsr77
-    // this is really nasty because it builds dependencies between the
-    // impl and mbean layer which Greg has been very careful to avoid
-    // everywhere else. Think of a better way to do it...
-//    protected void setUpDeploymentInfo() throws Exception
-//    {
-//        if(_mbean==null)
-//            return; // we can't do anything...
-//        DeploymentInfo di=_descriptorParser.getDeploymentInfo();
-//        
-//        di.deployedObject=_mbean.getObjectName();
-//        List mbeanNames=di.mbeans;
-//        ServletHandler wah=(ServletHandler)getServletHandler();
-//        List components=new ArrayList();
-//        ServletHolder servlets[]=wah.getServlets();
-//        if(servlets!=null)
-//            for(int i=0;i<servlets.length;i++)
-//                components.add(servlets[i]);
-//        
-//        Object filters[]=wah.getFilters();
-//        if(filters!=null)
-//            for(int i=0;i<filters.length;i++)
-//                components.add(filters[i]);
-//        components.add(getSessionHandler().getSessionManager());
-//        //make mbeans for all jetty objects
-//        ObjectName[] names=_mbean.getComponentMBeans(components.toArray(),null);
-//       
-//        //      populate JSR77 info...
-//        Set jsr77Names = _mbean.getJsr77ObjectNames();
-//        Iterator itor = jsr77Names.iterator();
-//        while (itor.hasNext())
-//        {
-//            ObjectName on = (ObjectName)itor.next();
-//            __log.info ("Adding jsr77 mbean="+on.toString());
-//        
-//            mbeanNames.add(on);
-//        }
-//
-//    }
-
 }
