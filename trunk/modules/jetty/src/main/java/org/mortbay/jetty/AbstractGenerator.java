@@ -38,16 +38,28 @@ import org.mortbay.util.TypeUtil;
 /**
  * Abstract Generator. Builds HTTP Messages.
  * 
+ * Currently this class uses a system parameter "buffer.writers" to control
+ * two optional writer to byte conversions. buffer.writers=true will probably be 
+ * faster, but will consume more memory.   This option is just for testing and tuning.
+ * 
  * @author gregw
  * 
  */
 public abstract class AbstractGenerator implements Generator
 {
+    // TODO temp boolean to help tune
+    public static boolean __direct=!Boolean.getBoolean("buffer.writers");
+    
     // states
     public final static int STATE_HEADER = 0;
     public final static int STATE_CONTENT = 2;
     public final static int STATE_FLUSHING = 3;
     public final static int STATE_END = 4;
+    
+    private static byte[] NO_BYTES = {};
+    private static int MAX_OUTPUT_BYTES = 8192;
+    private static int MAX_OUTPUT_CHARS = 1024;
+    private static int FLUSH_AT_OFFSET = MAX_OUTPUT_BYTES - (6 * MAX_OUTPUT_CHARS);
 
     private static Buffer[] __reasons = new Buffer[505];
     static
@@ -429,7 +441,6 @@ public abstract class AbstractGenerator implements Generator
             setResponse(code, reason);
             _close = close;
             completeHeader(null, false);
-            // TODO something better than this!
             if (content != null) 
                 addContent(new View(new ByteArrayBuffer(content)), Generator.LAST);
             complete();
@@ -459,10 +470,17 @@ public abstract class AbstractGenerator implements Generator
     {
         protected AbstractGenerator _generator;
         protected long _maxIdleTime;
-        protected ByteArrayBuffer _buf1 = null;
-        protected ByteArrayBuffer _bufn = null;
+        protected ByteArrayBuffer _buf = new ByteArrayBuffer(NO_BYTES);
         protected boolean _closed;
         
+        // These are held here for reuse by Writer
+        String _characterEncoding;
+        Writer _converter;
+        protected char[] _chars;
+        ByteArrayOutputStream2 _bytes;
+        
+
+        /* ------------------------------------------------------------ */
         public Output(AbstractGenerator generator, long maxIdleTime)
         {
             _generator=generator;
@@ -478,6 +496,7 @@ public abstract class AbstractGenerator implements Generator
             _closed=true;
         }
 
+        /* ------------------------------------------------------------ */
         void  blockForOutput() throws IOException
         {
             if (_generator._endp.isBlocking())
@@ -528,11 +547,8 @@ public abstract class AbstractGenerator implements Generator
         /* ------------------------------------------------------------ */
         public void write(byte[] b, int off, int len) throws IOException
         {
-            if (_bufn == null)
-                _bufn = new ByteArrayBuffer(b, off, len);
-            else
-                _bufn.wrap(b, off, len);
-            write(_bufn);
+            _buf.wrap(b, off, len);
+            write(_buf);
         }
 
         /* ------------------------------------------------------------ */
@@ -541,11 +557,8 @@ public abstract class AbstractGenerator implements Generator
          */
         public void write(byte[] b) throws IOException
         {
-            if (_bufn == null)
-                _bufn = new ByteArrayBuffer(b);
-            else
-                _bufn.wrap(b);
-            write(_bufn);
+            _buf.wrap(b);
+            write(_buf);
         }
 
         /* ------------------------------------------------------------ */
@@ -614,207 +627,170 @@ public abstract class AbstractGenerator implements Generator
      */
     public static class OutputWriter extends Writer
     {
+        private static final int WRITE_CONV = 0;
+        private static final int WRITE_ISO1 = 1;
+        private static final int WRITE_UTF8 = 2;
+        
         Output _out;
         AbstractGenerator _generator;
-        EndPoint _endp;
-        int _maxChar;
-        String _characterEncoding;
-        Writer _converter;
-        ByteArrayOutputStream2 _bytes;
-        char[] _chars;
-        private int _space;
+        int _space;
+        int _writeMode;
         int _surrogate;
-        int _writeChunk = 1500; // TODO configure or tune
-        
+        boolean _direct;
+
+        /* ------------------------------------------------------------ */
         public OutputWriter(Output out)
         {
             _out=out;
             _generator=_out._generator;
-            _endp=_generator._endp;
+             
         }
 
+        /* ------------------------------------------------------------ */
         public void setCharacterEncoding(String encoding)
         {
-            if (_characterEncoding==null || !_characterEncoding.equalsIgnoreCase(encoding))
-                _converter=null;
-            _characterEncoding=encoding;
-            if (_characterEncoding==null)
-                _maxChar=0x100;
-            else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
-                _maxChar=0x100;
-            else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
-                _maxChar=0x80;
+            if (encoding == null || StringUtil.__ISO_8859_1.equalsIgnoreCase(encoding))
+            {
+                _direct=__direct;
+                _writeMode = WRITE_ISO1;
+            }
+            else if (StringUtil.__UTF8.equalsIgnoreCase(encoding))
+            {
+                _direct=__direct;
+                _writeMode = WRITE_UTF8;
+            }
             else
-                _maxChar=0;
+            {
+                _direct=false;
+                _writeMode = WRITE_CONV;
+                if (_out._characterEncoding == null || _out._characterEncoding.equalsIgnoreCase(encoding))
+                    _out._converter = null; // Set lazily in getConverter()
+            }
+            _out._characterEncoding = encoding;
         }
-        
+
+        /* ------------------------------------------------------------ */
         public void close() throws IOException
         {
             _out.close();
         }
 
+        /* ------------------------------------------------------------ */
         public void flush() throws IOException
         {
             _out.flush();
         }
-        
+
+        /* ------------------------------------------------------------ */
         public void write (String s,int offset, int length) throws IOException
-        {   
-            if (_maxChar==0x80)
+        {          
+            if (_direct)
             {
-                writeUtf8(s,offset,length);
-                return;
+                if (_writeMode==WRITE_UTF8)
+                    writeUtf8(s,offset,length);
+                else
+                    writeIso1(s,offset,length);
             }
-            
-            if (_bytes==null)
-                _bytes=new ByteArrayOutputStream2(_writeChunk*2);
             else
-                _bytes.reset();
-            
-            if (_converter==null)
-                _converter=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
-            
-            if (length>16) // TODO - tune or perhaps remove
             {
-                if (_chars==null)
-                    _chars=new char[_writeChunk];
-                    
-                int end=offset+length;
-                
-                // for each CHAR in the string 
-                for (int i=offset;i<end; )
+                while (length > MAX_OUTPUT_CHARS)
                 {
-                    // work out the size of a good chunk to convert
-                    int chunk=_writeChunk;
-                    int next=i+chunk;
-                    if (next>end)
-                    {
-                        next=end;
-                        chunk=next-i;
-                    }
-                    
-                    // get a chunk of characters to convert
-                    s.getChars(i, next, _chars, 0);
-                    i+=chunk;
-                    
-                    // for each CHAR in the chunk
-                    for (int n=0;n<chunk;)
-                    {
-                        char c=_chars[n];
-                        
-                        // convert and write
-                        if (c<_maxChar) 
-                        {
-                            _bytes.writeUnchecked(c); 
-                            n++;
-                        }
-                        else
-                        {
-                            // write a chunk characters to the converter
-                            int i0=n++;
-                            n+=(_writeChunk+5)/6;
-                            if (n>chunk)
-                                n=chunk;
-                            _converter.write(_chars,i0,n-i0);
-                            _converter.flush();
-                        }
-                    }
-                    
-                    _out.write(_bytes.getBuf(),0,_bytes.getCount());
+                    write(s, offset, MAX_OUTPUT_CHARS);
+                    offset += MAX_OUTPUT_CHARS;
+                    length -= MAX_OUTPUT_CHARS;
                 }
-            }
-            else
-            {
-                synchronized (_bytes)
-                {
-                    int end=offset+length;
-                    
-                    for (int i=offset;i<end; )
-                    {
-                        int next=i+_writeChunk;
-                        if (next>end)
-                            next=end;
-                        
-                        while (i<next)
-                        {
-                            char c=s.charAt(i);
-                            
-                            if (c<_maxChar) 
-                            {
-                                _bytes.writeUnchecked(c);
-                                i++;
-                            }
-                            else
-                            {   
-                                // write a chunket
-                                int i0=i;
-                                i+=_writeChunk/2;
-                                if (i>next)
-                                    i=next;
-                                
-                                _converter.write(s,i0,i-i0);
-                                _converter.flush();
-                            }
-                        }
-                        
-                        _out.write(_bytes.getBuf(),0,_bytes.getCount());
-                    }
-                } 
+
+                if (_out._chars==null)
+                    _out._chars = new char[MAX_OUTPUT_CHARS]; 
+                char[] chars = _out._chars;
+                s.getChars(offset, offset + length, chars, 0);
+                write(chars, 0, length);
             }
         }
         
 
+        /* ------------------------------------------------------------ */
         public void write (char[] s,int offset, int length) throws IOException
-        {
-            if (_maxChar==0x80)
-                writeUtf8(s,offset,length);
+        {        
+            if (_direct)
+            {
+                if (_writeMode==WRITE_UTF8)
+                    writeUtf8(s,offset,length);
+                else
+                    writeIso1(s,offset,length);
+            }
             else
             {
-                if (_bytes==null)
-                    _bytes=new ByteArrayOutputStream2(_writeChunk*2);
-                else
-                    _bytes.reset();
-                
-                synchronized (_bytes)
+                while (length > MAX_OUTPUT_CHARS)
                 {
-                    int end=offset+length;
-                    for (int i=offset;i<end; )
+                    write(s, offset, MAX_OUTPUT_CHARS);
+                    offset += MAX_OUTPUT_CHARS;
+                    length -= MAX_OUTPUT_CHARS;
+                }
+
+                Output out = _out;        
+                if (_out._bytes==null)
+                    out._bytes = new ByteArrayOutputStream2(MAX_OUTPUT_CHARS*6);
+
+                switch (_writeMode)
+                {
+                    case WRITE_CONV:
                     {
-                        int next=i+_writeChunk;
-                        if (next>end)
-                            next=end;
-                        
-                        while (i<next)
+                        Writer converter=getConverter();
+                        converter.write(s, offset, length);
+                        converter.flush();
+                    }
+                    break;
+
+                    case WRITE_ISO1:
+                        for (int i = 0; i < length; i++)
                         {
-                            char c=s[i];
-                            
-                            if (c<_maxChar) 
+                            int c = s[offset+i];
+                            out._bytes.writeUnchecked((c>=0&&c<256)?c:'?'); // ISO-1 and UTF-8 match for 0 - 255
+                        }
+                        break;
+
+                    case WRITE_UTF8:
+                        for (int i = 0; i < length; i++)
+                        {
+                            int c = s[offset+i];
+                            if (c < 128)
                             {
-                                i++;
-                                _bytes.writeUnchecked(c);
+                                // Do cheap conversion when we can.
+                                out._bytes.writeUnchecked(c);
                             }
-                            else 
+                            else
                             {
-                                if (_converter==null)
-                                    _converter=new OutputStreamWriter(_bytes,_characterEncoding);
-                                
-                                // write a chunket
-                                int i0=i;
-                                i+=_writeChunk/2;
-                                if (i>next)
-                                    i=next;
-                                _converter.write(s,i0,i-i0);
-                                _converter.flush();
+                                // Use full converter for remaining chars.
+                                offset += i;
+                                length -= i;
+                                Writer converter=getConverter();
+                                converter.write(s, offset, length);
+                                converter.flush();
+                                break;
                             }
                         }
-                        
-                        byte[] b=_bytes.getBuf();
-                        _out.write(b,0,_bytes.getCount());
-                    }
+                        break;
+                    default:
+                        throw new IllegalStateException();
                 }
+
+                out._bytes.writeTo(out);
+                out._bytes.reset();
             }
         }
+
+        /* ------------------------------------------------------------ */
+        private Writer getConverter() throws IOException
+        {
+            if (_out._converter == null)
+                _out._converter = new OutputStreamWriter(_out._bytes, _out._characterEncoding);
+            return _out._converter;
+        }
         
+        
+
+        /* ------------------------------------------------------------ */
         public void writeUtf8 (char[] s,int offset, int length) throws IOException
         {
             if (_out._closed)
@@ -822,13 +798,13 @@ public abstract class AbstractGenerator implements Generator
             
             _space= _generator.prepareUncheckedAddContent();
             if (_space<0)
-                return;
+                throw new IOException("Closed");
     
             int end=offset+length;
             for (int i=offset;i<end;i++)
             {
                 // Block until we can add _content.
-                if (_space<6 && _endp.isOpen())
+                if (_space<6 && _generator._endp.isOpen())
                 {
                     _generator.completeUncheckedAddContent();
                     _out.flush();
@@ -844,13 +820,11 @@ public abstract class AbstractGenerator implements Generator
                     writeUtf8(_surrogate+c-0xdc00);
             }
             _generator.completeUncheckedAddContent();
-            if (_space==0 && _endp.isOpen())
-            {
+            if (_space<6 && _generator._endp.isOpen())
                 _out.flush();
-            }
         }
-        
-        
+
+        /* ------------------------------------------------------------ */
         public void writeUtf8 (String s,int offset, int length) throws IOException
         {
             if (_out._closed)
@@ -858,13 +832,13 @@ public abstract class AbstractGenerator implements Generator
             
             _space= _generator.prepareUncheckedAddContent();
             if (_space<0)
-                return;
+                throw new IOException("Closed");
     
             int end=offset+length;
             for (int i=offset;i<end;i++)
             {
                 // Do we need to flush?
-                if (_space<6 && _endp.isOpen()) // 6 is maximum UTF-8 encoded character length
+                if (_space<6 && _generator._endp.isOpen()) // 6 is maximum UTF-8 encoded character length
                 {
                     _generator.completeUncheckedAddContent();
                     _out.flush();
@@ -880,12 +854,11 @@ public abstract class AbstractGenerator implements Generator
                     writeUtf8(_surrogate+c-0xdc00);
             }
             _generator.completeUncheckedAddContent();
-            if (_space==0 && _endp.isOpen())
-            {
+            if (_space==0 && _generator._endp.isOpen())
                 _out.flush();
-            }
         }
-      
+
+        /* ------------------------------------------------------------ */
         private void writeUtf8(int code)
         {
             if ((code & 0xffffff80) == 0) 
@@ -944,6 +917,66 @@ public abstract class AbstractGenerator implements Generator
                 _generator.uncheckedAddContent('?');
             }
         }
-    }
+
+        /* ------------------------------------------------------------ */
+        public void writeIso1 (char[] s,int offset, int length) throws IOException
+        {
+            if (_out._closed)
+                throw new IOException("Closed");
+            
+            _space= _generator.prepareUncheckedAddContent();
+            if (_space<0)
+                throw new IOException("Closed");
     
+            int end=offset+length;
+            for (int i=offset;i<end;i++)
+            {
+                // Block until we can add _content.
+                if (_space<1 && _generator._endp.isOpen())
+                {
+                    _generator.completeUncheckedAddContent();
+                    _out.flush();
+                    _space= _generator.prepareUncheckedAddContent();
+                }
+                
+                int c=s[i];
+                _out._bytes.writeUnchecked((c>=0&&c<256)?c:'?'); 
+            }
+            _space-=length;
+            _generator.completeUncheckedAddContent();
+            if (_space==0 && _generator._endp.isOpen())
+                _out.flush();
+        }
+        
+
+        /* ------------------------------------------------------------ */
+        public void writeIso1(String s,int offset, int length) throws IOException
+        {
+            if (_out._closed)
+                throw new IOException("Closed");
+            
+            _space= _generator.prepareUncheckedAddContent();
+            if (_space<0)
+                throw new IOException("Closed");
+    
+            int end=offset+length;
+            for (int i=offset;i<end;i++)
+            {
+                // Do we need to flush?
+                if (_space<6 && _generator._endp.isOpen()) // 6 is maximum UTF-8 encoded character length
+                {
+                    _generator.completeUncheckedAddContent();
+                    _out.flush();
+                    _space= _generator.prepareUncheckedAddContent();
+                }
+                
+                int c=s.charAt(i);
+                _out._bytes.writeUnchecked((c>=0&&c<256)?c:'?'); 
+            }
+            _space-=length;
+            _generator.completeUncheckedAddContent();
+            if (_space==0 && _generator._endp.isOpen())
+                _out.flush();
+        }
+    }
 }
