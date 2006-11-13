@@ -30,7 +30,7 @@ import org.mortbay.xml.XmlParser;
  */
 public class JBossWebXmlConfiguration extends WebXmlConfiguration
 {
-    protected static Logger __log=Logger.getLogger(JBossWebApplicationContext.class); 
+    protected static Logger __log=Logger.getLogger(JBossWebAppContext.class); 
 
     public JBossWebXmlConfiguration()
     {
@@ -38,9 +38,9 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
     }
 
 
-    public JBossWebApplicationContext getJBossWebApplicationContext()
+    public JBossWebAppContext getJBossWebApplicationContext()
     {
-        return (JBossWebApplicationContext)getWebAppContext();
+        return (JBossWebAppContext)getWebAppContext();
     }
 
    

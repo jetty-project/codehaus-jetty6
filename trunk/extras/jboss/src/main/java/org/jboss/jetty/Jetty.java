@@ -1,17 +1,20 @@
-/*
- * jBoss, the OpenSource EJB server
- *
- * Distributable under GPL license.
- * See terms of license at gnu.org.
- */
-
-// $Id: Jetty.java,v 1.8 2005/04/20 10:40:18 janb Exp $
-// A Jetty HttpServer with the interface expected by JBoss'
-// J2EEDeployer...
-//------------------------------------------------------------------------------
+//========================================================================
+//$Id:  $
+//Copyright 2006 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
 package org.jboss.jetty;
 
-//------------------------------------------------------------------------------
+
 
 import java.io.CharArrayWriter;
 
@@ -25,8 +28,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.jboss.logging.Logger;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
-
-//import org.mortbay.j2ee.J2EEWebApplicationContext;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.xml.XmlConfiguration;
 import org.w3c.dom.Element;
@@ -34,14 +35,9 @@ import org.w3c.dom.Element;
 //------------------------------------------------------------------------------
 
 /**
- * <description>
- * 
+ * Jetty 
  * @author <a href="mailto:jules_gosnell@yahoo..com">Julian Gosnell </a>
  * @author <a href="mailto:andreas@jboss.org">Andreas Schaefer </a>.
- * @version $Revision: 1.8 $
- * 
- * <p>
- * <b>Revisions: </b>
  * 
  * <p>
  * <b>20011201 andreas: </b>
@@ -85,8 +81,6 @@ public class Jetty extends org.mortbay.jetty.Server
     {
         return (HandlerCollection)getChildHandlerByClass(ContextHandlerCollection.class);
     }
-
-  
 
 
     public Element getConfigurationElement()
