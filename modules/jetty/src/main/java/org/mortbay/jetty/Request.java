@@ -742,7 +742,7 @@ public class Request implements HttpServletRequest
         Principal p = getUserPrincipal();
         if (p==null)
             return null;
-        return p.toString();
+        return p.getName();
     }
 
     /* ------------------------------------------------------------ */
