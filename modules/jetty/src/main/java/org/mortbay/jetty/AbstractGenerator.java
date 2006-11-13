@@ -476,7 +476,7 @@ public abstract class AbstractGenerator implements Generator
         // These are held here for reuse by Writer
         String _characterEncoding;
         Writer _converter;
-        protected char[] _chars;
+        char[] _chars;
         ByteArrayOutputStream2 _bytes;
         
 
@@ -667,6 +667,9 @@ public abstract class AbstractGenerator implements Generator
                     _out._converter = null; // Set lazily in getConverter()
             }
             _out._characterEncoding = encoding;
+            if (!_direct && _out._bytes==null)
+                _out._bytes = new ByteArrayOutputStream2(MAX_OUTPUT_CHARS*6);
+                
         }
 
         /* ------------------------------------------------------------ */
@@ -728,9 +731,7 @@ public abstract class AbstractGenerator implements Generator
                     length -= MAX_OUTPUT_CHARS;
                 }
 
-                Output out = _out;        
-                if (_out._bytes==null)
-                    out._bytes = new ByteArrayOutputStream2(MAX_OUTPUT_CHARS*6);
+                Output out = _out;   
 
                 switch (_writeMode)
                 {
@@ -940,7 +941,7 @@ public abstract class AbstractGenerator implements Generator
                 }
                 
                 int c=s[i];
-                _out._bytes.writeUnchecked((c>=0&&c<256)?c:'?'); 
+                _out._generator.uncheckedAddContent((c>=0&&c<256)?c:'?'); 
             }
             _space-=length;
             _generator.completeUncheckedAddContent();
@@ -971,7 +972,7 @@ public abstract class AbstractGenerator implements Generator
                 }
                 
                 int c=s.charAt(i);
-                _out._bytes.writeUnchecked((c>=0&&c<256)?c:'?'); 
+                _out._generator.uncheckedAddContent((c>=0&&c<256)?c:'?'); 
             }
             _space-=length;
             _generator.completeUncheckedAddContent();
