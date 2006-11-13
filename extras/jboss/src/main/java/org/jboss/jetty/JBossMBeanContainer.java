@@ -1,5 +1,5 @@
 //========================================================================
-//$Id: ConfigurationManager.java 1096 2006-10-12 20:59:46Z janb $
+//$Id:  $
 //Copyright 2006 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ public class JBossMBeanContainer extends MBeanContainer
 {
     
     public static final String JBOSS_DOMAIN = "jboss.jetty";
-    public static final String JSR77_DOMAIN = "jboss.management.local";
+
     
 	public JBossMBeanContainer(MBeanServer server)
 	{
@@ -42,10 +42,6 @@ public class JBossMBeanContainer extends MBeanContainer
     {
      //do nothing - the superclass does initialization of stuff we don't want 
     }
-    
-    public String getJsr77Domain()
-    {
-        return JSR77_DOMAIN;
-    }
+
 
 }

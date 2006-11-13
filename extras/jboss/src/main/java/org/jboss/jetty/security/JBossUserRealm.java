@@ -24,7 +24,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.security.auth.Subject;
 
-import org.jboss.jetty.JBossWebApplicationContext;
+import org.jboss.jetty.JBossWebAppContext;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.RealmMapping;
@@ -66,7 +66,7 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
 
     private SubjectSecurityManager _subjSecMgr = null;
 
-    private JBossWebApplicationContext _jbossWebAppContext = null;
+    private JBossWebAppContext _jbossWebAppContext = null;
 
     /*
      * Since there is a seperate instance of JBossUserRealm per web-app

@@ -1,14 +1,17 @@
-/*
- * jBoss, the OpenSource EJB server
- *
- * Distributable under GPL license.
- * See terms of license at gnu.org.
- */
-
-// $Id: JettyService.java,v 1.8 2004/10/07 22:51:17 janb Exp $
-
-//------------------------------------------------------------------------------
-
+//========================================================================
+//$Id:  $
+//Copyright 2006 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
 package org.jboss.jetty;
 
 
@@ -38,13 +41,10 @@ import org.w3c.dom.Element;
  *            extends="org.jboss.web.AbstractWebContainerMBean"
  *
  * @todo convert to use JMXDoclet...
- *
- * @author <a href="mailto:jules@mortbay.com">Julian Gosnell</a>
- * @version $Revision: 1.8 $
+ * 
  */
 
-public class JettyService extends AbstractWebContainer implements
-        JettyServiceMBean, MBeanRegistration
+public class JettyService extends AbstractWebContainer implements JettyServiceMBean, MBeanRegistration
 {
     public static final String NAME = "Jetty";
 
@@ -72,6 +72,9 @@ public class JettyService extends AbstractWebContainer implements
         private boolean _acceptNonWarDirs;
         private String _webDefaultResource;
         private boolean _supportJSR77;
+        private String _mbeanDomain;
+        
+        
         
         /**
          * @return the _webDefaultResource
@@ -178,6 +181,22 @@ public class JettyService extends AbstractWebContainer implements
         public void setSupportJSR77(boolean _supportjsr77)
         {
             _supportJSR77 = _supportjsr77;
+        }
+
+        /**
+         * @return the _mbeanDomain
+         */
+        public String getMBeanDomain()
+        {
+            return _mbeanDomain;
+        }
+
+        /**
+         * @param domain the _mbeanDomain to set
+         */
+        public void setMBeanDomain(String domain)
+        {
+            _mbeanDomain = domain;
         }
     }
 
@@ -407,8 +426,6 @@ public class JettyService extends AbstractWebContainer implements
     {
         log.debug("Saving Configuration to xml fragment");
         this._jettyConfig = configElement;
-        // Don't apply this now as this element can be set more than during init
-        // _jetty.setConfigurationElement (configElement);
     }
 
     
@@ -420,6 +437,7 @@ public class JettyService extends AbstractWebContainer implements
         JettyDeployer deployer = new JettyDeployer(di);
         deployer.setHandlerCollection(_jetty.getContextHandlerCollection());
         ConfigurationData configData = new ConfigurationData();
+        configData.setMBeanDomain("jboss.jetty");
         configData.setAcceptNonWarDirs(getAcceptNonWarDirs());
         configData.setJava2ClassLoadingCompliance(getJava2ClassLoadingCompliance());
         configData.setLenientEjbLink(getLenientEjbLink());

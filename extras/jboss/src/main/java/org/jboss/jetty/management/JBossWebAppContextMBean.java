@@ -1,4 +1,5 @@
 //========================================================================
+//$Id$
 //Copyright 2006 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,44 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty.servlet.management;
+package org.jboss.jetty.management;
 
 import javax.management.ObjectName;
 
+import org.jboss.jetty.JBossWebAppContext;
+import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.log.Log;
 import org.mortbay.management.ObjectMBean;
 
-public class ServletHolderMBean extends ObjectMBean
+/**
+ * JBossWebApplicationContextMBean
+ *
+ * Provides special object name for itself so that 
+ * we can integrate with jboss jsr77 management system.
+ */
+public class JBossWebAppContextMBean extends ObjectMBean
 {
-    public ServletHolderMBean(Object managedObject)
+    private JBossWebAppContext _webAppContext;
+    
+    public JBossWebAppContextMBean(Object managedObject)
     {
         super(managedObject);
+        _webAppContext = (JBossWebAppContext)managedObject;
     }
+    
+    public ObjectName getObjectName()
+    {
+
+        ObjectName oname = null;
+        try
+        {
+            oname = new ObjectName(getMBeanContainer().getDomain()+":J2EEServer=none,J2EEApplication=none,J2EEWebModule="+_webAppContext.getUniqueName());    
+        }
+        catch (Exception e)
+        {
+            Log.warn(e);
+        }
+        return oname;
+    }
+
 }
