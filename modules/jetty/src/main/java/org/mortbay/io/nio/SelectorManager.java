@@ -467,14 +467,13 @@ public abstract class SelectorManager extends AbstractLifeCycle
         {
             wakeup();
             Thread.yield();
-            
-            synchronized (this)
-            {
-                // horrid hack until I find a better way
-            
-                stopchanging:
-                while (_selector.keys().size()>0)
-                {   
+
+            // horrid hack until I find a better way
+
+            stopchanging: while (_selector.keys().size()>0)
+            {   
+                synchronized (this)
+                {
                     try
                     {
                         Iterator iter =_selector.keys().iterator();

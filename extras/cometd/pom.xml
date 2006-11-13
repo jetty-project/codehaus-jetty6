@@ -47,6 +47,13 @@
       <version>${project.version}</version>
        <scope>provided</scope>
      </dependency>
+     <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jms_1.1_spec</artifactId>
+      <version>1.0</version>
+      <optional>false</optional>
+     </dependency>
+
     <!-- dependency> 
       <groupId>incubator-activemq</groupId> 
       <artifactId>activemq-core</artifactId> 

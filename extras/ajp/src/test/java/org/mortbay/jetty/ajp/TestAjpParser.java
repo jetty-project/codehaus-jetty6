@@ -29,6 +29,8 @@ public class TestAjpParser extends TestCase
         Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),null);
         
         parser.parseAvailable();
+        
+        assertTrue(true);
     }
     
     
