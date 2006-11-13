@@ -144,6 +144,12 @@ public class HttpParser implements Parser
     }
 
     /* ------------------------------------------------------------ */
+    public boolean isIdle()
+    {
+        return isState(STATE_START);
+    }
+
+    /* ------------------------------------------------------------ */
     public boolean isComplete()
     {
         return isState(STATE_END);
@@ -898,15 +904,22 @@ public class HttpParser implements Parser
             // Handle blocking end points
             else if (_endp.isBlocking())
             {
-                long filled=_parser.parseNext();
-                
-                // parse until some progress is made (or IOException thrown for timeout)
-                while(_content.length() == 0 && filled!=0 && !_parser.isState(HttpParser.STATE_END))
+                try
                 {
-                    // Try to get more _parser._content
-                    filled=_parser.parseNext();
+                    long filled=_parser.parseNext();
+
+                    // parse until some progress is made (or IOException thrown for timeout)
+                    while(_content.length() == 0 && filled!=0 && !_parser.isState(HttpParser.STATE_END))
+                    {
+                        // Try to get more _parser._content
+                        filled=_parser.parseNext();
+                    }
                 }
-                
+                catch(IOException e)
+                {
+                    _endp.close();
+                    throw e;
+                }
             }
             // Handle non-blocking end point
             else
@@ -917,7 +930,10 @@ public class HttpParser implements Parser
                 while(_content.length() == 0 && !_parser.isState(HttpParser.STATE_END))
                 {
                     if (!_endp.blockReadable(_maxIdleTime))
-                        throw new InterruptedIOException("timeout");
+                    {
+                        _endp.close();
+                        throw new EofException("timeout");
+                    }
 
                     // Try to get more _parser._content
                     _parser.parseNext();

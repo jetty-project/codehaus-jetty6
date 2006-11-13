@@ -84,4 +84,6 @@ public interface Generator
  
     void setVersion(int version);
 
+    boolean isIdle();
+
 }

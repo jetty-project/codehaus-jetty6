@@ -54,7 +54,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         _key = key;
         _key.attach(this); // TODO not here!
         
-        scheduleIdle();
     }
 
     
@@ -69,8 +68,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
      */
     public boolean dispatch(boolean assumeShortDispatch) throws IOException
     {
-        scheduleIdle();
-
         // If threads are blocked on this
         synchronized (this)
         {
@@ -122,6 +119,12 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         _selectSet.scheduleIdle(_timeoutTask);
     }
+
+    /* ------------------------------------------------------------ */
+    protected void cancelIdle()
+    {
+        _selectSet.cancelIdle(_timeoutTask);
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -139,7 +142,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 if (getChannel().isOpen())
                 {
                     updateKey();
-                    scheduleIdle();
                 }
             }
             catch (Exception e)
@@ -194,13 +196,14 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /*
      * Allows thread to block waiting for further events.
      */
-    public boolean blockReadable(long timeoutMs)
+    public boolean blockReadable(long timeoutMs) throws IOException
     {
-        long start=_selectSet.getNow();
         synchronized (this)
         {
+            long start=_selectSet.getNow();
             try
             {   
+                _readBlocked=true;
                 while (isOpen() && _readBlocked)
                 {
                     try
@@ -229,13 +232,14 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /*
      * Allows thread to block waiting for further events.
      */
-    public boolean blockWritable(long timeoutMs)
+    public boolean blockWritable(long timeoutMs) throws IOException
     {
-        long start=_selectSet.getNow();
         synchronized (this)
         {
+            long start=_selectSet.getNow();
             try
             {   
+                _writeBlocked=true;
                 while (isOpen() && _writeBlocked)
                 {
                     try
@@ -357,8 +361,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
             }
             _key = null;
         }
-        _selectSet.cancelIdle(_timeoutTask);
-
         
         try
         {

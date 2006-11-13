@@ -37,7 +37,7 @@ import org.mortbay.util.ajax.Continuation;
  * To change the template for this generated type comment go to Window - Preferences - Java - Code
  * Generation - Code and Comments
  */
-public class HttpConnection implements org.mortbay.io.Connection
+public class HttpConnection implements Connection
 {
     private static int UNKNOWN = -2;
     private static ThreadLocal __currentConnection = new ThreadLocal();
@@ -50,7 +50,6 @@ public class HttpConnection implements org.mortbay.io.Connection
     protected Server _server;
     
     private boolean _expectingContinues;  // TODO use this!
-    private boolean _idle=true;
 
     protected HttpURI _uri=new HttpURI();
 
@@ -75,6 +74,7 @@ public class HttpConnection implements org.mortbay.io.Connection
     private transient int _version = UNKNOWN;
     private transient boolean _head = false;
     private transient boolean _host = false;
+    private transient boolean  _delayedHandling=false;
 
     /* ------------------------------------------------------------ */
     public static HttpConnection getCurrentConnection()
@@ -329,7 +329,6 @@ public class HttpConnection implements org.mortbay.io.Connection
         
         while (more_in_buffer && _endp.isOpen())
         {
-            _idle=false; // TODO not always true!
             try
             {
                 setCurrentConnection(this);
@@ -378,7 +377,7 @@ public class HttpConnection implements org.mortbay.io.Connection
                 // TODO.  Need to consider how to really flush this for non-blocking
                 
                 _parser.reset(true);
-                
+                _endp.close();
                 throw e;
             }
             finally
@@ -389,7 +388,6 @@ public class HttpConnection implements org.mortbay.io.Connection
                 
                 if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
                 {  
-                    _idle=true;
                     if (!_generator.isPersistent())
                     {
                         _parser.reset(true);
@@ -463,17 +461,26 @@ public class HttpConnection implements org.mortbay.io.Connection
                 Log.ignore(e);
                 error=true;
             }
-            catch (ServletException e)
-            {
-                Log.warn(e);
-                _request.setHandled(true);
-                _generator.sendError(500, null, null, true);
-            }
             catch (HttpException e)
             {
                 Log.debug(e);
                 _request.setHandled(true);
                 _response.sendError(e.getStatus(), e.getReason());
+                error=true;
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+                _request.setHandled(true);
+                _generator.sendError(500, null, null, true);
+                error=true;
+            }
+            catch (Error e)
+            {
+                Log.warn(e);
+                _request.setHandled(true);
+                _generator.sendError(500, null, null, true);
+                error=true;
             }
             finally
             {   
@@ -489,12 +496,17 @@ public class HttpConnection implements org.mortbay.io.Connection
                         Log.debug("continuation still pending {}");
                         _request.getContinuation().reset();
                     }
-                    
-                    if (!error && _endp.isOpen()) 
+
+                    if(_endp.isOpen())
                     {
-                        if (!_response.isCommitted() && !_request.isHandled())
-                            _response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                        _response.complete();
+                        if (error) 
+                            _endp.close();
+                        else
+                        {
+                            if (!_response.isCommitted() && !_request.isHandled())
+                                _response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                            _response.complete();
+                        }
                     }
                 }
             }
@@ -569,7 +581,7 @@ public class HttpConnection implements org.mortbay.io.Connection
     /* ------------------------------------------------------------ */
     public boolean isIdle()
     {
-        return _idle;
+        return _generator.isIdle() && _parser.isIdle() || _delayedHandling;
     }
     
     /* ------------------------------------------------------------ */
@@ -577,8 +589,6 @@ public class HttpConnection implements org.mortbay.io.Connection
     /* ------------------------------------------------------------ */
     private class RequestHandler extends HttpParser.EventHandler
     {
-        boolean _delayedHandling=false;
-        
         /*
          * 
          * @see org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,

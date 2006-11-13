@@ -32,4 +32,6 @@ public interface Parser
 
     boolean isMoreInBuffer() throws IOException;
 
+    boolean isIdle();
+
 }

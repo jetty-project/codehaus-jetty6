@@ -260,6 +260,7 @@ public class HttpGenerator extends AbstractGenerator
         
         if (_method!=null)
         {
+            _close = false;
             // Request
             if (_version == HttpVersions.HTTP_0_9_ORDINAL)
             {
@@ -269,7 +270,6 @@ public class HttpGenerator extends AbstractGenerator
                 _header.put(_uri.getBytes("utf-8")); // TODO WRONG!
                 _header.put(HttpTokens.CRLF);
                 _state = STATE_FLUSHING;
-                _close = false;
                 _noContent=true;
                 return;
             }
@@ -295,7 +295,7 @@ public class HttpGenerator extends AbstractGenerator
             }
             else
             {
-                if (_version == HttpVersions.HTTP_1_0_ORDINAL && _method==null) 
+                if (_version == HttpVersions.HTTP_1_0_ORDINAL) 
                     _close = true;
 
                 // add response line
