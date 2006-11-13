@@ -57,7 +57,7 @@ public class FilterMapping
      */
     boolean appliesTo(int type)
     {
-       if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
+       if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)))
            return true;
        return false;
     }

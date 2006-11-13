@@ -10,6 +10,8 @@ jetty-6.0-SNAPSHOT
     + Port NPE fix in SocketEndPoint from trunk
     + Reverted UnixCrypt to use coersions (that effected results)
     + JETTY-151 avoid byte array overflows when endp is closed
+    + JETTY-171 Fixed filter mapping
+    + JETTY-172 use getName() instead of toString
 
 jetty-6.0.1 - 24 September 2006
     + fixed isUserInRole checking for JAASUserRealm
