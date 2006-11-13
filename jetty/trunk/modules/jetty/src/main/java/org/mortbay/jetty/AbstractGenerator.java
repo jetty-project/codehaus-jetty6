@@ -85,7 +85,7 @@ public abstract class AbstractGenerator implements Generator
     // data
     protected int _state = STATE_HEADER;
     
-    protected int _status = HttpStatus.ORDINAL_200_OK;
+    protected int _status = 0;
     protected int _version = HttpVersions.HTTP_1_1_ORDINAL;
     protected  Buffer _reason;
     protected  Buffer _method;
@@ -161,6 +161,7 @@ public abstract class AbstractGenerator implements Generator
             }
         }
         _content = null;
+        _method=null;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -242,6 +243,12 @@ public abstract class AbstractGenerator implements Generator
     }
 
     /* ------------------------------------------------------------ */
+    public boolean isIdle()
+    {
+        return _state == STATE_HEADER && _method==null && _status==0;
+    }
+
+    /* ------------------------------------------------------------ */
     public boolean isCommitted()
     {
         return _state != STATE_HEADER;
@@ -273,6 +280,12 @@ public abstract class AbstractGenerator implements Generator
     public boolean isPersistent()
     {
         return !_close;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setPersistent(boolean persistent)
+    {
+        _close=!persistent;
     }
 
     /* ------------------------------------------------------------ */
@@ -465,6 +478,32 @@ public abstract class AbstractGenerator implements Generator
             _closed=true;
         }
 
+        void  blockForOutput() throws IOException
+        {
+            if (_generator._endp.isBlocking())
+            {
+                try
+                {
+                    flush();
+                }
+                catch(IOException e)
+                {
+                    _generator._endp.close();
+                    throw e;
+                }
+            }
+            else
+            {
+                if (!_generator._endp.blockWritable(_maxIdleTime))
+                {
+                    _generator._endp.close();
+                    throw new EofException("timeout");
+                }
+                
+                _generator.flush();
+            }
+        }
+        
         /* ------------------------------------------------------------ */
         void reopen()
         {
@@ -482,12 +521,7 @@ public abstract class AbstractGenerator implements Generator
                 _generator.flush();
                 
                 while ((content!=null && content.length()>0 ||buffer!=null && buffer.length()>0) && _generator._endp.isOpen())
-                {
-                    if (!_generator._endp.isBlocking())
-                        if (!_generator._endp.blockWritable(_maxIdleTime))
-                            throw new IOException("timeout");
-                    _generator.flush();
-                }
+                    blockForOutput();
             }
         }
 
@@ -525,12 +559,7 @@ public abstract class AbstractGenerator implements Generator
             
             // Block until we can add _content.
             while (_generator.isBufferFull() && _generator._endp.isOpen())
-            {
-                if (!_generator._endp.isBlocking())
-                    if(!_generator._endp.blockWritable(_maxIdleTime))
-                        throw new IOException("timeout");
-                flush();
-            }
+                blockForOutput();
 
             // Add the _content
             if (_generator.addContent((byte)b))
@@ -548,12 +577,7 @@ public abstract class AbstractGenerator implements Generator
             
             // Block until we can add _content.
             while (_generator.isBufferFull() && _generator._endp.isOpen())
-            {
-                if (!_generator._endp.isBlocking())
-                    if(!_generator._endp.blockWritable(_maxIdleTime))
-                        throw new IOException("timeout");
-                flush();
-            }
+                blockForOutput();
 
             // Add the _content
             _generator.addContent(buffer, Generator.MORE);
@@ -564,12 +588,7 @@ public abstract class AbstractGenerator implements Generator
 
             // Block until our buffer is free
             while (buffer.length() > 0 && _generator._endp.isOpen())
-            {
-                if (!_generator._endp.isBlocking())
-                    if(!_generator._endp.blockWritable(_maxIdleTime))
-                        throw new IOException("timeout"); 
-                flush();
-            }
+                blockForOutput();
         }
 
         /* ------------------------------------------------------------ */

@@ -18,6 +18,7 @@ package org.mortbay.io;
 import java.io.IOException;
 
 
+
 /**
  * @author gregw
  * A transport EndPoint
@@ -117,10 +118,10 @@ public interface EndPoint
     public boolean isBufferred();
     
     /* ------------------------------------------------------------ */
-    public boolean blockReadable(long millisecs);
+    public boolean blockReadable(long millisecs) throws IOException;
 
     /* ------------------------------------------------------------ */
-    public boolean blockWritable(long millisecs);
+    public boolean blockWritable(long millisecs) throws IOException;
 
     /* ------------------------------------------------------------ */
     public boolean isOpen();

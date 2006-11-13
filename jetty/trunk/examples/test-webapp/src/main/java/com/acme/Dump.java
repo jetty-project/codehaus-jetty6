@@ -140,7 +140,6 @@ public class Dump extends HttpServlet
                 
                 if (dribble!=null)
                 {
-                    System.err.println("dribble="+dribble);
                     out.flush();
                     try
                     {

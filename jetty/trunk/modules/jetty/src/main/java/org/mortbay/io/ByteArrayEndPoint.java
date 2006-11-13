@@ -18,6 +18,7 @@ package org.mortbay.io;
 import java.io.IOException;
 
 
+
 /* ------------------------------------------------------------ */
 /** ByteArrayEndPoint.
  * @author gregw

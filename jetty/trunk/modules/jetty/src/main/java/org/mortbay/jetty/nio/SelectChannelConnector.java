@@ -250,6 +250,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
         public ConnectorEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
         {
             super(channel,selectSet,key);
+            scheduleIdle();
         }
 
         public void close() throws IOException
@@ -259,6 +260,12 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 continuation.reset();
 
             super.close();
+        }
+        
+        public boolean dispatch(boolean assumeShortDispatch) throws IOException
+        {
+            cancelIdle();
+            return super.dispatch(assumeShortDispatch);
         }
 
         public void undispatch()
@@ -275,20 +282,10 @@ public class SelectChannelConnector extends AbstractNIOConnector
             else
             {
                 super.undispatch();
+                if (_connection.isIdle())
+                    scheduleIdle();
             }
-        }
-
-        public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
-        {
-            // TODO - is this really expensive? 
-            scheduleIdle(); 
-            return super.flush(header,buffer,trailer);
-        }
-
-        public int flush(Buffer buffer) throws IOException
-        {
-            scheduleIdle();
-            return super.flush(buffer);
+            
         }
 
     }
