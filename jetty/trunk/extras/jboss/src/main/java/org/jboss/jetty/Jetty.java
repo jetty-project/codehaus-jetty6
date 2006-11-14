@@ -67,8 +67,6 @@ public class Jetty extends org.mortbay.jetty.Server
 
     //TODO move these to JettyDeployer?
     protected boolean _stopWebApplicationsGracefully = false;
-    protected boolean _forceDistributable = false;
-    protected SessionManager _distributableSessionManagerPrototype;
     
     Jetty(JettyService service)
     {
@@ -190,27 +188,6 @@ public class Jetty extends org.mortbay.jetty.Server
 //            // SecurityAssociation.setCredential(null);
 //        }
 //    } 
-
-    public void setDistributableSessionManagerPrototype(SessionManager manager)
-    {
-        _distributableSessionManagerPrototype = manager;
-    }
-
-    public SessionManager getDistributableSessionManagerPrototype()
-    {
-        return _distributableSessionManagerPrototype;
-    }
-
-    public boolean getForceDistributable()
-    {
-        return _forceDistributable;
-    }
-
-    public void setForceDistributable(boolean distributable)
-    {
-        _forceDistributable = distributable;
-    }
-
 
     public boolean getStopWebApplicationsGracefully()
     {
