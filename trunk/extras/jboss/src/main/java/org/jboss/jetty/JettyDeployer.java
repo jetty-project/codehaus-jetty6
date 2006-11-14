@@ -90,7 +90,7 @@ public class JettyDeployer extends AbstractWebDeployer
 
     public void performDeploy(WebApplication webApp, String warUrl, WebDescriptorParser parser) throws DeploymentException
     {
-    	log.debug("webapp="+webApp);
+    	log.debug("webapp="+webApp);        
         String contextPath = webApp.getMetaData().getContextRoot();
         try
         {
@@ -110,8 +110,6 @@ public class JettyDeployer extends AbstractWebDeployer
             if (found)
                 _log.warn("A WebApplication is already deployed in context '" + contextPath
                         + "' - proceed at your own risk.");
-
-        	log.debug("before deploy webapp="+webApp);
 
             // deploy the WebApp
             JBossWebAppContext app = new JBossWebAppContext(parser, webApp, warUrl);
