@@ -137,6 +137,13 @@
       <systemPath>${jboss.home}/server/all/lib/jboss-jsr77.jar</systemPath>
       <scope>system</scope>
     </dependency>
+    <dependency>
+      <groupId>jboss</groupId>
+      <artifactId>jboss-j2ee</artifactId>
+      <version>4.0.5</version>
+      <systemPath>${jboss.home}/server/all/lib/jboss-j2ee.jar</systemPath>
+      <scope>system</scope>
+    </dependency>
   </dependencies>
   <properties>
     <!-- jboss.home must be provided on the command line -->
