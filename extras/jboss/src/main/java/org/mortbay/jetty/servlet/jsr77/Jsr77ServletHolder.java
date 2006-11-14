@@ -58,7 +58,7 @@ public class Jsr77ServletHolder extends ServletHolder
 	public void doStart() throws Exception 
 	{
 		super.doStart();
-		_servletStats = new ServletStatsImpl(getServlet().getServletConfig().getServletName());
+		_servletStats = new ServletStatsImpl(getName());
 	}
 	
 	public void handle(ServletRequest request, ServletResponse response) 
