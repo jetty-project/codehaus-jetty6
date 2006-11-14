@@ -221,28 +221,27 @@ public class ServletHolder extends Holder
     
     /* ------------------------------------------------------------ */
     public void doStart()
-        throws Exception
+    throws Exception
     {
         _unavailable=0;
-        super.doStart();
-        
-        if (!javax.servlet.Servlet.class
-            .isAssignableFrom(_class))
+        try
         {
-            Exception ex = new IllegalStateException("Servlet "+_class+
-                                            " is not a javax.servlet.Servlet");
-            super.stop();
-            throw ex;
-        }        
+            super.doStart();
+            checkServletType();
+        }
+        catch (UnavailableException ue)
+        {
+            makeUnavailable(ue);
+        }
 
         _config=new Config();
-        
+
         if (_runAs!=null)
             _realm=((SecurityHandler)(ContextHandler.getCurrentContext()
                     .getContextHandler().getChildHandlerByClass(SecurityHandler.class))).getUserRealm();
-        
+
         if (javax.servlet.SingleThreadModel.class
-            .isAssignableFrom(_class))
+                .isAssignableFrom(_class))
             _servlets=new Stack();
 
         if (_extInstance || _initOnStartup)
@@ -264,7 +263,7 @@ public class ServletHolder extends Holder
                 else
                     throw new ServletException(e);
             }            
-            
+
             if(_servlets != null)
             {
                 _servlets.push(_servlet);
@@ -368,6 +367,21 @@ public class ServletHolder extends Holder
         }    
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * Check to ensure class of servlet is acceptable.
+     * @throws UnavailableException
+     */
+    public void checkServletType ()
+    throws UnavailableException
+    {
+        if (!javax.servlet.Servlet.class.isAssignableFrom(_class))
+        {
+            throw new UnavailableException("Servlet "+_class+" is not a javax.servlet.Servlet");
+        }
+    }
+    
+    
     /* ------------------------------------------------------------ */
     private Servlet makeUnavailable(UnavailableException e) 
       throws UnavailableException 
