@@ -468,8 +468,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
             wakeup();
             Thread.yield();
 
-            // horrid hack until I find a better way
-
+            // horrid hack until I find a better way.  Really need to get the select set to stop itself, but
+            // the thread pool is stopped by this stage!
             stopchanging: while (_selector!= null && _selector.keys().size()>0)
             {   
                 synchronized (this)
@@ -504,20 +504,21 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         Thread.yield();
                     }
                 }
-
-                _idleTimeout.cancelAll();
-                _retryTimeout.cancelAll();
-                try
-                {
-                    if (_selector != null)
-                        _selector.close();
-                }
-                catch (IOException e)
-                {
-                    Log.ignore(e);
-                } 
-                _selector=null;
             }
+
+            _idleTimeout.cancelAll();
+            _retryTimeout.cancelAll();
+            try
+            {
+                if (_selector != null)
+                    _selector.close();
+            }
+            catch (IOException e)
+            {
+                Log.ignore(e);
+            } 
+            _selector=null;
+
         }
     }
 }
