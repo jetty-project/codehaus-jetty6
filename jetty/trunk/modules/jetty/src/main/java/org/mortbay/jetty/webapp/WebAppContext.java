@@ -23,6 +23,9 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
@@ -31,6 +34,8 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.deployer.WebAppDeployer;
@@ -93,6 +98,7 @@ public class WebAppContext extends Context
     
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
+    private transient boolean _unavailable;
 
     public static WebAppContext getCurrentWebAppContext()
     {
@@ -369,45 +375,70 @@ public class WebAppContext extends Context
         return resource;
     }
     
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     */
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    throws IOException, ServletException
+    {   
+        if (_unavailable)
+        {
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        }
+        else
+            super.handle(target, request, response, dispatch);
+    }
+
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.thread.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
     {
-        // Setup configurations 
-        loadConfigurations();
-        
-        for (int i=0;i<_configurations.length;i++)
-            _configurations[i].setWebAppContext(this);
-        
-        // Configure classloader
-        _ownClassLoader=false;
-        if (getClassLoader()==null)
+        try
         {
-            WebAppClassLoader classLoader = new WebAppClassLoader(this);
-            setClassLoader(classLoader);
-            _ownClassLoader=true;
-        }
+            // Setup configurations 
+            loadConfigurations();
 
-        if (Log.isDebugEnabled()) 
-        {
-            ClassLoader loader = getClassLoader();
-            Log.debug("Thread Context class loader is: " + loader);
-            loader=loader.getParent();
-            while(loader!=null)
+            for (int i=0;i<_configurations.length;i++)
+                _configurations[i].setWebAppContext(this);
+
+            // Configure classloader
+            _ownClassLoader=false;
+            if (getClassLoader()==null)
             {
-                Log.debug("Parent class loader is: " + loader); 
-                loader=loader.getParent();
+                WebAppClassLoader classLoader = new WebAppClassLoader(this);
+                setClassLoader(classLoader);
+                _ownClassLoader=true;
             }
-        }
-        
-        for (int i=0;i<_configurations.length;i++)
-            _configurations[i].configureClassLoader();
 
-        getTempDirectory();
-        
-        super.doStart();
+            if (Log.isDebugEnabled()) 
+            {
+                ClassLoader loader = getClassLoader();
+                Log.debug("Thread Context class loader is: " + loader);
+                loader=loader.getParent();
+                while(loader!=null)
+                {
+                    Log.debug("Parent class loader is: " + loader); 
+                    loader=loader.getParent();
+                }
+            }
+
+            for (int i=0;i<_configurations.length;i++)
+                _configurations[i].configureClassLoader();
+
+            getTempDirectory();
+
+            super.doStart();
+        }
+        catch (Exception e)
+        {
+            //start up of the webapp context failed, make sure it is not started
+            Log.warn("Failed startup of context "+this, e);
+            _unavailable = true;
+        }
 
     }
     
@@ -441,6 +472,8 @@ public class WebAppContext extends Context
         {
             if (_ownClassLoader)
                 setClassLoader(null);
+            
+            _unavailable = false;
         }
     }
     
