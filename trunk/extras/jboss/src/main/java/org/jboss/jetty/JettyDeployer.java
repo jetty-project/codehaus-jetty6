@@ -35,7 +35,9 @@ import org.jboss.logging.Logger;
 import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
+import org.mortbay.j2ee.session.Manager;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -54,6 +56,9 @@ public class JettyDeployer extends AbstractWebDeployer
     protected DeploymentInfo _deploymentInfo;
     protected HandlerCollection _contexts;
     protected JettyService.ConfigurationData  _configData;
+    protected SessionManager _distributableSessionManagerPrototype;
+    protected boolean _forceDistributable = false;
+
     /**
      * use Hashtable because is is synchronised
      */
@@ -115,14 +120,14 @@ public class JettyDeployer extends AbstractWebDeployer
                 app.setConfigurationClasses (new String[]{"org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"/*,"org.mortbay.jetty.servlet.jsr77.Configuration"*/});
             else
                 app.setConfigurationClasses (new String[]{ "org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"});
-
-
-//          SessionManager manager = getDistributableSessionManagerPrototype();
-//          if (manager != null)
-//          {
-//          app.setDistributableSessionManager((SessionManager) manager.clone());
-//          if (getForceDistributable()) app.setDistributable(true);
-//          }
+          
+            Manager manager = (Manager) getDistributableSessionManagerPrototype();
+            if (manager != null)
+            {
+                app.setDistributableSessionManager((Manager) manager.clone());
+                if (getForceDistributable())
+                    app.setDistributable(true);
+            }
 
             // configure whether the context is to flatten the classes in
             // the WAR or not
@@ -268,4 +273,26 @@ public class JettyDeployer extends AbstractWebDeployer
             return url;
         }
     }
+    
+    public void setDistributableSessionManagerPrototype(SessionManager manager)
+    {
+        _distributableSessionManagerPrototype = manager;
+    }
+
+    public SessionManager getDistributableSessionManagerPrototype()
+    {
+        return _distributableSessionManagerPrototype;
+    }
+    
+    public boolean getForceDistributable()
+    {
+        return _forceDistributable;
+    }
+
+    public void setForceDistributable(boolean distributable)
+    {
+        _forceDistributable = distributable;
+    }
+
+
 }

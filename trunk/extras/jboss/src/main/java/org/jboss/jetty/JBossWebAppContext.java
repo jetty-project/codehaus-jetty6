@@ -28,6 +28,11 @@ import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 //import org.mortbay.j2ee.session.AbstractReplicatedStore;
 //import org.mortbay.j2ee.session.Manager;
 //import org.mortbay.j2ee.session.Store;
+import org.mortbay.j2ee.J2EEWebAppContext;
+import org.mortbay.j2ee.session.AbstractReplicatedStore;
+import org.mortbay.j2ee.session.Manager;
+import org.mortbay.j2ee.session.Store;
+import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -45,7 +50,7 @@ import org.mortbay.util.MultiException;
  * TODO jsr77 support, distributable session support
  *
  */
-public class JBossWebAppContext extends WebAppContext
+public class JBossWebAppContext extends J2EEWebAppContext
 {
     protected static Logger __log=Logger.getLogger(JBossWebAppContext.class);
 
@@ -61,7 +66,7 @@ public class JBossWebAppContext extends WebAppContext
     public JBossWebAppContext(WebDescriptorParser descriptorParser,WebApplication webApp, String warUrl) 
     throws IOException
     {
-        super(null,null, new Jsr77ServletHandler(), null);
+        super(null,new SessionHandler(), new Jsr77ServletHandler(), null);
         setWar(warUrl);
         ((Jsr77ServletHandler)getServletHandler()).setWebAppContext(this);
         _descriptorParser=descriptorParser;
@@ -104,32 +109,32 @@ public class JBossWebAppContext extends WebAppContext
     protected void startContext() throws Exception
     {
         ClassLoader loader=Thread.currentThread().getContextClassLoader();
-//        if(getDistributable()&&getDistributableSessionManager()!=null)
-//            setUpDistributableSessionManager(loader);
+        if(getDistributable()&&getDistributableSessionManager()!=null)
+            setUpDistributableSessionManager(loader);
         setUpENC(loader);
         if(_realm!=null)
             _realm.init();
         super.startContext();
     }
 
-//    protected void setUpDistributableSessionManager(ClassLoader loader)
-//    {
-//        try
-//        {
-//            SessionManager sm=getDistributableSessionManager();
-//            Store store=sm.getStore();
-//            if(store instanceof AbstractReplicatedStore)
-//                ((AbstractReplicatedStore)store).setLoader(loader);
-//            if(_timeOutPresent)
-//                sm.setMaxInactiveInterval(_timeOutMinutes*60);
-//            getServletHandler().setSessionManager(sm);
-//            //_log.info("using Distributable HttpSession Manager: "+sm);
-//        }
-//        catch(Exception e)
-//        {
-//            __log.error("could not set up Distributable HttpSession Manager - using local one",e);
-//        }
-//    }
+    protected void setUpDistributableSessionManager(ClassLoader loader)
+    {
+        try
+        {
+            Manager sm=(Manager)getDistributableSessionManager();
+            Store store=sm.getStore();
+            if(store instanceof AbstractReplicatedStore)
+                ((AbstractReplicatedStore)store).setLoader(loader);
+            if(_timeOutPresent)
+                sm.setMaxInactiveInterval(_timeOutMinutes*60);
+            getSessionHandler().setSessionManager(sm);
+            //_log.info("using Distributable HttpSession Manager: "+sm);
+        }
+        catch(Exception e)
+        {
+            __log.error("could not set up Distributable HttpSession Manager - using local one",e);
+        }
+    }
 
     protected void setUpENC(ClassLoader loader) throws Exception
     {
