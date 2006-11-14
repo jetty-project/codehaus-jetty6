@@ -470,7 +470,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
             // horrid hack until I find a better way
 
-            stopchanging: while (_selector.keys().size()>0)
+            stopchanging: while (_selector!= null && _selector.keys().size()>0)
             {   
                 synchronized (this)
                 {
