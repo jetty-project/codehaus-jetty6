@@ -37,8 +37,7 @@ import org.jboss.logging.Logger;
 // we should cache our id locally...
 
 public class StateAdaptor
-  //implements org.mortbay.jetty.SessionManager.Session
-	implements javax.servlet.http.HttpSession
+  implements Manager.Session
 {
   protected static final Logger _log=Logger.getLogger(StateAdaptor.class);
   Manager        _manager;
