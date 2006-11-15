@@ -85,7 +85,7 @@ import org.mortbay.log.Log;
 
 //----------------------------------------
 
-public class Manager extends AbstractSessionManager
+public class Manager implements org.mortbay.jetty.SessionManager
 {
     // ----------------------------------------
     protected WebAppContext _context;
@@ -431,7 +431,7 @@ public class Manager extends AbstractSessionManager
 
     public HttpSessionContext getSessionContext()
     {
-        return org.mortbay.jetty.servlet.SessionContext.NULL_IMPL;
+        return null;
     }
 
     // --------------------
@@ -815,8 +815,8 @@ public class Manager extends AbstractSessionManager
 
     public Cookie getSessionCookie(HttpSession session, String contextPath, boolean requestIsSecure)
     {
-        if (isUsingCookies())
-        {
+//        if (_handler.isUsingCookies())
+//        { what's the jetty6 counterpart for isUsingCookies? - nik
             Cookie cookie = _handler.getSessionManager().getHttpOnly() ? new HttpOnlyCookie(SessionManager.__SessionCookieProperty, session.getId()) : new Cookie(
                 SessionManager.__SessionCookieProperty, session.getId());
             String domain = getServletContext().getInitParameter(SessionManager.__SessionDomainProperty);
@@ -838,8 +838,166 @@ public class Manager extends AbstractSessionManager
             cookie.setPath(path);
 
             return cookie;
-        }
+//        }
+//        return null;
+    }
+
+    public boolean isStarting()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public void stop() throws Exception
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public SessionIdManager getMetaManager()
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 
+    public boolean isFailed()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isRunning()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isStopped()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isStopping()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public void start() throws Exception
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public String getSessionPath()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getSessionCookie()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getSessionURL()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Cookie access(HttpSession arg0)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void complete(HttpSession arg0)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public boolean getHttpOnly()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public int getMaxCookieAge()
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public boolean getSecureCookies()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public String getSessionDomain()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getSessionURLPrefix()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean isValid(HttpSession arg0)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public void setIdManager(SessionIdManager arg0)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setMaxCookieAge(int arg0)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setSessionCookie(String arg0)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setSessionDomain(String arg0)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setSessionPath(String arg0)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setSessionURL(String arg0)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public interface Session extends HttpSession
+    {
+        /* ------------------------------------------------------------ */
+        public boolean isValid();
+
+        /* ------------------------------------------------------------ */
+        public void access();
+    }
 }
