@@ -109,7 +109,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
     private boolean _redirectWelcome=false;
-    private boolean _gzip=true;
+    private boolean _gzip=false;
     
     private Resource _resourceBase;
     private ResourceCache _cache;
@@ -122,7 +122,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     /* ------------------------------------------------------------ */
     public void init()
-    throws UnavailableException
+        throws UnavailableException
     {
         ServletContext config=getServletContext();
         _context = (ContextHandler.Context)config;
@@ -640,7 +640,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     /* ------------------------------------------------------------ */
     protected void writeHeaders(HttpServletResponse response,HttpContent content,long count)
-    throws IOException
+        throws IOException
     {   
         if (content.getContentType()!=null)
             response.setContentType(content.getContentType().toString());
