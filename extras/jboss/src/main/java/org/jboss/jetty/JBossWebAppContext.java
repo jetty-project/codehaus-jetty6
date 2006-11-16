@@ -15,11 +15,7 @@
 package org.jboss.jetty;
 
 
-import java.io.IOException;
 
-
-
-import org.jboss.deployment.DeploymentInfo;
 import org.jboss.jetty.security.JBossUserRealm;
 import org.jboss.logging.Logger;
 import org.jboss.web.WebApplication;
@@ -32,13 +28,9 @@ import org.mortbay.j2ee.J2EEWebAppContext;
 import org.mortbay.j2ee.session.AbstractReplicatedStore;
 import org.mortbay.j2ee.session.Manager;
 import org.mortbay.j2ee.session.Store;
-import org.mortbay.jetty.SessionManager;
-import org.mortbay.jetty.handler.ErrorHandler;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.util.MultiException;
 
 
@@ -63,14 +55,32 @@ public class JBossWebAppContext extends J2EEWebAppContext
     protected boolean _timeOutPresent=false;
     protected int _timeOutMinutes=0;
 
+    
+    /**
+     * Constructor
+     * @param descriptorParser
+     * @param webApp
+     * @param warUrl
+     * @throws Exception
+     */
     public JBossWebAppContext(WebDescriptorParser descriptorParser,WebApplication webApp, String warUrl) 
-    throws IOException
+    throws Exception
     {
         super(null,new SessionHandler(), new Jsr77ServletHandler(), null);
         setWar(warUrl);
         ((Jsr77ServletHandler)getServletHandler()).setWebAppContext(this);
         _descriptorParser=descriptorParser;
         _webApp=webApp;
+        //make a classloader for the webapp, as when this context is deployed, a
+        //classloader must be available to set on the _webApp metadata for
+        //use by webservices
+        ClassLoader loader=Thread.currentThread().getContextClassLoader();
+        if(getDistributable()&&getDistributableSessionManager()!=null)
+            setUpDistributableSessionManager(loader);
+        setUpENC(loader);
+        if(_realm!=null)
+            _realm.init();
+        setClassLoader(new WebAppClassLoader(loader, this));
     }
 
     /* ------------------------------------------------------------ */
@@ -104,19 +114,8 @@ public class JBossWebAppContext extends J2EEWebAppContext
     {
         return _descriptorParser.getDeploymentInfo().getCanonicalName();
     }
-    
-    
-    protected void startContext() throws Exception
-    {
-        ClassLoader loader=Thread.currentThread().getContextClassLoader();
-        if(getDistributable()&&getDistributableSessionManager()!=null)
-            setUpDistributableSessionManager(loader);
-        setUpENC(loader);
-        if(_realm!=null)
-            _realm.init();
-        super.startContext();
-    }
 
+    
     protected void setUpDistributableSessionManager(ClassLoader loader)
     {
         try
