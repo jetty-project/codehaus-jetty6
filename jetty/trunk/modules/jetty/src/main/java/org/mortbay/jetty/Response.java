@@ -960,6 +960,12 @@ public class Response implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
+    public HttpFields getHttpFields()
+    {
+        return _connection.getResponseFields();
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         return "HTTP/1.1 "+_status+" "+ (_reason==null?"":_reason) +System.getProperty("line.separator")+
@@ -975,5 +981,6 @@ public class Response implements HttpServletResponse
         {
         }
     }
+
 
 }
