@@ -114,7 +114,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private MimeTypes _mimeTypes;
     private String[] _welcomes;
     private boolean _aliases=false;
-    private boolean _useFileMappedBuffer=true;
+    private boolean _useFileMappedBuffer=false;
     
     
     /* ------------------------------------------------------------ */
@@ -428,6 +428,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         {
             if (content!=null)
                 content.release();
+            if (resource!=null)
+                resource.release();
         }
         
     }
