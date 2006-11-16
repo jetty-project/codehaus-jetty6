@@ -213,6 +213,8 @@ public class Dispatcher implements RequestDispatcher
         
         String old_uri=base_request.getRequestURI();
         String old_context_path=base_request.getContextPath();
+        String old_servlet_path=base_request.getServletPath();
+        String old_path_info=base_request.getPathInfo();
         String old_query=base_request.getQueryString();
         Attributes old_attr=base_request.getAttributes();
         MultiMap old_params=base_request.getParameters();
@@ -270,6 +272,8 @@ public class Dispatcher implements RequestDispatcher
         {
             base_request.setRequestURI(old_uri);
             base_request.setContextPath(old_context_path);
+            base_request.setServletPath(old_servlet_path);
+            base_request.setPathInfo(old_path_info);
             base_request.setAttributes(old_attr);
             base_request.setParameters(old_params);
             base_request.setQueryString(old_query);
