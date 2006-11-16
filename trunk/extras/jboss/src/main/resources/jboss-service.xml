@@ -11,7 +11,8 @@
      | environment.
    -->
 
-  <mbean code="org.jboss.jetty.JettyService" name="jboss.web:service=WebServer">
+  <mbean code="org.jboss.jetty.JettyService" 
+         name="jboss.web:service=WebServer" xmbean-dd="META-INF/webserver-xmbean.xml">
 
     <!-- ================================================================= -->
     <!-- Your webdefault.xml file - The default settings for every webapp  -->
