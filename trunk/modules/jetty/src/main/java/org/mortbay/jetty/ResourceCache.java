@@ -129,44 +129,39 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         {
             // Look for it in the cache
             content = (Content)_cache.get(pathInContext);
-            if (content!=null)
+        
+            if (content!=null && content.isValid())
             {
-                if (content!=null && !content.isValid())
-                    content=null;
-                else
-                    if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",content);
-            }
+                if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",content);
+                return content;
+            }    
+        }
 
-            if (content==null)
+        Resource resource=factory.getResource(pathInContext);
+        if (resource!=null && resource.exists() && !resource.isDirectory())
+        {
+            long len = resource.length();
+            if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
             {
-                Resource resource=factory.getResource(pathInContext);
-                if (resource==null)
-                    return null;
-                
-                long len = resource.length();
-                if (resource.exists())
+                content = new Content(resource);
+                fill(content);
+
+                synchronized(_cache)
                 {
-                    // Is it badly named?
-                    if (resource.isDirectory())
-                        return null;
-
-                    content= new Content(resource);
-                    
-                    // Is it cacheable?
-                    if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
+                    // check that somebody else did not fill this spot.
+                    Content content2 =(Content)_cache.get(pathInContext);
+                    if (content2!=null)
                     {
-                        int needed=_maxCacheSize-(int)len;
-                        while(_cacheSize>needed || (_maxCachedFiles>0 && _cachedFiles>_maxCachedFiles))
-                            _leastRecentlyUsed.invalidate();
-                        
-                        fill(content);
-                        content.cache(pathInContext);
-                        Log.debug("CACHED: {}",resource);
+                        content.release();
+                        return content2;
                     }
+                    
+                    content.cache(pathInContext);
                 }
             }
         }
-        return content; 
+
+        return null; 
     }
 
 
@@ -193,12 +188,19 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     protected void fill(Content content)
         throws IOException
     {
-        InputStream in = content.getResource().getInputStream();
-        int len=(int)content.getResource().length();
-        Buffer buffer = new ByteArrayBuffer(len);
-        buffer.readFrom(in,len);
-        in.close();
-        content.setBuffer(buffer);
+        try
+        {
+            InputStream in = content.getResource().getInputStream();
+            int len=(int)content.getResource().length();
+            Buffer buffer = new ByteArrayBuffer(len);
+            buffer.readFrom(in,len);
+            in.close();
+            content.setBuffer(buffer);
+        }
+        finally
+        {
+            content.getResource().release();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -343,11 +345,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         
         public void release()
         {
-            synchronized(this)
-            {
-                if (_key==null)
-                    _resource.release();
-            }
         }
 
         /* ------------------------------------------------------------ */

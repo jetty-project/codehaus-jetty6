@@ -871,7 +871,7 @@ public class HttpFields
      * @param name the field name
      * @param date the field date value
      */
-    public void putDateField(String name, long date)
+    public void putDateField(Buffer name, long date)
     {
         if (_dateBuffer == null)
         {
@@ -881,9 +881,21 @@ public class HttpFields
         _dateBuffer.setLength(0);
         _calendar.setTimeInMillis(date);
         formatDate(_dateBuffer, _calendar, false);
-        Buffer n = HttpHeaders.CACHE.lookup(name);
         Buffer v = new ByteArrayBuffer(_dateBuffer.toString());
-        put(n, v, date);
+        put(name, v, date);
+    }
+
+    /* -------------------------------------------------------------- */
+    /**
+     * Sets the value of a date field.
+     * 
+     * @param name the field name
+     * @param date the field date value
+     */
+    public void putDateField(String name, long date)
+    {
+        Buffer n = HttpHeaders.CACHE.lookup(name);
+        putDateField(n,date);
     }
 
     /* -------------------------------------------------------------- */
