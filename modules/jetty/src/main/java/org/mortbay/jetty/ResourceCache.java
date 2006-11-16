@@ -132,17 +132,19 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         
             if (content!=null && content.isValid())
             {
-                if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",content);
+                if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",pathInContext);
                 return content;
             }    
         }
-
+        
         Resource resource=factory.getResource(pathInContext);
         if (resource!=null && resource.exists() && !resource.isDirectory())
         {
             long len = resource.length();
             if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
             {
+                if (Log.isDebugEnabled()) Log.debug("CACHE MISS: {}",pathInContext);
+
                 content = new Content(resource);
                 fill(content);
 
@@ -152,15 +154,20 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                     Content content2 =(Content)_cache.get(pathInContext);
                     if (content2!=null)
                     {
+                        if (Log.isDebugEnabled()) Log.debug("FALSE HIT: {}",content);
                         content.release();
                         return content2;
                     }
                     
+                    if (Log.isDebugEnabled()) Log.debug("CACHE FILL: {}",pathInContext);                    
                     content.cache(pathInContext);
+                    
+                    return content;
                 }
             }
         }
 
+        if (Log.isDebugEnabled()) Log.debug("CACHE MISS: {}",pathInContext);
         return null; 
     }
 
@@ -223,12 +230,14 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         Content(Resource resource)
         {
             _resource=resource;
-            _lastModified=resource.lastModified();
 
             _next=this;
             _prev=this;
-            
             _contentType=_mimeTypes.getMimeByExtension(_resource.toString());
+            
+            _lastModified=resource.lastModified();
+            if (_lastModified!=-1)
+                _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_lastModified,false));
         }
 
         /* ------------------------------------------------------------ */
@@ -246,8 +255,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             _cache.put(_key,this);
             _cacheSize+=_resource.length();
             _cachedFiles++;
-            
-            _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_resource.lastModified(),false));
         }
 
         /* ------------------------------------------------------------ */
@@ -299,8 +306,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             return false;
         }
 
-        
-        
+        /* ------------------------------------------------------------ */
         public void invalidate()
         {
             synchronized(this)
@@ -327,22 +333,26 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 
             }
         }
-        
+
+        /* ------------------------------------------------------------ */
         public Buffer getLastModified()
         {
             return _lastModifiedBytes;
         }
 
+        /* ------------------------------------------------------------ */
         public Buffer getContentType()
         {
             return _contentType;
         }
-        
+
+        /* ------------------------------------------------------------ */
         public void setContentType(Buffer type)
         {
             _contentType=type;
         }
-        
+
+        /* ------------------------------------------------------------ */
         public void release()
         {
         }
