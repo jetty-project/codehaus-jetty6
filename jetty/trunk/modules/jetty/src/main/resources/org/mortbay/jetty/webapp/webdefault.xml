@@ -110,7 +110,7 @@
     </init-param>
     <init-param>
       <param-name>useFileMappedBuffer</param-name>
-      <param-value>true</param-value>
+      <param-value>false</param-value>
     </init-param>  
     <load-on-startup>0</load-on-startup>
   </servlet> 
