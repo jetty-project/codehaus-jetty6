@@ -830,6 +830,19 @@ public class HttpFields
      * @param name the field name
      * @param value the field long value
      */
+    public void putLongField(Buffer name, long value)
+    {
+        Buffer v = BufferUtil.toBuffer(value);
+        put(name, v, value);
+    }
+
+    /* -------------------------------------------------------------- */
+    /**
+     * Sets the value of an long field.
+     * 
+     * @param name the field name
+     * @param value the field long value
+     */
     public void putLongField(String name, long value)
     {
         Buffer n = HttpHeaders.CACHE.lookup(name);
