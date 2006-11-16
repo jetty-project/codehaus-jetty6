@@ -32,7 +32,6 @@ public abstract class AbstractLifeCycle implements LifeCycle
 
     public final void start() throws Exception
     {
-        //MultiException me = new MultiException();
         try
         {
             if (_state==STARTED)
@@ -44,19 +43,8 @@ public abstract class AbstractLifeCycle implements LifeCycle
         }
         catch (Exception e)
         {
-           // me.add(e);
             Log.warn("failed "+this,e);
-           // try
-           //{
-           //     stop();
-           // }
-           // catch (Exception x)
-           // {
-           //     Log.warn("error stopping failed context", x);
-           //     me.add(x);
-           // }
             _state=FAILED;
-           // throw me;
             throw e;
         }
         catch(Error e)
