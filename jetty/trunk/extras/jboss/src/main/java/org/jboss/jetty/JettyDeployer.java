@@ -39,8 +39,10 @@ import org.mortbay.j2ee.session.Manager;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 
 /**
@@ -53,8 +55,9 @@ public class JettyDeployer extends AbstractWebDeployer
 {
     protected static final Logger _log = Logger.getLogger("org.jboss.jetty");
 
+    protected Jetty _jetty;
+    protected ContextHandlerCollection _contexts;
     protected DeploymentInfo _deploymentInfo;
-    protected HandlerCollection _contexts;
     protected JettyService.ConfigurationData  _configData;
     protected SessionManager _distributableSessionManagerPrototype;
     protected boolean _forceDistributable = false;
@@ -64,20 +67,13 @@ public class JettyDeployer extends AbstractWebDeployer
      */
     Hashtable _deployed = new Hashtable();
 
-    public JettyDeployer(DeploymentInfo di)
+    public JettyDeployer(Jetty jetty, DeploymentInfo di)
     {
+        _jetty = jetty;
         _deploymentInfo = di;
+        _contexts = (ContextHandlerCollection)_jetty.getChildHandlerByClass(ContextHandlerCollection.class);
     }
 
-    public void setHandlerCollection (HandlerCollection contexts)
-    {
-        _contexts = contexts;
-    }
-
-    public HandlerCollection getHandlerCollection ()
-    {
-        return _contexts;
-    }
 
     public void init(Object containerConfig) throws Exception
     {
@@ -90,35 +86,22 @@ public class JettyDeployer extends AbstractWebDeployer
 
     public void performDeploy(WebApplication webApp, String warUrl, WebDescriptorParser parser) throws DeploymentException
     {
-    	log.debug("webapp="+webApp);        
-        String contextPath = webApp.getMetaData().getContextRoot();
+    	log.debug("deploying webapp at "+warUrl);        
         try
         {
+            String contextPath = webApp.getMetaData().getContextRoot();
             webApp.setURL(new URL(warUrl));
-        	log.debug("set url webapp="+webApp);
 
-            // check whether the context already exists... - a bit hacky,
-            // could be nicer...
-            boolean found = false;
-            Handler[] installed=_contexts.getChildHandlersByClass(ContextHandler.class);
-            for (int i=0; (i<installed.length && !found); i++)
-            {
-                ContextHandler c=(ContextHandler)installed[i];                   
-                found = contextPath.equals(c.getContextPath());
+            if (_deployed.get(warUrl) != null)
+                throw new DeploymentException(warUrl+" is already deployed");
 
-            }
-            if (found)
-                _log.warn("A WebApplication is already deployed in context '" + contextPath
-                        + "' - proceed at your own risk.");
-
-            // deploy the WebApp
+            //make a context for the webapp and configure it from the jetty jboss-service.xml defaults
+            //and the jboss-web.xml descriptor
             JBossWebAppContext app = new JBossWebAppContext(parser, webApp, warUrl);
             app.setContextPath(contextPath);
-            if (_configData.getSupportJSR77())
-                app.setConfigurationClasses (new String[]{"org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"/*,"org.mortbay.jetty.servlet.jsr77.Configuration"*/});
-            else
-                app.setConfigurationClasses (new String[]{ "org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"});
-          
+            app.setConfigurationClasses (new String[]{ "org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"});
+            app.setExtractWAR(getUnpackWars());
+            app.setParentLoaderPriority(getJava2ClassLoadingCompliance());
             Manager manager = (Manager) getDistributableSessionManagerPrototype();
             if (manager != null)
             {
@@ -127,22 +110,16 @@ public class JettyDeployer extends AbstractWebDeployer
                     app.setDistributable(true);
             }
 
-            // configure whether the context is to flatten the classes in
-            // the WAR or not
-            app.setExtractWAR(getUnpackWars());
-            app.setParentLoaderPriority(getJava2ClassLoadingCompliance());
-
             // if a different webdefault.xml file has been provided, use it
-            // if it exists
             if (_configData.getWebDefaultResource() != null)
             {
                 try
                 {
-                  URL url = getClass().getClassLoader().getResource(_configData.getWebDefaultResource());
-                  String fixedUrl = (fixURL(url.toString()));
-                  app.setDefaultsDescriptor(fixedUrl);
-                  if (_log.isDebugEnabled())
-                      _log.debug("webdefault specification is: " + _configData.getWebDefaultResource());
+                    URL url = getClass().getClassLoader().getResource(_configData.getWebDefaultResource());
+                    String fixedUrl = (fixURL(url.toString()));
+                    app.setDefaultsDescriptor(fixedUrl);
+                    if (_log.isDebugEnabled())
+                        _log.debug("webdefault specification is: " + _configData.getWebDefaultResource());
                 }
                 catch (Exception e)
                 {
@@ -152,60 +129,41 @@ public class JettyDeployer extends AbstractWebDeployer
 
             Iterator hosts = webApp.getMetaData().getVirtualHosts();
             List hostList = new ArrayList();
-
             while(hosts.hasNext())
                 hostList.add((String)hosts.next());
+            app.setVirtualHosts((String[])LazyList.toArray(hostList, String.class));
 
-            app.setVirtualHosts((String[])hostList.toArray(new String[hostList.size()]));
-
-            // Add the webapp
+            // Add the webapp to jetty
             _contexts.addHandler(app);
 
             // keep track of deployed contexts for undeployment
             _deployed.put(warUrl, app);
 
-            try
-            {
-                // finally start the app
-                app.start();
-                
-                //get all the jsr77 mbeans
-                
-                //first check that there is an mbean for the webapp itself
-                ObjectName webAppMBean = new ObjectName(_configData.getMBeanDomain() + ":J2EEServer=none,J2EEApplication=none,J2EEWebModule="+app.getUniqueName());
-                if (server.isRegistered(webAppMBean))
-                    _deploymentInfo.deployedObject = webAppMBean;
-                else
-                    throw new IllegalStateException("No mbean registered for webapp at "+app.getUniqueName());
-                
-                //now get all the mbeans that represent servlets and set them on the 
-                //deployment info so they will be found by the jsr77 management system
-                ObjectName servletQuery = new ObjectName
-                (_configData.getMBeanDomain() + ":J2EEServer=none,J2EEApplication=none,J2EEWebModule="+app.getUniqueName()+ ",j2eeType=Servlet,*");
-                Iterator iterator = server.queryNames(servletQuery, null).iterator();
-                while (iterator.hasNext())
-                {
-                    _deploymentInfo.mbeans.add((ObjectName) iterator.next());
-                }
+            // finally start the app - NOT NECESSARY?
+            //app.start();
 
-                _log.info("successfully deployed " + warUrl + " to " + contextPath);
-            }
-            catch (MultiException me)
+            //tell jboss about the jsr77 mbeans we've created               
+            //first check that there is an mbean for the webapp itself
+            ObjectName webAppMBean = new ObjectName(_configData.getMBeanDomain() + ":J2EEServer=none,J2EEApplication=none,J2EEWebModule="+app.getUniqueName());
+            if (server.isRegistered(webAppMBean))
+                _deploymentInfo.deployedObject = webAppMBean;
+            else
+                throw new IllegalStateException("No mbean registered for webapp at "+app.getUniqueName());
+
+            //now get all the mbeans that represent servlets and set them on the 
+            //deployment info so they will be found by the jsr77 management system
+            ObjectName servletQuery = new ObjectName
+            (_configData.getMBeanDomain() + ":J2EEServer=none,J2EEApplication=none,J2EEWebModule="+app.getUniqueName()+ ",j2eeType=Servlet,*");
+            Iterator iterator = server.queryNames(servletQuery, null).iterator();
+            while (iterator.hasNext())
             {
-                _log.warn("problem deploying " + warUrl + " to " + contextPath);
-                for (int i = 0; i < me.size(); i++)
-                {
-                    Exception e = (Exception)me.getThrowable(i);
-                    _log.warn(e, e);
-                }
+                _deploymentInfo.mbeans.add((ObjectName) iterator.next());
             }
 
-        }
-        catch (DeploymentException e)
-        {
-            _log.error("Undeploying on start due to error", e);
-            performUndeploy(warUrl, webApp);
-            throw e;
+            //tell jboss about the classloader the webapp is using
+            webApp.getMetaData().setContextLoader(app.getClassLoader());
+
+            _log.info("successfully deployed " + warUrl + " to " + contextPath);
         }
         catch (Exception e)
         {
@@ -216,15 +174,16 @@ public class JettyDeployer extends AbstractWebDeployer
     }
 
 
+    /** 
+     * Undeploy a webapp
+     * @see org.jboss.web.AbstractWebDeployer#performUndeploy(java.lang.String, org.jboss.web.WebApplication)
+     */
     public void performUndeploy(String warUrl, WebApplication wa) throws DeploymentException
     {
-        // find the WebApp Context in the repository
         JBossWebAppContext app = (JBossWebAppContext) _deployed.get(warUrl);
 
         if (app == null)
-        {
             _log.warn("app (" + warUrl + ") not currently deployed");
-        }
         else
         {
             try
@@ -243,34 +202,33 @@ public class JettyDeployer extends AbstractWebDeployer
                 _deployed.remove(warUrl);
             }
         }
-
     }
+   
     
-    // work around broken JarURLConnection caching...
+    /**
+     * Work around broken JarURLConnection caching...
+     * @param url
+     * @return
+     */
     static String fixURL(String url)
     {
+        String fixedUrl = url;
+        
         // Get the separator of the JAR URL and the file reference
         int index = url.indexOf('!');
         if (index >= 0)
-        {
             index = url.lastIndexOf('/', index);
-        }
         else
-        {
             index = url.lastIndexOf('/');
-        }
-        // Now add a "./" before the JAR file to add a different path
+       
+        // If there is at least one forward slash, add a "/." before the JAR file 
+        // change the path just slightly. Otherwise, the url is malformed, but
+        // we will ignore that.
         if (index >= 0)
-        {
-            return url.substring(0, index) + "/." + url.substring(index);
-        }
-        else
-        {
-            // Now forward slash found then there is severe problem with
-            // the URL but here we just ignore it
-            return url;
-        }
-    }
+            fixedUrl = url.substring(0, index) + "/." + url.substring(index);
+
+        return fixedUrl;
+    } 
     
     public void setDistributableSessionManagerPrototype(SessionManager manager)
     {
@@ -291,6 +249,4 @@ public class JettyDeployer extends AbstractWebDeployer
     {
         _forceDistributable = distributable;
     }
-
-
 }

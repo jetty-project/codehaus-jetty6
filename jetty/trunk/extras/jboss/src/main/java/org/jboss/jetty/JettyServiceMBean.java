@@ -5,9 +5,10 @@ package org.jboss.jetty;
 
 /**
  * MBean interface.
+ * TODO - use JMXDoclet to autogenerate
  */
-public interface JettyServiceMBean extends org.jboss.web.AbstractWebContainerMBean {
-
+public interface JettyServiceMBean extends org.jboss.web.AbstractWebContainerMBean 
+{
    //default object name
    public static final javax.management.ObjectName OBJECT_NAME = org.jboss.mx.util.ObjectNameFactory.create("jboss.jetty:service=Jetty");
 
@@ -41,5 +42,4 @@ public interface JettyServiceMBean extends org.jboss.web.AbstractWebContainerMBe
   java.lang.String getSubjectAttributeName() ;
 
   void setSubjectAttributeName(java.lang.String subjectAttributeName) ;
-
 }

@@ -32,7 +32,7 @@ import org.mortbay.jetty.SessionManager;
 import org.mortbay.xml.XmlConfiguration;
 import org.w3c.dom.Element;
 
-//------------------------------------------------------------------------------
+
 
 /**
  * Jetty 
@@ -72,12 +72,6 @@ public class Jetty extends org.mortbay.jetty.Server
     {
         super();
         _service = service;
-    }
-
- 
-    public HandlerCollection getContextHandlerCollection ()
-    {
-        return (HandlerCollection)getChildHandlerByClass(ContextHandlerCollection.class);
     }
 
 

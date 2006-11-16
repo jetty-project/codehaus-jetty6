@@ -24,6 +24,9 @@ import javax.management.ObjectName;
 
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
+import org.jboss.deployment.SubDeployerExt;
+import org.jboss.mx.util.MBeanProxyExt;
+import org.jboss.system.ServiceControllerMBean;
 import org.jboss.web.AbstractWebContainer;
 import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;
@@ -34,7 +37,7 @@ import org.w3c.dom.Element;
 //------------------------------------------------------------------------------
 /**
  * JettyService
- * A service to launch jetty from JMX.
+ * A service to launch jetty as the webserver for JBoss.
  *
  *
  * @jmx:mbean name="jboss.jetty:service=Jetty"
@@ -53,7 +56,7 @@ public class JettyService extends AbstractWebContainer implements JettyServiceMB
     protected Element _jettyConfig = null;
     protected boolean _supportJSR77;
     protected String _webDefaultResource;
-    
+    protected SubDeployerExt subDeployerProxy = null;
     
     /**
      * ConfigurationData
@@ -73,8 +76,6 @@ public class JettyService extends AbstractWebContainer implements JettyServiceMB
         private String _webDefaultResource;
         private boolean _supportJSR77;
         private String _mbeanDomain;
-        
-        
         
         /**
          * @return the _webDefaultResource
@@ -213,154 +214,94 @@ public class JettyService extends AbstractWebContainer implements JettyServiceMB
 
 
 
-    /**
-     * Log a jetty MultiException 
+    /** 
+     * Listen for our registration as an mbean and remember our name.
+     * @see org.jboss.system.ServiceMBeanSupport#preRegister(javax.management.MBeanServer, javax.management.ObjectName)
      */
-    protected void log(MultiException e)
-    {
-        log.error("multiple exceptions...");
-        Iterator iter = e.getThrowables().iterator();
-        while (iter.hasNext())
-            log.error("exception", (Exception) iter.next());
-    }
-
-
-
     public ObjectName preRegister(MBeanServer server, ObjectName name)
             throws Exception
     {
         super.preRegister(server, name);
         name = getObjectName(server, name);
         _server = server;
-
         return name;
     }
 
+    
+    /** 
+     * Listen for post-mbean registration and set up the jetty
+     * mbean infrastructure so it can generate mbeans according
+     * to the elements contained in the <configuration> element
+     * of the jboss-service.xml file.
+     * @see org.jboss.system.ServiceMBeanSupport#postRegister(java.lang.Boolean)
+     */
     public void postRegister(Boolean done)
     {
         super.postRegister(done);
-
-        // this must be done before config is read otherwise configs
-        // defined therein will not receive MBean peers. Since it must now
-        // be done before JMX has a chance to configure us, I'm removing
-        // the option not to have these MBeans built...
         try
         {
-            log.info("Setting up mbeanlistener on Jetty");
+            log.debug("Setting up mbeanlistener on Jetty");
             _jetty.getContainer().addEventListener(new JBossMBeanContainer(_server));
         }
         catch (Throwable e)
         {
-            StackTraceElement[] ste = e.getStackTrace();
-            for (int i = 0; i < ste.length; i++)
-            {
-                log.error(ste[i].toString());
-            }
             log.error("could not create MBean peers", e);
         }
-
-        log.debug("created MBean peers");
     }
 
-    // ----------------------------------------------------------------------------
-    // 'name' interface
-    // ----------------------------------------------------------------------------
 
+    /** 
+     * @see org.jboss.system.ServiceMBeanSupport#getName()
+     */
     public String getName()
     {
         return NAME;
     }
 
-    // ----------------------------------------------------------------------------
-    // 'service' interface
-    // ----------------------------------------------------------------------------
 
+    /** 
+     * @see org.jboss.deployment.SubDeployerSupport#createService()
+     */
     public void createService() throws Exception
     {
         super.createService();
         if (_jettyConfig != null) _jetty.setConfigurationElement(_jettyConfig);
     }
 
+    /** 
+     * Start up the jetty service. Also, as we need to be able
+     * to have interceptors injected into us to support jboss.ws:service=WebService,
+     * we need to create a proxy to ourselves and register that proxy with the
+     * mainDeployer.
+     * See <a href="http://wiki.jboss.org/wiki/Wiki.jsp?page=SubDeployerInterceptorSupport">SubDeployerInterceptorSupport</a>
+     * @see org.jboss.web.AbstractWebContainer#startService()
+     */
     public void startService() throws Exception
     {
-        super.startService();
+        //do what AbstractWebContainer.startService() would have done
+        serviceController = (ServiceControllerMBean)
+        MBeanProxyExt.create(ServiceControllerMBean.class,
+                             ServiceControllerMBean.OBJECT_NAME,
+                             server);
 
-        try
-        {
-            _jetty.start();
-        }
-        catch (MultiException e)
-        {
-            log(e);
-        }
-        catch (Exception e)
-        {
-            log.error("could not start Jetty", e);
-        }
+        //instead of calling mainDeployer.addDeployer(this) as SubDeployerSupport super class does,
+        //we register instead a proxy to oursevles so we can support dynamic addition of interceptors
+        subDeployerProxy = (SubDeployerExt)MBeanProxyExt.create(SubDeployerExt.class, super.getServiceName(), super.getServer());
+        mainDeployer.addDeployer(subDeployerProxy);
+        _jetty.start();
     }
 
     public void stopService() throws Exception
     {
-        super.stopService();
-
-        try
-        {
-            _jetty.stop();
-        }
-        catch (Exception e)
-        {
-            log.error("could not stop Jetty", e);
-        }
+        mainDeployer.removeDeployer(subDeployerProxy);
+        _jetty.stop();
     }
 
     public void destroyService() throws Exception
     {
         super.destroyService();
-
-        // this is not symmetrical - these things are created in
-        // postRegister, not createService()...
-        try
-        {
-            // _jetty.destroy();
-            _jetty.stop();
-            _jetty = null;
-        }
-        catch (Throwable e)
-        {
-            log.error("could not destroy Jetty", e);
-        }
-
-    }
-
-
-
-    /**
-     * Old deployment method from AbstractWebContainer.
-     * 
-     * TODO remove this?
-     * @param webApp
-     * @param warUrl
-     * @param parser
-     * @throws DeploymentException
-     */
-    public void performDeploy(WebApplication webApp, String warUrl,
-            WebDescriptorParser parser) throws DeploymentException
-    {
-        //TODO: backwards compatibility
-        throw new UnsupportedOperationException("Backward compatibility not implemented");
-    }
-
-    /**
-     * Old undeploy method from AbstractWebContainer.
-     * 
-     * TODO remove?
-     * @param warUrl
-     * @throws DeploymentException
-     */
-    public void performUndeploy(String warUrl) throws DeploymentException
-    {
-        //TODO backwards compatibility
-        throw new UnsupportedOperationException("Backward compatibility not implemented");
+        _jetty.stop();
+        _jetty = null;
     }
 
     /**
@@ -428,14 +369,42 @@ public class JettyService extends AbstractWebContainer implements JettyServiceMB
         this._jettyConfig = configElement;
     }
 
+
+    /**
+     * Old deployment method from AbstractWebContainer.
+     * 
+     * TODO remove this?
+     * @param webApp
+     * @param warUrl
+     * @param parser
+     * @throws DeploymentException
+     */
+    public void performDeploy(WebApplication webApp, String warUrl,
+            WebDescriptorParser parser) throws DeploymentException
+    {
+        //TODO: backwards compatibility?
+        throw new UnsupportedOperationException("Backward compatibility not implemented");
+    }
+
+    /**
+     * Old undeploy method from AbstractWebContainer.
+     * 
+     * TODO remove?
+     * @param warUrl
+     * @throws DeploymentException
+     */
+    public void performUndeploy(String warUrl) throws DeploymentException
+    {
+        //TODO backwards compatibility?
+        throw new UnsupportedOperationException("Backward compatibility not implemented");
+    }
     
     /** 
      * @see org.jboss.web.AbstractWebContainer#getDeployer(org.jboss.deployment.DeploymentInfo)
      */
     public AbstractWebDeployer getDeployer(DeploymentInfo di) throws Exception
     {
-        JettyDeployer deployer = new JettyDeployer(di);
-        deployer.setHandlerCollection(_jetty.getContextHandlerCollection());
+        JettyDeployer deployer = new JettyDeployer(_jetty, di);
         ConfigurationData configData = new ConfigurationData();
         configData.setMBeanDomain("jboss.jetty");
         configData.setAcceptNonWarDirs(getAcceptNonWarDirs());
