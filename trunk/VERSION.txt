@@ -13,6 +13,7 @@ jetty-6.1-SNAPSHOT
     + release resource lookup in Default servlet
     + Simplified ResourceCache and Default servlet 
     + Added override descriptor for deployment of RO webapps
+    + Added hierarchical destroy of mbeans
 
 jetty-6.1.0pre0 - 21 Oct 2006
     + add <Property> replacement in jetty xml config files

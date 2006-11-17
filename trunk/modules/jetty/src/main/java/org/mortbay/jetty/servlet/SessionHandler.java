@@ -97,10 +97,11 @@ public class SessionHandler extends HandlerWrapper
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
     {
-        if (getServer()!=null && getServer()!=server)
-            getServer().getContainer().update(this, _sessionManager, null, "sessionManager",true);
+        Server old_server=getServer();
+        if (old_server!=null && old_server!=server)
+            old_server.getContainer().update(this, _sessionManager, null, "sessionManager",true);
         super.setServer(server);
-        if (server!=null && server!=getServer())
+        if (server!=null && server!=old_server)
             server.getContainer().update(this, null,_sessionManager, "sessionManager",true);
     }
     

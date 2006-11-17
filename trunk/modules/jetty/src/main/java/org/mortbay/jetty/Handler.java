@@ -54,5 +54,7 @@ public interface Handler extends LifeCycle
     public void setServer(Server server);
     public Server getServer();
     
+    public void destroy();
+    
 }
 
