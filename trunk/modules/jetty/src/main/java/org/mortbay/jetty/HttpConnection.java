@@ -828,6 +828,13 @@ public class HttpConnection implements Connection
                 Buffer lm = c.getLastModified();
                 if (lm != null) 
                     _responseFields.put(HttpHeaders.LAST_MODIFIED_BUFFER, lm);
+                else if (c.getResource()!=null)
+                {
+                    long lml=c.getResource().lastModified();
+                    if (lml!=-1)
+                        _responseFields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER, lml);
+                }
+                    
                 
                 content = c.getBuffer();
                 if (content==null)
