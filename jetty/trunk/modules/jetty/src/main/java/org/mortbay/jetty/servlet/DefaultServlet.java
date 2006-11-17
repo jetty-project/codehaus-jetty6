@@ -186,6 +186,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             else
                 _cache=null;
             
+            _cache=null;
+            
             if (_cache!=null)
             {
                 int max_cached_file_size=getInitInt("maxCachedFileSize", -2);
@@ -439,24 +441,41 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     {
         if (!request.getMethod().equals(HttpMethods.HEAD) )
         {
-            if (content!=null)
+            String ifms=request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
+            if (ifms!=null)
             {
-                String ifms=request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
-   
-                Buffer mdlm=content.getLastModified();
-                if (ifms!=null && mdlm!=null && ifms.equals(mdlm.toString()))
+                if (content!=null)
                 {
-                    response.reset();
-                    response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                    response.flushBuffer();
-                    return false;
+                    Buffer mdlm=content.getLastModified();
+                    if (mdlm!=null)
+                    {
+                        if (ifms.equals(mdlm.toString()))
+                        {
+                            response.reset();
+                            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                            response.flushBuffer();
+                            return false;
+                        }
+                    }
+                }
+                    
+                long ifmsl=request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
+                if (ifmsl!=-1)
+                {
+                    if (resource.lastModified()/1000 <= ifmsl/1000)
+                    {
+                        response.reset();
+                        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                        response.flushBuffer();
+                        return false;
+                    }
                 }
             }
 
             // Parse the if[un]modified dates and compare to resource
-            long date=0;
+            long date=request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
             
-            if ((date=request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE))>0)
+            if (date!=-1)
             {
                 if (resource.lastModified()/1000 > date/1000)
                 {
@@ -465,16 +484,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 }
             }
             
-            if ((date=request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE))>0)
-            {
-                if (resource.lastModified()/1000 <= date/1000)
-                {
-                    response.reset();
-                    response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                    response.flushBuffer();
-                    return false;
-                }
-            }
         }
         return true;
     }
@@ -654,8 +663,12 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
 
             if (content.getLastModified()!=null)  
                 headers.put(HttpHeaders.LAST_MODIFIED_BUFFER,content.getLastModified());
-            else
-                headers.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER,content.getResource().lastModified());
+            else if (content.getResource()!=null)
+            {
+                long lml=content.getResource().lastModified();
+                if (lml!=-1)
+                    headers.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER,lml);
+            }
                 
             if (count != -1)
                 r.setLongContentLength(count);
