@@ -73,17 +73,17 @@ public class
       try
       {
 	Class[] ctorParams={};
-	for (int i=interceptors.length; i>0; i--)
-	{
-	  StateInterceptor si=interceptors[i-1];
-//	  if (_log.isDebugEnabled()) _log.debug("adding interceptor instance: "+name);
-	  StateInterceptor interceptor=(StateInterceptor)si.clone();
-	  si.setManager(manager); // overkill - but safe
-	  si.setSession(adp);	// overkill - but safe
-	  interceptor.setState(last); // this is also passed into ctor - make up your mind - TODO
-	  interceptor.start();
-	  last=interceptor;
-	}
+//	for (int i=interceptors.length; i>0; i--)
+//	{
+//	  StateInterceptor si=interceptors[i-1];
+////	  if (_log.isDebugEnabled()) _log.debug("adding interceptor instance: "+name);
+//	  StateInterceptor interceptor=(StateInterceptor)si.clone();
+//	  si.setManager(manager); // overkill - but safe
+//	  si.setSession(adp);	// overkill - but safe
+//	  interceptor.setState(last); // this is also passed into ctor - make up your mind - TODO
+//	  interceptor.start();
+//	  last=interceptor;
+//	}
       }
       catch (Exception e)
       {

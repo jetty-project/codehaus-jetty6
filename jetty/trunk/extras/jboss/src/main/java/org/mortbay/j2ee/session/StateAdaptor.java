@@ -401,11 +401,29 @@ public class StateAdaptor
   {
     if (_state==null)
       throw new IllegalStateException("invalid session");
+    else
+    {
 
     // this is a hack to get new interceptor stack to work... - TODO
-    StateInterceptor si=(StateInterceptor)_state;
-     si.setManager(_manager);
-     si.setSession(this);
+//    StateInterceptor si=(StateInterceptor)_state;
+//     si.setManager(_manager);
+//     si.setSession(this);
+        StateInterceptor si = null;
+        if (_state instanceof StateInterceptor)
+        {
+            si = (StateInterceptor) _state;
+            si.setManager(_manager);
+            si.setSession(this);
+        }
+        else
+        {
+            si = new StateInterceptor();
+            si.setManager(_manager);
+            si.setSession(this);
+            si.setState(_state);
+            _state = si;
+        }
+    }
   }
 
   public String
