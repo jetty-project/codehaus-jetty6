@@ -72,14 +72,13 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
 
     protected void initLoginConfig(XmlParser.Node node)
     {
-        // if the realm-name element is set in web.xml use it as the realm name 
-        // otherwise, use the security domain name from jboss-web.xml
         // check if a realm has been explicitly set
         String realmName=null;
         UserRealm userRealm = getJBossWebApplicationContext().getSecurityHandler().getUserRealm();
         if (userRealm!= null)
             realmName=userRealm.getName();
-
+        
+        //use a security domain from jboss-web.xml
         if (null==realmName)
         {
             WebMetaData metaData = getJBossWebApplicationContext()._webApp.getMetaData();
@@ -93,11 +92,16 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
                     realmName = realmName.substring(idx+1);
             }
         }
-
+        
         if(__log.isDebugEnabled())
-            __log.debug("setting Realm: "+realmName);
-        getJBossWebApplicationContext()._realm=new JBossUserRealm(realmName,getJBossWebApplicationContext()._subjAttrName); 
-        getJBossWebApplicationContext().getSecurityHandler().setUserRealm(getJBossWebApplicationContext()._realm);
+            __log.debug("Realm is : "+realmName);
+        
+        if (realmName != null)
+        {
+            JBossUserRealm realm = new JBossUserRealm(realmName,getJBossWebApplicationContext().getSubjectAttribute());
+            getJBossWebApplicationContext().setRealm(realm); 
+            getJBossWebApplicationContext().getSecurityHandler().setUserRealm(realm);
+        }
         super.initLoginConfig(node);
     }
 

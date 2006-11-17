@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Stack;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -51,23 +52,13 @@ import org.mortbay.jetty.security.Credential;
 public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
 {
     private final Logger _log;
-
-    private final String _realmName;
-
-    private final String _subjAttrName;
-
-    private final boolean _useJAAS;
-
+    protected final String _realmName;
+    protected final String _subjAttrName;
+    protected SubjectSecurityManager _subjSecMgr = null;
+    protected AuthenticationManager _authMgr = null;
     private final HashMap _users = new HashMap();
-
-    private AuthenticationManager _authMgr = null;
-
-    private RealmMapping _realmMapping = null;
-
-    private SubjectSecurityManager _subjSecMgr = null;
-
-    private JBossWebAppContext _jbossWebAppContext = null;
-
+    protected RealmMapping _realmMapping = null; 
+    protected JBossWebAppContext _jbossWebAppContext = null;
     /*
      * Since there is a seperate instance of JBossUserRealm per web-app
      * regardless of whether the realm-name is the same, this creates an
@@ -75,41 +66,37 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
      * same realm-name.
      */
     private final static HashMap _sharedHashSSORealms = new HashMap();
-
     private String _ssoRealmName = null;
-
     private HashSSORealm _ssoRealm = null;
+    
+    
 
+    /**
+     * JBossUserPrincipal
+     *
+     *
+     */
     static class JBossUserPrincipal implements Principal, Serializable
     {
         protected transient Logger _logRef;
-
-        protected transient RealmMapping _realmMappingRef;
-
-        protected transient SubjectSecurityManager _subjSecMgrRef;
-
         protected transient JBossUserRealm _realm;
-
-        final SimplePrincipal _principal; // JBoss API
-
+        final SimplePrincipal _principal;
         private String _password;
+        private Stack _roleStack;
 
         JBossUserPrincipal(String name, Logger _log)
         {
+            _roleStack = new Stack();
             _principal = new SimplePrincipal(name);
             this._logRef = _log;
 
             if (_log.isDebugEnabled())
-                _log.debug("created JBossUserRealm::JBossUserPrincipal: "
-                        + name);
+                _log.debug("created JBossUserRealm::JBossUserPrincipal: " + name);
         }
 
-        void associateWithRealm(RealmMapping _realmMapping,
-                SubjectSecurityManager _subjSecMgr, JBossUserRealm _realm)
+        void associateWithRealm(JBossUserRealm realm)
         {
-            this._realmMappingRef = _realmMapping;
-            this._subjSecMgrRef = _subjSecMgr;
-            this._realm = _realm;
+            this._realm = realm;
         }
 
         private boolean isAuthenticated(String password)
@@ -117,27 +104,19 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
             boolean authenticated = false;
 
             if (password == null) password = "";
-
             char[] passwordChars = password.toCharArray();
 
             if (_logRef.isDebugEnabled())
-                _logRef.debug("authenticating: Name:" + _principal
-                        + " Password:****"/* +password */);
+                _logRef.debug("authenticating: Name:" + _principal + " Password:****"/* +password */);
 
             Subject subjectCopy = new Subject();
 
-            if (_subjSecMgrRef != null
-                    && _subjSecMgrRef.isValid(this._principal, passwordChars,
-                            subjectCopy))
+            if (_realm._subjSecMgr != null && _realm._subjSecMgr.isValid(this._principal, passwordChars, subjectCopy))
             {
                 if (_logRef.isDebugEnabled())
                     _logRef.debug("authenticated: " + _principal);
 
-                // work around the fact that we are not serialisable - thanks
-                // Anatoly
-                // SecurityAssociation.setPrincipal(this);
                 SecurityAssociation.setPrincipal(_principal);
-
                 SecurityAssociation.setCredential(passwordChars);
                 SecurityAssociation.setSubject(subjectCopy);
                 authenticated = true;
@@ -168,17 +147,12 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
             return false;
         }
 
-        // ----------------------------------------
-        // SimplePrincipal - for JBoss
-
+ 
         public String getName()
         {
-            // return _principal.getName();
-            return _realmMappingRef.getPrincipal(_principal).getName();
+            return _realm._realmMapping.getPrincipal(_principal).getName();
         }
 
-        // ----------------------------------------
-        // UserPrincipal - for Jetty
 
         public boolean authenticate(String password, Request request)
         {
@@ -186,16 +160,10 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
             boolean authenticated = false;
             authenticated = isAuthenticated(_password);
 
-            // This doesn't mean anything to Jetty - but may to some
-            // Servlets - confirm later...
-            if (authenticated && _subjSecMgrRef != null)
+            if (authenticated && _realm._subjSecMgr != null)
             {
-                Subject subject = _subjSecMgrRef.getActiveSubject();
-                if (_logRef.isDebugEnabled())
-                    _logRef
-                            .debug("setting JAAS subjectAttributeName(j_subject) : "
-                                    + subject);
-                request.setAttribute("j_subject", subject);
+                Subject subject = _realm._subjSecMgr.getActiveSubject();
+                request.setAttribute(_realm._subjAttrName, subject);
             }
 
             return authenticated;
@@ -206,32 +174,27 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
             return isAuthenticated(_password);
         }
 
-        private UserRealm getUserRealm()
-        {
-            return _realm;
-        }
-
+        
         public boolean isUserInRole(String role)
         {
             boolean isUserInRole = false;
+            
+            if (!_roleStack.isEmpty() && _roleStack.peek().equals(role))
+                return true;
 
-            Set requiredRoles = Collections
-                    .singleton(new SimplePrincipal(role));
-            if (_realmMappingRef != null
-                    && _realmMappingRef.doesUserHaveRole(this._principal,
-                            requiredRoles))
+            Set requiredRoles = Collections.singleton(new SimplePrincipal(role));
+            if (_realm._realmMapping != null
+               && _realm._realmMapping.doesUserHaveRole(this._principal,requiredRoles))
             {
                 if (_logRef.isDebugEnabled())
-                    _logRef.debug("JBossUserPrincipal: " + _principal
-                            + " is in Role: " + role);
+                    _logRef.debug("JBossUserPrincipal: " + _principal + " is in Role: " + role);
 
                 isUserInRole = true;
             }
             else
             {
                 if (_logRef.isDebugEnabled())
-                    _logRef.debug("JBossUserPrincipal: " + _principal
-                            + " is NOT in Role: " + role);
+                    _logRef.debug("JBossUserPrincipal: " + _principal + " is NOT in Role: " + role);
             }
 
             return isUserInRole;
@@ -241,30 +204,39 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
         {
             return getName();
         }
+        
+        public void push (String roleName)
+        {
+            _roleStack.push(roleName);
+        }
+        
+        public void pop ()
+        {
+            _roleStack.pop();
+        }
     }
 
-    // Represents a user which has been authenticated elsewhere
-    // (e.g. at the fronting server), and thus doesnt have credentials
+ 
+    /**
+     * JBossCertificatePrincipal
+     * Represents a user which has been authenticated elsewhere
+     * (e.g. at the fronting server), and thus doesnt have credentials
+     *
+     */
     static class JBossCertificatePrincipal extends JBossUserPrincipal
     {
         private X509Certificate[] _certs;
 
-        JBossCertificatePrincipal(String name, Logger log,
-                X509Certificate[] certs)
+        JBossCertificatePrincipal(String name, Logger log, X509Certificate[] certs)
         {
             super(name, log);
-
             _certs = certs;
-
             if (_logRef.isDebugEnabled())
-                _logRef
-                        .debug("created JBossUserRealm::JBossCertificatePrincipal: "
-                                + name);
+                _logRef.debug("created JBossUserRealm::JBossCertificatePrincipal: "+ name);
         }
 
         public boolean isAuthenticated()
         {
-
             // TODO I'm dubious if this is correct???
             _logRef.debug("JBossUserRealm::isAuthenticated called");
             return true;
@@ -279,8 +251,7 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
 
             // Authenticate using the cert as the credential
             Subject subjectCopy = new Subject();
-            if (_subjSecMgrRef != null
-                    && _subjSecMgrRef.isValid(_principal, _certs, subjectCopy))
+            if (_realm._subjSecMgr != null && _realm._subjSecMgr.isValid(_principal, _certs, subjectCopy))
             {
                 if (_logRef.isDebugEnabled())
                     _logRef.debug("authenticated: " + _principal);
@@ -302,24 +273,18 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
     public JBossUserRealm(String realmName, String subjAttrName)
     {
         _realmName = realmName;
-        _log = Logger.getLogger(JBossUserRealm.class.getName() + "#"
-                + _realmName);
+        _log = Logger.getLogger(JBossUserRealm.class.getName() + "#"+ _realmName);
         _subjAttrName = subjAttrName;
-        _useJAAS = (_subjAttrName != null);
     }
 
     public void init()
     {
-        _log.debug("initialising...");
+        _log.debug("initialising realm "+_realmName);
         try
         {
-            // can I get away with just doing this lookup once per webapp ?
             InitialContext iniCtx = new InitialContext();
-            // do we need the 'java:comp/env' prefix ? TODO
-            Context securityCtx = (Context) iniCtx
-                    .lookup("java:comp/env/security");
-            _authMgr = (AuthenticationManager) securityCtx
-                    .lookup("securityMgr");
+            Context securityCtx = (Context) iniCtx.lookup("java:comp/env/security");
+            _authMgr = (AuthenticationManager) securityCtx.lookup("securityMgr");
             _realmMapping = (RealmMapping) securityCtx.lookup("realmMapping");
             iniCtx = null;
 
@@ -328,10 +293,7 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
         }
         catch (NamingException e)
         {
-            _log
-                    .error(
-                            "java:comp/env/security does not appear to be correctly set up",
-                            e);
+            _log.error("java:comp/env/security does not appear to be correctly set up", e);
         }
         _log.debug("...initialised");
     }
@@ -344,7 +306,7 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
         if (user == null)
         {
             user = new JBossUserPrincipal(userName, _log);
-            user.associateWithRealm(_realmMapping, _subjSecMgr, this);
+            user.associateWithRealm(this);
             _users.put(userName, user);
         }
 
@@ -369,7 +331,7 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
     {
         if (_log.isDebugEnabled())
             _log.debug("JBossUserPrincipal: " + userName);
-
+ 
         // until we get DigestAuthentication sorted JBoss side...
         JBossUserPrincipal user = null;
 
@@ -389,9 +351,7 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
 
         if (user != null)
         {
-            request
-                    .setAuthType(javax.servlet.http.HttpServletRequest.CLIENT_CERT_AUTH);
-            // request.setAuthUser(user.getName());
+            request.setAuthType(javax.servlet.http.HttpServletRequest.CLIENT_CERT_AUTH);
             request.setUserPrincipal(user);
         }
 
@@ -424,9 +384,8 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
 
         if (user == null)
         {
-            user = new JBossCertificatePrincipal(
-                    getFilterFromCertificate(certs[0]), _log, certs);
-            user.associateWithRealm(_realmMapping, _subjSecMgr, this);
+            user = new JBossCertificatePrincipal(getFilterFromCertificate(certs[0]), _log, certs);
+            user.associateWithRealm(this);
             _users.put(certs[0], user);
         }
 
@@ -450,7 +409,6 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
      */
     private String getFilterFromCertificate(X509Certificate cert)
     {
-        // StringBuffer buff = new StringBuffer("certSerialAndIssuer=");
         StringBuffer buff = new StringBuffer();
         String serialNumber = cert.getSerialNumber().toString(16).toUpperCase();
 
@@ -470,16 +428,13 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
 
     public Principal pushRole(Principal user, String role)
     {
-        // Not implemented.
-        // need to return a new user with the role added.
+        ((JBossUserPrincipal)user).push(role);
         return user;
     }
 
     public Principal popRole(Principal user)
     {
-        // Not implemented
-        // need to return the original user with any new role associations
-        // removed from this thread.
+        ((JBossUserPrincipal)user).pop();
         return user;
     }
 
@@ -488,9 +443,6 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
         // yukky hack to try and force JBoss to actually
         // flush the user from the jaas security manager's cache therefore
         // forcing logincontext.logout() to be called
-
-        _log.info("logout for " + user.getName());
-
         try
         {
             Principal pUser = user;

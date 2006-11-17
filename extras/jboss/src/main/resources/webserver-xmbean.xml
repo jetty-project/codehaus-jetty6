@@ -53,6 +53,11 @@
       <type>java.lang.String</type>
    </attribute>
 
+   <attribute access="read-write" getMethod="getDefaultSecurityDomain" setMethod="setDefaultSecurityDomain">
+     <name>DefaultSecurityDomain</name>
+     <type>java.lang.String</type>
+   </attribute>
+
    <attribute access='read-write' getMethod='getUnpackWars' setMethod='setUnpackWars'>
       <description>MBean Attribute.</description>
       <name>UnpackWars</name>
