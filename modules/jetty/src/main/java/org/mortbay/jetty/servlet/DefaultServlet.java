@@ -72,7 +72,9 @@ import org.mortbay.util.URIUtil;
  *   redirectWelcome  If true, welcome files are redirected rather than
  *                    forwarded to.
  *
- *   gzip             deprecated.
+ *   gzip             If set to true, then static content will be served as 
+ *                    gzip content encoded if a matching resource is 
+ *                    found ending with ".gz"
  *
  *  resourceBase      Set to replace the context resource base
  *
@@ -109,7 +111,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
     private boolean _redirectWelcome=false;
-    private boolean _gzip=false;
+    private boolean _gzip=true;
     
     private Resource _resourceBase;
     private ResourceCache _cache;
@@ -135,10 +137,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         _acceptRanges=getInitBoolean("acceptRanges",_acceptRanges);
         _dirAllowed=getInitBoolean("dirAllowed",_dirAllowed);
         _redirectWelcome=getInitBoolean("redirectWelcome",_redirectWelcome);
-        boolean gzip=getInitBoolean("gzip",_gzip);
-        if (gzip)
-            Log.warn("gzip no longer supported");
-            
+        _gzip=getInitBoolean("gzip",_gzip);
+        
         _aliases=getInitBoolean("aliases",_aliases);
         _useFileMappedBuffer=getInitBoolean("useFileMappedBuffer",_useFileMappedBuffer);
         
@@ -186,8 +186,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             else
                 _cache=null;
             
-            _cache=null;
-            
             if (_cache!=null)
             {
                 int max_cached_file_size=getInitInt("maxCachedFileSize", -2);
@@ -206,7 +204,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             Log.warn(Log.EXCEPTION,e);
             throw new UnavailableException(e.toString()); 
         }
-        
         
         if (Log.isDebugEnabled()) Log.debug("resource base = "+_resourceBase);
     }
@@ -297,24 +294,57 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
         boolean endsWithSlash=pathInContext.endsWith("/");
         
-
+        // Can we gzip this request?
+        String pathInContextGz=null;
+        boolean gzip=false;
+        if (_gzip && reqRanges==null && !endsWithSlash )
+        {
+            String accept=request.getHeader(HttpHeaders.ACCEPT_ENCODING);
+            if (accept!=null && accept.indexOf("gzip")>=0)
+                gzip=true;
+        }
         
         // Find the resource and content
         Resource resource=null;
         HttpContent content=null;
         try
         {   
-            // find resource
-            if (_cache==null)
-                resource=getResource(pathInContext);
-            else
+            // Try gzipped content first
+            if (gzip)
             {
-                content=_cache.lookup(pathInContext,this);
-
-                if (content!=null)
-                    resource=content.getResource();
+                pathInContextGz=pathInContext+".gz";  
+                if (_cache==null)
+                    resource=getResource(pathInContextGz);
                 else
+                {
+                    content=_cache.lookup(pathInContextGz,this);
+                    if (content!=null)
+                        resource=content.getResource();
+                    else
+                        resource=getResource(pathInContextGz);
+                }
+
+                if (resource==null || !resource.exists()|| resource.isDirectory())
+                {
+                    gzip=false;
+                    pathInContextGz=null;
+                }
+            }
+        
+            // find resource
+            if (!gzip)
+            {
+                if (_cache==null)
                     resource=getResource(pathInContext);
+                else
+                {
+                    content=_cache.lookup(pathInContext,this);
+
+                    if (content!=null)
+                        resource=content.getResource();
+                    else
+                        resource=getResource(pathInContext);
+                }
             }
             
             if (Log.isDebugEnabled())
@@ -330,7 +360,16 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     content=new UnCachedContent(resource);
                 
                 if (included.booleanValue() || passConditionalHeaders(request,response, resource,content))  
-                    sendData(request,response,included.booleanValue(),resource,content,reqRanges);   
+                {
+                    if (gzip)
+                    {
+                       response.setHeader(HttpHeaders.CONTENT_ENCODING,"gzip");
+                       String mt=_context.getMimeType(pathInContext);
+                       if (mt!=null)
+                           response.setContentType(mt);
+                    }
+                    sendData(request,response,included.booleanValue(),resource,content,reqRanges);  
+                }
             }
             else
             {
@@ -550,6 +589,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 }
                 else
                 {
+                    
                     // Write content normally
                     writeHeaders(response,content,content_length);
                     resource.writeTo(out,0,content_length);
@@ -580,7 +620,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 InclusiveByteRange singleSatisfiableRange =
                     (InclusiveByteRange)ranges.get(0);
                 long singleLength = singleSatisfiableRange.getSize(content_length);
-                writeHeaders(response,content,singleLength);
+                writeHeaders(response,content,singleLength                     );
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 response.setHeader(HttpHeaders.CONTENT_RANGE, 
                         singleSatisfiableRange.toHeaderRangeString(content_length));
