@@ -32,11 +32,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.WriterOutputStream;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpContent;
+import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.InclusiveByteRange;
@@ -51,6 +53,7 @@ import org.mortbay.resource.ResourceFactory;
 import org.mortbay.util.IO;
 import org.mortbay.util.MultiPartOutputStream;
 import org.mortbay.util.URIUtil;
+import org.mortbay.util.TypeUtil;
 
 
 
@@ -101,6 +104,8 @@ import org.mortbay.util.URIUtil;
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory
 {
+    private static ByteArrayBuffer BYTE_RANGES=new ByteArrayBuffer("bytes");
+    
     private ContextHandler.Context _context;
     
     private boolean _acceptRanges=true;
@@ -119,7 +124,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     /* ------------------------------------------------------------ */
     public void init()
-    throws UnavailableException
+        throws UnavailableException
     {
         ServletContext config=getServletContext();
         _context = (ContextHandler.Context)config;
@@ -133,6 +138,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         _dirAllowed=getInitBoolean("dirAllowed",_dirAllowed);
         _redirectWelcome=getInitBoolean("redirectWelcome",_redirectWelcome);
         _gzip=getInitBoolean("gzip",_gzip);
+        
         _aliases=getInitBoolean("aliases",_aliases);
         _useFileMappedBuffer=getInitBoolean("useFileMappedBuffer",_useFileMappedBuffer);
         
@@ -169,13 +175,15 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 _resourceBase=Resource.newResource(_context.getResource("/"));
 
             int max_cache_size=getInitInt("maxCacheSize", -2);
-            if (max_cache_size>0)
+            if (max_cache_size==-2 || max_cache_size>0)
             {
                 if (_cache==null)
                     _cache=new NIOResourceCache(_mimeTypes);
-                _cache.setMaxCacheSize(max_cache_size);    
+                
+                if (max_cache_size>0)
+		    _cache.setMaxCacheSize(max_cache_size);    
             }
-            else if (max_cache_size!=-2)
+            else
                 _cache=null;
             
             if (_cache!=null)
@@ -196,7 +204,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             Log.warn(Log.EXCEPTION,e);
             throw new UnavailableException(e.toString()); 
         }
-        
         
         if (Log.isDebugEnabled()) Log.debug("resource base = "+_resourceBase);
     }
@@ -287,7 +294,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
         boolean endsWithSlash=pathInContext.endsWith("/");
         
-
         // Can we gzip this request?
         String pathInContextGz=null;
         boolean gzip=false;
@@ -299,7 +305,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         
         // Find the resource and content
-        String path=null;
         Resource resource=null;
         HttpContent content=null;
         try
@@ -307,7 +312,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             // Try gzipped content first
             if (gzip)
             {
-                pathInContextGz=pathInContext+".gz";  // TODO grrrr - hate having to do this every request!
+                pathInContextGz=pathInContext+".gz";  
                 if (_cache==null)
                     resource=getResource(pathInContextGz);
                 else
@@ -318,27 +323,23 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     else
                         resource=getResource(pathInContextGz);
                 }
+
+                if (resource==null || !resource.exists()|| resource.isDirectory())
+                {
+                    gzip=false;
+                    pathInContextGz=null;
+                }
             }
-            
-            // If we found a gzipped resource
-            if (resource!=null && resource.exists())
+        
+            // find resource
+            if (!gzip)
             {
-                path=pathInContextGz;
-            }
-            else
-            {
-                // Look for a normal resource
-                pathInContextGz=null;
-                gzip=false;
-                path=pathInContext;
-                
-                // look for normal resource
                 if (_cache==null)
                     resource=getResource(pathInContext);
                 else
                 {
                     content=_cache.lookup(pathInContext,this);
-                    
+
                     if (content!=null)
                         resource=content.getResource();
                     else
@@ -347,26 +348,28 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             }
             
             if (Log.isDebugEnabled())
-                Log.debug("resource="+resource+(content!=null?" content":"")+(gzip?" gzip":""));
+                Log.debug("resource="+resource+(content!=null?" content":""));
                         
             // Handle resource
             if (resource==null || !resource.exists())
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             else if (!resource.isDirectory())
-            {
-                // Handle gzipping
-                if (gzip)
-                {
-                   response.setHeader(HttpHeaders.CONTENT_ENCODING,"gzip");
-                   response.setHeader(HttpHeaders.CONTENT_TYPE,_context.getMimeType(pathInContext));
-                }
-                
+            {   
                 // ensure we have content
                 if (content==null)
                     content=new UnCachedContent(resource);
                 
                 if (included.booleanValue() || passConditionalHeaders(request,response, resource,content))  
-                    sendData(request,response,included.booleanValue(),resource,content,reqRanges);   
+                {
+                    if (gzip)
+                    {
+                       response.setHeader(HttpHeaders.CONTENT_ENCODING,"gzip");
+                       String mt=_context.getMimeType(pathInContext);
+                       if (mt!=null)
+                           response.setContentType(mt);
+                    }
+                    sendData(request,response,included.booleanValue(),resource,content,reqRanges);  
+                }
             }
             else
             {
@@ -428,7 +431,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         {
             if (content!=null)
                 content.release();
-            if (resource!=null)
+            else if (resource!=null)
                 resource.release();
         }
         
@@ -477,24 +480,41 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     {
         if (!request.getMethod().equals(HttpMethods.HEAD) )
         {
-            if (content!=null)
+            String ifms=request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
+            if (ifms!=null)
             {
-                String ifms=request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
-   
-                Buffer mdlm=content.getLastModified();
-                if (ifms!=null && mdlm!=null && ifms.equals(mdlm.toString()))
+                if (content!=null)
                 {
-                    response.reset();
-                    response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                    response.flushBuffer();
-                    return false;
+                    Buffer mdlm=content.getLastModified();
+                    if (mdlm!=null)
+                    {
+                        if (ifms.equals(mdlm.toString()))
+                        {
+                            response.reset();
+                            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                            response.flushBuffer();
+                            return false;
+                        }
+                    }
+                }
+                    
+                long ifmsl=request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
+                if (ifmsl!=-1)
+                {
+                    if (resource.lastModified()/1000 <= ifmsl/1000)
+                    {
+                        response.reset();
+                        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                        response.flushBuffer();
+                        return false;
+                    }
                 }
             }
 
             // Parse the if[un]modified dates and compare to resource
-            long date=0;
+            long date=request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
             
-            if ((date=request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE))>0)
+            if (date!=-1)
             {
                 if (resource.lastModified()/1000 > date/1000)
                 {
@@ -503,16 +523,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 }
             }
             
-            if ((date=request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE))>0)
-            {
-                if (resource.lastModified()/1000 <= date/1000)
-                {
-                    response.reset();
-                    response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                    response.flushBuffer();
-                    return false;
-                }
-            }
         }
         return true;
     }
@@ -541,13 +551,11 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             return;
         }
         
-        // TODO cache this?
         data=dir.getBytes("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
         response.setContentLength(data.length);
         response.getOutputStream().write(data);
     }
-    
     
     /* ------------------------------------------------------------ */
     protected void sendData(HttpServletRequest request,
@@ -581,6 +589,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 }
                 else
                 {
+                    
                     // Write content normally
                     writeHeaders(response,content,content_length);
                     resource.writeTo(out,0,content_length);
@@ -589,7 +598,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         else
         {
-            
             // Parse the satisfiable ranges
             List ranges =InclusiveByteRange.satisfiableRanges(reqRanges,content_length);
             
@@ -612,7 +620,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 InclusiveByteRange singleSatisfiableRange =
                     (InclusiveByteRange)ranges.get(0);
                 long singleLength = singleSatisfiableRange.getSize(content_length);
-                writeHeaders(response,content,singleLength);
+                writeHeaders(response,content,singleLength                     );
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 response.setHeader(HttpHeaders.CONTENT_RANGE, 
                         singleSatisfiableRange.toHeaderRangeString(content_length));
@@ -683,29 +691,49 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     /* ------------------------------------------------------------ */
     protected void writeHeaders(HttpServletResponse response,HttpContent content,long count)
-    throws IOException
+        throws IOException
     {   
-        // TODO - use the buffers
-        
         if (content.getContentType()!=null)
             response.setContentType(content.getContentType().toString());
-        if (content.getLastModified()!=null)	
-            response.setHeader(HttpHeaders.LAST_MODIFIED,content.getLastModified().toString());
-        else
-            response.setDateHeader(HttpHeaders.LAST_MODIFIED,content.getResource().lastModified());
         
-        if (count != -1)
+        if (response instanceof Response)
         {
-            if (response instanceof Response)
-                ((Response)response).setLongContentLength(count);
-            else if (count<Integer.MAX_VALUE)
-                response.setContentLength((int)count);
-            else 
-                response.setHeader(HttpHeaders.CONTENT_LENGTH,""+count);
+            Response r=(Response)response;
+            HttpFields headers = r.getHttpFields();
+
+            if (content.getLastModified()!=null)  
+                headers.put(HttpHeaders.LAST_MODIFIED_BUFFER,content.getLastModified());
+            else if (content.getResource()!=null)
+            {
+                long lml=content.getResource().lastModified();
+                if (lml!=-1)
+                    headers.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER,lml);
+            }
+                
+            if (count != -1)
+                r.setLongContentLength(count);
+
+            if (_acceptRanges)
+                headers.put(HttpHeaders.ACCEPT_RANGES_BUFFER,BYTE_RANGES);
         }
-        
-        if (_acceptRanges)
-            response.setHeader(HttpHeaders.ACCEPT_RANGES,"bytes");
+        else
+        {
+            if (content.getLastModified()!=null)	
+                response.setHeader(HttpHeaders.LAST_MODIFIED,content.getLastModified().toString());
+            else
+                response.setDateHeader(HttpHeaders.LAST_MODIFIED,content.getResource().lastModified());
+
+            if (count != -1)
+            {
+                if (count<Integer.MAX_VALUE)
+                    response.setContentLength((int)count);
+                else 
+                    response.setHeader(HttpHeaders.CONTENT_LENGTH,TypeUtil.toString(count));
+            }
+
+            if (_acceptRanges)
+                response.setHeader(HttpHeaders.ACCEPT_RANGES,"bytes");
+        }
     }
 
     /* ------------------------------------------------------------ */

@@ -66,6 +66,10 @@
   <!--   redirectWelcome  If true, redirect welcome file requests           -->
   <!--                    else use request dispatcher forwards              -->
   <!--                                                                      -->
+  <!--   gzip             If set to true, then static content will be served--> 
+  <!--                    as gzip content encoded if a matching resource is -->
+  <!--                    found ending with ".gz"                           -->
+  <!--                                                                      -->
   <!--   resoureBase      Can be set to replace the context resource base   -->
   <!--                                                                      -->
   <!--   relativeResourceBase                                               -->
@@ -107,6 +111,10 @@
     <init-param>
       <param-name>maxCachedFiles</param-name>
       <param-value>1000</param-value>
+    </init-param>
+    <init-param>
+      <param-name>gzip</param-name>
+      <param-value>false</param-value>
     </init-param>
     <init-param>
       <param-name>useFileMappedBuffer</param-name>

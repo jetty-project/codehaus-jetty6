@@ -787,14 +787,26 @@ public class HttpConnection
             if (content instanceof HttpContent)
             {
                 HttpContent c = (HttpContent) content;
-                if (c.getContentType() != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER)) _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
-                if (c.getContentLength() > 0) _responseFields.addLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
-                if (c.getLastModified() != null) _responseFields.add(HttpHeaders.LAST_MODIFIED_BUFFER, c.getLastModified());
+                if (c.getContentType() != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER)) 
+                    _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
+                if (c.getContentLength() > 0) 
+                    _responseFields.putLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
+                Buffer lm = c.getLastModified();
+                if (lm != null) 
+                    _responseFields.put(HttpHeaders.LAST_MODIFIED_BUFFER, lm);
+                else if (c.getResource()!=null)
+                {
+                    long lml=c.getResource().lastModified();
+                    if (lml!=-1)
+                        _responseFields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER, lml);
+                }
+                    
                 
                 content = c.getBuffer();
                 if (content==null)
                     content=c.getInputStream();
             }
+            
             
             if (content instanceof Buffer)
             {
