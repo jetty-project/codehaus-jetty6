@@ -20,10 +20,6 @@ import org.jboss.jetty.security.JBossUserRealm;
 import org.jboss.logging.Logger;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
-//import org.mortbay.j2ee.J2EEWebApplicationContext;
-//import org.mortbay.j2ee.session.AbstractReplicatedStore;
-//import org.mortbay.j2ee.session.Manager;
-//import org.mortbay.j2ee.session.Store;
 import org.mortbay.j2ee.J2EEWebAppContext;
 import org.mortbay.j2ee.session.AbstractReplicatedStore;
 import org.mortbay.j2ee.session.Manager;
@@ -31,7 +27,7 @@ import org.mortbay.j2ee.session.Store;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.util.MultiException;
+
 
 
 /**
@@ -39,7 +35,7 @@ import org.mortbay.util.MultiException;
  *
  * Customize the jetty WebAppContext to jboss environment.
  * 
- * TODO jsr77 support, distributable session support
+ * TODO  distributable session support
  *
  */
 public class JBossWebAppContext extends J2EEWebAppContext
@@ -48,8 +44,8 @@ public class JBossWebAppContext extends J2EEWebAppContext
 
     protected WebDescriptorParser _descriptorParser;
     protected WebApplication _webApp;
-    protected String _subjAttrName="j_subject";//TODO what was this doing here?
-    protected JBossUserRealm _realm=null;
+    private String _subjAttrName="j_subject";//TODO what was this doing here?
+    private JBossUserRealm _realm=null;
     // this is a hack - but we need the session timeout - in case we are
     // going to use a distributable session manager....
     protected boolean _timeOutPresent=false;
@@ -71,50 +67,76 @@ public class JBossWebAppContext extends J2EEWebAppContext
         ((Jsr77ServletHandler)getServletHandler()).setWebAppContext(this);
         _descriptorParser=descriptorParser;
         _webApp=webApp;
-        //make a classloader for the webapp, as when this context is deployed, a
-        //classloader must be available to set on the _webApp metadata for
-        //use by webservices
+        //very important - establish the classloader now, as it is the one
+        //that is being used for the performDeploy step
         ClassLoader loader=Thread.currentThread().getContextClassLoader();
         if(getDistributable()&&getDistributableSessionManager()!=null)
-            setUpDistributableSessionManager(loader);
-        setUpENC(loader);
-        if(_realm!=null)
-            _realm.init();
+            setUpDistributableSessionManager(loader);  
+        
         setClassLoader(new WebAppClassLoader(loader, this));
     }
 
-    /* ------------------------------------------------------------ */
-    protected void doStart() throws Exception
-    {
-        MultiException e=null;
-        try
-        {
-            super.doStart();
-        }
-        catch(MultiException me)
-        {
-            e=me;
-        }
-        if(e!=null)
-            throw e;
-    }
 
     /* ------------------------------------------------------------ */
     public void doStop() throws Exception
     {
         super.doStop();
-        //_descriptorParser=null;
-        //_webApp=null;
-        //_subjAttrName=null;
+        _descriptorParser=null;
+        _webApp=null;
+        _subjAttrName=null;
+        _realm = null;
     }
 
 
+    public void setRealm (JBossUserRealm realm)
+    {
+        _realm = realm;
+    }
+    
+    public JBossUserRealm getRealm ()
+    {
+        return _realm;
+    }
+    
+    public void setSubjectAttribute (String subjAttr)
+    {
+        _subjAttrName = subjAttr;
+    }
+    
+    
+    public String getSubjectAttribute ()
+    {
+        return _subjAttrName;
+    }
 
     public String getUniqueName ()
     {
         return _descriptorParser.getDeploymentInfo().getCanonicalName();
     }
 
+    protected void startContext ()
+    throws Exception
+    {
+        //set up the java:comp/env namespace so that it can be refered to
+        //in other parts of the startup
+        setUpENC(getClassLoader());      
+        super.startContext();
+        if (_realm!=null)
+        {
+            //start the realm from within the webapp's classloader as it wants
+            //to do JNDI lookups
+            ClassLoader currentLoader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(getClassLoader());
+            try
+            {
+                _realm.init();
+            }
+            finally
+            {
+                Thread.currentThread().setContextClassLoader(currentLoader);
+            }
+        }
+    }
     
     protected void setUpDistributableSessionManager(ClassLoader loader)
     {
@@ -141,7 +163,7 @@ public class JBossWebAppContext extends J2EEWebAppContext
         _webApp.setName(getDisplayName());
         _webApp.setAppData(this);
         __log.debug("setting up ENC...");
-        _descriptorParser.parseWebAppDescriptors(_webApp.getClassLoader(),_webApp.getMetaData());
+        _descriptorParser.parseWebAppDescriptors(loader,_webApp.getMetaData());
         __log.debug("setting up ENC succeeded");
     }
 }

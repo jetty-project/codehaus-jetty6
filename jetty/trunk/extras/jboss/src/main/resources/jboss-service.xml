@@ -55,6 +55,14 @@
 
     <attribute name="SubjectAttributeName">j_subject</attribute>
 
+
+
+    <!-- ================================================================= -->
+    <!-- The name of the security realm to use if none is defined in       -->
+    <!-- jboss-web.xml                                                     -->
+    <!-- ================================================================= -->
+    <attribute name="DefaultSecurityDomain">java:/jaas/other</attribute>
+
     <!-- ================================================================= -->
     <!-- Configuring Jetty. The XML fragment contained in the              -->
     <!-- name="ConfigurationElement" attribute is a Jetty-style            -->
