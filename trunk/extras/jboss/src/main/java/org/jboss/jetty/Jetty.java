@@ -159,29 +159,6 @@ public class Jetty extends org.mortbay.jetty.Server
         return _service.getCompileClasspath(cl);
     }
 
-//    /**
-//     * Override service method to allow ditching of security info after a request has been
-//     * processed
-//     * 
-//     * @param request
-//     * @param response
-//     * @return @exception IOException
-//     * @exception HttpException
-//     */
-//    public Context service(Request request, Response response) throws IOException,
-//            HttpException
-//    {
-//        try
-//        {
-//            return super.service(request, response);
-//        }
-//        finally
-//        {
-//            // Moved to JBossUserRealm.deAuthenticate(UserPrincipal);
-//            // SecurityAssociation.setPrincipal(null);
-//            // SecurityAssociation.setCredential(null);
-//        }
-//    } 
 
     public boolean getStopWebApplicationsGracefully()
     {
