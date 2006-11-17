@@ -117,6 +117,10 @@ public class WebAppDeployer extends AbstractLifeCycle
         return _allowDuplicates;
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @param allowDuplicates If false, do not deploy webapps that have already been deployed or duplicate context path
+     */
     public void setAllowDuplicates(boolean allowDuplicates)
     {
         _allowDuplicates=allowDuplicates;
@@ -179,7 +183,7 @@ public class WebAppDeployer extends AbstractLifeCycle
             if (context.endsWith("/")&&context.length()>0)
                 context=context.substring(0,context.length()-1);
 
-            // Check the context path has not already been added.
+            // Check the context path has not already been added or the webapp itself is not already deployed
             if (!_allowDuplicates)
             {
                 Handler[] installed=_contexts.getChildHandlersByClass(ContextHandler.class);
@@ -189,6 +193,11 @@ public class WebAppDeployer extends AbstractLifeCycle
                     
                     if (context.equals(c.getContextPath()))
                         continue files;
+                    
+                    if (c.getBaseResource()!=null && c.getBaseResource().getFile().getAbsolutePath().equals(app.getFile().getAbsolutePath()))
+                        continue files;
+                    
+                            
                 }
             }
 
