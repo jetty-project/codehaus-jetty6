@@ -414,7 +414,7 @@ public class Dump extends HttpServlet
             if (!"application/x-www-form-urlencoded".equals(request.getContentType()))
             {
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"left\" colspan=\"2\"><big><br/>Content:</big></th>");
+                pout.write("<th align=\"left\" valign=\"top\" colspan=\"2\"><big><br/>Content:</big></th>");
                 pout.write("</tr><tr>\n");
                 pout.write("<td><pre>");
                 byte[] content= new byte[4096];
@@ -444,7 +444,7 @@ public class Dump extends HttpServlet
             {
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
+                pout.write("<th align=\"right\" valign=\"top\">"+name+":&nbsp;</th>");
                 pout.write("<td>"+"<pre>" + toString(request.getAttribute(name)) + "</pre>"+"</td>");
             }            
 
@@ -457,7 +457,7 @@ public class Dump extends HttpServlet
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
                 pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
-                pout.write("<td>"+"<pre>" + toString(getInitParameter(name)) + "</pre>"+"</td>");
+                pout.write("<td>"+ toString(getInitParameter(name)) +"</td>");
             }
 
             pout.write("</tr><tr>\n");
@@ -468,7 +468,7 @@ public class Dump extends HttpServlet
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
                 pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
-                pout.write("<td>"+"<pre>" + toString(getServletContext().getInitParameter(name)) + "</pre>"+"</td>");
+                pout.write("<td>"+ toString(getServletContext().getInitParameter(name)) + "</td>");
             }
 
             pout.write("</tr><tr>\n");
@@ -478,7 +478,7 @@ public class Dump extends HttpServlet
             {
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
+                pout.write("<th align=\"right\" valign=\"top\">"+name+":&nbsp;</th>");
                 pout.write("<td>"+"<pre>" + toString(getServletContext().getAttribute(name)) + "</pre>"+"</td>");
             }
 

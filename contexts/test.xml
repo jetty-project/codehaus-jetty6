@@ -18,6 +18,7 @@ detected.
 
   <Set name="contextPath">/test</Set>
   <Set name="resourceBase"><SystemProperty name="jetty.home" default="."/>/webapps/test</Set>
+  <Set name="overrideDescriptor"><SystemProperty name="jetty.home" default="."/>/contexts/test.d/override-web.xml</Set>
 
   <!-- Optional context configuration -->
 
