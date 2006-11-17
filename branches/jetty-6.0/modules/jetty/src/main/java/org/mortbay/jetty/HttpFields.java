@@ -830,6 +830,19 @@ public class HttpFields
      * @param name the field name
      * @param value the field long value
      */
+    public void putLongField(Buffer name, long value)
+    {
+        Buffer v = BufferUtil.toBuffer(value);
+        put(name, v, value);
+    }
+
+    /* -------------------------------------------------------------- */
+    /**
+     * Sets the value of an long field.
+     * 
+     * @param name the field name
+     * @param value the field long value
+     */
     public void putLongField(String name, long value)
     {
         Buffer n = HttpHeaders.CACHE.lookup(name);
@@ -871,7 +884,7 @@ public class HttpFields
      * @param name the field name
      * @param date the field date value
      */
-    public void putDateField(String name, long date)
+    public void putDateField(Buffer name, long date)
     {
         if (_dateBuffer == null)
         {
@@ -881,9 +894,21 @@ public class HttpFields
         _dateBuffer.setLength(0);
         _calendar.setTimeInMillis(date);
         formatDate(_dateBuffer, _calendar, false);
-        Buffer n = HttpHeaders.CACHE.lookup(name);
         Buffer v = new ByteArrayBuffer(_dateBuffer.toString());
-        put(n, v, date);
+        put(name, v, date);
+    }
+
+    /* -------------------------------------------------------------- */
+    /**
+     * Sets the value of a date field.
+     * 
+     * @param name the field name
+     * @param date the field date value
+     */
+    public void putDateField(String name, long date)
+    {
+        Buffer n = HttpHeaders.CACHE.lookup(name);
+        putDateField(n,date);
     }
 
     /* -------------------------------------------------------------- */

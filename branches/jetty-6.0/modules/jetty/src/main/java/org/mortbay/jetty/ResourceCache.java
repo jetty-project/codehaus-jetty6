@@ -129,44 +129,46 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         {
             // Look for it in the cache
             content = (Content)_cache.get(pathInContext);
-            if (content!=null)
+        
+            if (content!=null && content.isValid())
             {
-                if (content!=null && !content.isValid())
-                    content=null;
-                else
-                    if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",content);
-            }
+                if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",pathInContext);
+                return content;
+            }    
+        }
+        
+        Resource resource=factory.getResource(pathInContext);
+        if (resource!=null && resource.exists() && !resource.isDirectory())
+        {
+            long len = resource.length();
+            if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
+            {
+                if (Log.isDebugEnabled()) Log.debug("CACHE MISS: {}",pathInContext);
 
-            if (content==null)
-            {
-                Resource resource=factory.getResource(pathInContext);
-                if (resource==null)
-                    return null;
-                
-                long len = resource.length();
-                if (resource.exists())
+                content = new Content(resource);
+                fill(content);
+
+                synchronized(_cache)
                 {
-                    // Is it badly named?
-                    if (resource.isDirectory())
-                        return null;
-
-                    content= new Content(resource);
-                    
-                    // Is it cacheable?
-                    if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
+                    // check that somebody else did not fill this spot.
+                    Content content2 =(Content)_cache.get(pathInContext);
+                    if (content2!=null)
                     {
-                        int needed=_maxCacheSize-(int)len;
-                        while(_cacheSize>needed || (_maxCachedFiles>0 && _cachedFiles>_maxCachedFiles))
-                            _leastRecentlyUsed.invalidate();
-                        
-                        fill(content);
-                        content.cache(pathInContext);
-                        Log.debug("CACHED: {}",resource);
+                        if (Log.isDebugEnabled()) Log.debug("FALSE HIT: {}",pathInContext);
+                        content.release();
+                        return content2;
                     }
+                    
+                    if (Log.isDebugEnabled()) Log.debug("CACHE FILL: {}",pathInContext);                    
+                    content.cache(pathInContext);
+                    
+                    return content;
                 }
             }
         }
-        return content; 
+
+        if (Log.isDebugEnabled()) Log.debug("CACHE MISS: {}",pathInContext);
+        return null; 
     }
 
 
@@ -193,12 +195,19 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     protected void fill(Content content)
         throws IOException
     {
-        InputStream in = content.getResource().getInputStream();
-        int len=(int)content.getResource().length();
-        Buffer buffer = new ByteArrayBuffer(len);
-        buffer.readFrom(in,len);
-        in.close();
-        content.setBuffer(buffer);
+        try
+        {
+            InputStream in = content.getResource().getInputStream();
+            int len=(int)content.getResource().length();
+            Buffer buffer = new ByteArrayBuffer(len);
+            buffer.readFrom(in,len);
+            in.close();
+            content.setBuffer(buffer);
+        }
+        finally
+        {
+            content.getResource().release();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -221,12 +230,12 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         Content(Resource resource)
         {
             _resource=resource;
-            _lastModified=resource.lastModified();
 
             _next=this;
             _prev=this;
-            
             _contentType=_mimeTypes.getMimeByExtension(_resource.toString());
+            
+            _lastModified=resource.lastModified();
         }
 
         /* ------------------------------------------------------------ */
@@ -244,8 +253,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             _cache.put(_key,this);
             _cacheSize+=_resource.length();
             _cachedFiles++;
-            
-            _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_resource.lastModified(),false));
+            if (_lastModified!=-1)
+                _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_lastModified,false));
         }
 
         /* ------------------------------------------------------------ */
@@ -297,8 +306,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             return false;
         }
 
-        
-        
+        /* ------------------------------------------------------------ */
         public void invalidate()
         {
             synchronized(this)
@@ -325,29 +333,28 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 
             }
         }
-        
+
+        /* ------------------------------------------------------------ */
         public Buffer getLastModified()
         {
             return _lastModifiedBytes;
         }
 
+        /* ------------------------------------------------------------ */
         public Buffer getContentType()
         {
             return _contentType;
         }
-        
+
+        /* ------------------------------------------------------------ */
         public void setContentType(Buffer type)
         {
             _contentType=type;
         }
-        
+
+        /* ------------------------------------------------------------ */
         public void release()
         {
-            synchronized(this)
-            {
-                if (_key==null)
-                    _resource.release();
-            }
         }
 
         /* ------------------------------------------------------------ */
