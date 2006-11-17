@@ -175,13 +175,15 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 _resourceBase=Resource.newResource(_context.getResource("/"));
 
             int max_cache_size=getInitInt("maxCacheSize", -2);
-            if (max_cache_size>0)
+            if (max_cache_size==-2 || max_cache_size>0)
             {
                 if (_cache==null)
                     _cache=new NIOResourceCache(_mimeTypes);
-                _cache.setMaxCacheSize(max_cache_size);    
+                
+                if (max_cache_size>0)
+		    _cache.setMaxCacheSize(max_cache_size);    
             }
-            else if (max_cache_size!=-2)
+            else
                 _cache=null;
             
             if (_cache!=null)
