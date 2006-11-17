@@ -86,6 +86,7 @@ public class WebAppContext extends Context
     private String[] _configurationClasses=__dftConfigurationClasses;
     private Configuration[] _configurations;
     private String _defaultsDescriptor=WEB_DEFAULTS_XML;
+    private String _overrideDescriptor=null;
     private boolean _distributable=false;
     private boolean _extractWAR=true;
     private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.webapp.parentLoaderPriority");
@@ -497,11 +498,22 @@ public class WebAppContext extends Context
     
     /* ------------------------------------------------------------ */
     /**
+     * The default descriptor is a web.xml format file that is applied to the context before the standard WEB-INF/web.xml
      * @return Returns the defaultsDescriptor.
      */
     public String getDefaultsDescriptor()
     {
         return _defaultsDescriptor;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * The override descriptor is a web.xml format file that is applied to the context after the standard WEB-INF/web.xml
+     * @return Returns the Override Descriptor.
+     */
+    public String getOverrideDescriptor()
+    {
+        return _overrideDescriptor;
     }
     
     /* ------------------------------------------------------------ */
@@ -911,12 +923,23 @@ public class WebAppContext extends Context
     }
 
     /* ------------------------------------------------------------ */
-    /**
+    /** 
+     * The default descriptor is a web.xml format file that is applied to the context before the standard WEB-INF/web.xml
      * @param defaultsDescriptor The defaultsDescriptor to set.
      */
     public void setDefaultsDescriptor(String defaultsDescriptor)
     {
         _defaultsDescriptor = defaultsDescriptor;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * The override descriptor is a web.xml format file that is applied to the context after the standard WEB-INF/web.xml
+     * @param defaultsDescriptor The overrideDescritpor to set.
+     */
+    public void setOverrideDescriptor(String overrideDescriptor)
+    {
+        _overrideDescriptor = overrideDescriptor;
     }
     
     

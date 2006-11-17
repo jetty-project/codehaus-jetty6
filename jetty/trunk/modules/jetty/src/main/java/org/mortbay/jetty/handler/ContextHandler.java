@@ -496,7 +496,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 current_thread.setContextClassLoader(old_classloader);
         }
 
-        _contextAttributes.clearAttributes();
+        if (_contextAttributes!=null)
+            _contextAttributes.clearAttributes();
         _contextAttributes=null;
     }
     
@@ -886,7 +887,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "ContextHandler@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getBaseResource()+"}";
+        
+        return this.getClass().getName()+"@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getBaseResource()+"}";
     }
 
     /* ------------------------------------------------------------ */

@@ -227,6 +227,7 @@ public class ContextDeployer extends AbstractLifeCycle
     private void deploy(String filename) throws Exception
     {
         ContextHandler context=createContext(filename);
+        Log.info("Deploy "+filename+" -> "+ context);
         _contexts.addHandler(context);
         _currentDeployments.put(filename,context);
         if (_contexts.isStarted())
@@ -237,6 +238,7 @@ public class ContextDeployer extends AbstractLifeCycle
     private void undeploy(String filename) throws Exception
     {
         ContextHandler context=(ContextHandler)_currentDeployments.get(filename);
+        Log.info("Undeploy "+filename+" -> "+context);
         if (context==null)
             return;
         context.stop();
