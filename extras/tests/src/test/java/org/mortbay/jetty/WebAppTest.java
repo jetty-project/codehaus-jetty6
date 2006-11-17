@@ -116,7 +116,18 @@ public class WebAppTest extends TestCase
         assertTrue(IO.toString(url.openStream()).startsWith("0000"));
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/data.txt");
         System.err.println("9999 3333333333333333333333333333333333333333333333333333333\n");
-        assertTrue(IO.toString(url.openStream()).endsWith("9999 3333333333333333333333333333333333333333333333333333333\n"));
+        String result = IO.toString(url.openStream());
+        if (result.endsWith("\r\n")) {
+            //windows
+            result = result.substring(0,result.length() - 2);
+        } else if (result.endsWith("\n")) {
+            //*nix
+            result = result.substring(0,result.length() - 1);
+        } else {
+            //Error: Unexpected end of stream data encountered
+            assertTrue(false);
+        }
+        assertTrue(result.endsWith("9999 3333333333333333333333333333333333333333333333333333333"));
         
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dispatch/forward/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
