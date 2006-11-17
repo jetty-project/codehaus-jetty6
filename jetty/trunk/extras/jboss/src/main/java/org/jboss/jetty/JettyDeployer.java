@@ -188,6 +188,7 @@ public class JettyDeployer extends AbstractWebDeployer
             {
                 app.stop();
                 _contexts.removeHandler(app);
+                app.destroy();
                 app = null;
                 _log.info("Successfully undeployed " + warUrl);
             }
