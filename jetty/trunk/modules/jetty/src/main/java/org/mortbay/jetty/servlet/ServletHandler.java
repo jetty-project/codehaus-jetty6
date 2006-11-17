@@ -136,7 +136,8 @@ public class ServletHandler extends AbstractHandler
     {
         _servletContext=ContextHandler.getCurrentContext();
         _contextHandler=_servletContext==null?null:_servletContext.getContextHandler();
-        
+
+        updateNameMappings();
         updateMappings();
         
         if(_filterChainsCached)
@@ -171,11 +172,9 @@ public class ServletHandler extends AbstractHandler
             }
         }
 
-        _filterNameMap.clear();
         _filterPathMappings=null;
         _filterNameMappings=null;
         
-        _servletNameMap.clear();
         _servletPathMap=null;
         _chainCache=null;
         _namedChainCache=null;

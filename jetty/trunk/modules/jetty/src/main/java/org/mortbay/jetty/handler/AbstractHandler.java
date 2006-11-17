@@ -86,4 +86,14 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
         return _server;
     }
 
+
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        if (!isStopped())
+            throw new IllegalStateException("!STOPPED");
+        if (_server!=null)
+            _server.getContainer().removeBean(this);
+    }
+
 }
