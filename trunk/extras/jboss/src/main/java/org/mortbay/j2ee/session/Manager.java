@@ -38,6 +38,7 @@ import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.jboss.jetty.JBossWebAppContext;
 import org.mortbay.jetty.HttpOnlyCookie;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.SessionManager;
@@ -232,7 +233,7 @@ public class Manager implements org.mortbay.jetty.SessionManager
         }
     }
 
-    public void doStart()
+    public void start()
     {
         Log.debug("starting...");
         synchronized (_startedLock)
@@ -291,7 +292,7 @@ public class Manager implements org.mortbay.jetty.SessionManager
         }
     }
 
-    public void doStop()
+    public void stop()
     {
         Log.debug("stopping...");
 
@@ -823,7 +824,7 @@ public class Manager implements org.mortbay.jetty.SessionManager
             String maxAge = getServletContext().getInitParameter(SessionManager.__MaxAgeProperty);
             String path = getServletContext().getInitParameter(SessionManager.__SessionPathProperty);
             if (path == null)
-                path = getCrossContextSessionIDs() ? "/" : getServletContext().getContextPath();
+                path = getCrossContextSessionIDs() ? "/" : ((JBossWebAppContext)_context).getUniqueName();
             if (path == null || path.length() == 0)
                 path = "/";
 
@@ -846,12 +847,6 @@ public class Manager implements org.mortbay.jetty.SessionManager
     {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    public void stop() throws Exception
-    {
-        // TODO Auto-generated method stub
-        
     }
 
     public SessionIdManager getMetaManager()
@@ -884,11 +879,6 @@ public class Manager implements org.mortbay.jetty.SessionManager
         return false;
     }
 
-    public void start() throws Exception
-    {
-        // TODO Auto-generated method stub
-        
-    }
 
     public String getSessionPath()
     {
@@ -950,10 +940,10 @@ public class Manager implements org.mortbay.jetty.SessionManager
         return null;
     }
 
-    public boolean isValid(HttpSession arg0)
+    public boolean isValid(HttpSession session)
     {
         // TODO Auto-generated method stub
-        return false;
+        return ((Session)session).isValid();
     }
 
     public void setIdManager(SessionIdManager arg0)
