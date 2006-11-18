@@ -2,10 +2,14 @@ package org.mortbay.jetty;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -16,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 
 import org.mortbay.jetty.handler.AbstractHandler;
+import org.mortbay.util.IO;
 
 /**
  * HttpServer Tester.
@@ -121,8 +126,6 @@ public class HttpServerTestBase extends TestCase
 
         // Read the response.
         String response=readResponse(client);
-
-        System.err.println(response);
 
         // Shut down
         client.close();
@@ -341,6 +344,60 @@ public class HttpServerTestBase extends TestCase
     }
 
     /**
+     * After several iterations, I generated some known bad fragment points.
+     * 
+     * @throws Exception
+     */
+    public void testFlush() throws Exception
+    {
+
+        for (int d=0;d<2;d++)
+        {
+            AbstractGenerator.__direct=d==0;
+
+            Server server=startServer(new DataHandler());
+            try
+            {   
+                String[] encoding = {"NONE","UTF-8","ISO-8859-1","ISO-8859-2","JIS"};
+
+
+                for (int e =0; e<encoding.length;e++)
+                {
+                    for (int b=1;b<100;b+=50)
+                    {
+                        for (int w=1024;w<10000;w+=4096)
+                        {
+                            for (int c=0;c<2;c++)
+                            {
+                                String test=encoding[e]+"x"+b+"x"+w+"x"+d+"x"+c;
+                                URL url=new URL("http://"+HOST+":"+port+"/?writes="+w+"&block="+b+ (e==0?"":("&encoding="+encoding[e]))+(c==0?"&chars=true":""));
+                                InputStream in = (InputStream)url.getContent();
+                                String response=IO.toString(in);
+
+                                assertEquals(test,b*w,response.length());
+                            }
+                        }
+                    }
+                }
+
+
+            }
+            finally
+            {
+                System.err.println("stopping "+d);
+                // Shut down
+                server.stop();
+                Thread.yield();
+                System.err.println("stopped "+d);
+            }
+        }
+    }
+
+    
+    
+    
+    
+    /**
      * Read entire response from the client. Close the output.
      * 
      * @param client
@@ -459,18 +516,61 @@ public class HttpServerTestBase extends TestCase
         }
     }
 
+    // ----------------------------------------------------------
     private static class HelloWorldHandler extends AbstractHandler
     {
-
-        // ~ Methods
         // ------------------------------------------------------------
-
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             base_request.setHandled(true);
             response.setStatus(200);
             response.getOutputStream().print("Hello world");
+        }
+    }
+
+    // ----------------------------------------------------------
+    private static class DataHandler extends AbstractHandler
+    {
+        // ------------------------------------------------------------
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        {
+            Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+            base_request.setHandled(true);
+            response.setStatus(200);
+            
+            String tmp = request.getParameter("writes");
+            int writes=Integer.parseInt(tmp==null?"10":tmp);
+            tmp = request.getParameter("block");
+            int block=Integer.parseInt(tmp==null?"10":tmp);
+            String encoding=request.getParameter("encoding");
+            String chars=request.getParameter("chars");
+            
+            String chunk = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+                .substring(0,block);
+            response.setContentType("text/plain");
+            if (encoding==null)
+            {
+                byte[] bytes=chunk.getBytes("ISO-8859-1");
+                OutputStream out=response.getOutputStream();
+                for (int i=0;i<writes;i++)
+                    out.write(bytes);
+            }
+            else if ("true".equals(chars))
+            {
+                response.setCharacterEncoding(encoding);
+                Writer out=response.getWriter();
+                char[] c=chunk.toCharArray();
+                for (int i=0;i<writes;i++)
+                    out.write(c);
+            }
+            else 
+            {
+                response.setCharacterEncoding(encoding);
+                Writer out=response.getWriter();
+                for (int i=0;i<writes;i++)
+                    out.write(chunk);
+            }
         }
     }
 
