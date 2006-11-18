@@ -1,1 +1,0 @@
-WARNING: This module contains some LGPL and GPL code.  We are currently investigating if we can change this to apache 2.0.
