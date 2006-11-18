@@ -52,7 +52,6 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class XmlParser
 {
-
     private Map _redirectMap = new HashMap();
     private SAXParser _parser;
     private Map _observerMap;
@@ -66,35 +65,13 @@ public class XmlParser
      */
     public XmlParser()
     {
-        try
-        {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        boolean validating_dft = factory.getClass().toString().startsWith("org.apache.xerces.");
+        String validating_prop = System.getProperty("org.mortbay.xml.XmlParser.Validating", validating_dft ? "true" : "false");
+        boolean notValidating = Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating"); // deprecated!
+        boolean validating = !notValidating && Boolean.valueOf(validating_prop).booleanValue();
 
-            boolean validating_dft = factory.getClass().toString().startsWith("org.apache.xerces.");
-            String validating_prop = System.getProperty("org.mortbay.xml.XmlParser.Validating", validating_dft ? "true" : "false");
-            boolean notValidating = Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating"); // deprecated!
-            boolean validating = !notValidating && Boolean.valueOf(validating_prop).booleanValue();
-            factory.setValidating(validating);
-            _parser = factory.newSAXParser();
-
-            try
-            {
-                _parser.getXMLReader().setFeature("http://apache.org/xml/features/validation/schema", validating);
-            }
-            catch (Exception e)
-            {
-                Log.info("Apache schema validation is not supported");
-                Log.ignore(e);
-            }
-
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation", validating);
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces", validating);
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", validating);
-        }
-        catch (Exception e)
-        {
-            Log.warn(Log.EXCEPTION, e);
-        }
+        setValidating(validating);
     }
 
     /* ------------------------------------------------------------ */
@@ -103,12 +80,18 @@ public class XmlParser
      */
     public XmlParser(boolean validating)
     {
+        setValidating(validating);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setValidating(boolean validating)
+    {
         try
         {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(validating);
             _parser = factory.newSAXParser();
-
+            
             try
             {
                 if (validating)
@@ -124,16 +107,14 @@ public class XmlParser
 
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation", validating);
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces", validating);
-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", validating);
-        }
+            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", validating);  }
         catch (Exception e)
         {
             Log.warn(Log.EXCEPTION, e);
             throw new Error(e.toString());
         }
-
     }
-
+    
     /* ------------------------------------------------------------ */
     /**
      * @param name
