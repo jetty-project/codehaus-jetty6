@@ -633,7 +633,6 @@ public abstract class AbstractGenerator implements Generator
         
         Output _out;
         AbstractGenerator _generator;
-        int _space;
         int _writeMode;
         int _surrogate;
         boolean _direct;
@@ -797,31 +796,31 @@ public abstract class AbstractGenerator implements Generator
             if (_out._closed)
                 throw new IOException("Closed");
             
-            _space= _generator.prepareUncheckedAddContent();
-            if (_space<0)
+            int space= _generator.prepareUncheckedAddContent();
+            if (space<0)
                 throw new IOException("Closed");
     
             int end=offset+length;
             for (int i=offset;i<end;i++)
             {
                 // Block until we can add _content.
-                if (_space<6 && _generator._endp.isOpen())
+                if (space<6 && _generator._endp.isOpen())
                 {
                     _generator.completeUncheckedAddContent();
                     _out.flush();
-                    _space= _generator.prepareUncheckedAddContent();
+                    space= _generator.prepareUncheckedAddContent();
                 }
                 
                 int c=s[i];
                 if ((c<0xd800) || (c>0xdfff)) 
-                    writeUtf8(c);
+                    space-=writeUtf8(c);
                 else if (c < 0xdc00) 
                     _surrogate = (c-0xd800)<<10;
                 else 
-                    writeUtf8(_surrogate+c-0xdc00);
+                    space-=writeUtf8(_surrogate+c-0xdc00);
             }
             _generator.completeUncheckedAddContent();
-            if (_space<6 && _generator._endp.isOpen())
+            if (space<6 && _generator._endp.isOpen())
                 _out.flush();
         }
 
@@ -831,49 +830,49 @@ public abstract class AbstractGenerator implements Generator
             if (_out._closed)
                 throw new IOException("Closed");
             
-            _space= _generator.prepareUncheckedAddContent();
-            if (_space<0)
+            int space= _generator.prepareUncheckedAddContent();
+            if (space<0)
                 throw new IOException("Closed");
     
             int end=offset+length;
             for (int i=offset;i<end;i++)
             {
                 // Do we need to flush?
-                if (_space<6 && _generator._endp.isOpen()) // 6 is maximum UTF-8 encoded character length
+                if (space<6 && _generator._endp.isOpen()) // 6 is maximum UTF-8 encoded character length
                 {
                     _generator.completeUncheckedAddContent();
                     _out.flush();
-                    _space= _generator.prepareUncheckedAddContent();
+                    space= _generator.prepareUncheckedAddContent();
                 }
                 
                 int c=s.charAt(i);
                 if ((c<0xd800) || (c>0xdfff)) 
-                    writeUtf8(c);
+                    space-=writeUtf8(c);
                 else if (c < 0xdc00) 
                     _surrogate = (c-0xd800)<<10;
                 else 
-                    writeUtf8(_surrogate+c-0xdc00);
+                    space-=writeUtf8(_surrogate+c-0xdc00);
             }
             _generator.completeUncheckedAddContent();
-            if (_space==0 && _generator._endp.isOpen())
+            if (space==0 && _generator._endp.isOpen())
                 _out.flush();
         }
 
         /* ------------------------------------------------------------ */
-        private void writeUtf8(int code)
+        private int writeUtf8(int code)
         {
             if ((code & 0xffffff80) == 0) 
             {
                 // 1b
                 _generator.uncheckedAddContent(code);
-                _space--;
+                return 1;
             }
             else if((code&0xfffff800)==0)
             {
                 // 2b
                 _generator.uncheckedAddContent(0xc0|(code>>6));
                 _generator.uncheckedAddContent(0x80|(code&0x3f));
-                _space-=2;
+                return 2;
             }
             else if((code&0xffff0000)==0)
             {
@@ -881,7 +880,7 @@ public abstract class AbstractGenerator implements Generator
                 _generator.uncheckedAddContent(0xe0|(code>>12));
                 _generator.uncheckedAddContent(0x80|((code>>6)&0x3f));
                 _generator.uncheckedAddContent(0x80|(code&0x3f));
-                _space-=3;
+                return 3;
             }
             else if((code&0xff200000)==0)
             {
@@ -890,7 +889,7 @@ public abstract class AbstractGenerator implements Generator
                 _generator.uncheckedAddContent(0x80|((code>>12)&0x3f));
                 _generator.uncheckedAddContent(0x80|((code>>6)&0x3f));
                 _generator.uncheckedAddContent(0x80|(code&0x3f));
-                _space-=4;
+                return 4;
             }
             else if((code&0xf4000000)==0)
             {
@@ -900,7 +899,7 @@ public abstract class AbstractGenerator implements Generator
                 _generator.uncheckedAddContent(0x80|((code>>12)&0x3f));
                 _generator.uncheckedAddContent(0x80|((code>>6)&0x3f));
                 _generator.uncheckedAddContent(0x80|(code&0x3f));
-                _space-=5;
+                return 5;
             }
             else if((code&0x80000000)==0)
             {
@@ -911,11 +910,12 @@ public abstract class AbstractGenerator implements Generator
                 _generator.uncheckedAddContent(0x80|((code>>12)&0x3f));
                 _generator.uncheckedAddContent(0x80|((code>>6)&0x3f));
                 _generator.uncheckedAddContent(0x80|(code&0x3f));
-                _space-=6;
+                return 6;
             }
             else
             {
                 _generator.uncheckedAddContent('?');
+                return 1;
             }
         }
 
@@ -925,27 +925,37 @@ public abstract class AbstractGenerator implements Generator
             if (_out._closed)
                 throw new IOException("Closed");
             
-            _space= _generator.prepareUncheckedAddContent();
-            if (_space<0)
+            int space= _generator.prepareUncheckedAddContent();
+            if (space<0)
                 throw new IOException("Closed");
-    
-            int end=offset+length;
-            for (int i=offset;i<end;i++)
+            
+            while (length>0)
             {
-                // Block until we can add _content.
-                if (_space<1 && _generator._endp.isOpen())
+                int chunk=length;
+                if (chunk>space)
+                    chunk=space;
+                
+                int end=offset+chunk;
+                for (int i=offset;i<end;i++)
+                {
+                    int c=s[i];
+                    _out._generator.uncheckedAddContent((c>=0&&c<256)?c:'?'); 
+                }
+                offset+=chunk;
+                length-=chunk;
+                space-=chunk;
+
+                // Do we need to flush?
+                if (space<1 && _generator._endp.isOpen()) 
                 {
                     _generator.completeUncheckedAddContent();
                     _out.flush();
-                    _space= _generator.prepareUncheckedAddContent();
+                    space= _generator.prepareUncheckedAddContent();
                 }
-                
-                int c=s[i];
-                _out._generator.uncheckedAddContent((c>=0&&c<256)?c:'?'); 
             }
-            _space-=length;
+                
             _generator.completeUncheckedAddContent();
-            if (_space==0 && _generator._endp.isOpen())
+            if (space==0 && _generator._endp.isOpen())
                 _out.flush();
         }
         
@@ -956,27 +966,37 @@ public abstract class AbstractGenerator implements Generator
             if (_out._closed)
                 throw new IOException("Closed");
             
-            _space= _generator.prepareUncheckedAddContent();
-            if (_space<0)
+            int space= _generator.prepareUncheckedAddContent();
+            if (space<0)
                 throw new IOException("Closed");
-    
-            int end=offset+length;
-            for (int i=offset;i<end;i++)
+            
+            while (length>0)
             {
+                int chunk=length;
+                if (chunk>space)
+                    chunk=space;
+                
+                int end=offset+chunk;
+                for (int i=offset;i<end;i++)
+                {
+                    int c=s.charAt(i);
+                    _out._generator.uncheckedAddContent((c>=0&&c<256)?c:'?'); 
+                }
+                offset+=chunk;
+                length-=chunk;
+                space-=chunk;
+
                 // Do we need to flush?
-                if (_space<6 && _generator._endp.isOpen()) // 6 is maximum UTF-8 encoded character length
+                if (space<1 && _generator._endp.isOpen()) 
                 {
                     _generator.completeUncheckedAddContent();
                     _out.flush();
-                    _space= _generator.prepareUncheckedAddContent();
+                    space=_generator.prepareUncheckedAddContent();
                 }
-                
-                int c=s.charAt(i);
-                _out._generator.uncheckedAddContent((c>=0&&c<256)?c:'?'); 
             }
-            _space-=length;
+            
             _generator.completeUncheckedAddContent();
-            if (_space==0 && _generator._endp.isOpen())
+            if (space==0 && _generator._endp.isOpen())
                 _out.flush();
         }
     }
