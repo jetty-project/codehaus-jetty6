@@ -648,6 +648,7 @@ public abstract class AbstractGenerator implements Generator
         /* ------------------------------------------------------------ */
         public void setCharacterEncoding(String encoding)
         {
+            
             if (encoding == null || StringUtil.__ISO_8859_1.equalsIgnoreCase(encoding))
             {
                 _direct=__direct;
@@ -668,7 +669,6 @@ public abstract class AbstractGenerator implements Generator
             _out._characterEncoding = encoding;
             if (!_direct && _out._bytes==null)
                 _out._bytes = new ByteArrayOutputStream2(MAX_OUTPUT_CHARS*6);
-                
         }
 
         /* ------------------------------------------------------------ */
@@ -723,6 +723,7 @@ public abstract class AbstractGenerator implements Generator
             }
             else
             {
+                
                 while (length > MAX_OUTPUT_CHARS)
                 {
                     write(s, offset, MAX_OUTPUT_CHARS);
@@ -774,7 +775,7 @@ public abstract class AbstractGenerator implements Generator
                     default:
                         throw new IllegalStateException();
                 }
-
+                
                 out._bytes.writeTo(out);
                 out._bytes.reset();
             }
