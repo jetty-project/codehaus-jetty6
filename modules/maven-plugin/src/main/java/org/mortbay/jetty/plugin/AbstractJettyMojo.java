@@ -18,21 +18,13 @@ package org.mortbay.jetty.plugin;
 
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
-import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
@@ -101,6 +93,14 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     private File webDefaultXml;
     
     
+    /**
+     * A web.xml file to be applied AFTER
+     * the webapp's web.xml file. Useful for
+     * applying different build profiles, eg
+     * test, production etc. Optional.
+     * @parameter
+     */
+    private File overrideWebXml;
     
     /**
      * The interval in seconds to scan the webapp for changes 
@@ -192,6 +192,11 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     public File getWebDefaultXml()
     {
         return this.webDefaultXml;
+    }
+    
+    public File getOverrideWebXml()
+    {
+        return this.overrideWebXml;
     }
     
     /**
@@ -364,9 +369,11 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         webapp.setWebDefaultXmlFile(getWebDefaultXml());
         String contextPath = getContextPath();
         webapp.setContextPath((contextPath.startsWith("/") ? contextPath : "/"+ contextPath));
+        webapp.setOverrideWebXmlFile(getOverrideWebXml());
         getLog().info("Context path = " + webapp.getContextPath());
         getLog().info("Tmp directory = "+(getTmpDirectory()==null?" jetty default":getTmpDirectory().toString()));
         getLog().info("Web defaults = "+(getWebDefaultXml()==null?" jetty default":getWebDefaultXml().toString()));
+        getLog().info("Web overrides = "+(getOverrideWebXml()==null?" none":getOverrideWebXml().toString()));
         
     }
     
