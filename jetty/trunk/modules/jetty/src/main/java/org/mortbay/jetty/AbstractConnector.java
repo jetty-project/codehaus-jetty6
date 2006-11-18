@@ -274,7 +274,9 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     protected void doStop() throws Exception
     {
-        if (_threadPool!=_server.getThreadPool() && _threadPool instanceof LifeCycle)
+        if (_threadPool==_server.getThreadPool())
+            _threadPool=null;
+        else if (_threadPool instanceof LifeCycle)
             ((LifeCycle)_threadPool).stop();
         
         Thread[] acceptors=_acceptorThread;
