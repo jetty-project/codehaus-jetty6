@@ -183,6 +183,7 @@ public class WebXmlConfiguration implements Configuration
             Resource orideResource=Resource.newSystemResource(overrideDescriptor);
             if(orideResource==null)
                 orideResource=Resource.newResource(overrideDescriptor);
+            _xmlParser.setValidating(false);
             configure(orideResource.getURL().toString());
         }
     }
