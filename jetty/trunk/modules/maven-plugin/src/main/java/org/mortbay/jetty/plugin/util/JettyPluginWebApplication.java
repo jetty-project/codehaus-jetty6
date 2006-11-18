@@ -37,6 +37,7 @@ public interface JettyPluginWebApplication extends Proxy {
     public void setClassPathFiles (List classpathFiles);
     public void setWebXmlFile (File webxml);
     public void setJettyEnvXmlFile (File jettyEnvXml);
+    public void setOverrideWebXmlFile (File overrideWebXml) throws Exception;
     public void configure ();
     public void start () throws Exception;
     public void stop () throws Exception;
