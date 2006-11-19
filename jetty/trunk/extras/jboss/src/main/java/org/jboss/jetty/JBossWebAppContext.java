@@ -34,8 +34,6 @@ import org.mortbay.jetty.webapp.WebAppClassLoader;
  * JBossWebApplicationContext
  *
  * Customize the jetty WebAppContext to jboss environment.
- * 
- * TODO  distributable session support
  *
  */
 public class JBossWebAppContext extends J2EEWebAppContext
@@ -149,7 +147,6 @@ public class JBossWebAppContext extends J2EEWebAppContext
             if(_timeOutPresent)
                 sm.setMaxInactiveInterval(_timeOutMinutes*60);
             getSessionHandler().setSessionManager(sm);
-            //_log.info("using Distributable HttpSession Manager: "+sm);
         }
         catch(Exception e)
         {

@@ -19,11 +19,8 @@ import javax.management.MBeanException;
 import javax.management.ObjectName;
 import javax.management.j2ee.statistics.ServletStats;
 
-import org.jboss.jetty.JBossMBeanContainer;
 import org.jboss.jetty.JBossWebAppContext;
 import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHolder;
-import org.mortbay.jetty.servlet.jsr77.Jsr77ServletHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.management.ObjectMBean;
 import org.mortbay.log.Log;
 

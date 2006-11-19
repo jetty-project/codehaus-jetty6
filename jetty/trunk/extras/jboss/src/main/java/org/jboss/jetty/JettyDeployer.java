@@ -2,20 +2,8 @@
 //$Id$
 //Copyright 2006 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
-// This is free software; you can redistribute it and/or modify it
-// under the terms of the GNU Lesser General Public License as
-// published by the Free Software Foundation; either version 2.1 of
-// the License, or (at your option) any later version.
-//
-// This software is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-// Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License along with this software; if not, write to the Free
-// Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-// 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+//Licensed under LGPL.
+//See license terms at http://www.gnu.org/licenses/lgpl.html
 //========================================================================
 
 package org.jboss.jetty;
@@ -26,7 +14,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
 import org.jboss.deployment.DeploymentException;
@@ -36,14 +23,10 @@ import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.mortbay.j2ee.session.Manager;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.SessionManager;
-import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.util.LazyList;
-import org.mortbay.util.MultiException;
+
 
 /**
  * JettyDeployer

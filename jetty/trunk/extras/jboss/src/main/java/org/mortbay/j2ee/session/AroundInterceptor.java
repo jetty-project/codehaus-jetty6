@@ -23,245 +23,220 @@ import java.util.Map;
 
 //----------------------------------------
 
-
-public abstract class AroundInterceptor
-  extends StateInterceptor
+public abstract class AroundInterceptor extends StateInterceptor
 {
-  protected abstract void before();
-  protected abstract void after();
+    protected abstract void before();
 
-  public long
-    getCreationTime()
-    throws RemoteException
-  {
-    long tmp=0;
+    protected abstract void after();
 
-    before();
-    try
+    public long getCreationTime() throws RemoteException
     {
-      tmp=super.getCreationTime();
-    }
-    finally
-    {
-      after();
-    }
+        long tmp = 0;
 
-    return tmp;
-  }
+        before();
+        try
+        {
+            tmp = super.getCreationTime();
+        }
+        finally
+        {
+            after();
+        }
 
-  public String
-    getId()
-    throws RemoteException
-  {
-    String tmp=null;
-
-    before();
-    try
-    {
-      tmp=super.getId();
-    }
-    finally
-    {
-      after();
+        return tmp;
     }
 
-    return tmp;
-  }
+    public String getId() throws RemoteException
+    {
+        String tmp = null;
 
-  public void
-    setLastAccessedTime(long time)
-    throws RemoteException
-  {
-    before();
-    try
-    {
-      super.setLastAccessedTime(time);
-    }
-    finally
-    {
-      after();
-    }
-  }
+        before();
+        try
+        {
+            tmp = super.getId();
+        }
+        finally
+        {
+            after();
+        }
 
-  public long
-    getLastAccessedTime()
-    throws RemoteException
-  {
-    long tmp=0;
-
-    before();
-    try
-    {
-      tmp=super.getLastAccessedTime();
-    }
-    finally
-    {
-      after();
+        return tmp;
     }
 
-    return tmp;
-  }
-
-  public void
-    setMaxInactiveInterval(int interval)
-    throws RemoteException
-  {
-    before();
-    try
+    public void setLastAccessedTime(long time) throws RemoteException
     {
-      super.setMaxInactiveInterval(interval);
-    }
-    finally
-    {
-      after();
-    }
-  }
-
-  public int
-    getMaxInactiveInterval()
-    throws RemoteException
-  {
-    int tmp=0;
-
-    before();
-    try
-    {
-      tmp=super.getMaxInactiveInterval();
-    }
-    finally
-    {
-      after();
+        before();
+        try
+        {
+            super.setLastAccessedTime(time);
+        }
+        finally
+        {
+            after();
+        }
     }
 
-    return tmp;
-  }
-
-  public Object
-    getAttribute(String name)
-    throws RemoteException
-  {
-    Object tmp=null;
-
-    before();
-    try
+    public long getLastAccessedTime() throws RemoteException
     {
-      tmp=super.getAttribute(name);
-    }
-    finally
-    {
-      after();
+        long tmp = 0;
+
+        before();
+        try
+        {
+            tmp = super.getLastAccessedTime();
+        }
+        finally
+        {
+            after();
+        }
+
+        return tmp;
     }
 
-    return tmp;
-  }
-
-  public Enumeration
-    getAttributeNameEnumeration()
-    throws RemoteException
-  {
-    Enumeration tmp=null;
-
-    before();
-    try
+    public void setMaxInactiveInterval(int interval) throws RemoteException
     {
-      tmp=super.getAttributeNameEnumeration();
-    }
-    finally
-    {
-      after();
+        before();
+        try
+        {
+            super.setMaxInactiveInterval(interval);
+        }
+        finally
+        {
+            after();
+        }
     }
 
-    return tmp;
-  }
-
-  public String[]
-    getAttributeNameStringArray()
-    throws RemoteException
-  {
-    String[] tmp=null;
-
-    before();
-    try
+    public int getMaxInactiveInterval() throws RemoteException
     {
-      tmp=super.getAttributeNameStringArray();
-    }
-    finally
-    {
-      after();
+        int tmp = 0;
+
+        before();
+        try
+        {
+            tmp = super.getMaxInactiveInterval();
+        }
+        finally
+        {
+            after();
+        }
+
+        return tmp;
     }
 
-    return tmp;
-  }
-
-  public Object
-    setAttribute(String name, Object value, boolean returnValue)
-    throws RemoteException
-  {
-    Object tmp=null;
-
-    before();
-    try
+    public Object getAttribute(String name) throws RemoteException
     {
-      tmp=super.setAttribute(name, value, returnValue);
-    }
-    finally
-    {
-      after();
+        Object tmp = null;
+
+        before();
+        try
+        {
+            tmp = super.getAttribute(name);
+        }
+        finally
+        {
+            after();
+        }
+
+        return tmp;
     }
 
-    return tmp;
-  }
-
-  public Object
-    removeAttribute(String name, boolean returnValue)
-    throws RemoteException
-  {
-    Object tmp=null;
-
-    before();
-    try
+    public Enumeration getAttributeNameEnumeration() throws RemoteException
     {
-      tmp=super.removeAttribute(name, returnValue);
-    }
-    finally
-    {
-      after();
+        Enumeration tmp = null;
+
+        before();
+        try
+        {
+            tmp = super.getAttributeNameEnumeration();
+        }
+        finally
+        {
+            after();
+        }
+
+        return tmp;
     }
 
-    return tmp;
-  }
-
-  public Map
-    getAttributes()
-    throws RemoteException
-  {
-    Map tmp=null;
-
-    before();
-    try
+    public String[] getAttributeNameStringArray() throws RemoteException
     {
-      tmp=super.getAttributes();
-    }
-    finally
-    {
-      after();
+        String[] tmp = null;
+
+        before();
+        try
+        {
+            tmp = super.getAttributeNameStringArray();
+        }
+        finally
+        {
+            after();
+        }
+
+        return tmp;
     }
 
-    return tmp;
-  }
+    public Object setAttribute(String name, Object value, boolean returnValue)
+            throws RemoteException
+    {
+        Object tmp = null;
 
-  public void
-    setAttributes(Map attributes)
-    throws RemoteException
-  {
-    before();
-    try
-    {
-      super.setAttributes(attributes);
+        before();
+        try
+        {
+            tmp = super.setAttribute(name, value, returnValue);
+        }
+        finally
+        {
+            after();
+        }
+
+        return tmp;
     }
-    finally
+
+    public Object removeAttribute(String name, boolean returnValue)
+            throws RemoteException
     {
-      after();
+        Object tmp = null;
+
+        before();
+        try
+        {
+            tmp = super.removeAttribute(name, returnValue);
+        }
+        finally
+        {
+            after();
+        }
+
+        return tmp;
     }
-  }
+
+    public Map getAttributes() throws RemoteException
+    {
+        Map tmp = null;
+
+        before();
+        try
+        {
+            tmp = super.getAttributes();
+        }
+        finally
+        {
+            after();
+        }
+
+        return tmp;
+    }
+
+    public void setAttributes(Map attributes) throws RemoteException
+    {
+        before();
+        try
+        {
+            super.setAttributes(attributes);
+        }
+        finally
+        {
+            after();
+        }
+    }
 }
