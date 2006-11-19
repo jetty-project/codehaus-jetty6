@@ -843,7 +843,16 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 else 
                 {
                     FileInputStream fis = new FileInputStream(resource.getFile());
-                    buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+                    try
+                    {
+                        buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+                    }
+                    catch(OutOfMemoryError e)
+                    {
+                        Log.warn(e.toString());
+                        Log.debug(e);
+                        buffer = new NIOBuffer((int) length, NIOBuffer.INDIRECT);
+                    }
                     buffer.readFrom(fis,(int)length);
                     fis.close();
                 }
