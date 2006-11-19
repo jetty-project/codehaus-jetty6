@@ -190,16 +190,16 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     /** conveniance method to add a filter
      */
-    public void addFilter(Class filterClass,String pathSpec,int dispatches)
+    public FilterHolder addFilter(Class filterClass,String pathSpec,int dispatches)
     {
-        _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
+        return _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
 
     /* ------------------------------------------------------------ */
     /** conveniance method to add a filter
      */
-    public void addFilter(String filterClass,String pathSpec,int dispatches)
+    public FilterHolder addFilter(String filterClass,String pathSpec,int dispatches)
     {
-        _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
+        return _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
 }
