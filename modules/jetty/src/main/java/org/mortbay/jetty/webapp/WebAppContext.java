@@ -96,6 +96,7 @@ public class WebAppContext extends Context
     private File _tmpDir;
     private boolean _isExistingTmpDir;
     private String _war;
+    private String _extraClasspath;
     
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
@@ -1099,7 +1100,30 @@ public class WebAppContext extends Context
     {
         _war = war;
     }
-    
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Comma or semicolon separated path of filenames or URLs
+     * pointing to directories or jar files. Directories should end
+     * with '/'.
+     */
+    public String getExtraClasspath()
+    {
+        return _extraClasspath;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param extraClasspath Comma or semicolon separated path of filenames or URLs
+     * pointing to directories or jar files. Directories should end
+     * with '/'.
+     */
+    public void setExtraClasspath(String extraClasspath)
+    {
+        _extraClasspath=extraClasspath;
+    }
+
     /* ------------------------------------------------------------ */
     protected void startContext()
         throws Exception
@@ -1186,5 +1210,4 @@ public class WebAppContext extends Context
         
         return canonicalName.toString();
     }
-
 }
