@@ -1,12 +1,10 @@
-/*
- * jBoss, the OpenSource EJB server
- *
- * Distributable under GPL license.
- * See terms of license at gnu.org.
- */
-
-// $Id: JBossUserRealm.java,v 1.9 2005/04/13 14:46:48 janb Exp $
-
+//========================================================================
+//$Id:  $
+//JBoss Jetty Integration
+//------------------------------------------------------------------------
+//Licensed under LGPL.
+//See license terms at http://www.gnu.org/licenses/lgpl.html
+//========================================================================
 package org.jboss.jetty.security;
 
 import java.io.Serializable;
@@ -40,6 +38,7 @@ import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.security.Credential;
 
 /**
+ * JBossUserRealm
  * An implementation of UserRealm that integrates with the JBossSX security
  * manager associted with the web application.
  * 
@@ -49,7 +48,7 @@ import org.mortbay.jetty.security.Credential;
  * @version $Revision: 1.9 $
  */
 
-public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
+public class JBossUserRealm implements UserRealm, SSORealm
 {
     private final Logger _log;
     protected final String _realmName;
@@ -449,17 +448,15 @@ public class JBossUserRealm implements UserRealm, SSORealm // Jetty API
             if (user instanceof JBossUserPrincipal)
                 pUser = ((JBossUserPrincipal) user)._principal;
 
-            java.util.ArrayList servers = MBeanServerFactory
-                    .findMBeanServer(null);
+            java.util.ArrayList servers = MBeanServerFactory.findMBeanServer(null);
             if (servers.size() != 1)
                 _log.warn("More than one MBeanServer found, choosing first");
             MBeanServer server = (MBeanServer) servers.get(0);
 
-            server.invoke(new ObjectName(
-                    "jboss.security:service=JaasSecurityManager"),
-                    "flushAuthenticationCache",
-                    new Object[] { getName(), pUser }, new String[] {
-                            "java.lang.String", "java.security.Principal" });
+            server.invoke(new ObjectName("jboss.security:service=JaasSecurityManager"),
+                                         "flushAuthenticationCache",
+                                         new Object[] { getName(), pUser }, 
+                                         new String[] {"java.lang.String", "java.security.Principal" });
         }
         catch (Exception e)
         {

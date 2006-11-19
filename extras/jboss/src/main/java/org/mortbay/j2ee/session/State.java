@@ -22,14 +22,11 @@ import java.util.Enumeration;
 import java.util.Map;
 
 //----------------------------------------
-
 // The API around the isolated state encapsulated by an HttpSession -
 // NOT quite the same as an HttpSession interface...
-
 // It would be much cheaper to have set/removeAttribute return a
 // boolean or void - but we HAVE TO HAVE the old binding to use in
 // ValueUnbound events...
-
 //----------------------------------------
 
 /**
@@ -39,28 +36,40 @@ import java.util.Map;
  * @author <a href="mailto:jules@mortbay.com">Jules Gosnell</a>
  * @version 1.0
  */
-public interface
-  State
+public interface State
 {
-  // invariant field accessors
-  String      getId()                                                      throws RemoteException;
-  int         getActualMaxInactiveInterval()                               throws RemoteException;
-  long        getCreationTime()                                            throws RemoteException;
+    // invariant field accessors
+    String getId() throws RemoteException;
 
-  // variant field accessors
-  Map         getAttributes()                                              throws RemoteException;
-  void        setAttributes(Map attributes)                                throws RemoteException;
-  long        getLastAccessedTime()                                        throws RemoteException;
-  void        setLastAccessedTime(long time)                               throws RemoteException;
-  int         getMaxInactiveInterval()                                     throws RemoteException;
-  void        setMaxInactiveInterval(int interval)                         throws RemoteException;
+    int getActualMaxInactiveInterval() throws RemoteException;
 
-  // compound fn-ality
-  Object      getAttribute(String name)                                    throws RemoteException;
-  Object      setAttribute(String name, Object value, boolean returnValue) throws RemoteException;
-  Object      removeAttribute(String name, boolean returnValue)            throws RemoteException;
-  Enumeration getAttributeNameEnumeration()                                throws RemoteException;
-  String[]    getAttributeNameStringArray()                                throws RemoteException;
-  boolean     isValid()                                                    throws RemoteException;
+    long getCreationTime() throws RemoteException;
+
+    // variant field accessors
+    Map getAttributes() throws RemoteException;
+
+    void setAttributes(Map attributes) throws RemoteException;
+
+    long getLastAccessedTime() throws RemoteException;
+
+    void setLastAccessedTime(long time) throws RemoteException;
+
+    int getMaxInactiveInterval() throws RemoteException;
+
+    void setMaxInactiveInterval(int interval) throws RemoteException;
+
+    // compound fn-ality
+    Object getAttribute(String name) throws RemoteException;
+
+    Object setAttribute(String name, Object value, boolean returnValue)
+            throws RemoteException;
+
+    Object removeAttribute(String name, boolean returnValue)
+            throws RemoteException;
+
+    Enumeration getAttributeNameEnumeration() throws RemoteException;
+
+    String[] getAttributeNameStringArray() throws RemoteException;
+
+    boolean isValid() throws RemoteException;
 }
-
