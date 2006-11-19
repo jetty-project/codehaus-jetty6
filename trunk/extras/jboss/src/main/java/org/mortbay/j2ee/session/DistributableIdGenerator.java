@@ -22,14 +22,11 @@
 
 package org.mortbay.j2ee.session;
 
-public class
-  DistributableIdGenerator
-  extends GUIDGenerator
+public class DistributableIdGenerator extends GUIDGenerator
 {
-  public synchronized Object
-    clone()
+    public synchronized Object clone()
     {
-      DistributableIdGenerator dig=(DistributableIdGenerator)super.clone();
-      return dig;
+        DistributableIdGenerator dig = (DistributableIdGenerator) super.clone();
+        return dig;
     }
 }

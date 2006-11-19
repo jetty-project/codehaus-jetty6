@@ -26,9 +26,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.jboss.logging.Logger;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.SessionManager;
 import org.mortbay.xml.XmlConfiguration;
 import org.w3c.dom.Element;
 
@@ -36,6 +33,12 @@ import org.w3c.dom.Element;
 
 /**
  * Jetty 
+ *
+ * Extends the jetty Server class. 
+ * 
+ * TODO remove this class and apply jboss-web.xml configuration in
+ * JettyService class instead.
+ * 
  * @author <a href="mailto:jules_gosnell@yahoo..com">Julian Gosnell </a>
  * @author <a href="mailto:andreas@jboss.org">Andreas Schaefer </a>.
  * 

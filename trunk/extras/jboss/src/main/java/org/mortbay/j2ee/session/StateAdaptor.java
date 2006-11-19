@@ -1,17 +1,17 @@
-// ========================================================================
-// $Id: StateAdaptor.java,v 1.4 2004/05/09 20:30:47 gregwilkins Exp $
-// Copyright 2002-2004 Mort Bay Consulting Pty. Ltd.
-// ------------------------------------------------------------------------
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
-// http://www.apache.org/licenses/LICENSE-2.0
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// ========================================================================
+//========================================================================
+//$Id: StateAdaptor.java,v 1.4 2004/05/09 20:30:47 gregwilkins Exp $
+//Copyright 2002-2004 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
 
 package org.mortbay.j2ee.session;
 
@@ -26,428 +26,396 @@ import javax.servlet.http.HttpSessionContext;
 import org.jboss.logging.Logger;
 
 //----------------------------------------
-// this class is responsible for presenting a State container to a
-// servlet as a HttpSession - since this interface is not an ideal one
-// to use for the container interceptors. It constrains all the inputs
-// to this API as specified...
+//this class is responsible for presenting a State container to a
+//servlet as a HttpSession - since this interface is not an ideal one
+//to use for the container interceptors. It constrains all the inputs
+//to this API as specified...
 
-// Since this is the front end of the Container, maybe it should be so
-// called ? or maybe I should just call it [Http]Session?
+//Since this is the front end of the Container, maybe it should be so
+//called ? or maybe I should just call it [Http]Session?
 
-// we should cache our id locally...
+//we should cache our id locally...
 
-public class StateAdaptor
-  implements Manager.Session
+public class StateAdaptor implements Manager.Session
 {
-  protected static final Logger _log=Logger.getLogger(StateAdaptor.class);
-  Manager        _manager;
-  State          _state=null;
-  boolean        _new=true;
+    protected static final Logger _log = Logger.getLogger(StateAdaptor.class);
 
-  // we cache these for speed...
-  final String _id;
+    Manager _manager;
 
-  StateAdaptor(String id, Manager manager, int maxInactiveInterval, long lastAccessedTime)
-  {
-    _id=id;
-    _manager=manager;
-  }
+    State _state = null;
 
-  void
-    setState(State state)
-  {
-    _state=state;
-  }
+    boolean _new = true;
 
-  State
-    getState()
-  {
-    return _state;
-  }
+    // we cache these for speed...
+    final String _id;
 
-  // hmmmm...
-  // why does Greg call this?
-  // could it be compressed into a subsequent call ?
-  public boolean
-    isValid()
-  {
-    if (_state==null)
-      return false;
-
-    StateInterceptor si=(StateInterceptor)_state;
-     si.setManager(_manager);
-     si.setSession(this);
-
-    try
+    StateAdaptor(String id, Manager manager, int maxInactiveInterval,
+            long lastAccessedTime)
     {
-      _state.getLastAccessedTime(); // this should cause an interceptor/the session to check
-      return true;
+        _id = id;
+        _manager = manager;
     }
-    catch (IllegalStateException ignore)
+
+    void setState(State state)
     {
-      return false;
+        _state = state;
     }
-    catch (Exception e)
+
+    State getState()
     {
-      _log.error("problem contacting HttpSession", e);
-      return false;
+        return _state;
     }
-  }
 
-  // HttpSession API
-
-  public long
-    getCreationTime()
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
+    // hmmmm...
+    // why does Greg call this?
+    // could it be compressed into a subsequent call ?
+    public boolean isValid()
     {
-      return _state.getCreationTime();
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not get CreationTime", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
+        if (_state == null) return false;
 
-  public String
-    getId()
-    throws IllegalStateException
-  {
-    checkState();
+        StateInterceptor si = (StateInterceptor) _state;
+        si.setManager(_manager);
+        si.setSession(this);
 
-    // locally cached and invariant
-    return _id;
-  }
-
-  public long
-    getLastAccessedTime()
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      return _state.getLastAccessedTime();
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not get LastAccessedTime", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  // clarify with Tomcat, whether this is on a per Session or SessionManager basis...
-  public void
-    setMaxInactiveInterval(int interval)
-  {
-    checkState();
-
-    try
-    {
-      _state.setMaxInactiveInterval(interval);
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not set MaxInactiveInterval", e);
-    }
-  }
-
-  public int
-    getMaxInactiveInterval()
-  {
-    checkState();
-
-    try
-    {
-      return _state.getMaxInactiveInterval();
-    }
-    catch (RemoteException e)
-    {
-      // Can I throw an exception of some type here - instead of
-      // returning rubbish ? - TODO
-      _log.error("could not get MaxInactiveInterval", e);
-      return 0;
-    }
-  }
-
-  public Object
-    getAttribute(String name)
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      return _state.getAttribute(name);
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not get Attribute", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  public Object
-    getValue(String name)
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      return _state.getAttribute(name);
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not get Value", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  public Enumeration
-    getAttributeNames()
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      return _state.getAttributeNameEnumeration();
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not get AttributeNames", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  public String[]
-    getValueNames()
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      return _state.getAttributeNameStringArray();
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not get ValueNames", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  public void
-    setAttribute(String name, Object value)
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      if (value==null)
-	_state.removeAttribute(name, false);
-      else
-      {
-	if (name==null)
-	  throw new IllegalArgumentException("invalid attribute name: "+name);
-
-	_state.setAttribute(name, value, false);
-      }
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not set Attribute", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  public void
-    putValue(String name, Object value)
-    throws IllegalStateException
-  {
-    checkState();
-
-    if (name==null)
-      throw new IllegalArgumentException("invalid attribute name: "+name);
-
-    if (value==null)
-      throw new IllegalArgumentException("invalid attribute value: "+value);
-
-    try
-    {
-      _state.setAttribute(name, value, false);
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not put Value", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  public void
-    removeAttribute(String name)
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      _state.removeAttribute(name, false);
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not remove Attribute", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  public void
-    removeValue(String name)
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      _state.removeAttribute(name, false);
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not remove Value", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  public void
-    invalidate()
-    throws IllegalStateException
-  {
-    if (_log.isTraceEnabled()) _log.trace("user invalidated session: "+getId());
-    _manager.destroySession(this);
-  }
-
-  /**
-   *
-   * Returns <code>true</code> if the client does not yet know about the
-   * session or if the client chooses not to join the session.  For
-   * example, if the server used only cookie-based sessions, and
-   * the client had disabled the use of cookies, then a session would
-   * be new on each request.
-   *
-   * @return 				<code>true</code> if the
-   *					server has created a session,
-   *					but the client has not yet joined
-   *
-   * @exception IllegalStateException	if this method is called on an
-   *					already invalidated session
-   *
-   */
-
-  public boolean
-    isNew()
-    throws IllegalStateException
-  {
-    return _new;
-  }
-
-  public ServletContext
-    getServletContext()
-  {
-    return _manager.getServletContext();
-  }
-
-  public HttpSessionContext
-    getSessionContext()
-  {
-    return _manager.getSessionContext();
-  }
-
-  // this one's for Greg...
-  public void
-    access()
-  {
-    long time=System.currentTimeMillis(); // we could get this from Manager - less accurate
-    setLastAccessedTime(time);
-
-    _new=false;			// synchronise - TODO
-  }
-
-  public void
-    setLastAccessedTime(long time)
-    throws IllegalStateException
-  {
-    checkState();
-
-    try
-    {
-      _state.setLastAccessedTime(time);
-    }
-    catch (RemoteException e)
-    {
-      _log.error("could not set LastAccessedTime", e);
-      throw new IllegalStateException("problem with distribution layer");
-    }
-  }
-
-  protected void
-    checkState()
-    throws IllegalStateException
-  {
-    if (_state==null)
-      throw new IllegalStateException("invalid session");
-    else
-    {
-
-    // this is a hack to get new interceptor stack to work... - TODO
-//    StateInterceptor si=(StateInterceptor)_state;
-//     si.setManager(_manager);
-//     si.setSession(this);
-        StateInterceptor si = null;
-        if (_state instanceof StateInterceptor)
+        try
         {
-            si = (StateInterceptor) _state;
-            si.setManager(_manager);
-            si.setSession(this);
+            _state.getLastAccessedTime(); // this should cause an interceptor/the session to check
+            return true;
         }
+        catch (IllegalStateException ignore)
+        {
+            return false;
+        }
+        catch (Exception e)
+        {
+            _log.error("problem contacting HttpSession", e);
+            return false;
+        }
+    }
+
+    // HttpSession API
+
+    public long getCreationTime() throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            return _state.getCreationTime();
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not get CreationTime", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public String getId() throws IllegalStateException
+    {
+        checkState();
+
+        // locally cached and invariant
+        return _id;
+    }
+
+    public long getLastAccessedTime() throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            return _state.getLastAccessedTime();
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not get LastAccessedTime", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    // clarify with Tomcat, whether this is on a per Session or SessionManager basis...
+    public void setMaxInactiveInterval(int interval)
+    {
+        checkState();
+
+        try
+        {
+            _state.setMaxInactiveInterval(interval);
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not set MaxInactiveInterval", e);
+        }
+    }
+
+    public int getMaxInactiveInterval()
+    {
+        checkState();
+
+        try
+        {
+            return _state.getMaxInactiveInterval();
+        }
+        catch (RemoteException e)
+        {
+            // Can I throw an exception of some type here - instead of
+            // returning rubbish ? - TODO
+            _log.error("could not get MaxInactiveInterval", e);
+            return 0;
+        }
+    }
+
+    public Object getAttribute(String name) throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            return _state.getAttribute(name);
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not get Attribute", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public Object getValue(String name) throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            return _state.getAttribute(name);
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not get Value", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public Enumeration getAttributeNames() throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            return _state.getAttributeNameEnumeration();
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not get AttributeNames", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public String[] getValueNames() throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            return _state.getAttributeNameStringArray();
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not get ValueNames", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public void setAttribute(String name, Object value)
+            throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            if (value == null)
+                _state.removeAttribute(name, false);
+            else
+            {
+                if (name == null)
+                    throw new IllegalArgumentException(
+                            "invalid attribute name: " + name);
+
+                _state.setAttribute(name, value, false);
+            }
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not set Attribute", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public void putValue(String name, Object value)
+            throws IllegalStateException
+    {
+        checkState();
+
+        if (name == null)
+            throw new IllegalArgumentException("invalid attribute name: "
+                    + name);
+
+        if (value == null)
+            throw new IllegalArgumentException("invalid attribute value: "
+                    + value);
+
+        try
+        {
+            _state.setAttribute(name, value, false);
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not put Value", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public void removeAttribute(String name) throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            _state.removeAttribute(name, false);
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not remove Attribute", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public void removeValue(String name) throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            _state.removeAttribute(name, false);
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not remove Value", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    public void invalidate() throws IllegalStateException
+    {
+        if (_log.isTraceEnabled())
+            _log.trace("user invalidated session: " + getId());
+        _manager.destroySession(this);
+    }
+
+    /**
+     *
+     * Returns <code>true</code> if the client does not yet know about the
+     * session or if the client chooses not to join the session.  For
+     * example, if the server used only cookie-based sessions, and
+     * the client had disabled the use of cookies, then a session would
+     * be new on each request.
+     *
+     * @return 				<code>true</code> if the
+     *					server has created a session,
+     *					but the client has not yet joined
+     *
+     * @exception IllegalStateException	if this method is called on an
+     *					already invalidated session
+     *
+     */
+
+    public boolean isNew() throws IllegalStateException
+    {
+        return _new;
+    }
+
+    public ServletContext getServletContext()
+    {
+        return _manager.getServletContext();
+    }
+
+    public HttpSessionContext getSessionContext()
+    {
+        return _manager.getSessionContext();
+    }
+
+    // this one's for Greg...
+    public void access()
+    {
+        long time = System.currentTimeMillis(); // we could get this from Manager - less accurate
+        setLastAccessedTime(time);
+
+        _new = false; // synchronise - TODO
+    }
+
+    public void setLastAccessedTime(long time) throws IllegalStateException
+    {
+        checkState();
+
+        try
+        {
+            _state.setLastAccessedTime(time);
+        }
+        catch (RemoteException e)
+        {
+            _log.error("could not set LastAccessedTime", e);
+            throw new IllegalStateException("problem with distribution layer");
+        }
+    }
+
+    protected void checkState() throws IllegalStateException
+    {
+        if (_state == null)
+            throw new IllegalStateException("invalid session");
         else
         {
-            si = new StateInterceptor();
-            si.setManager(_manager);
-            si.setSession(this);
-            si.setState(_state);
-            _state = si;
+
+            // this is a hack to get new interceptor stack to work... - TODO
+            //          StateInterceptor si=(StateInterceptor)_state;
+            //          si.setManager(_manager);
+            //          si.setSession(this);
+            StateInterceptor si = null;
+            if (_state instanceof StateInterceptor)
+            {
+                si = (StateInterceptor) _state;
+                si.setManager(_manager);
+                si.setSession(this);
+            }
+            else
+            {
+                si = new StateInterceptor();
+                si.setManager(_manager);
+                si.setSession(this);
+                si.setState(_state);
+                _state = si;
+            }
         }
     }
-  }
 
-  public String
-    toString()
-  {
-    return "<"+getClass()+"->"+_state+">";
-  }
+    public String toString()
+    {
+        return "<" + getClass() + "->" + _state + ">";
+    }
 
-  // I'm still not convinced that this is the correct place for this
-  // method- but I can;t think of a better way - maybe in the next
-  // iteration...
+    // I'm still not convinced that this is the correct place for this
+    // method- but I can;t think of a better way - maybe in the next
+    // iteration...
 
-//   MigrationInterceptor _mi=null;
-//
-//   public void
-//     registerMigrationListener(MigrationInterceptor mi)
-//   {
-//     _mi=mi;
-//   }
-//
-   public void
-     migrate()
-   {
-     //     if (_mi!=null)
-     //       _mi.migrate(); // yeugh - TODO
-   }
+    //  MigrationInterceptor _mi=null;
+
+    //  public void
+    //  registerMigrationListener(MigrationInterceptor mi)
+    //  {
+    //  _mi=mi;
+    //  }
+
+    public void migrate()
+    {
+        //     if (_mi!=null)
+        //       _mi.migrate(); // yeugh - TODO
+    }
 }
