@@ -102,7 +102,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     public String getDisplayName()
     {
-        return _name;
+        return _displayName;
     }
 
     /* ---------------------------------------------------------------- */
@@ -175,7 +175,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     public void setDisplayName(String name)
     {
-        _name=name;
+        _displayName=name;
     }
     
     /* ------------------------------------------------------------ */
