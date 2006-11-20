@@ -18,3 +18,4 @@ Some portions of the code are Copyright:
   2006 Tim Vernum 
   1999 Jason Gilbert.
 
+The jboss integration module contains some LGPL code.
