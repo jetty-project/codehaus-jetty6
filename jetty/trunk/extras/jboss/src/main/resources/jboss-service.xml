@@ -49,12 +49,9 @@
     <!-- ================================================================= -->
     <!-- If you require JAAS authentication, configure the name of the     -->
     <!-- attribute in which you expect to find the JAAS active subject:    -->
-    <!--                                                                   -->
-    <!-- Commenting out this configuration will disable JAAS support       -->
     <!-- ================================================================= -->
 
     <attribute name="SubjectAttributeName">j_subject</attribute>
-
 
 
     <!-- ================================================================= -->
