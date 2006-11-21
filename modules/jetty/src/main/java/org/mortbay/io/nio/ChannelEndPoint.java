@@ -166,8 +166,8 @@ public class ChannelEndPoint implements EndPoint
                 }
                 finally
                 {
-                    if (!buffer.isImmutable())
-                        buffer.setGetIndex(bbuf.position());
+                    if (len>0)
+                        buffer.skip(len);
                     bbuf.position(0);
                     bbuf.limit(bbuf.capacity());
                 }
@@ -177,14 +177,13 @@ public class ChannelEndPoint implements EndPoint
         {
             ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
             len=_channel.write(b);
-            if (!buffer.isImmutable())
-                buffer.setGetIndex(b.position());
+            if (len>0)
+                buffer.skip(len);
         }
         else
         {
             throw new IOException("Not Implemented");
         }
-        
         return len;
     }
 
@@ -238,6 +237,17 @@ public class ChannelEndPoint implements EndPoint
 
                                 // do the gathering write.
                                 length=(int)((GatheringByteChannel)_channel).write(_gather2);
+                                
+                                int hl=header.length();
+                                if (length>hl)
+                                {
+                                    header.clear();
+                                    buffer.skip(length-hl);
+                                }
+                                else if (length>0)
+                                {
+                                    header.skip(length);
+                                }
                             }
                         }
                         else
@@ -261,6 +271,24 @@ public class ChannelEndPoint implements EndPoint
                                         _gather3[2]=bbuf2;
                                         // do the gathering write.
                                         length=(int)((GatheringByteChannel)_channel).write(_gather3);
+                                        
+                                        int hl=header.length();
+                                        int bl=buffer.length();
+                                        if (length>hl+bl)
+                                        {
+                                            header.clear();
+                                            buffer.clear();
+                                            trailer.skip(length-hl-bl);
+                                        }
+                                        else if (length>hl)
+                                        {
+                                            header.clear();
+                                            buffer.skip(length-hl);
+                                        }
+                                        else if (length>0)
+                                        {
+                                            header.skip(length);
+                                        }
                                     }
                                 }
                                 finally
