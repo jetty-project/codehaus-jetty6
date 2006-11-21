@@ -24,26 +24,26 @@ import org.mortbay.io.View;
  */
 public class Ajp13RequestPacket
 {
-    private Buffer _buffer;
-    private View _tok0=new View();
+//    private Buffer _buffer;
+//    private View _tok0=new View();
    
-    public void setBuffer(Buffer buffer)
-    {
-        _buffer=buffer;
-        reset();
-    }
+//    public void setBuffer(Buffer buffer)
+//    {
+//        _buffer=buffer;
+//        reset();
+//    }
 
-    public boolean isEmpty()
+    public boolean isEmpty(Buffer _buffer)
     {
         return _buffer.length()==0;
     }
     
-    public int getInt()
+    public int getInt(Buffer _buffer)
     {
         return ((_buffer.get()&0xFF)<<8)|(_buffer.get()&0xFF);
     }
 
-    public Buffer getString()
+    public Buffer getString(Buffer _buffer, View _tok0)
     {
         int len= ((_buffer.peek()&0xFF)<<8)|(_buffer.peek(_buffer.getIndex()+1)&0xFF);
         if (len==0xffff)
@@ -57,22 +57,22 @@ public class Ajp13RequestPacket
         return _tok0;
     }
     
-    public byte getByte()
+    public byte getByte(Buffer _buffer)
     {
         return _buffer.get();
     }
 
-    public boolean getBool()
+    public boolean getBool(Buffer _buffer)
     {
         return _buffer.get()>0;
     }
 
-    public Buffer getMethod()
+    public Buffer getMethod(Buffer _buffer)
     {
         return Ajp13PacketMethods.CACHE.get(_buffer.get());
     }
 
-    public Buffer getHeaderName()
+    public Buffer getHeaderName(Buffer _buffer, View _tok0)
     {
         int len= ((_buffer.peek()&0xFF)<<8)|(_buffer.peek(_buffer.getIndex()+1)&0xFF);
         if ((0xFF00&len)==0xA000)
@@ -88,16 +88,16 @@ public class Ajp13RequestPacket
     }
     
 
-    public Buffer get(int length)
+    public Buffer get(Buffer _buffer, int length)
     {
         return _buffer.get(length);
     }
     
-    public void reset()
-    {
-        _tok0.update(_buffer);
-        _tok0.update(0,0);
-    }
+//    public void reset()
+//    {
+//        _tok0.update(_buffer);
+//        _tok0.update(0,0);
+//    }
 
 
  
