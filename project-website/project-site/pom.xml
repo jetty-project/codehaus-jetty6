@@ -135,6 +135,15 @@
                     <include name="jspc-mojo.xml"/>
                   </fileset>
                 </copy>
+                <copy todir="${basedir}/target/site" overwrite="true">
+                  <fileset dir="${basedir}/../../modules/jetty/target/classes/org/mortbay/xml">
+                    <include name="*.dtd"/>
+                  </fileset>
+                </copy>
+                <copy file="${basedir}/target/site/configure_6_0.dtd" tofile="${basedir}/target/site/configure.dtd"/>
+                <copy file="${basedir}/target/site/configure_6_0.dtd" tofile="${basedir}/target/site/configure_1_0.dtd"/>
+                <copy file="${basedir}/target/site/configure_6_0.dtd" tofile="${basedir}/target/site/configure_1_1.dtd"/>
+                <copy file="${basedir}/target/site/configure_6_0.dtd" tofile="${basedir}/target/site/configure_1_2.dtd"/>
               </tasks>
             </configuration>
           </execution>
