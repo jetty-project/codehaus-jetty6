@@ -563,7 +563,6 @@ public class HttpGenerator extends AbstractGenerator
             {
                 int len = -1;
                 int to_flush = ((_header != null && _header.length() > 0)?4:0) | ((_buffer != null && _buffer.length() > 0)?2:0) | ((_bypass && _content != null && _content.length() > 0)?1:0);
-                
                 switch (to_flush)
                 {
                     case 7:
