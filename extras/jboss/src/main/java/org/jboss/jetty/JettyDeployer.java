@@ -88,9 +88,10 @@ public class JettyDeployer extends AbstractWebDeployer
             Manager manager = (Manager) getDistributableSessionManagerPrototype();
             if (manager != null)
             {
-                app.setDistributableSessionManager((Manager) manager.clone());
-                if (getForceDistributable())
-                    app.setDistributable(true);
+                throw new UnsupportedOperationException("NOT IMPLEMENTED - please ask"); 
+//                app.setDistributableSessionManager((Manager) manager.clone());
+//                if (getForceDistributable())
+//                    app.setDistributable(true);
             }
 
             // if a different webdefault.xml file has been provided, use it
@@ -214,7 +215,8 @@ public class JettyDeployer extends AbstractWebDeployer
     
     public void setDistributableSessionManagerPrototype(SessionManager manager)
     {
-        _distributableSessionManagerPrototype = manager;
+        throw new UnsupportedOperationException("NOT SUPPORTED - please ask");
+//        _distributableSessionManagerPrototype = manager;
     }
 
     public SessionManager getDistributableSessionManagerPrototype()
