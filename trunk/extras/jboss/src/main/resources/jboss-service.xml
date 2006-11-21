@@ -84,6 +84,9 @@
       </New>
     </Set>
 
+    <!-- =========================================================== -->
+    <!-- Connectors.                                                 -->
+    <!-- =========================================================== -->
     <Call name="addConnector">
       <Arg>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
