@@ -279,6 +279,7 @@ public class RandomConnector extends AbstractNIOConnector
             buffer.put(temp);
             temp.reset();
             System.err.print(temp);
+            buffer.skip(len);
             return len;
         }
 

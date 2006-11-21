@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.mortbay.log.Log;
+
 
 /* ------------------------------------------------------------ */
 /** Handles coding of MIME  "x-www-form-urlencoded".
@@ -596,6 +598,8 @@ public class UrlEncoded extends MultiMap
         }
         catch (UnsupportedEncodingException e)
         {
+            Log.warn(e.toString());
+            Log.debug(e);
             return new String(bytes,0,n);
         }
         
