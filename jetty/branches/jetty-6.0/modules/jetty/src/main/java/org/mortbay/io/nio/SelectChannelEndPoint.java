@@ -1,4 +1,4 @@
-package org.mortbay.jetty.nio;
+package org.mortbay.io.nio;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -6,58 +6,81 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.Connection;
+import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.EofException;
-import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpException;
-import org.mortbay.jetty.nio.SelectChannelConnector.RetryContinuation;
-import org.mortbay.jetty.nio.SelectChannelConnector.SelectChannelEndPoint;
-import org.mortbay.jetty.nio.SelectChannelConnector.SelectSet;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
+import org.omg.CORBA.SystemException;
 
-public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnable
+/* ------------------------------------------------------------ */
+/**
+ * An Endpoint that can be scheduled by {@link SelectorManager}.
+ * 
+ * @author gregw
+ *
+ */
+public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
 {
-    public SelectSet _selectSet;
-    private boolean _dispatched = false;
-    protected boolean _writable = true; // TODO - get rid of this bad side effect
+    protected SelectorManager _manager;
+    protected SelectorManager.SelectSet _selectSet;
+    protected boolean _dispatched = false;
+    protected boolean _writable = true; 
     protected SelectionKey _key;
-    private int _interestOps;
-    private int _readBlocked;
-    private int _writeBlocked;
+    protected int _interestOps;
+    protected boolean _readBlocked;
+    protected boolean _writeBlocked;
+    protected Connection _connection;
 
-    private HttpChannelEndPoint.IdleTask _timeoutTask = new IdleTask();
+    private Timeout.Task _timeoutTask = new IdleTask();
 
-    /* ------------------------------------------------------------ */
-    public HttpChannelEndPoint(SelectChannelConnector connector, SocketChannel channel, SelectSet selectSet, SelectionKey key)
+    public Connection getConnection()
     {
-        super(connector,channel);
+        return _connection;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public SelectChannelEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
+    {
+        super(channel);
+
+        _manager = selectSet.getManager();
         _selectSet = selectSet;
-        _connector = connector;
-        _connection = new HttpConnection(connector, this, connector.getServer());
-        connectionOpened();
+        _connection = _manager.newConnection(channel,this);
+        
+        _manager.endPointOpened(this); // TODO not here!
+        
         _key = key;
-        _key.attach(this);
-        _selectSet.scheduleIdle(_timeoutTask, _connection.isIdle());
+        _key.attach(this); // TODO not here!
+        
     }
 
+    
     /* ------------------------------------------------------------ */
     /**
-     * Dispatch the endpoint by arranging for a thread to service it. Either a blocked thread is
-     * woken up or the endpoint is passed to the server job queue. If the thread is dispatched and
-     * then the selection key is modified so that it is no longer selected.
+     * Put the endpoint into the dispatched state.
+     * A blocked thread may be woken up by this call, or the endpoint placed in a state ready
+     * for a dispatch to a threadpool.
+     * @param assumeShortDispatch If true, the interested ops are not modified.
+     * @return True if the endpoint should be dispatched to a thread pool.
+     * @throws IOException
      */
     public boolean dispatch(boolean assumeShortDispatch) throws IOException
     {
-        _selectSet.scheduleIdle(_timeoutTask, _connection.isIdle());
-
         // If threads are blocked on this
         synchronized (this)
         {
-            if (_readBlocked > 0 || _writeBlocked > 0)
+            if (_readBlocked || _writeBlocked)
             {
+                if (_readBlocked && _key.isReadable())
+                    _readBlocked=false;
+                if (_writeBlocked && _key.isWritable())
+                    _writeBlocked=false;
+
                 // wake them up is as good as a dispatched.
                 this.notifyAll();
-
+                
                 // we are not interested in further selecting
                 _key.interestOps(0);
                 return false;
@@ -92,6 +115,18 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
     }
 
     /* ------------------------------------------------------------ */
+    protected void scheduleIdle()
+    {
+        _selectSet.scheduleIdle(_timeoutTask);
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void cancelIdle()
+    {
+        _selectSet.cancelIdle(_timeoutTask);
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * Called when a dispatched thread is no longer handling the endpoint. The selection key
      * operations are updated.
@@ -107,8 +142,6 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
                 if (getChannel().isOpen())
                 {
                     updateKey();
-                    if (_connection.isIdle())
-                        _selectSet.scheduleIdle(_timeoutTask, true);
                 }
             }
             catch (Exception e)
@@ -155,63 +188,80 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
     /* ------------------------------------------------------------ */
     public boolean isOpen()
     {
-        return super.isOpen() && _key.isValid();
+        SelectionKey key=_key;
+        return super.isOpen() && key!=null && key.isValid();
     }
 
     /* ------------------------------------------------------------ */
     /*
      * Allows thread to block waiting for further events.
      */
-    public void blockReadable(long timeoutMs)
+    public boolean blockReadable(long timeoutMs) throws IOException
     {
         synchronized (this)
         {
-            if (isOpen())
-            {
-                try
+            long start=_selectSet.getNow();
+            try
+            {   
+                _readBlocked=true;
+                while (isOpen() && _readBlocked)
                 {
-                    _readBlocked++;
-                    updateKey();
-                    this.wait(timeoutMs);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-                finally
-                {
-                    _readBlocked--;
+                    try
+                    {
+                        updateKey();
+                        this.wait(timeoutMs);
+
+                        if (_readBlocked && timeoutMs<(_selectSet.getNow()-start))
+                            return false;
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
             }
+            finally
+            {
+                _readBlocked=false;
+            }
         }
+        return true;
     }
 
     /* ------------------------------------------------------------ */
     /*
      * Allows thread to block waiting for further events.
      */
-    public void blockWritable(long timeoutMs)
+    public boolean blockWritable(long timeoutMs) throws IOException
     {
         synchronized (this)
         {
-            if (isOpen())
-            {
-                try
+            long start=_selectSet.getNow();
+            try
+            {   
+                _writeBlocked=true;
+                while (isOpen() && _writeBlocked)
                 {
-                    _writeBlocked++;
-                    updateKey();
-                    this.wait(timeoutMs);
-                }
-                catch (InterruptedException e)
-                {
-                    Log.ignore(e);
-                }
-                finally
-                {
-                    _writeBlocked--;
+                    try
+                    {
+                        updateKey();
+                        this.wait(timeoutMs);
+
+                        if (_writeBlocked && timeoutMs<(_selectSet.getNow()-start))
+                            return false;
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
             }
+            finally
+            {
+                _writeBlocked=false;
+            }
         }
+        return true;
     }
 
     /* ------------------------------------------------------------ */
@@ -225,7 +275,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
         synchronized (this)
         {
             int ops = _key == null ? 0 : _key.interestOps();
-            _interestOps = ops | ((!_dispatched || _readBlocked > 0) ? SelectionKey.OP_READ : 0) | ((!_writable || _writeBlocked > 0) ? SelectionKey.OP_WRITE : 0);
+            _interestOps = ops | ((!_dispatched || _readBlocked) ? SelectionKey.OP_READ : 0) | ((!_writable || _writeBlocked) ? SelectionKey.OP_WRITE : 0);
             _writable = true; // Once writable is in ops, only removed with dispatch.
 
             if (_interestOps != ops)
@@ -251,7 +301,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
                 else
                 {
                     _key.cancel();
-                    connectionClosed();
+                    _manager.endPointClosed(this);
                     _key = null;
                 }
             }
@@ -293,18 +343,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
         }
         finally
         {
-            RetryContinuation continuation = (RetryContinuation) _connection.getRequest().getContinuation();
-            if (continuation != null)
-            {
-                // We have a continuation
-                Log.debug("continuation {}", continuation);
-                if (!continuation.schedule())
-                    undispatch();
-            }
-            else
-            {
-                undispatch();
-            }
+            undispatch();
         }
     }
 
@@ -314,15 +353,14 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
      */
     public void close() throws IOException
     {
-        if (_key != null)
+        synchronized (this)
         {
-            _key.cancel();
+            if (_key != null)
+            {
+                _key.cancel();
+            }
+            _key = null;
         }
-        _key = null;
-        _selectSet.cancelIdle(_timeoutTask);
-        RetryContinuation continuation = (RetryContinuation) _connection.getRequest().getContinuation();
-        if (continuation != null && continuation.isPending())
-            continuation.reset();
         
         try
         {
@@ -342,7 +380,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
     }
 
     /* ------------------------------------------------------------ */
-    public HttpChannelEndPoint.IdleTask getTimeoutTask()
+    public Timeout.Task getTimeoutTask()
     {
         return _timeoutTask;
     }
@@ -356,7 +394,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class IdleTask extends Timeout.Task // implements HttpChannelEndPointIdleTask
+    public class IdleTask extends Timeout.Task 
     {
         /* ------------------------------------------------------------ */
         /*
@@ -376,7 +414,7 @@ public class HttpChannelEndPoint extends SelectChannelEndPoint implements Runnab
 
         public String toString()
         {
-            return "TimeoutTask:" + HttpChannelEndPoint.this.toString();
+            return "TimeoutTask:" + SelectChannelEndPoint.this.toString();
         }
 
     }

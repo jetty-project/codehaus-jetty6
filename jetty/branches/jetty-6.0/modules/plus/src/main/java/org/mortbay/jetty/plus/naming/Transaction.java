@@ -57,7 +57,7 @@ public class Transaction extends NamingEntry
     {   
         InitialContext ic = new InitialContext();
         Context env = (Context)ic.lookup("java:comp");
-        Log.info("Binding java:comp/"+getJndiName()+" to "+absoluteObjectNameString);
+        Log.debug("Binding java:comp/"+getJndiName()+" to "+absoluteObjectNameString);
         NamingUtil.bind(env, getJndiName(), new LinkRef(absoluteObjectNameString));
     }
     
@@ -70,7 +70,7 @@ public class Transaction extends NamingEntry
         {
             InitialContext ic = new InitialContext();
             Context env = (Context)ic.lookup("java:comp");
-            Log.info("Unbinding java:comp/"+getJndiName());
+            Log.debug("Unbinding java:comp/"+getJndiName());
             env.unbind(getJndiName());
         }
         catch (NamingException e)

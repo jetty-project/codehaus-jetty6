@@ -37,6 +37,7 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     private WebAppContext context;
     private File webAppDir;
     private File webXmlFile;
+    private File overrideWebXmlFile;
     private File jettyEnvXmlFile;
     private List classpathFiles;
     private Configuration[] configurations = {new WebInfConfiguration(), new EnvConfiguration(), new Jetty6MavenConfiguration(), new JettyWebXmlConfiguration(), new Jetty6MavenTagLibConfiguration()};
@@ -83,6 +84,14 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
             context.setDefaultsDescriptor(webDefaultXml.getCanonicalPath());
     }
     
+    
+    public void setOverrideWebXmlFile (File overrideWebXml)
+    throws Exception
+    {
+        this.overrideWebXmlFile = overrideWebXml;
+        if (overrideWebXml != null)
+            context.setOverrideDescriptor(overrideWebXml.getCanonicalPath());
+    }
     
     public void configure ()
     {        

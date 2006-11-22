@@ -39,7 +39,7 @@ public class NIOBuffer extends AbstractBuffer
   		DIRECT=true,
   		INDIRECT=false;
   	
-    private ByteBuffer _buf;
+    protected ByteBuffer _buf;
     private ReadableByteChannel _in;
     private WritableByteChannel _out;
 
@@ -175,8 +175,14 @@ public class NIOBuffer extends AbstractBuffer
     {
         return _buf;
     }
+    
+    
+    public void setByteBuffer(ByteBuffer buf)
+    {
+        this._buf = buf;
+    }
 
-
+    
     public int readFrom(InputStream in, int max) throws IOException
     {
         if (_in==null || !_in.isOpen())

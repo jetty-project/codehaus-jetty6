@@ -136,7 +136,7 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    void recycle()
+    protected void recycle()
     {
         _handled=false;
         if (_context!=null)
@@ -155,6 +155,7 @@ public class Request implements HttpServletRequest
         _queryString=null;
         _requestedSessionId=null;
         _requestedSessionIdFromCookie=false;
+        _session=null;
         _requestURI=null;
         _scheme=URIUtil.HTTP;
         _servletPath=null;
@@ -946,6 +947,9 @@ public class Request implements HttpServletRequest
      */
     public HttpSession getSession(boolean create)
     {
+        if (_sessionManager==null && create)
+            throw new IllegalStateException("No SessionHandler or SessionManager");
+        
         if (_session != null && _sessionManager!=null && _sessionManager.isValid(_session))
             return _session;
         
@@ -960,7 +964,7 @@ public class Request implements HttpServletRequest
                 return null;
         }
         
-        if (_session == null && _sessionManager!=null && create)
+        if (_session == null && _sessionManager!=null && create )
         {
             _session=_sessionManager.newHttpSession(this);
             Cookie cookie=_sessionManager.getSessionCookie(_session,getContextPath(),isSecure());
@@ -1104,6 +1108,9 @@ public class Request implements HttpServletRequest
     public void setAttribute(String name, Object value)
     {
         Object old_value=_attributes==null?null:_attributes.getAttribute(name);
+        
+        if ("org.mortbay.jetty.Request.queryEncoding".equals(name))
+            setQueryEncoding(value==null?null:value.toString());
         
         if (_attributes==null)
             _attributes=new AttributesMap();
@@ -1600,14 +1607,26 @@ public class Request implements HttpServletRequest
         _userRealm = userRealm;
     }
 
+    /* ------------------------------------------------------------ */
     public String getQueryEncoding()
     {
         return _queryEncoding;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set the character encoding used for the query string.
+     * This call will effect the return of getQueryString and getParamaters.
+     * It must be called before any geParameter methods.
+     * 
+     * The request attribute "org.mortbay.jetty.Request.queryEncoding"
+     * may be set as an alternate method of calling setQueryEncoding.
+     * 
+     * @param queryEncoding
+     */
     public void setQueryEncoding(String queryEncoding)
     {
         _queryEncoding=queryEncoding;
+        _queryString=null;
     }
 }
 

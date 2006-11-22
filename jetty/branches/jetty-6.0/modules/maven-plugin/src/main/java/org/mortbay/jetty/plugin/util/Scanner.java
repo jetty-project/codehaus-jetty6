@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -187,7 +188,7 @@ public class Scanner extends Thread
 	    if ((roots == null) || (roots.isEmpty()))
 	        return Collections.EMPTY_MAP;
 	    
-	    HashMap scanInfoMap = new HashMap();	
+	    LinkedHashMap scanInfoMap = new LinkedHashMap();	
 	    Iterator itor = roots.iterator();
 	    while (itor.hasNext())
 	    {

@@ -18,6 +18,7 @@ package org.mortbay.io;
 import java.io.IOException;
 
 
+
 /**
  * @author gregw
  * A transport EndPoint
@@ -114,15 +115,40 @@ public interface EndPoint
     public boolean isBlocking();
     
     /* ------------------------------------------------------------ */
-    public void blockReadable(long millisecs);
+    public boolean isBufferred();
+    
+    /* ------------------------------------------------------------ */
+    public boolean blockReadable(long millisecs) throws IOException;
 
     /* ------------------------------------------------------------ */
-    public void blockWritable(long millisecs);
+    public boolean blockWritable(long millisecs) throws IOException;
 
     /* ------------------------------------------------------------ */
     public boolean isOpen();
 
     /* ------------------------------------------------------------ */
-    public Object getConnection();
+    /**
+     * @return The underlying transport object (socket, channel, etc.)
+     */
+    public Object getTransport();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if the endpoint has some buffered input data
+     */
+    public boolean isBufferingInput();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if the endpoint has some buffered output data
+     */
+    public boolean isBufferingOutput();
+    
+    /* ------------------------------------------------------------ */
+    /** Flush any buffered output.
+     * May fail to write all data if endpoint is non-blocking
+     * @throws IOException 
+     */
+    public void flush() throws IOException;
     
 }

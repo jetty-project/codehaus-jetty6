@@ -55,6 +55,7 @@ public class WebAppClassLoader extends URLClassLoader implements Cloneable
     /** Constructor.
      */
     public WebAppClassLoader(WebAppContext context)
+        throws IOException
     {
         this(null,context);
     }
@@ -63,6 +64,7 @@ public class WebAppClassLoader extends URLClassLoader implements Cloneable
     /** Constructor.
      */
     public WebAppClassLoader(ClassLoader parent, WebAppContext context)
+        throws IOException
     {
         super(new URL[]{},parent!=null?parent
                 :(Thread.currentThread().getContextClassLoader()!=null?Thread.currentThread().getContextClassLoader()
@@ -72,6 +74,9 @@ public class WebAppClassLoader extends URLClassLoader implements Cloneable
         _context=context;
         if (_parent==null)
             throw new IllegalArgumentException("no parent classloader!");
+        
+        if (context.getExtraClasspath()!=null)
+            addClassPath(context.getExtraClasspath());
     }
     
     /* ------------------------------------------------------------ */

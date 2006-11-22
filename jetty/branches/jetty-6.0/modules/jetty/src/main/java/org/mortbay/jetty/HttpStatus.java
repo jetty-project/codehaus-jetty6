@@ -193,8 +193,8 @@ public class HttpStatus
             bytes[versionLength+3]=(byte)('0'+(i%10));
             bytes[versionLength+4]=' ';
             reason.peek(0, bytes, versionLength+5, reason.length());
-            bytes[versionLength+5+reason.length()]=HttpParser.CARRIAGE_RETURN;
-            bytes[versionLength+6+reason.length()]=HttpParser.LINE_FEED;
+            bytes[versionLength+5+reason.length()]=HttpTokens.CARRIAGE_RETURN;
+            bytes[versionLength+6+reason.length()]=HttpTokens.LINE_FEED;
             __responseLine[i]=new ByteArrayBuffer(bytes,0,bytes.length,Buffer.IMMUTABLE);
         }
     }

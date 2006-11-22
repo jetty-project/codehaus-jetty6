@@ -402,6 +402,13 @@ public class HttpURI
         return StringUtil.toString(_raw,_path,_query-_path,URIUtil.__CHARSET);
     }
     
+    public String getCompletePath()
+    {
+        if (_path==_end)
+            return null;
+        return StringUtil.toString(_raw,_path,_end-_path,URIUtil.__CHARSET);
+    }
+    
     public String getParam()
     {
         if (_param==_query)
@@ -420,7 +427,7 @@ public class HttpURI
     {
         if (_query==_fragment)
             return null;
-        return StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding);
+        return StringUtil.toString(_raw,_query+1,_fragment-_query-1,encoding==null?URIUtil.__CHARSET:encoding);
     }
     
     public String getFragment()

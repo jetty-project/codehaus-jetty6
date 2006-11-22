@@ -20,6 +20,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.UnavailableException;
+
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.log.Log;
 import org.mortbay.util.Loader;
@@ -59,9 +61,23 @@ public class Holder extends AbstractLifeCycle implements Serializable
     public void doStart()
         throws Exception
     {
+        //if no class already loaded and no classname, make servlet permanently unavailable
+        if (_class==null && (_className==null || _className.equals("")))
+            throw new UnavailableException("No class for Servlet or Filter", -1);
+        
+        //try to load class
         if (_class==null)
-            _class=Loader.loadClass(Holder.class, _className);
-        if(Log.isDebugEnabled())Log.debug("Holding {}",_class);
+        {
+            try
+            {
+                _class=Loader.loadClass(Holder.class, _className);
+                if(Log.isDebugEnabled())Log.debug("Holding {}",_class);
+            }
+            catch (Exception e)
+            {
+                throw new UnavailableException(e.getMessage(), -1);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -86,7 +102,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     public String getDisplayName()
     {
-        return _name;
+        return _displayName;
     }
 
     /* ---------------------------------------------------------------- */
@@ -159,7 +175,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     public void setDisplayName(String name)
     {
-        _name=name;
+        _displayName=name;
     }
     
     /* ------------------------------------------------------------ */

@@ -15,8 +15,10 @@
 package org.mortbay.management;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -30,6 +32,7 @@ import org.mortbay.component.Container;
 import org.mortbay.component.Container.Relationship;
 import org.mortbay.log.Log;
 import org.mortbay.log.Logger;
+import org.mortbay.util.MultiMap;
 import org.mortbay.util.TypeUtil;
 
 public class MBeanContainer implements Container.Listener
@@ -38,6 +41,9 @@ public class MBeanContainer implements Container.Listener
     private volatile int _managementPort;
     private final WeakHashMap _beans = new WeakHashMap();
     private final HashMap _unique = new HashMap();
+    private String _domain = null;
+    private MultiMap _relations = new MultiMap();
+    
 
     public synchronized ObjectName findMBean(Object object)
     {
@@ -63,6 +69,22 @@ public class MBeanContainer implements Container.Listener
         Logger log = Log.getLog();
         if (log!=null)
             addBean(log);
+    }
+    
+    public MBeanServer getMBeanServer()
+    {
+        return _server;
+    }
+    
+    
+    public void setDomain (String domain)
+    {
+        _domain =domain;
+    }
+    
+    public String getDomain()
+    {
+        return _domain;
     }
     
     public void setManagementPort(int port)
@@ -102,26 +124,54 @@ public class MBeanContainer implements Container.Listener
         }
     }
 
-    public synchronized void add(Relationship event)
+    public synchronized void add(Relationship relationship)
     {
-        ObjectName parent=(ObjectName)_beans.get(event.getParent());
+        ObjectName parent=(ObjectName)_beans.get(relationship.getParent());
         if (parent==null)
-            addBean(event.getParent());
+        {
+            addBean(relationship.getParent());
+            parent=(ObjectName)_beans.get(relationship.getParent());
+        }
         
-        ObjectName child=(ObjectName)_beans.get(event.getChild());
+        ObjectName child=(ObjectName)_beans.get(relationship.getChild());
         if (child==null)
-            addBean(event.getChild());
+        {
+            addBean(relationship.getChild());
+            child=(ObjectName)_beans.get(relationship.getChild());
+        }
+        
+        if (parent!=null && child!=null)
+            _relations.add(parent,relationship);
+        
+        
     }
 
-    public synchronized void remove(Relationship event)
+    public synchronized void remove(Relationship relationship)
     {
+        ObjectName parent=(ObjectName)_beans.get(relationship.getParent());
+        ObjectName child=(ObjectName)_beans.get(relationship.getChild());
+        if (parent!=null && child!=null)
+            _relations.removeValue(parent,relationship);
     }
 
     public synchronized void removeBean(Object obj)
     {
         ObjectName bean=(ObjectName)_beans.get(obj);
+
         if (bean!=null)
         {
+            List r=_relations.getValues(bean);
+            if (r!=null && r.size()>0)
+            {
+                Log.debug("Unregister {}", r);
+                Iterator iter = new ArrayList(r).iterator();
+                while (iter.hasNext())
+                {
+                    Relationship rel = (Relationship)iter.next();
+                    rel.getContainer().update(rel.getParent(),rel.getChild(),null,rel.getRelationship(),true);
+                }
+            }
+            
             try
             {
                 _server.unregisterMBean(bean);
@@ -149,19 +199,32 @@ public class MBeanContainer implements Container.Listener
             if (mbean == null)
                 return;
 
+            ObjectName oname = null;
             if (mbean instanceof ObjectMBean)
+            {
                 ((ObjectMBean) mbean).setMBeanContainer(this);
+                oname = ((ObjectMBean)mbean).getObjectName();
+            }
             
-            String name = obj.getClass().getName().toLowerCase();
-            int dot = name.lastIndexOf('.');
-            if (dot >= 0)
-                name = name.substring(dot + 1);
-            Integer count = (Integer) _unique.get(name);
-            count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
-            _unique.put(name, count);
+            //no override mbean object name, so make a generic one
+            if (oname == null)
+            {
+                String name = obj.getClass().getName().toLowerCase();
+                int dot = name.lastIndexOf('.');
+                if (dot >= 0)
+                    name = name.substring(dot + 1);
+                Integer count = (Integer) _unique.get(name);
+                count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
+                _unique.put(name, count);
 
-            String domain=obj.getClass().getPackage().getName();
-            ObjectName oname = ObjectName.getInstance(domain+":type="+name+",id="+count);
+                //if no explicit domain, create one
+                String domain = _domain;
+                if (domain==null)
+                    domain = obj.getClass().getPackage().getName();
+
+                oname = ObjectName.getInstance(domain+":type="+name+",id="+count);
+            }
+            
             
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
             Log.debug("Registered {}" , oinstance.getObjectName());

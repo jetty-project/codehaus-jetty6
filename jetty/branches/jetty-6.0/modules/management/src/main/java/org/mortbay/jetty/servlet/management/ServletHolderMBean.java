@@ -24,9 +24,4 @@ public class ServletHolderMBean extends ObjectMBean
     {
         super(managedObject);
     }
-    
-    public ObjectName getJSR77()
-    {
-        return null;
-    }
 }

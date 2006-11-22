@@ -40,6 +40,14 @@ import org.mortbay.jetty.plugin.util.Scanner;
 public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
 {
 
+    /**
+     * If true, the &lt;testOutputDirectory&gt;
+     * and the dependencies of &lt;scope&gt;test&lt;scope&gt;
+     * will be put first on the runtime classpath.
+     * @parameter default-value="false"
+     */
+    private boolean useTestClasspath;
+    
     
     /**
      * The location of a jetty-env.xml file. Optional.
@@ -63,6 +71,16 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      * 
      */
     private File classesDirectory;
+    
+    
+    
+    /**
+     * The directory containing generated test classes.
+     * 
+     * @parameter expression="${project.build.testOutputDirectory}"
+     * @required
+     */
+    private File testClassesDirectory;
     
     /**
      * Root directory for all html/jsp etc files
@@ -371,8 +389,9 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         {
             Artifact artifact = (Artifact) iter.next();
             
-            // Include runtime and compile time libraries
-            if (!Artifact.SCOPE_TEST.equals( artifact.getScope()) )
+            // Include runtime and compile time libraries, and possibly test libs too
+            if ((!Artifact.SCOPE_TEST.equals( artifact.getScope())) ||
+                (useTestClasspath && Artifact.SCOPE_TEST.equals( artifact.getScope())))
             {
                 dependencyFiles.add(artifact.getFile());
                 getLog().debug( "Adding artifact " + artifact.getFile().getName() + " for WEB-INF/lib " );   
@@ -387,12 +406,24 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     private List setUpClassPath()
     {
         List classPathFiles = new ArrayList();       
+        
+        //if using the test classes, make sure they are first
+        //on the list
+        if (useTestClasspath && (testClassesDirectory != null))
+            classPathFiles.add(testClassesDirectory);
+        
         if (getClassesDirectory() != null)
             classPathFiles.add(getClassesDirectory());
+        
+        //now add all of the dependencies
         classPathFiles.addAll(getDependencyFiles());
-        for (int i = 0; i < classPathFiles.size(); i++)
+        
+        if (getLog().isDebugEnabled())
         {
-            getLog().debug("classpath element: "+ ((File) classPathFiles.get(i)).getName());
+            for (int i = 0; i < classPathFiles.size(); i++)
+            {
+                getLog().debug("classpath element: "+ ((File) classPathFiles.get(i)).getName());
+            }
         }
         return classPathFiles;
     }

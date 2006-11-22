@@ -155,11 +155,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     {
         if (_errorHandler!=null)
         {
-            if (getServer()!=null && getServer()!=server)
-                getServer().getContainer().update(this, _errorHandler, null, "error");
+            Server old_server=getServer();
+            if (old_server!=null && old_server!=server)
+                old_server.getContainer().update(this, _errorHandler, null, "error",true);
             super.setServer(server); 
-            if (server!=null && server!=getServer())
-                server.getContainer().update(this, null, _errorHandler, "error");
+            if (server!=null && server!=old_server)
+                server.getContainer().update(this, null, _errorHandler, "error",true);
             _errorHandler.setServer(server); 
         }
         else
@@ -496,7 +497,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 current_thread.setContextClassLoader(old_classloader);
         }
 
-        _contextAttributes.clearAttributes();
+        if (_contextAttributes!=null)
+            _contextAttributes.clearAttributes();
         _contextAttributes=null;
     }
     
@@ -879,14 +881,15 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         if (errorHandler!=null)
             errorHandler.setServer(getServer());
         if (getServer()!=null)
-            getServer().getContainer().update(this, _errorHandler, errorHandler, "errorHandler");
+            getServer().getContainer().update(this, _errorHandler, errorHandler, "errorHandler",true);
         _errorHandler = errorHandler;
     }
 
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "ContextHandler@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getBaseResource()+"}";
+        
+        return this.getClass().getName()+"@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getBaseResource()+"}";
     }
 
     /* ------------------------------------------------------------ */

@@ -59,7 +59,7 @@ public class Configuration extends AbstractConfiguration
             InitialContext ic = new InitialContext();
             Context envCtx = (Context)ic.lookup("java:comp/env");
             NamingUtil.bind(envCtx, name, value);
-            Log.info("Bound java:comp/env/"+name+"="+value);  
+            Log.debug("Bound java:comp/env/"+name+"="+value);  
         }
     }
 
@@ -80,7 +80,7 @@ public class Configuration extends AbstractConfiguration
         {
             //no locally scoped overrides, so bind the global one
             resource.bindToEnv();
-            Log.info("Bound resourceref java:comp/env/"+name);
+            Log.debug("Bound resourceref java:comp/env/"+name);
         }
         else
         {
@@ -103,7 +103,7 @@ public class Configuration extends AbstractConfiguration
         if (resource != null)
         {
             resource.bindToEnv();
-            Log.info("Bound resource-env-ref java:comp/env/"+name);
+            Log.debug("Bound resource-env-ref java:comp/env/"+name);
         }
         else
             Log.warn("No resource to bind matching name="+name);
@@ -124,7 +124,7 @@ public class Configuration extends AbstractConfiguration
         if (transaction != null)
         {
             transaction.bindToEnv();
-            Log.info("Bound UserTransaction to java:comp/"+transaction.getJndiName());
+            Log.debug("Bound UserTransaction to java:comp/"+transaction.getJndiName());
         }
     }
     

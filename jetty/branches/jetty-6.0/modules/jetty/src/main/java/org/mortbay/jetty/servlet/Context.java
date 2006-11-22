@@ -22,6 +22,7 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.security.SecurityHandler;
 
+
 /* ------------------------------------------------------------ */
 /** Servlet Context.
  * This conveniance extention to the ContextHandler allows for
@@ -114,7 +115,6 @@ public class Context extends ContextHandler
         
     }    
     
-    
     /* ------------------------------------------------------------ */
     /**
      * @see org.mortbay.jetty.handler.ContextHandler#startContext()
@@ -190,16 +190,16 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     /** conveniance method to add a filter
      */
-    public void addFilter(Class filterClass,String pathSpec,int dispatches)
+    public FilterHolder addFilter(Class filterClass,String pathSpec,int dispatches)
     {
-        _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
+        return _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
 
     /* ------------------------------------------------------------ */
     /** conveniance method to add a filter
      */
-    public void addFilter(String filterClass,String pathSpec,int dispatches)
+    public FilterHolder addFilter(String filterClass,String pathSpec,int dispatches)
     {
-        _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
+        return _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
 }
