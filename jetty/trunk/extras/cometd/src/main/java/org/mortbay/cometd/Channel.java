@@ -132,8 +132,8 @@ public class Channel
      */
     public String getToken(Client client, boolean subscribe, boolean send, boolean oneTime)
     {
-        String token=Long.toString(_bayeux.getRandom(),36);
-        // TODO register somewher
+        String token=Long.toString(_bayeux.getRandom(client.hashCode()),36);
+        // TODO register somewhere ?
         return token;
     }
     
