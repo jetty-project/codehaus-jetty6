@@ -1,6 +1,5 @@
 //========================================================================
 // Parts Copyright 2006 Mort Bay Consulting Pty. Ltd.
-// Parts Copyright 2006 Jeanfrancois Arcand
 //------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
