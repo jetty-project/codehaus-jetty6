@@ -48,7 +48,7 @@ jetty-6.0.2 - 22 November 2006
     + Simplified ResourceCache and Default servlet
     + SocketConnector closes all connections in doStop
     + Upgraded session ID generation to use SecureRandom
-
+    + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
 
 jetty-6.0.1 - 24 September 2006
     + fixed isUserInRole checking for JAASUserRealm
