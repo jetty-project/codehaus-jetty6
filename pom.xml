@@ -82,6 +82,13 @@
       <email>ngonzalez@exist.com</email>
       <organization />
     </developer>
+    <developer>
+      <id>jfarcand</id>
+      <name>Jeanfrancois Arcand</name>
+      <email>jfarcand@apache.org</email>
+      <organization>Sun Microsystems</organization>
+      <organizationUrl>http://www.sun.com</organizationUrl>
+    </developer>
   </developers>
   <licenses>
     <license>
