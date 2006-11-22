@@ -15,6 +15,7 @@
 package org.mortbay.cometd;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -54,7 +55,7 @@ public class Bayeux
     HashMap _clients=new HashMap();
     ServletContext _context;
     DateCache _dateCache=new DateCache();
-    Random _random=new Random(System.currentTimeMillis());
+    Random _random;
     HashMap _handlers=new HashMap();
     HashMap _transports=new HashMap();
     HashMap _filters=new java.util.HashMap();
@@ -80,6 +81,16 @@ public class Bayeux
     Bayeux(ServletContext context)
     {
         _context=context;
+        try 
+        {
+            _random=SecureRandom.getInstance("SHA1PRNG");
+        }
+        catch (Exception e)
+        {
+            context.log("Could not get secure random for ID generation",e);
+            _random=new Random();
+        }
+        _random.setSeed(_random.nextLong()^hashCode()^(context.hashCode()<<32)^Runtime.getRuntime().freeMemory());
     }
 
     /* ------------------------------------------------------------ */
@@ -248,9 +259,9 @@ public class Bayeux
     }
 
     /* ------------------------------------------------------------ */
-    long getRandom()
+    long getRandom(long variation)
     {
-        long l=_random.nextLong();
+        long l=_random.nextLong()^variation;
         return l<0?-l:l;
     }
 
@@ -465,9 +476,9 @@ public class Bayeux
             // select a random channel ID if none specifified
             if (channel_id==null)
             {
-                channel_id=Long.toString(getRandom(),36);
+                channel_id=Long.toString(getRandom(message.hashCode()^client.hashCode()),36);
                 while (getChannel(channel_id)!=null)
-                    channel_id=Long.toString(getRandom(),36);
+                    channel_id=Long.toString(getRandom(message.hashCode()^client.hashCode()),36);
             }
 
             // get the channel (or create if permitted)

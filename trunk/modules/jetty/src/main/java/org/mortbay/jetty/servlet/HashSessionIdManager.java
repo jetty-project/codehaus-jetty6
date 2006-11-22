@@ -14,6 +14,8 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +24,7 @@ import javax.servlet.http.HttpSession;
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
+import org.mortbay.log.Log;
 import org.mortbay.util.MultiMap;
 
 /* ------------------------------------------------------------ */
@@ -30,10 +33,13 @@ import org.mortbay.util.MultiMap;
  */
 public class HashSessionIdManager extends AbstractLifeCycle implements SessionIdManager
 {
-    private final static String __NEW_SESSION_ID="org.mortbay.jetty.newSessionId";
+    private final static String __NEW_SESSION_ID="org.mortbay.jetty.newSessionId";  
+    protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
+    protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
 
     MultiMap _sessions;
     protected Random _random;
+    private boolean _weakRandom;
     private String _workerName;
 
     /* ------------------------------------------------------------ */
@@ -45,6 +51,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     public HashSessionIdManager(Random random)
     {
         _random=random;
+      
     }
 
     /* ------------------------------------------------------------ */
@@ -75,8 +82,27 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     protected void doStart()
     {
         if (_random==null)
-            _random=new Random();
-        _random.nextLong();
+        {      
+            try 
+            {
+                _random=SecureRandom.getInstance(SESSION_ID_RANDOM_ALGORITHM);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                try
+                {
+                    _random=SecureRandom.getInstance(SESSION_ID_RANDOM_ALGORITHM_ALT);
+                    _weakRandom=false;
+                }
+                catch (NoSuchAlgorithmException e_alt)
+                {
+                    Log.warn("Could not generate SecureRandom for session-id randomness",e);
+                    _random=new Random();
+                    _weakRandom=true;
+                }
+            }
+        }
+        _random.setSeed(_random.nextLong()^System.currentTimeMillis()^hashCode()^Runtime.getRuntime().freeMemory());
         _sessions=new MultiMap();
     }
 
@@ -145,11 +171,11 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     /* ------------------------------------------------------------ */
     /*
      * new Session ID. If the request has a requestedSessionID which is unique,
-     * that is used. The session ID is created as a unique random long,
-     * represented as in a base between 30 and 36, selected by timestamp. If the
-     * request has a jvmRoute attribute, that is appended as a worker tag, else
-     * any worker tag set on the manager is appended. @param request @param
-     * created @return Session ID.
+     * that is used. The session ID is created as a unique random long XORed with
+     * connection specific information, base 36.
+     * @param request 
+     * @param created 
+     * @return Session ID.
      */
     public String newSessionId(HttpServletRequest request, long created)
     {
@@ -169,15 +195,33 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
             String id=null;
             while (id==null||id.length()==0||idInUse(id))
             {
-                long r=_random.nextLong();
+                long r=_weakRandom
+                ?(hashCode()^Runtime.getRuntime().freeMemory()^_random.nextInt()^(((long)request.hashCode())<<32))
+                :_random.nextLong();
+                r^=created;
+                if (request!=null && request.getRemoteAddr()!=null)
+                    r^=request.getRemoteAddr().hashCode();
                 if (r<0)
                     r=-r;
-                id=Long.toString(r,30+(int)(created%7));
+                id=Long.toString(r,36);
             }
 
             request.setAttribute(__NEW_SESSION_ID,id);
             return id;
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    public Random getRandom()
+    {
+        return _random;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setRandom(Random random)
+    {
+        _random=random;
+        _weakRandom=false;
     }
 
 }
