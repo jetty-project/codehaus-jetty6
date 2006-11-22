@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
     + fixed NIO endpoint flush. Avoid duplicate sends
     + Upgraded session ID generation to use SecureRandom
     + Merged refactored AJP
