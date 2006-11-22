@@ -52,8 +52,8 @@ import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 import org.mortbay.util.IO;
 import org.mortbay.util.MultiPartOutputStream;
-import org.mortbay.util.URIUtil;
 import org.mortbay.util.TypeUtil;
+import org.mortbay.util.URIUtil;
 
 
 
@@ -110,7 +110,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
-    private boolean _redirectWelcome=true;
+    private boolean _redirectWelcome=false;
     private boolean _gzip=true;
     
     private Resource _resourceBase;
@@ -818,7 +818,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     /* ------------------------------------------------------------ */
     class NIOResourceCache extends ResourceCache
     {
-
         /* ------------------------------------------------------------ */
         public NIOResourceCache(MimeTypes mimeTypes)
         {
@@ -828,14 +827,13 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         /* ------------------------------------------------------------ */
         protected void fill(Content content) throws IOException
         {
-            super.fill(content);
-            
             Connector connector = HttpConnection.getCurrentConnection().getConnector();
-            Buffer buffer=null;
-            Resource resource=content.getResource();
-            long length=resource.length();
             if (connector instanceof NIOConnector) 
             {
+                Buffer buffer=null;
+                Resource resource=content.getResource();
+                long length=resource.length();
+                
                 if (_useFileMappedBuffer) 
                 {    
                     File file = resource.getFile();
@@ -845,17 +843,26 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 else 
                 {
                     FileInputStream fis = new FileInputStream(resource.getFile());
-                    buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+                    try
+                    {
+                        buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+                    }
+                    catch(OutOfMemoryError e)
+                    {
+                        Log.warn(e.toString());
+                        Log.debug(e);
+                        buffer = new NIOBuffer((int) length, NIOBuffer.INDIRECT);
+                    }
                     buffer.readFrom(fis,(int)length);
                     fis.close();
                 }
+                content.setBuffer(buffer);
             } 
             else 
             {
                 super.fill(content);
             }   
             
-            content.setBuffer(buffer);
         }
     }
 }

@@ -23,6 +23,9 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
@@ -31,6 +34,8 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -79,18 +84,21 @@ public class WebAppContext extends Context
     private String[] _configurationClasses=__dftConfigurationClasses;
     private Configuration[] _configurations;
     private String _defaultsDescriptor=WEB_DEFAULTS_XML;
+    private String _overrideDescriptor=null;
     private boolean _distributable=false;
     private boolean _extractWAR=true;
     private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
-    private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.naming.","org.mortbay.log.","org.mortbay.util.","org.xml.","org.w3c.", "org.apache.commons.logging.", "org.apache.log4j."};
+    private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c.", "org.apache.commons.logging.", "org.apache.log4j."};
     private String[] _serverClasses = {"-org.mortbay.jetty.plus.jaas.", "org.mortbay.jetty.", "org.slf4j."}; // TODO hide all mortbay classes
     private File _tmpDir;
     private boolean _isExistingTmpDir;
     private String _war;
+    private String _extraClasspath;
     
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
+    private transient boolean _unavailable;
 
     public static WebAppContext getCurrentWebAppContext()
     {
@@ -119,6 +127,7 @@ public class WebAppContext extends Context
      * @param extract If true, extract war files
      * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
      * @exception IOException 
+     * @deprecated use {@link org.mortbay.jetty.deployer.WebAppDeployer} or {@link org.mortbay.jetty.deployer.ContextDeployer}
      */
     public static void addWebApplications(Server server,
                                           String webapps,
@@ -148,6 +157,7 @@ public class WebAppContext extends Context
      * @exception IOException 
      * @throws IllegalAccessException 
      * @throws InstantiationException 
+     * @deprecated use {@link org.mortbay.jetty.deployer.WebAppDeployer} or {@link org.mortbay.jetty.deployer.ContextDeployer}
      */
     public static void addWebApplications(Server server,
                                           String webapps,
@@ -182,6 +192,7 @@ public class WebAppContext extends Context
      * @exception IOException 
      * @throws IllegalAccessException 
      * @throws InstantiationException 
+     * @deprecated use {@link WebAppDeployer} or {@link ContextDeployer}
      */
     public static void addWebApplications(HandlerContainer contexts,
                                           String webapps,
@@ -211,6 +222,7 @@ public class WebAppContext extends Context
      * @exception IOException 
      * @throws IllegalAccessException 
      * @throws InstantiationException 
+     * @deprecated use {@link WebAppDeployer} or {@link ContextDeployer}
      */
     public static void addWebApplications(HandlerContainer contexts,
                                           String webapps,
@@ -218,9 +230,8 @@ public class WebAppContext extends Context
                                           String[] configurations,
                                           boolean extract,
                                           boolean java2CompliantClassLoader)
-    throws IOException
+        throws IOException
     {
-        
         if (contexts==null)
             throw new IllegalArgumentException("No HandlerContainer");
         
@@ -301,7 +312,7 @@ public class WebAppContext extends Context
             wah.setParentLoaderPriority(java2CompliantClassLoader);
             //add it
             contexts.addHandler(wah);
-        }
+         }
     }
     
     /* ------------------------------------------------------------ */
@@ -426,45 +437,70 @@ public class WebAppContext extends Context
         return resource;
     }
     
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @see org.mortbay.jetty.handler.ContextHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+     */
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+    throws IOException, ServletException
+    {   
+        if (_unavailable)
+        {
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        }
+        else
+            super.handle(target, request, response, dispatch);
+    }
+
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.thread.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
     {
-        // Setup configurations 
-        loadConfigurations();
-        
-        for (int i=0;i<_configurations.length;i++)
-            _configurations[i].setWebAppContext(this);
-        
-        // Configure classloader
-        _ownClassLoader=false;
-        if (getClassLoader()==null)
+        try
         {
-            WebAppClassLoader classLoader = new WebAppClassLoader(this);
-            setClassLoader(classLoader);
-            _ownClassLoader=true;
-        }
+            // Setup configurations 
+            loadConfigurations();
 
-        if (Log.isDebugEnabled()) 
-        {
-            ClassLoader loader = getClassLoader();
-            Log.debug("Thread Context class loader is: " + loader);
-            loader=loader.getParent();
-            while(loader!=null)
+            for (int i=0;i<_configurations.length;i++)
+                _configurations[i].setWebAppContext(this);
+
+            // Configure classloader
+            _ownClassLoader=false;
+            if (getClassLoader()==null)
             {
-                Log.debug("Parent class loader is: " + loader); 
-                loader=loader.getParent();
+                WebAppClassLoader classLoader = new WebAppClassLoader(this);
+                setClassLoader(classLoader);
+                _ownClassLoader=true;
             }
-        }
-        
-        for (int i=0;i<_configurations.length;i++)
-            _configurations[i].configureClassLoader();
 
-        getTempDirectory();
-        
-        super.doStart();
+            if (Log.isDebugEnabled()) 
+            {
+                ClassLoader loader = getClassLoader();
+                Log.debug("Thread Context class loader is: " + loader);
+                loader=loader.getParent();
+                while(loader!=null)
+                {
+                    Log.debug("Parent class loader is: " + loader); 
+                    loader=loader.getParent();
+                }
+            }
+
+            for (int i=0;i<_configurations.length;i++)
+                _configurations[i].configureClassLoader();
+
+            getTempDirectory();
+
+            super.doStart();
+        }
+        catch (Exception e)
+        {
+            //start up of the webapp context failed, make sure it is not started
+            Log.warn("Failed startup of context "+this, e);
+            _unavailable = true;
+        }
 
     }
     
@@ -498,6 +534,8 @@ public class WebAppContext extends Context
         {
             if (_ownClassLoader)
                 setClassLoader(null);
+            
+            _unavailable = false;
         }
     }
     
@@ -521,11 +559,22 @@ public class WebAppContext extends Context
     
     /* ------------------------------------------------------------ */
     /**
+     * The default descriptor is a web.xml format file that is applied to the context before the standard WEB-INF/web.xml
      * @return Returns the defaultsDescriptor.
      */
     public String getDefaultsDescriptor()
     {
         return _defaultsDescriptor;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * The override descriptor is a web.xml format file that is applied to the context after the standard WEB-INF/web.xml
+     * @return Returns the Override Descriptor.
+     */
+    public String getOverrideDescriptor()
+    {
+        return _overrideDescriptor;
     }
     
     /* ------------------------------------------------------------ */
@@ -935,12 +984,23 @@ public class WebAppContext extends Context
     }
 
     /* ------------------------------------------------------------ */
-    /**
+    /** 
+     * The default descriptor is a web.xml format file that is applied to the context before the standard WEB-INF/web.xml
      * @param defaultsDescriptor The defaultsDescriptor to set.
      */
     public void setDefaultsDescriptor(String defaultsDescriptor)
     {
         _defaultsDescriptor = defaultsDescriptor;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * The override descriptor is a web.xml format file that is applied to the context after the standard WEB-INF/web.xml
+     * @param defaultsDescriptor The overrideDescritpor to set.
+     */
+    public void setOverrideDescriptor(String overrideDescriptor)
+    {
+        _overrideDescriptor = overrideDescriptor;
     }
     
     
@@ -1100,7 +1160,30 @@ public class WebAppContext extends Context
     {
         _war = war;
     }
-    
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Comma or semicolon separated path of filenames or URLs
+     * pointing to directories or jar files. Directories should end
+     * with '/'.
+     */
+    public String getExtraClasspath()
+    {
+        return _extraClasspath;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param extraClasspath Comma or semicolon separated path of filenames or URLs
+     * pointing to directories or jar files. Directories should end
+     * with '/'.
+     */
+    public void setExtraClasspath(String extraClasspath)
+    {
+        _extraClasspath=extraClasspath;
+    }
+
     /* ------------------------------------------------------------ */
     protected void startContext()
         throws Exception
@@ -1127,8 +1210,7 @@ public class WebAppContext extends Context
             _configurations[i].configureWebApp();
 
         // bypass security handler if not used.
-        if (_securityHandler.getConstraintMappings()==null ||
-            _securityHandler.getConstraintMappings().length==0)
+        if (!_securityHandler.hasConstraints() && _securityHandler.getHandler()==_servletHandler)
         {
             _securityHandler.setHandler(null);
             _sessionHandler.setHandler(_servletHandler);
@@ -1188,5 +1270,4 @@ public class WebAppContext extends Context
         
         return canonicalName.toString();
     }
-
 }

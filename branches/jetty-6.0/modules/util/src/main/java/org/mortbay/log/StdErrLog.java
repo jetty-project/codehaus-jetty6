@@ -25,9 +25,21 @@ import org.mortbay.util.DateCache;
  */
 public class StdErrLog implements Logger
 {    
+    private static DateCache _dateCache;
     private static boolean debug = System.getProperty("DEBUG",null)!=null;
     private String name;
-    private DateCache _dateCache=new DateCache("yyyy-MM-dd HH:mm:ss.SSS");
+    
+    static
+    {
+        try
+        {
+            _dateCache=new DateCache("yyyy-MM-dd HH:mm:ss.SSS");
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+    }
     
     StdErrLog()
     {
@@ -59,7 +71,7 @@ public class StdErrLog implements Logger
         if (debug)
         {
             System.err.println(_dateCache.now()+":"+name+":DEBUG: "+msg);
-            th.printStackTrace();
+            if (th!=null) th.printStackTrace();
         }
     }
     
@@ -79,7 +91,8 @@ public class StdErrLog implements Logger
     public void warn(String msg, Throwable th)
     {
         System.err.println(_dateCache.now()+":"+name+":WARN:  "+msg);
-        th.printStackTrace();
+        if (th!=null)
+            th.printStackTrace();
     }
 
     private String format(String msg, Object arg0, Object arg1)

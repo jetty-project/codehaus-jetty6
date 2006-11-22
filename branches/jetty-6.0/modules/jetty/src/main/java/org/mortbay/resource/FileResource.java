@@ -94,9 +94,12 @@ public class FileResource extends URLResource
             {
                 // Assume that File.toURL produced unencoded chars. So try
                 // encoding them.
-                String urls=
-                    "file:"+org.mortbay.util.URIUtil.encodePath(url.toString().substring(5));
-                _file =new File(new URI(urls));
+                String file_url="file:"+URIUtil.encodePath(url.toString().substring(5));           
+                URI uri = new URI(file_url);
+                if (uri.getAuthority()==null) 
+                    _file = new File(uri);
+                else
+                    _file = new File("//"+uri.getAuthority()+URIUtil.decodePath(url.getFile()));
             }
             catch (Exception e2)
             {

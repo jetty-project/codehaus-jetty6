@@ -49,13 +49,6 @@ import org.mortbay.jetty.security.UserRealm;
 public class Jetty6RunWarExploded extends AbstractJetty6Mojo
 {
 
-    /**
-     * List of connectors to use. If none are configured
-     * then we use a single SelectChannelConnector at port 8080
-     * 
-     * @parameter 
-     */
-    private Connector[] connectors;
     
     
     /**
@@ -68,29 +61,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
     
    
   
-    
-    /**
-     * List of security realms to set up. Optional.
-     * @parameter
-     */
-    private UserRealm[] userRealms;
-    
-    
-    /**
-     * @see org.mortbay.jetty.plugin.AbstractJettyMojo#getConfiguredUserRealms()
-     */
-    public Object[] getConfiguredUserRealms()
-    {
-        return this.userRealms;
-    }
-
-    /**
-     * @see org.mortbay.jetty.plugin.AbstractJettyMojo#getConfiguredConnectors()
-     */
-    public Object[] getConfiguredConnectors()
-    {
-        return this.connectors;
-    }
+   
 
     /**
      * 

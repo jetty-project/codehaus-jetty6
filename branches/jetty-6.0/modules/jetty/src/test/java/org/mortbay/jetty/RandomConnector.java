@@ -238,14 +238,16 @@ public class RandomConnector extends AbstractNIOConnector
             }
         }
 
-        public void blockReadable(long millisecs)
+        public boolean blockReadable(long millisecs)
         {
             try {Thread.sleep(random.nextInt(10*rate));} catch (InterruptedException e) {e.printStackTrace();}
+            return true;
         }
 
-        public void blockWritable(long millisecs)
+        public boolean blockWritable(long millisecs)
         {
             try {Thread.sleep(random.nextInt(10*rate));} catch (InterruptedException e) {e.printStackTrace();}
+            return true;
         }
 
         public int fill(Buffer buffer) throws IOException
@@ -277,6 +279,7 @@ public class RandomConnector extends AbstractNIOConnector
             buffer.put(temp);
             temp.reset();
             System.err.print(temp);
+            buffer.skip(len);
             return len;
         }
 

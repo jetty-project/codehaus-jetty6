@@ -65,6 +65,8 @@ Configuration Common to All Goals
 
   * <<webDefaultXml>> Optional. A webdefault.xml file to use instead of the supplied jetty default for the webapp.
 
+  * <<overrideWebXml>> Optional. A web.xml file which will be applied AFTER the webapp's web.xml. This file can be stored anywhere. It is used to add or modify the configuration of a web.xml for different environments eg test, production etc. 
+
   * <<userRealms>> Optional. A list of <<<UserRealm>>> objects. Note that there is no default realm. If you use a realm in your web.xml you can specify a corresponding realm here.
 
   * <<requestLog>> Optional. An implementation of the <<<org.mortbay.jetty.RequestLog>>> request log interface. An implementation that respects the NCSA format is available as <<<org.mortbay.jetty.NCSARequestLog>>>.
@@ -92,6 +94,7 @@ Configuration Common to All Goals
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <tmpDir>target/not/necessary</tmpDir>
           <webDefaultXml>src/main/resources/webdefault.xml</webDefaultXml>
+          <overrideWebXml>src/main/resources/override-web.xml</overrideWebXml>
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
               <name>Test Realm</name>

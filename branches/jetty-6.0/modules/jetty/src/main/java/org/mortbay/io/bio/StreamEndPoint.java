@@ -49,12 +49,14 @@ public class StreamEndPoint implements EndPoint
         return true;
     }
 
-    public void blockReadable(long millisecs)
+    public boolean blockReadable(long millisecs) throws IOException
     {
+        return true;
     }
     
-    public void blockWritable(long millisecs)
+    public boolean blockWritable(long millisecs) throws IOException
     {
+        return true;
     }
 
     /* 
@@ -111,8 +113,7 @@ public class StreamEndPoint implements EndPoint
         int length=buffer.length();
         if (length>0)
             buffer.writeTo(_out);
-        if (!buffer.isImmutable())
-            buffer.clear();
+        buffer.clear();
         return length;
     }
 
@@ -224,7 +225,7 @@ public class StreamEndPoint implements EndPoint
     /* 
      * @see org.mortbay.io.EndPoint#getConnection()
      */
-    public Object getConnection()
+    public Object getTransport()
     {
         return null;
     }
@@ -251,6 +252,32 @@ public class StreamEndPoint implements EndPoint
     public void setOutputStream(OutputStream out)
     {
         _out=out;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public void flush()
+        throws IOException
+    {   
+        _out.flush();
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferingInput()
+    {
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferingOutput()
+    {
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferred()
+    {
+        return false;
     }
 
 }

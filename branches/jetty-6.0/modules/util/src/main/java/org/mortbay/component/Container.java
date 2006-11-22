@@ -201,7 +201,7 @@ public class Container
             Log.debug("Container "+parent+" + "+child+" as "+relationship);
         if (_listeners!=null)
         {
-            Relationship event=new Relationship(parent,child,relationship);
+            Relationship event=new Relationship(this,parent,child,relationship);
             for (int i=0; i<LazyList.size(_listeners); i++)
                 ((Listener)LazyList.get(_listeners, i)).add(event);
         }
@@ -219,7 +219,7 @@ public class Container
             Log.debug("Container "+parent+" - "+child+" as "+relationship);
         if (_listeners!=null)
         {
-            Relationship event=new Relationship(parent,child,relationship);
+            Relationship event=new Relationship(this,parent,child,relationship);
             for (int i=0; i<LazyList.size(_listeners); i++)
                 ((Listener)LazyList.get(_listeners, i)).remove(event);
         }
@@ -235,12 +235,19 @@ public class Container
         private Object _parent;
         private Object _child;
         private String _relationship;
+        private Container _container;
         
-        private Relationship(Object parent,Object child, String relationship)
+        private Relationship(Container container, Object parent,Object child, String relationship)
         {
+            _container=container;
             _parent=parent;
             _child=child;
             _relationship=relationship;
+        }
+        
+        public Container getContainer()
+        {
+            return _container;
         }
         
         public Object getChild()
@@ -263,6 +270,18 @@ public class Container
             return _parent+"---"+_relationship+"-->"+_child;
         }
         
+        public int hashCode()
+        {
+            return _parent.hashCode()+_child.hashCode()+_relationship.hashCode();
+        }
+        
+        public boolean equals(Object o)
+        {
+            if (o==null || !(o instanceof Relationship))
+                return false;
+            Relationship r = (Relationship)o;
+            return r._parent==_parent && r._child==_child && r._relationship.equals(_relationship);
+        }
     }
     
     /* ------------------------------------------------------------ */

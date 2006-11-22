@@ -88,11 +88,11 @@ public class ServletHandler extends AbstractHandler
     private ServletHolder[] _servlets;
     private ServletMapping[] _servletMappings;
     
-    private transient Map _filterNameMap;
+    private transient Map _filterNameMap= new HashMap();
     private transient List _filterPathMappings;
     private transient MultiMap _filterNameMappings;
     
-    private transient Map _servletNameMap;
+    private transient Map _servletNameMap=new HashMap();
     private transient PathMap _servletPathMap;
     
     protected transient HashMap _chainCache[];
@@ -136,7 +136,8 @@ public class ServletHandler extends AbstractHandler
     {
         _servletContext=ContextHandler.getCurrentContext();
         _contextHandler=_servletContext==null?null:_servletContext.getContextHandler();
-        
+
+        updateNameMappings();
         updateMappings();
         
         if(_filterChainsCached)
@@ -171,10 +172,9 @@ public class ServletHandler extends AbstractHandler
             }
         }
 
-        _filterNameMap=null;
         _filterPathMappings=null;
         _filterNameMappings=null;
-        _servletNameMap=null;
+        
         _servletPathMap=null;
         _chainCache=null;
         _namedChainCache=null;
@@ -276,6 +276,12 @@ public class ServletHandler extends AbstractHandler
         return _servlets;
     }
 
+    /* ------------------------------------------------------------ */
+    public ServletHolder getServlet(String name)
+    {
+        return (ServletHolder)_servletNameMap.get(name);
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
@@ -567,7 +573,7 @@ public class ServletHandler extends AbstractHandler
                     
                     servlets[i].start();
                 }
-                catch(Exception e)
+                catch(Throwable e)
                 {
                     Log.debug(Log.EXCEPTION,e);
                     mx.add(e);
@@ -587,11 +593,11 @@ public class ServletHandler extends AbstractHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated use {@link #newServletHolder(Class)}
+     * @see also newServletHolder(Class)
      */
-    protected final ServletHolder newServletHolder()
+    public ServletHolder newServletHolder()
     {
-        return null;
+        return new ServletHolder();
     }
     
     /* ------------------------------------------------------------ */
@@ -699,11 +705,17 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /** 
-     * @deprecated use {@link #newFilterHolder(Class)}
+     * @see {@link #newFilterHolder(Class)}
      */
-    protected FilterHolder newFilterHolder()
+    public FilterHolder newFilterHolder()
     {
-        return null;
+        return new FilterHolder();
+    }
+
+    /* ------------------------------------------------------------ */
+    public FilterHolder getFilter(String name)
+    {
+        return (FilterHolder)_filterNameMap.get(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -823,72 +835,37 @@ public class ServletHandler extends AbstractHandler
         if (mapping != null)
             setFilterMappings((FilterMapping[])LazyList.addToArray(getFilterMappings(), mapping, FilterMapping.class));
     }
+
+    /* ------------------------------------------------------------ */
+    protected synchronized void updateNameMappings()
+    {   
+        // update filter name map
+        _filterNameMap.clear();
+        if (_filters!=null)
+        {   
+            for (int i=0;i<_filters.length;i++)
+            {
+                _filterNameMap.put(_filters[i].getName(),_filters[i]);
+                _filters[i].setServletHandler(this);
+            }
+        }
+
+        // Map servlet names to holders
+        _servletNameMap.clear();
+        if (_servlets!=null)
+        {   
+            // update the maps
+            for (int i=0;i<_servlets.length;i++)
+            {
+                _servletNameMap.put(_servlets[i].getName(),_servlets[i]);
+                _servlets[i].setServletHandler(this);
+            }
+        }
+    }
     
     /* ------------------------------------------------------------ */
     protected synchronized void updateMappings()
     {   
-        // Map servlet names to holders
-        if (_servlets==null)
-        {
-            _servletNameMap=null;
-        }
-        else
-        {   
-            HashMap nm = new HashMap();
-            
-            // update the maps
-            for (int i=0;i<_servlets.length;i++)
-            {
-                nm.put(_servlets[i].getName(),_servlets[i]);
-                _servlets[i].setServletHandler(this);
-            }
-            _servletNameMap=nm;
-        }
-
-        // Map servlet paths to holders
-        if (_servletMappings==null || _servletNameMap==null)
-        {
-            _servletPathMap=null;
-        }
-        else
-        {
-            PathMap pm = new PathMap();
-            
-            // update the maps
-            for (int i=0;i<_servletMappings.length;i++)
-            {
-                ServletHolder servlet_holder = (ServletHolder)_servletNameMap.get(_servletMappings[i].getServletName());
-                if (servlet_holder==null)
-                    throw new IllegalStateException("No such servlet: "+_servletMappings[i].getServletName());
-                else if (_servletMappings[i].getPathSpecs()!=null)
-                {
-                    String[] pathSpecs = _servletMappings[i].getPathSpecs();
-                    for (int j=0;j<pathSpecs.length;j++)
-                        if (pathSpecs[j]!=null)
-                            pm.put(pathSpecs[j],servlet_holder);
-                }
-            }
-            
-            _servletPathMap=pm;
-        }
-        
-        
-        // update filter name map
-        if (_filters==null)
-        {
-            _filterNameMap=null;
-        }
-        else
-        {   
-            HashMap nm = new HashMap();
-            for (int i=0;i<_filters.length;i++)
-            {
-                nm.put(_filters[i].getName(),_filters[i]);
-                _filters[i].setServletHandler(this);
-            }
-            _filterNameMap=nm;
-        }
-
         // update filter mappings
         if (_filterMappings==null)
         {
@@ -919,6 +896,35 @@ public class ServletHandler extends AbstractHandler
                 }
             }
         }
+
+        // Map servlet paths to holders
+        if (_servletMappings==null || _servletNameMap==null)
+        {
+            _servletPathMap=null;
+        }
+        else
+        {
+            PathMap pm = new PathMap();
+            
+            // update the maps
+            for (int i=0;i<_servletMappings.length;i++)
+            {
+                ServletHolder servlet_holder = (ServletHolder)_servletNameMap.get(_servletMappings[i].getServletName());
+                if (servlet_holder==null)
+                    throw new IllegalStateException("No such servlet: "+_servletMappings[i].getServletName());
+                else if (_servletMappings[i].getPathSpecs()!=null)
+                {
+                    String[] pathSpecs = _servletMappings[i].getPathSpecs();
+                    for (int j=0;j<pathSpecs.length;j++)
+                        if (pathSpecs[j]!=null)
+                            pm.put(pathSpecs[j],servlet_holder);
+                }
+            }
+            
+            _servletPathMap=pm;
+        }
+        
+        
 
         if (Log.isDebugEnabled()) 
         {
@@ -968,8 +974,7 @@ public class ServletHandler extends AbstractHandler
         if (getServer()!=null)
             getServer().getContainer().update(this,_filterMappings,filterMappings,"filterMapping",true);
         _filterMappings = filterMappings;
-        if (isStarted())
-            updateMappings();
+        updateMappings();
     }
     
     /* ------------------------------------------------------------ */
@@ -978,6 +983,7 @@ public class ServletHandler extends AbstractHandler
         if (getServer()!=null)
             getServer().getContainer().update(this,_filters,holders,"filter",true);
         _filters=holders;
+        updateNameMappings();
     }
     
     /* ------------------------------------------------------------ */
@@ -989,8 +995,7 @@ public class ServletHandler extends AbstractHandler
         if (getServer()!=null)
             getServer().getContainer().update(this,_servletMappings,servletMappings,"servletMapping",true);
         _servletMappings = servletMappings;
-        if (isStarted())
-            updateMappings();
+        updateMappings();
     }
     
     /* ------------------------------------------------------------ */
@@ -1002,7 +1007,7 @@ public class ServletHandler extends AbstractHandler
         if (getServer()!=null)
             getServer().getContainer().update(this,_servlets,holders,"servlet",true);
         _servlets=holders;
-        updateMappings();
+        updateNameMappings();
     }
 
 

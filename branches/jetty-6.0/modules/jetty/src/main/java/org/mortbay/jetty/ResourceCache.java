@@ -159,7 +159,11 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                         return content2;
                     }
                     
-                    if (Log.isDebugEnabled()) Log.debug("CACHE FILL: {}",pathInContext);                    
+                    if (Log.isDebugEnabled()) Log.debug("CACHE FILL: {}",pathInContext);
+
+                    int needed=_maxCacheSize-(int)len;
+                    while(_cacheSize>needed || (_maxCachedFiles>0 && _cachedFiles>_maxCachedFiles))
+                        _leastRecentlyUsed.invalidate();
                     content.cache(pathInContext);
                     
                     return content;

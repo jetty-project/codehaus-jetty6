@@ -70,7 +70,8 @@
     <target name="export" description="Export src from glassfish" depends="test-export" if="export.checks.ok">
        <cvspass cvsroot=":pserver:guest@cvs.dev.java.net:/cvs" password="" />
        <property name="CVSROOT" value=":pserver:guest@cvs.dev.java.net:/cvs"/>
-       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/com" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/org/apache/jasper" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="export -r ${glassfish.tag}" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <property name="export.done" value="true"/>
    </target>
@@ -81,7 +82,8 @@
     <target name="checkout" description="Checkout src from glassfish" depends="test-checkout" if="checkout.checks.ok">
        <cvspass cvsroot=":pserver:guest@cvs.dev.java.net:/cvs" password="" />
        <property name="CVSROOT" value=":pserver:guest@cvs.dev.java.net:/cvs"/>
-       <cvs command="co" package="glassfish/appserv-webtier/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="co" package="glassfish/appserv-webtier/src/java/com" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="co" package="glassfish/appserv-webtier/src/java/org/apache/jasper" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="co" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <property name="checkout.done" value="true"/>
    </target>
@@ -112,6 +114,7 @@
       <fileset dir="target/glassfish/appserv-webtier/src/java/org/apache/jasper">
         <exclude name="**/resources/*"/>
         <exclude name="**/CVS/*"/>
+        <exclude name="**/Jsr199JavaCompiler.java"/>
       </fileset>
     </copy>
     <copy todir="${generated.resources}/org/apache/jasper/resources">

@@ -102,6 +102,15 @@ public class SocketConnector extends AbstractConnector
     }
 
     /* ------------------------------------------------------------------------------- */
+    /**
+     * Allows subclass to override Conection if required.
+     */
+    protected HttpConnection newHttpConnection(EndPoint endpoint) 
+    {
+        return new HttpConnection(this, endpoint, getServer());
+    }
+
+    /* ------------------------------------------------------------------------------- */
     protected Buffer newBuffer(int size)
     {
         return new ByteArrayBuffer(size);
@@ -115,7 +124,7 @@ public class SocketConnector extends AbstractConnector
         if (connection._sotimeout!=_maxIdleTime)
         {
             connection._sotimeout=_maxIdleTime;
-            ((Socket)endpoint.getConnection()).setSoTimeout(_maxIdleTime);
+            ((Socket)endpoint.getTransport()).setSoTimeout(_maxIdleTime);
         }
               
         super.customize(endpoint, request);
@@ -162,7 +171,7 @@ public class SocketConnector extends AbstractConnector
         public Connection(Socket socket) throws IOException
         {
             super(socket);
-            _connection = new HttpConnection(SocketConnector.this,this,getServer());
+            _connection = newHttpConnection(this);
             _sotimeout=socket.getSoTimeout();
             _socket=socket;
         }
@@ -204,7 +213,7 @@ public class SocketConnector extends AbstractConnector
                                 _socket.setSoTimeout(_sotimeout);
                             }
                         }
-                    }
+                    }                    
                     _connection.handle();
                 }
             }

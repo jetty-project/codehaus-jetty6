@@ -18,6 +18,7 @@ package org.mortbay.io;
 import java.io.IOException;
 
 
+
 /* ------------------------------------------------------------ */
 /** ByteArrayEndPoint.
  * @author gregw
@@ -100,13 +101,15 @@ public class ByteArrayEndPoint implements EndPoint
     }
 
     /* ------------------------------------------------------------ */
-    public void blockReadable(long millisecs)
+    public boolean blockReadable(long millisecs)
     {
+        return true;
     }
 
     /* ------------------------------------------------------------ */
-    public void blockWritable(long millisecs)
+    public boolean blockWritable(long millisecs)
     {
+        return true;
     }
 
     /* ------------------------------------------------------------ */
@@ -256,9 +259,32 @@ public class ByteArrayEndPoint implements EndPoint
     /* 
      * @see org.mortbay.io.EndPoint#getConnection()
      */
-    public Object getConnection()
+    public Object getTransport()
     {
         return _inBytes;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void flush() throws IOException
+    {   
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferingInput()
+    {
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferingOutput()
+    {
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isBufferred()
+    {
+        return false;
     }
 
 

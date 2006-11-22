@@ -23,6 +23,7 @@ import java.util.List;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.plus.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
+import org.mortbay.resource.Resource;
 import org.mortbay.util.LazyList;
 
 public class Jetty6MavenConfiguration extends Configuration 
@@ -91,6 +92,21 @@ public class Jetty6MavenConfiguration extends Configuration
         if (webXmlFile.exists())
             configure(webXmlFile.toURL().toString());
         PluginLog.getLog().debug("Finished configuring web.xml");
+        
+        //apply any override file
+        String overrideDescriptor=getWebAppContext().getOverrideDescriptor();
+        if(overrideDescriptor!=null&&overrideDescriptor.length()>0)
+        {
+            PluginLog.getLog().debug("Applying override web.xml file at="+overrideDescriptor);
+            Resource orideResource=Resource.newSystemResource(overrideDescriptor);
+            if(orideResource==null)
+                orideResource=Resource.newResource(overrideDescriptor);
+            //ensure we don't validate the override web.xml as it probably 
+            //only contains a partial web.xml file
+            _xmlParser.setValidating(false);
+            configure(orideResource.getURL().toString());
+            PluginLog.getLog().debug("Finished applying override web.xml");
+        }
         
         bindUserTransaction();
         lockCompEnv();

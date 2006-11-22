@@ -94,7 +94,7 @@ public class Response implements HttpServletResponse
     /*
      * @see javax.servlet.ServletResponse#reset()
      */
-    void recycle()
+    protected void recycle()
     {
         _status=SC_OK;
         _reason=null;
@@ -153,7 +153,6 @@ public class Response implements HttpServletResponse
         String id=session.getId();
         
         // TODO Check host and port are for this server
-
         String sessionURLPrefix = sessionManager.getSessionURLPrefix();
         // Already encoded
         int prefix=url.indexOf(sessionURLPrefix);
@@ -803,6 +802,8 @@ public class Response implements HttpServletResponse
      */
     public void setBufferSize(int size)
     {
+        if (isCommitted() || getContentCount()>0)
+            throw new IllegalStateException("Committed or content written");
         _connection.getGenerator().increaseContentBufferSize(size);
     }
 

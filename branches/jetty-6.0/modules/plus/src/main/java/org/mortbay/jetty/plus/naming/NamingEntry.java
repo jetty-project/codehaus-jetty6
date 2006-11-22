@@ -267,8 +267,8 @@ public abstract class NamingEntry
         absoluteObjectNameString = (isGlobal()?"":"java:")+fullName.toString();
         
         
-        Log.info("Bound "+absoluteObjectNameString);
-        Log.info("Bound "+absoluteNamingEntryNameString);
+        Log.debug("Bound "+absoluteObjectNameString);
+        Log.debug("Bound "+absoluteNamingEntryNameString);
     }
 
     
