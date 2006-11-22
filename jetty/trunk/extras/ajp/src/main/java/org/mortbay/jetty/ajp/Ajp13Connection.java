@@ -42,7 +42,7 @@ import org.mortbay.util.ajax.Continuation;
  * Connection implementation of the Ajp13 protocol. <p/> XXX Refactor to remove
  * duplication of HttpConnection
  * 
- * @author Markus Kobler  markus(at)inquisitive-mind.com
+ * @author Markus Kobler markus(at)inquisitive-mind.com
  * @author Greg Wilkins
  */
 public class Ajp13Connection extends HttpConnection
@@ -53,11 +53,11 @@ public class Ajp13Connection extends HttpConnection
     {
         super(connector,endPoint,server);
 
-        _generator=new Ajp13Generator(_connector,_endp,_connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
+        _generator=new Ajp13Generator(_connector,_endp,_connector.getHeaderBufferSize(),_connector.getResponseBufferSize());
         _parser=new Ajp13Parser(_connector,_endp,new RequestHandler(),(Ajp13Generator)_generator);
         _generator.setSendServerVersion(server.getSendServerVersion());
-        _server = server;
-        
+        _server=server;
+
     }
 
     public boolean isConfidential(Request request)
@@ -72,17 +72,18 @@ public class Ajp13Connection extends HttpConnection
 
     public ServletInputStream getInputStream()
     {
-    	if (_in==null)
+        if (_in==null)
             _in=new Ajp13Parser.Input((Ajp13Parser)_parser,_connector.getMaxIdleTime());
         return _in;
     }
- 
+
     private class RequestHandler implements Ajp13Parser.EventHandler
     {
-        boolean _delayedHandling = false;
+        boolean _delayedHandling=false;
+
         public void startForwardRequest() throws IOException
         {
-            _delayedHandling = false;
+            _delayedHandling=false;
             _uri.clear();
             _sslSecure=false;
             _request.setTimeStamp(System.currentTimeMillis());
@@ -97,7 +98,7 @@ public class Ajp13Connection extends HttpConnection
         public void parsedUri(Buffer uri) throws IOException
         {
             // TODO avoid this copy.
-            _uri.parse(uri.asArray(), 0, uri.length());
+            _uri.parse(uri.asArray(),0,uri.length());
         }
 
         public void parsedProtocol(Buffer protocol) throws IOException
@@ -162,11 +163,10 @@ public class Ajp13Connection extends HttpConnection
             }
         }
 
-        
         public void messageComplete(long contextLength) throws IOException
         {
         }
-        
+
         public void content(Buffer ref) throws IOException
         {
             if (_delayedHandling)
@@ -175,7 +175,6 @@ public class Ajp13Connection extends HttpConnection
                 handleRequest();
             }
         }
-        
 
     }
 
