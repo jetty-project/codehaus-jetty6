@@ -708,7 +708,7 @@ public class Ajp13Generator extends AbstractGenerator
         // don't forget to delete this comment when you fix it :-)
         _expectMore=needMore;
 
-        if (_buffer.length()!=0)
+        if (_buffer!=null && _buffer.length()!=0)
             Log.warn("Ooops - may have partially flushed data!");
         
         if (needMore)
