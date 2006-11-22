@@ -24,81 +24,63 @@ import org.mortbay.io.View;
  */
 public class Ajp13RequestPacket
 {
-//    private Buffer _buffer;
-//    private View _tok0=new View();
-   
-//    public void setBuffer(Buffer buffer)
-//    {
-//        _buffer=buffer;
-//        reset();
-//    }
-
-    public boolean isEmpty(Buffer _buffer)
+    public static boolean isEmpty(Buffer _buffer)
     {
         return _buffer.length()==0;
     }
-    
-    public int getInt(Buffer _buffer)
+
+    public static int getInt(Buffer _buffer)
     {
         return ((_buffer.get()&0xFF)<<8)|(_buffer.get()&0xFF);
     }
 
-    public Buffer getString(Buffer _buffer, View _tok0)
+    public static Buffer getString(Buffer _buffer, View tok)
     {
-        int len= ((_buffer.peek()&0xFF)<<8)|(_buffer.peek(_buffer.getIndex()+1)&0xFF);
+        int len=((_buffer.peek()&0xFF)<<8)|(_buffer.peek(_buffer.getIndex()+1)&0xFF);
         if (len==0xffff)
         {
             _buffer.skip(2);
             return null;
         }
-        int start =_buffer.getIndex();
-        _tok0.update(start+2,start+len+2);
+        int start=_buffer.getIndex();
+        tok.update(start+2,start+len+2);
         _buffer.skip(len+3);
-        return _tok0;
+        return tok;
     }
-    
-    public byte getByte(Buffer _buffer)
+
+    public static byte getByte(Buffer _buffer)
     {
         return _buffer.get();
     }
 
-    public boolean getBool(Buffer _buffer)
+    public static boolean getBool(Buffer _buffer)
     {
         return _buffer.get()>0;
     }
 
-    public Buffer getMethod(Buffer _buffer)
+    public static Buffer getMethod(Buffer _buffer)
     {
         return Ajp13PacketMethods.CACHE.get(_buffer.get());
     }
 
-    public Buffer getHeaderName(Buffer _buffer, View _tok0)
+    public static Buffer getHeaderName(Buffer _buffer, View tok)
     {
-        int len= ((_buffer.peek()&0xFF)<<8)|(_buffer.peek(_buffer.getIndex()+1)&0xFF);
+        int len=((_buffer.peek()&0xFF)<<8)|(_buffer.peek(_buffer.getIndex()+1)&0xFF);
         if ((0xFF00&len)==0xA000)
         {
             _buffer.skip(1);
             return Ajp13RequestHeaders.CACHE.get(_buffer.get());
         }
-        int start =_buffer.getIndex();
-        _tok0.update(start+2,start+len+2);
+        int start=_buffer.getIndex();
+        tok.update(start+2,start+len+2);
         _buffer.skip(len+3);
-        return _tok0;
-        
-    }
-    
+        return tok;
 
-    public Buffer get(Buffer _buffer, int length)
+    }
+
+    public static Buffer get(Buffer buffer, int length)
     {
-        return _buffer.get(length);
+        return buffer.get(length);
     }
-    
-//    public void reset()
-//    {
-//        _tok0.update(_buffer);
-//        _tok0.update(0,0);
-//    }
 
-
- 
 }
