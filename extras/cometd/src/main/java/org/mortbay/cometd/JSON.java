@@ -14,8 +14,6 @@
 
 package org.mortbay.cometd;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,14 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.TypeUtil;
 
 
 /** JSON Parser and Generator.
- * 
  * <p>This class provides some static methods to convert POJOs to and from JSON
  * notation.  The mapping from JSON to java is:<pre>
  *   object ==> Map
@@ -52,9 +48,8 @@ import org.mortbay.util.TypeUtil;
  *   Object --> string (dubious!)
  * </pre>
  * </p><p>
- * The interface {@link JSON.Generator} may be implemented by classes that know how to render themselves as JSON and
- * the {@link #toString(Object)} method will use {@link JSON.Generator#addJSON(StringBuffer)} to generate the JSON.
- * The class {@link JSON.Literal} may be used to hold pre-gnerated JSON object. 
+ * Note that this class has minimal dependencies on org.mortbay.util classes.  
+ * If there is demand, these dependencies can be removed so this class stands on it's own.
  * </p>
  * @author gregw
  *
@@ -92,16 +87,6 @@ public class JSON
     {
         return parse(new Source(s));
     }
-
-    /**
-     * @param s Stream containing JSON object or array.
-     * @return A Map, Object array or primitive array parsed from the JSON.
-     */
-    public static Object parse(InputStream in) throws IOException
-    {
-        String s=IO.toString(in);
-        return parse(new Source(s));
-    }
     
     /**
      * Append object as JSON to string buffer.
@@ -112,8 +97,6 @@ public class JSON
     {
         if (object==null)
             buffer.append("null");
-        else if (object instanceof Generator)
-            appendJSON(buffer, (Generator)object);
         else if (object instanceof Map)
             appendMap(buffer, (Map)object);
         else if (object instanceof List)
@@ -134,11 +117,6 @@ public class JSON
     private static void appendNull(StringBuffer buffer)
     {
         buffer.append("null");
-    }
-
-    private static void appendJSON(StringBuffer buffer, Generator generator)
-    {
-        generator.addJSON(buffer);
     }
     
     private static void appendMap(StringBuffer buffer, Map object)
@@ -216,7 +194,7 @@ public class JSON
         QuotedStringTokenizer.quote(buffer,string);
     }
     
-    private static Object parse(Source source)
+    public static Object parse(Source source)
     {
         int comment_state=0;
         
@@ -307,10 +285,10 @@ public class JSON
             source.next();
         }
         
-        return null;
+        throw new IllegalStateException("No value");
     }
     
-    private static Map parseObject(Source source)
+    public static Map parseObject(Source source)
     {
         if (source.next()!='{')
             throw new IllegalStateException();
@@ -344,7 +322,7 @@ public class JSON
         return map;
     }
     
-    private static Object parseArray(Source source)
+    public static Object parseArray(Source source)
     {
         if (source.next()!='[')
             throw new IllegalStateException();
@@ -360,29 +338,27 @@ public class JSON
                 case ']':
                     source.next();
                     return list.toArray(new Object[list.size()]);
-
+                    
                 case ',':
                     if (coma)
                         throw new IllegalStateException();
                     coma=true;
                     source.next();
-
+                    
                 default:
-                    if (Character.isWhitespace(c))
-                        source.next();
-                    else
+                    if (!Character.isWhitespace(c))
                     {
                         coma=false;
                         list.add(parse(source));
                     }
             }
-
+                    
         }
 
         throw new IllegalStateException("unexpected end of array");
     }
     
-    private static String parseString(Source source)
+    public static String parseString(Source source)
     {
         if (source.next()!='"')
             throw new IllegalStateException();
@@ -440,7 +416,7 @@ public class JSON
         return b.toString();
     }
     
-    private static Number parseNumber(Source source)
+    public static Number parseNumber(Source source)
     {
         int start=source.index();
         int end=-1;
@@ -570,38 +546,7 @@ public class JSON
         {
             return string.substring(mark,end);
         }
-    }
-    
-    public interface Generator
-    {
-        public void addJSON(StringBuffer buffer);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** A Literal JSON generator
-     * A utility instance of {@link JSON.Generator} that holds a pre-generated string on JSON text.
-     */
-    public static class Literal implements Generator
-    {
-        private String _json;
-        /* ------------------------------------------------------------ */
-        /** Construct a literal JSON instance for use by {@link JSON#toString(Object)}.
-         * @param json A literal JSON string that will be parsed to check validity.
-         */
-        public Literal(String json)
-        {
-            parse(json);
-            _json=json;
-        }
         
-        public String toString()
-        {
-            return _json;
-        }
-        
-        public void addJSON(StringBuffer buffer)
-        {
-            buffer.append(_json);
-        }
+       
     }
 }

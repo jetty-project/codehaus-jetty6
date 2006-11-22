@@ -3,7 +3,7 @@
   <parent>
     <artifactId>project-website</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -11,7 +11,7 @@
   <artifactId>project-site</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Site</name>
-  <version>6.1-SNAPSHOT</version>
+  <version>6.0-SNAPSHOT</version>
   <build>
     <plugins>
       <plugin>
@@ -28,21 +28,6 @@
             <configuration>
               <executable>mvn</executable>
               <workingDirectory>../../modules/maven-plugin</workingDirectory>
-              <arguments>
-                <argument>-Dmaven.test.skip=true</argument>
-                <argument>plugin:xdoc</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>exec-jspc-plugin-doc</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>mvn</executable>
-              <workingDirectory>../../modules/jspc-maven-plugin</workingDirectory>
               <arguments>
                 <argument>-Dmaven.test.skip=true</argument>
                 <argument>plugin:xdoc</argument>
@@ -79,7 +64,8 @@
               <tasks>
                 <delete failonerror="false" includeemptydirs="true">
                  <fileset dir="src/site/apt/maven-plugin" includes="**/**"/> 
-                 <fileset dir="src/site/apt/jspc-maven-plugin" includes="**/**"/> 
+                </delete>
+                <delete failonerror="false" includeemptydirs="true">
                  <fileset dir="${basedir}/../../javadoc" includes="**/**"/> 
                 </delete>
               </tasks>
@@ -116,11 +102,6 @@
                     <include name="**/**"/>
                   </fileset>
                 </copy>
-                <copy todir="${basedir}/src/site/apt/jspc-maven-plugin" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../../modules/jspc-maven-plugin/src/site/apt">
-                    <include name="**/**"/>
-                  </fileset>
-                </copy>
                 <copy todir="${basedir}/target/generated-site/xdoc/maven-plugin" failonerror="false" overwrite="true">
                   <fileset dir="${basedir}/../../modules/maven-plugin/target/generated-site/xdoc">
                     <include name="index.xml"/>
@@ -129,21 +110,6 @@
                     <include name="run-exploded-mojo.xml"/>
                   </fileset>
                 </copy>
-                <copy todir="${basedir}/target/generated-site/xdoc/jspc-maven-plugin" failonerror="false" overwrite="true">
-                  <fileset dir="${basedir}/../../modules/jspc-maven-plugin/target/generated-site/xdoc">
-                    <include name="index.xml"/>
-                    <include name="jspc-mojo.xml"/>
-                  </fileset>
-                </copy>
-                <copy todir="${basedir}/target/site" overwrite="true">
-                  <fileset dir="${basedir}/../../modules/jetty/target/classes/org/mortbay/xml">
-                    <include name="*.dtd"/>
-                  </fileset>
-                </copy>
-                <copy file="${basedir}/target/site/configure_6_0.dtd" tofile="${basedir}/target/site/configure.dtd"/>
-                <copy file="${basedir}/target/site/configure_6_0.dtd" tofile="${basedir}/target/site/configure_1_0.dtd"/>
-                <copy file="${basedir}/target/site/configure_6_0.dtd" tofile="${basedir}/target/site/configure_1_1.dtd"/>
-                <copy file="${basedir}/target/site/configure_6_0.dtd" tofile="${basedir}/target/site/configure_1_2.dtd"/>
               </tasks>
             </configuration>
           </execution>

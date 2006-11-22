@@ -7,125 +7,74 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-public class IFrameTransport extends AbstractTransport
+public class IFrameTransport implements Transport
 {
     PrintWriter _writer;
-    boolean _initialized=false;
-
-    public void setResponse(HttpServletResponse response) throws IOException
+    
+    public void preample(HttpServletResponse response) throws IOException
     {
-        _initialized=false;
-        super.setResponse(response);
-    }
-
-    private void init(Map reply) throws IOException
-    {
-        if (_initialized)
-            return;
-        _initialized=true;
+        response.setContentType("text/html; charset=UTF-8");
+        _writer=response.getWriter();
         
-        String channel=(String)reply.get("channel");
-        if (!"/meta/connect".equals(channel)&&!"/meta/reconnect".equals(channel))
-            reply=null;
-
-        getResponse().setContentType("text/html; charset=UTF-8");
-        _writer=getResponse().getWriter();
-
         _writer.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
         _writer.println("<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">");
         _writer.println("<head>");
         _writer.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></meta>");
         _writer.println("<title>cometd: over jetty</title>");
-
-        if (reply!=null)
-        {
-            _writer.write("<script type=\"text/javascript\">");
-            _writer.write("window.parent.cometd.deliver([");
-            _writer.write(JSON.toString(reply));
-            _writer.write("]);");
-            _writer.write("</script>");
-        }
         _writer.println("</head>");
         _writer.println("<body onload=\"window.parent.cometd.tunnelCollapse();\">");
-        _writer.flush();
     }
 
-    public void send(Map reply) throws IOException
+    public void encode(Map reply) throws IOException
     {
-        if (!_initialized)
-            init(reply);
-        else
-        {
-            _writer.write("<br /><script type=\"text/javascript\">");
-            _writer.write("window.parent.cometd.deliver([");
-            _writer.write(JSON.toString(reply));
-            _writer.write("]);");
-            _writer.write("</script><br/>");
-            for (int i=0; i<16; i++)
-                _writer.write("                                                                                                                                ");
-            _writer.write("<br/>");
-            _writer.flush();
-        }
+        _writer.write("<br /><script type=\"text/javascript\">");
+        _writer.write("window.parent.cometd.deliver('");
+        _writer.write(JSON.toString(reply));
+        _writer.write("');");
+        _writer.write("</script><br/>");
+        for (int i=0;i<16;i++)
+            _writer.write("                                                                                                                                ");
+        _writer.write("<br/>");
     }
 
-    public void send(List replies) throws IOException
+    public void encode(List replies) throws IOException
     {
         if (replies==null)
             return;
-        
-        int m=0;
-        
-        if (!_initialized)
-        {
-            if (replies.size()>0)
-                init((Map)replies.get(m++));
-            else
-                init(null);
-        }
-        
-        if (replies.size()>m)
-        {
-            _writer.write("<br /><script type=\"text/javascript\">");
-            _writer.write("window.parent.cometd.deliver([");
-
-            for (int i=m; i<replies.size(); i++)
-            {
-                
-                
-                // encode((Map)replies.get(i));
-                // do multiple messages in one deliver
-                _writer.write(JSON.toString(replies.get(i)));
-                if (i!=replies.size()-1)
-                    _writer.write(", ");
-            }
-            _writer.write("]);");
-            _writer.write("</script><br/>");
-            for (int i=0; i<16; i++)
-                _writer
-                        .write("                                                                                                                                ");
-            _writer.write("<br/>");
-            _writer.flush();
-        }
+        for (int i=0;i<replies.size();i++)
+            encode((Map)replies.get(i));
     }
 
     public void complete() throws IOException
     {
-        // _writer.write("<script
-        // type=\"text/javascript\">window.parent.cometd.tunnelCollapse();");
-        // _writer.write("</script>");
+        _writer.write("<script type=\"text/javascript\">window.parent.cometd.disconnect()");
+        _writer.write("</script>");
         _writer.write("</body>");
         _writer.write("</html>");
-        _writer.flush();
+
+    }
+
+    public boolean isPolling()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public void setPolling(boolean polling)
+    {
+        // TODO Auto-generated method stub
+
     }
 
     public boolean keepAlive() throws IOException
     {
+        // TODO Auto-generated method stub
         return false;
     }
 
     public void initTunnel(HttpServletResponse response) throws IOException
     {
-        response.setContentType("text/html; charset=utf-8");
+        response.setContentType("text/html; charset=UTF-8");
         _writer=response.getWriter();
         _writer.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"");
         _writer.println(" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");

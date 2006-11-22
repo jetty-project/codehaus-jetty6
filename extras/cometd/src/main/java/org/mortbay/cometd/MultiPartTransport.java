@@ -11,20 +11,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.util.MultiPartWriter;
 
-public class MultiPartTransport extends AbstractTransport
+public class MultiPartTransport implements Transport
 {
     MultiPartWriter _writer;
+    boolean _polling;
     
-    public void setResponse(HttpServletResponse response) throws IOException
+    public void preample(HttpServletResponse response) throws IOException
     {
-        super.setResponse(response);
         response.setCharacterEncoding("utf-8");
         _writer = new MultiPartWriter(response.getWriter());
         response.setContentType(MultiPartWriter.MULTIPART_X_MIXED_REPLACE+"; boundary="+_writer.getBoundary());
-        
     }
     
-    public void send(Map reply) throws IOException
+    public void encode(Map reply) throws IOException
     {
         if (reply!=null)
         {
@@ -34,7 +33,7 @@ public class MultiPartTransport extends AbstractTransport
         }
     }
     
-    public void send(List replies) throws IOException
+    public void encode(List replies) throws IOException
     {
         if (replies!=null)
         {
@@ -50,11 +49,27 @@ public class MultiPartTransport extends AbstractTransport
         _writer.close();
     }
 
+    public boolean isPolling()
+    {
+        return _polling;
+    }
+
+    public void setPolling(boolean polling)
+    {
+        _polling=polling;
+    }
+
     public boolean keepAlive() throws IOException
     {
         _writer.startPart("text/plain; charset=utf-8");
         _writer.write("{}");
         _writer.flush();
         return false;
+    }
+
+    public void initTunnel(HttpServletResponse response) throws IOException
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

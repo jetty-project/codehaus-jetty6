@@ -14,11 +14,7 @@
 
 package org.mortbay.cometd;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -30,7 +26,7 @@ import org.mortbay.util.DateCache;
 /* ------------------------------------------------------------ */
 /**
  * @author gregw
- * 
+ *
  */
 public class Bayeux
 {
@@ -42,29 +38,21 @@ public class Bayeux
     public static final String META_STATUS="/meta/status";
     public static final String META_SUBSCRIBE="/meta/subscribe";
     public static final String META_UNSUBSCRIBE="/meta/unsubscribe";
+    static final String DATA_ATTR="data";
+    static final String CHANNEL_ATTR="channel";
+    static final String TIMESTAMP_ATTR="timestamp";
 
-    public static final String CLIENT_ATTR="clientId";
-    public static final String DATA_ATTR="data";
-    public static final String CHANNEL_ATTR="channel";
-    public static final String TIMESTAMP_ATTR="timestamp";
-    public static final String TRANSPORT_ATTR="transport";
-    public static final String ADVICE_ATTR="advice";
-
-    private static final JSON.Literal __NO_ADVICE = new JSON.Literal("{}");
     HashMap _channels=new HashMap();
     HashMap _clients=new HashMap();
     ServletContext _context;
     DateCache _dateCache=new DateCache();
-    Random _random;
+    Random _random=new Random(System.currentTimeMillis());
     HashMap _handlers=new HashMap();
     HashMap _transports=new HashMap();
-    HashMap _filters=new java.util.HashMap();
-    ArrayList _filterOrder= new ArrayList();
     SecurityPolicy _securityPolicy=new DefaultPolicy();
-    Object _advice = new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":0,\"transport\":{\"long-polling\":{}}}");
 
     {
-        _handlers.put("*",new PublishHandler());
+        _handlers.put("*",new DefaultHandler());
         _handlers.put(META_HANDSHAKE,new HandshakeHandler());
         _handlers.put(META_CONNECT,new ConnectHandler());
         _handlers.put(META_RECONNECT,new ReconnectHandler());
@@ -73,24 +61,15 @@ public class Bayeux
         _handlers.put(META_UNSUBSCRIBE,new UnsubscribeHandler());
         _handlers.put(META_STATUS,new StatusHandler());
         _handlers.put(META_PING,new PingHandler());
-
+        
         _transports.put("iframe",IFrameTransport.class);
+        _transports.put("http-polling",PlainTextJSONTransport.class);
         _transports.put("long-polling",PlainTextJSONTransport.class);
     }
 
     Bayeux(ServletContext context)
     {
         _context=context;
-        try 
-        {
-            _random=SecureRandom.getInstance("SHA1PRNG");
-        }
-        catch (Exception e)
-        {
-            context.log("Could not get secure random for ID generation",e);
-            _random=new Random();
-        }
-        _random.setSeed(_random.nextLong()^hashCode()^(context.hashCode()<<32)^Runtime.getRuntime().freeMemory());
     }
 
     /* ------------------------------------------------------------ */
@@ -103,23 +82,6 @@ public class Bayeux
         return (Channel)_channels.get(id);
     }
 
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param channels A {@link ChannelPattern}
-     * @param filter The filter instance to apply to new channels matching the pattern
-     */
-    public void addFilter(String channels, DataFilter filter)
-    {
-        synchronized (_filters)
-        {
-            ChannelPattern pattern=new ChannelPattern(channels);
-            _filters.put(pattern,filter);
-            _filterOrder.remove(pattern);
-            _filterOrder.add(pattern);
-        }
-    }
-    
     /* ------------------------------------------------------------ */
     /**
      * @param id
@@ -131,15 +93,6 @@ public class Bayeux
         if (channel==null)
         {
             channel=new Channel(id,this);
-            
-            Iterator p = _filterOrder.iterator();
-            while(p.hasNext())
-            {
-                ChannelPattern pattern = (ChannelPattern)p.next();
-                if (pattern.matches(id))
-                    channel.addDataFilter((DataFilter)_filters.get(pattern));
-            }
-            
             _channels.put(id,channel);
         }
         return channel;
@@ -153,27 +106,25 @@ public class Bayeux
     {
         return _channels.keySet();
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param message
+     * @return
+     */
+    Client getClient(Map message)
+    {
+        return getClient((String)message.get("clientId"));
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param client_id
      * @return
      */
-    public synchronized Client getClient(String client_id)
+    public Client getClient(String client_id)
     {
         return (Client)_clients.get(client_id);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param client_id
-     * @return
-     */
-    public synchronized Client newClient()
-    {
-        Client client = new Client(); 
-        _clients.put(client.getId(),client); 
-        return client;
     }
 
     /* ------------------------------------------------------------ */
@@ -184,7 +135,7 @@ public class Bayeux
     {
         return _clients.keySet();
     }
-
+    
     /* ------------------------------------------------------------ */
     /**
      * @return
@@ -229,40 +180,26 @@ public class Bayeux
      * @param message
      * @return
      */
-    void handle(Client client, Transport transport, Map message)
-        throws IOException
+    Map handle(Client client, Transport transport, Map message)
     {
-        String channel_id=(String)message.get(CHANNEL_ATTR);
-        
+        String channel_id=(String)message.get("channel");
+
+        Map response=new HashMap();
+        response.put("channel",channel_id);
         Handler handler=(Handler)_handlers.get(channel_id);
         if (handler==null)
             handler=(Handler)_handlers.get("*");
 
-        handler.handle(client,transport,message);
-    }
-    
-    /* ------------------------------------------------------------ */
-    void advise(Client client, Transport transport, Object advice) throws IOException
-    {
-        if (advice==null)
-            advice=_advice;
-        if (advice==null)
-            advice=__NO_ADVICE;
-        String connection_id="/meta/connections/"+client.getId();
-        Map reply=new HashMap();
-        reply.put(CHANNEL_ATTR,connection_id);
-        reply.put("connectionId",connection_id);
-        reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
-        reply.put("successful",Boolean.TRUE);
-        reply.put(ADVICE_ATTR,advice);
-        transport.send(reply);
+        if (!handler.handle(client,transport,message,response))
+            return null;
+
+        return response;
     }
 
     /* ------------------------------------------------------------ */
-    long getRandom(long variation)
+    long getRandom()
     {
-        long l=_random.nextLong()^variation;
-        return l<0?-l:l;
+        return _random.nextLong();
     }
 
     /* ------------------------------------------------------------ */
@@ -276,31 +213,26 @@ public class Bayeux
     {
         _securityPolicy=securityPolicy;
     }
-
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private interface Handler
     {
-        void handle(Client client, Transport transport, Map message)
-            throws IOException;
+        boolean handle(Client client, Transport transport, Map message, Map reply);
     }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private class ConnectHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message)
-           throws IOException
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
-            Map reply=new HashMap();
-            reply.put(CHANNEL_ATTR,META_CONNECT);
-            
             if (client==null)
                 throw new IllegalStateException("No client");
             String type=(String)message.get("connectionType");
             client.setConnectionType(type);
-            String connection_id="/meta/connections/"+client.getId();
-            Channel channel=getChannel(connection_id);
+            String channel_id="/meta/connections/"+client.getId();
+            Channel channel=getChannel(channel_id);
             if (channel!=null)
             {
                 channel.addSubscriber(client);
@@ -312,36 +244,27 @@ public class Bayeux
                 reply.put("successful",Boolean.FALSE);
                 reply.put("error","unknown client ID");
             }
-            reply.put("connectionId",connection_id);
+            reply.put("connectionId",channel_id);
             reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
-            transport.send(reply);
             transport.setPolling(true);
+            return true;
         }
     }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class PublishHandler implements Handler
+    private class DefaultHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message)
-            throws IOException
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
             String channel_id=(String)message.get("channel");
 
             Channel channel=getChannel(channel_id);
             Object data=message.get("data");
 
-            if (client==null)
+            if (channel!=null&&data!=null && _securityPolicy.canSend(client,channel,message))
             {
-               if (_securityPolicy.authenticate((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken")))
-                   client=newClient();
-            }
-            
-            Map reply=new HashMap();
-            reply.put(CHANNEL_ATTR,channel_id);
-            if (channel!=null&&data!=null&&_securityPolicy.canSend(client,channel,message))
-            {
-                channel.publish(data,client);
+                channel.send(data);
                 reply.put("successful",Boolean.TRUE);
                 reply.put("error","");
             }
@@ -350,7 +273,8 @@ public class Bayeux
                 reply.put("successful",Boolean.FALSE);
                 reply.put("error","unknown channel");
             }
-            transport.send(reply);
+
+            return true;
         }
     }
 
@@ -358,8 +282,9 @@ public class Bayeux
     /* ------------------------------------------------------------ */
     private class DisconnectHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message)
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
+            return false;
         }
     }
 
@@ -367,40 +292,27 @@ public class Bayeux
     /* ------------------------------------------------------------ */
     private class HandshakeHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message)
-            throws IOException
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
             if (client!=null)
                 throw new IllegalStateException();
 
-            if (_securityPolicy.authenticate((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken")))
-                client=newClient();
+            client=new Client();
+            _clients.put(client.getId(),client);
 
-            Map reply=new HashMap();
-            reply.put(CHANNEL_ATTR,META_HANDSHAKE);
+            String channel_id="/meta/connections/"+client.getId();
+            Channel channel=new Channel(channel_id,Bayeux.this);
+            _channels.put(channel_id,channel);
+
+            // TODO actually do authentication
+
+            reply.put("supportedConnectionTypes",new String[]
+            { "long-polling" });
+            reply.put("authSuccessful",Boolean.TRUE);
+            reply.put("clientId",client.getId());
             reply.put("version",new Double(0.1));
             reply.put("minimumVersion",new Double(0.1));
-            
-            if (client!=null)
-            {
-                String connection_id="/meta/connections/"+client.getId();
-                Channel channel=new Channel(connection_id,Bayeux.this);
-                _channels.put(connection_id,channel);
-
-                reply.put("supportedConnectionTypes",new String[] { "long-polling", "iframe" });
-                reply.put("authSuccessful",Boolean.TRUE);
-                reply.put(CLIENT_ATTR,client.getId());
-                if (_advice!=null)
-                    reply.put(ADVICE_ATTR,_advice);
-            }
-            else
-            {
-                reply.put("authSuccessful",Boolean.FALSE);
-                if (_advice!=null)
-                    reply.put(ADVICE_ATTR,_advice);
-            }
-
-            transport.send(reply);
+            return true;
         }
     }
 
@@ -408,9 +320,9 @@ public class Bayeux
     /* ------------------------------------------------------------ */
     private class PingHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message)
-        throws IOException
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
+            return false;
         }
     }
 
@@ -418,36 +330,22 @@ public class Bayeux
     /* ------------------------------------------------------------ */
     private class ReconnectHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message)
-        throws IOException
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
             // TODO check other parameters.
 
-            String connection_id="/meta/connections/"+message.get(CLIENT_ATTR);
-            Map reply=new HashMap();
-            reply.put(CHANNEL_ATTR,META_RECONNECT);
-            reply.put("connectionId",connection_id);
-            reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
-            
             if (client==null)
-            {
-                reply.put("successful",Boolean.FALSE);
-                reply.put("error","unknown clientID");
-                if (_advice!=null)
-                    reply.put(ADVICE_ATTR,_advice);
-                transport.setPolling(false);
-                transport.send(reply);
-            }
-            else
-            {
-                String type=(String)message.get("connectionType");
-                if (type!=null)
-                    client.setConnectionType(type); 
-                reply.put("successful",Boolean.TRUE);
-                reply.put("error","");
-                transport.setPolling(true);
-                transport.send(reply);
-            }
+                throw new IllegalStateException("No client");
+            String type=(String)message.get("connectionType");
+            client.setConnectionType(type);
+            String channel_id="/meta/connections/"+client.getId();
+            reply.put("successful",Boolean.TRUE);
+            reply.put("error","");
+            reply.put("connectionId",channel_id);
+            reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
+            transport.setPolling(true);
+            return true; // TODO - this should be true... once JSON arrays
+                            // can be handled by javascript.
         }
     }
 
@@ -455,9 +353,9 @@ public class Bayeux
     /* ------------------------------------------------------------ */
     private class StatusHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message)
-        throws IOException
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
+            return false;
         }
     }
 
@@ -465,43 +363,40 @@ public class Bayeux
     /* ------------------------------------------------------------ */
     private class SubscribeHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message) 
-            throws IOException
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
             if (client==null)
                 throw new IllegalStateException("No client");
 
             String channel_id=(String)message.get("subscription");
-
+            
             // select a random channel ID if none specifified
             if (channel_id==null)
             {
-                channel_id=Long.toString(getRandom(message.hashCode()^client.hashCode()),36);
-                while (getChannel(channel_id)!=null)
-                    channel_id=Long.toString(getRandom(message.hashCode()^client.hashCode()),36);
+                channel_id=Long.toString(getRandom(),36);
+                while(getChannel(channel_id)!=null)
+                    channel_id=Long.toString(getRandom(),36);          
             }
-
+            
             // get the channel (or create if permitted)
             Channel channel=getChannel(channel_id);
-            if (channel==null&&_securityPolicy.canCreate(client,channel,message))
+            if (channel==null && _securityPolicy.canCreate(client,channel,message))
                 channel=newChannel(channel_id);
-
-            Map reply=new HashMap();
-            reply.put(CHANNEL_ATTR,channel_id);
-            reply.put("subscription",channel.getId());
             
-            if (channel!=null&&_securityPolicy.canSubscribe(client,channel,message))
+            if (channel!=null && _securityPolicy.canSubscribe(client,channel,message))
             {
                 channel.addSubscriber(client);
+                reply.put("subscription",channel.getId());
                 reply.put("successful",Boolean.TRUE);
                 reply.put("error","");
             }
             else
             {
+                reply.put("subscription",channel.getId());
                 reply.put("successful",Boolean.FALSE);
                 reply.put("error","cannot subscribe");
             }
-            transport.send(reply);
+            return true;
         }
     }
 
@@ -509,23 +404,20 @@ public class Bayeux
     /* ------------------------------------------------------------ */
     private class UnsubscribeHandler implements Handler
     {
-        public void handle(Client client, Transport transport, Map message) 
-            throws IOException
+        public boolean handle(Client client, Transport transport, Map message, Map reply)
         {
             if (client==null)
-                return;
+                return false;
 
             String channel_id=(String)message.get("subscription");
             Channel channel=getChannel(channel_id);
             if (channel!=null)
                 channel.removeSubscriber(client);
 
-            Map reply=new HashMap();
-            reply.put(CHANNEL_ATTR,channel_id);
             reply.put("subscription",channel.getId());
             reply.put("successful",Boolean.TRUE);
             reply.put("error","");
-            transport.send(reply);
+            return true;
         }
     }
 
@@ -536,27 +428,18 @@ public class Bayeux
 
         public boolean canCreate(Client client, Channel channel, Map message)
         {
-            return client!=null;
-            // TODO return !channel.getId().startsWith("/meta/");
+            return true;
         }
 
         public boolean canSubscribe(Client client, Channel channel, Map message)
         {
-            return client!=null;
-            // TODO return !channel.getId().startsWith("/meta/");
-        }
-
-        public boolean canSend(Client client, Channel channel, Map message)
-        {
-            return client!=null;
-            //TODO return !channel.getId().startsWith("/meta/");
-        }
-
-        public boolean authenticate(String scheme, String user, String credentials)
-        {
-            // TODO Auto-generated method stub
             return true;
         }
-
+        
+        public boolean canSend(Client client, Channel channel, Map message)
+        {
+            return true;
+        }
+        
     }
 }

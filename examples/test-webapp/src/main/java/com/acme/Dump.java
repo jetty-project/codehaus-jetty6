@@ -104,7 +104,6 @@ public class Dump extends HttpServlet
         // Handle a dump of data
         String data= request.getParameter("data");
         String block= request.getParameter("block");
-        String dribble= request.getParameter("dribble");
         if (data != null && data.length() > 0)
         {
             int d=Integer.parseInt(data);
@@ -137,21 +136,6 @@ public class Dump extends HttpServlet
                     out.write(buf,0,d);
                     d=0;
                 }
-                
-                if (dribble!=null)
-                {
-                    out.flush();
-                    try
-                    {
-                        Thread.sleep(Long.parseLong(dribble));
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-                
             }
             
             return;
@@ -197,10 +181,7 @@ public class Dump extends HttpServlet
         if (buffer != null && buffer.length() > 0)
             response.setBufferSize(Integer.parseInt(buffer));
 
-        String charset= request.getParameter("charset");
-        if (charset==null)
-            charset="UTF-8";
-        response.setCharacterEncoding(charset);
+        response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html");
 
         if (info != null && info.indexOf("Locale/") >= 0)
@@ -257,7 +238,7 @@ public class Dump extends HttpServlet
         }
         catch(IllegalStateException e)
         {
-            pout=new PrintWriter(new OutputStreamWriter(response.getOutputStream(),charset));
+            pout=new PrintWriter(new OutputStreamWriter(response.getOutputStream(),"UTF-8"));
         }
         
         
@@ -414,7 +395,7 @@ public class Dump extends HttpServlet
             if (!"application/x-www-form-urlencoded".equals(request.getContentType()))
             {
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"left\" valign=\"top\" colspan=\"2\"><big><br/>Content:</big></th>");
+                pout.write("<th align=\"left\" colspan=\"2\"><big><br/>Content:</big></th>");
                 pout.write("</tr><tr>\n");
                 pout.write("<td><pre>");
                 byte[] content= new byte[4096];
@@ -444,7 +425,7 @@ public class Dump extends HttpServlet
             {
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\" valign=\"top\">"+name+":&nbsp;</th>");
+                pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
                 pout.write("<td>"+"<pre>" + toString(request.getAttribute(name)) + "</pre>"+"</td>");
             }            
 
@@ -457,7 +438,7 @@ public class Dump extends HttpServlet
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
                 pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
-                pout.write("<td>"+ toString(getInitParameter(name)) +"</td>");
+                pout.write("<td>"+"<pre>" + toString(getInitParameter(name)) + "</pre>"+"</td>");
             }
 
             pout.write("</tr><tr>\n");
@@ -468,7 +449,7 @@ public class Dump extends HttpServlet
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
                 pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
-                pout.write("<td>"+ toString(getServletContext().getInitParameter(name)) + "</td>");
+                pout.write("<td>"+"<pre>" + toString(getServletContext().getInitParameter(name)) + "</pre>"+"</td>");
             }
 
             pout.write("</tr><tr>\n");
@@ -478,7 +459,7 @@ public class Dump extends HttpServlet
             {
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\" valign=\"top\">"+name+":&nbsp;</th>");
+                pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
                 pout.write("<td>"+"<pre>" + toString(getServletContext().getAttribute(name)) + "</pre>"+"</td>");
             }
 
@@ -526,11 +507,11 @@ public class Dump extends HttpServlet
             
             pout.write("<br/>");
             pout.write("<h2>International Characters (UTF-8)</h2>");
-            pout.write("LATIN LETTER SMALL CAPITAL AE<br/>\n");
-            pout.write("Directly uni encoded(\\u1d01): \u1d01<br/>");
+            pout.write("MODIFIER LETTER CAPITAL AE<br/>\n");
+            pout.write("Directly uni encoded(\\u1d2d): \u1d2d<br/>");
             pout.write("HTML reference (&amp;AElig;): &AElig;<br/>");
-            pout.write("Decimal (&amp;#7425;): &#7425;<br/>");
-            pout.write("Javascript unicode (\\u1d01) : <script language='javascript'>document.write(\"\u1d01\");</script><br/>");
+            pout.write("Decimal (&amp;#7469;): &#7469;<br/>");
+            pout.write("Javascript unicode (\\u1d2d) : <script language='javascript'>document.write(\"\u1d2d\");</script><br/>");
             pout.write("<br/>");
             pout.write("<h2>Form to generate GET content</h2>");
             pout.write("<form method=\"GET\" action=\""+response.encodeURL(getURI(request))+"\">");

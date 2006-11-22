@@ -3,12 +3,12 @@ package org.mortbay.cometd.filter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.mortbay.util.StringUtil;
-
+import org.mortbay.cometd.JSONDataFilter;import org.mortbay.util.StringUtil;
+;
 
 public class NoScriptsFilter extends JSONDataFilter
 {
-    private static Pattern __script=Pattern.compile("<\\s*[Ss][Cc][Rr][Ii][Pp][Tt]");
+    private static Pattern __script=Pattern.compile("<\\s*script");
 
     protected Object filterString(String string)
     {

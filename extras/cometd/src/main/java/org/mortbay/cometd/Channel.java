@@ -16,7 +16,6 @@ package org.mortbay.cometd;
 
 import java.util.HashMap;
 
-import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 public class Channel
@@ -89,22 +88,10 @@ public class Channel
     /**
      * @param data
      */
-    public void publish(Object data, Client from)
+    public void send(Object data)
     {
-        try
-        {
-            for (int f=0;f<LazyList.size(_dataFilters);f++)
-            {
-                data=((DataFilter)LazyList.get(_dataFilters,f)).filter(data, from);
-                if (data==null)
-                    return;
-            }
-        }
-        catch (IllegalStateException e)
-        {
-            Log.debug(e);
-            return;
-        }
+        for (int f=0;data!=null && f<LazyList.size(_dataFilters);f++)
+            data=((DataFilter)LazyList.get(_dataFilters,f)).filter(data);
         
         HashMap msg = new HashMap();
         msg.put(Bayeux.CHANNEL_ATTR,_id);
@@ -118,7 +105,7 @@ public class Channel
             msg.put("id",Long.toString(id,36)+Long.toString(_nextMsgId++,36));
             int subscribers=LazyList.size(_subscribers);
             for (int i=0;i<subscribers;i++)
-                ((Client)LazyList.get(_subscribers,i)).deliver(msg);
+                ((Client)LazyList.get(_subscribers,i)).send(msg);
         }
     }
     
@@ -132,8 +119,8 @@ public class Channel
      */
     public String getToken(Client client, boolean subscribe, boolean send, boolean oneTime)
     {
-        String token=Long.toString(_bayeux.getRandom(client.hashCode()),36);
-        // TODO register somewhere ?
+        String token=Long.toString(_bayeux.getRandom(),36);
+        // TODO register somewher
         return token;
     }
     

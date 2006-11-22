@@ -83,7 +83,7 @@ public class Client
     }
 
     /* ------------------------------------------------------------ */
-    void deliver(Map message)
+    void send(Map message)
     {
         synchronized (this)
         {

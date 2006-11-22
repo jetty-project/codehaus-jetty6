@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Server Project</name>
-  <version>6.1-SNAPSHOT</version>
+  <version>6.0-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -82,13 +82,6 @@
       <email>ngonzalez@exist.com</email>
       <organization />
     </developer>
-    <developer>
-      <id>jfarcand</id>
-      <name>Jeanfrancois Arcand</name>
-      <email>jfarcand@apache.org</email>
-      <organization>Sun Microsystems</organization>
-      <organizationUrl>http://www.sun.com</organizationUrl>
-    </developer>
   </developers>
   <licenses>
     <license>
@@ -97,9 +90,9 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
-    <url>http://fisheye.codehaus.org/viewrep/jetty/</url>
+    <connection>scm:svn:https://svn.codehaus.org/jetty/jetty</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty</developerConnection>
+    <url>https://svn.codehaus.org/jetty/jetty</url>
   </scm>
   <organization>
     <name>Mort Bay Consulting</name>
@@ -150,35 +143,35 @@
           <tagBase>https://svn.codehaus.org/jetty/jetty/tags</tagBase>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-one-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>install-maven-one-repository</goal>
+              <goal>deploy-maven-one-repository</goal>
+            </goals>
+            <configuration>
+              <remoteRepositoryUrl>scpexe://jetty.mortbay.org/home/ftp/pub/maven</remoteRepositoryUrl>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.1</version>
         <configuration>
           <archive>
             <manifestEntries>
-              <mode>development</mode>
+              <mode>stable</mode>
               <url>${pom.url}</url>
 	      <implementation-version>${pom.version}</implementation-version>
 	      <package>org.mortbay</package>
             </manifestEntries>
           </archive>
         </configuration>
-      </plugin>
-
-      <plugin>
-	<inherited>true</inherited>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-source-plugin</artifactId>
-	<executions>
-	  <execution>
-	    <id>attach-sources</id>
-	    <goals>
-	      <goal>jar</goal>
-	    </goals>
-	  </execution>
-	</executions>
       </plugin>
 
       <!-- plugin>
@@ -211,25 +204,30 @@
     <module>modules/management</module>
     <module>modules/start</module>
     <module>modules/maven-plugin</module>
-    <module>modules/jspc-maven-plugin</module>
     <module>modules/naming</module>
     <module>modules/plus</module>
     <module>modules/html</module>
     <module>extras/xbean</module>
     <module>extras/cometd</module>
-    <module>extras/cometd-demo</module>
     <module>extras/spring</module>
-    <module>extras/grizzly</module>
-    <module>extras/sslengine</module>
-    <module>extras/ajp</module>
-    <module>extras/setuid</module>
-    <module>extras/client</module>
+    <!-- module>extras/grizzly</module-->
+    <!-- module>extras/sslengine</module-->
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
     <module>examples/test-jndi-webapp</module>
     <module>examples/embedded</module>
-    <module>extras/tests</module>
   </modules>
+
+  <repositories>
+    <repository>
+      <id>mergere-public-repository</id>
+      <url>http://repo.mergere.com/maven2</url>
+    </repository>
+    <repository>
+      <id>ibiblio-public-repository</id>
+      <url>http://www.ibiblio.org/maven2</url>
+    </repository>
+  </repositories>
 
   <reporting>
     <outputDirectory>target/site</outputDirectory>
