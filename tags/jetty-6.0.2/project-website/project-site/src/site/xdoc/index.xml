@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<document>
+  <properties>
+    <title>Jetty WebServer</title>
+  </properties>
+  <link REL="icon" HREF="./images/jicon.gif" TYPE="image/gif"/>
+  <body>
+     <iframe src="http://www.webtide.com/include/inc_blogs.jsp" class="study">
+       <a href="http://blogs.webtide.com">Blogs about Jetty.</a>
+    </iframe>
+    <iframe src="http://www.webtide.com/include/inc_offers.jsp" class="offers">
+       <a href="http://www.webtide.com">Webtide special offers</a>
+    </iframe>
+
+<div class="summary">
+ <div class="news"></div>
+<p>
+<span>Jetty</span> is an open-source, standards-based, full-featured web server implemented entirely in java. It is released under the <a href="LICENSE.TXT">Apache 2.0</a> licence and is therefore free for commercial use and distribution. 
+First created in 1995, Jetty has benefitted from input from a vast user community and consistent and focussed development by a stable core of lead developers. 
+Full commercial 24x7 support, training and development services for Jetty are available from <a href="http://www.webtide.com">Webtide</a>.
+</p>
+<p>
+Jetty can be used as:
+<ul>
+  <li>a stand-alone traditional web server for static and dynamic content</li>
+  <li>a dynamic content server behind a dedicated HTTP server such as Apache using mod_proxy</li>
+  <li>an embedded component within a java application</li>
+</ul>
+</p>
+<p>
+This flexibility means that Jetty can be encountered in a number of different contexts:  
+ <ul>
+  <li>shipped with products to provide out-of-the-box useability eg  <a href="http://tapestry.sourceforge.net">Tapestry</a>, <a href="http://www.liferay.com/">Liferay</a></li>
+  <li>distributed on CDs with books to make examples and exercises ready-to-run</li>
+  <li>incorporated into applications as a HTTP transport eg <a href="http://www.jxta.org/">JXTA</a>, <a href="http://www.mx4j.org">MX4J</a></li>
+  <li>integrated as a web container in J2EE app servers eg <a href="http://www.objectweb.org/jonas/index.html">JOnAS</a>, <a href="http://geronimo.apache.org">Geronimo</a>, <a href="http://sourceforge.net/projects/jboss//">JBoss</a>, <a href="http://www.huihoo.org/jfox">JFox</a></li>
+  <li>included as a component of an application eg <a href="http://maven.apache.org/continuum">Continuum</a>, <a href="http://www.cenqua.com/fisheye">FishEye</a>, <a href="http://maven.apache.org">Maven</a></li>
+ </ul>
+</p>
+<p>
+There are many more examples of Jetty in action on the  <a href="http://www.mortbay.com/mortbay/powered.html">Jetty Powered Page</a>. However, as Jetty aims to be as unobtrusive as possible, countless websites and products are based around Jetty, but Jetty is invisible!
+</p>
+<p>
+Some of the defining features of Jetty are:
+</p>
+<div class="feature">
+<h2>Simplicity</h2>
+The guiding principle of Jetty could be said to be "simplicity not complexity". We want to make Jetty easy to understand and use: 
+<ul>
+  <li>Configuration is either by API or by xml file</li>
+  <li>Xml file syntax is a straightforward mapping from the API operating on POJOs</li>
+  <li>Default configuration files make Jetty useable out-of-the-box</li>
+  <li>Minimal number of lines required to embed a Jetty instance</li>
+</ul>
+</div>
+
+<div class="feature">
+<h2>Efficiency</h2>
+A lot of effort goes into optimizing Jetty's performance and crafting the code so as to make the footprint as small as possible:
+<ul>
+<li>Dependencies are kept to the absolute minimum</li>
+<li>The core is kept small with extra functionality in optional jars</li>
+<li>Scalability is a key concern</li>
+<li>Performance degrades gracefully under stress</li>
+</ul>
+</div>
+<div class="feature">
+<h2>Embeddability</h2>
+Jetty is designed to be a good component. This means that it can easily be embedded in an application without forcing the application to adapt to it:
+  <ul>
+    <li>Usage of dependency injection and inversion of control patterns</li>
+  </ul>
+</div>
+<div class="feature">
+<h2>Pluggability</h2>
+Jetty is architected for pluggability. The API allows different implementations of all of the principal Jetty components to be selected. At least one, but sometimes more, implementations of a component are always provided. However if these do not meet your needs, you are free to code your own using the interfaces and abstract classes as a basis. This means that Jetty can be easily customised to a particular application environment. This is particularly useful when Jetty is acting as the web container in a J2EE server, as Jetty's pluggability ensures a tight integration with a host container. 
+</div>
+</div>
+  </body>
+</document>
