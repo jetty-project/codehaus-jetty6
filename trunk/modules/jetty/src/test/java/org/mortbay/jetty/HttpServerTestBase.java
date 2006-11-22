@@ -384,11 +384,9 @@ public class HttpServerTestBase extends TestCase
             }
             finally
             {
-                System.err.println("stopping "+d);
                 // Shut down
                 server.stop();
                 Thread.yield();
-                System.err.println("stopped "+d);
             }
         }
     }
