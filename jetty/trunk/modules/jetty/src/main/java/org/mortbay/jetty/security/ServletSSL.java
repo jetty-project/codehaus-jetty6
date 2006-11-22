@@ -60,6 +60,8 @@ public class ServletSSL
         // Roughly ordered from most common to least common.
         if (cipherSuite == null)
             return 0;
+        else if (cipherSuite.indexOf("WITH_AES_256_") >= 0)
+            return 256;
         else if (cipherSuite.indexOf("WITH_RC4_128_") >= 0)
             return 128;
         else if (cipherSuite.indexOf("WITH_AES_128_") >= 0)
