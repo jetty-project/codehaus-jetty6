@@ -32,10 +32,11 @@ import org.mortbay.log.Log;
 
 /**
  * @author Greg Wilkins
- * @author Markus Kobler  markus(at)inquisitive-mind.com
+ * @author Markus Kobler markus(at)inquisitive-mind.com
  * 
  */
-public class Ajp13SocketConnector extends SocketConnector {
+public class Ajp13SocketConnector extends SocketConnector
+{
 
     public Ajp13SocketConnector()
     {
@@ -44,22 +45,26 @@ public class Ajp13SocketConnector extends SocketConnector {
         super.setResponseBufferSize(Ajp13Packet.MAX_DATA_SIZE);
     }
 
-    protected void doStart() throws Exception {
-        Log.info("AJP13 is not a secure protocol. Please protect port {}", Integer.toString(getPort()));
+    protected void doStart() throws Exception
+    {
+        Log.info("AJP13 is not a secure protocol. Please protect port {}",Integer.toString(getPort()));
         super.doStart();
     }
 
-    protected HttpConnection newHttpConnection(EndPoint endpoint) {
-        return new Ajp13Connection(this, endpoint, getServer());
+    protected HttpConnection newHttpConnection(EndPoint endpoint)
+    {
+        return new Ajp13Connection(this,endpoint,getServer());
     }
 
     // Secured on a packet by packet bases not by connection
-    public boolean isConfidential(Request request) {
+    public boolean isConfidential(Request request)
+    {
         throw new UnsupportedOperationException();
     }
 
     // Secured on a packet by packet bases not by connection
-    public boolean isIntegral(Request request) {
+    public boolean isIntegral(Request request)
+    {
         throw new UnsupportedOperationException();
     }
 
@@ -77,32 +82,34 @@ public class Ajp13SocketConnector extends SocketConnector {
     {
         Log.debug(Log.IGNORED);
     }
-    
+
     /* TODO temp main - just to help testing */
-    public static void main(String[] args)
-        throws Exception
+    public static void main(String[] args) throws Exception
     {
-        Server server = new Server();
-        
-        SocketConnector socketConnector = new SocketConnector();
+        Server server=new Server();
+
+        SocketConnector socketConnector=new SocketConnector();
         socketConnector.setPort(8080);
-        
-        Ajp13SocketConnector connector=new Ajp13SocketConnector(); 
-        
+
+        Ajp13SocketConnector connector=new Ajp13SocketConnector();
+
         connector.setPort(8009);
-        server.setConnectors(new Connector[]{socketConnector, connector});
-        HandlerCollection handlers = new HandlerCollection();
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        handlers.setHandlers(new Handler[]{contexts,new DefaultHandler()});
+        server.setConnectors(new Connector[]
+        { socketConnector, connector });
+        HandlerCollection handlers=new HandlerCollection();
+        ContextHandlerCollection contexts=new ContextHandlerCollection();
+        handlers.setHandlers(new Handler[]
+        { contexts, new DefaultHandler() });
         server.setHandler(handlers);
-        
-        HashUserRealm userRealm = new HashUserRealm();
+
+        HashUserRealm userRealm=new HashUserRealm();
         userRealm.setName("Test Realm");
         userRealm.setConfig("../../etc/realm.properties");
-        server.setUserRealms(new UserRealm[]{userRealm});
-        
+        server.setUserRealms(new UserRealm[]
+        { userRealm });
+
         WebAppContext.addWebApplications(server,"../../webapps","../../etc/webdefault.xml",false,false);
-        
+
         server.start();
         server.join();
     }
