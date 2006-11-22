@@ -1,23 +1,63 @@
 
 jetty-6.1-SNAPSHOT
-    + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
-    + fixed NIO endpoint flush. Avoid duplicate sends
-    + Upgraded session ID generation to use SecureRandom
-    + Merged refactored AJP
 
 jetty-6.0-SNAPSHOT
-    + ensure setContextPath() works when invoked from jetty-web.xml
-    + ensure sessions nulled out on request recycle; ensure session null after invalidate
-    + ensure "" returned for ServletContext.getContextPath() for root context
-    + Fixed tld parsing for maven plugin
-    + JETTY-129 ServletContextListeners called after servlets are initialized
-    + change examples/test-jndi-webapp so it can be regularly built
+
+jetty-6.1.0pre3 - 22 November 2006
+    + fixed NIO endpoint flush. Avoid duplicate sends
+    + Merged refactored AJP
+    + Upgraded session ID generation to use SecureRandom
+    + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
+
+jetty-6.0.2 - 22 November 2006
+    + Moved all modules updates from 6.1pre2 to 6.0
+    + Added concept of bufferred endpoint
+    + Added conversion Object -> ObjectName for the result of method calls made on MBeans
+    + Added DataFilter configuration to cometd
     + added examples/test-jaas-webapp
-    + (re)make JAAS classes available to webapp classloader
-    + Reverted UnixCrypt to use coersions (that effected results)
+    + Added extraClassPath to WebAppContext
+    + Added hierarchical destroy of mbeans
+    + Added ID constructor to AbstractSessionManager.Session
+    + added isStopped() in LifeCycle and AbstractLifeCycle
+    + Added override descriptor for deployment of RO webapps
+    + add <Property> replacement in jetty xml config files
+    + alternate optimizations of writer (use -Dbuffer.writers=true)
+    + Allow session cookie to be refreshed
+    + Apply queryEncoding to getQueryString
+    + CGI example in test webapp
+    + change examples/test-jndi-webapp so it can be regularly built
+    + Default soLinger is -1 (disabled)
+    + ensure "" returned for ServletContext.getContextPath() for root context
+    + ensure sessions nulled out on request recycle; ensure session null after invalidate
+    + ensure setContextPath() works when invoked from jetty-web.xml
+    + fixed NIO endpoint flush. Avoid duplicate sends
+    + Fixed NPE in bio.SocketEndPoint.getRemoteAddr()
+    + Fixed resource cache flushing
+    + Fixed tld parsing for maven plugin
+    + HttpGenerator can generate requests
+    + Improved *-mbean.properties files and specialized some MBean
+    + JETTY-118 ignore extra content after close.
+    + JETTY-119 cleanedup Security optimizatoin
+    + JETTY-123 handle windows UNC paths
+    + JETTY-126 handle content > Integer.MAX_VALUE
+    + JETTY-129 ServletContextListeners called after servlets are initialized
+    + JETTY-151 Idle timeout only applies to blocking operations
+    + JETTY-151 refactored writers
     + JETTY-171 Fixed filter mapping
     + JETTY-172 use getName() instead of toString
     + JETTY-173 restore servletpath after dispatch
+    + Major refactor of SelectChannel EndPoint for client selector
+    + make .tag files work in packed wars
+    + Plugin shutdown context before stopping it.
+    + Refactored session lifecycle and additional tests
+    + release resource lookup in Default servlet
+    + (re)make JAAS classes available to webapp classloader
+    + Reverted UnixCrypt to use coersions (that effected results)
+    + Session IDs can change worker ID
+    + Simplified ResourceCache and Default servlet
+    + SocketConnector closes all connections in doStop
+    + Upgraded session ID generation to use SecureRandom
+    + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
 
 jetty-6.1.0pre2 - 20 Nov 2006
     + Added extraClassPath to WebAppContext
