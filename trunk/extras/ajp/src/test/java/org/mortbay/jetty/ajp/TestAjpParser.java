@@ -26,7 +26,7 @@ public class TestAjpParser extends TestCase
         
         EndPoint endp = new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
         
-        Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),null);
+        Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
         
         parser.parseAvailable();
         
