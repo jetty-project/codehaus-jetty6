@@ -22,10 +22,10 @@ import com.sun.enterprise.web.connector.grizzly.SelectorThread;
 import com.sun.enterprise.web.connector.grizzly.StreamAlgorithm;
 import com.sun.enterprise.web.connector.grizzly.XAReadTask;
 import com.sun.enterprise.web.connector.grizzly.algorithms.NoParsingAlgorithm;
+import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 
@@ -67,6 +67,22 @@ public class JettySelectorThread extends SelectorThread
         }
     }
 
+    
+    /**
+     * Initialize <code>JeetySelectorReadThread</code> used to process
+     * OP_READ operations.
+     */
+    protected void initMultiSelectors() throws IOException,InstantiationException 
+    {
+        for (int i = 0; i < readThreads.length; i++) 
+        {
+            readThreads[i] = new JettyMultiSelectorThread();
+            ((JettyMultiSelectorThread)readThreads[i]).countName = i;
+            configureReadThread((JettyMultiSelectorThread)readThreads[i]);
+        }
+    }
+    
+    
     /**
      * Force Grizzly to use the <code>JettyStreamAlgorithm</code>
      * implementation by default.
