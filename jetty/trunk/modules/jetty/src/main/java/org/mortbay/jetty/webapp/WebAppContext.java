@@ -32,12 +32,8 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -129,7 +125,7 @@ public class WebAppContext extends Context
      * @param extract If true, extract war files
      * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
      * @exception IOException 
-     * @deprecated use {@link WebAppDeployer} or {@link ContextDeployer}
+     * @deprecated use {@link org.mortbay.jetty.deployer.WebAppDeployer} or {@link org.mortbay.jetty.deployer.ContextDeployer}
      */
     public static void addWebApplications(Server server,
                                           String webapps,
@@ -159,7 +155,7 @@ public class WebAppContext extends Context
      * @exception IOException 
      * @throws IllegalAccessException 
      * @throws InstantiationException 
-     * @deprecated use {@link WebAppDeployer} or {@link ContextDeployer}
+     * @deprecated use {@link org.mortbay.jetty.deployer.WebAppDeployer} or {@link org.mortbay.jetty.deployer.ContextDeployer}
      */
     public static void addWebApplications(Server server,
                                           String webapps,
