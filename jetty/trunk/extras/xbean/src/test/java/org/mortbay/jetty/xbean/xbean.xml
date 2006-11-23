@@ -23,6 +23,10 @@
         </requestLog>
       </requestLogHandler>
     </handlers>
+    
+    <deployers>
+    	<hotDeployer directory="${java.io.tmpdir}/deploy" />
+    </deployers>
 
     <userRealms>
       <jaasUserRealm  name="xyzrealm" loginModuleName="xyz" />
