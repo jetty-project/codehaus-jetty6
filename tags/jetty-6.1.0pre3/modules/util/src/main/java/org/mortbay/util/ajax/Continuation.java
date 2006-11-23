@@ -84,6 +84,12 @@ public interface Continuation
     public boolean isPending();
     
     /* ------------------------------------------------------------ */
+    /** Get the resumed status?
+     * @return True if the continuation is has been resumed.
+     */
+    public boolean isResumed();
+    
+    /* ------------------------------------------------------------ */
     /** Arbitrary object associated with the continuation for context.
      * @return An arbitrary object associated with the continuation
      */

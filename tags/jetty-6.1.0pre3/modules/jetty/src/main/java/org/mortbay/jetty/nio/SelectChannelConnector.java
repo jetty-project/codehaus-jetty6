@@ -338,6 +338,11 @@ public class SelectChannelConnector extends AbstractNIOConnector
             return _pending;
         }
 
+        public boolean isResumed()
+        {
+            return _pending;
+        }
+
         public void reset()
         {
             synchronized (this)
