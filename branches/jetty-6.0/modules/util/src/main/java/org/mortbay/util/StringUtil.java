@@ -214,10 +214,7 @@ public class StringUtil
      */
     public static String unquote(String s)
     {
-        if ((s.startsWith("\"") && s.endsWith("\"")) ||
-            (s.startsWith("'") && s.endsWith("'")))
-            s=s.substring(1,s.length()-1);
-        return s;
+        return QuotedStringTokenizer.unquote(s);
     }
 
 
