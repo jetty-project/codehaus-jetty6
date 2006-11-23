@@ -91,6 +91,20 @@ public class QuotedStringTokenizerTest extends TestCase
                                         true,true);
         checkTok(tok,true,true);
     }
+
+    /*
+     * Test for String nextToken()
+     */
+    public void testTokenizer4()
+    {
+        QuotedStringTokenizer tok = new QuotedStringTokenizer("abc'def,ghi'jkl",",");
+        tok.setSingle(false);
+        assertEquals("abc'def",tok.nextToken());
+        assertEquals("ghi'jkl",tok.nextToken());
+        tok = new QuotedStringTokenizer("abc'def,ghi'jkl",",");
+        tok.setSingle(true);
+        assertEquals("abcdef,ghijkl",tok.nextToken());
+    }
     
     private void checkTok(QuotedStringTokenizer tok,boolean delim,boolean quotes)
     {
