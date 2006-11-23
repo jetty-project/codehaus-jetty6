@@ -346,7 +346,8 @@ public class Request implements HttpServletRequest
                 lastCookies = LazyList.add(lastCookies, hdr);
 
                 // Parse the header
-                QuotedStringTokenizer tok = new QuotedStringTokenizer(hdr, ",;", false, false);
+                QuotedStringTokenizer tok = new QuotedStringTokenizer(hdr, ";", false, false);
+                tok.setSingle(false);
                 while (tok.hasMoreElements())
                 {
                     String c = (String) tok.nextElement();
