@@ -60,6 +60,9 @@ import org.mortbay.util.Scanner;
  * somewhere, and apply different configurations to it simply by dropping
  * different xml configuration files into the configuration directory.
  * 
+ * @org.apache.xbean.XBean element="hotDeployer" description="Creates a hot deployer 
+ * 						to watch a directory for changes at a configurable interval."
+ * 
  */
 public class ContextDeployer extends AbstractLifeCycle
 {
@@ -194,6 +197,24 @@ public class ContextDeployer extends AbstractLifeCycle
         if (isStarted()||isStarting())
             throw new IllegalStateException("Cannot change hot deploy dir after deployer start");
         _configurationDir=resource;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param directory
+     */
+    public void setDirectory(String directory) throws Exception
+    {
+		setConfigurationDir(directory);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public String getDirectory()
+    {
+        return getConfigurationDir().getName();
     }
 
     /* ------------------------------------------------------------ */

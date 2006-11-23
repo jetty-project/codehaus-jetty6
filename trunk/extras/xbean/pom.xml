@@ -84,6 +84,7 @@
                   <fileset dir="${basedir}/../../modules/jetty/src/main/java/org/mortbay/jetty">
                     <include name="*.java" />
                     <include name="bio/**/*.java" />
+                    <include name="deployer/**/*.java" />
                     <include name="nio/**/*.java" />
                     <include name="handler/**/*.java" />
                     <include name="webapp/**/*.java" />

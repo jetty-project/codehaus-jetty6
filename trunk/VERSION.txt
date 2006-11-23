@@ -9,6 +9,7 @@ jetty-6.1.0pre3 - 22 November 2006
     + Upgraded session ID generation to use SecureRandom
     + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
     + Support TLS_DHE_RSA_WITH_AES_256_CBC_SHA 
+    + JETTY-180 XBean support for context deploy
 
 jetty-6.0.2 - 22 November 2006
     + Moved all modules updates from 6.1pre2 to 6.0
