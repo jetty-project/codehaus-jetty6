@@ -18,7 +18,10 @@ package org.mortbay.jetty.xbean;
 
 
 
+import java.util.Collection;
+
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.deployer.ContextDeployer;
 
 
 /**
@@ -32,7 +35,9 @@ import org.mortbay.jetty.Server;
  * @version $Revision$
  */
 public class JettyFactoryBean  extends Server {
-    
+	
+	public Collection deployers;
+	public ContextDeployer hotDeployer; 
 
     /**
      * @org.apache.xbean.InitMethod
@@ -40,5 +45,23 @@ public class JettyFactoryBean  extends Server {
      */
     public void run () throws Exception {
         start();
-    }    
+    }
+
+	public Collection getDeployers() {
+		return deployers;
+	}
+
+	public void setDeployers(Collection deployers) {
+		this.deployers = deployers;
+	}
+
+	public ContextDeployer getHotDeployer() {
+		return hotDeployer;
+	}
+
+	public void setHotDeployer(ContextDeployer hotDeployer) {
+		this.hotDeployer = hotDeployer;
+		addLifeCycle(hotDeployer);
+	}
+    
 }
