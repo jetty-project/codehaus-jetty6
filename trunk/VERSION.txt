@@ -46,6 +46,7 @@ jetty-6.0.2 - 22 November 2006
     + JETTY-129 ServletContextListeners called after servlets are initialized
     + JETTY-151 Idle timeout only applies to blocking operations
     + JETTY-151 refactored writers
+    + JETTY-154 Cookies are double quotes only
     + JETTY-171 Fixed filter mapping
     + JETTY-172 use getName() instead of toString
     + JETTY-173 restore servletpath after dispatch
