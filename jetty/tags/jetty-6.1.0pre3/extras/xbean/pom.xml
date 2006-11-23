@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.1.0pre3</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -84,6 +84,7 @@
                   <fileset dir="${basedir}/../../modules/jetty/src/main/java/org/mortbay/jetty">
                     <include name="*.java" />
                     <include name="bio/**/*.java" />
+                    <include name="deployer/**/*.java" />
                     <include name="nio/**/*.java" />
                     <include name="handler/**/*.java" />
                     <include name="webapp/**/*.java" />
