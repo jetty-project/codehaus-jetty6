@@ -90,6 +90,11 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
     {
         return _pending;
     }
+    
+    public boolean isResumed()
+    {
+        return _resumed;
+    }
 
     public Object getObject()
     {
