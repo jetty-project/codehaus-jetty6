@@ -41,6 +41,8 @@ public class QuotedStringTokenizer
     private boolean _hasToken=false;
     private int _i=0;
     private int _lastStart=0;
+    private boolean _double=true;
+    private boolean _single=true;
     
     /* ------------------------------------------------------------ */
     public QuotedStringTokenizer(String str,
@@ -109,13 +111,13 @@ public class QuotedStringTokenizer
                           return _hasToken=true;
                       }
                   }
-                  else if (c=='\'')
+                  else if (c=='\'' && _single)
                   {
                       if (_returnQuotes)
                           _token.append(c);
                       state=2;
                   }
-                  else if (c=='\"')
+                  else if (c=='\"' && _double)
                   {
                       if (_returnQuotes)
                           _token.append(c);
@@ -137,13 +139,13 @@ public class QuotedStringTokenizer
                           _i--;
                       return _hasToken;
                   }
-                  else if (c=='\'')
+                  else if (c=='\'' && _single)
                   {
                       if (_returnQuotes)
                           _token.append(c);
                       state=2;
                   }
-                  else if (c=='\"')
+                  else if (c=='\"' && _double)
                   {
                       if (_returnQuotes)
                           _token.append(c);
@@ -349,7 +351,7 @@ public class QuotedStringTokenizer
             buf.append('"');
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     /** Unquote a string.
      * @param s The string to unquote.
@@ -419,6 +421,42 @@ public class QuotedStringTokenizer
             
             return b.toString();
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return handle double quotes if true
+     */
+    public boolean getDouble()
+    {
+        return _double;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param d handle double quotes if true
+     */
+    public void setDouble(boolean d)
+    {
+        _double=d;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return handle single quotes if true
+     */
+    public boolean getSingle()
+    {
+        return _single;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param single handle single quotes if true
+     */
+    public void setSingle(boolean single)
+    {
+        _single=single;
     }
 }
 
