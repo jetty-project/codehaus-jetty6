@@ -66,6 +66,17 @@ jetty-6.0.2 - 22 November 2006
     + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
     + Support TLS_DHE_RSA_WITH_AES_256_CBC_SHA 
 
+Jetty-5.1.12 - 22 November 2006
+    + Added support for TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+    + Upgraded session ID generation to use SecureRandom
+    + Quote single quotes in cookies
+    + AJP protected against bad requests from mod_jk
+    + JETTY-154 Cookies ignore single quotes
+ 
+Jetty-4.2.27 - 22 November 2006
+    + Upgraded session ID generation to use SecureRandom
+    + AJP protected against bad requests from mod_jk
+
 jetty-6.1.0pre2 - 20 Nov 2006
     + Added extraClassPath to WebAppContext
     + Fixed resource cache flushing
