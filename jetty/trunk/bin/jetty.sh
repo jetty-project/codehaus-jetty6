@@ -4,9 +4,13 @@
 #
 # Configuration files
 #
+# /etc/default/jetty
+#   If it exists, this is read at the start of script. It may perform any 
+#   sequence of shell commands, like setting relevant environment variables.
+#
 # $HOME/.jettyrc
-#   This is read at the start of script. It may perform any sequence of
-#   shell commands, like setting relevant environment variables.
+#   If it exists, this is read at the start of script. It may perform any 
+#   sequence of shell commands, like setting relevant environment variables.
 #
 # /etc/jetty.conf
 #   If found, and no configurations were given on the command line,
@@ -20,11 +24,10 @@
 #
 #   The files will be checked for existence before being passed to jetty.
 #
-# $JETTY_HOME/etc/jetty.conf
+# $JETTY_HOME/etc/jetty.xml
 #   If found, used as this script's configuration file, but only if
 #   /etc/jetty.conf was not present. See above.
 #   
-# 
 # Configuration variables
 #
 # JAVA_HOME  
@@ -72,6 +75,9 @@
 # JETTY_PID
 #   The Jetty PID file, defaults to $JETTY_RUN/jetty.pid
 #   
+# JETTY_ARGS
+#   The default arguments to pass to jetty.
+#
 
 usage()
 {
@@ -81,7 +87,7 @@ usage()
 
 [ $# -gt 0 ] || usage
 
-TMPJ=/tmp/jetty$$
+TMPJ=/tmp/j$$
 
 ##################################################
 # Get the action & configs
@@ -106,6 +112,13 @@ findDirectory()
     done 
 }
 
+
+##################################################
+# See if there's a default configuration file
+##################################################
+if [ -f /etc/default/jetty ] ; then 
+  . /etc/default/jetty
+fi
 
 ##################################################
 # See if there's a user-specific configuration file
@@ -140,12 +153,11 @@ fi
 ##################################################
 if [ "$JETTY_HOME" = "" ] ; then
   STANDARD_LOCATIONS="           \
-        .                        \
-	..                       \
-	../..                    \
         $HOME                    \
+        $HOME/src                \
         ${HOME}/opt/             \
         /opt                     \
+        /java                    \
         /usr/share               \
         /usr/share/java          \
         /usr/local               \
@@ -154,12 +166,10 @@ if [ "$JETTY_HOME" = "" ] ; then
         /home                    \
         "
   JETTY_DIR_NAMES="              \
-        jetty                    \
         Jetty                    \
-        jetty6                   \
-        Jetty6                   \
-        jetty-6                  \
-        Jetty-6                  \
+        jetty                    \
+        Jetty-*                  \
+        jetty-*                  \
         "
         
   JETTY_HOME=
@@ -167,11 +177,10 @@ if [ "$JETTY_HOME" = "" ] ; then
   do
      for N in $JETTY_DIR_NAMES 
      do
-         if [ -d "$L/$N" ] && [ -f "$L/${N}/${JETTY_INSTALL_TRACE_FILE}" ] ; 
+         if [ -d $L/$N ] && [ -f "$L/${N}/${JETTY_INSTALL_TRACE_FILE}" ] ; 
          then 
             JETTY_HOME="$L/$N"
             echo "Defaulting JETTY_HOME to $JETTY_HOME"
-            break
          fi
      done
      [ ! -z "$JETTY_HOME" ] && break
@@ -240,7 +249,8 @@ then
   if [ -f /etc/jetty.conf ]
   then
      JETTY_CONF=/etc/jetty.conf
-  else
+  elif [ -f "${JETTY_HOME}/etc/jetty.conf" ]
+  then
      JETTY_CONF="${JETTY_HOME}/etc/jetty.conf"
   fi
 fi
@@ -290,7 +300,7 @@ then
 fi
 
 #####################################################
-# Run the demo server if there's nothing else to run
+# Run the standard server if there's nothing else to run
 #####################################################
 if [ -z "$CONFIGS" ] 
 then
@@ -425,7 +435,7 @@ JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.home=$JETTY_HOME "
 #####################################################
 # This is how the Jetty server will be started
 #####################################################
-RUN_CMD="$JAVA $JAVA_OPTIONS -jar $JETTY_HOME/start.jar $CONFIGS"
+RUN_CMD="$JAVA $JAVA_OPTIONS -jar $JETTY_HOME/start.jar $JETTY_ARGS $CONFIGS"
 
 #####################################################
 # Comment these out after you're happy with what 
@@ -436,11 +446,10 @@ RUN_CMD="$JAVA $JAVA_OPTIONS -jar $JETTY_HOME/start.jar $CONFIGS"
 #echo "JETTY_RUN      =  $JETTY_RUN"
 #echo "JETTY_PID      =  $JETTY_PID"
 #echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"
+#echo "JETTY_ARGS     =  $JETTY_ARGS"
 #echo "CONFIGS        =  $CONFIGS"
-#echo "PATH_SEPARATOR =  $PATH_SEPARATOR"
 #echo "JAVA_OPTIONS   =  $JAVA_OPTIONS"
 #echo "JAVA           =  $JAVA"
-#echo "CLASSPATH      =  $CLASSPATH"
 
 
 ##################################################
@@ -487,7 +496,7 @@ case "$ACTION" in
          exec $RUN_CMD
          ;;
 
-  run)
+  run|demo)
         echo "Running Jetty: "
 
         if [ -f $JETTY_PID ]
@@ -508,7 +517,6 @@ case "$ACTION" in
         echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"
         echo "JETTY_PORT     =  $JETTY_PORT"
         echo "CONFIGS        =  $CONFIGS"
-        echo "PATH_SEPARATOR =  $PATH_SEPARATOR"
         echo "JAVA_OPTIONS   =  $JAVA_OPTIONS"
         echo "JAVA           =  $JAVA"
         echo "CLASSPATH      =  $CLASSPATH"
