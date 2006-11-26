@@ -191,6 +191,14 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------------------------- */
     protected URL findWebXml() throws IOException, MalformedURLException
     {
+        String descriptor=getWebAppContext().getDescriptor();
+        if (descriptor!=null)
+        {
+            Resource web= Resource.newResource(descriptor);
+            if (web.exists()&& !web.isDirectory())
+                return web.getURL();
+        }
+        
         Resource web_inf=getWebAppContext().getWebInf();
         if(web_inf!=null && web_inf.isDirectory())
         {
@@ -455,6 +463,16 @@ public class WebXmlConfiguration implements Configuration
             _servlets=LazyList.add(_servlets,holder);
         }
         
+        // init params
+        Iterator iParamsIter=node.iterator("init-param");
+        while(iParamsIter.hasNext())
+        {
+            XmlParser.Node paramNode=(XmlParser.Node)iParamsIter.next();
+            String pname=paramNode.getString("param-name",false,true);
+            String pvalue=paramNode.getString("param-value",false,true);
+            holder.setInitParameter(pname,pvalue);
+        }
+        
         String servlet_class=node.getString("servlet-class",false,true);
         
         // Handle JSP
@@ -479,20 +497,19 @@ public class WebXmlConfiguration implements Configuration
                 if (!scratch.exists())
                     scratch.mkdir();
                 holder.setInitParameter("scratchdir",scratch.getAbsolutePath());
+                
+                if ("?".equals(holder.getInitParameter("classpath")))
+                {
+                    String classpath=getWebAppContext().getClassPath();
+                    Log.debug("classpath="+classpath);
+                    if (classpath!=null)
+                        holder.setInitParameter("classpath",classpath);
+                }
             }
         }
         if (servlet_class!=null)
             holder.setClassName(servlet_class);
         
-        // init params
-        Iterator iParamsIter=node.iterator("init-param");
-        while(iParamsIter.hasNext())
-        {
-            XmlParser.Node paramNode=(XmlParser.Node)iParamsIter.next();
-            String pname=paramNode.getString("param-name",false,true);
-            String pvalue=paramNode.getString("param-value",false,true);
-            holder.setInitParameter(pname,pvalue);
-        }
         
         // Handler JSP file
         String jsp_file=node.getString("jsp-file",false,true);

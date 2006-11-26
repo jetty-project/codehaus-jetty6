@@ -82,6 +82,7 @@ public class WebAppContext extends Context
     private String[] _configurationClasses=__dftConfigurationClasses;
     private Configuration[] _configurations;
     private String _defaultsDescriptor=WEB_DEFAULTS_XML;
+    private String _descriptor=null;
     private String _overrideDescriptor=null;
     private boolean _distributable=false;
     private boolean _extractWAR=true;
@@ -938,7 +939,24 @@ public class WebAppContext extends Context
     {
         _overrideDescriptor = overrideDescriptor;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the web.xml descriptor to use. If set to null, WEB-INF/web.xml is used if it exists.
+     */
+    public String getDescriptor()
+    {
+        return _descriptor;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param descriptor the web.xml descriptor to use. If set to null, WEB-INF/web.xml is used if it exists.
+     */
+    public void setDescriptor(String descriptor)
+    {
+        _descriptor=descriptor;
+    }
     
     /* ------------------------------------------------------------ */
     /**
