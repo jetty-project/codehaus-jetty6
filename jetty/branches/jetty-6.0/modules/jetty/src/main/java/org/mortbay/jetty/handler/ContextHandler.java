@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -280,6 +281,41 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     public ClassLoader getClassLoader()
     {
         return _classLoader;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Make best effort to extract a file classpath from the context classloader
+     * @return Returns the classLoader.
+     */
+    public String getClassPath()
+    {
+        if ( _classLoader==null || !(_classLoader instanceof URLClassLoader))
+            return null;
+        URLClassLoader loader = (URLClassLoader)_classLoader;
+        URL[] urls =loader.getURLs();
+        StringBuffer classpath=new StringBuffer();
+        for (int i=0;i<urls.length;i++)
+        {
+            try
+            {
+                Resource resource = Resource.newResource(urls[i]);
+                File file=resource.getFile();
+                if (file.exists())
+                {
+                    if (classpath.length()>0)
+                        classpath.append(File.pathSeparatorChar);
+                    classpath.append(file.getAbsolutePath());
+                }
+            }
+            catch (IOException e)
+            {
+                Log.debug(e);
+            }
+        }
+        if (classpath.length()==0)
+            return null;
+        return classpath.toString();
     }
 
     /* ------------------------------------------------------------ */
