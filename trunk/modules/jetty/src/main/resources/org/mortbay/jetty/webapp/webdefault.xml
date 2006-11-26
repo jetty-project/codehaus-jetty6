@@ -131,7 +131,7 @@
   <!-- This is the jasper JSP servlet from the jakarta project              -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <!-- The JSP page compiler and execution servlet, which is the mechanism  -->
-  <!-- used by Tomcat to support JSP pages.  Traditionally, this servlet    -->
+  <!-- used by Glassfish to support JSP pages.  Traditionally, this servlet -->
   <!-- is mapped to URL patterh "*.jsp".  This servlet supports the         -->
   <!-- following initialization parameters (default values are in square    -->
   <!-- brackets):                                                           -->
@@ -151,6 +151,8 @@
   <!--   classpath           What class path should I use while compiling   -->
   <!--                       generated servlets?  [Created dynamically      -->
   <!--                       based on the current web application]          -->
+  <!--                       Set to ? to make the container explicitly set  -->
+  <!--                       this parameter.                                -->
   <!--                                                                      -->
   <!--   development         Is Jasper used in development mode (will check -->
   <!--                       for JSP modification on every access)?  [true] -->
@@ -224,6 +226,12 @@
         <param-name>xpoweredBy</param-name>
         <param-value>false</param-value>
     </init-param>
+    <!--  
+    <init-param>
+        <param-name>classpath</param-name>
+        <param-value>?</param-value>
+    </init-param>
+    -->
     <load-on-startup>0</load-on-startup>
   </servlet>
 
@@ -238,6 +246,7 @@
     <url-pattern>*.JSPX</url-pattern>
     <url-pattern>*.XSP</url-pattern>
   </servlet-mapping>
+  
   <!-- ==================================================================== -->
   <!-- Dynamic Servlet Invoker.                                             -->
   <!-- This servlet invokes anonymous servlets that have not been defined   -->
