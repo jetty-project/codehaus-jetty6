@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+    + JETTY-182 Optionally set JSP classpath initparameter
 
 jetty-6.0-SNAPSHOT
 
