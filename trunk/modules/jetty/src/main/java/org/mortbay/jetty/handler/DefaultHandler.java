@@ -128,9 +128,13 @@ public class DefaultHandler extends AbstractHandler
             if (context.isRunning())
             {
                 writer.write("<li><a href=\"");
+                if (context.getVirtualHosts()!=null && context.getVirtualHosts().length>0)
+                    writer.write("http://"+context.getVirtualHosts()[0]+":"+request.getLocalPort());
                 writer.write(context.getContextPath());
                 writer.write("/\">");
                 writer.write(context.getContextPath());
+                if (context.getVirtualHosts()!=null && context.getVirtualHosts().length>0)
+                    writer.write("&nbsp;@&nbsp;"+context.getVirtualHosts()[0]+":"+request.getLocalPort());
                 writer.write("&nbsp;--->&nbsp;");
                 writer.write(context.toString());
                 writer.write("</a></li>\n");
@@ -139,6 +143,8 @@ public class DefaultHandler extends AbstractHandler
             {
                 writer.write("<li>");
                 writer.write(context.getContextPath());
+                if (context.getVirtualHosts()!=null && context.getVirtualHosts().length>0)
+                    writer.write("&nbsp;@&nbsp;"+context.getVirtualHosts()[0]+":"+request.getLocalPort());
                 writer.write("&nbsp;--->&nbsp;");
                 writer.write(context.toString());
                 if (context.isFailed())
@@ -148,8 +154,6 @@ public class DefaultHandler extends AbstractHandler
                 writer.write("</li>\n");
             }
         }
-        
-        writer.write("</ul><small><I>The links above may not work if a virtual host is configured</I></small>");
         
         for (int i=0;i<10;i++)
             writer.write("\n<!-- Padding for IE                  -->");
