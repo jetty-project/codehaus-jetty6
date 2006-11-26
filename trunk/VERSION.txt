@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
 jetty-6.0-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter
     + Dispatcher does not protect javax.servlet attributes
+    + Fixed cachesize on invalidate
 
 jetty-6.1.0pre3 - 22 November 2006
     + fixed NIO endpoint flush. Avoid duplicate sends
