@@ -1,6 +1,7 @@
 
 jetty-6.1-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter
+    + Dispatcher does not protect javax.servlet attributes
 
 jetty-6.0-SNAPSHOT
 
