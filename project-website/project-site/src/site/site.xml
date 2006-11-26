@@ -37,6 +37,7 @@
     </menu>
   </body>
   <poweredBy>
+    <logo name="jetty" href="http://jetty.mortbay.org" img="./images/powered_by_jetty.gif"/>
     <logo name="webtide" href="http://www.webtide.com" img="./images/webtide_logo.jpg"/>
     <logo name="Maven" href="http://maven.apache.org" img="./images/logos/maven-feather.png"/>
     <logo name="Codehaus" href="http://www.codehaus.org" img="./images/codehaus-small.png"/>
