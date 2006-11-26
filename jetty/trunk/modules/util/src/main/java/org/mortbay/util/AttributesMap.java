@@ -88,7 +88,12 @@ public class AttributesMap implements Attributes
     {
         _map.clear();
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return _map.toString();
+    }
     
 
 }
