@@ -80,23 +80,6 @@
       </plugin>
     </plugins>
   </build>
-  <repositories>
-    <repository>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <id>mortbay-snapshot-repo</id>
-      <name>MortBay Snapshot Repo</name>
-      <url>http://jetty.mortbay.org/maven2/snapshot</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>mortbay-snapshot-repo</id>
-      <name>mortbay-snapshot-repo</name>
-      <url>http://jetty.mortbay.org/maven2/snapshot</url>
-    </pluginRepository>
-  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
