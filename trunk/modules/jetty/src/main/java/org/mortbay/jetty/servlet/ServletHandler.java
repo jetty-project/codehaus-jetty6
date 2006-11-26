@@ -65,8 +65,6 @@ import org.mortbay.util.URIUtil;
  */
 public class ServletHandler extends AbstractHandler
 {
-    private static String __AllowString="GET, HEAD, POST, OPTIONS, TRACE";  // TODO Allow handling
-
     /* ------------------------------------------------------------ */
     public static final String __DEFAULT_SERVLET="default";
     public static final String __J_S_CONTEXT_TEMPDIR="javax.servlet.context.tempdir";
