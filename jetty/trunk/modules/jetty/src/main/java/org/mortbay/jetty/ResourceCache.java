@@ -41,7 +41,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     private MimeTypes _mimeTypes;
     
     protected transient Map _cache;
-    protected transient int _cacheSize;
+    protected transient int _cachedSize;
     protected transient int _cachedFiles;
     protected transient Content _mostRecentlyUsed;
     protected transient Content _leastRecentlyUsed;
@@ -55,6 +55,18 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         _mimeTypes=mimeTypes;
     }
 
+    /* ------------------------------------------------------------ */
+    public int getCachedSize()
+    {
+        return _cachedSize;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getCachedFiles()
+    {
+        return _cachedFiles;
+    }
+    
     
     /* ------------------------------------------------------------ */
     public int getMaxCachedFileSize()
@@ -104,7 +116,16 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     public void flushCache()
     {
         if (_cache!=null)
-            _cache.clear();
+        {
+            synchronized(this)
+            {
+                _cache.clear();
+                _cachedSize=0;
+                _cachedFiles=0;
+                _mostRecentlyUsed=null;
+                _leastRecentlyUsed=null;
+            }
+        }
         System.gc();
     }
 
@@ -161,8 +182,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                     
                     if (Log.isDebugEnabled()) Log.debug("CACHE FILL: {}",pathInContext);
 
-                    int needed=_maxCacheSize-(int)len;
-                    while(_cacheSize>needed || (_maxCachedFiles>0 && _cachedFiles>_maxCachedFiles))
+                    int must_be_smaller_than=_maxCacheSize-(int)len;
+                    while(_cachedSize>must_be_smaller_than || (_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles))
                         _leastRecentlyUsed.invalidate();
                     content.cache(pathInContext);
                     
@@ -181,7 +202,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         throws Exception
     {
         _cache=new HashMap();
-        _cacheSize=0;
+        _cachedSize=0;
         _cachedFiles=0;
     }
 
@@ -255,7 +276,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 _leastRecentlyUsed=this;
 
             _cache.put(_key,this);
-            _cacheSize+=_resource.length();
+            _cachedSize+=_buffer.length();
             _cachedFiles++;
             if (_lastModified!=-1)
                 _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_lastModified,false));
@@ -318,7 +339,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 // Invalidate it
                 _cache.remove(_key);
                 _key=null;
-                _cacheSize=_cacheSize-(int)_resource.length();
+                _cachedSize=_cachedSize-(int)_buffer.length();
                 _cachedFiles--;
                 
                 if (_mostRecentlyUsed==this)
