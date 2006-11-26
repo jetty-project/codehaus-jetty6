@@ -57,9 +57,7 @@ public abstract class AbstractGenerator implements Generator
     public final static int STATE_END = 4;
     
     private static byte[] NO_BYTES = {};
-    private static int MAX_OUTPUT_BYTES = 8192;
     private static int MAX_OUTPUT_CHARS = 1024;
-    private static int FLUSH_AT_OFFSET = MAX_OUTPUT_BYTES - (6 * MAX_OUTPUT_CHARS);
 
     private static Buffer[] __reasons = new Buffer[505];
     static
