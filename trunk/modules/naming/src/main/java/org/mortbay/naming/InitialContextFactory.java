@@ -26,7 +26,7 @@ import javax.naming.NameParser;
 import javax.naming.NamingException;
 
 import org.mortbay.log.Log;
-import org.mortbay.naming.local.localContext;
+import org.mortbay.naming.local.localContextRoot;
 
 
 /*------------------------------------------------*/    
@@ -73,7 +73,7 @@ public class InitialContextFactory implements javax.naming.spi.InitialContextFac
     {
         Log.debug("InitialContextFactory.getInitialContext()");
 
-        Context ctx = new localContext(env);
+        Context ctx = new localContextRoot(env);
         if(Log.isDebugEnabled())Log.debug("Created initial context delegate for local namespace:"+ctx);
 
         return ctx;

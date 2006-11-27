@@ -57,13 +57,21 @@ import org.mortbay.log.Log;
  */
 public class ContextFactory implements ObjectFactory
 {
-    //map of classloaders to contexts
+    /**
+     * Map of classloaders to contexts.
+     */
     private static WeakHashMap _contextMap;
-
+    
+    /**
+     * Threadlocal for injecting a context to use
+     * instead of looking up the map.
+     */
+    private static ThreadLocal _threadContext;
 
     static
     {
         _contextMap = new WeakHashMap();
+        _threadContext = new ThreadLocal();
     }
     
   
@@ -82,8 +90,15 @@ public class ContextFactory implements ObjectFactory
                                      Hashtable env)
         throws Exception
     {
+        //First, see if we have had a context injected into us to use.
+        Context ctx = (Context)_threadContext.get();
+        if (ctx != null) 
+        {
+            if(Log.isDebugEnabled()) Log.debug("Using the Context that is bound on the thread");
+            return ctx;
+        }
         
-        // First, see if we are in a webapp context, if we are, use
+        // Next, see if we are in a webapp context, if we are, use
         // the classloader of the webapp to find the right jndi comp context
         ClassLoader loader = null;
         if (ContextHandler.getCurrentContext() != null)
@@ -98,14 +113,14 @@ public class ContextFactory implements ObjectFactory
         }
         else
         {
-            //Not already in a webapp context, in that case, we must use the
+            //Not already in a webapp context, in that case, we try the
             //curren't thread's classloader instead
             loader = Thread.currentThread().getContextClassLoader();
             if (Log.isDebugEnabled()) Log.debug("Using thread context classloader");
         }
         
         //Get the context matching the classloader
-        Context ctx = (Context)_contextMap.get(loader);
+        ctx = (Context)_contextMap.get(loader);
         
         //The map does not contain an entry for this classloader
         if (ctx == null)
@@ -134,6 +149,12 @@ public class ContextFactory implements ObjectFactory
         return ctx;
     }
 
+    /**
+     * Keep trying ancestors of the given classloader to find one to which
+     * the context is bound.
+     * @param loader
+     * @return
+     */
     public Context getParentClassLoaderContext (ClassLoader loader)
     {
         Context ctx = null;
@@ -145,4 +166,29 @@ public class ContextFactory implements ObjectFactory
 
         return ctx;
     }
+    
+
+    /**
+     * Associate the given Context with the current thread.
+     * resetComponentContext method should be called to reset the context.
+     * @param ctx the context to associate to the current thread.
+     * @return the previous context associated on the thread (can be null)
+     */
+    public static Context setComponentContext(final Context ctx) 
+    {
+        Context previous = (Context)_threadContext.get();
+        _threadContext.set(ctx);
+        return previous;
+    }
+
+    /**
+     * Set back the context with the given value.
+     * Don't return the previous context, use setComponentContext() method for this.
+     * @param ctx the context to associate to the current thread.
+     */
+    public static void resetComponentContext(final Context ctx) 
+    {
+        _threadContext.set(ctx);
+    }
+
 } 
