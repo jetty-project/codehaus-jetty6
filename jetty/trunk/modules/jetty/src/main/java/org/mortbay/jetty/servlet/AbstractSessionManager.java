@@ -74,7 +74,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     protected int _maxSessions=0;
     protected int _minSessions=0;
     private int _scavengePeriodMs=30000;
-    private SessionIdManager _sessionIdManager;
+    protected SessionIdManager _sessionIdManager;
     private SessionHandler _sessionHandler;
 
     private Thread _scavenger=null;
@@ -552,8 +552,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _context=ContextHandler.getCurrentContext();
         _loader=Thread.currentThread().getContextClassLoader();
 
-        if (_sessions==null)
-            _sessions=new HashMap();
+        newSessionMap();
 
         if (_sessionIdManager==null)
         {
@@ -615,19 +614,17 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _sessionHandler.getServer().getThreadPool().dispatch(new SessionScavenger());
     }
 
+    protected void newSessionMap()
+    {
+        if (_sessions==null)
+            _sessions=new HashMap();
+    }
     /* ------------------------------------------------------------ */
     public void doStop() throws Exception
     {
         super.doStop();
 
-        // Invalidate all sessions to cause unbind events
-        ArrayList sessions=new ArrayList(_sessions.values());
-        for (Iterator i=sessions.iterator(); i.hasNext();)
-        {
-            Session session=(Session)i.next();
-            session.invalidate();
-        }
-        _sessions.clear();
+        invalidateSessions();
 
         // stop the scavenger
         Thread scavenger=_scavenger;
@@ -636,6 +633,19 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             scavenger.interrupt();
 
         _loader=null;
+    }
+    
+    protected void invalidateSessions()
+    {
+        // Invalidate all sessions to cause unbind events
+        ArrayList sessions=new ArrayList(_sessions.values());
+        for (Iterator i=sessions.iterator(); i.hasNext();)
+        {
+            Session session=(Session)i.next();
+            session.invalidate();
+        }
+        _sessions.clear();
+        
     }
 
     /* ------------------------------------------------------------ */
