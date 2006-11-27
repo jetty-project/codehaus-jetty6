@@ -18,9 +18,19 @@ detected.
 
   <Set name="contextPath">/test</Set>
   <Set name="resourceBase"><SystemProperty name="jetty.home" default="."/>/webapps/test</Set>
-  <Set name="overrideDescriptor"><SystemProperty name="jetty.home" default="."/>/contexts/test.d/override-web.xml</Set>
 
   <!-- Optional context configuration -->
+  <Set name="overrideDescriptor"><SystemProperty name="jetty.home" default="."/>/contexts/test.d/override-web.xml</Set>
+
+  <!-- virtual hosts
+  <Set name="virtualHosts">
+    <Array type="String">
+      <Item>www.myVirtualDomain.com</Item>
+      <Item>localhost</Item>
+      <Item>127.0.0.1</Item>
+    </Array>
+  </Set>
+  -->
 
   <Get name="securityHandler">
     <Set name="userRealm">
