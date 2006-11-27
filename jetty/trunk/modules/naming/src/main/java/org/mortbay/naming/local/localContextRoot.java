@@ -35,7 +35,7 @@ import org.mortbay.naming.NamingContext;
  * @version $Revision$ $Date$
  * 
  */
-public class localContext implements Context
+public class localContextRoot implements Context
 {
     private static final NamingContext _root;
 
@@ -65,7 +65,7 @@ public class localContext implements Context
         }
     }
 
-    public localContext(Hashtable env)
+    public localContextRoot(Hashtable env)
     {
         _env = new Hashtable(env);
     }
