@@ -67,7 +67,7 @@ public class MailSessionReference extends Reference implements ObjectFactory
         
         public PasswordAuthenticator(String user, String password)
         {
-            passwordAuthentication = new PasswordAuthentication (user, Password.deobfuscate(password));
+            passwordAuthentication = new PasswordAuthentication (user, (password.startsWith(Password.__OBFUSCATE)?Password.deobfuscate(password):password));
         }
 
         public PasswordAuthentication getPasswordAuthentication()
