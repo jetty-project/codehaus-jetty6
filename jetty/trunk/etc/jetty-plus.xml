@@ -90,7 +90,7 @@
   <!-- Deploy all webapps in webapps-plus                          -->
   <!-- =========================================================== -->
   <Call class="org.mortbay.jetty.webapp.WebAppContext" name="addWebApplications">
-    <Arg><Ref id="contexts"/></Arg>
+    <Arg><Ref id="Contexts"/></Arg>
     <Arg>./webapps-plus</Arg>
     <Arg>org/mortbay/jetty/webapp/webdefault.xml</Arg>
     <Arg><Ref id="plusConfig"/></Arg>
