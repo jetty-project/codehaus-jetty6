@@ -26,18 +26,34 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
 
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.log.Log;
 
 
 
 /**
- * CompContextFactory.java
+ * ContextFactory.java
  *
- *
+ * This is an object factory that produces a jndi naming
+ * context based on a classloader. 
+ * 
+ *  It is used for the java:comp context.
+ *  
+ *  This object factory is bound at java:comp. When a
+ *  lookup arrives for java:comp,  this object factory
+ *  is invoked and will return a context specific to
+ *  the caller's environment (so producing the java:comp/env
+ *  specific to a webapp).
+ *  
+ *  The context selected is based on classloaders. First
+ *  we try looking in at the classloader that is associated
+ *  with the current webapp context (if there is one). If
+ *  not, we use the thread context classloader.
+ * 
  * Created: Fri Jun 27 09:26:40 2003
  *
  * @author <a href="mailto:janb@mortbay.com">Jan Bartel</a>
- * @version 1.0
+ * 
  */
 public class ContextFactory implements ObjectFactory
 {
@@ -52,22 +68,53 @@ public class ContextFactory implements ObjectFactory
     
   
 
+    /** 
+     * Find or create a context which pertains to a classloader.
+     * 
+     * We use either the classloader for the current ContextHandler if
+     * we are handling a request, OR we use the thread context classloader
+     * if we are not processing a request.
+     * @see javax.naming.spi.ObjectFactory#getObjectInstance(java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable)
+     */
     public Object getObjectInstance (Object obj,
                                      Name name,
                                      Context nameCtx,
                                      Hashtable env)
         throws Exception
     {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        if(Log.isDebugEnabled()) Log.debug("looking for context for "+loader);
+        
+        // First, see if we are in a webapp context, if we are, use
+        // the classloader of the webapp to find the right jndi comp context
+        ClassLoader loader = null;
+        if (ContextHandler.getCurrentContext() != null)
+        {
+            loader = ContextHandler.getCurrentContext().getContextHandler().getClassLoader();
+        }
+        
+        
+        if (loader != null)
+        {
+            if (Log.isDebugEnabled()) Log.debug("Using classloader of current org.mortbay.jetty.handler.ContextHandler");
+        }
+        else
+        {
+            //Not already in a webapp context, in that case, we must use the
+            //curren't thread's classloader instead
+            loader = Thread.currentThread().getContextClassLoader();
+            if (Log.isDebugEnabled()) Log.debug("Using thread context classloader");
+        }
+        
+        //Get the context matching the classloader
         Context ctx = (Context)_contextMap.get(loader);
         
-        //the map does not contain an entry for this classloader
+        //The map does not contain an entry for this classloader
         if (ctx == null)
         {
-            //check if a parent classloader has created the context
+            //Check if a parent classloader has created the context
             ctx = getParentClassLoaderContext(loader);
 
+            //Didn't find a context to match any of the ancestors
+            //of the classloader, so make a context
             if (ctx == null)
             {
                 Reference ref = (Reference)obj;
