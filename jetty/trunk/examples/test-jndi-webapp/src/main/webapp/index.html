@@ -15,18 +15,34 @@ This example shows how to configure and lookup resources such as DataSources, a 
 
 <h2>Preparation</h2>
 <p>
-Make sure you have built this demo. Assuming your jetty src distro is installed at $JETTY_HOME:
+<ol>
+<li>Ensure that you have installed the jars for the transaction manager of your choice in $JETTY_HOME/lib/ext. This demo has been tested with <a href="http://jotm.objectweb.org/">JOTM</a> and <a href="http://www.atomikos.com">Atomikos</a>.
+
+<li>Make sure you have built this demo. Assuming your jetty src distro is installed at $JETTY_HOME:
 </p>
 <blockquote>
 <pre>
-  >  cd $JETTY_HOME/modules/test-jndi-webapp
-  >  mvn -Dtxmgr=xxxx clean install
-  >  cd $JETTY_HOME
+  +  cd $JETTY_HOME/modules/test-jndi-webapp
+  +  mvn clean install
+</pre>
+</blockquote>
+<li> Set up the configuration files with the transaction manager of your choice:
+<blockquote>
+<pre>
+  +  cd $JETTY_HOME
+  +  edit etc/jetty-test-jndi.xml and uncomment one of the transaction manager setups
+  +  edit webapps-plus/test-jndi/WEB-INF/jetty-env.xml and uncomment one of the transaction manager setups
+</pre>
+</blockquote>
+</ol>
+ 
+<p>
+Now you can start the demo:
+<blockquote>
+<pre>
   > java -jar start.jar etc/jetty.xml etc/jetty-plus.xml etc/jetty-test-jndi.xml
 </pre>
 </blockquote>
-<p>
-Where <code>xxxx</code> is the name of a transaction manager to use. There is a list of these that are supported for the demo in <code>$JETTY_HOME/modules/test-jndi-webapp/src/templates</code>. Ensure that you have installed the jars etc for the transaction manager of your choice in jetty6.
 </p>
 <p>If you want to use the Mail demonstration, you will need to edit the <code>etc/jetty-test-jndi.xml</code> file and change the smtp authentication information and properties appropriately for your environment.
 </p>

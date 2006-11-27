@@ -45,6 +45,7 @@ import org.mortbay.log.Log;
  */
 public class Password extends Credential
 {
+    public static final String __OBFUSCATE = "OBF:";
 
     private String _pw;
     
@@ -57,7 +58,7 @@ public class Password extends Credential
         _pw=password;
         
         // expand password
-        while (_pw!=null && _pw.startsWith("OBF:"))
+        while (_pw!=null && _pw.startsWith(__OBFUSCATE))
             _pw=deobfuscate(_pw);
     }    
 
@@ -126,7 +127,7 @@ public class Password extends Credential
         
         synchronized(buf)
         {
-            buf.append("OBF:");
+            buf.append(__OBFUSCATE);
             for (int i=0;i<b.length;i++)
             {
                 byte b1 = b[i];
@@ -151,7 +152,7 @@ public class Password extends Credential
     /* ------------------------------------------------------------ */
     public static String deobfuscate(String s)
     {
-        if (s.startsWith("OBF:"))
+        if (s.startsWith(__OBFUSCATE))
             s=s.substring(4);
         
         byte[] b=new byte[s.length()/2];

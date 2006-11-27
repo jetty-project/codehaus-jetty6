@@ -36,12 +36,13 @@
      <Arg>mail/Session</Arg>
      <Arg>
        <New class="org.mortbay.naming.factories.MailSessionReference">
-         <Set name="user">fred</Set>
-         <Set name="password">OBF:1xmk1w261z0f1w1c1xmq</Set>
+         <Set name="user">CHANGE-ME</Set>
+         <Set name="password">CHANGE-ME</Set>
          <Set name="properties">
            <New class="java.util.Properties">
-             <Put name="mail.smtp.host">XXX</Put>
-             <Put name="mail.from">me@me</Put>
+             <Put name="mail.smtp.auth">false</Put> <!-- change to true if you want to authenticate -->
+             <Put name="mail.smtp.host">CHANGE-ME</Put>
+             <Put name="mail.from">CHANGE-ME</Put>
              <Put name="mail.debug">true</Put>
            </New>
           </Set>
