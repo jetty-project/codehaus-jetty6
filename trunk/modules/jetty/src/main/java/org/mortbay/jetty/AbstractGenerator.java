@@ -661,7 +661,7 @@ public abstract class AbstractGenerator implements Generator
             {
                 _direct=false;
                 _writeMode = WRITE_CONV;
-                if (_out._characterEncoding == null || _out._characterEncoding.equalsIgnoreCase(encoding))
+                if (_out._characterEncoding == null || !_out._characterEncoding.equalsIgnoreCase(encoding))
                     _out._converter = null; // Set lazily in getConverter()
             }
             _out._characterEncoding = encoding;
