@@ -350,45 +350,40 @@ public class HttpServerTestBase extends TestCase
      */
     public void testFlush() throws Exception
     {
-
-        for (int d=0;d<2;d++)
-        {
-            AbstractGenerator.__direct=d==0;
-
-            Server server=startServer(new DataHandler());
-            try
-            {   
-                String[] encoding = {"NONE","UTF-8","ISO-8859-1","ISO-8859-2","JIS"};
+        Server server=startServer(new DataHandler());
+        try
+        {   
+            String[] encoding = {"NONE","UTF-8","ISO-8859-1","ISO-8859-2","JIS"};
 
 
-                for (int e =0; e<encoding.length;e++)
+            for (int e =0; e<encoding.length;e++)
+            {
+                for (int b=1;b<100;b+=50)
                 {
-                    for (int b=1;b<100;b+=50)
+                    for (int w=1024;w<10000;w+=4096)
                     {
-                        for (int w=1024;w<10000;w+=4096)
+                        for (int c=0;c<2;c++)
                         {
-                            for (int c=0;c<2;c++)
-                            {
-                                String test=encoding[e]+"x"+b+"x"+w+"x"+d+"x"+c;
-                                URL url=new URL("http://"+HOST+":"+port+"/?writes="+w+"&block="+b+ (e==0?"":("&encoding="+encoding[e]))+(c==0?"&chars=true":""));
-                                InputStream in = (InputStream)url.getContent();
-                                String response=IO.toString(in);
+                            String test=encoding[e]+"x"+b+"x"+w+"x"+"x"+c;
+                            URL url=new URL("http://"+HOST+":"+port+"/?writes="+w+"&block="+b+ (e==0?"":("&encoding="+encoding[e]))+(c==0?"&chars=true":""));
+                            InputStream in = (InputStream)url.getContent();
+                            String response=IO.toString(in);
 
-                                assertEquals(test,b*w,response.length());
-                            }
+                            assertEquals(test,b*w,response.length());
                         }
                     }
                 }
+            }
 
 
-            }
-            finally
-            {
-                // Shut down
-                server.stop();
-                Thread.yield();
-            }
         }
+        finally
+        {
+            // Shut down
+            server.stop();
+            Thread.yield();
+        }
+
     }
 
     
