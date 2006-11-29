@@ -266,6 +266,17 @@ public class Dispatcher implements RequestDispatcher
                 base_request.setQueryString(query);
                 
                 _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, dispatch);
+                
+                if (base_request.getConnection().getResponse().isWriting())
+                {
+                    try {response.getWriter().close();}
+                    catch(IllegalStateException e) { response.getOutputStream().close(); }
+                }
+                else
+                {
+                    try {response.getOutputStream().close();}
+                    catch(IllegalStateException e) { response.getWriter().close(); }
+                }
             }
         }
         finally
@@ -277,18 +288,6 @@ public class Dispatcher implements RequestDispatcher
             base_request.setAttributes(old_attr);
             base_request.setParameters(old_params);
             base_request.setQueryString(old_query);
-            
-            if (base_request.getConnection().getResponse().isWriting())
-            {
-                try {response.getWriter().close();}
-                catch(IllegalStateException e) { response.getOutputStream().close(); }
-            }
-            else
-            {
-                try {response.getOutputStream().close();}
-                catch(IllegalStateException e) { response.getWriter().close(); }
-            }
-            
         }
     }
 
