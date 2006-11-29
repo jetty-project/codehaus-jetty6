@@ -18,6 +18,7 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -374,7 +375,7 @@ public class HttpConnection implements Connection
                     Log.debug(e);
                 }
                 _generator.sendError(e.getStatus(), e.getReason(), null, true);
-                // TODO.  Need to consider how to really flush this for non-blocking
+                // TODO.  Need to consider how to really flush this for non-blocking - probably OK now with buffered endp. 
                 
                 _parser.reset(true);
                 _endp.close();
@@ -589,6 +590,8 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     private class RequestHandler extends HttpParser.EventHandler
     {
+        private String _charset;
+        
         /*
          * 
          * @see org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,
@@ -600,9 +603,11 @@ public class HttpConnection implements Connection
             _expect = UNKNOWN;
             _connection = UNKNOWN;
             _delayedHandling=false;
+            _charset=null;
 
             _request.setTimeStamp(System.currentTimeMillis());
             _request.setMethod(method.toString());
+            
 
             try
             {
@@ -626,7 +631,7 @@ public class HttpConnection implements Connection
             }
             catch (Exception e)
             {
-                throw new HttpException(400,null,e);
+                throw new HttpException(HttpStatus.ORDINAL_400_Bad_Request,null,e);
             }
         }
 
@@ -650,6 +655,11 @@ public class HttpConnection implements Connection
                 case HttpHeaders.ACCEPT_ENCODING_ORDINAL:
                     value = HttpHeaderValues.CACHE.lookup(value);
                     break;
+                    
+                case HttpHeaders.CONTENT_TYPE_ORDINAL:
+                    value = MimeTypes.CACHE.lookup(value);
+                    _charset=MimeTypes.getCharsetFromContentType(value);
+                    break;
 
                 case HttpHeaders.CONNECTION_ORDINAL:
                     // TODO coma list of connections ???
@@ -661,7 +671,6 @@ public class HttpConnection implements Connection
                         value=HttpHeaderValues.CACHE.get(_connection);
                         _responseFields.put(HttpHeaders.CONNECTION_BUFFER,value);
                     }
-                        
             }
 
             _requestFields.add(name, value);
@@ -684,7 +693,7 @@ public class HttpConnection implements Connection
                     _generator.setHead(_head);
                     if (!_host)
                     {
-                        _generator.setResponse(400, null);
+                        _generator.setResponse(HttpStatus.ORDINAL_400_Bad_Request, null);
                         _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
                         _generator.completeHeader(_responseFields, true);
                         _generator.complete();
@@ -700,7 +709,7 @@ public class HttpConnection implements Connection
                             // TODO delay sending 100 response until a read is attempted.
                             if (((HttpParser)_parser).getHeaderBuffer()==null || ((HttpParser)_parser).getHeaderBuffer().length()<2)
                             {
-                                _generator.setResponse(100, null);
+                                _generator.setResponse(HttpStatus.ORDINAL_100_Continue, null);
                                 _generator.completeHeader(null, true);
                                 _generator.complete();
                                 _generator.reset(false);
@@ -708,7 +717,7 @@ public class HttpConnection implements Connection
                         }
                         else
                         {
-                            _generator.sendError(417, null, null, true);
+                            _generator.sendError(HttpStatus.ORDINAL_417_Expectation_Failed, null, null, true);
                             return;
                         }
                     }
@@ -716,6 +725,18 @@ public class HttpConnection implements Connection
                 default:
             }
 
+            if(_charset!=null)
+            {
+                try
+                {
+                    _request.setCharacterEncoding(_charset);
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    _generator.sendError(HttpStatus.ORDINAL_415_Unsupported_Media_Type, null, e.toString(), true);
+                } 
+            }
+            
             // Either handle now or wait for first content
             if (((HttpParser)_parser).getContentLength()<=0 && !((HttpParser)_parser).isChunking())
                 handleRequest();
