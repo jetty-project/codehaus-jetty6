@@ -282,6 +282,16 @@ public class Request implements HttpServletRequest
 
     /* ------------------------------------------------------------ */
     /* 
+     * @see javax.servlet.ServletRequest#getContentType()
+     */
+    public void setContentType(String contentType)
+    {
+        _connection.getRequestFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,contentType);
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
      * @see javax.servlet.http.HttpServletRequest#getContextPath()
      */
     public String getContextPath()
@@ -1144,7 +1154,10 @@ public class Request implements HttpServletRequest
     {
         if (_inputState!=__NONE) 
             return;
-        // TODO throw unsupportedEncodingException ?
+        
+        // check encoding is supported
+        "".getBytes(encoding);
+        
         _characterEncoding=encoding;
     }
     
