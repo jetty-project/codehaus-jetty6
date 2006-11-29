@@ -47,21 +47,21 @@ public class MimeTypes
       TEXT_XML_UTF_8="text/xml; charset=UTF-8";
     
 
-    private static int index=1;
-    
     private final static int
-	    FORM_ENCODED_ORDINAL=index++,
-    	MESSAGE_HTTP_ORDINAL=index++,
-    	MULTIPART_BYTERANGES_ORDINAL=index++,
-    	TEXT_HTML_ORDINAL=index++,
-	    TEXT_PLAIN_ORDINAL=index++,
-	    TEXT_XML_ORDINAL=index++,
-        TEXT_HTML_8859_1_ORDINAL=index++,
-        TEXT_PLAIN_8859_1_ORDINAL=index++,
-        TEXT_XML_8859_1_ORDINAL=index++,
-        TEXT_HTML_UTF_8_ORDINAL=index++,
-        TEXT_PLAIN_UTF_8_ORDINAL=index++,
-        TEXT_XML_UTF_8_ORDINAL=index++;
+	FORM_ENCODED_ORDINAL=1,
+    	MESSAGE_HTTP_ORDINAL=2,
+    	MULTIPART_BYTERANGES_ORDINAL=3,
+    	TEXT_HTML_ORDINAL=4,
+	TEXT_PLAIN_ORDINAL=5,
+	TEXT_XML_ORDINAL=6,
+        TEXT_HTML_8859_1_ORDINAL=7,
+        TEXT_PLAIN_8859_1_ORDINAL=8,
+        TEXT_XML_8859_1_ORDINAL=9,
+        TEXT_HTML_UTF_8_ORDINAL=10,
+        TEXT_PLAIN_UTF_8_ORDINAL=11,
+        TEXT_XML_UTF_8_ORDINAL=12;
+    
+    private static int __index=13;
     
     public final static BufferCache CACHE = new BufferCache(); 
 
@@ -131,7 +131,6 @@ public class MimeTypes
 
     /* ------------------------------------------------------------ */
     private Map _mimeMap;
-    private Map _encodingMap;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -220,72 +219,58 @@ public class MimeTypes
         _mimeMap.put(StringUtil.asciiToLowerCase(extension),normalizeMimeType(type));
     }
 
-
-    /* ------------------------------------------------------------ */
-    /** Get the map of mime type to char encoding.
-     * @return Map of mime type to character encodings.
-     */
-    public synchronized Map getEncodingMap()
-    {
-        return _encodingMap;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the map of mime type to char encoding.
-     * Also sets the org.mortbay.http.encodingMap context attribute
-     * @param encodingMap Map of mime type to character encodings.
-     */
-    public void setEncodingMap(Map encodingMap)
-    {
-        if (encodingMap==null)
-        {
-            _encodingMap=null;
-            return;
-        }
-        
-        Map e=new HashMap();
-        Iterator i=encodingMap.entrySet().iterator();
-        while (i.hasNext())
-        {
-            Map.Entry entry = (Map.Entry)i.next();
-            e.put(normalizeMimeType(entry.getKey().toString()),entry.getValue());
-        }
-        _encodingMap=e;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get char encoding by mime type.
-     * @param type A mime type.
-     * @return The prefered character encoding for that type if known.
-     */
-    public String getEncodingByMimeType(String type)
-    {
-        String encoding =null;
-
-        if (type!=null)
-            encoding=(String)_encodingMap.get(type);
-
-        return encoding;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the encoding that should be used for a mimeType.
-     * @param mimeType
-     * @param encoding
-     */
-    public void addTypeEncoding(String mimeType,String encoding)
-    {
-        getEncodingMap().put(mimeType,encoding);
-    }
-
-
     /* ------------------------------------------------------------ */
     private static synchronized Buffer normalizeMimeType(String type)
     {
         Buffer b =CACHE.get(type);
         if (b==null)
-            b=CACHE.add(type,index++);
+            b=CACHE.add(type,__index++);
         return b;
+    }
+
+    /* ------------------------------------------------------------ */
+    public static String getCharsetFromContentType(Buffer value)
+    {
+        if (value instanceof CachedBuffer)
+        {
+            switch(((CachedBuffer)value).getOrdinal())
+            {
+                case TEXT_HTML_8859_1_ORDINAL:
+                case TEXT_PLAIN_8859_1_ORDINAL:
+                case TEXT_XML_8859_1_ORDINAL:
+                    return StringUtil.__ISO_8859_1;
+                    
+                case TEXT_HTML_UTF_8_ORDINAL:
+                case TEXT_PLAIN_UTF_8_ORDINAL:
+                case TEXT_XML_UTF_8_ORDINAL:
+                    return StringUtil.__UTF8;
+            }
+        }
+        
+        String charset = value.toString();
+        int i = charset.indexOf(';');
+        if (i>0)
+        {
+            i=charset.indexOf("charset",i);
+            if (i>0)
+            {
+                i=charset.indexOf('=',i+6);
+                if (i>0)
+                {
+                    int s=i+1;
+                    while (s<charset.length() && charset.charAt(s)==' ')
+                        s++;
+                    i=charset.indexOf(' ',s);
+                    if (i<0)
+                        i=charset.indexOf(';',s);
+                    if (i<0)
+                        return charset.substring(s);
+                    return charset.substring(s,i);
+                }
+            }
+        }
+        
+        return null;
     }
 
 

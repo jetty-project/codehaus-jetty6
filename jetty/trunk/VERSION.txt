@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
     + Optimization of writers
     + ServletHandler allows non REQUEST exceptions to propogate
     + Minor TCK fixes from Sybase
+    + Handle request content encodings
 
 jetty-6.0-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter

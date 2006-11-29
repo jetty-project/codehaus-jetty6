@@ -78,6 +78,8 @@ public class DumpHandler extends AbstractHandler
         Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
         writer.write("<html><h1>"+label+"</h1>");
         writer.write("<pre>\npathInfo="+request.getPathInfo()+"\n</pre>\n");
+        writer.write("<pre>\ncontentType="+request.getContentType()+"\n</pre>\n");
+        writer.write("<pre>\nencoding="+request.getCharacterEncoding()+"\n</pre>\n");
         writer.write("<h3>Header:</h3><pre>");
         writer.write(request.toString());
         writer.write("</pre>\n<h3>Parameters:</h3>\n<pre>");

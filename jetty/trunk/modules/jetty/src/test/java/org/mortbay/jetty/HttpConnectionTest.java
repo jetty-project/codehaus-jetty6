@@ -81,7 +81,6 @@ public class HttpConnectionTest extends TestCase
                                            "5;\015\012",true);
             response=connector.getResponses("ABCDE\015\012"+
                                            "0;\015\012\015\012");
-            System.err.println(response);
             offset = checkContains(response,offset,"HTTP/1.1 200","Fragment Chunk");
             offset = checkContains(response,offset,"/R2","Fragmented Chunk");
             offset = checkContains(response,offset,"ABCDE","Fragmented Chunk");
@@ -90,7 +89,65 @@ public class HttpConnectionTest extends TestCase
         }
         catch(Exception e)
         {
-	        e.printStackTrace();
+            e.printStackTrace();
+            assertTrue(false);
+            if (response!=null)
+                System.err.println(response);
+        }
+    }
+
+    /* --------------------------------------------------------------- */
+    public void testCharset()
+    {        
+        
+        String response=null;
+        try
+        {
+            int offset=0;
+            
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 200","Fragment Chunk");
+            offset = checkContains(response,offset,"/R1","Fragmented Chunk");
+            offset = checkContains(response,offset,"encoding=utf-8","encoding");
+            offset = checkContains(response,offset,"12345","Fragmented Chunk");
+
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset =  iso-8859-1 ; other=value\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 200","Fragment Chunk");
+            offset = checkContains(response,offset,"encoding=iso-8859-1","encoding");
+            offset = checkContains(response,offset,"/R1","Fragmented Chunk");
+            offset = checkContains(response,offset,"12345","Fragmented Chunk");
+
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=unkown\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 415","Unsupported");
+            
+        }
+        catch(Exception e)
+        {
+                e.printStackTrace();
             assertTrue(false);
             if (response!=null)
                 System.err.println(response);
@@ -119,10 +176,6 @@ public class HttpConnectionTest extends TestCase
         assertTrue(test,o<offset);
     }
 
-    private void checkNotContained(String s,String c,String test)
-    {
-        checkNotContained(s,0,c,test);
-    }
 
     
 
