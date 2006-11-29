@@ -371,6 +371,14 @@ public class ServletHandler extends AbstractHandler
         }
         catch(Exception e)
         {
+            if (type!=REQUEST)
+            {
+                if (e instanceof IOException)
+                    throw (IOException)e;
+                if (e instanceof RuntimeException)
+                    throw (RuntimeException)e;
+            }
+            
             Throwable th=e;
             while (th instanceof ServletException)
             {
@@ -413,6 +421,8 @@ public class ServletHandler extends AbstractHandler
         }
         catch(Error e)
         {   
+            if (type!=REQUEST)
+                throw e;
             Log.warn("Error for "+request.getRequestURI(),e);
             if(Log.isDebugEnabled())Log.debug(request.toString());
             
