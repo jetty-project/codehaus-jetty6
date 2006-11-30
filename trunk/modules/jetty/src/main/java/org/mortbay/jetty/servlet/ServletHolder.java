@@ -186,6 +186,12 @@ public class ServletHolder extends Holder
     }
 
     /* ------------------------------------------------------------ */
+    public Map getRoleMap()
+    {
+        return _roleMap;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** 
      * @param role Role name that is added to UserPrincipal when this servlet
      * is called. 
