@@ -83,6 +83,7 @@ public class Request implements HttpServletRequest
     private int _maxFormContentSize = 200000;
     private HttpConnection _connection;
     private EndPoint _endp;
+    private Map _roleMap;
     
     private Attributes _attributes;
     private String _authType;
@@ -1082,6 +1083,9 @@ public class Request implements HttpServletRequest
      */
     public boolean isUserInRole(String role)
     {
+        if (_roleMap!=null)
+            role=(String)_roleMap.get(role);
+        
         if (_userRealm!=null && _userPrincipal!=null)
             return _userRealm.isUserInRole(_userPrincipal, role);
         
@@ -1641,6 +1645,18 @@ public class Request implements HttpServletRequest
     {
         _queryEncoding=queryEncoding;
         _queryString=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setRoleMap(Map map)
+    {
+        _roleMap=map;
+    }
+
+    /* ------------------------------------------------------------ */
+    public Map getRoleMap()
+    {
+        return _roleMap;
     }
 }
 

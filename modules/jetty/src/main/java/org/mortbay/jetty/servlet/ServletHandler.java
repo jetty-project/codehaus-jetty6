@@ -295,6 +295,7 @@ public class ServletHandler extends AbstractHandler
         final String old_servlet_name=base_request.getServletName();
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
+        final Map old_role_map=base_request.getRoleMap();
         
         try
         {
@@ -310,6 +311,7 @@ public class ServletHandler extends AbstractHandler
                 {
                     servlet_holder=(ServletHolder)entry.getValue();
                     base_request.setServletName(servlet_holder.getName());
+                    base_request.setRoleMap(servlet_holder.getRoleMap());
                     if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
                     
                     String servlet_path_spec=(String)entry.getKey(); 
@@ -441,6 +443,7 @@ public class ServletHandler extends AbstractHandler
         finally
         {
             base_request.setServletName(old_servlet_name);
+            base_request.setRoleMap(old_role_map);
             if (type!=INCLUDE)
             {
                 base_request.setServletPath(old_servlet_path);
