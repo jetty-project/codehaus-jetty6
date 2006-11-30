@@ -7,8 +7,10 @@ jetty-6.1-SNAPSHOT
     + Fixed cachesize on invalidate
     + Optimization of writers
     + ServletHandler allows non REQUEST exceptions to propogate
-    + Minor TCK fixes from Sybase
-    + Handle request content encodings
+    + TCK fixes from Sybase:
+      * Handle request content encodings
+      * forward query attribute fix
+      * session attribute listener
 
 jetty-6.0-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter
