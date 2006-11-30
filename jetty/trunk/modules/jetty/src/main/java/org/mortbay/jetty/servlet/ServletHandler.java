@@ -285,7 +285,7 @@ public class ServletHandler extends AbstractHandler
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request,HttpServletResponse response, int type)
-         throws IOException
+         throws IOException, ServletException
     {
         if (!isStarted())
             return;
@@ -377,6 +377,8 @@ public class ServletHandler extends AbstractHandler
                     throw (IOException)e;
                 if (e instanceof RuntimeException)
                     throw (RuntimeException)e;
+                if (e instanceof ServletException)
+                    throw (ServletException)e;
             }
             
             Throwable th=e;
