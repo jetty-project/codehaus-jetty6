@@ -254,11 +254,11 @@ public class Dispatcher implements RequestDispatcher
                 
                 ForwardAttributes attr = new ForwardAttributes(old_attr); 
                 
-                attr._requestURI=base_request.getRequestURI();
-                attr._contextPath=base_request.getContextPath();
-                attr._servletPath=base_request.getServletPath();
-                attr._pathInfo=base_request.getPathInfo();
-                attr._query=base_request.getQueryString();
+                attr._requestURI=old_uri;
+                attr._contextPath=old_context_path;
+                attr._servletPath=old_servlet_path;
+                attr._pathInfo=old_path_info;
+                attr._query=old_query;
                 
                 base_request.setRequestURI(_uri);
                 base_request.setContextPath(_contextHandler.getContextPath());
