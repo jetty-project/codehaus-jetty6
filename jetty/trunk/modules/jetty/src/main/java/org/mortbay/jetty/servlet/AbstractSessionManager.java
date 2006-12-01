@@ -84,7 +84,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     protected Map _sessions;
     private boolean _usingCookies=true;
     protected ClassLoader _loader;
-    protected ContextHandler.Context _context;
+    protected ContextHandler.SContext _context;
     protected String _sessionCookie=__DefaultSessionCookie;
     protected String _sessionURL=__DefaultSessionURL;
     protected String _sessionURLPrefix=";"+_sessionURL+"=";

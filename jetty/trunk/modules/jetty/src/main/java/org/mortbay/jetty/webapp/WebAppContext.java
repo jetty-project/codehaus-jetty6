@@ -101,7 +101,7 @@ public class WebAppContext extends Context
 
     public static WebAppContext getCurrentWebAppContext()
     {
-        ContextHandler.Context context=ContextHandler.getCurrentContext();
+        ContextHandler.SContext context=ContextHandler.getCurrentContext();
         if (context!=null)
         {
             ContextHandler handler = context.getContextHandler();

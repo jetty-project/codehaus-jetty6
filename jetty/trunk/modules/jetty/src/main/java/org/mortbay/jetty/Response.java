@@ -231,7 +231,7 @@ public class Response implements HttpServletResponse
             Request request = _connection.getRequest();
 
             ErrorHandler error_handler = null;
-            ContextHandler.Context context = request.getContext();
+            ContextHandler.SContext context = request.getContext();
             if (context!=null)
                 error_handler=context.getContextHandler().getErrorHandler();
             if (error_handler!=null)
