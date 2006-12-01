@@ -315,7 +315,7 @@ public class Bayeux
             reply.put("connectionId",connection_id);
             reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
             transport.send(reply);
-            transport.setPolling(true);
+            transport.setPolling(false);
         }
     }
 
