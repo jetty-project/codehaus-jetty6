@@ -435,10 +435,10 @@ public class SecurityHandler extends HandlerWrapper
                 if (!inRole)
                 {
                     Log.warn("AUTH FAILURE: incorrect role for " + user.getName());
-                    if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
+                    /* if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
                          ((BasicAuthenticator)authenticator).sendChallenge(realm, response);
-                    else
-                        response.sendError(Response.SC_FORBIDDEN,"User not in required role");
+                    else for TCK */
+                    response.sendError(Response.SC_FORBIDDEN,"User not in required role");
                     return false; // role failed.
                 }
             }
