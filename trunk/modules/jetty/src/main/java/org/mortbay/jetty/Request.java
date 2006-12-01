@@ -1158,10 +1158,19 @@ public class Request implements HttpServletRequest
     {
         if (_inputState!=__NONE) 
             return;
+
+        _characterEncoding=encoding;
         
         // check encoding is supported
         "".getBytes(encoding);
-        
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.ServletRequest#setCharacterEncoding(java.lang.String)
+     */
+    public void setCharacterEncodingUnchecked(String encoding)
+    {
         _characterEncoding=encoding;
     }
     
