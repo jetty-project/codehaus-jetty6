@@ -11,7 +11,7 @@ jetty-6.1-SNAPSHOT
       * Handle request content encodings
       * forward query attribute fix
       * session attribute listener
-      + Servlet role ref
+      * Servlet role ref
 
 jetty-6.0-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter

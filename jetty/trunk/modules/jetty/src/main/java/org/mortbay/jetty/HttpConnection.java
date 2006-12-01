@@ -726,16 +726,7 @@ public class HttpConnection implements Connection
             }
 
             if(_charset!=null)
-            {
-                try
-                {
-                    _request.setCharacterEncoding(_charset);
-                }
-                catch (UnsupportedEncodingException e)
-                {
-                    _generator.sendError(HttpStatus.ORDINAL_415_Unsupported_Media_Type, null, e.toString(), true);
-                } 
-            }
+                _request.setCharacterEncodingUnchecked(_charset);
             
             // Either handle now or wait for first content
             if (((HttpParser)_parser).getContentLength()<=0 && !((HttpParser)_parser).isChunking())
