@@ -46,7 +46,7 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.ContextHandler.Context;
+import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.UserRealm;
@@ -110,7 +110,7 @@ public class Request implements HttpServletRequest
     private int _inputState=__NONE;
     private BufferedReader _reader;
     private boolean _dns=false;
-    private ContextHandler.Context _context;
+    private ContextHandler.SContext _context;
     private HttpSession _session;
     private SessionManager _sessionManager;
     private boolean _cookiesExtracted=false;
@@ -1463,17 +1463,17 @@ public class Request implements HttpServletRequest
     /**
      * @param context
      */
-    public void setContext(Context context)
+    public void setContext(SContext context)
     {
         _context=context;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The current {@link Context context} used for this request, or <code>null</code> if {@link #setContext} has not yet
+     * @return The current {@link SContext context} used for this request, or <code>null</code> if {@link #setContext} has not yet
      * been called. 
      */
-    public Context getContext()
+    public SContext getContext()
     {
         return _context;
     }

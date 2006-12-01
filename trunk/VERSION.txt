@@ -13,7 +13,8 @@ jetty-6.1-SNAPSHOT
       * session attribute listener
       * Servlet role ref
       * flush if content-length written
-      + 403 for BASIC authorization failure
+      * 403 for BASIC authorization failure
+      * null for unknown named dispatches
     + JETTY-184 cometd connect non blocking
 
 jetty-6.0-SNAPSHOT
