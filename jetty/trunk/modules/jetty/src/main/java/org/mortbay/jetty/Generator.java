@@ -86,4 +86,6 @@ public interface Generator
 
     boolean isIdle();
 
+    void setContentLength(long length);
+
 }

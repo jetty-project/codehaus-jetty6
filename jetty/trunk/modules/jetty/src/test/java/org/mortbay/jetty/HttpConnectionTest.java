@@ -97,6 +97,27 @@ public class HttpConnectionTest extends TestCase
     }
 
     /* --------------------------------------------------------------- */
+    public void testAutoFlush() throws Exception
+    {        
+        
+        String response=null;
+            int offset=0;
+            
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            checkNotContained(response,offset,"IgnoreMe");
+            offset = checkContains(response,offset,"/R1");
+            offset = checkContains(response,offset,"12345");
+    }
+    /* --------------------------------------------------------------- */
     public void testCharset()
     {        
         
@@ -174,10 +195,19 @@ public class HttpConnectionTest extends TestCase
         return o;
     }
 
-    private void checkNotContained(String s,int offset,String c,String test)
+    private void checkNotContained(String s,int offset,String c)
     {
         int o=s.indexOf(c,offset);
-        assertTrue(test,o<offset);
+        if (o>=offset)
+        {
+            System.err.println("FAILED");
+            System.err.println("'"+c+"' IS in:");
+            System.err.println(s.substring(offset));
+            System.err.flush();
+            System.out.println("--\n"+s);
+            System.out.flush();
+            assertTrue(false);
+        }
     }
 
 
