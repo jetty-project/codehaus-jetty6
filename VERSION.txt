@@ -12,6 +12,7 @@ jetty-6.1-SNAPSHOT
       * forward query attribute fix
       * session attribute listener
       * Servlet role ref
+      * flush if content-length written
 
 jetty-6.0-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter

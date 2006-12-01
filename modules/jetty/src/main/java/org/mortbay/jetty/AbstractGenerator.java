@@ -271,6 +271,12 @@ public abstract class AbstractGenerator implements Generator
     }
 
     /* ------------------------------------------------------------ */
+    public void setContentLength(long value)
+    {
+        _contentLength=value;
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * @param head The head to set.
      */
@@ -388,6 +394,12 @@ public abstract class AbstractGenerator implements Generator
              _state == STATE_FLUSHING || 
              (_buffer != null && _buffer.space() == 0));
         return full;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isContentWritten()
+    {
+        return _contentLength>=0 && _contentWritten>=_contentLength;
     }
     
     /* ------------------------------------------------------------ */
@@ -570,7 +582,7 @@ public abstract class AbstractGenerator implements Generator
                 blockForOutput();
 
             // Add the _content
-            if (_generator.addContent((byte)b))
+            if (_generator.addContent((byte)b) || _generator.isContentWritten() )
             {
                 // Buffers are full so flush.
                 flush();
@@ -591,7 +603,7 @@ public abstract class AbstractGenerator implements Generator
             _generator.addContent(buffer, Generator.MORE);
 
             // Have to flush and complete headers?
-            if (_generator.isBufferFull())
+            if (_generator.isBufferFull() || _generator.isContentWritten())
                 flush();
 
             // Block until our buffer is free

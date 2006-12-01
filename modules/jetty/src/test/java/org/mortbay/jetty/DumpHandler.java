@@ -177,11 +177,9 @@ public class DumpHandler extends AbstractHandler
         
         // commit now
         writer.flush();
-        response.setIntHeader(HttpHeaders.CONTENT_LENGTH,buf.size()+1000);
+        response.setContentLength(buf.size()+1000);
         buf.writeTo(out);
-        out.flush();
         
-        // Now add the response
         buf.reset();
         writer.flush();
         for (int pad=998-buf.size();pad-->0;)
@@ -189,5 +187,7 @@ public class DumpHandler extends AbstractHandler
         writer.write("\015\012");
         writer.flush();
         buf.writeTo(out);
+        
+        response.setHeader("IgnoreMe","ignored");
     }
 }

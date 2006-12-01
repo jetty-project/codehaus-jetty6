@@ -36,6 +36,7 @@ import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.IO;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
@@ -77,8 +78,6 @@ public class Response implements HttpServletResponse
     private String _contentType;
     private int _outputState;
     private PrintWriter _writer;
-
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -373,7 +372,11 @@ public class Response implements HttpServletResponse
     public void setHeader(String name, String value)
     {
         if (!_connection.isIncluding())
+        {
             _connection.getResponseFields().put(name, value);
+            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+                _connection._generator.setContentLength(Long.parseLong(value));
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -402,7 +405,11 @@ public class Response implements HttpServletResponse
     public void addHeader(String name, String value)
     {
         if (!_connection.isIncluding())
+        {
             _connection.getResponseFields().add(name, value);
+            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+                _connection._generator.setContentLength(Long.parseLong(value));
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -412,7 +419,11 @@ public class Response implements HttpServletResponse
     public void setIntHeader(String name, int value)
     {
         if (!_connection.isIncluding())
+        {
             _connection.getResponseFields().putLongField(name, value);
+            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+                _connection._generator.setContentLength(value);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -422,7 +433,11 @@ public class Response implements HttpServletResponse
     public void addIntHeader(String name, int value)
     {
         if (!_connection.isIncluding())
+        {
             _connection.getResponseFields().addLongField(name, value);
+            if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+                _connection._generator.setContentLength(value);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -612,7 +627,8 @@ public class Response implements HttpServletResponse
         // of a servlet HEAD request ALWAYS sets _content length, even
         // if the getHandling committed the response!
         if (isCommitted() || _connection.isIncluding())
-        	return;
+            return;
+        _connection._generator.setContentLength(len);
         _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
     }
 
@@ -627,9 +643,10 @@ public class Response implements HttpServletResponse
         // if the getHandling committed the response!
         if (isCommitted() || _connection.isIncluding())
         	return;
+        _connection._generator.setContentLength(len);
         _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
     }
-
+    
     /* ------------------------------------------------------------ */
     /*
      * @see javax.servlet.ServletResponse#setContentType(java.lang.String)

@@ -178,8 +178,6 @@ public class HttpGenerator extends AbstractGenerator
         }
 
         _contentWritten++;
-        // if (_contentLength>=0 && _contentWritten>=_contentLength)
-        //     flush();
         
         // Handle the _content
         if (_head)
