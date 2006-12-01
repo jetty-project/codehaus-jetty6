@@ -106,7 +106,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
 {
     private static ByteArrayBuffer BYTE_RANGES=new ByteArrayBuffer("bytes");
     
-    private ContextHandler.Context _context;
+    private ContextHandler.SContext _context;
     
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
@@ -127,7 +127,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         throws UnavailableException
     {
         ServletContext config=getServletContext();
-        _context = (ContextHandler.Context)config;
+        _context = (ContextHandler.SContext)config;
         _mimeTypes = _context.getContextHandler().getMimeTypes();
         
         _welcomes = _context.getContextHandler().getWelcomeFiles();

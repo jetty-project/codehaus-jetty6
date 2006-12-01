@@ -77,7 +77,7 @@ public class ServletHandler extends AbstractHandler
         
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
-    private ContextHandler.Context _servletContext;
+    private ContextHandler.SContext _servletContext;
     private FilterHolder[] _filters;
     private FilterMapping[] _filterMappings;
     private boolean _filterChainsCached=true;
