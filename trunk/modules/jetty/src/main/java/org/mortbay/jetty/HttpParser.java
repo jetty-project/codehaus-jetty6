@@ -728,63 +728,66 @@ public class HttpParser implements Parser
     /* ------------------------------------------------------------------------------- */
     public void reset(boolean returnBuffers)
     {   
-        _state=STATE_START;
-        _contentLength=HttpTokens.UNKNOWN_CONTENT;
-        _contentPosition=0;
-        _length=0;
-        _response=false;
-        
-        if (_buffer!=null && _buffer.length()>0 && _eol == HttpTokens.CARRIAGE_RETURN && _buffer.peek() == HttpTokens.LINE_FEED)
+        synchronized (this) // prevent dual reset.
         {
-            _buffer.skip(1);
-            _eol=HttpTokens.LINE_FEED;
-        }
-        
-        if (_body!=null)
-        {   
-            if (_body.hasContent())
+            _state=STATE_START;
+            _contentLength=HttpTokens.UNKNOWN_CONTENT;
+            _contentPosition=0;
+            _length=0;
+            _response=false;
+
+            if (_buffer!=null && _buffer.length()>0 && _eol == HttpTokens.CARRIAGE_RETURN && _buffer.peek() == HttpTokens.LINE_FEED)
+            {
+                _buffer.skip(1);
+                _eol=HttpTokens.LINE_FEED;
+            }
+
+            if (_body!=null)
+            {   
+                if (_body.hasContent())
+                {
+                    _header.setMarkIndex(-1);
+                    _header.compact();
+                    // TODO if pipelined requests received after big input - maybe this is not good?.
+                    _body.skip(_header.put(_body));
+
+                }
+
+                if (_body.length()==0)
+                {
+                    if (_buffers!=null && returnBuffers)
+                        _buffers.returnBuffer(_body);
+                    _body=null; 
+                }
+                else
+                {
+                    _body.setMarkIndex(-1);
+                    _body.compact();
+                }
+            }
+
+
+            if (_header!=null)
             {
                 _header.setMarkIndex(-1);
-                _header.compact();
-                // TODO if pipelined requests received after big input - maybe this is not good?.
-                _body.skip(_header.put(_body));
+                if (!_header.hasContent() && _buffers!=null && returnBuffers)
+                {
+                    _buffers.returnBuffer(_header);
+                    _header=null;
+                    _buffer=null;
+                }   
+                else
+                {
+                    _header.compact();
+                    _tok0.update(_header);
+                    _tok0.update(0,0);
+                    _tok1.update(_header);
+                    _tok1.update(0,0);
+                }
+            }
 
-            }
-            
-            if (_body.length()==0)
-            {
-                if (_buffers!=null && returnBuffers)
-                    _buffers.returnBuffer(_body);
-                _body=null; 
-            }
-            else
-            {
-                _body.setMarkIndex(-1);
-                _body.compact();
-            }
+            _buffer=_header;
         }
-            
-            
-        if (_header!=null)
-        {
-            _header.setMarkIndex(-1);
-            if (!_header.hasContent() && _buffers!=null && returnBuffers)
-            {
-                _buffers.returnBuffer(_header);
-                _header=null;
-                _buffer=null;
-            }   
-            else
-            {
-                _header.compact();
-                _tok0.update(_header);
-                _tok0.update(0,0);
-                _tok1.update(_header);
-                _tok1.update(0,0);
-            }
-        }
-        
-        _buffer=_header;
     }
 
     /* ------------------------------------------------------------------------------- */
