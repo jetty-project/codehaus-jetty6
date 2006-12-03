@@ -71,6 +71,14 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         // If threads are blocked on this
         synchronized (this)
         {
+            if (_key == null)
+            {
+                _readBlocked=false;
+                _writeBlocked=false;
+                this.notifyAll();
+                return false;
+            }
+            
             if (_readBlocked || _writeBlocked)
             {
                 if (_readBlocked && _key.isReadable())
@@ -98,8 +106,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
             }
 
             // Remove writeable op
-            if (_key == null)
-                return false;
             if ((_key.readyOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE && (_key.interestOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE)
             {
                 // Remove writeable op
