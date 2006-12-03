@@ -382,8 +382,11 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     else
                         Log.ignore(e);
                     
-                    if (key != null && !(key.channel() instanceof ServerSocketChannel))
+                    if (key != null && !(key.channel() instanceof ServerSocketChannel) && key.isValid())
+                    {
                         key.interestOps(0);
+                        key.cancel();
+                    } 
                 }
             }
 
