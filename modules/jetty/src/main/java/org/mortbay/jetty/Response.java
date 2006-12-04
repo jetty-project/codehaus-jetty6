@@ -950,6 +950,10 @@ public class Response implements HttpServletResponse
             else if (!_explicitEncoding)
                 type = type.substring(0,semi)+"; charset="+charset;
 
+            _mimeType=type;
+            _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
+            _characterEncoding=charset;
+            
             _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,type);
         }
 
