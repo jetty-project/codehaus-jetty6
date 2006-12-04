@@ -34,7 +34,6 @@ import org.mortbay.log.Log;
  */
 public class HttpGenerator extends AbstractGenerator
 {
-
     // common _content
     private static byte[] LAST_CHUNK =
     { (byte) '0', (byte) '\015', (byte) '\012', (byte) '\015', (byte) '\012'};
@@ -758,5 +757,6 @@ public class HttpGenerator extends AbstractGenerator
             _content = null;
 
     }
+
 
 }

@@ -315,6 +315,12 @@ public abstract class AbstractGenerator implements Generator
     }
 
     /* ------------------------------------------------------------ */
+    public int getVersion()
+    {
+        return _version;
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      */
     public void setRequest(String method, String uri)
