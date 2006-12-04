@@ -58,6 +58,7 @@ public class XmlParser
     private Stack _observers = new Stack();
     private String _xpath;
     private Object _xpaths;
+    private String _dtd;
 
     /* ------------------------------------------------------------ */
     /**
@@ -152,6 +153,12 @@ public class XmlParser
     }
 
     /* ------------------------------------------------------------ */
+    public String getDTD()
+    {
+        return _dtd;
+    }
+
+    /* ------------------------------------------------------------ */
     /**
      * Add a ContentHandler. Add an additional _content handler that is triggered on a tag name. SAX
      * events are passed to the ContentHandler provided from a matching start element to the
@@ -170,6 +177,7 @@ public class XmlParser
     /* ------------------------------------------------------------ */
     public synchronized Node parse(InputSource source) throws IOException, SAXException
     {
+        _dtd=null;
         Handler handler = new Handler();
         XMLReader reader = _parser.getXMLReader();
         reader.setContentHandler(handler);
@@ -213,6 +221,7 @@ public class XmlParser
      */
     public synchronized Node parse(InputStream in) throws IOException, SAXException
     {
+        _dtd=null;
         Handler handler = new Handler();
         XMLReader reader = _parser.getXMLReader();
         reader.setContentHandler(handler);
@@ -383,10 +392,12 @@ public class XmlParser
         /* ------------------------------------------------------------ */
         public InputSource resolveEntity(String pid, String sid)
         {
-
             if (Log.isDebugEnabled())
                 Log.debug("resolveEntity(" + pid + ", " + sid + ")");
 
+            if (sid!=null && sid.endsWith(".dtd"))
+                _dtd=sid;
+            
             URL entity = null;
             if (pid != null)
                 entity = (URL) _redirectMap.get(pid);

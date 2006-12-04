@@ -68,7 +68,8 @@ public class WebXmlConfiguration implements Configuration
     protected boolean _hasJSP;
     protected String _jspServletName;
     protected boolean _defaultWelcomeFileList;
-    private ServletHandler _servlet_handler;
+    protected ServletHandler _servletHandler;
+    protected int _version;
 
     public WebXmlConfiguration()
     {
@@ -225,12 +226,12 @@ public class WebXmlConfiguration implements Configuration
     {
         // TODO preserve any configuration that pre-existed.
 
-        _servlet_handler = getWebAppContext().getServletHandler();
+        _servletHandler = getWebAppContext().getServletHandler();
 
-        _servlet_handler.setFilters(null);
-        _servlet_handler.setFilterMappings(null);
-        _servlet_handler.setServlets(null);
-        _servlet_handler.setServletMappings(null);
+        _servletHandler.setFilters(null);
+        _servletHandler.setFilterMappings(null);
+        _servletHandler.setServlets(null);
+        _servletHandler.setServletMappings(null);
 
         getWebAppContext().setEventListeners(null);
         getWebAppContext().setWelcomeFiles(null);
@@ -246,12 +247,12 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initialize(XmlParser.Node config) throws ClassNotFoundException,UnavailableException
     {
-        _servlet_handler = getWebAppContext().getServletHandler();
+        _servletHandler = getWebAppContext().getServletHandler();
         // Get any existing servlets and mappings.
-        _filters=LazyList.array2List(_servlet_handler.getFilters());
-        _filterMappings=LazyList.array2List(_servlet_handler.getFilterMappings());
-        _servlets=LazyList.array2List(_servlet_handler.getServlets());
-        _servletMappings=LazyList.array2List(_servlet_handler.getServletMappings());
+        _filters=LazyList.array2List(_servletHandler.getFilters());
+        _filterMappings=LazyList.array2List(_servletHandler.getFilterMappings());
+        _servlets=LazyList.array2List(_servletHandler.getServlets());
+        _servletMappings=LazyList.array2List(_servletHandler.getServletMappings());
 
         _listeners = LazyList.array2List(getWebAppContext().getEventListeners());
         _welcomeFiles = LazyList.array2List(getWebAppContext().getWelcomeFiles());
@@ -260,6 +261,19 @@ public class WebXmlConfiguration implements Configuration
         _errorPages = getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler ?
                         ((ErrorPageErrorHandler)getWebAppContext().getErrorHandler()).getErrorPages():null;
 
+        String version=config.getAttribute("version","DTD");
+        if ("2.5".equals(version))
+            _version=25;
+        else if ("2.4".equals(version))
+            _version=24;
+        else if ("DTD".equals(version))
+        {
+            _version=23;
+            String dtd=_xmlParser.getDTD();
+            if (dtd!=null && dtd.indexOf("web-app_2_2")>=0)
+                _version=22;
+        }
+                        
         Iterator iter=config.iterator();
         XmlParser.Node node=null;
         while(iter.hasNext())
@@ -284,10 +298,10 @@ public class WebXmlConfiguration implements Configuration
             }
         }
 
-        _servlet_handler.setFilters((FilterHolder[])LazyList.toArray(_filters,FilterHolder.class));
-        _servlet_handler.setFilterMappings((FilterMapping[])LazyList.toArray(_filterMappings,FilterMapping.class));
-        _servlet_handler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
-        _servlet_handler.setServletMappings((ServletMapping[])LazyList.toArray(_servletMappings,ServletMapping.class));
+        _servletHandler.setFilters((FilterHolder[])LazyList.toArray(_filters,FilterHolder.class));
+        _servletHandler.setFilterMappings((FilterMapping[])LazyList.toArray(_filterMappings,FilterMapping.class));
+        _servletHandler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
+        _servletHandler.setServletMappings((ServletMapping[])LazyList.toArray(_servletMappings,ServletMapping.class));
 
         getWebAppContext().setEventListeners((EventListener[])LazyList.toArray(_listeners,EventListener.class));
         getWebAppContext().setWelcomeFiles((String[])LazyList.toArray(_welcomeFiles,String.class));
@@ -382,10 +396,10 @@ public class WebXmlConfiguration implements Configuration
     protected void initFilter(XmlParser.Node node)
     {
         String name=node.getString("filter-name",false,true);
-        FilterHolder holder= _servlet_handler.getFilter(name);
+        FilterHolder holder= _servletHandler.getFilter(name);
         if (holder==null)
         {
-            holder=_servlet_handler.newFilterHolder();
+            holder=_servletHandler.newFilterHolder();
             holder.setName(name);
             _filters=LazyList.add(_filters,holder);
         }
@@ -421,6 +435,7 @@ public class WebXmlConfiguration implements Configuration
         while(iter.hasNext())
         {
             String p=((XmlParser.Node)iter.next()).toString(false,true);
+            p=normalizePattern(p);
             paths.add(p);
         }
         mapping.setPathSpecs((String[])paths.toArray(new String[paths.size()]));
@@ -449,16 +464,24 @@ public class WebXmlConfiguration implements Configuration
     }
 
     /* ------------------------------------------------------------ */
+    protected String normalizePattern(String p)
+    {
+        if (_version==22 && p!=null && p.length()>0 && !p.startsWith("/") && !p.startsWith("*"))
+            return "/"+p;
+        return p;
+    }
+
+    /* ------------------------------------------------------------ */
     protected void initServlet(XmlParser.Node node) 
     {
         String id=node.getAttribute("id");
 
         // initialize holder
         String servlet_name=node.getString("servlet-name",false,true);
-        ServletHolder holder = _servlet_handler.getServlet(servlet_name);
+        ServletHolder holder = _servletHandler.getServlet(servlet_name);
         if (holder==null)
         {
-            holder=_servlet_handler.newServletHolder();
+            holder=_servletHandler.newServletHolder();
             holder.setName(servlet_name);
             _servlets=LazyList.add(_servlets,holder);
         }
@@ -583,6 +606,7 @@ public class WebXmlConfiguration implements Configuration
         while(iter.hasNext())
         {
             String p=((XmlParser.Node)iter.next()).toString(false,true);
+            p=normalizePattern(p);
             paths.add(p);
         }
         mapping.setPathSpecs((String[])paths.toArray(new String[paths.size()]));
@@ -723,6 +747,7 @@ public class WebXmlConfiguration implements Configuration
             while (iter2.hasNext())
             {
                 String url = ((XmlParser.Node) iter2.next()).toString(false, true);
+                url=normalizePattern(url);
                 paths=LazyList.add(paths,url);
             }
         }
@@ -793,7 +818,8 @@ public class WebXmlConfiguration implements Configuration
                 while (iter2.hasNext())
                 {
                     String url = ((XmlParser.Node) iter2.next()).toString(false, true);
-
+                    url=normalizePattern(url);
+                    
                     Iterator iter3 = collection.iterator("http-method");
                     if (iter3.hasNext())
                     {
