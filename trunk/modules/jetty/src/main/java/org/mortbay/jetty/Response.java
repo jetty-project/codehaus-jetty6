@@ -305,7 +305,41 @@ public class Response implements HttpServletResponse
      */
     public void sendError(int sc) throws IOException
     {
-        sendError(sc,null);
+        if (sc==102)
+            sendProcessing();
+        else
+            sendError(sc,null);
+    }
+
+    /* ------------------------------------------------------------ */
+    /* Send a 102-Processing response.
+     * If the connection is a HTTP connection, the version is 1.1 and the
+     * request has a Expect header starting with 102, then a 102 response is
+     * sent. This indicates that the request still be processed and real response
+     * can still be sent.   This method is called by sendError if it is passed 102.
+     * @see javax.servlet.http.HttpServletResponse#sendError(int)
+     */
+    public void sendProcessing() throws IOException
+    {
+        Generator g = _connection.getGenerator();
+        if (g instanceof HttpGenerator)
+        {
+            HttpGenerator generator = (HttpGenerator)g;
+            
+            String expect = _connection.getRequest().getHeader(HttpHeaders.EXPECT);
+            
+            if (expect!=null && expect.startsWith("102") && generator.getVersion()>=HttpVersions.HTTP_1_1_ORDINAL)
+            {
+                boolean was_persistent=generator.isPersistent();
+                generator.setResponse(HttpStatus.ORDINAL_102_Processing,null);
+                generator.completeHeader(null,true);
+                generator.setPersistent(true);
+                generator.complete();
+                generator.flush();
+                generator.reset(false);
+                generator.setPersistent(was_persistent);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
