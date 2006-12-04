@@ -35,6 +35,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
 
     private Timeout.Task _timeoutTask = new IdleTask();
 
+    /* ------------------------------------------------------------ */
     public Connection getConnection()
     {
         return _connection;
@@ -121,13 +122,13 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
 
     /* ------------------------------------------------------------ */
-    protected void scheduleIdle()
+    public void scheduleIdle()
     {
         _selectSet.scheduleIdle(_timeoutTask);
     }
 
     /* ------------------------------------------------------------ */
-    protected void cancelIdle()
+    public void cancelIdle()
     {
         _selectSet.cancelIdle(_timeoutTask);
     }
@@ -291,7 +292,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
             }
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     /**
      * Synchronize the interestOps with the actual key. Call is scheduled by a call to updateKey
@@ -380,6 +381,19 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
 
     /* ------------------------------------------------------------ */
+    protected void idleExpired()
+    {
+        try
+        {
+            close();
+        }
+        catch (IOException e)
+        {
+            Log.ignore(e);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         return "HEP@" + hashCode() + "[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
@@ -408,14 +422,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
          */
         public void expire()
         {
-            try
-            {
-                close();
-            }
-            catch (IOException e)
-            {
-                Log.ignore(e);
-            }
+            idleExpired();
         }
 
         public String toString()

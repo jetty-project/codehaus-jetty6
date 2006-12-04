@@ -440,11 +440,6 @@ public class HttpParser implements Parser
                                         }
                                         break;
                                         
-                                    case HttpHeaders.CONNECTION_ORDINAL:
-                                        // TODO comma list of connections !!!
-                                        value=HttpHeaderValues.CACHE.lookup(value);
-                                        break;
-                                        
                                     case HttpHeaders.TRANSFER_ENCODING_ORDINAL:
                                         value=HttpHeaderValues.CACHE.lookup(value);
                                         vo=HttpHeaderValues.CACHE.getOrdinal(value);
@@ -459,10 +454,6 @@ public class HttpParser implements Parser
                                             else if (c.indexOf(HttpHeaderValues.CHUNKED) >= 0)
                                                 throw new HttpException(400,null);
                                         }
-                                        break;
-                                        
-                                    case HttpHeaders.CONTENT_TYPE_ORDINAL:
-                                        // TODO confirm there are no other cases where _hasContent should be true
                                         break;
                                 }
                             }

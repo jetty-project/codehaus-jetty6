@@ -82,6 +82,7 @@ public class HttpGenerator extends AbstractGenerator
         _bufferChunked=false;
         _method=null;
         _uri=null;
+        _noContent=false;
     }
 
 
@@ -335,7 +336,19 @@ public class HttpGenerator extends AbstractGenerator
                     }
                 }
 
-                if (_status==100 || _status==204 || _status==304)
+                if (_status<200 && _status>=100 )
+                {
+                    _noContent=true;
+                    _content=null;
+                    if (_buffer!=null)
+                        _buffer.clear();
+                    // end the header.
+                    _header.put(HttpTokens.CRLF);
+                    _state = STATE_CONTENT;
+                    return;
+                }
+
+                if (_status==204 || _status==304)
                 {
                     _noContent=true;
                     _content=null;
@@ -425,7 +438,6 @@ public class HttpGenerator extends AbstractGenerator
         // 4. Content-Length
         // 5. multipart/byteranges
         // 6. close
-
         switch ((int) _contentLength)
         {
             case HttpTokens.UNKNOWN_CONTENT:
@@ -488,7 +500,6 @@ public class HttpGenerator extends AbstractGenerator
             }
             else
                 _header.put(TRANSFER_ENCODING_CHUNKED);
-
         }
 
         // Handle connection if need be
@@ -507,8 +518,6 @@ public class HttpGenerator extends AbstractGenerator
 
         // end the header.
         _header.put(HttpTokens.CRLF);
-
-
 
         _state = STATE_CONTENT;
 
