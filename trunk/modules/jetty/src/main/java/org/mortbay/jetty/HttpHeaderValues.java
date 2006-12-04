@@ -30,21 +30,16 @@ public class HttpHeaderValues extends BufferCache
         IDENTITY="identity",
         KEEP_ALIVE="keep-alive",
         CONTINUE="100-continue",
-        
-        CLIENT0="gzip",
-        CLIENT1="gzip,deflate",
-        CLIENT2="deflate";
+        PROCESSING="102-processing";
 
-    private static int index=1;
     public final static int
-        CLOSE_ORDINAL=index++,
-        CHUNKED_ORDINAL=index++,
-        GZIP_ORDINAL=index++,
-        IDENTITY_ORDINAL=index++,
-        KEEP_ALIVE_ORDINAL=index++,
-        CONTINUE_ORDINAL=index++;
-
-
+        CLOSE_ORDINAL=1,
+        CHUNKED_ORDINAL=2,
+        GZIP_ORDINAL=3,
+        IDENTITY_ORDINAL=4,
+        KEEP_ALIVE_ORDINAL=5,
+        CONTINUE_ORDINAL=6,
+        PROCESSING_ORDINAL=7;
     
     public final static HttpHeaderValues CACHE= new HttpHeaderValues();
 
@@ -54,13 +49,22 @@ public class HttpHeaderValues extends BufferCache
         GZIP_BUFFER=CACHE.add(GZIP,GZIP_ORDINAL),
         IDENTITY_BUFFER=CACHE.add(IDENTITY,IDENTITY_ORDINAL),
         KEEP_ALIVE_BUFFER=CACHE.add(KEEP_ALIVE,KEEP_ALIVE_ORDINAL),
-        CONTINUE_BUFFER=CACHE.add(CONTINUE, CONTINUE_ORDINAL);
+        CONTINUE_BUFFER=CACHE.add(CONTINUE, CONTINUE_ORDINAL),
+        PROCESSING_BUFFER=CACHE.add(PROCESSING, PROCESSING_ORDINAL);
         
     static
     {  
-        index=100;
-        CACHE.add(CLIENT0,index++);
-        CACHE.add(CLIENT1,index++);
-        CACHE.add(CLIENT2,index++);
+        int index=100;
+        CACHE.add("gzip",index++);
+        CACHE.add("gzip,deflate",index++);
+        CACHE.add("deflate",index++);
+        CACHE.add("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)",index++);
+        CACHE.add("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)",index++);
+        CACHE.add("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.0.7) Gecko/20060909 Firefox/1.5.0.7",index++);
+        CACHE.add("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",index++);
+        CACHE.add("Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",index++);
+        CACHE.add("Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",index++);
+        CACHE.add("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1) Gecko/20061010 Firefox/2.0",index++);
+        CACHE.add("msnbot/1.0 (+http://search.msn.com/msnbot.htm)",index++);
     }
 }

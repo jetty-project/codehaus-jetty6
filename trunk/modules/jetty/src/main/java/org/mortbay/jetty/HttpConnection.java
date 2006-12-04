@@ -18,9 +18,7 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -49,8 +47,6 @@ public class HttpConnection implements Connection
     protected Connector _connector;
     protected EndPoint _endp;
     protected Server _server;
-    
-    private boolean _expectingContinues;  // TODO use this!
 
     protected HttpURI _uri=new HttpURI();
 
@@ -395,8 +391,6 @@ public class HttpConnection implements Connection
                         more_in_buffer=false;
                     }
                     
-                    _expectingContinues = false; // TODO do something with this!
-                    
                     reset(!more_in_buffer);
                 }
                 
@@ -420,7 +414,7 @@ public class HttpConnection implements Connection
         _responseFields.clear();
         _response.recycle();
         
-        _uri.clear();   
+        _uri.clear(); 
     }
     
     /* ------------------------------------------------------------ */
@@ -647,14 +641,15 @@ public class HttpConnection implements Connection
                     // TODO check if host matched a host in the URI.
                     _host = true;
                     break;
-
+                    
                 case HttpHeaders.EXPECT_ORDINAL:
+                    value = HttpHeaderValues.CACHE.lookup(value);
                     _expect = HttpHeaderValues.CACHE.getOrdinal(value);
                     break;
                     
                 case HttpHeaders.ACCEPT_ENCODING_ORDINAL:
+                case HttpHeaders.USER_AGENT_ORDINAL:
                     value = HttpHeaderValues.CACHE.lookup(value);
-                    break;
                     
                 case HttpHeaders.CONTENT_TYPE_ORDINAL:
                     value = MimeTypes.CACHE.lookup(value);
@@ -704,8 +699,6 @@ public class HttpConnection implements Connection
                     {
                         if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                         {
-                            _expectingContinues = true;
-                            
                             // TODO delay sending 100 response until a read is attempted.
                             if (((HttpParser)_parser).getHeaderBuffer()==null || ((HttpParser)_parser).getHeaderBuffer().length()<2)
                             {
@@ -714,6 +707,10 @@ public class HttpConnection implements Connection
                                 _generator.complete();
                                 _generator.reset(false);
                             }
+                        }
+                        else if (_expect == HttpHeaderValues.PROCESSING_ORDINAL)
+                        {
+                            // TODO - need to know if the filter is installed.
                         }
                         else
                         {
@@ -895,6 +892,5 @@ public class HttpConnection implements Connection
             super(HttpConnection.this._out);
         }
     }
-
 
 }
