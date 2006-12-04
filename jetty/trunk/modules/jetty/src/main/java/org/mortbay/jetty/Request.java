@@ -72,7 +72,7 @@ public class Request implements HttpServletRequest
     private static final String __maxFormContentSizeName = "org.mortbay.jetty.Request.maxFormContentSize";
 
     private static final int __NONE=0, _STREAM=1, __READER=2;
-    private static Cookie[] __noCookies = new Cookie[0];
+    
     /* ------------------------------------------------------------ */
     /**
      * Max size of the form content. Limits the size of the data a client can push at the server.
@@ -313,7 +313,7 @@ public class Request implements HttpServletRequest
             // Handle no cookies
             if (!_connection.getRequestFields().containsKey(HttpHeaders.COOKIE_BUFFER))
             {
-                _cookies = __noCookies;
+                _cookies = null;
                 _cookiesExtracted = true;
                 _lastCookies = null;
                 return _cookies;
@@ -409,22 +409,26 @@ public class Request implements HttpServletRequest
             }
 
             int l = LazyList.size(cookies);
-            if (_cookies == null || _cookies.length != l) _cookies = new Cookie[l];
-            for (int i = 0; i < l; i++)
-                _cookies[i] = (Cookie) LazyList.get(cookies, i);
             _cookiesExtracted = true;
+            if (l>0)
+            {
+                if (_cookies == null || _cookies.length != l) _cookies = new Cookie[l];
+                for (int i = 0; i < l; i++)
+                    _cookies[i] = (Cookie) LazyList.get(cookies, i);
 
-            l = LazyList.size(lastCookies);
-            _lastCookies = new String[l];
-            for (int i = 0; i < l; i++)
-                _lastCookies[i] = (String) LazyList.get(lastCookies, i);
-
+                l = LazyList.size(lastCookies);
+                _lastCookies = new String[l];
+                for (int i = 0; i < l; i++)
+                    _lastCookies[i] = (String) LazyList.get(lastCookies, i);
+            }
         }
         catch (Exception e)
         {
             Log.warn(e);
         }
 
+        if (_cookies==null || _cookies.length==0)
+            return null;
         return _cookies;
     }
 
