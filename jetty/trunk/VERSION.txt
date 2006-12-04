@@ -16,6 +16,7 @@ jetty-6.1-SNAPSHOT
       * 403 for BASIC authorization failure
       * null for unknown named dispatches
     + JETTY-184 cometd connect non blocking
+    + Support for RFC2518 102-processing response
 
 jetty-6.0-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter
