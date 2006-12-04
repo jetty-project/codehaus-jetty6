@@ -1205,7 +1205,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
          */
         public String getServerInfo()
         {
-            return "Jetty-6.0";
+            return "jetty-"+getServer().getVersion();
         }
 
         /* ------------------------------------------------------------ */
