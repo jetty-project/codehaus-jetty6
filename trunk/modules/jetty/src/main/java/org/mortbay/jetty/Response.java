@@ -941,20 +941,27 @@ public class Response implements HttpServletResponse
             type="application/octet-stream";
         }
 
+        if (_connection.getRequest().getContext()==null)
+            return;
         String charset = _connection.getRequest().getContext().getContextHandler().getLocaleEncoding(locale);
         if (charset != null && charset.length()>0)
         {
+            _characterEncoding=charset;
             int semi=type.indexOf(';');
             if (semi<0)
-                type += "; charset="+charset;
+            {
+                _mimeType=type;
+                _contentType= type += "; charset="+charset;
+            }
             else if (!_explicitEncoding)
-                type = type.substring(0,semi)+"; charset="+charset;
+            {
+                _mimeType=type.substring(0,semi);
+                _contentType= _mimeType += "; charset="+charset;
+            }
 
-            _mimeType=type;
             _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
-            _characterEncoding=charset;
             
-            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,type);
+            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
         }
 
     }

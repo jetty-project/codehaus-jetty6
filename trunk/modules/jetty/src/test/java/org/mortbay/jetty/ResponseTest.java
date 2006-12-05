@@ -22,8 +22,10 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSessionContext;
 
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.servlet.HashSessionManager;
+import java.util.Locale;
 
 import junit.framework.TestCase;
 
@@ -73,7 +75,9 @@ public class ResponseTest extends TestCase
     public void testContentType()
     	throws Exception
     {
-        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+
+        HttpConnection connection = new HttpConnection(connector,connector.endp,connector.server);
+        Response response = connection.getResponse();
         
         assertEquals(null,response.getContentType());
         
@@ -101,13 +105,41 @@ public class ResponseTest extends TestCase
         assertEquals("text/html; charset=ISO-8859-1",response.getContentType());
         response.setContentType("foo2/bar2");
         assertEquals("foo2/bar2; charset=ISO-8859-1",response.getContentType());
+
+        response.recycle();
+        
+        
+        
+        
+        
     }
 
+
+    public void testLocale()
+        throws Exception
+    {
+
+        HttpConnection connection = new HttpConnection(connector,connector.endp,connector.server);
+        Request request = connection.getRequest();
+        Response response = connection.getResponse();
+        ContextHandler context = new ContextHandler();
+        context.addLocaleEncoding(Locale.ENGLISH.toString(),"ISO-8859-1");
+        request.setContext(context.getServletContext());
+
+        response.setLocale(java.util.Locale.ENGLISH);
+        assertEquals("application/octet-stream; charset=ISO-8859-1",response.getContentType());
+        response.setContentType("text/plain");
+        assertEquals("text/plain; charset=ISO-8859-1",response.getContentType());
+    }
     
     public void testContentTypeCharacterEncoding()
         throws Exception
     {
-        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+        HttpConnection connection = new HttpConnection(connector,connector.endp,connector.server);
+        
+        Request request = connection.getRequest();
+        Response response = connection.getResponse();
+        
         
         response.setContentType("foo/bar");
         response.setCharacterEncoding("utf-8");
