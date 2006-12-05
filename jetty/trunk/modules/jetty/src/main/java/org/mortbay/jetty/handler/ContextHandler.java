@@ -161,7 +161,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         setContextPath(contextPath);
         parent.addHandler(this);
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public SContext getServletContext()
+    {
+        return _scontext;
+    }
 
     /* ------------------------------------------------------------ */
     public void setServer(Server server)
