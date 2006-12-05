@@ -117,6 +117,7 @@ public class HttpConnectionTest extends TestCase
             offset = checkContains(response,offset,"/R1");
             offset = checkContains(response,offset,"12345");
     }
+    
     /* --------------------------------------------------------------- */
     public void testCharset()
     {        

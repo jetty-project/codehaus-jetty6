@@ -466,7 +466,7 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected String normalizePattern(String p)
     {
-        if (_version==22 && p!=null && p.length()>0 && !p.startsWith("/") && !p.startsWith("*"))
+        if (p!=null && p.length()>0 && !p.startsWith("/") && !p.startsWith("*"))
             return "/"+p;
         return p;
     }

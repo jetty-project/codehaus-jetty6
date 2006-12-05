@@ -928,8 +928,8 @@ public class Response implements HttpServletResponse
 
         _locale = locale;
         _connection.getResponseFields().put(HttpHeaders.CONTENT_LANGUAGE_BUFFER,locale.toString().replace('_','-'));
-
-        if (this._outputState!=0 )
+        
+        if (_explicitEncoding || _outputState!=0 )
             return;
 
         /* get current MIME type from Content-Type header */
@@ -953,14 +953,13 @@ public class Response implements HttpServletResponse
                 _mimeType=type;
                 _contentType= type += "; charset="+charset;
             }
-            else if (!_explicitEncoding)
+            else
             {
                 _mimeType=type.substring(0,semi);
                 _contentType= _mimeType += "; charset="+charset;
             }
 
             _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
-            
             _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
         }
 
