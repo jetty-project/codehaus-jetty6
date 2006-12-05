@@ -710,7 +710,6 @@ public class HttpConnection implements Connection
                         }
                         else if (_expect == HttpHeaderValues.PROCESSING_ORDINAL)
                         {
-                            // TODO - need to know if the filter is installed.
                         }
                         else
                         {
