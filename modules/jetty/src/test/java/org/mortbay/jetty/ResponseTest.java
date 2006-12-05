@@ -102,16 +102,11 @@ public class ResponseTest extends TestCase
         response.setContentType("text/html");
         assertEquals("text/html",response.getContentType());
         response.getWriter();
-        assertEquals("text/html; charset=ISO-8859-1",response.getContentType());
+        assertEquals("text/html; charset=iso-8859-1",response.getContentType());
         response.setContentType("foo2/bar2");
         assertEquals("foo2/bar2; charset=ISO-8859-1",response.getContentType());
 
         response.recycle();
-        
-        
-        
-        
-        
     }
 
 
@@ -124,12 +119,21 @@ public class ResponseTest extends TestCase
         Response response = connection.getResponse();
         ContextHandler context = new ContextHandler();
         context.addLocaleEncoding(Locale.ENGLISH.toString(),"ISO-8859-1");
+        context.addLocaleEncoding(Locale.ITALIAN.toString(),"ISO-8859-2");
         request.setContext(context.getServletContext());
 
         response.setLocale(java.util.Locale.ENGLISH);
         assertEquals("application/octet-stream; charset=ISO-8859-1",response.getContentType());
         response.setContentType("text/plain");
-        assertEquals("text/plain; charset=ISO-8859-1",response.getContentType());
+        assertEquals("text/plain; charset=iso-8859-1",response.getContentType());
+
+        response.recycle();
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("utf-8");
+        response.setLocale(java.util.Locale.ITALIAN);
+        assertEquals("text/plain; charset=utf-8",response.getContentType());
+        assertTrue(response.toString().indexOf("charset=utf-8")>0);
+        
     }
     
     public void testContentTypeCharacterEncoding()
@@ -155,13 +159,13 @@ public class ResponseTest extends TestCase
         
         response.setContentType("text/html");
         response.setCharacterEncoding("utf-8");
-        assertEquals("text/html; charset=UTF-8",response.getContentType());
+        assertEquals("text/html; charset=utf-8",response.getContentType());
         response.getWriter();
-        assertEquals("text/html; charset=UTF-8",response.getContentType());
+        assertEquals("text/html; charset=utf-8",response.getContentType());
         response.setContentType("text/xml");
-        assertEquals("text/xml; charset=UTF-8",response.getContentType());
+        assertEquals("text/xml; charset=utf-8",response.getContentType());
         response.setCharacterEncoding("ISO-8859-1");
-        assertEquals("text/xml; charset=UTF-8",response.getContentType());
+        assertEquals("text/xml; charset=utf-8",response.getContentType());
         
     }
     
@@ -184,13 +188,13 @@ public class ResponseTest extends TestCase
         
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/html");
-        assertEquals("text/html; charset=UTF-8",response.getContentType());
+        assertEquals("text/html; charset=utf-8",response.getContentType());
         response.getWriter();
-        assertEquals("text/html; charset=UTF-8",response.getContentType());
+        assertEquals("text/html; charset=utf-8",response.getContentType());
         response.setContentType("text/xml");
-        assertEquals("text/xml; charset=UTF-8",response.getContentType());
-        response.setCharacterEncoding("ISO-8859-1");
-        assertEquals("text/xml; charset=UTF-8",response.getContentType());
+        assertEquals("text/xml; charset=utf-8",response.getContentType());
+        response.setCharacterEncoding("iso-8859-1");
+        assertEquals("text/xml; charset=utf-8",response.getContentType());
         
     }
 
@@ -213,13 +217,13 @@ public class ResponseTest extends TestCase
 
         response.setCharacterEncoding("utf16");
         response.setContentType("text/html; charset=utf-8");
-        assertEquals("text/html; charset=UTF-8",response.getContentType());
+        assertEquals("text/html; charset=utf-8",response.getContentType());
         response.getWriter();
-        assertEquals("text/html; charset=UTF-8",response.getContentType());
+        assertEquals("text/html; charset=utf-8",response.getContentType());
         response.setContentType("text/xml");
-        assertEquals("text/xml; charset=UTF-8",response.getContentType());
-        response.setCharacterEncoding("ISO-8859-1");
-        assertEquals("text/xml; charset=UTF-8",response.getContentType());
+        assertEquals("text/xml; charset=utf-8",response.getContentType());
+        response.setCharacterEncoding("iso-8859-1");
+        assertEquals("text/xml; charset=utf-8",response.getContentType());
         
     }
     
@@ -243,8 +247,7 @@ public class ResponseTest extends TestCase
         response.getWriter();
         assertEquals("text/html; other=xyz charset=utf-8",response.getContentType());
         response.setContentType("text/xml");
-        assertEquals("text/xml; charset=UTF-8",response.getContentType());
-        
+        assertEquals("text/xml; charset=utf-8",response.getContentType());       
     }
     
 
