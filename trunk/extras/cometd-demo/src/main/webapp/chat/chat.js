@@ -36,10 +36,6 @@ var room =
        
        // Really need to batch to avoid ordering issues
 	   cometd.subscribe("/chat/demo", false, room, "_chat");
-	   
-	   // but will simply delay instead with an apply
-       Behaviour.apply();
-       
 	   cometd.publish("/chat/demo", { user: room._username, join: true, chat : room._username+" has joined"});
 	   
        // XXX ajax.sendMessage('join', room._username);
