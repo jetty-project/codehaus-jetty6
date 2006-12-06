@@ -147,76 +147,141 @@ public class CometdServlet extends HttpServlet
             }
         }
         
+        // variables to loop through batches and messages
+        String[] batches=null;
+        int batch_index=0;
+        Object batch=null;
+        int index=0;
+        Map message=null;
         int message_count=0;
+        
+        
         // Look for an existing client and protect from context restarts
         Object clientObj=req.getAttribute(CLIENT_ATTR);
         Client client=(clientObj instanceof Client)?(Client)clientObj:null;
         Transport transport=client==null?null:(Transport)req.getAttribute(Bayeux.TRANSPORT_ATTR);
-
-        if (client==null)
-        {
-            // This is the first time we have seen this request - so handle all
-            // the messages
-            // We may see this request again if a continuation retries the
-            // request.
-
-            // handle all messages (before any polling)
-            String[] messages=req.getParameterValues(MESSAGE_PARAM);
-            
-            Object objects=null;
-            int index=0;
-            for (int m=0; m<messages.length; m++)
-            {
-                System.err.println("="+m+"=>"+messages[m]);
-                if (objects==null)
-                {
-                    index=0;
-                    objects=JSON.parse(messages[m]);
-                }
-
-                if (objects==null)
-                    continue;
-
-                Object object=objects;
-                if (objects.getClass().isArray())
-                {
-                    if (index>=Array.getLength(objects))
-                    {
-                        objects=null;
-                        continue;
-                    }
-                    object=Array.get(objects,index++);
-                }
-                else
-                    objects=null;
-
-                message_count++;
-                Map message=(Map)object;
-
-                // Get a client if possible
-                if (client==null)
-                {
-                    client=_bayeux.getClient((String)message.get(Bayeux.CLIENT_ATTR));
-                    req.setAttribute(CLIENT_ATTR,client);
-                }
-
-                if (transport==null)
-                {
-                    transport=_bayeux.newTransport(client,message);
-                    req.setAttribute(Bayeux.TRANSPORT_ATTR,transport);
-                }
-                transport.setResponse(resp);
-
-                _bayeux.handle(client,transport,message);
-                
-            }
-        }
-
-        // handle polling for additinal messages
         Continuation continuation=null;
+
         try
         {
-            while (client!=null && transport!=null && transport.isPolling())
+            // Have we seen this request before?
+            if (client==null)
+            {
+                // This is the first time we have seen this request - so handle all
+                // the messages
+                // We may see this request again if a continuation retries the
+                // request.
+
+                batches=req.getParameterValues(MESSAGE_PARAM);
+
+                // handle batches/messages until we have a client!
+                while (batch_index<batches.length)
+                {
+                    // Do we need to get another batch?
+                    if (batch==null)
+                    {
+                        System.err.println("="+batch_index+"=>"+batches[batch_index]);
+                        index=0;
+                        batch=JSON.parse(batches[batch_index++]);
+                    }
+
+                    if (batch==null)
+                        continue;
+
+                    if (batch.getClass().isArray())
+                    {
+                        message=(Map)Array.get(batch,index++);
+                        if (index>=Array.getLength(batch))
+                            batch=null;
+                    }
+                    else
+                    {
+                        message=(Map)batch;
+                        batch=null;
+                    }
+
+                    message_count++;
+
+                    // Get a client if possible
+                    if (client==null)
+                    {
+                        client=_bayeux.getClient((String)message.get(Bayeux.CLIENT_ATTR));
+                        req.setAttribute(CLIENT_ATTR,client);
+                    }
+
+                    if (transport==null)
+                    {
+                        transport=_bayeux.newTransport(client,message);
+                        req.setAttribute(Bayeux.TRANSPORT_ATTR,transport);
+                    }
+                    transport.setResponse(resp);
+
+                    if (client!=null)
+                        break;
+
+                    _bayeux.handle(null,transport,message);
+                    message=null;
+
+                }
+                
+                if (client==null)
+                    return;
+
+                
+                // continue handling messages with a known client and transport!
+                try
+                {
+                    // client.responsePending();
+
+                    // handle any message left over from client loop above
+                    if (message!=null)
+                        _bayeux.handle(client,transport,message);
+                    message=null;
+
+                    while (batch_index<batches.length)
+                    {
+
+
+                        // Do we need to get another batch?
+                        if (batch==null)
+                        {
+                            System.err.println("="+batch_index+"=>"+batches[batch_index]);
+                            index=0;
+                            batch=JSON.parse(batches[batch_index++]);
+                        }
+                        if (batch==null)
+                            continue;
+
+                        // get the next message
+                        if (batch.getClass().isArray())
+                        {
+                            message=(Map)Array.get(batch,index++);
+                            if (index>=Array.getLength(batch))
+                                batch=null;
+                        }
+                        else
+                        {
+                            message=(Map)batch;
+                            batch=null;
+                        }
+
+                        // handle message
+                        if (message!=null)
+                            _bayeux.handle(client,transport,message);
+                        message=null;
+                    }
+                }
+                finally
+                {
+                    // client.responded();
+                }
+            }
+
+            if (client==null || transport==null)
+                return;
+            
+            // Do we need to wait for messages or are we streaming?
+            while (transport.isPolling())
             {   
                 long timeout=_timeout;
                 continuation=ContinuationSupport.getContinuation(req,client);
@@ -247,6 +312,7 @@ public class CometdServlet extends HttpServlet
                         if (client.hasMessages())
                         {
                             List messages=client.takeMessages();
+                            System.err.println("responses"+messages);
                             transport.send(messages);
                         }
                         else
@@ -254,7 +320,10 @@ public class CometdServlet extends HttpServlet
 
                         // Only a simple poll if the transport does not flush
                         if (!transport.keepAlive())
+                        {
                             transport.setPolling(false);
+                            return;
+                        }
                     } 
                 }
                 finally
@@ -269,6 +338,15 @@ public class CometdServlet extends HttpServlet
                     }
                 }
             }
+
+            // Send any left over messages.
+            /*
+            synchronized (client)
+            {
+                if (client.hasMessages())
+                    transport.send(client.takeMessages());
+            }
+            */ 
         }
         finally
         {
@@ -282,6 +360,7 @@ public class CometdServlet extends HttpServlet
                     transport.setPolling(false);
                 }
             }
+
         }
     }
 

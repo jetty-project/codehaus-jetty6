@@ -33,6 +33,7 @@ public class Client
     private String _type;
     private ArrayList _messages=new ArrayList();
     private Object _continuations;
+    private int _responsesPending;
 
     /* ------------------------------------------------------------ */
     Client()
@@ -65,6 +66,24 @@ public class Client
     }
 
     /* ------------------------------------------------------------ */
+    int responsePending()
+    {
+        synchronized (this)
+        {
+            return ++_responsesPending;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    int responded()
+    {
+        synchronized (this)
+        {
+            return _responsesPending--;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
     void removeContinuation(Continuation continuation)
     {
         synchronized (this)
@@ -88,19 +107,23 @@ public class Client
         synchronized (this)
         {
             _messages.add(message);
-            if (_continuations!=null)
+            
+            if (_responsesPending<1)
             {
-                for (int i=0;i<LazyList.size(_continuations);i++)
+                if (_continuations!=null)
                 {
-                    Continuation continuation=(Continuation)LazyList.get(_continuations,i);
-                    continuation.resume();
+                    for (int i=0;i<LazyList.size(_continuations);i++)
+                    {
+                        Continuation continuation=(Continuation)LazyList.get(_continuations,i);
+                        continuation.resume();
+                    }
                 }
             }
         }
     }
 
     /* ------------------------------------------------------------ */
-    List takeMessages()
+    public List takeMessages()
     {
         synchronized (this)
         {
