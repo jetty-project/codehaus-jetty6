@@ -61,7 +61,8 @@ public class Bayeux
     HashMap _filters=new java.util.HashMap();
     ArrayList _filterOrder= new ArrayList();
     SecurityPolicy _securityPolicy=new DefaultPolicy();
-    Object _advice = new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":0,\"transport\":{\"long-polling\":{}}}");
+    Object _advice = new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":0}");
+    Object _unknownAdvice = new JSON.Literal("{\"reconnect\":\"handshake\",\"interval\":500}");
 
     {
         _handlers.put("*",new PublishHandler());
@@ -311,6 +312,8 @@ public class Bayeux
             {
                 reply.put("successful",Boolean.FALSE);
                 reply.put("error","unknown client ID");
+                if (_unknownAdvice!=null)
+                    reply.put(ADVICE_ATTR,_unknownAdvice);
             }
             reply.put("connectionId",connection_id);
             reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
@@ -433,8 +436,8 @@ public class Bayeux
             {
                 reply.put("successful",Boolean.FALSE);
                 reply.put("error","unknown clientID");
-                if (_advice!=null)
-                    reply.put(ADVICE_ATTR,_advice);
+                if (_unknownAdvice!=null)
+                    reply.put(ADVICE_ATTR,_unknownAdvice);
                 transport.setPolling(false);
                 transport.send(reply);
             }
