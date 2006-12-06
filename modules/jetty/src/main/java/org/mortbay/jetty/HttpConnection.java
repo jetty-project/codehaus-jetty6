@@ -371,7 +371,6 @@ public class HttpConnection implements Connection
                     Log.debug(e);
                 }
                 _generator.sendError(e.getStatus(), e.getReason(), null, true);
-                // TODO.  Need to consider how to really flush this for non-blocking - probably OK now with buffered endp. 
                 
                 _parser.reset(true);
                 _endp.close();
@@ -650,6 +649,7 @@ public class HttpConnection implements Connection
                 case HttpHeaders.ACCEPT_ENCODING_ORDINAL:
                 case HttpHeaders.USER_AGENT_ORDINAL:
                     value = HttpHeaderValues.CACHE.lookup(value);
+                    break;
                     
                 case HttpHeaders.CONTENT_TYPE_ORDINAL:
                     value = MimeTypes.CACHE.lookup(value);
