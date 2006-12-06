@@ -172,24 +172,30 @@ public class URIUtil
      */
     public static String decodePath(String path)
     {
-        int len=path.length();
-        byte[] bytes=null;
+        if (path==null)
+            return null;
+        char[] chars=null;
         int n=0;
-        boolean noDecode=true;
+        byte[] bytes=null;
+        int b=0;
+        
+        int len=path.length();
         
         for (int i=0;i<len;i++)
         {
             char c = path.charAt(i);
-            if (c<0||c>0xff)
-                throw new IllegalArgumentException("Not decoded");
-            
-            byte b = (byte)(0xff & c);
 
             if (c=='%' && (i+2)<len)
             {
-                noDecode=false;
-                b=(byte)(0xff&TypeUtil.parseInt(path,i+1,2,16));
+                if (chars==null)
+                {
+                    chars=new char[len];
+                    bytes=new byte[len];
+                    path.getChars(0,i,chars,0);
+                }
+                bytes[b++]=(byte)(0xff&TypeUtil.parseInt(path,i+1,2,16));
                 i+=2;
+                continue;
             }
             else if (bytes==null)
             {
@@ -197,28 +203,29 @@ public class URIUtil
                 continue;
             }
             
-            if (bytes==null)
+            if (b>0)
             {
-                noDecode=false;
-                bytes=new byte[len];
-                for (int j=0;j<n;j++)
-                    bytes[j]=(byte)(0xff & path.charAt(j));                
+                String s;
+                try
+                {
+                    s=new String(bytes,0,b,__CHARSET);
+                }
+                catch (UnsupportedEncodingException e)
+                {       
+                    s=new String(bytes,0,b);
+                }
+                s.getChars(0,s.length(),chars,n);
+                n+=s.length();
+                b=0;
             }
             
-            bytes[n++]=b;
+            chars[n++]=c;
         }
 
-        if (noDecode)
+        if (chars==null)
             return path;
-
-        try
-        {    
-            return new String(bytes,0,n,__CHARSET);
-        }
-        catch(UnsupportedEncodingException e)
-        {
-            return new String(bytes,0,n);
-        }
+        
+        return new String(chars,0,n);
     }
     
     /* ------------------------------------------------------------ */
