@@ -44,7 +44,7 @@ public class JEEContextLoader extends ContextLoader
     {
         Log.info("Bootstrapping JEE application context");
         ApplicationContext parentContext = new ClassPathXmlApplicationContext( 
-                new String[] { "classpath*:/META-INF/spring-ejb-jar.xml","classpath:spring-jee-bootstrap.xml" });
+                new String[] { "classpath*:/META-INF/spring-ejb-jar.xml"});
 
         return parentContext;
     }
