@@ -16,12 +16,23 @@
     <!-- Server Thread Pool                                          -->
     <!-- =========================================================== -->
     <Set name="ThreadPool">
+      <!-- Default bounded blocking threadpool -->
       <New class="org.mortbay.thread.BoundedThreadPool">
         <Set name="minThreads">10</Set>
         <Set name="lowThreads">50</Set>
         <Set name="maxThreads">250</Set>
       </New>
+
+      <!-- Optional Java 5 bounded threadpool with job queue -->
+      <!-- 
+      <New class="org.mortbay.thread.concurrent.ThreadPool">
+        <Set name="corePoolSize">10</Set>
+        <Set name="maximumPoolSize">250</Set>
+      </New>
+      -->
     </Set>
+
+
 
     <!-- =========================================================== -->
     <!-- Set connectors                                              -->
