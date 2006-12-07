@@ -19,6 +19,7 @@ jetty-6.1-SNAPSHOT
     + Support for RFC2518 102-processing response
     + JETTY-123 fix improved
     + Added org.mortbay.thread.concurrent.ThreadPool 
+    + Added extras/gwt
 
 jetty-6.0-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter
