@@ -162,17 +162,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
 
     /* ------------------------------------------------------------ */
-    /* 
-     */
-    public int fill(Buffer buffer) throws IOException
-    {
-        int l = super.fill(buffer);
-        if (l < 0)
-            getChannel().close();
-        return l;
-    }
-
-    /* ------------------------------------------------------------ */
     /*
      */
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
