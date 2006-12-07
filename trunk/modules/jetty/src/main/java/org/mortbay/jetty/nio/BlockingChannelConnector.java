@@ -142,14 +142,6 @@ public class BlockingChannelConnector extends AbstractNIOConnector
             }
         }
         
-        public int fill(Buffer buffer) throws IOException
-        {
-            int l = super.fill(buffer);
-            if (l<0)
-                getChannel().close();
-            return l;
-        }
-        
         public void run()
         {
             try
