@@ -145,8 +145,11 @@ public class MailSessionReference extends Reference implements ObjectFactory
             else
                 props.put(name, value);
         }
-        
-        return Session.getInstance(props, new PasswordAuthenticator(user, password));
+
+        if (password == null)
+            return Session.getInstance(props);
+        else
+            return Session.getInstance(props, new PasswordAuthenticator(user, password));
     }
     
     
