@@ -83,7 +83,7 @@ public class Response implements HttpServletResponse
     /**
      *
      */
-    Response(HttpConnection connection)
+    public Response(HttpConnection connection)
     {
         _connection=connection;
     }

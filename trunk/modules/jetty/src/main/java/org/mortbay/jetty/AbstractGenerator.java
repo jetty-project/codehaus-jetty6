@@ -138,7 +138,7 @@ public abstract class AbstractGenerator implements Generator
     public void reset(boolean returnBuffers)
     {
         _state = STATE_HEADER;
-        _status = HttpStatus.ORDINAL_200_OK;
+        _status = 0;
         _version = HttpVersions.HTTP_1_1_ORDINAL;
         _last = false;
         _head = false;
