@@ -1176,7 +1176,7 @@ public class WebAppContext extends Context
     /**
      * Create a canonical name for a webapp tmp directory.
      * The form of the name is:
-     *  "Jetty_"+host+"_"+port+"__"+context+"_"+virtualhost
+     *  "Jetty_"+host+"_"+port+"__"+resourceBase+"_"+context+"_"+virtualhost+base36 hashcode of whole string
      *  
      *  host and port uniquely identify the server
      *  context and virtual host uniquely identify the webapp
@@ -1209,6 +1209,34 @@ public class WebAppContext extends Context
         canonicalName.append(port);
 
        
+        //Resource  base
+        canonicalName.append("_");
+        try
+        {
+            Resource resource = super.getBaseResource();
+            if (resource == null)
+            {
+                if (_war==null || _war.length()==0)
+                    resource=Resource.newResource(getResourceBase());
+                
+                // Set dir or WAR
+                resource= Resource.newResource(_war);
+            }
+                
+            String tmp = resource.getURL().toExternalForm();
+            if (tmp.endsWith("/"))
+                tmp = tmp.substring(0, tmp.length()-1);
+            if (tmp.endsWith("!"))
+                tmp = tmp.substring(0, tmp.length() -1);
+            //get just the last part which is the filename
+            int i = tmp.lastIndexOf("/");
+            canonicalName.append(tmp.substring(i+1, tmp.length()));
+        }
+        catch (Exception e)
+        {
+            Log.warn("Can't generate resourceBase as part of webapp tmp dir name", e);
+        }
+            
         //Context name
         canonicalName.append("_");
         String contextPath = getContextPath();
@@ -1222,6 +1250,10 @@ public class WebAppContext extends Context
         String[] vhosts = getVirtualHosts();
         canonicalName.append((vhosts==null||vhosts[0]==null?"":vhosts[0]));
         
+        //base36 hash of the whole string for uniqueness
+        String hash = Integer.toString(canonicalName.toString().hashCode(),36);
+        canonicalName.append("_");
+        canonicalName.append(hash);
         return canonicalName.toString();
     }
 }
