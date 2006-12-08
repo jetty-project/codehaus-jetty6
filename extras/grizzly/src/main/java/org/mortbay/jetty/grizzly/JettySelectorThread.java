@@ -217,6 +217,11 @@ public class JettySelectorThread extends SelectorThread
         return task;
     }  
     
+    public ReadTask getReadTask() throws IOException
+    {
+        return getReadTask(null);
+    } 
+    
     public void setGrizzlyConnector(GrizzlyConnector grizzlyConnector)
     {
         this.grizzlyConnector=grizzlyConnector;
