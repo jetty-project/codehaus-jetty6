@@ -43,7 +43,7 @@ import org.mortbay.thread.ThreadPool;
  */
 public class GrizzlyConnector extends AbstractNIOConnector
 {
-    private JettySelectorThread _selectorThread;
+    protected JettySelectorThread _selectorThread;
 	
     /* ------------------------------------------------------------------------------- */
     /**
