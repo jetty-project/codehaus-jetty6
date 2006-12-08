@@ -146,7 +146,7 @@ public class JettyProtocolFinder implements ProtocolFinder
                         {
                             protocolInfo.protocol = 
                                     protocolInfo.isSecure?
-                                        "jetty-https":"jetty-http";
+                                        "https":"jetty-http";
                             protocolInfo.byteBuffer = byteBuffer;
                             protocolInfo.socketChannel = 
                                     (SocketChannel)key.channel();
