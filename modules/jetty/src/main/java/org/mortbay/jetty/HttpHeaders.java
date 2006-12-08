@@ -32,6 +32,7 @@ public class HttpHeaders extends BufferCache
         CACHE_CONTROL= "Cache-Control",
         DATE= "Date",
         PRAGMA= "Pragma",
+        PROXY_CONNECTION = "Proxy-Connection",
         TRAILER= "Trailer",
         TRANSFER_ENCODING= "Transfer-Encoding",
         UPGRADE= "Upgrade",
@@ -158,7 +159,8 @@ public class HttpHeaders extends BufferCache
         SET_COOKIE2_ORDINAL= 54,
         MIME_VERSION_ORDINAL= 55,
         IDENTITY_ORDINAL= 56,
-        CACHE_CONTROL_ORDINAL=57;
+        CACHE_CONTROL_ORDINAL=57,
+        PROXY_CONNECTION_ORDINAL=58;
 
     public final static HttpHeaders CACHE= new HttpHeaders();
     
@@ -220,7 +222,6 @@ public class HttpHeaders extends BufferCache
         SET_COOKIE_BUFFER=CACHE.add(SET_COOKIE,SET_COOKIE_ORDINAL),
         SET_COOKIE2_BUFFER=CACHE.add(SET_COOKIE2,SET_COOKIE2_ORDINAL),
         MIME_VERSION_BUFFER=CACHE.add(MIME_VERSION,MIME_VERSION_ORDINAL),
-        IDENTITY_BUFFER=CACHE.add(IDENTITY,IDENTITY_ORDINAL);
-
-
+        IDENTITY_BUFFER=CACHE.add(IDENTITY,IDENTITY_ORDINAL),
+        PROXY_CONNECTION_BUFFER=CACHE.add(PROXY_CONNECTION,PROXY_CONNECTION_ORDINAL);
 }
