@@ -798,6 +798,13 @@ public class WebAppContext extends Context
         return StringUtil.startsWithIgnoreCase(target, "/web-inf") || StringUtil.startsWithIgnoreCase(target, "/meta-inf");
     }
     
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return this.getClass().getName()+"@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+(_war==null?getResourceBase():_war)+"}";
+    }
+    
     /* ------------------------------------------------------------ */
     /** Resolve Web App directory
      * If the BaseResource has not been set, use the war resource to
