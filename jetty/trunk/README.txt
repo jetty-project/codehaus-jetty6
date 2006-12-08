@@ -29,12 +29,19 @@ in /etc/init.d
 JETTY DEPENDENCIES
 ==================
 
-Jetty depends only on a jre 1.4 runtime and the three jars found in
+The Jetty build is rather large, because it bundles many optional
+packages.
+
+Jetty depends ONLY on a jre 1.4 runtime and the three jars found in
 the top level of the $JETTY_HOME/lib directory:
 
   servlet-api-2.5-$VERSION.jar
   jetty-$VERSION.jar
   jetty-util-$VERSION.jar
+ 
+For small foot print applications, these three jars can be 
+trimmed of excess classes - we will soon automate generation
+of such minimal assemblies.
 
 The jars found in the subdirectories are all optional:
 
