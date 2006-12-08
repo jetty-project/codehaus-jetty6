@@ -1,5 +1,7 @@
 
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.0rc0 - 8 December 2006
     + JETTY-181 Allow injection of a java:comp Context
     + JETTY-182 Optionally set JSP classpath initparameter
     + Dispatcher does not protect javax.servlet attributes
@@ -22,6 +24,7 @@ jetty-6.1-SNAPSHOT
     + Added extras/gwt
     + Fixed idle timeout
     + JETTY-189 ProxyConnection
+    + Added spring ejb3 demo example
 
 jetty-6.0-SNAPSHOT
     + JETTY-182 Optionally set JSP classpath initparameter
