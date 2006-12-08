@@ -575,7 +575,7 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     public boolean isIdle()
     {
-        return _generator.isIdle() && _parser.isIdle() || _delayedHandling;
+        return _generator.isIdle() && (_parser.isIdle() || _delayedHandling);
     }
     
     /* ------------------------------------------------------------ */

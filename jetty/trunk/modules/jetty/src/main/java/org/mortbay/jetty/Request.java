@@ -127,7 +127,7 @@ public class Request implements HttpServletRequest
     /**
      * 
      */
-    Request(HttpConnection connection)
+    public Request(HttpConnection connection)
     {
         _connection=connection;
         _endp=connection.getEndPoint();

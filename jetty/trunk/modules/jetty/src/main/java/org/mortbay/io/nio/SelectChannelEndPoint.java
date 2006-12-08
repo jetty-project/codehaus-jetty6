@@ -411,6 +411,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
          */
         public void expire()
         {
+            System.err.println("EXPIRED: "+this);
             idleExpired();
         }
 
