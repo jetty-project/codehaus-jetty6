@@ -118,7 +118,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         }
 
         return true;
-
     }
 
     /* ------------------------------------------------------------ */
