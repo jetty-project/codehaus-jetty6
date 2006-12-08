@@ -73,6 +73,7 @@
        <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/com" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/org/apache/jasper" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="export -r ${glassfish.tag}" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="export -r ${glassfish.tag}" package="glassfish/pwc-commons/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <property name="export.done" value="true"/>
    </target>
 
@@ -85,6 +86,7 @@
        <cvs command="co" package="glassfish/appserv-webtier/src/java/com" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="co" package="glassfish/appserv-webtier/src/java/org/apache/jasper" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="co" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="co" package="glassfish/pwc-commons/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <property name="checkout.done" value="true"/>
    </target>
 
@@ -119,6 +121,11 @@
     </copy>
     <copy todir="${generated.resources}/org/apache/jasper/resources">
       <fileset dir="target/glassfish/appserv-webtier/src/java/org/apache/jasper/resources">
+        <exclude name="**/CVS/*"/>
+      </fileset>
+    </copy>
+    <copy todir="${generated.java}/com/sun/enterprise/web/io">
+      <fileset dir="target/glassfish/pwc-commons/src/java/com/sun/enterprise/web/io">
         <exclude name="**/CVS/*"/>
       </fileset>
     </copy>
