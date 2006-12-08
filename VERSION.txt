@@ -1,5 +1,5 @@
 
-jetty-6.1-SNAPSHOT
+jetty-6.1.0rc0
     + JETTY-181 Allow injection of a java:comp Context
     + JETTY-182 Optionally set JSP classpath initparameter
     + Dispatcher does not protect javax.servlet attributes
