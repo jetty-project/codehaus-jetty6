@@ -14,12 +14,19 @@ detected.
 <Configure class="org.mortbay.jetty.webapp.WebAppContext">
 
 
-  <!-- Required minimal context configuration -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Required minimal context configuration :                        -->
+  <!--  + contextPath                                                  -->
+  <!--  + war OR resourceBase                                          -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
   <Set name="contextPath">/test</Set>
-  <Set name="resourceBase"><SystemProperty name="jetty.home" default="."/>/webapps/test</Set>
+  <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/test</Set>
 
-  <!-- Optional context configuration -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Optional context configuration                                  -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Set name="extractWAR">true</Set>
   <Set name="overrideDescriptor"><SystemProperty name="jetty.home" default="."/>/contexts/test.d/override-web.xml</Set>
 
   <!-- virtual hosts
