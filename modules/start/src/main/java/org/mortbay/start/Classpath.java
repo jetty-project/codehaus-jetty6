@@ -26,7 +26,7 @@ import java.util.Vector;
 
 /**
  * Class to handle CLASSPATH construction
- * @author Jan Hlavatý
+ * @author Jan Hlavaty
  */
 public class Classpath {
 
