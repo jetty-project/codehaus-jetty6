@@ -32,8 +32,7 @@ import org.mortbay.util.ajax.ContinuationSupport;
 
 public class ChatFilter extends AjaxFilter
 {       
-    private final String mutex="mutex";
-    private Map chatroom;
+    private Map chatrooms;
     
 
     /* ------------------------------------------------------------ */
@@ -43,7 +42,7 @@ public class ChatFilter extends AjaxFilter
     public void init(FilterConfig filterConfig) throws ServletException
     {
         super.init(filterConfig);
-        chatroom=new HashMap();
+        chatrooms=new HashMap();
     }
     
     /* ------------------------------------------------------------ */
@@ -53,7 +52,8 @@ public class ChatFilter extends AjaxFilter
     public void destroy()
     {
         super.destroy();
-        chatroom=null;
+        chatrooms.clear();
+        chatrooms=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -62,20 +62,34 @@ public class ChatFilter extends AjaxFilter
      */
     public void handle(String method, String message, HttpServletRequest request, AjaxResponse response)
     {
+        String roomName=request.getParameter("room");
+        if (roomName==null)
+            roomName="0";
+        Map room = null;
+        synchronized(this)
+        {
+            room=(Map)chatrooms.get(roomName);
+            if (room==null)
+            {
+                room=new HashMap();
+                chatrooms.put(roomName,room);
+            }
+        }
+            
         if ("join".equals(method))
-            doJoinChat(message,request, response);
+            doJoinChat(room,message,request, response);
         else if ("chat".equals(method))
-            doChat(message,request,response);
+            doChat(room,message,request,response);
         else if ("poll".equals(method))
-            doPoll(request,response);
+            doPoll(room,request,response);
         else if ("leave".equals(method))
-            doLeaveChat(message,request,response);
+            doLeaveChat(room,message,request,response);
         else
             super.handle(method, message,request, response);   
     }
 
     /* ------------------------------------------------------------ */
-    private void doJoinChat(String name, HttpServletRequest request, AjaxResponse response)
+    private void doJoinChat(Map room, String name, HttpServletRequest request, AjaxResponse response)
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
@@ -83,70 +97,70 @@ public class ChatFilter extends AjaxFilter
             name="Newbie";
         Member member=null;
         
-        synchronized (mutex)
+        synchronized (room)
         {
-            member=(Member)chatroom.get(id);
+            member=(Member)room.get(id);
             if (member==null)
             {
                 member = new Member(session,name);
-                chatroom.put(session.getId(),member);
+                room.put(session.getId(),member);
             }
             else
                 member.setName(name);
             
             // exists already, so just update name
-            sendMessage(member,"has joined the chat",true);
+            sendMessage(room,member,"has joined the chat",true);
             
             //response.objectResponse("joined", "<joined from=\""+name+"\"/>");
-            sendMembers(response);
+            sendMembers(room,response);
         }
     }
     
 
     /* ------------------------------------------------------------ */
-    private void doLeaveChat(String name, HttpServletRequest request, AjaxResponse response)
+    private void doLeaveChat(Map room, String name, HttpServletRequest request, AjaxResponse response)
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
 
         Member member=null;
-        synchronized (mutex)
+        synchronized (room)
         {
-            member = (Member)chatroom.get(id);
+            member = (Member)room.get(id);
             if (member==null)
                 return;
             if ("Elvis".equals(member.getName()))
-                sendMessage(member,"has left the building",true);
+                sendMessage(room,member,"has left the building",true);
             else
-                sendMessage(member,"has left the chat",true);
-            chatroom.remove(id);
+                sendMessage(room,member,"has left the chat",true);
+            room.remove(id);
             member.setName(null);
         }
         //response.objectResponse("left", "<left from=\""+member.getName()+"\"/>");
-        sendMembers(response);
+        sendMembers(room,response);
     }
 
 
     /* ------------------------------------------------------------ */
-    private void doChat(String text, HttpServletRequest request, AjaxResponse response)
+    private void doChat(Map room, String text, HttpServletRequest request, AjaxResponse response)
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
         
         Member member=null;
-        synchronized (mutex)
+        synchronized (room)
         {
-            member = (Member)chatroom.get(id);
+            member = (Member)room.get(id);
             
             if (member==null)
                 return;
-            sendMessage(member, text, false);
+            sendMessage(room, member, text, false);
         }
     }
 
 
     /* ------------------------------------------------------------ */
-    private void doPoll(HttpServletRequest request, AjaxResponse response)
+    private void doPoll(Map room, HttpServletRequest request, AjaxResponse response)
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
@@ -155,39 +169,39 @@ public class ChatFilter extends AjaxFilter
             timeoutMS=Long.parseLong(request.getParameter("timeout"));
         
         Member member=null;
-        synchronized (mutex)
+        synchronized (room)
         {
-            member = (Member)chatroom.get(id);
+            member = (Member)room.get(id);
             if (member==null)
             {
                 member = new Member(session,null);
-                chatroom.put(session.getId(),member);
+                room.put(session.getId(),member);
             }
             
             // Get an existing Continuation or create a new one if there are no events.
             if (!member.hasMessages())
             {
-                Continuation continuation = ContinuationSupport.getContinuation(request, mutex);
+                Continuation continuation = ContinuationSupport.getContinuation(request, room);
                 member.setContinuation(continuation);
                 continuation.suspend(timeoutMS);
             }
             member.setContinuation(null);
             
             if (member.sendMessages(response))
-                sendMembers(response);
+                sendMembers(room,response);
         }
         
     }
 
     /* ------------------------------------------------------------ */
-    private void sendMessage(Member member, String text, boolean alert)
+    private void sendMessage(Map room, Member member, String text, boolean alert)
     {
         Message event=new Message(member.getName(),text,alert);
         
         ArrayList invalids=null;
-        synchronized (mutex)
+        synchronized (room)
         {
-            Iterator iter = chatroom.values().iterator();
+            Iterator iter = room.values().iterator();
             while (iter.hasNext())
             {
                 Member m = (Member)iter.next();
@@ -210,17 +224,17 @@ public class ChatFilter extends AjaxFilter
         for (int i=0;invalids!=null && i<invalids.size();i++)
         {
             Member m = (Member)invalids.get(i);
-            sendMessage(m,"has timed out of the chat",true);
+            sendMessage(room,m,"has timed out of the chat",true);
         }
     }
     
-    private void sendMembers(AjaxResponse response)
+    private void sendMembers(Map room, AjaxResponse response)
     {
         StringBuffer buf = new StringBuffer();
         buf.append("<ul>\n");
-        synchronized (mutex)
+        synchronized (room)
         {
-            Iterator iter = chatroom.values().iterator();
+            Iterator iter = room.values().iterator();
             while (iter.hasNext())
             {
                 Member m = (Member)iter.next();
@@ -318,14 +332,11 @@ public class ChatFilter extends AjaxFilter
         /* ------------------------------------------------------------ */
         public void addMessage(Message event)
         {
-            synchronized (mutex)
-            {
-                if (_name==null)
-                    return;
-                _messages.add(event);
-                if (_continuation!=null)
-                    _continuation.resume();
-            }
+            if (_name==null)
+                return;
+            _messages.add(event);
+            if (_continuation!=null)
+                _continuation.resume();
         }
 
         /* ------------------------------------------------------------ */
@@ -335,18 +346,18 @@ public class ChatFilter extends AjaxFilter
         }
         
         /* ------------------------------------------------------------ */
-        public void rename(String name)
+        public void rename(Map room,String name)
         {
             String oldName = getName();
             setName(name);
             if (oldName!=null)
-                ChatFilter.this.sendMessage(this,oldName+" has been renamed to "+name,true);
+                ChatFilter.this.sendMessage(room,this,oldName+" has been renamed to "+name,true);
         }
 
         /* ------------------------------------------------------------ */
         public boolean sendMessages(AjaxResponse response)
         {
-            synchronized (mutex)
+            synchronized (this)
             {
                 boolean alerts=false;
                 for (int i=0;i<_messages.size();i++)
