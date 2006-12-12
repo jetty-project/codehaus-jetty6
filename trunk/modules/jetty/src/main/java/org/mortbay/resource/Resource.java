@@ -27,6 +27,7 @@ import java.util.Date;
 
 import org.mortbay.log.Log;
 import org.mortbay.util.IO;
+import org.mortbay.util.Loader;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
@@ -225,6 +226,48 @@ public abstract class Resource implements Serializable
         
         return newResource(url);
     }
+
+    /* ------------------------------------------------------------ */
+    /** Find a classpath resource.
+     */
+    public static Resource newClassPathResource(String resource)
+    {
+        return newClassPathResource(resource,true,false);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Find a classpath resource.
+     * The {@java.lang.Class#getResource} method is used to lookup the resource. If it is not
+     * found, then the {@link Loader#getResource(Class, String, boolean)} method is used.
+     * If it is still not found, then {@link ClassLoader#getSystemResource(String)} is used.
+     * Unlike {@link #getSystemResource} this method does not check for normal resources.
+     * @param name The relative name of the resouce
+     * @param useCaches True if URL caches are to be used.
+     * @param checkParents True if forced searching of parent classloaders is performed to work around 
+     * loaders with inverted priorities
+     * @return Resource or null
+     */
+    public static Resource newClassPathResource(String name,boolean useCaches,boolean checkParents)
+    {
+        URL url=Resource.class.getResource(name);
+        
+        if (url==null)
+        {
+            try
+            {
+                url=Loader.getResource(Resource.class,name,checkParents);
+            }
+            catch(ClassNotFoundException e)
+            {
+                url=ClassLoader.getSystemResource(name);
+            }
+        }
+        if (url==null)
+            return null;
+        return newResource(url,useCaches);
+    }
+    
+    
 
     /* ------------------------------------------------------------ */
     protected void finalize()
