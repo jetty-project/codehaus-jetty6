@@ -52,7 +52,7 @@ public class Ajp13Connection extends HttpConnection
     public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
         super(connector,endPoint,server);
-
+        _request = new Ajp13Request(this);
         _generator=new Ajp13Generator(_connector,_endp,_connector.getHeaderBufferSize(),_connector.getResponseBufferSize());
         _parser=new Ajp13Parser(_connector,_endp,new RequestHandler(),(Ajp13Generator)_generator);
         _generator.setSendServerVersion(server.getSendServerVersion());
@@ -108,12 +108,12 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedRemoteAddr(Buffer addr) throws IOException
         {
-            // XXX Is the remote address used anywhere?
+            ((Ajp13Request)_request).setRemoteAddr(addr.toString());
         }
 
         public void parsedRemoteHost(Buffer name) throws IOException
         {
-            // XXX Is the remote host used anywhere?
+            ((Ajp13Request)_request).setRemoteHost(name.toString());
         }
 
         public void parsedServerName(Buffer name) throws IOException
@@ -121,6 +121,7 @@ public class Ajp13Connection extends HttpConnection
             // TODO So long as we get Host header, this is probably not needed?
             // but probably should remember as default if no header available
             // _uri.setHost(name.toString());
+            
         }
 
         public void parsedServerPort(int port) throws IOException
