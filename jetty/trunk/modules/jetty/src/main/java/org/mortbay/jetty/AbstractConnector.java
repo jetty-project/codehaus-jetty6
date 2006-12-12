@@ -333,6 +333,12 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     {      
     }
     
+    /* ------------------------------------------------------------ */
+    public void persist(EndPoint endpoint)
+        throws IOException
+    {      
+    }
+    
     
     /* ------------------------------------------------------------ */
     /* 
