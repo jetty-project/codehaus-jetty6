@@ -138,7 +138,15 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
     {
+        ((ConnectorEndPoint)endpoint).cancelIdle();
         super.customize(endpoint, request);
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public void persist(org.mortbay.io.EndPoint endpoint) throws IOException
+    {
+        ((ConnectorEndPoint)endpoint).scheduleIdle();
+        super.persist(endpoint);
     }
 
     /* ------------------------------------------------------------ */
@@ -148,7 +156,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     }
     
     /* ------------------------------------------------------------ */
-    /** Assume Short Dispatch
+    /** Get delay select key update
      * If true, the select set is not updated when a endpoint is dispatched for
      * reading. The assumption is that the task will be short and thus will probably
      * be complete before the select is tried again.
@@ -261,12 +269,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
             super.close();
         }
-        
-        public boolean dispatch(boolean assumeShortDispatch) throws IOException
-        {
-            cancelIdle();
-            return super.dispatch(assumeShortDispatch);
-        }
 
         public void undispatch()
         {
@@ -282,12 +284,8 @@ public class SelectChannelConnector extends AbstractNIOConnector
             else
             {
                 super.undispatch();
-                if (_connection.isIdle())
-                    scheduleIdle();
             }
-            
         }
-
     }
 
     /* ------------------------------------------------------------ */
@@ -298,10 +296,10 @@ public class SelectChannelConnector extends AbstractNIOConnector
         SelectChannelEndPoint _endPoint=(SelectChannelEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
         boolean _new = true;
         Object _object;
-        boolean _pending = false;
-        boolean _resumed = false;
+        boolean _pending = false;   // waiting for resume or timeout
+        boolean _resumed = false;   // resume called.
+        boolean _scheduled =false;  // Either dispatched or timeout set.
         RetryRequest _retry;
-        boolean _scheduled =false;
         long _timeout;
         
         public void expire()
@@ -313,6 +311,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             }
             if (redispatch)
             {
+                _endPoint.scheduleIdle();  // TODO maybe not needed?
                 _endPoint.getSelectSet().addChange(this);
                 _endPoint.getSelectSet().wakeup();
             }
@@ -379,6 +378,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
                     this.cancel();   
                 }
 
+                _endPoint.scheduleIdle();  // TODO maybe not needed?
                 selectSet.addChange(this);
                 selectSet.wakeup();
             }
@@ -389,7 +389,9 @@ public class SelectChannelConnector extends AbstractNIOConnector
             _endPoint.run();
         }
         
-        /* Called when a run exits */
+        /* schedule continuation.
+         * Called when a run exits.  
+         * Either sets timeout or dispatches if already resumed or expired */
         public boolean schedule()
         {
             boolean redispatch=false;
@@ -399,13 +401,14 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 if (!_pending)
                     return false;
                 _scheduled = true;
-                
                 redispatch=isExpired() || _resumed;
             }
             
             if (redispatch)
+            {
+                _endPoint.scheduleIdle();
                 _endPoint.getSelectSet().addChange(this);
-            
+            }
             else
                 _endPoint.getSelectSet().scheduleTimeout(this,_timeout);
             

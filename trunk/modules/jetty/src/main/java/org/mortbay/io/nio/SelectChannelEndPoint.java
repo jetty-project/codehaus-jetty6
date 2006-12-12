@@ -131,6 +131,20 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         _selectSet.cancelIdle(_timeoutTask);
     }
+
+
+    /* ------------------------------------------------------------ */
+    protected void idleExpired()
+    {
+        try
+        {
+            close();
+        }
+        catch (IOException e)
+        {
+            Log.ignore(e);
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -366,19 +380,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
             throw (e instanceof EofException) ? e : new EofException(e);
         }
         
-    }
-
-    /* ------------------------------------------------------------ */
-    protected void idleExpired()
-    {
-        try
-        {
-            close();
-        }
-        catch (IOException e)
-        {
-            Log.ignore(e);
-        }
     }
     
     /* ------------------------------------------------------------ */
