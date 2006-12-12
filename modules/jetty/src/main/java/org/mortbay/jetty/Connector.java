@@ -120,6 +120,17 @@ public interface Connector extends LifeCycle, Buffers
      * @throws IOException
      */
     void customize(EndPoint endpoint, Request request) throws IOException;
+
+    /* ------------------------------------------------------------ */
+    /** Persist an endpoint.
+     * Called after every request if the connection is to remain open.
+     * @param endpoint
+     * @param request
+     * @throws IOException
+     */
+    void persist(EndPoint endpoint) throws IOException;
+    
+    
     
     Continuation newContinuation();
     

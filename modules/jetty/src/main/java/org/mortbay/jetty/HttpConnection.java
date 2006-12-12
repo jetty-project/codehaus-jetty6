@@ -421,7 +421,7 @@ public class HttpConnection implements Connection
     {
         if (_server != null)
         {
-            boolean retry = false;
+            boolean retrying = false;
             boolean error = false;
             String threadName=null;
             try
@@ -448,7 +448,7 @@ public class HttpConnection implements Connection
             catch (RetryRequest r)
             {
                 Log.ignore(r);
-                retry = true;
+                retrying = true;
             }
             catch (EofException e)
             {
@@ -481,18 +481,19 @@ public class HttpConnection implements Connection
                 if (threadName!=null)
                     Thread.currentThread().setName(threadName);
                 
-                if (!retry)
+                if (!retrying)
                 {
-                    _requests++;
-                    
                     if (_request.getContinuation()!=null && _request.getContinuation().isPending())
                     {
                         Log.debug("continuation still pending {}");
                         _request.getContinuation().reset();
                     }
-
+                    
                     if(_endp.isOpen())
                     {
+                        if (_generator.isPersistent())
+                            _connector.persist(_endp);
+                        
                         if (error) 
                             _endp.close();
                         else
@@ -657,14 +658,23 @@ public class HttpConnection implements Connection
                     break;
 
                 case HttpHeaders.CONNECTION_ORDINAL:
-                    // TODO coma list of connections ???
+                    
                     _connection = HttpHeaderValues.CACHE.getOrdinal(value);
-                    if (_connection<0)
-                        _responseFields.put(HttpHeaders.CONNECTION_BUFFER, value);
-                    else
+                    switch(_connection)
                     {
-                        value=HttpHeaderValues.CACHE.get(_connection);
-                        _responseFields.put(HttpHeaders.CONNECTION_BUFFER,value);
+                        case -1:
+                        {
+                            // TODO coma list of connections ???
+                            break;
+                        }
+
+                        case HttpHeaderValues.CLOSE_ORDINAL:
+                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
+                            break;
+                            
+                        case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
+                            if (_version==HttpVersions.HTTP_1_0_ORDINAL)
+                                _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE);
                     }
             }
 
@@ -676,6 +686,7 @@ public class HttpConnection implements Connection
          */
         public void headerComplete() throws IOException
         {
+            _requests++;
             _generator.setVersion(_version);
             switch (_version)
             {
