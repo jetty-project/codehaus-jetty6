@@ -99,7 +99,7 @@ public class ServletHolder extends Holder
         _servlet=servlet;
         setHeldClass(servlet.getClass());
         if (getName()==null)
-            setName(servlet.getClass().getName());
+            setName(servlet.getClass().getName()+"-"+super.hashCode());
     }
     
     /* ------------------------------------------------------------ */
