@@ -77,7 +77,7 @@ public class FileResource extends URLResource
     }
     
     /* -------------------------------------------------------- */
-    FileResource(URL url)
+    public FileResource(URL url)
         throws IOException, URISyntaxException
     {
         super(url,null);
