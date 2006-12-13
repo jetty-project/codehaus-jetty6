@@ -100,6 +100,7 @@
      <copy todir="${generated.java}/com/sun/appserv">
       <fileset dir="target/glassfish/common-util/src/java/com/sun/appserv">
         <exclude name="**/CVS/*"/>
+        <exclude name="ha/**"/>
       </fileset>
      </copy>
      <copy todir="${generated.java}/com/sun/common">
