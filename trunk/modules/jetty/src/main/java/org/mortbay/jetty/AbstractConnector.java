@@ -497,6 +497,10 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
                     {
                         accept(_acceptor); 
                     }
+                    catch(EofException e)
+                    {
+                        Log.ignore(e);
+                    }
                     catch(IOException e)
                     {
                         Log.ignore(e);

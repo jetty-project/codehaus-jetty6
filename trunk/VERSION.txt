@@ -4,6 +4,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-193 MailSessionReference without authentication
  + JETTY-199 newClassPathResource
  + ensure unique name for ServletHolder instances
+ + added cache session manager(pre-alpha)
 
 jetty-6.1.0rc0 - 8 December 2006
  + JETTY-181 Allow injection of a java:comp Context
