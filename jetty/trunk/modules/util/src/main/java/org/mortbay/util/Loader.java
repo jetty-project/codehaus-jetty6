@@ -37,7 +37,6 @@ import java.util.ResourceBundle;
  */
 public class Loader
 {
-
     /* ------------------------------------------------------------ */
     public static URL getResource(Class loadClass,String name, boolean checkParents)
         throws ClassNotFoundException
