@@ -14,7 +14,6 @@
 
 package org.mortbay.jetty;
 
-import java.io.Serializable;
 import java.util.EventListener;
 
 import javax.servlet.http.Cookie;
@@ -32,7 +31,7 @@ import org.mortbay.jetty.servlet.SessionHandler;
  *
  * @author Greg Wilkins
  */
-public interface SessionManager extends LifeCycle, Serializable
+public interface SessionManager extends LifeCycle
 {
     
     /* ------------------------------------------------------------ */

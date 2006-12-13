@@ -377,7 +377,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         }
         catch (IOException e)
         {
-            throw (e instanceof EofException) ? e : new EofException(e);
+            Log.ignore(e);
         }
         
     }

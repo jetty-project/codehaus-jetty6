@@ -212,6 +212,8 @@ public class ServletHandler extends AbstractHandler
      */
     public PathMap.Entry getHolderEntry(String pathInContext)
     {
+        if (_servletPathMap==null)
+            return null;
         return _servletPathMap.getMatch(pathInContext);
     }
     
