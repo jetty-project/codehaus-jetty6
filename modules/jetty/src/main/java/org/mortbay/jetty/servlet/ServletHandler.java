@@ -143,7 +143,11 @@ public class ServletHandler extends AbstractHandler
             _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
             _namedChainCache=new HashMap[]{null,null,new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
         }
+
         super.doStart();
+        
+        if (_contextHandler==null)
+            initialize();
     }   
     
     /* ----------------------------------------------------------------- */

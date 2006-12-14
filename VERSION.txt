@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+ + ensure servlets initialized if only using ServletHandler
 
 jetty-6.1.0rc1 - 14 December 2006
  + simplified idle timeout handling
