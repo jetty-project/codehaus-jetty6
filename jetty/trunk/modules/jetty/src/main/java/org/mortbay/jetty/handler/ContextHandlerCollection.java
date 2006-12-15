@@ -129,40 +129,36 @@ public class ContextHandlerCollection extends HandlerCollection
     {
         Handler[] handlers = getHandlers();
         if (handlers==null || handlers.length==0)
-        {
-            response.sendError(500);
-        }
-        else
-        {
-            Request base_request = HttpConnection.getCurrentConnection().getRequest();
-            PathMap map = _contextMap;
-            if (map!=null && target!=null && target.startsWith("/"))
-            {
-                Object contexts = map.getLazyMatches(target);
-                for (int i=0; i<LazyList.size(contexts); i++)
-                {
-                    Map.Entry entry = (Map.Entry)LazyList.get(contexts, i);
-                    Object list = entry.getValue();
-                    for (int j=0; j<LazyList.size(list); j++)
-                    {
-                        Handler handler = (Handler)LazyList.get(list,j);
-                        handler.handle(target,request, response, dispatch);
-                        
-                        if (base_request.isHandled())
-                            return;
-                    }
-                }
-            }
-            else
-            {
-                for (int i=0;i<handlers.length;i++)
-                {
-                    handlers[i].handle(target,request, response, dispatch);
-                    if ( base_request.isHandled())
-                        return;
-                }
-            }
-        }    
+	    return;
+
+	Request base_request = HttpConnection.getCurrentConnection().getRequest();
+	PathMap map = _contextMap;
+	if (map!=null && target!=null && target.startsWith("/"))
+	{
+	    Object contexts = map.getLazyMatches(target);
+	    for (int i=0; i<LazyList.size(contexts); i++)
+	    {
+		Map.Entry entry = (Map.Entry)LazyList.get(contexts, i);
+		Object list = entry.getValue();
+		for (int j=0; j<LazyList.size(list); j++)
+		{
+		    Handler handler = (Handler)LazyList.get(list,j);
+		    handler.handle(target,request, response, dispatch);
+		    
+		    if (base_request.isHandled())
+			return;
+		}
+	    }
+	}
+	else
+	{
+	    for (int i=0;i<handlers.length;i++)
+	    {
+		handlers[i].handle(target,request, response, dispatch);
+		if ( base_request.isHandled())
+		    return;
+	    }
+	}
     }
     
     
