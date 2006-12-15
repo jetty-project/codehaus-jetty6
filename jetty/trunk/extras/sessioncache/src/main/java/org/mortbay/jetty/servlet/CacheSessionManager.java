@@ -1,5 +1,6 @@
 package org.mortbay.jetty.servlet;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,11 +16,8 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
-import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
-import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.Element;
 
 
 /* ------------------------------------------------------------ */
@@ -33,10 +31,11 @@ import net.sf.ehcache.Ehcache;
  */
 public class CacheSessionManager extends AbstractSessionManager
 {
-    protected AttributesFactory _mapFactory;
+    protected String _cacheKey;
     protected CacheSessionIdManager _cacheIdManager;
-    protected SelfPopulatingCache _sessionCache;
+    protected Ehcache _sessionCache;
 
+    /* ------------------------------------------------------------ */
     public void doStart() throws Exception
     {
         super.doStart();
@@ -44,60 +43,112 @@ public class CacheSessionManager extends AbstractSessionManager
         if (!(sid instanceof CacheSessionIdManager))
             throw new IllegalStateException("Non cached ID manager:" + sid);
         _cacheIdManager=(CacheSessionIdManager)sid;
-        if (_mapFactory == null)
-            _mapFactory = new HashAttributesFactory();
         
-        //set time to live and time to idle to 600 for now
+        _cacheKey=_context.getContextPath();
+        if (_context.getContextHandler().getVirtualHosts()!=null && _context.getContextHandler().getVirtualHosts().length>0)
+            _cacheKey=_cacheKey+"@"+_context.getContextHandler().getVirtualHosts()[0];
+        _cacheKey=_cacheKey.replace('/','_');
         
-        Ehcache cache = new Cache(_context.getContextPath().replaceAll("/",""), 1000, MemoryStoreEvictionPolicy.LRU, 
-            true, null, false, 600, 600, true, 200, null, null);
-        
-        //TODO discuss how to implement CacheEntryFactory
-        _cacheIdManager._cacheManager.addCache(cache);
-        _sessionCache = new SelfPopulatingCache(_cacheIdManager._cacheManager.getCache(_context.getContextPath().replaceAll("/","")), null);
+        synchronized(_cacheIdManager)
+        {
+            _sessionCache = _cacheIdManager._cacheManager.getEhcache(_cacheKey);
+            if (_sessionCache==null)
+            {
+                
+                // just create a cache with the default settings of the cacheIdManager
+                _cacheIdManager._cacheManager.addCache(_cacheKey);
+                _sessionCache = _cacheIdManager._cacheManager.getEhcache(_cacheKey);
+                
+                // XXX Changed my mind about self populating caches.
+                // they always create an element - which is not what we want.
+                
+            }
+        }   
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public Map getSessionMap()
+    {
+        // Not supported in this impl
+        return null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int getSessions()
+    {
+        // TODO this is not exactly correct and we need to think about the
+        // diskstore and sessions not on the node.  Maybe this is only sessions 
+        // this node??
+        return _sessionCache.getSize();
     }
     
-    protected AbstractSessionManager.Session newSession(HttpServletRequest request)
+    /* ------------------------------------------------------------ */
+    protected void addSession(Session session)
     {
-        return new Session(request);
+        // OK - changing my mind here.... perhaps the whole 
+        // session is in the cache!
+        _sessionCache.put(new Element(session.getClusterId(),session));
+        
+        // TODO - maybe put the Element as a transient in the Session
+        // instance, so it can be used for last access times, isValid etc.
     }
 
-    protected void setSessionAttributeMapFactory(AttributesFactory mapFactory)
+    /* ------------------------------------------------------------ */
+    protected Session getSession(String idInCluster)
     {
-        _mapFactory = mapFactory;
+        Element session = _sessionCache.get(idInCluster);
+        if (session==null || session.isExpired())
+        {
+            // XXX - changed my mind about the self populating
+            // cache
+            // it is here that we might look for the session in
+            // the cluster, in a db, in a file store.
+            return null;
+        }
+        return (Session)session.getValue();
     }
 
-    public interface AttributesFactory
+    /* ------------------------------------------------------------ */
+    protected void invalidateSessions()
     {
-        Map create(String id, Ehcache cache);
+        // TODO Auto-generated method stub
     }
-    
-    class Session extends AbstractSessionManager.Session
-    {
 
-        protected Session(HttpServletRequest request)
+    /* ------------------------------------------------------------ */
+    protected Session newSession(HttpServletRequest request)
+    {
+        return new EHSession(request);
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void removeSession(String idInCluster)
+    {
+        _sessionCache.remove(idInCluster);
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    protected class EHSession extends AbstractSessionManager.Session
+    {
+        /* ------------------------------------------------------------- */
+        protected EHSession(HttpServletRequest request)
         {
             super(request);
         }
         
+        /* ------------------------------------------------------------ */
         protected Map newAttributeMap()
         {
-            // TODO - Change this so that a Cache holds a map of session ID to hashmap
-            // so that Cache elements are sessions rather than elements.
-            // The cache should be a write through self populating cache.
-            //
-           return _mapFactory.create(_clusterId,_sessionCache);
+            return new HashMap(3);
         }
     }
 
-    class SessionCacheEntryFactory implements CacheEntryFactory
-    {
-        public synchronized Object createEntry(Object key)
-        {
-            return null;
-        }        
-    }
 
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     // TODO remove this test main eventually when not needed for simple testing.
     public static void main(String[] args)
     throws Exception
@@ -121,7 +172,6 @@ public class CacheSessionManager extends AbstractSessionManager
         {
             SessionHandler sessionHandler = new SessionHandler();
             CacheSessionManager cacheSessionManager = new CacheSessionManager();
-            cacheSessionManager.setSessionAttributeMapFactory(new FileAttributesFactory());
             cacheSessionManager.setSessionHandler(sessionHandler);
             sessionHandler.setSessionManager(cacheSessionManager);
         
@@ -143,5 +193,5 @@ public class CacheSessionManager extends AbstractSessionManager
         server.start();
         server.join();
     }
-
+    
 }

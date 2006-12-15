@@ -14,11 +14,11 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -66,14 +66,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
 
     private static final HttpSessionContext __nullSessionContext=new NullSessionContext();
 
+    private boolean _usingCookies=true;
     /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
-    private int _dftMaxIdleSecs=-1;
-    private int _scavengePeriodMs=30000;
-    private SessionHandler _sessionHandler;
-    private Thread _scavenger=null;
-    private boolean _usingCookies=true;
+    protected int _dftMaxIdleSecs=-1;
+    protected SessionHandler _sessionHandler;
     protected boolean _httpOnly=false;
     protected int _maxSessions=0;
 
@@ -82,7 +80,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     protected boolean _secureCookies=false;
     protected Object _sessionAttributeListeners;
     protected Object _sessionListeners;
-    protected Map _sessions;
+    
     protected ClassLoader _loader;
     protected ContextHandler.SContext _context;
     protected String _sessionCookie=__DefaultSessionCookie;
@@ -206,9 +204,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         super.doStart();
-
-        // Start the session scavenger if we haven't already
-        _sessionHandler.getServer().getThreadPool().dispatch(new SessionScavenger());
     }
 
     /* ------------------------------------------------------------ */
@@ -217,12 +212,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         super.doStop();
 
         invalidateSessions();
-
-        // stop the scavenger
-        Thread scavenger=_scavenger;
-        _scavenger=null;
-        if (scavenger!=null)
-            scavenger.interrupt();
 
         _loader=null;
     }
@@ -244,14 +233,13 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         
         synchronized (this)
         {
-            Session session = (Session)_sessions.get(cluster_id);
+            Session session = getSession(cluster_id);
             
             if (session!=null && !session.getId().equals(id))
                 session.setIdChanged(true);
             return session;
         }
     }
-
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the metaManager used for cross context session management
@@ -303,14 +291,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         return _refreshCookieAge;
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return seconds
-     */
-    public int getScavengePeriod()
-    {
-        return _scavengePeriodMs/1000;
-    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -321,6 +301,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         return _secureCookies;
     }
 
+    /* ------------------------------------------------------------ */
     public String getSessionCookie()
     {
         return _sessionCookie;
@@ -365,11 +346,11 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    public Map getSessionMap()
-    {
-        return Collections.unmodifiableMap(_sessions);
-    }
-
+    /** 
+     * @deprecated.  Need to review if it is needed.
+     */
+    public abstract Map getSessionMap();
+    
     /* ------------------------------------------------------------ */
     public String getSessionPath()
     {
@@ -377,16 +358,15 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    public int getSessions()
-    {
-        return _sessions.size();
-    }
+    public abstract int getSessions();
 
+    /* ------------------------------------------------------------ */
     public String getSessionURL()
     {
         return _sessionURL;
     }
 
+    /* ------------------------------------------------------------ */
     public String getSessionURLPrefix()
     {
         return _sessionURLPrefix;
@@ -431,8 +411,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public void resetStats()
     {
-        _minSessions=_sessions.size();
-        _maxSessions=_sessions.size();
+        _minSessions=getSessions();
+        _maxSessions=getSessions();
     }
 
     /* ------------------------------------------------------------ */
@@ -472,8 +452,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public void setMaxInactiveInterval(int seconds)
     {
         _dftMaxIdleSecs=seconds;
-        if (_dftMaxIdleSecs>0&&_scavengePeriodMs>_dftMaxIdleSecs*1000)
-            setScavengePeriod((_dftMaxIdleSecs+9)/10);
     }
 
     /* ------------------------------------------------------------ */
@@ -491,32 +469,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _refreshCookieAge=ageInSeconds;
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param seconds
-     */
-    public void setScavengePeriod(int seconds)
-    {
-        if (seconds==0)
-            seconds=60;
-
-        int old_period=_scavengePeriodMs;
-        int period=seconds*1000;
-        if (period>60000)
-            period=60000;
-        if (period<1000)
-            period=1000;
-
-        if (period!=old_period)
-        {
-            synchronized (this)
-            {
-                _scavengePeriodMs=period;
-                if (_scavenger!=null)
-                    _scavenger.interrupt();
-            }
-        }
-    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -566,63 +518,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         _usingCookies=usingCookies;
     }
-    
-    /* -------------------------------------------------------------- */
-    /**
-     * Find sessions that have timed out and invalidate them. This runs in the
-     * SessionScavenger thread.
-     */
-    private void scavenge()
-    {
-        Thread thread=Thread.currentThread();
-        ClassLoader old_loader=thread.getContextClassLoader();
-        try
-        {
-            if (_loader!=null)
-                thread.setContextClassLoader(_loader);
 
-            long now=System.currentTimeMillis();
 
-            // Since Hashtable enumeration is not safe over deletes,
-            // we build a list of stale sessions, then go back and invalidate
-            // them
-            Object stale=null;
-
-            synchronized (AbstractSessionManager.this)
-            {
-                // For each session
-                for (Iterator i=_sessions.values().iterator(); i.hasNext();)
-                {
-                    Session session=(Session)i.next();
-                    long idleTime=session._maxIdleMs;
-                    if (idleTime>0&&session._accessed+idleTime<now)
-                    {
-                        // Found a stale session, add it to the list
-                        stale=LazyList.add(stale,session);
-                    }
-                }
-            }
-
-            // Remove the stale sessions
-            for (int i=LazyList.size(stale); i-->0;)
-            {
-                // check it has not been accessed in the meantime
-                Session session=(Session)LazyList.get(stale,i);
-                long idleTime=session._maxIdleMs;
-                if (idleTime>0&&session._accessed+idleTime<System.currentTimeMillis())
-                {
-                    session.invalidate();
-                    int nbsess=this._sessions.size();
-                    if (nbsess<this._minSessions)
-                        this._minSessions=nbsess;
-                }
-            }
-        }
-        finally
-        {
-            thread.setContextClassLoader(old_loader);
-        }
-    }
+    protected abstract void addSession(Session session);
 
     /* ------------------------------------------------------------ */
     /**
@@ -636,9 +534,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             _sessionIdManager.addSession(session);
             synchronized (this)
             {
-                _sessions.put(session.getClusterId(),session);
-                if (_sessions.size()>this._maxSessions)
-                    this._maxSessions=_sessions.size();
+                addSession(session);
+                if (getSessions()>this._maxSessions)
+                    this._maxSessions=getSessions();
             }
         }
         
@@ -649,27 +547,30 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 ((HttpSessionListener)LazyList.get(_sessionListeners,i)).sessionCreated(event);
         }
     }
-
-    protected void invalidateSessions()
-    {
-        // Invalidate all sessions to cause unbind events
-        ArrayList sessions=new ArrayList(_sessions.values());
-        for (Iterator i=sessions.iterator(); i.hasNext();)
-        {
-            Session session=(Session)i.next();
-            session.invalidate();
-        }
-        _sessions.clear();
-        
-    }
-
+    
     /* ------------------------------------------------------------ */
-    protected abstract Session newSession(HttpServletRequest request);
+    /**
+     * Get a known existingsession
+     * @param idInCluster The session ID in the cluster, stripped of any worker name.
+     * @return A Session or null if none exists.
+     */
+    protected abstract Session getSession(String idInCluster);
 
-    protected void newSessionMap()
+    protected abstract void invalidateSessions();
+
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Create a new session instance
+     * @param request
+     * @return
+     */
+    protected abstract Session newSession(HttpServletRequest request);
+    
+
+    // TODO delete this 
+    protected final void newSessionMap()
     {
-        if (_sessions==null)
-            _sessions=new HashMap();
     }
 
     /* ------------------------------------------------------------ */
@@ -695,13 +596,16 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             
             synchronized (this)
             {
-                _sessions.remove(id);
+                removeSession(id);
             }
             if (invalidate)
                 _sessionIdManager.invalidateAll(id);
         }
     }
 
+    /* ------------------------------------------------------------ */
+    protected abstract void removeSession(String idInCluster);
+    
     /* ------------------------------------------------------------ */
     /**
      * Null returning implementation of HttpSessionContext
@@ -737,7 +641,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public abstract class Session implements HttpSession
+    public abstract class Session implements HttpSession, Serializable
     {
         String _clusterId;
         String _id;
@@ -1035,8 +939,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         public void setMaxInactiveInterval(int secs)
         {
             _maxIdleMs=(long)secs*1000;
-            if (_maxIdleMs>0&&(_maxIdleMs/10)<_scavengePeriodMs)
-                AbstractSessionManager.this.setScavengePeriod((secs+9)/10);
         }
 
         /* ------------------------------------------------------------- */
@@ -1096,62 +998,5 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 ((HttpSessionBindingListener)value).valueUnbound(new HttpSessionBindingEvent(this,name));
         }
     }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* -------------------------------------------------------------- */
-    /** SessionScavenger is a background thread that kills off old sessions */
-    class SessionScavenger implements Runnable
-    {
-        public void run()
-        {
-            _scavenger=Thread.currentThread();
-            String name=Thread.currentThread().getName();
-            if (_context!=null)
-                Thread.currentThread().setName(name+" - Invalidator - "+_context.getContextPath());
-            int period=-1;
-            try
-            {
-                do
-                {
-                    try
-                    {
-                        if (period!=_scavengePeriodMs)
-                        {
-                            if (Log.isDebugEnabled())
-                                Log.debug("Session scavenger period = "+_scavengePeriodMs/1000+"s");
-                            period=_scavengePeriodMs;
-                        }
-                        Thread.sleep(period>1000?period:1000);
-                        AbstractSessionManager.this.scavenge();
-                    }
-                    catch (InterruptedException ex)
-                    {
-                        continue;
-                    }
-                    catch (Error e)
-                    {
-                        Log.warn(Log.EXCEPTION,e);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.warn(Log.EXCEPTION,e);
-                    }
-                }
-                while (isStarted());
-            }
-            finally
-            {
-                AbstractSessionManager.this._scavenger=null;
-                String exit="Session scavenger exited";
-                if (isStarted())
-                    Log.warn(exit);
-                else
-                    Log.debug(exit);
-                Thread.currentThread().setName(name);
-            }
-        }
-
-    } // SessionScavenger
 
 }
