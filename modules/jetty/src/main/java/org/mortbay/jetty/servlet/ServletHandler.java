@@ -571,7 +571,6 @@ public class ServletHandler extends AbstractHandler
         
         if (_servlets!=null)
         {
-            
             // Sort and Initialize servlets
             ServletHolder[] servlets = (ServletHolder[])_servlets.clone();
             Arrays.sort(servlets);
@@ -601,6 +600,7 @@ public class ServletHandler extends AbstractHandler
             mx.ifExceptionThrow();  
         }
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the filterChainsCached.
