@@ -24,6 +24,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -236,7 +237,8 @@ public class JspcMojo extends AbstractMojo
         for (int i=0; i< urls.length; i++)
         {
             if (getLog().isDebugEnabled()) getLog().debug("webappclassloader contains: "+urls[i]);
-            classpathStr.append(urls[i]);
+            classpathStr.append(urls[i].getFile());
+            if (getLog().isDebugEnabled()) getLog().debug("added to classpath: "+urls[i].getFile());
             classpathStr.append(System.getProperty("path.separator"));
         }
         
