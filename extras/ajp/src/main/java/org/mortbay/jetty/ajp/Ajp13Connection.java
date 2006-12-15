@@ -47,16 +47,16 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class Ajp13Connection extends HttpConnection
 {
-    private boolean _sslSecure=false;
+    private boolean _sslSecure = false;
 
     public Ajp13Connection(Connector connector, EndPoint endPoint, Server server)
     {
-        super(connector,endPoint,server);
+        super(connector, endPoint, server);
         _request = new Ajp13Request(this);
-        _generator=new Ajp13Generator(_connector,_endp,_connector.getHeaderBufferSize(),_connector.getResponseBufferSize());
-        _parser=new Ajp13Parser(_connector,_endp,new RequestHandler(),(Ajp13Generator)_generator);
+        _generator = new Ajp13Generator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
+        _parser = new Ajp13Parser(_connector, _endp, new RequestHandler(), (Ajp13Generator) _generator);
         _generator.setSendServerVersion(server.getSendServerVersion());
-        _server=server;
+        _server = server;
 
     }
 
@@ -72,20 +72,20 @@ public class Ajp13Connection extends HttpConnection
 
     public ServletInputStream getInputStream()
     {
-        if (_in==null)
-            _in=new Ajp13Parser.Input((Ajp13Parser)_parser,_connector.getMaxIdleTime());
+        if (_in == null)
+            _in = new Ajp13Parser.Input((Ajp13Parser) _parser, _connector.getMaxIdleTime());
         return _in;
     }
 
     private class RequestHandler implements Ajp13Parser.EventHandler
     {
-        boolean _delayedHandling=false;
+        boolean _delayedHandling = false;
 
         public void startForwardRequest() throws IOException
         {
-            _delayedHandling=false;
+            _delayedHandling = false;
             _uri.clear();
-            _sslSecure=false;
+            _sslSecure = false;
             _request.setTimeStamp(System.currentTimeMillis());
             _request.setUri(_uri);
         }
@@ -98,7 +98,7 @@ public class Ajp13Connection extends HttpConnection
         public void parsedUri(Buffer uri) throws IOException
         {
             // TODO avoid this copy.
-            _uri.parse(uri.asArray(),0,uri.length());
+            _uri.parse(uri.asArray(), 0, uri.length());
         }
 
         public void parsedProtocol(Buffer protocol) throws IOException
@@ -108,59 +108,63 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedRemoteAddr(Buffer addr) throws IOException
         {
-            ((Ajp13Request)_request).setRemoteAddr(addr.toString());
+            if (addr != null)
+            {
+                ((Ajp13Request) _request).setRemoteAddr(addr.toString());
+            }
         }
 
         public void parsedRemoteHost(Buffer name) throws IOException
         {
-            ((Ajp13Request)_request).setRemoteHost(name.toString());
+            if (name != null)
+            {
+                ((Ajp13Request) _request).setRemoteHost(name.toString());
+            }
         }
 
         public void parsedServerName(Buffer name) throws IOException
         {
-            // TODO So long as we get Host header, this is probably not needed?
-            // but probably should remember as default if no header available
-            // _uri.setHost(name.toString());
-            
+            if (name != null)
+            {
+                _request.setServerName(name.toString());
+            }
         }
 
         public void parsedServerPort(int port) throws IOException
         {
-            // TODO So long as we get Host header, this is probably not needed?
-            // but probably should remember as default if no header available
-            // _uri.setPort(port);
+            ((Ajp13Request) _request).setRemotePort(port);
         }
 
         public void parsedSslSecure(boolean secure) throws IOException
         {
-            _sslSecure=secure;
+            _sslSecure = secure;
         }
 
         public void parsedQueryString(Buffer value) throws IOException
         {
-            String u=_uri+"?"+value;
+            String u = _uri + "?" + value;
             _uri.parse(u);
         }
 
         public void parsedHeader(Buffer name, Buffer value) throws IOException
         {
-            _requestFields.add(name,value);
+            _requestFields.add(name, value);
         }
 
         public void parsedRequestAttribute(String key, Buffer value) throws IOException
         {
-            _request.setAttribute(key,value.toString());
+            _request.setAttribute(key, value.toString());
         }
 
         public void headerComplete() throws IOException
         {
-            if (((Ajp13Parser)_parser).getContentLength()<=0)
+            if (((Ajp13Parser) _parser).getContentLength() <= 0)
             {
                 handleRequest();
             }
             else
             {
-                _delayedHandling=true;
+                _delayedHandling = true;
             }
         }
 
@@ -172,7 +176,7 @@ public class Ajp13Connection extends HttpConnection
         {
             if (_delayedHandling)
             {
-                _delayedHandling=false;
+                _delayedHandling = false;
                 handleRequest();
             }
         }
