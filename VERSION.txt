@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
  + ContextHandlerCollection is noop with no handlers
  + ensure servlets initialized if only using ServletHandler
  + fixed Jetty-197 AJP13 getRemoteHost()
+ + ensure classpath passed to jspc contains file paths not urls
  
 jetty-6.1.0rc1 - 14 December 2006
  + simplified idle timeout handling
