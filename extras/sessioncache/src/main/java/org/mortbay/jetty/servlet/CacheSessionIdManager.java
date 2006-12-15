@@ -7,16 +7,29 @@ import javax.servlet.http.HttpSession;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.DiskStoreConfiguration;
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.SessionIdManager;
 
 public class CacheSessionIdManager implements SessionIdManager
 {
-    protected CacheManager _cacheManager= new CacheManager();
-  
+    protected CacheManager _cacheManager;
+    protected String _cacheDir = System.getProperty("java.io.tmpdir",".")+"/org.mortbay.jetty.session.cache";
+
     private HashSessionIdManager _temporaryHack = new HashSessionIdManager();
 
+    public CacheSessionIdManager()
+    {
+    }
+    
+    public CacheSessionIdManager(String cacheDir)
+    {
+        _cacheDir = cacheDir;
+    }
     /* ------------------------------------------------------------ */
     /**
      * @param session
@@ -199,6 +212,27 @@ public class CacheSessionIdManager implements SessionIdManager
     public void start() throws Exception
     {
         _temporaryHack.start();
+        
+        //configure cacheManager - all values are hardcoded for now but there will be mutators for the values
+        Configuration conf = new Configuration();
+        
+        DiskStoreConfiguration diskStoreConf = new DiskStoreConfiguration();
+        diskStoreConf.setPath(_cacheDir);
+        conf.addDiskStore(diskStoreConf);
+        
+        CacheConfiguration cacheConf = new CacheConfiguration();
+        cacheConf.setDiskPersistent(true);
+        cacheConf.setMaxElementsInMemory(1000);
+        cacheConf.setMemoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU.toString());
+        cacheConf.setName("Default");
+        cacheConf.setOverflowToDisk(true);
+        cacheConf.setTimeToIdleSeconds(600);
+        cacheConf.setTimeToLiveSeconds(600);
+        cacheConf.setDiskExpiryThreadIntervalSeconds(200);
+        
+        conf.addDefaultCache(cacheConf);
+        
+        _cacheManager = new CacheManager(conf);
     }
 
     /* ------------------------------------------------------------ */
@@ -221,5 +255,9 @@ public class CacheSessionIdManager implements SessionIdManager
         return _temporaryHack.toString();
     }
     
+    public void setCacheDirectory(String cacheDir)
+    {
+        _cacheDir = cacheDir;
+    }
 
 }
