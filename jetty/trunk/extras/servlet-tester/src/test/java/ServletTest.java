@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.HttpTester;
-import org.mortbay.jetty.servlet.ServletTester;
+import org.mortbay.jetty.testing.HttpTester;
+import org.mortbay.jetty.testing.ServletTester;
 
 public class ServletTest extends TestCase
 {
