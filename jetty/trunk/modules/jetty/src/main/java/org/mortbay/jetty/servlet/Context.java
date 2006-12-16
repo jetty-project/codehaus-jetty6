@@ -55,6 +55,12 @@ public class Context extends ContextHandler
     }
     
     /* ------------------------------------------------------------ */
+    public Context(int options)
+    {
+        this(null,null,options);
+    }
+    
+    /* ------------------------------------------------------------ */
     public Context(HandlerContainer parent, String contextPath)
     {
         this(parent,null,null,null,null);

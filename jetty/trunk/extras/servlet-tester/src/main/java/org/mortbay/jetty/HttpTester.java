@@ -15,20 +15,37 @@ import org.mortbay.util.ByteArrayOutputStream2;
 
 /* ------------------------------------------------------------ */
 /** Test support class.
- * Assist with parsing and generating HTTP requests and responses
+ * Assist with parsing and generating HTTP requests and responses.
+ * 
+ * <pre>
+ *      HttpTester tester = new HttpTester();
+ *      
+ *      tester.parse(
+ *          "GET /uri HTTP/1.1\r\n"+
+ *          "Host: fakehost\r\n"+
+ *          "Content-Length: 10\r\n" +
+ *          "\r\n");
+ *     
+ *      System.err.println(tester.getMethod());
+ *      System.err.println(tester.getURI());
+ *      System.err.println(tester.getVersion());
+ *      System.err.println(tester.getHeader("Host"));
+ *      System.err.println(tester.getContent());
+ * </pre>      
+ * 
  * @author gregw
- *
+ * @see org.mortbay.jetty.servlet.ServletTester
  */
 public class HttpTester
 {
-    HttpFields _fields=new HttpFields();
-    String _method;
-    String _uri;
-    String _version;
-    int _status;
-    String _reason;
-    ByteArrayOutputStream2 _parsedContent;
-    byte[] _genContent;
+    protected HttpFields _fields=new HttpFields();
+    protected String _method;
+    protected String _uri;
+    protected String _version;
+    protected int _status;
+    protected String _reason;
+    protected ByteArrayOutputStream2 _parsedContent;
+    protected byte[] _genContent;
     
     public HttpTester()
     {
@@ -72,7 +89,7 @@ public class HttpTester
         
         if (_method!=null)
         {
-            generator.setRequest(getMethod(),getUri());
+            generator.setRequest(getMethod(),getURI());
             if (_version==null)
                 generator.setVersion(HttpVersions.HTTP_1_1_ORDINAL);
             else
@@ -84,7 +101,6 @@ public class HttpTester
                 generator.addContent(new ByteArrayBuffer(_parsedContent.toByteArray()),false);
         }
         
-
         generator.complete();
         generator.flush();
         return endp.getOutput();
@@ -148,7 +164,7 @@ public class HttpTester
     /**
      * @return the uri
      */
-    public String getUri()
+    public String getURI()
     {
         return _uri;
     }
@@ -157,7 +173,7 @@ public class HttpTester
     /**
      * @param uri the uri to set
      */
-    public void setUri(String uri)
+    public void setURI(String uri)
     {
         _uri=uri;
     }
@@ -187,7 +203,7 @@ public class HttpTester
      * @throws IllegalArgumentException
      * @see org.mortbay.jetty.HttpFields#add(java.lang.String, java.lang.String)
      */
-    public void add(String name, String value) throws IllegalArgumentException
+    public void addHeader(String name, String value) throws IllegalArgumentException
     {
         _fields.add(name,value);
     }
@@ -198,7 +214,7 @@ public class HttpTester
      * @param date
      * @see org.mortbay.jetty.HttpFields#addDateField(java.lang.String, long)
      */
-    public void addDateField(String name, long date)
+    public void addDateHeader(String name, long date)
     {
         _fields.addDateField(name,date);
     }
@@ -209,7 +225,7 @@ public class HttpTester
      * @param value
      * @see org.mortbay.jetty.HttpFields#addLongField(java.lang.String, long)
      */
-    public void addLongField(String name, long value)
+    public void addLongHeader(String name, long value)
     {
         _fields.addLongField(name,value);
     }
@@ -230,7 +246,7 @@ public class HttpTester
      * @return
      * @see org.mortbay.jetty.HttpFields#getDateField(java.lang.String)
      */
-    public long getDateField(String name)
+    public long getDateHeader(String name)
     {
         return _fields.getDateField(name);
     }
@@ -240,7 +256,7 @@ public class HttpTester
      * @return
      * @see org.mortbay.jetty.HttpFields#getFieldNames()
      */
-    public Enumeration getFieldNames()
+    public Enumeration getHeaderNames()
     {
         return _fields.getFieldNames();
     }
@@ -252,7 +268,7 @@ public class HttpTester
      * @throws NumberFormatException
      * @see org.mortbay.jetty.HttpFields#getLongField(java.lang.String)
      */
-    public long getLongField(String name) throws NumberFormatException
+    public long getLongHeader(String name) throws NumberFormatException
     {
         return _fields.getLongField(name);
     }
@@ -263,7 +279,7 @@ public class HttpTester
      * @return
      * @see org.mortbay.jetty.HttpFields#getStringField(java.lang.String)
      */
-    public String getStringField(String name)
+    public String getHeader(String name)
     {
         return _fields.getStringField(name);
     }
@@ -274,7 +290,7 @@ public class HttpTester
      * @return
      * @see org.mortbay.jetty.HttpFields#getValues(java.lang.String)
      */
-    public Enumeration getValues(String name)
+    public Enumeration getHeaderValues(String name)
     {
         return _fields.getValues(name);
     }
@@ -285,7 +301,7 @@ public class HttpTester
      * @param value
      * @see org.mortbay.jetty.HttpFields#put(java.lang.String, java.lang.String)
      */
-    public void put(String name, String value)
+    public void setHeader(String name, String value)
     {
         _fields.put(name,value);
     }
@@ -296,7 +312,7 @@ public class HttpTester
      * @param date
      * @see org.mortbay.jetty.HttpFields#putDateField(java.lang.String, long)
      */
-    public void putDateField(String name, long date)
+    public void setDateHeader(String name, long date)
     {
         _fields.putDateField(name,date);
     }
@@ -307,7 +323,7 @@ public class HttpTester
      * @param value
      * @see org.mortbay.jetty.HttpFields#putLongField(java.lang.String, long)
      */
-    public void putLongField(String name, long value)
+    public void setLongHeader(String name, long value)
     {
         _fields.putLongField(name,value);
     }
@@ -317,7 +333,7 @@ public class HttpTester
      * @param name
      * @see org.mortbay.jetty.HttpFields#remove(java.lang.String)
      */
-    public void remove(String name)
+    public void removeHeader(String name)
     {
         _fields.remove(name);
     }
@@ -339,7 +355,8 @@ public class HttpTester
         _genContent=content.getBytes();
     }
     
-    
+
+    /* ------------------------------------------------------------ */
     private class PH extends HttpParser.EventHandler
     {
         public void startRequest(Buffer method, Buffer url, Buffer version) throws IOException
@@ -382,25 +399,6 @@ public class HttpTester
     
     public static void main(String[] args) throws Exception
     {
-        HttpTester tester = new HttpTester();
-        
-        String remainder = tester.parse(
-            "GET /uri HTTP/1.1\r\n"+
-            "Host: fakehost\r\n"+
-            "Content-Length: 10\r\n" +
-            "\r\n"+
-            "01234567\r\n"+
-            "GET /next HTTP/1.0\r\n"+
-            "\r\n");
-       
-        System.err.println(tester.getMethod());
-        System.err.println(tester.getUri());
-        System.err.println(tester.getVersion());
-        System.err.println(tester.getStringField("Host"));
-        System.err.println(tester.getContent());
-        System.err.println(remainder);
-        
-        System.err.println(tester.generate());
     }
 
 }
