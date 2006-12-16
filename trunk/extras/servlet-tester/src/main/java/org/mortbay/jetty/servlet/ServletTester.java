@@ -8,16 +8,37 @@ import org.mortbay.jetty.Server;
 import org.mortbay.util.Attributes;
 
 
+
+/* ------------------------------------------------------------ */
+/** Testing support for servlets and filters.
+ * 
+ * Allows a programatic setup of a context with servlets and filters for 
+ * testing.  Raw HTTP requests may be sent to the context and responses received.
+ * To avoid handling raw HTTP see {@link org.mortbay.jetty.HttpTester}.
+ * <pre>
+ *      ServletTester tester=new ServletTester();
+ *      tester.setContextPath("/context");
+ *      tester.addServlet(TestServlet.class, "/servlet/*");
+ *      tester.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");
+ *      tester.start();
+ *      String response = tester.getResponses("GET /context/servlet/info HTTP/1.0\r\n\r\n");
+ * </pre>
+ * 
+ * @see org.mortbay.jetty.HttpTester
+ * @author gregw
+ *
+ */
 public class ServletTester
 {
     Server server = new Server();
     LocalConnector connector = new LocalConnector();
     Context context = new Context(Context.SESSIONS|Context.SECURITY);
     
-    ServletTester()
+    public ServletTester()
     {
         try
         {
+            server.setSendServerVersion(false);
             server.addConnector(connector);
             server.addHandler(context);
         }
