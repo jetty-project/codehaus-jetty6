@@ -12,7 +12,7 @@ public class ServletTester
 {
     Server server = new Server();
     LocalConnector connector = new LocalConnector();
-    Context context = new Context();
+    Context context = new Context(Context.SESSIONS|Context.SECURITY);
     
     ServletTester()
     {
