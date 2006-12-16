@@ -215,6 +215,7 @@
     <module>modules/naming</module>
     <module>modules/plus</module>
     <module>modules/html</module>
+    <module>extras/servlet-tester</module>
     <module>extras/xbean</module>
     <module>extras/cometd</module>
     <module>extras/cometd-demo</module>
