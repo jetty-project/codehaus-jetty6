@@ -34,7 +34,6 @@ public class StringEndPoint extends StreamEndPoint
     ByteArrayOutputStream _bout = new ByteArrayOutputStream();
     
     public StringEndPoint()
-    	throws IOException
     {
         super(null,null);
         _in=_bin;

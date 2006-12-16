@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpTester;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.DefaultHandler;
@@ -36,54 +37,37 @@ import org.mortbay.util.IO;
 
 public class ServletTest extends TestCase
 {
-    Server server = new Server();
-    Connector connector=new SelectChannelConnector();
-    HandlerCollection collection = new HandlerCollection();
-    DefaultHandler dft = new DefaultHandler();
-    ContextHandler context = new ContextHandler();
-    ServletHandler handler=new ServletHandler();
-    
-    protected void setUp() throws Exception
+    public void testRawDoGet() throws Exception
     {
-        server.setConnectors(new Connector[]{connector});
-        context.setContextPath("/context");
+        // Setup test context
+        ServletTester tester=new ServletTester();
+        tester.setContextPath("/context");
+        tester.addServlet(TestServlet.class, "/servlet/*");
+        tester.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");
+        tester.start();
         
-        collection.setHandlers(new Handler[]{context,dft});
-        server.setHandler(collection);
+        // Raw HTTP test
+        String responses = tester.getResponses("GET /context/servlet/info?query=foo HTTP/1.0\r\n\r\n");
+        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=iso-8859-1\r\nContent-Length: 28\r\nServer: Jetty(6.1.x)\r\n\r\n<h1>Hello SimpleServlet</h1>",responses);
         
-        context.setHandler(handler);
-        handler.addServletWithMapping("org.mortbay.jetty.servlet.ServletTest$TestServlet", "/servlet/*");
-        handler.initialize();
-        server.start();
+        // generated and parsed test
+        HttpTester http = new HttpTester();
+        http.setMethod("GET");
+        http.setUri("/context/servlet/info?query=foo");
+        http.setVersion("HTTP/1.0");
+        http.parse(tester.getResponses(http.generate()));
+        assertTrue(http.getMethod()==null);
+        assertEquals(200,http.getStatus());
+        assertEquals("<h1>Hello SimpleServlet</h1>",http.getContent());
         
-    }
-
-    protected void tearDown() throws Exception
-    {
-        server.stop();
-    }
-
-    public void testDoGet() throws Exception
-    {
-        URL url = null;
         
-        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/context/servlet/info?query=foo");
-        assertEquals("<h1>Hello SimpleServlet</h1>",IO.toString(url.openStream()));
+        /* TODO convert
+        responses = tester.getResponses("GET /context HTTP/1.0\r\n\r\n");
+        assertEquals("<h1>Hello SimpleServlet</h1>/",responses);
         
-        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/");
-        try
-        {
-            String s=IO.toString(url.openStream()); 
-            System.err.println("s="+s);
-            assertTrue(false); 
-        } 
-        catch(FileNotFoundException e) { assertTrue(true); } 
-        
-        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/context");
-        try{IO.toString(url.openStream()); assertTrue(false); } catch(FileNotFoundException e) { assertTrue(true); } 
-        
-        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/context/xxxxx");
-        try{IO.toString(url.openStream()); assertTrue(false); } catch(FileNotFoundException e) { assertTrue(true); } 
+        responses = tester.getResponses("GET /context/xxxxx HTTP/1.0\r\n\r\n");
+        assertEquals("<h1>Hello SimpleServlet</h1>",responses);
+        */
     }
 
     
