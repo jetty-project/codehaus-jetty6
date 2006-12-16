@@ -1,4 +1,4 @@
-package org.mortbay.jetty;
+package org.mortbay.jetty.testing;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -11,6 +11,10 @@ import org.mortbay.io.ByteArrayEndPoint;
 import org.mortbay.io.SimpleBuffers;
 import org.mortbay.io.View;
 import org.mortbay.io.bio.StringEndPoint;
+import org.mortbay.jetty.HttpFields;
+import org.mortbay.jetty.HttpGenerator;
+import org.mortbay.jetty.HttpParser;
+import org.mortbay.jetty.HttpVersions;
 import org.mortbay.util.ByteArrayOutputStream2;
 
 /* ------------------------------------------------------------ */
@@ -34,7 +38,7 @@ import org.mortbay.util.ByteArrayOutputStream2;
  * </pre>      
  * 
  * @author gregw
- * @see org.mortbay.jetty.servlet.ServletTester
+ * @see org.mortbay.jetty.testing.ServletTester
  */
 public class HttpTester
 {
@@ -394,11 +398,6 @@ public class HttpTester
                 _parsedContent=new ByteArrayOutputStream2();
             _parsedContent.write(ref.asArray());
         }
-    }
-    
-    
-    public static void main(String[] args) throws Exception
-    {
     }
 
 }
