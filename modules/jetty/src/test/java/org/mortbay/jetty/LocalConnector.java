@@ -82,14 +82,14 @@ public class LocalConnector extends AbstractConnector
     }
 
     /* ------------------------------------------------------------ */
-    String getResponses(String requests)
+    public String getResponses(String requests)
         throws Exception
     {
         return getResponses(requests,false);
     }
     
     /* ------------------------------------------------------------ */
-    String getResponses(String requests, boolean keepOpen)
+    public String getResponses(String requests, boolean keepOpen)
     throws Exception
     {
         // System.out.println("\nREQUESTS :\n"+requests);
