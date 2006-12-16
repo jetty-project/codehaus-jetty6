@@ -38,7 +38,6 @@ public class StreamEndPoint implements EndPoint
      * 
      */
     public StreamEndPoint(InputStream in, OutputStream out)
-    	throws IOException	
     {
         _in=in;
         _out=out;
