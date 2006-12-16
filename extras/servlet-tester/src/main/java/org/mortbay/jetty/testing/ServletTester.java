@@ -1,10 +1,13 @@
-package org.mortbay.jetty.servlet;
+package org.mortbay.jetty.testing;
 
 import java.util.Enumeration;
 import java.util.EventListener;
 
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.util.Attributes;
 
 
@@ -14,7 +17,7 @@ import org.mortbay.util.Attributes;
  * 
  * Allows a programatic setup of a context with servlets and filters for 
  * testing.  Raw HTTP requests may be sent to the context and responses received.
- * To avoid handling raw HTTP see {@link org.mortbay.jetty.HttpTester}.
+ * To avoid handling raw HTTP see {@link org.mortbay.jetty.testing.HttpTester}.
  * <pre>
  *      ServletTester tester=new ServletTester();
  *      tester.setContextPath("/context");
@@ -24,7 +27,7 @@ import org.mortbay.util.Attributes;
  *      String response = tester.getResponses("GET /context/servlet/info HTTP/1.0\r\n\r\n");
  * </pre>
  * 
- * @see org.mortbay.jetty.HttpTester
+ * @see org.mortbay.jetty.testing.HttpTester
  * @author gregw
  *
  */

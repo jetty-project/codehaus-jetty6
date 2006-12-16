@@ -55,7 +55,7 @@
           </execution>		  
         </executions>
       </plugin>
-	</plugins>
+i   </plugins>
   </build>
   <dependencies>
     <dependency>
