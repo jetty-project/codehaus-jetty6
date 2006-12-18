@@ -177,8 +177,8 @@ public class URITest extends junit.framework.TestCase
         String[][] canonical = 
         {
             {"/aaa/bbb/","/aaa/bbb/"},
-            {"/aaa//bbb/","/aaa/bbb/"},
-            {"/aaa///bbb/","/aaa/bbb/"},
+            {"/aaa//bbb/","/aaa//bbb/"},
+            {"/aaa///bbb/","/aaa///bbb/"},
             {"/aaa/./bbb/","/aaa/bbb/"},
             {"/aaa/../bbb/","/bbb/"},
             {"/aaa/./../bbb/","/bbb/"},
@@ -186,17 +186,17 @@ public class URITest extends junit.framework.TestCase
             {"./bbb/","bbb/"},
             {"./aaa/../bbb/","bbb/"},
             {"./",""},
-            {".//",""},
-            {".///",""},
+            {".//",".//"},
+            {".///",".///"},
             {"/.","/"},
-            {"//.","/"},
-            {"///.","/"},
+            {"//.","//"},
+            {"///.","///"},
             {"/","/"},
             {"aaa/bbb","aaa/bbb"},
             {"aaa/","aaa/"},
             {"aaa","aaa"},
             {"/aaa/bbb","/aaa/bbb"},
-            {"/aaa//bbb","/aaa/bbb"},
+            {"/aaa//bbb","/aaa//bbb"},
             {"/aaa/./bbb","/aaa/bbb"},
             {"/aaa/../bbb","/bbb"},
             {"/aaa/./../bbb","/bbb"},
@@ -218,7 +218,7 @@ public class URITest extends junit.framework.TestCase
             {"a/.","a/"},
             {"a/..",""},
             {"a/../..",null},
-            {"/foo/../bar//","/bar/"},
+            {"/foo/../bar//","/bar//"},
         };
 
         for (int t=0;t<canonical.length;t++)
