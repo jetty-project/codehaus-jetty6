@@ -295,6 +295,14 @@ public class ServletHolder extends Holder
             while (_servlets!=null && _servlets.size()>0)
             {
                 Servlet s = (Servlet)_servlets.pop();
+                try
+                {
+                    getServletHandler().customizeServletDestroy(s);
+                }
+                catch (Exception e)
+                {
+                    Log.warn(e);
+                }
                 s.destroy();
             }
             _config=null;
@@ -414,10 +422,17 @@ public class ServletHolder extends Holder
         Principal user=null;
         try
         {
+            //handle any cusomizations of the servlet, such as @postConstruct
+            _servlet = getServletHandler().customizeServlet(servlet);
+            
             // Handle run as
             if (_runAs!=null && _realm!=null)
                 user=_realm.pushRole(null,_runAs);
             servlet.init(config);
+        }
+        catch (Exception e)
+        {
+            throw new ServletException(e);
         }
         finally
         {

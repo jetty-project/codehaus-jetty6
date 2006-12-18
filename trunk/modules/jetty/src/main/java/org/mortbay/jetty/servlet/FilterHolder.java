@@ -23,6 +23,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.SingleThreadModel;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.log.Log;
 
 /* --------------------------------------------------------------------- */
 /** 
@@ -91,6 +92,9 @@ public class FilterHolder
 
         if (_filter==null)
             _filter=(Filter)newInstance();
+        
+        _filter = getServletHandler().customizeFilter(_filter);
+        
         _config=new Config();
         _filter.init(_config);
     }
@@ -99,7 +103,17 @@ public class FilterHolder
     public void doStop()
     {      
         if (_filter!=null)
+        {
+            try
+            {
+                getServletHandler().customizeFilterDestroy(_filter);
+            }
+            catch (Exception e)
+            {
+                Log.warn(e);
+            }
             _filter.destroy();
+        }
         if (!_extInstance)
             _filter=null;
         
