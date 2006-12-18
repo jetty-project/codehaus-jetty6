@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -1160,5 +1161,54 @@ public class ServletHandler extends AbstractHandler
     public void setMaxFilterChainsCacheSize(int maxFilterChainsCacheSize)
     {
         _maxFilterChainsCacheSize = maxFilterChainsCacheSize;
+    }
+    
+    /**
+     * Customize a servlet.
+     * 
+     * Called before the servlet goes into service.
+     * Subclasses of ServletHandler should override
+     * this method.
+     * 
+     * @param servlet
+     * @return
+     * @throws Exception
+     */
+    public Servlet customizeServlet (Servlet servlet)
+    throws Exception
+    {
+        return servlet;
+    }
+    
+    
+    public Servlet customizeServletDestroy (Servlet servlet)
+    throws Exception
+    {
+        return servlet;
+    }
+    
+    
+    /**
+     * Customize a Filter.
+     * 
+     * Called before the Filter goes into service.
+     * Subclasses of ServletHandler should override
+     * this method.
+     * 
+     * @param filter
+     * @return
+     * @throws Exception
+     */
+    public Filter customizeFilter (Filter filter)
+    throws Exception
+    {
+        return filter;
+    }
+    
+    
+    public Filter customizeFilterDestroy (Filter filter)
+    throws Exception
+    {
+        return filter;
     }
 }
