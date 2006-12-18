@@ -5,6 +5,7 @@ jetty-6.1-SNAPSHOT
  + fixed Jetty-197 AJP13 getRemoteHost()
  + Refactored AbstractSessionManager for ehcache
  + ensure classpath passed to jspc contains file paths not urls
+ + JETTY-194 doubles slashes are significant in URIs
  
 jetty-6.1.0rc1 - 14 December 2006
  + simplified idle timeout handling

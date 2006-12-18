@@ -362,7 +362,7 @@ public class URIUtil
     
     /* ------------------------------------------------------------ */
     /** Convert a path to a cananonical form.
-     * All instances of "//", "." and ".." are factored out.  Null is returned
+     * All instances of "." and ".." are factored out.  Null is returned
      * if the path tries to .. above its root.
      * @param path 
      * @return path or null.
@@ -377,14 +377,10 @@ public class URIUtil
         int start = path.lastIndexOf('/', (queryIdx > 0 ? queryIdx : end));
 
     search:
-        while (end>=0)
+        while (end>0)
         {
             switch(end-start)
             {
-              case 1: // double slash
-                  if (start<0 || end==path.length())
-                      break;
-                  break search;
               case 2: // possible single dot
                   if (path.charAt(start+1)!='.')
                       break;
@@ -408,34 +404,24 @@ public class URIUtil
         int delEnd=-1;
         int skip=0;
         
-        while (end>=0)
+        while (end>0)
         {
             switch(end-start)
-            {
-              case 1: // double slash
-                  if (start<0 || end==path.length())
-                      break;
-                  delStart=start;
-                  if (delEnd<0)
-                      delEnd=end;
-                  if(delStart==0 && delEnd==buf.length())
-                  {
-                      delStart++;
-                      break;
-                  }
-                          
-                  end=start--;
-                  while (start>=0 && buf.charAt(start)!='/')
-                      start--;
-                  continue;
-                  
+            {       
               case 2: // possible single dot
                   if (buf.charAt(start+1)!='.')
                   {
                       if (skip>0 && --skip==0)
+                      {   
                           delStart=start>=0?start:0;
+                          if(delStart>0 && delEnd==buf.length() && buf.charAt(delEnd-1)=='.')
+                              delStart++;
+                      }
                       break;
                   }
+                  
+                  if(start<0 && buf.length()>2 && buf.charAt(1)=='/' && buf.charAt(2)=='/')
+                      break;
                   
                   if(delEnd<0)
                       delEnd=end;
@@ -447,6 +433,9 @@ public class URIUtil
                           delEnd++;
                       break;
                   }
+                  if (end==buf.length())
+                      delStart++;
+                  
                   end=start--;
                   while (start>=0 && buf.charAt(start)!='/')
                       start--;
@@ -456,7 +445,10 @@ public class URIUtil
                   if (buf.charAt(start+1)!='.' || buf.charAt(start+2)!='.')
                   {
                       if (skip>0 && --skip==0)
-                          delStart=start>=0?start:0;
+                      {   delStart=start>=0?start:0;
+                          if(delStart>0 && delEnd==buf.length() && buf.charAt(delEnd-1)=='.')
+                              delStart++;
+                      }
                       break;
                   }
                   
@@ -465,7 +457,6 @@ public class URIUtil
                       delEnd=end;
 
                   skip++;
-                  
                   end=start--;
                   while (start>=0 && buf.charAt(start)!='/')
                       start--;
@@ -473,12 +464,16 @@ public class URIUtil
 
               default:
                   if (skip>0 && --skip==0)
+                  {
                       delStart=start>=0?start:0;
-            }            
-
+                      if(delEnd==buf.length() && buf.charAt(delEnd-1)=='.')
+                          delStart++;
+                  }
+            }     
+            
             // Do the delete
             if (skip<=0 && delStart>=0 && delStart>=0)
-            {
+            {  
                 buf.delete(delStart,delEnd);
                 delStart=delEnd=-1;
                 if (skip>0)
@@ -497,10 +492,6 @@ public class URIUtil
         // Do the delete
         if (delEnd>=0)
             buf.delete(delStart,delEnd);
-
-        // If it was a dir, keep it a dir
-        if (path.endsWith(".") && buf.length()>0 && buf.charAt(buf.length()-1)!='/')
-            buf.append('/');
 
         return buf.toString();
     }
