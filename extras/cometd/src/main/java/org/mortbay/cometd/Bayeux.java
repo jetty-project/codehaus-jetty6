@@ -42,6 +42,9 @@ public class Bayeux
     public static final String META_STATUS="/meta/status";
     public static final String META_SUBSCRIBE="/meta/subscribe";
     public static final String META_UNSUBSCRIBE="/meta/unsubscribe";
+    
+    public static final String MONITOR_CHANNEL_EVENT="/meta/monitor/channel/event";
+    public static final String MONITOR_CLIENT_EVENT="/meta/monitor/client/event";
 
     public static final String CLIENT_ATTR="clientId";
     public static final String DATA_ATTR="data";
@@ -77,6 +80,9 @@ public class Bayeux
 
         _transports.put("iframe",IFrameTransport.class);
         _transports.put("long-polling",PlainTextJSONTransport.class);
+        
+        newChannel(MONITOR_CHANNEL_EVENT);
+        newChannel(MONITOR_CLIENT_EVENT);
     }
 
     Bayeux(ServletContext context)
@@ -319,6 +325,9 @@ public class Bayeux
             reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
             transport.send(reply);
             transport.setPolling(false);
+            
+            // send event to monitoring channel
+            getChannel(MONITOR_CLIENT_EVENT).publish(reply, client);
         }
     }
 
@@ -390,7 +399,7 @@ public class Bayeux
                 Channel channel=new Channel(connection_id,Bayeux.this);
                 _channels.put(connection_id,channel);
 
-                reply.put("supportedConnectionTypes",new String[] { "long-polling", "iframe" });
+                reply.put("supportedConnectionTypes",new String[] { "long-polling","iframe" });
                 reply.put("authSuccessful",Boolean.TRUE);
                 reply.put(CLIENT_ATTR,client.getId());
                 if (_advice!=null)
@@ -451,6 +460,9 @@ public class Bayeux
                 transport.setPolling(true);
                 transport.send(reply);
             }
+            
+            // send event to monitoring channel
+            getChannel(MONITOR_CLIENT_EVENT).publish(reply, client);
         }
     }
 
@@ -505,6 +517,13 @@ public class Bayeux
                 reply.put("error","cannot subscribe");
             }
             transport.send(reply);
+            
+            //this is ugly. but the transport does not operate in a seperate thread so it should not 
+            //do any harm. maybe it is better to not pass the reply to the monitoring
+            //channels but instead a custom object
+            reply.put(CHANNEL_ATTR, message.get(CHANNEL_ATTR));
+            // send event to monitoring channel
+            getChannel(MONITOR_CHANNEL_EVENT).publish(reply, client);
         }
     }
 
@@ -529,6 +548,13 @@ public class Bayeux
             reply.put("successful",Boolean.TRUE);
             reply.put("error","");
             transport.send(reply);
+            
+            //this is ugly. but the transport does not operate in a seperate thread so it should not 
+            //do any harm. maybe it is better to not pass the reply to the monitoring
+            //channels but instead a custom object
+            reply.put(CHANNEL_ATTR, message.get(CHANNEL_ATTR));
+            // send event to monitoring channel
+            getChannel(MONITOR_CHANNEL_EVENT).publish(reply, client);
         }
     }
 
