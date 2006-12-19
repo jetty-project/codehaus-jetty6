@@ -54,11 +54,13 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
     
     private static class EchoRPC implements DataFilter
     {
+        Bayeux _bayeux;
         Client _client;
         Channel _channel;
         
         public EchoRPC(Bayeux bayeux,String channel)
         {
+            _bayeux = bayeux;
             _client = bayeux.newClient("echo");
             _channel = bayeux.newChannel(channel);
             _channel.addSubscriber(_client);
@@ -67,7 +69,10 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
         
         public Object filter(Object data, Client from) throws IllegalStateException
         {
-            from.getConnection().publish(data,_client);
+            String reply_channel_id=_channel.getId()+"/"+from.getId();
+            Channel reply_channel=_bayeux.getChannel(reply_channel_id);
+            if (reply_channel!=null)       
+                reply_channel.publish(data,_client);
             return null;
         }
 
