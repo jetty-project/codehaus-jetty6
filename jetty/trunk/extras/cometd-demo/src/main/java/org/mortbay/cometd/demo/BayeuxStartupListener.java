@@ -4,6 +4,7 @@ import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 
 import org.mortbay.cometd.Bayeux;
+import org.mortbay.cometd.Channel;
 import org.mortbay.cometd.Client;
 import org.mortbay.cometd.CometdServlet;
 import org.mortbay.cometd.DataFilter;
@@ -17,12 +18,12 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
         {
             Bayeux bayeux=(Bayeux)scab.getValue();
 
-            Client client=bayeux.newClient();
-            client.addDataFilter(new Reporter());  // Report all messages
-            client.addDataFilter(new BitBucket()); // prevent messages queueing forever 
-            bayeux.getChannel(Bayeux.MONITOR_CHANNEL_EVENT).addSubscriber(client);
-            bayeux.getChannel(Bayeux.MONITOR_CLIENT_EVENT).addSubscriber(client);
+            Client monitor_client=bayeux.newClient(null);
+            monitor_client.addDataFilter(new Reporter());  // Report all messages
+            bayeux.getChannel(Bayeux.MONITOR_CHANNEL_EVENT).addSubscriber(monitor_client);
+            bayeux.getChannel(Bayeux.MONITOR_CLIENT_EVENT).addSubscriber(monitor_client);
   
+            new EchoRPC(bayeux,"/rpc/echo");
         }
     }
 
@@ -51,10 +52,22 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
         
     }
     
-    private static class BitBucket implements DataFilter
+    private static class EchoRPC implements DataFilter
     {
+        Client _client;
+        Channel _channel;
+        
+        public EchoRPC(Bayeux bayeux,String channel)
+        {
+            _client = bayeux.newClient("echo");
+            _channel = bayeux.newChannel(channel);
+            _channel.addSubscriber(_client);
+            _client.addDataFilter(this);
+        }
+        
         public Object filter(Object data, Client from) throws IllegalStateException
         {
+            from.getConnection().publish(data,_client);
             return null;
         }
 
@@ -63,4 +76,5 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
         }
         
     }
+    
 }
