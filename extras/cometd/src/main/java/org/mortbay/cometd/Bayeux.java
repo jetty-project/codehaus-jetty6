@@ -173,12 +173,21 @@ public class Bayeux
 
     /* ------------------------------------------------------------ */
     /**
-     * @param client_id
      * @return
      */
     public synchronized Client newClient()
     {
-        Client client = new Client(); 
+        return newClient(null);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param idPrefix Prefix to random client ID
+     * @return
+     */
+    public synchronized Client newClient(String idPrefix)
+    {
+        Client client = new Client(this,idPrefix); 
         _clients.put(client.getId(),client); 
         return client;
     }
@@ -306,13 +315,13 @@ public class Bayeux
                 throw new IllegalStateException("No client");
             String type=(String)message.get("connectionType");
             client.setConnectionType(type);
-            String connection_id="/meta/connections/"+client.getId();
-            Channel channel=getChannel(connection_id);
-            if (channel!=null)
+            
+            Channel connection=client.connect();
+            if (connection!=null)
             {
-                channel.addSubscriber(client);
                 reply.put("successful",Boolean.TRUE);
                 reply.put("error","");
+                reply.put("connectionId",connection.getId());
             }
             else
             {
@@ -321,7 +330,6 @@ public class Bayeux
                 if (_unknownAdvice!=null)
                     reply.put(ADVICE_ATTR,_unknownAdvice);
             }
-            reply.put("connectionId",connection_id);
             reply.put("timestamp",_dateCache.format(System.currentTimeMillis()));
             transport.send(reply);
             transport.setPolling(false);
@@ -341,12 +349,13 @@ public class Bayeux
             String channel_id=(String)message.get("channel");
 
             Channel channel=getChannel(channel_id);
+            
             Object data=message.get("data");
 
             if (client==null)
             {
                if (_securityPolicy.authenticate((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken")))
-                   client=newClient();
+                   client=newClient(null);
             }
             
             Map reply=new HashMap();
@@ -386,7 +395,7 @@ public class Bayeux
                 throw new IllegalStateException();
 
             if (_securityPolicy.authenticate((String)message.get("authScheme"),(String)message.get("authUser"),(String)message.get("authToken")))
-                client=newClient();
+                client=newClient(null);
 
             Map reply=new HashMap();
             reply.put(CHANNEL_ATTR,META_HANDSHAKE);
@@ -395,10 +404,6 @@ public class Bayeux
             
             if (client!=null)
             {
-                String connection_id="/meta/connections/"+client.getId();
-                Channel channel=new Channel(connection_id,Bayeux.this);
-                _channels.put(connection_id,channel);
-
                 reply.put("supportedConnectionTypes",new String[] { "long-polling","iframe" });
                 reply.put("authSuccessful",Boolean.TRUE);
                 reply.put(CLIENT_ATTR,client.getId());
