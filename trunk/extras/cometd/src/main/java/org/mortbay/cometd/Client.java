@@ -30,17 +30,23 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class Client
 {
+    private Bayeux _bayeux;
     private String _id;
     private String _type;
     private ArrayList _messages=new ArrayList();
     private Object _continuations;
     private int _responsesPending;
     private Object _dataFilters=null;
+    private Channel _connection=null;
     
     /* ------------------------------------------------------------ */
-    Client()
+    Client(Bayeux bayeux, String idPrefix)
     {
-        _id=Long.toString(System.identityHashCode(this)*System.currentTimeMillis(),36);
+        _bayeux=bayeux;
+        if (idPrefix==null)
+            _id=Long.toString(bayeux.getRandom(System.identityHashCode(this)^System.currentTimeMillis()),36);
+        else
+            _id=idPrefix+"_"+Long.toString(bayeux.getRandom(System.identityHashCode(this)^System.currentTimeMillis()),36);
     }
 
     /* ------------------------------------------------------------ */
@@ -63,8 +69,31 @@ public class Client
     {
         return _id;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the meta Channel for the connection or null if not connected.
+     */
+    public Channel connect()
+    {
+        synchronized(this)
+        {
+            String connection_id="/meta/connections/"+getId();
+            _connection=_bayeux.newChannel(connection_id);
+            _connection.addSubscriber(this);
+            return _connection;
+        }
+    }
    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the meta Channel for the connection or null if not connected.
+     */
+    public Channel getConnection()
+    {
+        return _connection;
+    }
+    
     /* ------------------------------------------------------------ */
     public boolean hasMessages()
     {
@@ -96,13 +125,13 @@ public class Client
         }
     }
     
+    
     /* ------------------------------------------------------------ */
     public String toString()
     {
         return _id;
     }
-    
-    
+
     /* ------------------------------------------------------------ */
     void addContinuation(Continuation continuation)
     {
@@ -117,6 +146,9 @@ public class Client
     {
         synchronized (this)
         {
+            if (_connection==null)
+                return;
+            
             _messages.add(message);
             
             if (_responsesPending<1)
@@ -132,7 +164,7 @@ public class Client
             }
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     Object filterData(Object data,Client from)
     {
@@ -155,7 +187,7 @@ public class Client
         }
         return data;
     }
-    
+
     /* ------------------------------------------------------------ */
     void removeContinuation(Continuation continuation)
     {
@@ -182,13 +214,13 @@ public class Client
             return ++_responsesPending;
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     void setConnectionType(String type)
     {
         _type=type;
     }
-    
+
     /* ------------------------------------------------------------ */
     void setId(String _id)
     {
