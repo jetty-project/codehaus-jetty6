@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.ajax.Continuation;
 
@@ -34,7 +35,8 @@ public class Client
     private ArrayList _messages=new ArrayList();
     private Object _continuations;
     private int _responsesPending;
-
+    private Object _dataFilters=null;
+    
     /* ------------------------------------------------------------ */
     Client()
     {
@@ -42,15 +44,18 @@ public class Client
     }
 
     /* ------------------------------------------------------------ */
-    public String getConnectionType()
+    /**
+     * @param filter
+     */
+    public void addDataFilter(DataFilter filter)
     {
-        return _type;
+        _dataFilters=LazyList.add(_dataFilters,filter);
     }
     
     /* ------------------------------------------------------------ */
-    void setConnectionType(String type)
+    public String getConnectionType()
     {
-        _type=type;
+        return _type;
     }
     
     /* ------------------------------------------------------------ */
@@ -58,40 +63,46 @@ public class Client
     {
         return _id;
     }
-    
-    /* ------------------------------------------------------------ */
-    void setId(String _id)
-    {
-        this._id=_id;
-    }
 
+   
     /* ------------------------------------------------------------ */
-    int responsePending()
+    public boolean hasMessages()
     {
         synchronized (this)
         {
-            return ++_responsesPending;
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    int responded()
-    {
-        synchronized (this)
-        {
-            return _responsesPending--;
+            return _messages!=null && _messages.size()>0;
         }
     }
     
     /* ------------------------------------------------------------ */
-    void removeContinuation(Continuation continuation)
+    /**
+     * @param filter
+     */
+    public void removeDataFilter(DataFilter filter)
+    {
+        _dataFilters=LazyList.remove(_dataFilters,filter);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public List takeMessages()
     {
         synchronized (this)
         {
-            _continuations=LazyList.remove(_continuations,continuation);
+            if (_messages==null || _messages.size()==0)
+                return null;
+            List list = _messages;
+            _messages=new ArrayList();
+            return list;
         }
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return _id;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     void addContinuation(Continuation continuation)
     {
@@ -123,24 +134,64 @@ public class Client
     }
 
     /* ------------------------------------------------------------ */
-    public List takeMessages()
+    Object filterData(Object data,Client from)
     {
         synchronized (this)
         {
-            if (_messages==null || _messages.size()==0)
+            try
+            {
+                for (int f=0;f<LazyList.size(_dataFilters);f++)
+                {
+                    data=((DataFilter)LazyList.get(_dataFilters,f)).filter(data, from);
+                    if (data==null)
+                        return null;
+                }
+            }
+            catch (IllegalStateException e)
+            {
+                Log.debug(e);
                 return null;
-            List list = _messages;
-            _messages=new ArrayList();
-            return list;
+            }
         }
+        return data;
     }
     
     /* ------------------------------------------------------------ */
-    public boolean hasMessages()
+    void removeContinuation(Continuation continuation)
     {
         synchronized (this)
         {
-            return _messages!=null && _messages.size()>0;
+            _continuations=LazyList.remove(_continuations,continuation);
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    int responded()
+    {
+        synchronized (this)
+        {
+            return _responsesPending--;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    int responsePending()
+    {
+        synchronized (this)
+        {
+            return ++_responsesPending;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    void setConnectionType(String type)
+    {
+        _type=type;
+    }
+    
+    /* ------------------------------------------------------------ */
+    void setId(String _id)
+    {
+        this._id=_id;
     }
 }

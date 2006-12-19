@@ -77,7 +77,7 @@ public class Channel
     /**
      * @param client
      */
-    void removeSubscriber(Client client)
+    public void removeSubscriber(Client client)
     {
         synchronized (this)
         {
@@ -108,7 +108,6 @@ public class Channel
         
         HashMap msg = new HashMap();
         msg.put(Bayeux.CHANNEL_ATTR,_id);
-        msg.put(Bayeux.DATA_ATTR,data);
         msg.put(Bayeux.TIMESTAMP_ATTR,_bayeux.getTimeOnServer());
         
         synchronized (this)
@@ -118,7 +117,15 @@ public class Channel
             msg.put("id",Long.toString(id,36)+Long.toString(_nextMsgId++,36));
             int subscribers=LazyList.size(_subscribers);
             for (int i=0;i<subscribers;i++)
-                ((Client)LazyList.get(_subscribers,i)).deliver(msg);
+            {
+                Client client= (Client)LazyList.get(_subscribers,i);
+                Object client_data=client.filterData(data,from);
+                if (client_data!=null)
+                {
+                    msg.put(Bayeux.DATA_ATTR,client_data);
+                    ((Client)LazyList.get(_subscribers,i)).deliver(msg);
+                }
+            }
         }
     }
     
