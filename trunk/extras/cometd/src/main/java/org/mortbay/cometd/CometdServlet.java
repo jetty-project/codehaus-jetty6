@@ -64,7 +64,9 @@ public class CometdServlet extends HttpServlet
     private Bayeux _bayeux;
     private long _timeout=45000;
     private long _multiTimeout=0;
+    private Object _multiAdvice=null;
     private Map _bidCount=new HashMap();
+    private boolean _verbose;
 
     public void init() throws ServletException
     {
@@ -108,7 +110,15 @@ public class CometdServlet extends HttpServlet
         
         String multiTimeout=getInitParameter("multi-timeout");
         if (multiTimeout!=null)
+        {
             _multiTimeout=Long.parseLong(multiTimeout);
+            _multiAdvice= new JSON.Literal("{\"status\":\"multipleconnections\",\"reconnect\":\"retry\",\"interval\":"+_multiTimeout+",\"transport\":{\"long-polling\":{}}}");
+        }
+        
+        String verbose=getInitParameter("verbose");
+        if (verbose!=null)
+            _verbose=Boolean.parseBoolean(verbose);
+       
     }
 
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
@@ -116,8 +126,10 @@ public class CometdServlet extends HttpServlet
         String init=req.getParameter(TUNNEL_INIT_PARAM);
         if ("iframe".equals(init))
         {
+            if (_verbose) System.err.println("--> Init Tunnel - IFRAME CURRENTLY BROKEN!!!!!!!");
             Transport transport=new IFrameTransport();
             ((IFrameTransport)transport).initTunnel(resp);
+            if (_verbose) System.err.println("<-- Tunnel Over");
         }
         else
         {
@@ -127,125 +139,141 @@ public class CometdServlet extends HttpServlet
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
-        String bid=null;
-        if (_multiTimeout>0)
-        {
-            Cookie[] cookies=req.getCookies();
-            for (int i=0;cookies!=null && i<cookies.length;i++)
-            {
-                if (cookies[i].getName().equals(BROWSER_ID))
-                    bid=cookies[i].getValue();
-            }
-            if (bid==null)
-            {
-                long l1=_bayeux._random.nextLong();
-                long l2=_bayeux._random.nextLong();
-                bid=Long.toString(l1<0?-l1:l1,16)+Long.toString(l2<0?-l2:l2,16);
-                Cookie cookie = new Cookie(BROWSER_ID,bid);
-                cookie.setPath("/");
-                resp.addCookie(cookie);
-            }
-        }
-        
-        // variables to loop through batches and messages
-        String[] batches=null;
-        int batch_index=0;
-        Object batch=null;
-        int index=0;
-        Map message=null;
-        int message_count=0;
-        
-        
         // Look for an existing client and protect from context restarts
         Object clientObj=req.getAttribute(CLIENT_ATTR);
         Client client=(clientObj instanceof Client)?(Client)clientObj:null;
-        Transport transport=client==null?null:(Transport)req.getAttribute(Bayeux.TRANSPORT_ATTR);
+        Transport transport=null;
         Continuation continuation=null;
-
-        try
+        String bid=null;
+        
+ 
+        // Have we seen this request before?
+        if (client!=null)
         {
-            // Have we seen this request before?
-            if (client==null)
+            // yes - extract saved properties
+            transport =(Transport)req.getAttribute(Bayeux.TRANSPORT_ATTR);
+            transport.setResponse(resp);
+            bid=(String)req.getAttribute(BROWSER_ID);
+
+            // Reduce browser ID counter
+            // TODO protect from exceptions
+            if (_multiTimeout>0 && decBID(bid)==0)
             {
-                // This is the first time we have seen this request - so handle all
-                // the messages
-                // We may see this request again if a continuation retries the
-                // request.
+                /*
+                if (false) // TODO only reset if advised previously
+                    _bayeux.advise(client,transport,null);
+                    */
+            }
+        }
+        else
+        {
+            // No - process messages
 
-                batches=req.getParameterValues(MESSAGE_PARAM);
-
-                // handle batches/messages until we have a client!
-                while (batch_index<batches.length)
+            // Look for a browser ID
+            if (_multiTimeout>0)
+            {
+                Cookie[] cookies=req.getCookies();
+                for (int i=0;cookies!=null && i<cookies.length;i++)
                 {
-                    // Do we need to get another batch?
-                    if (batch==null)
-                    {
-                        System.err.println("="+batch_index+"=>"+batches[batch_index]);
-                        index=0;
-                        batch=JSON.parse(batches[batch_index++]);
-                    }
+                    if (cookies[i].getName().equals(BROWSER_ID))
+                        bid=cookies[i].getValue();
+                }
+                if (bid==null)
+                {
+                    long l1=_bayeux._random.nextLong();
+                    long l2=_bayeux._random.nextLong();
+                    bid=Long.toString(l1<0?-l1:l1,16)+Long.toString(l2<0?-l2:l2,16);
+                    Cookie cookie = new Cookie(BROWSER_ID,bid);
+                    cookie.setPath("/");
+                    resp.addCookie(cookie);
+                }
+            }
 
-                    if (batch==null)
-                        continue;
 
-                    if (batch.getClass().isArray())
-                    {
-                        message=(Map)Array.get(batch,index++);
-                        if (index>=Array.getLength(batch))
-                            batch=null;
-                    }
-                    else
-                    {
-                        message=(Map)batch;
+            // variables to loop through batches and messages
+            // May have multiple message parameters, each with an array of messages - or just a message
+            String[] batches=null;
+            int batch_index=0;
+            Object batch=null;
+            int index=0;
+            Map message=null;
+            int message_count=0;
+
+
+            batches=req.getParameterValues(MESSAGE_PARAM);
+
+            // Loop to the first message - it may be handshake without a client
+            while (batch_index<batches.length)
+            {
+                // Do we need to get another batch?
+                if (batch==null)
+                {
+                    if (_verbose) System.err.println("="+batch_index+"=>"+batches[batch_index]);
+                    index=0;
+                    batch=JSON.parse(batches[batch_index++]);
+                }
+
+                if (batch==null)
+                    continue;
+
+                if (batch.getClass().isArray())
+                {
+                    message=(Map)Array.get(batch,index++);
+                    if (index>=Array.getLength(batch))
                         batch=null;
-                    }
+                }
+                else
+                {
+                    message=(Map)batch;
+                    batch=null;
+                }
 
-                    message_count++;
+                message_count++;
 
-                    // Get a client if possible
-                    if (client==null)
-                    {
-                        client=_bayeux.getClient((String)message.get(Bayeux.CLIENT_ATTR));
-                        req.setAttribute(CLIENT_ATTR,client);
-                    }
 
-                    if (transport==null)
-                    {
-                        transport=_bayeux.newTransport(client,message);
-                        req.setAttribute(Bayeux.TRANSPORT_ATTR,transport);
-                    }
+                client=_bayeux.getClient((String)message.get(Bayeux.CLIENT_ATTR));
+
+
+                // If no client, this is a handshake
+                if (client==null)
+                {
+                    // handshake!
+                    transport=_bayeux.newTransport(client,message);
                     transport.setResponse(resp);
-
-                    if (client!=null)
-                        break;
-
                     _bayeux.handle(null,transport,message);
                     message=null;
-
                 }
-                
-                if (client==null)
-                    return;
 
-                
+                break;
+            }
+
+            // Handle all client messages
+            if (client!=null)
+            {
+                // resolve transport
+                transport=_bayeux.newTransport(client,message);
+                transport.setResponse(resp);
+                if (_verbose && transport instanceof PlainTextJSONTransport)
+                    ((PlainTextJSONTransport)transport).setVerbose(_verbose);
+
                 // continue handling messages with a known client and transport!
                 try
                 {
-                    // client.responsePending();
+                    // Tell client to hold messages as a response is likely to be sent.
+                    // client.responsePending(); 
 
                     // handle any message left over from client loop above
                     if (message!=null)
                         _bayeux.handle(client,transport,message);
                     message=null;
 
+                    // handle all other messages
                     while (batch_index<batches.length)
                     {
-
-
                         // Do we need to get another batch?
                         if (batch==null)
                         {
-                            System.err.println("="+batch_index+"=>"+batches[batch_index]);
+                            if (_verbose) System.err.println("="+batch_index+"=>"+batches[batch_index]);
                             index=0;
                             batch=JSON.parse(batches[batch_index++]);
                         }
@@ -270,98 +298,78 @@ public class CometdServlet extends HttpServlet
                             _bayeux.handle(client,transport,message);
                         message=null;
                     }
+                    
+                    
                 }
                 finally
                 {
-                    // client.responded();
+                    //client.responded();
                 }
             }
-
-            if (client==null || transport==null)
-                return;
-            
-            // Do we need to wait for messages or are we streaming?
-            while (transport.isPolling())
-            {   
-                long timeout=_timeout;
-                continuation=ContinuationSupport.getContinuation(req,client);
-                try
-                {
-                    // Are there multiple windows from the same browser?
-                    if (bid!=null && !continuation.isPending())
-                    {
-                        if (incBID(bid)>1)
-                        {
-                            // Advise that there are multiple windows
-                            // fall back to traditional polling
-                            timeout=_multiTimeout;       
-                            _bayeux.advise(client,
-                                    transport,
-                                    new JSON.Literal("{\"status\":\"multipleconnections\",\"reconnect\":\"retry\",\"interval\":"+_multiTimeout+",\"transport\":{\"long-polling\":{}}}"));
-                        }
-                    }
-
-                    synchronized (client)
-                    {
-                        client.addContinuation(continuation);
-                        if (!client.hasMessages())
-                            continuation.suspend(timeout);
-                        client.removeContinuation(continuation);
-                        continuation.reset();
-
-                        if (client.hasMessages())
-                        {
-                            List messages=client.takeMessages();
-                            System.err.println("responses"+messages);
-                            transport.send(messages);
-                        }
-                        else
-                            transport.setPolling(false);
-
-                        // Only a simple poll if the transport does not flush
-                        if (!transport.keepAlive())
-                        {
-                            transport.setPolling(false);
-                            return;
-                        }
-                    } 
-                }
-                finally
-                {
-                    // Are we really finished polling?
-                    if (bid!=null && (continuation==null || !continuation.isPending()))
-                    {
-                        if (decBID(bid)==0)
-                        {
-                            _bayeux.advise(client,transport,null);
-                        }
-                    }
-                }
-            }
-
-            // Send any left over messages.
-            /*
-            synchronized (client)
-            {
-                if (client.hasMessages())
-                    transport.send(client.takeMessages());
-            }
-            */ 
         }
-        finally
-        {
-            // Are we really finished polling?
-            if (continuation==null || !continuation.isPending())
+
+        // Do we need to wait for messages or are we streaming?
+        while (transport.isPolling())
+        {   
+
+            long timeout=_timeout;
+            continuation=ContinuationSupport.getContinuation(req,client);
+
+            // Get messages or wait
+            List messages = null;
+            synchronized(client)
             {
-                // complete transport
-                if (transport!=null)
+                messages = client.takeMessages();
+
+                if (messages==null && !continuation.isPending())
                 {
-                    transport.complete();
+                    //check that only 1 request per browser is waiting
+                    if (_multiTimeout>0 && incBID(bid)>1)
+                    {
+                        // Advise that there are multiple windows waiting
+                        // fall back to traditional polling
+                        timeout=_multiTimeout;       
+                        _bayeux.advise(client,transport,_multiAdvice);
+                    }
+
+                    // save state and suspend
+                    client.addContinuation(continuation);
+                    req.setAttribute(CLIENT_ATTR,client);
+                    req.setAttribute(BROWSER_ID,bid);
+                    req.setAttribute(Bayeux.TRANSPORT_ATTR,transport);
+                    continuation.suspend(timeout);
+                    client.removeContinuation(continuation);
+
+                    messages=client.takeMessages();
+                }
+                continuation.reset();
+                client.removeContinuation(continuation);
+
+                if (messages==null) // timeout
                     transport.setPolling(false);
-                }
+                
             }
 
+            // Send the messages
+            if (messages!=null)
+            {
+                transport.send(messages);
+            }
+
+            // Only a simple poll if the transport does not flush
+            if (!transport.keepAlive())
+                transport.setPolling(false);
+
         }
+
+        // Send any left over messages.
+        /*
+            List messages = client.takeMessage();
+            if (messages!=null)
+                transport.send(messages);
+         */ 
+
+        transport.complete();
     }
 
     private int incBID(String bid)

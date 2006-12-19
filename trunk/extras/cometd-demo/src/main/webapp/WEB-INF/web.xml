@@ -6,6 +6,12 @@
    version="2.5"> 
   <display-name>Cometd Test WebApp</display-name>
   
+  <listener>
+    <listener-class>
+     	org.mortbay.cometd.demo.BayeuxStartupListener
+    </listener-class>
+  </listener>
+  
   <servlet>
     <servlet-name>cometd</servlet-name>
     <servlet-class>org.mortbay.cometd.CometdServlet</servlet-class>
@@ -20,6 +26,10 @@
     <init-param>
       <param-name>multi-timeout</param-name>
       <param-value>1500</param-value>
+    </init-param>
+    <init-param>
+      <param-name>verbose</param-name>
+      <param-value>true</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>

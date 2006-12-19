@@ -4,6 +4,7 @@
 package org.mortbay.cometd;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -13,55 +14,63 @@ import org.mortbay.util.LazyList;
 
 public class PlainTextJSONTransport extends AbstractTransport
 {
-    Object _responses=null;
+    int _responses=0;
+    PrintWriter _out;
+    boolean _verbose;
     
-    
-    public void send(Map reply)
+    public PlainTextJSONTransport()
     {
-        if (reply!=null)
-            _responses=LazyList.add(_responses,reply);
     }
     
-    public void send(List replies)
+    public void send(Map reply) throws IOException
     {
-        if (replies!=null)
-            _responses=LazyList.addCollection(_responses,replies);
+        if (reply!=null)
+        {
+            if (_responses==0)
+            {
+                HttpServletResponse response=getResponse();
+                response.setContentType("text/plain; charset=utf-8");
+                _out=response.getWriter();
+                _out.write('[');
+            }
+            else
+                _out.write(",\r\n");
+            
+            String r=JSON.toString(reply);
+            if (_verbose) System.err.println("<="+_responses+"="+r);
+            _responses++;
+            _out.write(r);
+        }
+    }
+    
+    public void send(List replies) throws IOException
+    {
+        super.send(replies);
     }
     
     public void complete() throws IOException
     {
         HttpServletResponse response=getResponse();
         response.setStatus(200);
-        switch (LazyList.size(_responses))
+        
+        if (_responses==0)
+            response.setContentLength(0);
+        else
         {
-            case 0:
-                response.setContentLength(0);
-                break;
-                
-            case 1:
-            {
-                response.setContentType("text/plain; charset=utf-8");
-                String s = "["+JSON.toString(LazyList.get(_responses,0))+"]";
-                System.err.println("<=1="+s);
-                response.getWriter().println(s);
-                break;
-            }
-                
-            default:
-            {
-                response.setContentType("text/plain; charset=utf-8");
-                String s = JSON.toString(LazyList.getList(_responses));
-                System.err.println("<=*="+s);
-                response.getWriter().println(s); 
-                break;   
-            }
+            if (_verbose) System.err.println("<=-=");
+            _out.write("]\r\n");
+            _out.flush();
         }
-        response.getWriter().close();
-        response=null;
+        
     }
 
     public boolean keepAlive() throws IOException
     {
         return false;
+    }
+
+    public void setVerbose(boolean verbose)
+    {
+        _verbose=verbose;
     }
 }
