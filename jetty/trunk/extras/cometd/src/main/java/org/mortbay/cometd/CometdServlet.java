@@ -260,7 +260,7 @@ public class CometdServlet extends HttpServlet
                 try
                 {
                     // Tell client to hold messages as a response is likely to be sent.
-                    // client.responsePending(); 
+                    client.responsePending(); 
 
                     // handle any message left over from client loop above
                     if (message!=null)
@@ -303,7 +303,7 @@ public class CometdServlet extends HttpServlet
                 }
                 finally
                 {
-                    //client.responded();
+                    client.responded();
                 }
             }
         }
@@ -363,12 +363,12 @@ public class CometdServlet extends HttpServlet
         }
 
         // Send any left over messages.
-        /*
-            List messages = client.takeMessage();
+        if (client!=null)
+        {
+            List messages = client.takeMessages();
             if (messages!=null)
                 transport.send(messages);
-         */ 
-
+        }
         transport.complete();
     }
 
