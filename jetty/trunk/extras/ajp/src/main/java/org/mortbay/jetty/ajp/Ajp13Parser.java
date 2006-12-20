@@ -320,10 +320,9 @@ public class Ajp13Parser implements Parser
                 default:
                     // XXX Throw an Exception here?? Close
                     // connection!
-                    Log.warn("AJP13 message type ({}) not supported/regonised as a " + "container request", Integer.toString(packetType));
-                    // throw new IllegalStateException("Not
-                    // implemented packet type: " +
-                    // packetType);
+                    Log.warn("AJP13 message type ({SHUTDOWN, CPING, PING}) not supported/recognized as a " + "container request", Integer.toString(packetType));
+                    throw new IllegalStateException("SHUTDOWN, CPING, PING is not implemented");
+                   
 
                 }
                 break;
