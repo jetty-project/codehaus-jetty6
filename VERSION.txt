@@ -1,5 +1,5 @@
 
-jetty-6.1-SNAPSHOT
+jetty-6.1.0rc2
  + AJP13Parser, throw IllegalStateException on unimplemented AJP13 Requests
  + ContextHandlerCollection is noop with no handlers
  + ensure servlets initialized if only using ServletHandler
@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
  + ensure classpath passed to jspc contains file paths not urls
  + JETTY-194 doubles slashes are significant in URIs
  + JETTY-167 cometd refactor
+ + JETTY-201 make run-as work for both web container and ejb container in jboss
  
 jetty-6.1.0rc1 - 14 December 2006
  + simplified idle timeout handling
