@@ -9,6 +9,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-194 doubles slashes are significant in URIs
  + JETTY-167 cometd refactor
  + remove code to remove SecurityHandler if no constraints present
+ + JETTY-201 make run-as work for both web container and ejb container in jboss
  
 jetty-6.1.0rc1 - 14 December 2006
  + simplified idle timeout handling
