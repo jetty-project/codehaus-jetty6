@@ -74,7 +74,8 @@ public class WebAppTest extends TestCase
         userRealm.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
         server.setUserRealms(new UserRealm[]{userRealm});
         
-        NCSARequestLog requestLog = new NCSARequestLog(dir.getAbsolutePath()+"/logs/jetty-yyyy-mm-dd.log");
+	File file = File.createTempFile("test",".log");
+        NCSARequestLog requestLog = new NCSARequestLog(file.getAbsolutePath());
         
         requestLog.setExtended(false);
         requestLogHandler.setRequestLog(requestLog);

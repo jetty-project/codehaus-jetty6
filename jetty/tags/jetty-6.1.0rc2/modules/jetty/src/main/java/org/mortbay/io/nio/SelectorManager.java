@@ -301,7 +301,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
             long now=-1;
 
             // have we been destroyed while sleeping
-            if (!_selector.isOpen())
+            Selector selector=_selector;
+            if (selector==null || !selector.isOpen())
                 return;
 
             // update the timers for task schedule in this loop
@@ -310,7 +311,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
             _retryTimeout.setNow(now);
 
             // Look for things to do
-            Iterator iter = _selector.selectedKeys().iterator();
+            Iterator iter = selector.selectedKeys().iterator();
             while (iter.hasNext())
             {
                 SelectionKey key = (SelectionKey) iter.next();
