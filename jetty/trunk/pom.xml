@@ -218,7 +218,6 @@
     <module>extras/servlet-tester</module>
     <module>extras/xbean</module>
     <module>extras/cometd</module>
-    <module>extras/cometd-demo</module>
     <module>extras/spring</module>
     <module>extras/grizzly</module>
     <module>extras/sslengine</module>
@@ -231,6 +230,7 @@
     <module>examples/test-jaas-webapp</module>
     <module>examples/test-jndi-webapp</module>
     <module>examples/embedded</module>
+    <module>examples/cometd-demo</module>
     <!-- <module>examples/spring-ebj3-demo</module> -->
     <module>extras/tests</module>
   </modules>
