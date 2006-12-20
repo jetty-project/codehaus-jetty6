@@ -1170,12 +1170,6 @@ public class WebAppContext extends Context
         for (int i=0;i<_configurations.length;i++)
             _configurations[i].configureWebApp();
 
-        // bypass security handler if not used.
-        if (!_securityHandler.hasConstraints() && _securityHandler.getHandler()==_servletHandler)
-        {
-            _securityHandler.setHandler(null);
-            _sessionHandler.setHandler(_servletHandler);
-        }
         
         super.startContext();
     }
