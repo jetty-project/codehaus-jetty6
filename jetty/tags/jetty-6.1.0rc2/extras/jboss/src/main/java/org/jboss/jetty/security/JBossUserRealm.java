@@ -26,7 +26,9 @@ import javax.security.auth.Subject;
 import org.jboss.jetty.JBossWebAppContext;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
+import org.jboss.security.NobodyPrincipal;
 import org.jboss.security.RealmMapping;
+import org.jboss.security.RunAsIdentity;
 import org.jboss.security.SecurityAssociation;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.SubjectSecurityManager;
@@ -79,18 +81,19 @@ public class JBossUserRealm implements UserRealm, SSORealm
     {
         protected transient Logger _logRef;
         protected transient JBossUserRealm _realm;
-        final SimplePrincipal _principal;
+        protected Principal _principal;
         private String _password;
-        private Stack _roleStack;
+        private Stack _roleStack= new Stack();;
 
-        JBossUserPrincipal(String name, Logger _log)
+        JBossUserPrincipal() {}
+        
+        JBossUserPrincipal(String name, Logger log)
         {
-            _roleStack = new Stack();
             _principal = new SimplePrincipal(name);
-            this._logRef = _log;
+            this._logRef = log;
 
-            if (_log.isDebugEnabled())
-                _log.debug("created JBossUserRealm::JBossUserPrincipal: " + name);
+            if (log.isDebugEnabled())
+                log.debug("created JBossUserRealm::JBossUserPrincipal: " + name);
         }
 
         void associateWithRealm(JBossUserRealm realm)
@@ -215,6 +218,32 @@ public class JBossUserRealm implements UserRealm, SSORealm
         }
     }
 
+    /**
+     * JBossNobodyUserPrincipal
+     * Represents the default user.
+     */
+    static class JBossNobodyUserPrincipal extends JBossUserPrincipal
+    {
+        public JBossNobodyUserPrincipal(Logger log)
+        {
+            _principal = new NobodyPrincipal();
+            this._logRef = log;
+
+            if (log.isDebugEnabled())
+                log.debug("created JBossUserRealm::JBossNobodyUserPrincipal");
+        }
+        
+        public boolean isAuthenticated()
+        {
+            return true;
+        }
+        
+        public boolean authenticate(String password, Request request)
+        {
+            return true;
+        }
+
+    }
  
     /**
      * JBossCertificatePrincipal
@@ -274,6 +303,11 @@ public class JBossUserRealm implements UserRealm, SSORealm
         _realmName = realmName;
         _log = Logger.getLogger(JBossUserRealm.class.getName() + "#"+ _realmName);
         _subjAttrName = subjAttrName;
+        
+        //always add a default user?
+        JBossUserPrincipal nobody = new JBossNobodyUserPrincipal(_log);
+        nobody.associateWithRealm(this);
+        _users.put("nobody", nobody);
     }
 
     public void init()
@@ -427,13 +461,23 @@ public class JBossUserRealm implements UserRealm, SSORealm
 
     public Principal pushRole(Principal user, String role)
     {
+        RunAsIdentity runAs = new RunAsIdentity(role, (user==null?null:user.getName()));
+        if (user==null)
+            user = (JBossUserPrincipal)_users.get("nobody");
+        
+        //set up security for Jetty
         ((JBossUserPrincipal)user).push(role);
+        //set up security for calls to jboss ejbs
+        SecurityAssociation.pushRunAsIdentity(runAs);
+        
         return user;
     }
 
     public Principal popRole(Principal user)
     {
         ((JBossUserPrincipal)user).pop();
+        //clear a run-as role set for jboss ejb calls
+        SecurityAssociation.popRunAsIdentity();
         return user;
     }
 
