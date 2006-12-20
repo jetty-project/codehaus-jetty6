@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+ + AJP13Parser, throw IllegalStateException on unimplemented AJP13 Requests
  + ContextHandlerCollection is noop with no handlers
  + ensure servlets initialized if only using ServletHandler
  + fixed Jetty-197 AJP13 getRemoteHost()
