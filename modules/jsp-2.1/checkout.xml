@@ -130,6 +130,12 @@
         <exclude name="**/CVS/*"/>
       </fileset>
     </copy>
+    <copy todir="${generated.resources}/com/sun/el">
+      <fileset dir="target/glassfish/appserv-webtier/src/java/com/sun/el">
+        <include name="Messages.properties"/>
+        <exclude name="**/CVS/*"/>
+      </fileset>
+    </copy>
    </target>
 
     <!-- ============================================================== -->
