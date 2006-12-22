@@ -163,11 +163,6 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
     {
         transient Element _sessionCacheElement;
         
-        public EHSession()
-        {
-            super();            
-        }
-
         /* ------------------------------------------------------------- */
         protected EHSession(HttpServletRequest request)
         {
