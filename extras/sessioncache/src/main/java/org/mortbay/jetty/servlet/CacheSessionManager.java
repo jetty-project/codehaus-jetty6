@@ -1,6 +1,8 @@
 package org.mortbay.jetty.servlet;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,11 +31,12 @@ import net.sf.ehcache.Element;
  * @author nik
  *
  */
-public class CacheSessionManager extends AbstractSessionManager
+public class CacheSessionManager extends AbstractSessionManager implements Serializable
 {
     protected String _cacheKey;
-    protected CacheSessionIdManager _cacheIdManager;
-    protected Ehcache _sessionCache;
+    transient CacheSessionIdManager _cacheIdManager;
+    transient Ehcache _sessionCache;
+    transient Store _sessionStore;
 
     /* ------------------------------------------------------------ */
     public void doStart() throws Exception
@@ -63,9 +66,18 @@ public class CacheSessionManager extends AbstractSessionManager
                 // they always create an element - which is not what we want.
                 
             }
-        }   
+        }
+        
+        if (_sessionStore != null)
+        {
+            _sessionStore.setContext(_context.getContextPath());
+        }
     }
 
+    public void setStore(Store store)
+    {
+        _sessionStore = store;
+    }
 
     /* ------------------------------------------------------------ */
     public Map getSessionMap()
@@ -92,21 +104,38 @@ public class CacheSessionManager extends AbstractSessionManager
         
         // TODO - maybe put the Element as a transient in the Session
         // instance, so it can be used for last access times, isValid etc.
+        
+        //add session to storage
+        _sessionStore.add(session.getClusterId(), session);
     }
 
     /* ------------------------------------------------------------ */
     protected Session getSession(String idInCluster)
     {
-        Element session = _sessionCache.get(idInCluster);
-        if (session==null || session.isExpired())
+        Element sessionElement = _sessionCache.get(idInCluster);
+        Session session = null;
+
+        if (sessionElement==null || sessionElement.isExpired())
         {
-            // XXX - changed my mind about the self populating
-            // cache
-            // it is here that we might look for the session in
-            // the cluster, in a db, in a file store.
-            return null;
+            session = (Session)_sessionStore.get(idInCluster);
+            if (session == null)
+            {
+                return null;
+            }
+            sessionElement = new Element(session.getClusterId(), session);
+            _sessionCache.put(sessionElement);
         }
-        return (Session)session.getValue();
+        else
+        {
+            session = (Session)sessionElement.getValue();
+        }
+
+        if(session != null)
+        {
+            ((EHSession)session).setSessionCacheElement(sessionElement);
+        }            
+
+        return session;
     }
 
     /* ------------------------------------------------------------ */
@@ -132,6 +161,13 @@ public class CacheSessionManager extends AbstractSessionManager
     /* ------------------------------------------------------------ */
     protected class EHSession extends AbstractSessionManager.Session
     {
+        transient Element _sessionCacheElement;
+        
+        public EHSession()
+        {
+            super();            
+        }
+
         /* ------------------------------------------------------------- */
         protected EHSession(HttpServletRequest request)
         {
@@ -143,6 +179,24 @@ public class CacheSessionManager extends AbstractSessionManager
         {
             return new HashMap(3);
         }
+        
+        protected void setSessionCacheElement(Element sessionCacheElement)
+        {
+            _sessionCacheElement = sessionCacheElement;
+        }
+    }
+
+    public interface Store
+    {
+        Object get(String id);
+        
+        void add(String id, Serializable serializable);
+        
+        void remove(String id);
+        
+        List getKeys();
+        
+        void setContext(String contextName);
     }
 
 
@@ -173,6 +227,7 @@ public class CacheSessionManager extends AbstractSessionManager
             SessionHandler sessionHandler = new SessionHandler();
             CacheSessionManager cacheSessionManager = new CacheSessionManager();
             cacheSessionManager.setSessionHandler(sessionHandler);
+            cacheSessionManager.setStore(new FileStore(jetty_home+"/sessions"));
             sessionHandler.setSessionManager(cacheSessionManager);
         
             wah[i]= new WebAppContext(null,sessionHandler,null,null);
