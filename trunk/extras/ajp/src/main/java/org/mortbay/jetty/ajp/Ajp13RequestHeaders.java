@@ -45,10 +45,19 @@ public class Ajp13RequestHeaders extends BufferCache
             HOST_BUFFER=CACHE.add(HOST,HOST_ORDINAL), PRAGMA_BUFFER=CACHE.add(PRAGMA,PRAGMA_ORDINAL), REFERER_BUFFER=CACHE.add(REFERER,REFERER_ORDINAL),
             USER_AGENT_BUFFER=CACHE.add(USER_AGENT,USER_AGENT_ORDINAL);
 
-    public final static byte CONTEXT_ATTR=1, // Legacy
-            SERVLET_PATH_ATTR=2, // Lagacy
-            REMOTE_USER_ATTR=3, AUTH_TYPE_ATTR=4, QUERY_STRING_ATTR=5, JVM_ROUTE_ATTR=6, SSL_CERT_ATTR=7, SSL_CIPHER_ATTR=8,
+    public final static byte 
+            CONTEXT_ATTR=1, // Legacy
+            SERVLET_PATH_ATTR=2, // Legacy
+            REMOTE_USER_ATTR=3, 
+            AUTH_TYPE_ATTR=4, 
+            QUERY_STRING_ATTR=5, 
+            JVM_ROUTE_ATTR=6, 
+            SSL_CERT_ATTR=7, 
+            SSL_CIPHER_ATTR=8,
             SSL_SESSION_ATTR=9,
-            REQUEST_ATTR=10, SSL_KEYSIZE_ATTR=11, SECRET_ATTR=12, STORED_METHOD_ATTR=13;
+            REQUEST_ATTR=10, 
+            SSL_KEYSIZE_ATTR=11, 
+            SECRET_ATTR=12, 
+            STORED_METHOD_ATTR=13;
 
 }
