@@ -288,7 +288,18 @@ public class ServletHolder extends Holder
                 user=_realm.pushRole(null,_runAs);
                 
             if (_servlet!=null)
+            {   
+                try
+                {
+                    getServletHandler().customizeServletDestroy(_servlet);
+                }
+                catch (Exception e)
+                {
+                    Log.warn(e);
+                }
                 _servlet.destroy();
+            }
+            
             if (!_extInstance)
                 _servlet=null;
             

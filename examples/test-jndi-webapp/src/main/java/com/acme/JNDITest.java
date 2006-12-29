@@ -27,7 +27,12 @@ import javax.sql.XADataSource;
 import javax.transaction.UserTransaction;
 
 /**
- * @author janb
+ * JNDITest
+ * 
+ * Use JNDI from within Jetty.
+ * 
+ * Also, use servlet spec 2.5 resource injection and lifecycle callbacks from within the web.xml
+ * to set up some of the JNDI resources.
  *
  */
 public class JNDITest extends HttpServlet {
@@ -42,32 +47,50 @@ public class JNDITest extends HttpServlet {
     
     private DataSource myDS;
     private DataSource myDS2;
+    private DataSource myDS99;
     private Session myMailSession;
-    Double wiggle;
-    Integer woggle;
+    private Double wiggle;
+    private Integer woggle;
+    
+    public void setMyDatasource(DataSource ds)
+    {
+        myDS=ds;
+    }
+    
+    public void setMyDatasource2(DataSource ds)
+    {
+        myDS2=ds;
+    }
 
+    public void setMyDatasource99(DataSource ds)
+    {
+        myDS99=ds;
+    }
+    
+    private void postConstruct ()
+    {
+        System.err.println("mydatasource="+myDS);
+        System.err.println("mydatasource2="+myDS2);
+        System.err.println("mydatasource99="+myDS99);
+        System.err.println("wiggle="+wiggle);
+    }
+    
+    private void preDestroy()
+    {
+        System.err.println("PreDestroy called");
+    }
+    
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
         try
         {
             InitialContext ic = new InitialContext();
-            myDS = (DataSource)ic.lookup("java:comp/env/jdbc/mydatasource");
-            myDS2 = (DataSource)ic.lookup("java:comp/env/jdbc/mydatasource2");
-
             woggle = (Integer)ic.lookup("java:comp/env/woggle");
             System.err.println("woggle="+woggle);
-            
-            wiggle = (Double)ic.lookup("java:comp/env/wiggle");          
-            System.err.println("wiggle="+wiggle);
-           
-            
             System.err.println("gargle="+(Double)ic.lookup("java:comp/env/gargle"));
-            
-            System.err.println("mydatasource99:"+(ic.lookup("java:comp/env/jdbc/mydatasource99")==null?"NO":"YES"));
             UserTransaction utx = (UserTransaction)ic.lookup("java:comp/UserTransaction");
             System.err.println("utx="+utx);
-            
             myMailSession = (Session)ic.lookup("java:comp/env/mail/Session");
             System.err.println("myMailSession: "+myMailSession);
             
@@ -150,8 +173,6 @@ public class JNDITest extends HttpServlet {
         // set the from and to address
         InternetAddress addressFrom = new InternetAddress(mailFrom);
         msg.setFrom(addressFrom);
-
-
         msg.addRecipient(Message.RecipientType.TO, new InternetAddress(mailTo));
         msg.setSubject("Jetty Mail Test Succeeded");
         msg.setContent("The test of Jetty Mail @ "+new Date()+" has been successful.", "text/plain");
