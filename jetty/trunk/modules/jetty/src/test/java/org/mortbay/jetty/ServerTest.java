@@ -14,11 +14,25 @@
 
 package org.mortbay.jetty;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
 import java.util.Random;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.DefaultHandler;
+import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.util.IO;
 
 /**
  * @version $Revision$
@@ -26,7 +40,8 @@ import org.mortbay.jetty.handler.DefaultHandler;
 public class ServerTest extends TestCase
 {
     /**
-     * JETTY-87, adding a handler to a server without any handlers should not throw an exception
+     * JETTY-87, adding a handler to a server without any handlers should not
+     * throw an exception
      */
     public void testAddHandlerToEmptyServer()
     {
@@ -41,11 +56,11 @@ public class ServerTest extends TestCase
             fail("Adding handler "+handler+" to server "+server+" threw exception "+e);
         }
     }
-    
+
     public void testServerWithPort()
     {
-        int port = new Random().nextInt(20000) + 10000;
-        Server server = new Server(port);
-        assertEquals(port, server.getConnectors()[0].getPort());
+        int port=new Random().nextInt(20000)+10000;
+        Server server=new Server(port);
+        assertEquals(port,server.getConnectors()[0].getPort());
     }
 }
