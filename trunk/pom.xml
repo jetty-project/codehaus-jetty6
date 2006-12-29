@@ -241,7 +241,10 @@
         <artifactId>maven-javadoc-plugin</artifactId>
           <configuration>
             <aggregate>true</aggregate>
+            <debug>true</debug>
+            <stylesheetfile>${basedir}/project-website/project-site/src/resources/javadoc.css</stylesheetfile>
             <links>
+              <link>http://java.sun.com/javaee/5/docs/api</link>
               <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
             </links>
           </configuration>

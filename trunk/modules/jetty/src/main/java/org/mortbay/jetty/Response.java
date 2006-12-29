@@ -17,7 +17,6 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -36,11 +35,14 @@ import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.IO;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /** Response.
+ * <p>
+ * Implements {@link javax.servlet.HttpServletResponse} from the {@link javax.servlet} package.   
+ * </p>
+ * 
  * @author gregw
  *
  */

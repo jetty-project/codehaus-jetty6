@@ -641,6 +641,14 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    /**
+     * 
+     * <p>
+     * Implements {@link javax.servlet.HttpSession} from the {@link javax.servlet} package.   
+     * </p>
+     * @author gregw
+     *
+     */
     public abstract class Session implements HttpSession, Serializable
     {
         String _clusterId;

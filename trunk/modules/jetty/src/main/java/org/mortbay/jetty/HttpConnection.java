@@ -31,10 +31,21 @@ import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
 
 /**
+ * <p>A HttpConnection represents the connection of a HTTP client to the server
+ * and is created by an instance of a {@link Connector}. It's prime function is 
+ * to associate {@link Request} and {@link Response} instances with a {@link EndPoint}.
+ * </p>
+ * <p>
+ * A connection is also the prime mechanism used by jetty to recycle objects without
+ * pooling.  The {@link Request},  {@link Response}, {@link HttpParser}, {@link HttpGenerator}
+ * and {@link HttpFields} instances are all recycled for the duraction of
+ * a connection. Where appropriate, allocated buffers are also kept associated
+ * with the connection via the parser and/or generator.
+ * </p>
+ * 
+ * 
  * @author gregw
  * 
- * To change the template for this generated type comment go to Window - Preferences - Java - Code
- * Generation - Code and Comments
  */
 public class HttpConnection implements Connection
 {
