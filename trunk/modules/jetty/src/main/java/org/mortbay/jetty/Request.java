@@ -69,18 +69,9 @@ import org.mortbay.util.ajax.Continuation;
 public class Request implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
-    private static final String __maxFormContentSizeName = "org.mortbay.jetty.Request.maxFormContentSize";
-
     private static final int __NONE=0, _STREAM=1, __READER=2;
     
-    /* ------------------------------------------------------------ */
-    /**
-     * Max size of the form content. Limits the size of the data a client can push at the server.
-     * Set via the org.mortbay.http.HttpRequest.maxContentSize attribute on the Server class
-     */
-    
     private boolean _handled =false;
-    private int _maxFormContentSize = 200000;
     private HttpConnection _connection;
     private EndPoint _endp;
     private Map _roleMap;
@@ -132,8 +123,6 @@ public class Request implements HttpServletRequest
         _connection=connection;
         _endp=connection.getEndPoint();
         _dns=_connection.getResolveNames();
-        Integer size = (Integer)_connection.getConnector().getServer().getAttribute(__maxFormContentSizeName);
-        _maxFormContentSize = (size==null?_maxFormContentSize:size.intValue()); 
     }
 
     /* ------------------------------------------------------------ */
@@ -1231,12 +1220,23 @@ public class Request implements HttpServletRequest
                 {
                     try
                     {
-                        if (content_length>_maxFormContentSize && _maxFormContentSize > 0)
+                        int maxFormContentSize=-1;
+                        
+                        if (_context!=null)
+                            maxFormContentSize=_context.getContextHandler().getMaxFormContentSize();
+                        else
+                        {
+                            Integer size = (Integer)_connection.getConnector().getServer().getAttribute("org.mortbay.jetty.Request.maxFormContentSize");
+                            if (size!=null)
+                                maxFormContentSize =size.intValue();
+                        }
+                        
+                        if (content_length>maxFormContentSize && maxFormContentSize > 0)
                                 throw new IllegalStateException("Form too large");
                         InputStream in = getInputStream();
                        
                         // Add form params to query params
-                        UrlEncoded.decodeTo(in, _baseParameters, encoding,content_length<0?_maxFormContentSize:-1);
+                        UrlEncoded.decodeTo(in, _baseParameters, encoding,content_length<0?maxFormContentSize:-1);
                     }
                     catch (IOException e)
                     {
