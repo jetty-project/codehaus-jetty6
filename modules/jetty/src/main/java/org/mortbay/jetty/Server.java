@@ -46,26 +46,8 @@ import org.mortbay.util.MultiException;
  * It aggregates Connectors (HTTP request receivers) and request Handlers.
  * The server is itself a handler and a ThreadPool.  Connectors use the ThreadPool methods
  * to run jobs that will eventually call the handle method.
- * 
- * A server instance also supports the setting of attributes:
- *    Object value = new Integer(99);
- *    server.setAttribute("myAttributeName", value);
- * 
- * which can be retrieved at any time:
- *    Object o = server.getAttribute("myAttributeName");
- *    
- * Some attributes can be used by Jetty to modify runtime behaviour
- * in place of using System Properties. The list of these attribute
- * names and value types is:
- * 
- *  Name                                            Type                    Default Value
- *  org.mortbay.jetty.Request.maxFormContentSize    java.lang.Integer       20000
- *  
- *  Some attributes are read-only. The list of these is:
- *  javax.servlet.context.tempdir
  *
- *  @org.apache.xbean.XBean  description="Creates an
- *                  embedded Jetty web server"
+ *  @org.apache.xbean.XBean  description="Creates an embedded Jetty web server"
  */
 public class Server extends HandlerWrapper implements Attributes
 {
