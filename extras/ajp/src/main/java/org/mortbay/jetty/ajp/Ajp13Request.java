@@ -6,13 +6,9 @@ import org.mortbay.jetty.Request;
 
 public class Ajp13Request extends Request
 {
-
     protected String _remoteAddr;
-
     protected String _remoteHost;
-
     protected int _remotePort;
-
     protected HttpConnection _connection;
 
     public Ajp13Request(HttpConnection connection)
@@ -27,6 +23,8 @@ public class Ajp13Request extends Request
     {
         if (_remoteAddr != null)
             return _remoteAddr;
+        if (_remoteHost != null)
+            return _remoteHost;
         return super.getRemoteAddr();
     }
 
@@ -39,6 +37,8 @@ public class Ajp13Request extends Request
     {
         if (_remoteHost != null)
             return _remoteHost;
+        if (_remoteAddr != null)
+            return _remoteAddr;
         return super.getRemoteHost();
     }
 
