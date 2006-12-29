@@ -103,12 +103,15 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedProtocol(Buffer protocol) throws IOException
         {
-            _request.setProtocol(protocol.toString());
+            if (protocol != null && protocol.length()>0)
+            {
+                _request.setProtocol(protocol.toString());
+            }
         }
 
         public void parsedRemoteAddr(Buffer addr) throws IOException
         {
-            if (addr != null)
+            if (addr != null && addr.length()>0)
             {
                 ((Ajp13Request) _request).setRemoteAddr(addr.toString());
             }
@@ -116,7 +119,7 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedRemoteHost(Buffer name) throws IOException
         {
-            if (name != null)
+            if (name != null && name.length()>0)
             {
                 ((Ajp13Request) _request).setRemoteHost(name.toString());
             }
@@ -124,7 +127,7 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedServerName(Buffer name) throws IOException
         {
-            if (name != null)
+            if (name != null && name.length()>0)
             {
                 _request.setServerName(name.toString());
             }

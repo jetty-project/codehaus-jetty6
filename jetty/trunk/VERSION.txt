@@ -1,6 +1,7 @@
 
 jetty-6.1-SNAPSHOT
  + JETTY-195 fixed ajp ssl_cert handling
+ + JETTY-197 fixed getRemoteHost
  + JETTY-203 initialize ServletHandler if no Context instance
  + JETTY-205 setuid fix
  + setLocale does not use default content type
