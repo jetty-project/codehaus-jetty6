@@ -189,6 +189,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         private transient Timeout _retryTimeout;
         private transient Selector _selector;
         private transient int _setID;
+        private transient boolean _selecting;
         
         /* ------------------------------------------------------------ */
         SelectSet(int acceptorID) throws Exception
@@ -230,194 +231,204 @@ public abstract class SelectorManager extends AbstractLifeCycle
             long idle_next = 0;
             long retry_next = 0;
 
-            List changes;
-            synchronized (_changes)
+            try
             {
-                changes=_changes[_change];
-                _change=_change==0?1:0;
-            }
-
-            // Make any key changes required
-            for (int i = 0; i < changes.size(); i++)
-            {
-                try
+                List changes;
+                synchronized (_changes)
                 {
-                    Object o = changes.get(i);
-                    if (o instanceof EndPoint)
-                    {
-                        // Update the operatios for a key.
-                        SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
-                        endpoint.syncKey();
-                    }
-                    else if (o instanceof SocketChannel)
-                    {
-                        // finish accepting this connection
-                        SocketChannel channel=(SocketChannel)o;
-                        SelectionKey cKey = channel.register(_selector, SelectionKey.OP_READ);
-                        SelectChannelEndPoint endpoint = newEndPoint(channel,this,cKey);
-                        
-                        if (_delaySelectKeyUpdate)
-                            doDispatch(endpoint);
-                    }
-                    else if (o instanceof Runnable)
-                    {
-                        dispatch((Runnable)o);
-                    }
-                    else
-                        throw new IllegalArgumentException(o.toString());
+                    changes=_changes[_change];
+                    _change=_change==0?1:0;
+                    _selecting=true;
                 }
-                catch (CancelledKeyException e)
+
+                // Make any key changes required
+                for (int i = 0; i < changes.size(); i++)
                 {
-                    if (isRunning())
-                        Log.warn(e);
-                    else
-                        Log.debug(e);
-                }
-            }
-            changes.clear();
-
-            synchronized (this)
-            {
-                _idleTimeout.setDuration(getMaxIdleTime());
-                idle_next=_idleTimeout.getTimeToNext();
-                retry_next=_retryTimeout.getTimeToNext();
-            }
-
-            // workout how low to wait in select
-            long wait = 1000L;  // not getMaxIdleTime() as the now value of the idle timers needs to be updated.
-            if (wait < 0 || idle_next >= 0 && wait > idle_next)
-                wait = idle_next;
-            if (wait < 0 || retry_next >= 0 && wait > retry_next)
-                wait = retry_next;
-
-            // Do the select.
-            if (wait > 0)
-                _selector.select(wait);
-            else if (wait == 0)
-                _selector.selectNow();
-            else
-                _selector.select();
-
-            long now=-1;
-
-            // have we been destroyed while sleeping
-            Selector selector=_selector;
-            if (selector==null || !selector.isOpen())
-                return;
-
-            // update the timers for task schedule in this loop
-            now = System.currentTimeMillis();
-            _idleTimeout.setNow(now);
-            _retryTimeout.setNow(now);
-
-            // Look for things to do
-            Iterator iter = selector.selectedKeys().iterator();
-            while (iter.hasNext())
-            {
-                SelectionKey key = (SelectionKey) iter.next();
-                iter.remove();
-
-                try
-                {
-                    if (!key.isValid())
+                    try
                     {
-                        key.cancel();
-                        SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
-                        if (endpoint != null)
+                        Object o = changes.get(i);
+                        if (o instanceof EndPoint)
                         {
-                            endpoint.close();
-                            endPointClosed(endpoint);
+                            // Update the operatios for a key.
+                            SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
+                            endpoint.syncKey();
                         }
-                        continue;
-                    }
-                    
-                    if (key.isAcceptable())
-                    {
-                        
-                        SocketChannel channel = acceptChannel(key);
-                        if (channel==null)
-                            continue;
-                        
-                        channel.configureBlocking(false);
-
-                        // TODO make it reluctant to leave 0
-                        _nextSet=++_nextSet%_selectSet.length;
-
-                        // Is this for this selectset
-                        if (_nextSet!=_setID)
+                        else if (o instanceof SocketChannel)
                         {
-                            // nope - give it to another.
-                            _selectSet[_nextSet].addChange(channel);
-                            _selectSet[_nextSet].wakeup();
+                            // finish accepting this connection
+                            SocketChannel channel=(SocketChannel)o;
+                            SelectionKey cKey = channel.register(_selector, SelectionKey.OP_READ);
+                            SelectChannelEndPoint endpoint = newEndPoint(channel,this,cKey);
+
+                            if (_delaySelectKeyUpdate)
+                                doDispatch(endpoint);
+                        }
+                        else if (o instanceof Runnable)
+                        {
+                            dispatch((Runnable)o);
+                        }
+                        else
+                            throw new IllegalArgumentException(o.toString());
+                    }
+                    catch (CancelledKeyException e)
+                    {
+                        if (isRunning())
+                            Log.warn(e);
+                        else
+                            Log.debug(e);
+                    }
+                }
+                changes.clear();
+
+                synchronized (this)
+                {
+                    _idleTimeout.setDuration(getMaxIdleTime());
+                    idle_next=_idleTimeout.getTimeToNext();
+                    retry_next=_retryTimeout.getTimeToNext();
+                }
+
+                // workout how low to wait in select
+                long wait = 1000L;  // not getMaxIdleTime() as the now value of the idle timers needs to be updated.
+                if (wait < 0 || idle_next >= 0 && wait > idle_next)
+                    wait = idle_next;
+                if (wait < 0 || retry_next >= 0 && wait > retry_next)
+                    wait = retry_next;
+
+                // Do the select.
+                if (wait > 0)
+                    _selector.select(wait);
+                else if (wait == 0)
+                    _selector.selectNow();
+                else
+                    _selector.select();
+
+                long now=-1;
+
+                // have we been destroyed while sleeping\
+                if (_selector==null || !_selector.isOpen())
+                    return;
+
+                // update the timers for task schedule in this loop
+                now = System.currentTimeMillis();
+                _idleTimeout.setNow(now);
+                _retryTimeout.setNow(now);
+
+                // Look for things to do
+                Iterator iter = _selector.selectedKeys().iterator();
+                while (iter.hasNext())
+                {
+                    SelectionKey key = (SelectionKey) iter.next();
+                    iter.remove();
+
+                    try
+                    {
+                        if (!key.isValid())
+                        {
+                            key.cancel();
+                            SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
+                            if (endpoint != null)
+                            {
+                                endpoint.close();
+                                endPointClosed(endpoint);
+                            }
+                            continue;
+                        }
+
+                        if (key.isAcceptable())
+                        {
+
+                            SocketChannel channel = acceptChannel(key);
+                            if (channel==null)
+                                continue;
+
+                            channel.configureBlocking(false);
+
+                            // TODO make it reluctant to leave 0
+                            _nextSet=++_nextSet%_selectSet.length;
+
+                            // Is this for this selectset
+                            if (_nextSet!=_setID)
+                            {
+                                // nope - give it to another.
+                                _selectSet[_nextSet].addChange(channel);
+                                _selectSet[_nextSet].wakeup();
+                            }
+                            else
+                            {
+                                // bind connections to this select set.
+                                SelectionKey cKey = channel.register(_selectSet[_nextSet].getSelector(), SelectionKey.OP_READ);
+                                SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
+                                if (endpoint != null)
+                                    doDispatch(endpoint);
+                            }
                         }
                         else
                         {
-                            // bind connections to this select set.
-                            SelectionKey cKey = channel.register(_selectSet[_nextSet].getSelector(), SelectionKey.OP_READ);
-                            SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
+                            SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
                             if (endpoint != null)
                                 doDispatch(endpoint);
                         }
+
+                        key = null;
                     }
-                    else
+                    catch (CancelledKeyException e)
                     {
-                        SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
-                        if (endpoint != null)
-                            doDispatch(endpoint);
+                        // TODO investigate if this actually is a problem?
+                        if (isRunning())
+                            Log.warn(e);
+                        else
+                            Log.ignore(e);
                     }
-
-                    key = null;
-                }
-                catch (CancelledKeyException e)
-                {
-                    // TODO investigate if this actually is a problem?
-                    if (isRunning())
-                        Log.warn(e);
-                    else
-                        Log.ignore(e);
-                }
-                catch (Exception e)
-                {
-                    if (isRunning())
-                        Log.warn(e);
-                    else
-                        Log.ignore(e);
-                    
-                    if (key != null && !(key.channel() instanceof ServerSocketChannel) && key.isValid())
+                    catch (Exception e)
                     {
-                        key.interestOps(0);
-                        key.cancel();
-                    } 
+                        if (isRunning())
+                            Log.warn(e);
+                        else
+                            Log.ignore(e);
+
+                        if (key != null && !(key.channel() instanceof ServerSocketChannel) && key.isValid())
+                        {
+                            key.interestOps(0);
+                            key.cancel();
+                        } 
+                    }
                 }
-            }
 
 
-            // tick over the timers
-            Timeout.Task task=null;
-            synchronized (this)
-            {
-                now = System.currentTimeMillis();
-                _retryTimeout.setNow(now);
-                _idleTimeout.setNow(now);
-
-                task=_idleTimeout.expired();
-                if (task==null)
-                    task=_retryTimeout.expired();
-            }
-
-            // handle any expired timers
-            while (task!=null)
-            {
-                task.expire();
-                
-                // get the next timer tasks
-                synchronized(this)
+                // tick over the timers
+                Timeout.Task task=null;
+                synchronized (this)
                 {
-                    if (_selector==null)
-                        break;
+                    now = System.currentTimeMillis();
+                    _retryTimeout.setNow(now);
+                    _idleTimeout.setNow(now);
+
                     task=_idleTimeout.expired();
                     if (task==null)
                         task=_retryTimeout.expired();
+                }
+
+                // handle any expired timers
+                while (task!=null)
+                {
+                    task.expire();
+
+                    // get the next timer tasks
+                    synchronized(this)
+                    {
+                        if (_selector==null)
+                            break;
+                        task=_idleTimeout.expired();
+                        if (task==null)
+                            task=_retryTimeout.expired();
+                    }
+                }
+            }
+            finally
+            {
+                synchronized(this)
+                {
+                    _selecting=false;
                 }
             }
         }
@@ -469,60 +480,53 @@ public abstract class SelectorManager extends AbstractLifeCycle
         /* ------------------------------------------------------------ */
         void stop() throws Exception
         {
-            wakeup();
-            Thread.yield();
-
-            // horrid hack until I find a better way.  Really need to get the select set to stop itself, but
-            // the thread pool is stopped by this stage!
-            stopchanging: while (_selector!= null && _selector.keys().size()>0)
-            {   
+            boolean selecting=true;
+            while(selecting)
+            {
+                wakeup();
+                Thread.yield();
                 synchronized (this)
                 {
-                    try
-                    {
-                        Iterator iter =_selector.keys().iterator();
-                        while (iter.hasNext())
-                        {
-                            SelectionKey key = (SelectionKey)iter.next();
-                            if (key==null)
-                                continue;
-                            EndPoint endpoint = (EndPoint)key.attachment();
-                            if (endpoint!=null)
-                            {
-                                try
-                                {
-                                    endpoint.close();
-                                }
-                                catch(IOException e)
-                                {
-                                    Log.ignore(e);
-                                }
-                            }
-                        }
-                        break stopchanging;
-                    }
-                    catch(ConcurrentModificationException e)
-                    {
-                        Log.ignore(e);
-                        wakeup();
-                        Thread.yield();
-                    }
+                    selecting=_selecting;
                 }
             }
-
-            _idleTimeout.cancelAll();
-            _retryTimeout.cancelAll();
-            try
+            
+            synchronized (this)
             {
-                if (_selector != null)
-                    _selector.close();
+                Iterator iter =_selector.keys().iterator();
+                while (iter.hasNext())
+                {
+                    SelectionKey key = (SelectionKey)iter.next();
+                    if (key==null)
+                        continue;
+                    EndPoint endpoint = (EndPoint)key.attachment();
+                    if (endpoint!=null)
+                    {
+                        try
+                        {
+                            endpoint.close();
+                        }
+                        catch(IOException e)
+                        {
+                            Log.ignore(e);
+                        }
+                    }
+                }
+
+
+                _idleTimeout.cancelAll();
+                _retryTimeout.cancelAll();
+                try
+                {
+                    if (_selector != null)
+                        _selector.close();
+                }
+                catch (IOException e)
+                {
+                    Log.ignore(e);
+                } 
+                _selector=null;
             }
-            catch (IOException e)
-            {
-                Log.ignore(e);
-            } 
-            _selector=null;
-
         }
     }
 }
