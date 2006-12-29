@@ -122,10 +122,10 @@ public class ResponseTest extends TestCase
         context.addLocaleEncoding(Locale.ITALIAN.toString(),"ISO-8859-2");
         request.setContext(context.getServletContext());
 
-        response.setLocale(java.util.Locale.ENGLISH);
-        assertEquals("application/octet-stream; charset=ISO-8859-1",response.getContentType());
+        response.setLocale(java.util.Locale.ITALIAN);
+        assertEquals(null,response.getContentType());
         response.setContentType("text/plain");
-        assertEquals("text/plain; charset=iso-8859-1",response.getContentType());
+        assertEquals("text/plain; charset=ISO-8859-2",response.getContentType());
 
         response.recycle();
         response.setContentType("text/plain");
@@ -133,7 +133,6 @@ public class ResponseTest extends TestCase
         response.setLocale(java.util.Locale.ITALIAN);
         assertEquals("text/plain; charset=utf-8",response.getContentType());
         assertTrue(response.toString().indexOf("charset=utf-8")>0);
-        
     }
     
     public void testContentTypeCharacterEncoding()
