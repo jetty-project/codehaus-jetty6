@@ -1,6 +1,7 @@
 
 jetty-6.1-SNAPSHOT
  + JETTY-195 fixed ajp ssl_cert handling
+ + JETTY-203 initialize ServletHandler if no Context instance
  + JETTY-205 setuid fix
 
 jetty-6.1.0rc2 - 20 December 2006

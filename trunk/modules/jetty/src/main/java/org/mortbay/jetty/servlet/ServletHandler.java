@@ -147,7 +147,7 @@ public class ServletHandler extends AbstractHandler
 
         super.doStart();
         
-        if (_contextHandler==null)
+        if (_contextHandler==null || !(_contextHandler instanceof Context))
             initialize();
     }   
     
