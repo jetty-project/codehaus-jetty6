@@ -5,6 +5,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-205 setuid fix
  + setLocale does not use default content type
  + Use standard releases of servlet and jsp APIs.
+ + implement resource injection and lifecycle callbacks declared in web.xml
 
 jetty-6.1.0rc2 - 20 December 2006
  + AJP13Parser, throw IllegalStateException on unimplemented AJP13 Requests
