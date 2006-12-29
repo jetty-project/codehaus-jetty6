@@ -110,12 +110,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     private EventListener[] _eventListeners;
     private Logger _logger;
     private boolean _shutdown;
+    private int _maxFormContentSize=Integer.getInteger("org.mortbay.jetty.Request.maxFormContentSize",200000).intValue();;
 
     private Object _contextListeners;
     private Object _contextAttributeListeners;
     private Object _requestListeners;
     private Object _requestAttributeListeners;
-    
     
     /* ------------------------------------------------------------ */
     /**
@@ -183,6 +183,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         }
         else
             super.setServer(server); 
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -937,6 +938,19 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             getServer().getContainer().update(this, _errorHandler, errorHandler, "errorHandler",true);
         _errorHandler = errorHandler;
     }
+    
+    /* ------------------------------------------------------------ */
+    public int getMaxFormContentSize()
+    {
+        return _maxFormContentSize;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setMaxFormContentSize(int maxSize)
+    {
+        _maxFormContentSize=maxSize;
+    }
+
 
     /* ------------------------------------------------------------ */
     public String toString()
