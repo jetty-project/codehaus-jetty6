@@ -475,6 +475,10 @@ public abstract class AbstractGenerator implements Generator
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** Output.
+     * 
+     * <p>
+     * Implements  {@link javax.servlet.ServletOutputStream} from the {@link javax.servlet} package.   
+     * </p>
      * A {@link ServletOutputStream} implementation that writes content
      * to a {@link AbstractGenerator}.   The class is designed to be reused
      * and can be reopened after a close.

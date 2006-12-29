@@ -1062,6 +1062,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     
     /* ------------------------------------------------------------ */
     /** Context.
+     * <p>
+     * Implements {@link javax.servlet.ServletContext} from the {@link javax.servlet} package.   
+     * </p>
      * @author gregw
      *
      */
