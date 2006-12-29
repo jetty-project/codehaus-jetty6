@@ -35,7 +35,7 @@ import org.mortbay.naming.NamingUtil;
 public class Configuration extends AbstractConfiguration
 {
 
-    private Integer key;
+    private Integer _key;
     
     /** 
      * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#bindEnvEntry(java.lang.String, java.lang.String)
@@ -68,17 +68,20 @@ public class Configuration extends AbstractConfiguration
      * @param name
      * @throws Exception
      */
-    public void bindResourceRef(String name) throws Exception
+    public void bindResourceRef(String name, Class typeClass)
+    throws Exception
     {
         
         Resource resource = Resource.getResource(NamingEntry.SCOPE_LOCAL, name);
+        
         if (resource != null)
             return; //already bound the locally scoped resource of that name
         
         resource = Resource.getResource(NamingEntry.SCOPE_GLOBAL, name);
         if (resource != null)
         {
-            //no locally scoped overrides, so bind the global one
+            //no locally scoped overrides, so bind the global one, if the
+            //TODO: check type is appropriate
             resource.bindToEnv();
             Log.debug("Bound resourceref java:comp/env/"+name);
         }
@@ -93,7 +96,8 @@ public class Configuration extends AbstractConfiguration
      * @param name
      * @throws Exception
      */
-    public void bindResourceEnvRef(String name) throws Exception
+    public void bindResourceEnvRef(String name, Class typeClass)
+    throws Exception
     {
         
         Resource resource = Resource.getResource(NamingEntry.SCOPE_LOCAL, name);
@@ -109,7 +113,25 @@ public class Configuration extends AbstractConfiguration
             Log.warn("No resource to bind matching name="+name);
     }
     
-    public void bindUserTransaction () throws Exception
+    
+    public void bindMessageDestinationRef(String name, Class typeClass)
+    throws Exception
+    {
+        Resource resource = Resource.getResource(NamingEntry.SCOPE_LOCAL, name);
+        if (resource != null)
+            return; //already bound
+        resource = Resource.getResource(NamingEntry.SCOPE_GLOBAL, name);
+        if (resource != null)
+        {
+            resource.bindToEnv();
+            Log.debug("Bound message-destination-ref java:comp/env/"+name);
+        }
+        else
+            Log.warn("No resource to bind matching name="+name);
+    }
+    
+    public void bindUserTransaction ()
+    throws Exception
     {
         Transaction transaction = Transaction.getTransaction (NamingEntry.SCOPE_LOCAL);
         if (transaction != null)
@@ -166,10 +188,10 @@ public class Configuration extends AbstractConfiguration
     throws Exception
     {
         Random random = new Random ();
-        key = new Integer(random.nextInt());
+        _key = new Integer(random.nextInt());
         Context context = new InitialContext();
         Context compCtx = (Context)context.lookup("java:comp");
-        compCtx.addToEnvironment("org.mortbay.jndi.lock", key);
+        compCtx.addToEnvironment("org.mortbay.jndi.lock", _key);
     }
     
     protected void unlockCompEnv ()
@@ -177,6 +199,6 @@ public class Configuration extends AbstractConfiguration
     {
         Context context = new InitialContext();
         Context compCtx = (Context)context.lookup("java:comp");
-        compCtx.addToEnvironment("org.mortbay.jndi.unlock", key);        
+        compCtx.addToEnvironment("org.mortbay.jndi.unlock", _key);        
     }
 }
