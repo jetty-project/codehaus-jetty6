@@ -418,11 +418,11 @@ public class Ajp13Parser implements Parser
                     break;
 
                 case Ajp13RequestHeaders.SSL_CERT_ATTR:
-                    _handler.parsedRequestAttribute("javax.servlet.request.cipher_suite", Ajp13RequestPacket.getString(_buffer, _tok1));
+                    _handler.parsedRequestAttribute("javax.servlet.request.X509Certificate", Ajp13RequestPacket.getString(_buffer, _tok1));
                     break;
 
                 case Ajp13RequestHeaders.SSL_CIPHER_ATTR:
-                    // XXX Implement! Investigate
+                    _handler.parsedRequestAttribute("javax.servlet.request.cipher_suite", Ajp13RequestPacket.getString(_buffer, _tok1));
                     // SslSocketConnector.customize()
                     break;
 
