@@ -1,16 +1,22 @@
 package org.mortbay.jetty.servlet;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -104,9 +110,6 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
         
         // TODO - maybe put the Element as a transient in the Session
         // instance, so it can be used for last access times, isValid etc.
-        
-        //add session to storage
-        _sessionStore.add(session.getClusterId(), session);
     }
 
     /* ------------------------------------------------------------ */
@@ -132,7 +135,8 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
 
         if(session != null)
         {
-            ((EHSession)session).setSessionCacheElement(sessionElement);
+            EHSession ehSession = (EHSession)session; 
+            ehSession.setSessionCacheElement(sessionElement);
         }            
 
         return session;
@@ -154,6 +158,11 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
     protected void removeSession(String idInCluster)
     {
         _sessionCache.remove(idInCluster);
+    }
+
+    public void complete(HttpSession session)
+    {
+        _sessionStore.add(((EHSession)session).getClusterId(), (EHSession)session);
     }
 
     /* ------------------------------------------------------------ */
@@ -179,7 +188,16 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
         {
             _sessionCacheElement = sessionCacheElement;
         }
-    }
+                
+        private void readObject(ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+        {
+            in.defaultReadObject();
+            _context = ContextHandler.getCurrentContext();
+        }
+
+
+}
 
     public interface Store
     {
@@ -238,7 +256,6 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
         hur.setName("Test Realm");
         hur.setConfig(jetty_home+"/etc/realm.properties");
         wah[0].getSecurityHandler().setUserRealm(hur);
-        // System.setProperty("DEBUG","true");
         
         server.start();
         server.join();
