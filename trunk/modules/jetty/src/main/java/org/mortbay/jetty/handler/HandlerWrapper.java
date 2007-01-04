@@ -69,8 +69,6 @@ public class HandlerWrapper extends AbstractHandlerContainer
             if (handler!=null)
             {
                 handler.setServer(getServer());
-                if (isStarted() && !handler.isStarted())
-                    handler.start();
             }
             
             _handler = handler;

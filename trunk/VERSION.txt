@@ -1,5 +1,7 @@
 
 jetty-6.1-SNAPSHOT
+ + Improved config of java5 threadpool
+ + Protect context deployer from Errors
 
 jetty-6.1.0rc3 - 2 Jan 2007
  + JETTY-195 fixed ajp ssl_cert handling
@@ -9,6 +11,7 @@ jetty-6.1.0rc3 - 2 Jan 2007
  + setLocale does not use default content type
  + Use standard releases of servlet and jsp APIs.
  + implement resource injection and lifecycle callbacks declared in web.xml
+ + extras/servlet-tester
 
 jetty-6.1.0rc2 - 20 December 2006
  + AJP13Parser, throw IllegalStateException on unimplemented AJP13 Requests
