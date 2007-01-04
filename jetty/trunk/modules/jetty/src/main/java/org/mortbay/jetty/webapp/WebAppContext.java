@@ -86,6 +86,7 @@ public class WebAppContext extends Context
     private String _overrideDescriptor=null;
     private boolean _distributable=false;
     private boolean _extractWAR=true;
+    private boolean _copyDir=false;
     private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
     private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c.", "org.apache.commons.logging.", "org.apache.log4j."};
@@ -766,6 +767,15 @@ public class WebAppContext extends Context
     {
         return _extractWAR;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if the webdir is copied (to allow hot replacement of jars)
+     */
+    public boolean isCopyWebDir()
+    {
+        return _copyDir;
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -840,56 +850,51 @@ public class WebAppContext extends Context
                 {
                     web_app= jarWebApp;
                     _war= web_app.toString();
-                    if (Log.isDebugEnabled())
-                        Log.debug(
-                            "Try webapp="
-                                + web_app
-                                + ", exists="
-                                + web_app.exists()
-                                + ", directory="
-                                + web_app.isDirectory());
                 }
             }
 
             // If we should extract or the URL is still not usable
-            if (web_app.exists()
-                && (!web_app.isDirectory()
-                    || (_extractWAR && web_app.getFile() == null)
-                    || (_extractWAR && web_app.getFile() != null && !web_app.getFile().isDirectory())))
+            if (web_app.exists()  && (
+               (_copyDir && web_app.getFile()!= null && web_app.getFile().isDirectory()) 
+               ||
+               (_extractWAR && web_app.getFile()!= null && !web_app.getFile().isDirectory())
+               ||
+               !web_app.isDirectory()
+               ))
             {
                 // Then extract it if necessary.
                 File extractedWebAppDir= new File(getTempDirectory(), "webapp");
                 
-                if (!extractedWebAppDir.exists())
+                if (web_app.getFile().isDirectory())
                 {
-                    //it hasn't been extracted before so extract it
-                    extractedWebAppDir.mkdir();
-                    Log.info("Extract " + _war + " to " + extractedWebAppDir);
-                    JarResource.extract(web_app, extractedWebAppDir, false);
+                    // Copy directory
+                    Log.info("Copy " + web_app.getFile() + " to " + extractedWebAppDir);
+                    IO.copyDir(web_app.getFile(),extractedWebAppDir);
                 }
                 else
                 {
-                    //only extract if the war file is newer
-                    if (web_app.lastModified() > extractedWebAppDir.lastModified())
+                    if (!extractedWebAppDir.exists())
                     {
-                        extractedWebAppDir.delete();
+                        //it hasn't been extracted before so extract it
                         extractedWebAppDir.mkdir();
                         Log.info("Extract " + _war + " to " + extractedWebAppDir);
                         JarResource.extract(web_app, extractedWebAppDir, false);
                     }
+                    else
+                    {
+                        //only extract if the war file is newer
+                        if (web_app.lastModified() > extractedWebAppDir.lastModified())
+                        {
+                            extractedWebAppDir.delete();
+                            extractedWebAppDir.mkdir();
+                            Log.info("Extract " + _war + " to " + extractedWebAppDir);
+                            JarResource.extract(web_app, extractedWebAppDir, false);
+                        }
+                    }
                 }
                 
-              
                 web_app= Resource.newResource(extractedWebAppDir.getCanonicalPath());
 
-                if (Log.isDebugEnabled())
-                    Log.debug(
-                        "Try webapp="
-                            + web_app
-                            + ", exists="
-                            + web_app.exists()
-                            + ", directory="
-                            + web_app.isDirectory());
             }
 
             // Now do we have something usable?
@@ -1011,11 +1016,21 @@ public class WebAppContext extends Context
     
     /* ------------------------------------------------------------ */
     /**
-     * @param extractWAR The extractWAR to set.
+     * @param extractWAR True if war files are extracted
      */
     public void setExtractWAR(boolean extractWAR)
     {
         _extractWAR = extractWAR;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * 
+     * @param copy True if the webdir is copied (to allow hot replacement of jars)
+     */
+    public void setCopyWebDir(boolean copy)
+    {
+        _copyDir = copy;
     }
 
     /* ------------------------------------------------------------ */

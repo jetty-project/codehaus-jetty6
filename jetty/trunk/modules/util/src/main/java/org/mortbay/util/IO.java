@@ -244,7 +244,45 @@ public class IO extends BoundedThreadPool
     }
 
     /* ------------------------------------------------------------ */
+    /** Copy files or directories
+     * @param from
+     * @param to
+     * @throws IOException
+     */
     public static void copy(File from,File to) throws IOException
+    {
+        if (from.isDirectory())
+            copyDir(from,to);
+        else
+            copyFile(from,to);
+    }
+
+    /* ------------------------------------------------------------ */
+    public static void copyDir(File from,File to) throws IOException
+    {
+        if (to.exists())
+        {
+            if (!to.isDirectory())
+                throw new IllegalArgumentException(to.toString());
+        }
+        else
+            to.mkdirs();
+        
+        File[] files = from.listFiles();
+        if (files!=null)
+        {
+            for (int i=0;i<files.length;i++)
+            {
+                String name = files[i].getName();
+                if (".".equals(name) || "..".equals(name))
+                    continue;
+                copy(files[i],new File(to,name));
+            }
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static void copyFile(File from,File to) throws IOException
     {
         FileInputStream in=new FileInputStream(from);
         FileOutputStream out=new FileOutputStream(to);
