@@ -364,6 +364,10 @@ public class Scanner implements Runnable
             {
                 Log.warn(e);
             }
+            catch (Error e)
+            {
+                Log.warn(e);
+            }
         }
     }
 
@@ -385,6 +389,10 @@ public class Scanner implements Runnable
             {
                 Log.warn(e);
             }
+            catch (Error e)
+            {
+                Log.warn(e);
+            }
         }
     }
 
@@ -403,6 +411,10 @@ public class Scanner implements Runnable
                 ((Listener)itor.next()).fileChanged(filename);
             }
             catch (Exception e)
+            {
+                Log.warn(e);
+            }
+            catch (Error e)
             {
                 Log.warn(e);
             }

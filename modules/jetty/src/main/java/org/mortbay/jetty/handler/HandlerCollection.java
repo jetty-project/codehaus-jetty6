@@ -72,15 +72,6 @@ public class HandlerCollection extends AbstractHandlerContainer
         {
             if (handlers[i].getServer()!=server)
                 handlers[i].setServer(server);
-            try
-            {
-                if (isStarted())
-                    handlers[i].start();
-            }
-            catch (Throwable e)
-            {
-                mex.add(e);
-            }
         }
 
         // quasi atomic.... so don't go doing this under load on a SMP system.

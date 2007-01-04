@@ -69,6 +69,12 @@ import org.mortbay.util.URIUtil;
  * This handler wraps a call to handle by setting the context and
  * servlet path, plus setting the context classloader.
  * 
+ * Note. Because of http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4425695
+ * directly replacing war or jar files in a context is not supported.
+ * You should use classes instead of jars if they will change, or deploy
+ * a packed war file that gets extracted on deployment.
+ * 
+ * 
  * @org.apache.xbean.XBean description="Creates a basic HTTP context"
  *
  * @author gregw
