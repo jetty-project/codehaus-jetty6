@@ -131,7 +131,9 @@ public class DefaultHandler extends AbstractHandler
                 if (context.getVirtualHosts()!=null && context.getVirtualHosts().length>0)
                     writer.write("http://"+context.getVirtualHosts()[0]+":"+request.getLocalPort());
                 writer.write(context.getContextPath());
-                writer.write("/\">");
+                if (context.getContextPath().length()>1 && context.getContextPath().endsWith("/"))
+                    writer.write("/");
+                writer.write("\">");
                 writer.write(context.getContextPath());
                 if (context.getVirtualHosts()!=null && context.getVirtualHosts().length>0)
                     writer.write("&nbsp;@&nbsp;"+context.getVirtualHosts()[0]+":"+request.getLocalPort());
