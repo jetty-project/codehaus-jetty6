@@ -97,7 +97,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    public Cookie access(HttpSession session)
+    public Cookie access(HttpSession session,boolean secure)
     {
         long now=System.currentTimeMillis();
 
@@ -111,8 +111,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             )
            )
         {
-            Cookie cookie=s.getCookie();
-            s.setCookie(cookie);
+            Cookie cookie=getSessionCookie(session,_context.getContextPath(),secure);
+            s.cookieSet();
             s.setIdChanged(false);
             return cookie;
         }
@@ -324,8 +324,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             if (_sessionPath!=null)
                 cookie.setPath(_sessionPath);
 
-            if (getMaxCookieAge()>0 || getIdManager().getWorkerName()!=null )
-                ((Session)session).setCookie(cookie);
             return cookie;
         }
         return null;
@@ -651,51 +649,58 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      */
     public abstract class Session implements HttpSession, Serializable
     {
-        String _clusterId;
-        String _id;
+        final String _clusterId;
+        final String _id;
         boolean _idChanged;
-        long _created;
+        final long _created;
         long _cookieSet;
         long _accessed;
-        boolean _invalid=false;
+        boolean _invalid;
         long _maxIdleMs=_dftMaxIdleSecs*1000;
-        boolean _newSession=true;
-        Cookie _cookie;
+        boolean _newSession;
         Map _values;
 
         /* ------------------------------------------------------------- */
         protected Session(HttpServletRequest request)
         {
-            _clusterId=_sessionIdManager.newSessionId(request,_created);
-            
-            String worker=request==null?null:(String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
-            if (worker!=null)
-                _id=_clusterId+'.'+worker;
-            else if (_sessionIdManager.getWorkerName()!=null)
-                _id=_clusterId+'.'+_sessionIdManager.getWorkerName();
-            else
-                _id=_clusterId;
-            
+            _newSession=true;
             _created=System.currentTimeMillis();
+            _clusterId=_sessionIdManager.newSessionId(request,_created);
+            _id=getId(request);
             _accessed=_created;
-            if (_dftMaxIdleSecs>=0)
-                _maxIdleMs=_dftMaxIdleSecs*1000;
         }
 
         /* ------------------------------------------------------------- */
-        protected Session(String id)
+        protected Session(long created, String clusterId)
         {
-            int dot=id.lastIndexOf('.');
-            if (dot>0)
-                id=id.substring(0,dot);
-            
-            _id=id;
-                 
-            _created=System.currentTimeMillis();
+            _created=created;
+            _clusterId=clusterId;
+            _id=getId(null);
             _accessed=_created;
-            _cookieSet=_created;
-            if (_dftMaxIdleSecs>=0)
-                _maxIdleMs=_dftMaxIdleSecs*1000;
+        }
+
+        /* ------------------------------------------------------------- */
+        protected void initValues() 
+        {
+            _values=newAttributeMap();
+        }
+
+        /* ------------------------------------------------------------ */
+        /** Get the session ID with any worker ID.
+         * 
+         * @param request
+         * @return sessionId plus any worker ID.
+         */
+        protected String getId(HttpServletRequest request) 
+        {
+            String worker=request==null?null:(String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
+            if (worker!=null) 
+                return _clusterId+'.'+worker; 
+            
+            if (_sessionIdManager.getWorkerName()!=null) 
+                return _clusterId+'.'+_sessionIdManager.getWorkerName();
+           
+            return _clusterId;
         }
 
         /* ------------------------------------------------------------ */
@@ -703,7 +708,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         {
             if (_invalid)
                 throw new IllegalStateException();
-            if (_values==null)
+            if (null == _values)
                 return null;
             return _values.get(name);
         }
@@ -976,12 +981,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             return _clusterId;
         }
 
-        /* ------------------------------------------------------------- */
-        protected Cookie getCookie()
-        {
-            return _cookie;
-        }
-
         /* ------------------------------------------------------------ */
         protected boolean isValid()
         {
@@ -992,10 +991,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         protected abstract Map newAttributeMap();
 
         /* ------------------------------------------------------------- */
-        protected void setCookie(Cookie cookie)
+        protected void cookieSet()
         {
             _cookieSet=_accessed;
-            _cookie=cookie;
         }
 
         /* ------------------------------------------------------------- */

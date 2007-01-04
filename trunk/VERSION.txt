@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
  + Improved config of java5 threadpool
  + Protect context deployer from Errors
  + Added WebAppContext.setCopyWebDir to avoid JVM jar caching issues.
+ + GERONIMO-2677 refactor of session id handling for clustering
 
 jetty-6.1.0rc3 - 2 Jan 2007
  + JETTY-195 fixed ajp ssl_cert handling
