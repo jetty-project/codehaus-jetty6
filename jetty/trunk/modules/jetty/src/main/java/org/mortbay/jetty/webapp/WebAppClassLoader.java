@@ -15,6 +15,7 @@
 package org.mortbay.jetty.webapp;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,14 +118,35 @@ public class WebAppClassLoader extends URLClassLoader implements Cloneable
             File file= resource.getFile();
             if (file != null)
             {
-                URL url= resource.getURL();
-                addURL(url);
+                if (file.isDirectory())
+                {
+                    URL url= resource.getURL();
+                    System.err.println("addClassPath dir "+file+" "+url+" "+resource);
+                    addURL(url);
+                }
+                else
+                {
+                    // assume a jar - so copy it!
+
+                    File jarcache=new File(_context.getTempDirectory(),"jarcache");
+                    if (!jarcache.exists())
+                        jarcache.mkdir();
+
+                    file.getName();
+                    File tmp_jar = File.createTempFile(file.getName(),".jar",jarcache);
+                    tmp_jar.deleteOnExit();
+
+                    System.err.println("COPY "+file+" to "+tmp_jar);
+                    IO.copy(file,tmp_jar);
+                    addURL(tmp_jar.toURL());
+                }
             }
             else
             {
                 // Add resource or expand jar/
                 if (!resource.isDirectory() && file == null)
                 {
+                    System.err.println("addClassPath resource "+resource);
                     InputStream in= resource.getInputStream();
                     File tmp_dir=_context.getTempDirectory();
                     if (tmp_dir==null)
@@ -160,6 +182,7 @@ public class WebAppClassLoader extends URLClassLoader implements Cloneable
                 }
                 else
                 {
+                    System.err.println("addClassPath url "+resource);
                     URL url= resource.getURL();
                     addURL(url);
                 }

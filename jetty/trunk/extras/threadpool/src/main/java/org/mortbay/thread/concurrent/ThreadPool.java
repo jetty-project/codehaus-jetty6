@@ -70,27 +70,32 @@ public class ThreadPool extends ThreadPoolExecutor implements org.mortbay.thread
     {
         super(corePoolSize,maximumPoolSize,keepAliveTime,unit,new LinkedBlockingQueue<Runnable>());
     }
-    
+
+    /* ------------------------------------------------------------ */
     public ThreadPool(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue)
     {
         super(corePoolSize,maximumPoolSize,keepAliveTime,unit,workQueue);
     }
 
+    /* ------------------------------------------------------------ */
     public ThreadPool(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler)
     {
         super(corePoolSize,maximumPoolSize,keepAliveTime,unit,workQueue,handler);
     }
 
+    /* ------------------------------------------------------------ */
     public ThreadPool(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)
     {
         super(corePoolSize,maximumPoolSize,keepAliveTime,unit,workQueue,threadFactory,handler);
     }
 
+    /* ------------------------------------------------------------ */
     public ThreadPool(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory)
     {
         super(corePoolSize,maximumPoolSize,keepAliveTime,unit,workQueue,threadFactory);
     }
 
+    /* ------------------------------------------------------------ */
     public boolean dispatch(Runnable job)
     {
         try
@@ -105,62 +110,74 @@ public class ThreadPool extends ThreadPoolExecutor implements org.mortbay.thread
         }
     }
 
+    /* ------------------------------------------------------------ */
     public int getIdleThreads()
     {
         return getPoolSize()-getActiveCount();
     }
 
+    /* ------------------------------------------------------------ */
     public int getThreads()
     {
         return getPoolSize();
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isLowOnThreads()
     {
         return getActiveCount()>=getMaximumPoolSize();
     }
 
+    /* ------------------------------------------------------------ */
     public void join() throws InterruptedException
     {
         this.awaitTermination(Long.MAX_VALUE,TimeUnit.MILLISECONDS);
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isFailed()
     {
         return false;
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isRunning()
     {
         return !isTerminated() && !isTerminating();
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isStarted()
     {
         return !isTerminated() && !isTerminating();
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isStarting()
     {
         return false;
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isStopped()
     {
         return isTerminated();
     }
 
+    /* ------------------------------------------------------------ */
     public boolean isStopping()
     {
         return isTerminating();
     }
 
+    /* ------------------------------------------------------------ */
     public void start() throws Exception
     {
         if (isTerminated() || isTerminating() || isShutdown())
             throw new IllegalStateException("Cannot restart");
     }
 
+    /* ------------------------------------------------------------ */
     public void stop() throws Exception
     {
         super.shutdown();

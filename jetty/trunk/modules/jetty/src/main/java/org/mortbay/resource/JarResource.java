@@ -38,10 +38,12 @@ public class JarResource extends URLResource
         super(url,null);
     }
 
+    /* ------------------------------------------------------------ */
     JarResource(URL url, boolean useCaches)
     {
         super(url, null, useCaches);
     }
+    
     /* ------------------------------------------------------------ */
     public synchronized void release()
     {
@@ -136,7 +138,6 @@ public class JarResource extends URLResource
         {
             String entryName = entry.getName();
            
-
             if ((subEntryName != null) && (entryName.startsWith(subEntryName)))
             { 
                 //if there is a particular subEntry that we are looking for, only

@@ -15,6 +15,8 @@
 package org.mortbay.util;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -241,6 +243,16 @@ public class IO extends BoundedThreadPool
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public static void copy(File from,File to) throws IOException
+    {
+        FileInputStream in=new FileInputStream(from);
+        FileOutputStream out=new FileOutputStream(to);
+        copy(in,out);
+        in.close();
+        out.close();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Read input stream to string.
      */
