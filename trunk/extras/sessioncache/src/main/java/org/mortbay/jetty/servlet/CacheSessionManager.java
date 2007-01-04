@@ -125,6 +125,7 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
             {
                 return null;
             }
+            ((EHSession)session).setServletContext(_context);
             sessionElement = new Element(session.getClusterId(), session);
             _sessionCache.put(sessionElement);
         }
@@ -162,7 +163,9 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
 
     public void complete(HttpSession session)
     {
-        _sessionStore.add(((EHSession)session).getClusterId(), (EHSession)session);
+        EHSession ehSession = (EHSession)session;
+        if (ehSession._dirty)
+            _sessionStore.add(ehSession.getClusterId(), (EHSession)session);
     }
 
     /* ------------------------------------------------------------ */
@@ -170,6 +173,7 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
     /* ------------------------------------------------------------ */
     protected class EHSession extends AbstractSessionManager.Session
     {
+        private boolean _dirty = false;
         transient Element _sessionCacheElement;
         
         /* ------------------------------------------------------------- */
@@ -189,15 +193,23 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
             _sessionCacheElement = sessionCacheElement;
         }
                 
-        private void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException
+        private void setServletContext(ContextHandler.SContext context)
         {
-            in.defaultReadObject();
-            _context = ContextHandler.getCurrentContext();
+            _context = context;
         }
 
-
-}
+        private void readObject(ObjectInputStream in)
+        throws ClassNotFoundException, IOException 
+        {
+            in.defaultReadObject();
+            _dirty = false;
+        }
+        public synchronized void setAttribute(String name, Object value)
+        {
+            super.setAttribute(name, value);
+            _dirty = true;
+        }
+    }
 
     public interface Store
     {
