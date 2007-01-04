@@ -88,10 +88,10 @@ public class SessionManagerTest extends TestCase
             assertTrue(sessionManager.getSessionCookie(session,"/context",false)!=null);
             
             assertEquals(session,sessionManager.getHttpSession(session.getId()));
-            assertTrue(sessionManager.access(session)==null);
+            assertTrue(sessionManager.access(session,false)==null);
             
             assertEquals(session,sessionManager.getHttpSession(id1));
-            assertTrue(sessionManager.access(session)!=null);
+            assertTrue(sessionManager.access(session,false)!=null);
             
         }
         finally

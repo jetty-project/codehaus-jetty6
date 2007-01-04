@@ -154,7 +154,7 @@ public interface SessionManager extends LifeCycle
      * @return Cookie If non null, this cookie should be set on the response to either migrate 
      * the session or to refresh a cookie that may expire.
      */
-    public Cookie access(HttpSession session);
+    public Cookie access(HttpSession session,boolean secure);
     
     /* ------------------------------------------------------------ */
     /** Called by the {@link SessionHandler} when a reqeuest is not longer 

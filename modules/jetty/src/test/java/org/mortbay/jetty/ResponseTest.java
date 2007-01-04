@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSessionContext;
 
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
+import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.HashSessionManager;
 import java.util.Locale;
 
@@ -318,6 +319,7 @@ public class ResponseTest extends TestCase
         request.setRequestedSessionId("12345");
         request.setRequestedSessionIdFromCookie(false);
         AbstractSessionManager manager=new HashSessionManager();
+        manager.setIdManager(new HashSessionIdManager());
         request.setSessionManager(manager);
         request.setSession(new TestSession(manager,"12345"));
         
@@ -356,7 +358,7 @@ public class ResponseTest extends TestCase
     {
         public TestSession(AbstractSessionManager abstractSessionManager, String id)
         {
-            abstractSessionManager.super(id);
+            abstractSessionManager.super(System.currentTimeMillis(), id);
         }
 
         public Object getAttribute(String name) 

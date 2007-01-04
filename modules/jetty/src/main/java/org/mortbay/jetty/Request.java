@@ -50,6 +50,7 @@ import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
