@@ -13,6 +13,7 @@ import org.mortbay.io.View;
 import org.mortbay.io.bio.StringEndPoint;
 import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpGenerator;
+import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.util.ByteArrayOutputStream2;
@@ -356,9 +357,17 @@ public class HttpTester
     public void setContent(String content)
     {
         _parsedContent=null;
-        _genContent=content.getBytes();
+        if (content!=null)
+        {
+            _genContent=content.getBytes();
+            setLongHeader(HttpHeaders.CONTENT_LENGTH,_genContent.length);
+        }
+        else
+        {
+            removeHeader(HttpHeaders.CONTENT_LENGTH);
+            _genContent=null;
+        }
     }
-    
 
     /* ------------------------------------------------------------ */
     private class PH extends HttpParser.EventHandler

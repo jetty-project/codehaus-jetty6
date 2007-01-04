@@ -11,6 +11,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
+import org.mortbay.util.IO;
 
 public class ServletTest extends TestCase
 {
@@ -65,17 +66,30 @@ public class ServletTest extends TestCase
         // generated and parsed test
         HttpTester request = new HttpTester();
         HttpTester response = new HttpTester();
+        
+        // test GET
         request.setMethod("GET");
+        request.setVersion("HTTP/1.0");
         request.setHeader("Host","tester");
         request.setURI("/context/hello/info");
-        request.setVersion("HTTP/1.0");
         response.parse(tester.getResponses(request.generate()));
         assertTrue(response.getMethod()==null);
         assertEquals(200,response.getStatus());
         assertEquals("<h1>Hello Servlet</h1>",response.getContent());
+
+        // test GET with content
+        request.setMethod("POST");
+        request.setContent("<pre>Some Test Content</pre>");
+        request.setHeader("Content-Type","text/html");
+        response.parse(tester.getResponses(request.generate()));
+        assertTrue(response.getMethod()==null);
+        assertEquals(200,response.getStatus());
+        assertEquals("<h1>Hello Servlet</h1><pre>Some Test Content</pre>",response.getContent());
         
         // test redirection
+        request.setMethod("GET");
         request.setURI("/context");
+        request.setContent(null);
         response.parse(tester.getResponses(request.generate()));
         assertEquals(302,response.getStatus());
         assertEquals("http://tester/context/",response.getHeader("location"));
@@ -92,10 +106,16 @@ public class ServletTest extends TestCase
     {
         private static final long serialVersionUID=2779906630657190712L;
 
+        protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+        {
+            doGet(request,response);
+        }
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
         {
             response.setContentType("text/html");
             response.getWriter().print("<h1>Hello Servlet</h1>");
+            if (request.getContentLength()>0)
+                response.getWriter().write(IO.toString(request.getInputStream()));
         }
     }
     
