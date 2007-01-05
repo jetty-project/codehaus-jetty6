@@ -32,6 +32,7 @@ public class Utf8StringBuffer
     StringBuffer _buffer;
     int _more;
     int _bits;
+    boolean _errors;
     
     Utf8StringBuffer()
     {
@@ -110,6 +111,7 @@ public class Utf8StringBuffer
                 _buffer.append('?');
                 _more=0;
                 _bits=0;
+                _errors=true;
             }
             else
             {
@@ -131,6 +133,7 @@ public class Utf8StringBuffer
         _buffer.setLength(0);
         _more=0;
         _bits=0;
+        _errors=false;
     }
     
     public StringBuffer getStringBuffer()
@@ -141,5 +144,14 @@ public class Utf8StringBuffer
     public String toString()
     {
         return _buffer.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if there are non UTF-8 characters or incomplete UTF-8 characters in the buffer.
+     */
+    public boolean isError()
+    {
+        return _errors || _more>0;
     }
 }
