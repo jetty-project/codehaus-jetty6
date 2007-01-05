@@ -2,6 +2,11 @@
 
 This is the Jetty 6 HTTP server and servlet container.
 
+For more information about Jetty, please see the Jetty wiki: 
+
+   http://docs.codehaus.org/display/JETTY/
+
+
 RUNNING JETTY
 =============
 From the release, you can run the server with:
