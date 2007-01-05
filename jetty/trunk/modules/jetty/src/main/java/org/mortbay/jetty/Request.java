@@ -865,7 +865,8 @@ public class Request implements HttpServletRequest
      * @see javax.servlet.ServletRequest#getServerName()
      */
     public String getServerName()
-    {        // Return already determined host
+    {       
+        // Return already determined host
         if (_serverName != null) 
             return _serverName;
 
@@ -1302,6 +1303,15 @@ public class Request implements HttpServletRequest
     public void setServerName(String host)
     {
         _serverName = host;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param host The host to set.
+     */
+    public void setServerPort(int port)
+    {
+        _port = port;
     }
     
     /* ------------------------------------------------------------ */
