@@ -1220,7 +1220,6 @@ public class Request implements HttpServletRequest
         _paramsExtracted = true;
 
         // Handle query string
-        String encoding = getCharacterEncoding();
         if (_uri!=null && _uri.getQuery()!=null)
         {
             try
@@ -1237,6 +1236,7 @@ public class Request implements HttpServletRequest
         }
 
         // handle any _content.
+        String encoding = getCharacterEncoding();
         String content_type = getContentType();
         if (content_type != null && content_type.length() > 0)
         {
