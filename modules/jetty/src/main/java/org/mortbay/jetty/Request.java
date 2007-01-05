@@ -1145,6 +1145,10 @@ public class Request implements HttpServletRequest
 
     /* ------------------------------------------------------------ */
     /* 
+     * Set a request attribute.
+     * if the attribute name is "org.mortbay.jetty.Request.queryEncoding" then
+     * the value is also passed in a call to {@link #setQueryEncoding}.
+     * 
      * @see javax.servlet.ServletRequest#setAttribute(java.lang.String, java.lang.Object)
      */
     public void setAttribute(String name, Object value)
