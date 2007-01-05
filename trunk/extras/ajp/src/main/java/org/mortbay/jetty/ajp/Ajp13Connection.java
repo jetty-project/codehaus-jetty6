@@ -135,7 +135,7 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedServerPort(int port) throws IOException
         {
-            ((Ajp13Request) _request).setRemotePort(port);
+            ((Ajp13Request) _request).setServerPort(port);
         }
 
         public void parsedSslSecure(boolean secure) throws IOException
