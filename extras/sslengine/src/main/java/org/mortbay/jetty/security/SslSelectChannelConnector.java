@@ -197,7 +197,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     /* ------------------------------------------------------------ */
     public SslSelectChannelConnector()
     {
-        Log.warn("The SslSelectChannelConnector is pre-ALPHA work in progress!!!!");
+        Log.info("The SslSelectChannelConnector is a BETA quality release");
         setHeaderBufferSize(32768);
         setRequestBufferSize(65536);
     }
