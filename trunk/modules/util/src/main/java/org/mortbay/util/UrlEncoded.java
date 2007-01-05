@@ -304,17 +304,6 @@ public class UrlEncoded extends MultiMap
             }
         }
     }
-
-    /* -------------------------------------------------------------- */
-    /** Decoded parameters to Map.
-     * @param in InputSteam to read
-     * @param map MultiMap to add parameters to
-     */
-    public static void decodeUtf8To(InputStream in, MultiMap map)
-    throws IOException
-    {
-        decodeUtf8To(in,map,-1);
-    }
     
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
@@ -394,16 +383,6 @@ public class UrlEncoded extends MultiMap
                 map.add(buffer.toString(), "");
             }
         }
-    }
-
-    /* -------------------------------------------------------------- */
-    /** Decoded parameters to Map.
-     * @param in the stream containing the encoded parameters
-     */
-    public static void decodeTo(InputStream in, MultiMap map, String charset)
-    throws IOException
-    {
-        decodeTo(in,map,charset,-1);
     }
     
     /* -------------------------------------------------------------- */
@@ -505,27 +484,6 @@ public class UrlEncoded extends MultiMap
         }
     }
     
-    /* -------------------------------------------------------------- */
-    /** Decode String with % encoding.
-     * This method makes the assumption that the majority of calls
-     * will need no decoding and uses the 8859 encoding.
-     */
-    public static String decodeString(String encoded)
-    {
-        return decodeString(encoded,0,encoded.length(),StringUtil.__UTF8);
-    }
-    
-    /* -------------------------------------------------------------- */
-    /** Decode String with % encoding.
-     * This method makes the assumption that the majority of calls
-     * will need no decoding.
-     */
-    public static String decodeString(String encoded,String charset)
-    {
-        return decodeString(encoded,0,encoded.length(),charset);
-    }
-    
-            
     /* -------------------------------------------------------------- */
     /** Decode String with % encoding.
      * This method makes the assumption that the majority of calls
