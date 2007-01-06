@@ -1,5 +1,7 @@
 
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.0 - 5 Jan 2007
  + Improved config of java5 threadpool
  + Protect context deployer from Errors
  + Added WebAppContext.setCopyWebDir to avoid JVM jar caching issues.
@@ -64,11 +66,6 @@ jetty-6.1.0rc0 - 8 December 2006
  + Added spring ejb3 demo example
  + update jasper to glassfish SJSAS-9_1-B27-EA-07_Dec_2006
  + fixed JETTY-185 tmp filename generation
-
-jetty-6.0-SNAPSHOT
- + JETTY-182 Optionally set JSP classpath initparameter
- + Dispatcher does not protect javax.servlet attributes
- + Fixed cachesize on invalidate
 
 jetty-6.1.0pre3 - 22 November 2006
  + fixed NIO endpoint flush. Avoid duplicate sends
