@@ -29,6 +29,7 @@
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
+         
           <execution>
             <id>copyfiles</id>
             <phase>install</phase>
@@ -37,17 +38,14 @@
             </goals>
             <configuration>
               <tasks>
-                <get src="${serviceWrapperURL}/wrapper-windows-x86-32-${serviceWrapperVersion}.zip" dest="target/wrapper-windows-x86-32-${serviceWrapperVersion}.zip" />
-                <unzip src="target/wrapper-windows-x86-32-${serviceWrapperVersion}.zip" dest="target/unziped" />
-                <copy failonerror="true" file="target/unziped/wrapper-windows-x86-32-${serviceWrapperVersion}/bin/wrapper.exe" tofile="../../bin/Jetty-Service.exe" />
-                <copy failonerror="true" file="target/unziped/wrapper-windows-x86-32-${serviceWrapperVersion}/lib/wrapper.jar" todir="../../lib/win32" />
-                <copy failonerror="true" file="target/unziped/wrapper-windows-x86-32-${serviceWrapperVersion}/lib/wrapper.dll" todir="../../lib/win32" />
-                
-                <copy failonerror="true" file="target/${project.artifactId}-${project.version}.${project.packaging}" todir="../../lib/win32" />
-                <copy failonerror="true" file="src/main/resources/jetty-win32-service.xml" todir="../../etc" />
-                <copy failonerror="true" file="src/main/resources/jetty-service.conf" todir="../../bin" />
-                
-                
+                <ant antfile="anttasks.xml" target="deploy-win32-wrapper">
+                    <property name="serviceWrapperURL" value="${serviceWrapperURL}" />
+                    <property name="serviceWrapperVersion" value="${serviceWrapperVersion}" />
+                    <property name="project.packaging" value="${project.packaging}" />
+                    <property name="project.groupId" value="${project.groupId}" />
+                    <property name="project.artifactId" value="${project.artifactId}" />
+                    <property name="project.version" value="${project.version}" />
+                </ant>
               </tasks>
             </configuration>
           </execution>
@@ -59,14 +57,14 @@
             </goals>
             <configuration>
               <tasks>
-                <delete failonerror="false" file="target/wrapper-windows-x86-${serviceWrapperVersion}.zip"/>
-                <delete failonerror="false" file="target/unziped"/>
-                <delete failonerror="false" file="../../lib/win32/${project.artifactId}-${project.version}.${project.packaging}"/>
-                <delete failonerror="false" file="../../etc/jetty-win32-service.xml"/>
-                <delete failonerror="false" file="../../bin/Jetty-Service.exe"/>
-                <delete failonerror="false" file="../../bin/jetty-service.conf"/>
-                <delete failonerror="false" file="../../lib/win32/wrapper.jar"/>
-                <delete failonerror="false" file="../../lib/win32/wrapper.dll"/>
+                <ant antfile="anttasks.xml" target="clean-win32-wrapper">
+                    <property name="serviceWrapperURL" value="${serviceWrapperURL}" />
+                    <property name="serviceWrapperVersion" value="${serviceWrapperVersion}" />
+                    <property name="project.packaging" value="${project.packaging}" />
+                    <property name="project.groupId" value="${project.groupId}" />
+                    <property name="project.artifactId" value="${project.artifactId}" />
+                    <property name="project.version" value="${project.version}" />
+                </ant>
                 
               </tasks>
             </configuration>
@@ -102,12 +100,12 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    
     <dependency>
       <groupId>tanukisoft</groupId>
       <artifactId>wrapper</artifactId>
       <version>3.2.0</version>
     </dependency>
+    
     
   </dependencies>
    <properties>
