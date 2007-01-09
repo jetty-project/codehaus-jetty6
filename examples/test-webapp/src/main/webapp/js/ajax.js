@@ -43,7 +43,7 @@ var ajax =
                 {
                   handler(child);
                 }
-        	      }
+              }
             }
           }
         }
@@ -51,7 +51,7 @@ var ajax =
     }
     catch(e)
     {
-      alert(e);
+      alert(e.name + ": " + e.message);
     }
     ajax._queueMessages=qm;
     
@@ -75,7 +75,7 @@ var ajax =
     }
     catch(e)
     {
-        alert(e);
+      alert(e.name + ": " + e.message);
     }
     
     ajax._queueMessages=false;
