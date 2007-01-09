@@ -859,13 +859,15 @@ public class WebAppContext extends Context
                ||
                (_extractWAR && web_app.getFile()!= null && !web_app.getFile().isDirectory())
                ||
+               (_extractWAR && web_app.getFile() == null)
+               ||
                !web_app.isDirectory()
                ))
             {
                 // Then extract it if necessary.
                 File extractedWebAppDir= new File(getTempDirectory(), "webapp");
                 
-                if (web_app.getFile().isDirectory())
+                if (web_app.getFile()!=null && web_app.getFile().isDirectory())
                 {
                     // Copy directory
                     Log.info("Copy " + web_app.getFile() + " to " + extractedWebAppDir);
