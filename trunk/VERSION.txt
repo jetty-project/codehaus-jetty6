@@ -1,8 +1,11 @@
 
 jetty-6.1-SNAPSHOT
+ + Build servlet-api-2.5 for java 1.4
  + Fixed unpacking WAR
  + extras/win32service download only if no JavaServiceWrapper exist
 
+jetty-6.1.0 - 9 Jan 2007
+ + Fixed unpacking WAR
 jetty-6.1.0 - 5 Jan 2007
  + Improved config of java5 threadpool
  + Protect context deployer from Errors
