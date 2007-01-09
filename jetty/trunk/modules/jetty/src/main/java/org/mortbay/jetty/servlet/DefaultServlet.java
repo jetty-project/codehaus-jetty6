@@ -834,7 +834,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 Resource resource=content.getResource();
                 long length=resource.length();
                 
-                if (_useFileMappedBuffer) 
+                if (_useFileMappedBuffer && resource.getFile()!=null) 
                 {    
                     File file = resource.getFile();
                     if (file != null) 
@@ -842,7 +842,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 } 
                 else 
                 {
-                    FileInputStream fis = new FileInputStream(resource.getFile());
+                    InputStream is = resource.getInputStream();
                     try
                     {
                         buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
@@ -853,8 +853,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                         Log.debug(e);
                         buffer = new NIOBuffer((int) length, NIOBuffer.INDIRECT);
                     }
-                    buffer.readFrom(fis,(int)length);
-                    fis.close();
+                    buffer.readFrom(is,(int)length);
+                    is.close();
                 }
                 content.setBuffer(buffer);
             } 
