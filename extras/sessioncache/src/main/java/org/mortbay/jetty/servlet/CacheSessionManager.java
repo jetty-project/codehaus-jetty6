@@ -159,6 +159,7 @@ public class CacheSessionManager extends AbstractSessionManager implements Seria
     protected void removeSession(String idInCluster)
     {
         _sessionCache.remove(idInCluster);
+        _sessionStore.remove(idInCluster);
     }
 
     public void complete(HttpSession session)
