@@ -55,11 +55,15 @@ var room =
          from+=":";
      }
      
-     if (special=='true')
-       chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span></span><br/>";
-     else
-       chat.innerHTML += "<span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span><br/>";
-     chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
+     if(chat != null)
+     {
+         if (special=='true')
+           chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span></span><br/>";
+         else
+           chat.innerHTML += "<span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span><br/>";
+         chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
+     }
+     
   },
    
   _members: function(message)
