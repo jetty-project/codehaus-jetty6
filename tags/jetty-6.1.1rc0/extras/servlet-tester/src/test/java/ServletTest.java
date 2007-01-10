@@ -1,6 +1,7 @@
 
 
 import java.io.IOException;
+import java.net.URL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,54 +16,73 @@ import org.mortbay.util.IO;
 
 public class ServletTest extends TestCase
 {
-    public void testServletTester() throws Exception
+    ServletTester tester;
+    
+    
+    /* ------------------------------------------------------------ */
+    protected void setUp() throws Exception
     {
-        // Setup test context
-        ServletTester tester=new ServletTester();
+        super.setUp();
+        tester=new ServletTester();
         tester.setContextPath("/context");
         tester.addServlet(TestServlet.class, "/servlet/*");
-        tester.addServlet(HelloServlet.class, "/hello");
+        tester.addServlet(HelloServlet.class, "/hello/*");
         tester.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");
         tester.start();
-        
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void tearDown() throws Exception
+    {
+        tester.stop();
+        tester=null;
+        super.tearDown();
+    }
+
+    /* ------------------------------------------------------------ */
+    public void testServletTesterRaw() throws Exception
+    {
         // Raw HTTP test requests
         String requests=
             "GET /context/servlet/info?query=foo HTTP/1.1\r\n"+
             "Host: tester\r\n"+
             "\r\n"+
-            
+
             "GET /context/hello HTTP/1.1\r\n"+
             "Host: tester\r\n"+
             "\r\n";
-            
+
         String responses = tester.getResponses(requests);
-        
+
         String expected=
             "HTTP/1.1 200 OK\r\n"+
             "Content-Type: text/html; charset=iso-8859-1\r\n"+
             "Content-Length: 21\r\n"+
             "\r\n"+
             "<h1>Test Servlet</h1>" +
-            
+
             "HTTP/1.1 200 OK\r\n"+
             "Content-Type: text/html; charset=iso-8859-1\r\n"+
             "Content-Length: 22\r\n"+
             "\r\n"+
             "<h1>Hello Servlet</h1>";
-            
-           
+
         assertEquals(expected,responses);
     }
 
+    /* ------------------------------------------------------------ */
+    public void testServletTesterClient() throws Exception
+    {
+        String base_url=tester.createSocketConnector(true);
+        
+        URL url = new URL(base_url+"/context/hello/info");
+        String result = IO.toString(url.openStream());
+        assertEquals("<h1>Hello Servlet</h1>",result);
+    }
+
+    /* ------------------------------------------------------------ */
     public void testHttpTester() throws Exception
     {
-        // Setup test context
-        ServletTester tester=new ServletTester();
-        tester.setContextPath("/context");
-        tester.addServlet(HelloServlet.class, "/hello/*");
-        tester.addServlet("org.mortbay.jetty.servlet.DefaultServlet", "/");
-        tester.start();
-        
         // generated and parsed test
         HttpTester request = new HttpTester();
         HttpTester response = new HttpTester();
@@ -101,7 +121,8 @@ public class ServletTest extends TestCase
         
     }
 
-    
+
+    /* ------------------------------------------------------------ */
     public static class HelloServlet extends HttpServlet
     {
         private static final long serialVersionUID=2779906630657190712L;
