@@ -34,7 +34,8 @@ var ajax =
     		}
     		catch(e)
     		{
-    			alert(e.name+" "+e.message);
+    		    window.status="ERROR: xhr "+e.name + ": " + e.message;
+    			// alert(e.name+" "+e.message);
     		}
     	}
     }
@@ -92,7 +93,8 @@ var ajax =
     }
     catch(e)
     {
-      alert(e.name + ": " + e.message);
+    	window.status="ERROR: _messageHandler "+e.name + ": " + e.message;
+      // alert(e.name + ": " + e.message);
     }
     ajax._queueMessages=qm;
     
@@ -121,7 +123,8 @@ var ajax =
     }
     catch(e)
     {
-      alert(e.name + ": " + e.message);
+    	window.status="ERROR: pollHandler "+e.name + ": " + e.message;
+      // alert(e.name + ": " + e.message);
     }
     
     ajax._queueMessages=false;
