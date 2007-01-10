@@ -68,7 +68,7 @@ public class JBossWebAppContext extends J2EEWebAppContext
         //very important - establish the classloader now, as it is the one
         //that is being used for the performDeploy step
         ClassLoader loader=Thread.currentThread().getContextClassLoader();
-        if(getDistributable()&&getDistributableSessionManager()!=null)
+        if(isDistributable()&&getDistributableSessionManager()!=null)
             setUpDistributableSessionManager(loader);  
         
         setClassLoader(new WebAppClassLoader(loader, this));
