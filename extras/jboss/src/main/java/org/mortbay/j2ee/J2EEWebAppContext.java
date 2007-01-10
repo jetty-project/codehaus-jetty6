@@ -31,7 +31,7 @@ public class J2EEWebAppContext extends WebAppContext
     // ----------------------------------------------------------------------------
     // DistributedHttpSession support
     // ----------------------------------------------------------------------------
-    protected boolean _distributable = false;
+
 
     protected Manager _distributableSessionManager;
 
@@ -43,19 +43,6 @@ public class J2EEWebAppContext extends WebAppContext
         super(securityHandler, sessionHandler, servletHandler, errorHandler);
     }
 
-    // ----------------------------------------------------------------------------
-    public boolean getDistributable()
-    {
-        return _distributable;
-    }
-
-    // ----------------------------------------------------------------------------
-    public void setDistributable(boolean distributable)
-    {
-        if (_log.isDebugEnabled())
-            _log.debug("setDistributable " + distributable);
-        _distributable = distributable;
-    }
 
     // ----------------------------------------------------------------------------
     public void setDistributableSessionManager(Manager manager)
