@@ -14,6 +14,9 @@
 
 package org.mortbay.jetty;
 
+import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
+
 /* ------------------------------------------------------------------------------- */
 /** 
  * 
@@ -24,4 +27,8 @@ public class HttpSchemes
     public final static String
         HTTP ="http",
         HTTPS="https";
+    
+    public final static Buffer
+        HTTP_BUFFER = new ByteArrayBuffer(HTTP),
+        HTTPS_BUFFER = new ByteArrayBuffer(HTTPS);
 }
