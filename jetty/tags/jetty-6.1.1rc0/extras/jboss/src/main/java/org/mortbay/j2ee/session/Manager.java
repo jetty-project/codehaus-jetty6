@@ -898,7 +898,7 @@ public class Manager implements org.mortbay.jetty.SessionManager
         return null;
     }
 
-    public Cookie access(HttpSession arg0)
+    public Cookie access(HttpSession arg0,boolean secure)
     {
         // TODO Auto-generated method stub
         return null;
