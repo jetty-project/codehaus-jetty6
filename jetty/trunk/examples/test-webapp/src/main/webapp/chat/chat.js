@@ -105,7 +105,8 @@ var room =
     }
     catch(e)
     {
-        alert("_members " + e);
+    	window.status="ERROR: members "+e.name + ": " + e.message;
+        // alert("_members " + e);
     }
   },
 /*      
