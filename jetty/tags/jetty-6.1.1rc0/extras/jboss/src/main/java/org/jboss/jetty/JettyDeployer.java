@@ -117,12 +117,17 @@ public class JettyDeployer extends AbstractWebDeployer
                 hostList.add((String)hosts.next());
             app.setVirtualHosts((String[])LazyList.toArray(hostList, String.class));
 
-            // Add the webapp to jetty - if jetty is already started, this will
-            //also start the webapp
+            // Add the webapp to jetty 
             _contexts.addHandler(app);
 
+            //if jetty has been started, then start the
+            //handler just added
+            if (_contexts.isStarted())
+                app.start();
+            
             // keep track of deployed contexts for undeployment
             _deployed.put(warUrl, app);
+    
 
             //tell jboss about the jsr77 mbeans we've created               
             //first check that there is an mbean for the webapp itself
