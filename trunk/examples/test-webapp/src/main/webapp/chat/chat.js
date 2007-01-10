@@ -83,22 +83,11 @@ var room =
     try
     {
         var divMembers = document.getElementById("members");
-        
-        if(message.xml != undefined)
-        {
-            var spanElem = document.createElement("<span>");
-            spanElem.innerHTML = ajax.getContentAsString(message);
-            if(divMembers.innerText != "")
-            {
-                divMembers.innerText="";
-            }
-            divMembers.appendChild(spanElem);
-            
-        }
-        else
-        {
-            divMembers.innerHTML = ajax.getContentAsString(message);
-        }
+
+        var spanMember = document.createElement("span");
+        spanMember.innerHTML=ajax.getContentAsString(message);
+        divMembers.innerHTML="";
+        divMembers.appendChild(spanMember);
     }
     catch(e)
     {
