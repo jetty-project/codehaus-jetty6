@@ -1,4 +1,11 @@
 
+function $() {
+  return document.getElementById(arguments[0]);
+}
+
+function $F() {
+  return document.getElementById(arguments[0]).value;
+}
 
 var room = 
 {

@@ -12,6 +12,46 @@ var ajax =
   _messageQueue: '',
   _queueMessages: false,
   
+  
+  _xhr: function(method,uri,body,handler)
+  {
+  	var req=null;
+  	
+    if (window.XMLHttpRequest) { // Non-IE browsers
+      	req = new XMLHttpRequest();
+	}
+	else if (window.ActiveXObject) { // IE
+      	req = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+    req.onreadystatechange=function()
+    {
+    	if (req.readyState==4) 
+    	{
+    		try
+    		{
+    	    	handler(req);
+    		}
+    		catch(e)
+    		{
+    			alert(e.name+" "+e.message);
+    		}
+    	}
+    }
+	
+    if (body!=null)
+    {
+       req.open(method,uri,true);
+       req.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+	   req.send(body);
+    }
+    else
+    {
+	   req.open(method,uri,true);
+       req.send(null);
+    }
+  },
+  
   _messageHandler: function(request) 
   {
     var qm=ajax._queueMessages;
@@ -26,6 +66,7 @@ var ajax =
           for ( var i = 0 ; i < response[0].childNodes.length ; i++ ) 
           {
             var responseElement = response[0].childNodes[i];
+	    
 	    
             // only process nodes of type element.....
             if ( responseElement.nodeType != 1 )
@@ -60,12 +101,17 @@ var ajax =
       var body = ajax._messageQueue;
       ajax._messageQueue='';
       ajax._messages=0;
-      new Ajax.Request('.', { method: 'post', onSuccess: ajax._pollHandler, postBody: body }); 
+      
+      ajax._xhr('POST','.',body,ajax._pollHandler);
+      
     }
   },
   
   _pollHandler: function(request) 
   {
+    if (request.status != 200)
+      return;
+      
     ajax._queueMessages=true;
     try
     {
@@ -83,14 +129,14 @@ var ajax =
     if (ajax._messages==0)
     {
       if (ajax.poll)
-        new Ajax.Request('.', { method: 'get', parameters: 'ajax=poll&message=poll', onSuccess: ajax._pollHandler }); 
+        ajax._xhr('GET','.?ajax=poll&message=poll',null,ajax._pollHandler);
     }
     else
     {
       var body = ajax._messageQueue+'&ajax=poll&message=poll';
       ajax._messageQueue='';
       ajax._messages=0;
-      new Ajax.Request('.', { method: 'post', onSuccess: ajax._pollHandler, postBody: body }); 
+      ajax._xhr('POST','.',body,ajax._pollHandler);
     }
   },
   
@@ -128,14 +174,14 @@ var ajax =
     }
     else
     {
-      new Ajax.Request('.', { method: 'post', postBody: 'ajax='+destination+'&message='+message,onSuccess: ajax._messageHandler});
+      ajax._xhr('POST','.','ajax='+destination+'&message='+message,ajax._messageHandler);
     }
   },
   
   _startPolling : function()
   {
     if (ajax.poll)
-      new Ajax.Request('.', { method: 'get', parameters: 'ajax=poll&message=poll&timeout=0', onSuccess: ajax._pollHandler });
+      ajax._xhr('GET','.?ajax=poll&message=poll&timeout=0',null,ajax._pollHandler);
   },
   
   getContentAsString: function( parentNode ) {
