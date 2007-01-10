@@ -1,10 +1,15 @@
 package org.mortbay.jetty.testing;
 
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.EventListener;
 
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -33,17 +38,17 @@ import org.mortbay.util.Attributes;
  */
 public class ServletTester
 {
-    Server server = new Server();
-    LocalConnector connector = new LocalConnector();
-    Context context = new Context(Context.SESSIONS|Context.SECURITY);
+    Server _server = new Server();
+    LocalConnector _connector = new LocalConnector();
+    Context _context = new Context(Context.SESSIONS|Context.SECURITY);
     
     public ServletTester()
     {
         try
         {
-            server.setSendServerVersion(false);
-            server.addConnector(connector);
-            server.addHandler(context);
+            _server.setSendServerVersion(false);
+            _server.addConnector(_connector);
+            _server.addHandler(_context);
         }
         catch (Error e)
         {
@@ -62,13 +67,13 @@ public class ServletTester
     /* ------------------------------------------------------------ */
     public void start() throws Exception
     {
-        server.start();
+        _server.start();
     }
     
     /* ------------------------------------------------------------ */
     public void stop() throws Exception
     {
-        server.stop();
+        _server.stop();
     }
     
     /* ------------------------------------------------------------ */
@@ -81,13 +86,37 @@ public class ServletTester
      */
     public String getResponses(String rawRequests) throws Exception
     {
-        connector.reopen();
+        _connector.reopen();
         //System.err.println(">>>>\n"+rawRequests);
-        String responses = connector.getResponses(rawRequests);
+        String responses = _connector.getResponses(rawRequests);
         //System.err.println("<<<<\n"+responses);
         return responses;
     }
     
+    
+    /* ------------------------------------------------------------ */
+    /** Create a Socket connector.
+     * This methods adds a socket connector to the server
+     * @param locahost if true, only listen on local host, else listen on all interfaces.
+     * @return A URL to access the server via the socket connector.
+     * @throws Exception
+     */
+    public String createSocketConnector(boolean localhost)
+    throws Exception
+    {
+       SocketConnector connector = new SocketConnector();
+       if (localhost)
+           connector.setHost("127.0.0.1");
+       _server.addConnector(connector);
+       if (_server.isStarted())
+           connector.start();
+       else
+           connector.open();
+       
+       return "http://"+(localhost?"127.0.0.1":
+       InetAddress.getLocalHost().getHostAddress()    
+       )+":"+connector.getLocalPort();
+   }
 
     /* ------------------------------------------------------------ */
     /**
@@ -96,7 +125,7 @@ public class ServletTester
      */
     public void addEventListener(EventListener listener)
     {
-        context.addEventListener(listener);
+        _context.addEventListener(listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -109,7 +138,7 @@ public class ServletTester
      */
     public FilterHolder addFilter(Class filterClass, String pathSpec, int dispatches)
     {
-        return context.addFilter(filterClass,pathSpec,dispatches);
+        return _context.addFilter(filterClass,pathSpec,dispatches);
     }
 
     /* ------------------------------------------------------------ */
@@ -122,7 +151,7 @@ public class ServletTester
      */
     public FilterHolder addFilter(String filterClass, String pathSpec, int dispatches)
     {
-        return context.addFilter(filterClass,pathSpec,dispatches);
+        return _context.addFilter(filterClass,pathSpec,dispatches);
     }
 
     /* ------------------------------------------------------------ */
@@ -134,7 +163,7 @@ public class ServletTester
      */
     public ServletHolder addServlet(Class servlet, String pathSpec)
     {
-        return context.addServlet(servlet,pathSpec);
+        return _context.addServlet(servlet,pathSpec);
     }
 
     /* ------------------------------------------------------------ */
@@ -146,7 +175,7 @@ public class ServletTester
      */
     public ServletHolder addServlet(String className, String pathSpec)
     {
-        return context.addServlet(className,pathSpec);
+        return _context.addServlet(className,pathSpec);
     }
 
     /* ------------------------------------------------------------ */
@@ -157,7 +186,7 @@ public class ServletTester
      */
     public Object getAttribute(String name)
     {
-        return context.getAttribute(name);
+        return _context.getAttribute(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -167,7 +196,7 @@ public class ServletTester
      */
     public Enumeration getAttributeNames()
     {
-        return context.getAttributeNames();
+        return _context.getAttributeNames();
     }
 
     /* ------------------------------------------------------------ */
@@ -177,7 +206,7 @@ public class ServletTester
      */
     public Attributes getAttributes()
     {
-        return context.getAttributes();
+        return _context.getAttributes();
     }
 
     /* ------------------------------------------------------------ */
@@ -187,7 +216,7 @@ public class ServletTester
      */
     public String getResourceBase()
     {
-        return context.getResourceBase();
+        return _context.getResourceBase();
     }
 
     /* ------------------------------------------------------------ */
@@ -198,7 +227,7 @@ public class ServletTester
      */
     public void setAttribute(String name, Object value)
     {
-        context.setAttribute(name,value);
+        _context.setAttribute(name,value);
     }
 
     /* ------------------------------------------------------------ */
@@ -208,7 +237,7 @@ public class ServletTester
      */
     public void setClassLoader(ClassLoader classLoader)
     {
-        context.setClassLoader(classLoader);
+        _context.setClassLoader(classLoader);
     }
 
     /* ------------------------------------------------------------ */
@@ -218,7 +247,7 @@ public class ServletTester
      */
     public void setContextPath(String contextPath)
     {
-        context.setContextPath(contextPath);
+        _context.setContextPath(contextPath);
     }
 
     /* ------------------------------------------------------------ */
@@ -228,7 +257,7 @@ public class ServletTester
      */
     public void setEventListeners(EventListener[] eventListeners)
     {
-        context.setEventListeners(eventListeners);
+        _context.setEventListeners(eventListeners);
     }
 
     /* ------------------------------------------------------------ */
@@ -238,7 +267,7 @@ public class ServletTester
      */
     public void setResourceBase(String resourceBase)
     {
-        context.setResourceBase(resourceBase);
+        _context.setResourceBase(resourceBase);
     }
     
 }
