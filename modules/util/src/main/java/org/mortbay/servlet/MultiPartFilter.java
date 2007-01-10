@@ -20,8 +20,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -29,6 +31,7 @@ import java.util.StringTokenizer;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -39,6 +42,8 @@ import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
+
 /* ------------------------------------------------------------ */
 /**
  * Multipart Form Data Filter.
@@ -48,12 +53,18 @@ import org.mortbay.util.TypeUtil;
  * as an attribute.  All other values are made available via the normal getParameter API and
  * the setCharacterEncoding mechanism is respected when converting bytes to Strings.
  * 
+ * If the init paramter "delete" is set to "true", any files created will be deleted when the
+ * current request returns.
+ * 
  * @author Greg Wilkins
  * @author Jim Crossley
  */
 public class MultiPartFilter implements Filter
 {
+    private final static String FILES ="org.mortbay.servlet.MultiPartFilter.files";
     private File tempdir;
+    private boolean _deleteFiles;
+    private ServletContext _context;
 
     /* ------------------------------------------------------------------------------- */
     /**
@@ -62,6 +73,8 @@ public class MultiPartFilter implements Filter
     public void init(FilterConfig filterConfig) throws ServletException
     {
         tempdir=(File)filterConfig.getServletContext().getAttribute("javax.servlet.context.tempdir");
+        _deleteFiles="true".equals(filterConfig.getInitParameter("deleteFiles"));
+        _context=filterConfig.getServletContext();
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -78,6 +91,8 @@ public class MultiPartFilter implements Filter
             chain.doFilter(request,response);
             return;
         }
+        
+        
         BufferedInputStream in = new BufferedInputStream(request.getInputStream());
         String content_type=srequest.getContentType();
         
@@ -160,6 +175,19 @@ public class MultiPartFilter implements Filter
                     out = new FileOutputStream(file);
                     request.setAttribute(name,file);
                     params.put(name, filename);
+                    
+                    if (_deleteFiles)
+                    {
+                        file.deleteOnExit();
+                        ArrayList files = (ArrayList)request.getAttribute(FILES);
+                        if (files==null)
+                        {
+                            files=new ArrayList();
+                            request.setAttribute(FILES,files);
+                        }
+                        files.add(file);
+                    }
+                    
                 }
                 else
                     out=new ByteArrayOutputStream();
@@ -243,9 +271,30 @@ public class MultiPartFilter implements Filter
             }
         }
 
-        chain.doFilter(new Wrapper(srequest,params),response);
-        
-        // TODO delete the files if they still exist.
+        try
+        {
+            chain.doFilter(new Wrapper(srequest,params),response);
+        }
+        finally
+        {
+            ArrayList files = (ArrayList)request.getAttribute(FILES);
+            if (files!=null)
+            {
+                Iterator iter = files.iterator();
+                while (iter.hasNext())
+                {
+                    File file=(File)iter.next();
+                    try
+                    {
+                        file.delete();
+                    }
+                    catch(Exception e)
+                    {
+                        _context.log("failed to delete "+file,e);
+                    }
+                }
+            }
+        }
     }
 
 

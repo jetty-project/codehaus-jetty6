@@ -614,17 +614,19 @@ public class HttpParser implements Parser
                         _handler.messageComplete(_contentPosition);
                         return total_filled;
                     }
-                    else if (length >= remaining) 
+                    
+                    if (length > remaining) 
                     {
                         // We can cast reamining to an int as we know that it is smaller than
                         // or equal to length which is already an int. 
                         length=(int)remaining;
-                        _state=STATE_END;
                     }
+                    
                     chunk=_buffer.get(length);
                     _contentPosition += chunk.length();
                     _contentView.update(chunk);
                     _handler.content(chunk);
+                    
                     // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
                 }
