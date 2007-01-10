@@ -43,7 +43,7 @@ var room =
   
   _chat: function(message)
   {
-     var chat=$('chat');
+     var divChat=document.getElementById("chat");
      var from=message.getAttribute('from');
      var special=message.getAttribute('alert');
      var text=message.childNodes[0].data;
@@ -55,20 +55,55 @@ var room =
          from+=":";
      }
      
-     if(chat != null)
-     {
-         if (special=='true')
-           chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span></span><br/>";
-         else
-           chat.innerHTML += "<span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">"+text+"</span><br/>";
-         chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
-     }
      
+     
+     var parentElement = divChat;
+     if (special=='true')
+     {
+       var span = document.createElement("span");
+       span.className="alert";
+       divChat.appendChild(span);
+       parentElement=span;
+     }
+     var spanFrom = document.createElement("span");
+     spanFrom.className="from";
+     spanFrom.innerHTML=from+"&nbsp;";
+     var spanText = document.createElement("span");
+     spanText.className="text";
+     spanText.innerHTML=text;
+     var lineBreak = document.createElement("br");
+     parentElement.appendChild(spanFrom);
+     parentElement.appendChild(spanText);
+     divChat.appendChild(lineBreak);
+     divChat.scrollTop = divChat.scrollHeight - divChat.clientHeight;     
   },
    
   _members: function(message)
   {   
-    $('members').innerHTML=ajax.getContentAsString(message);
+    try
+    {
+        var divMembers = document.getElementById("members");
+        
+        if(message.xml != undefined)
+        {
+            var spanElem = document.createElement("<span>");
+            spanElem.innerHTML = ajax.getContentAsString(message);
+            if(divMembers.innerText != "")
+            {
+                divMembers.innerText="";
+            }
+            divMembers.appendChild(spanElem);
+            
+        }
+        else
+        {
+            divMembers.innerHTML = ajax.getContentAsString(message);
+        }
+    }
+    catch(e)
+    {
+        alert("_members " + e);
+    }
   },
       
   _joined: function(message)
