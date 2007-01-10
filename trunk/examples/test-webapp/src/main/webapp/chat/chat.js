@@ -83,10 +83,17 @@ var room =
     try
     {
         var divMembers = document.getElementById("members");
-
-        var spanMember = document.createElement("span");
-        spanMember.innerHTML=ajax.getContentAsString(message);
         divMembers.innerHTML="";
+        var spanMember = document.createElement("span");
+        var ul = document.createElement("ul");
+        spanMember.appendChild(ul);
+        var x = message.getElementsByTagName("li");
+        for (var i=0;i<x.length;i++)
+        {
+          var li = document.createElement("li");
+          li.innerHTML = x[i].firstChild.nodeValue;
+          ul.appendChild(li);
+        } 
         divMembers.appendChild(spanMember);
     }
     catch(e)
@@ -94,30 +101,60 @@ var room =
         alert("_members " + e);
     }
   },
-      
+/*      
   _joined: function(message)
   {    
+     alert("room._joined is called");
      var from=message.getAttribute('from');
-     var chat=$('chat');
-     chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">has joined the room!</span></span><br/>";
-     chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
+     var divChat=$('chat');
+
+     var span = document.createElement("span");
+     span.className="alert";
+     divChat.appendChild(span);
+     var spanFrom = document.createElement("span");
+     spanFrom.className="from";
+     spanFrom.innerHTML=from+"&nbsp;";
+     var spanText = document.createElement("span");
+     spanText.className="text";
+     spanText.innerHTML="has joined the room!";
+     var lineBreak = document.createElement("br");
+     span.appendChild(spanFrom);
+     span.appendChild(spanText);
+     divChat.appendChild(lineBreak);
+     divChat.scrollTop = divChat.scrollHeight - divChat.clientHeight;
   },
+*/
   
+/*
   _left: function(message)
   {    
      var from=message.getAttribute('from');
-     var chat=$('chat');
-     chat.innerHTML += "<span class=\"alert\"><span class=\"from\">"+from+"&nbsp;</span><span class=\"text\">has left the room!</span></span><br/>";
-     chat.scrollTop = chat.scrollHeight - chat.clientHeight;     
+     var divChat=$('chat');
+
+     var span = document.createElement("span");
+     span.className="alert";
+     divChat.appendChild(span);
+     var spanFrom = document.createElement("span");
+     spanFrom.className="from";
+     spanFrom.innerHTML=from+"&nbsp;";
+     var spanText = document.createElement("span");
+     spanText.className="text";
+     spanText.innerHTML="has left the room!";
+     var lineBreak = document.createElement("br");
+     span.appendChild(spanFrom);
+     span.appendChild(spanText);
+     divChat.appendChild(lineBreak);
+     divChat.scrollTop = divChat.scrollHeight - divChat.clientHeight;
   },
+*/
   
   _poll: function(first)
   {
      if (first ||  $('join').className=='hidden' && $('joined').className=='hidden')
      {
        ajax.addListener('chat',room._chat);
-       ajax.addListener('joined',room._joined);
-       ajax.addListener('left',room._left);
+      // ajax.addListener('joined',room._joined);
+      // ajax.addListener('left',room._left);
        ajax.addListener('members',room._members);
        $('join').className='';
        $('joined').className='hidden';
