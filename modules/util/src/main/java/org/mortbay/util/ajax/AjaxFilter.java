@@ -72,6 +72,11 @@ public class AjaxFilter implements Filter
 
             out.println("</ajax-response>");
             byte[] ajax = sout.toString().getBytes("UTF-8");
+            sresponse.setHeader( "Pragma", "no-cache" );
+            sresponse.addHeader( "Cache-Control", "must-revalidate" );
+            sresponse.addHeader( "Cache-Control", "no-cache" );
+            sresponse.addHeader( "Cache-Control", "no-store" );
+            sresponse.setDateHeader("Expires", 0);
             sresponse.setContentType("text/xml; charset=UTF-8");
             sresponse.setContentLength(ajax.length);
             sresponse.getOutputStream().write(ajax);
