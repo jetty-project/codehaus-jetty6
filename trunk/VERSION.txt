@@ -2,6 +2,8 @@
 jetty-6.1-SNAPSHOT
  + Fixed unpacking WAR
  + extras/win32service download only if no JavaServiceWrapper exist
+ + MultiPartFilter deleteFiles option
+ + CGI servlet fails without exception
  + JETTY-209 Added ServletTester.createSocketConnector
  + JETTY-210 Build servlet-api-2.5 for java 1.4
  + JETTY-211 fixed jboss build
