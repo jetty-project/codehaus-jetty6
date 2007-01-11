@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.mortbay.log.Log;
 
@@ -40,7 +42,7 @@ import org.mortbay.log.Log;
  *
  * TODO AbstractLifeCycle
  */
-public class Scanner implements Runnable
+public class Scanner
 {
     private int _scanInterval;
 
@@ -49,10 +51,10 @@ public class Scanner implements Runnable
     private Map _prevScan = Collections.EMPTY_MAP;
     private FilenameFilter _filter;
     private File _scanDir;
-    private Thread _thread;
     private volatile boolean _running = false;
     private boolean _reportExisting = true;
-
+    private Timer _timer;
+    private TimerTask _task;
 
     /**
      * Listener
@@ -89,9 +91,15 @@ public class Scanner implements Runnable
      * Set the scan interval
      * @param scanInterval pause between scans in seconds
      */
-    public void setScanInterval(int scanInterval)
+    public synchronized void setScanInterval(int scanInterval)
     {
+        if (_running)
+            _task.cancel();
+        
         this._scanInterval = scanInterval;
+        
+        if (_running && _scanInterval >0)
+            _timer.scheduleAtFixedRate(_task,1000L*getScanInterval(),1000L*getScanInterval());
     }
 
     /**
@@ -168,17 +176,15 @@ public class Scanner implements Runnable
     }
 
 
-    /** 
-     * Scan the configured directory, sleeping for the
-     * configured scanInterval (in seconds) between each pass.
-     * 
-     * @see java.lang.Runnable#run()
+    /**
+     * Start the scanning action.
      */
-    public void run ()
-    {   
-        // set the sleep interval
-        long sleepMillis = getScanInterval()*1000L;
+    public synchronized void start ()
+    {
+        if (_running)
+            return;
 
+        _running = true;
 
         if (_reportExisting)
         {
@@ -191,46 +197,31 @@ public class Scanner implements Runnable
             _prevScan = scanFiles();
         }
 
-        _running = true;
-        while (_running)
+        _timer = new Timer();
+        _task = new TimerTask()
         {
-            try
-            {
-                //wake up and scan the files
-                Thread.sleep(sleepMillis);
-                scan();
-            }
-            catch (InterruptedException e)
-            {
-                _running = false;    
-            }
-        }
-    }
+            public void run() { scan(); }
+        };
 
-
-    /**
-     * Start the scanning action.
-     */
-    public void start ()
-    {
-        if (_running)
-            throw new IllegalStateException("Already running");
-
-        _thread = new Thread(this, "scanner");
-        _thread.setDaemon(true);
-        _thread.start();
+        if (getScanInterval()>0)
+            _timer.scheduleAtFixedRate(_task,1000L*getScanInterval(),1000L*getScanInterval());
+        
     }
 
 
     /**
      * Stop the scanning.
      */
-    public void stop ()
+    public synchronized void stop ()
     {
         if (_running)
-            _thread.interrupt ();
+        {
+            _running = false; 
+            _task.cancel();
+            _task=null;
+            _timer=null;
+        }
     }
-
 
     /**
      * Perform a pass of the scanner and report changes
@@ -241,8 +232,6 @@ public class Scanner implements Runnable
         reportDifferences(currentScan, _prevScan);
         _prevScan = currentScan;     
     }
-
-
 
     /**
      * Recursively scan all files in the designated directory.
@@ -303,9 +292,6 @@ public class Scanner implements Runnable
             }
         }
     }
-
-
-
 
 
     /**
