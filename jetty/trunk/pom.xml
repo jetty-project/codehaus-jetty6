@@ -206,6 +206,7 @@
     <module>modules/jetty</module>
     <module>modules/jsp-api-2.1</module>
     <module>modules/jsp-2.1</module>
+    <module>modules/jsp-api-2.0</module>
     <module>modules/jsp-2.0</module>
     <module>modules/management</module>
     <module>modules/start</module>
