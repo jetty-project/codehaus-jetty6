@@ -356,11 +356,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         
         if (_filename != null) 
         {
-            //TODO  the _fileOut should not be null
-            /**
-             * The previous implementation uses RollOverFileOutputStream
-             */
-            _fileOut = new RolloverFileOutputStream(_filename,_append,_retainDays);
+            _fileOut = new RolloverFileOutputStream(_filename,_append,_retainDays,TimeZone.getTimeZone(_logTimeZone));
             _closeOut = true;
         }
         else 
