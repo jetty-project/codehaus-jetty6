@@ -27,6 +27,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /** 
  * RolloverFileOutputStream
@@ -34,11 +37,11 @@ import java.util.StringTokenizer;
  */
 public class RolloverFileOutputStream extends FilterOutputStream
 {
-
-    static Rollover __rollover;
+    private static Timer __rollover;
+    
     final static String YYYY_MM_DD="yyyy_mm_dd";
-    final static ArrayList __rollovers = new ArrayList();
 
+    private RollTask _rollTask;
     private SimpleDateFormat _fileBackupFormat =
         new SimpleDateFormat(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS"));
     private SimpleDateFormat _fileDateFormat = 
@@ -48,7 +51,6 @@ public class RolloverFileOutputStream extends FilterOutputStream
     private File _file;
     private boolean _append;
     private int _retainDays;
-    private WeakReference _ref;
     
     /* ------------------------------------------------------------ */
     public RolloverFileOutputStream(String filename)
@@ -63,14 +65,27 @@ public class RolloverFileOutputStream extends FilterOutputStream
     {
         this(filename,append,Integer.getInteger("ROLLOVERFILE_RETAIN_DAYS",31).intValue());
     }
-    
+
     /* ------------------------------------------------------------ */
     public RolloverFileOutputStream(String filename,
                                     boolean append,
                                     int retainDays)
         throws IOException
     {
+        this(filename,append,retainDays,TimeZone.getDefault());
+    }
+    
+    /* ------------------------------------------------------------ */
+    public RolloverFileOutputStream(String filename,
+                                    boolean append,
+                                    int retainDays,
+                                    TimeZone zone)
+        throws IOException
+    {
         super(null);
+        
+        _fileBackupFormat.setTimeZone(zone);
+        _fileDateFormat.setTimeZone(zone);
         
         if (filename!=null)
         {
@@ -84,17 +99,26 @@ public class RolloverFileOutputStream extends FilterOutputStream
         _filename=filename;
         _append=append;
         _retainDays=retainDays;
-        _ref=new WeakReference(this);
         setFile();
         
-        synchronized(__rollovers)
+        synchronized(RolloverFileOutputStream.class)
         {
             if (__rollover==null)
-            {
-                __rollover=new Rollover();
-                __rollover.start();
-            }
-            __rollovers.add(_ref);
+                __rollover=new Timer();
+            
+            _rollTask=new RollTask();
+
+             Calendar now = Calendar.getInstance();
+             now.setTimeZone(zone);
+
+             GregorianCalendar midnight =
+                 new GregorianCalendar(now.get(Calendar.YEAR),
+                         now.get(Calendar.MONTH),
+                         now.get(Calendar.DAY_OF_MONTH),
+                         23,0);
+             midnight.setTimeZone(zone);
+             midnight.add(Calendar.HOUR,1);
+             __rollover.scheduleAtFixedRate(_rollTask,midnight.getTime(),1000L*60*60*24);
         }
     }
 
@@ -234,10 +258,8 @@ public class RolloverFileOutputStream extends FilterOutputStream
     public void close()
         throws IOException
     {
-        synchronized(__rollovers)
+        synchronized(RolloverFileOutputStream.class)
         {
-            __rollovers.remove(_ref);
-            _ref=null;
             try{super.close();}
             finally
             {
@@ -245,87 +267,26 @@ public class RolloverFileOutputStream extends FilterOutputStream
                 _file=null;
             }
 
-            //  this will kill the thread when the last stream is removed.
-            if ( __rollovers.size() == 0 ) {
-                __rollover.timeToStop();
-                __rollover.interrupt();
-                __rollover = null;
-            }
+            _rollTask.cancel(); 
         }
     }
     
-    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class Rollover extends Thread
+    private class RollTask extends TimerTask
     {
-        private boolean timeToStop = false;
-        
-        Rollover()
-        {
-            setName("Rollover");
-            setDaemon(true);
-        }
-        
-        synchronized void timeToStop()
-        {
-            timeToStop = true;
-        }
-
         public void run()
         {
-            while(!timeToStop)
+            try
             {
-                try
-                {
-                    // Sleep until midnight
-                    Calendar now = Calendar.getInstance();
-                    GregorianCalendar midnight =
-                        new GregorianCalendar(now.get(Calendar.YEAR),
-                                              now.get(Calendar.MONTH),
-                                              now.get(Calendar.DAY_OF_MONTH),
-                                              23,0);
-                    midnight.add(Calendar.HOUR,1);
-                    long sleeptime=
-                        midnight.getTime().getTime()-
-                        now.getTime().getTime();
-                    //if(log.isDebugEnabled())log.debug("Rollover sleep until "+midnight.getTime());
-                    Thread.sleep(sleeptime);
-                }
-                catch(InterruptedException e)
-                {
-                    if (!timeToStop)
-                        e.printStackTrace();
-                }
-                    
-                synchronized(__rollovers)
-                {
-                    ListIterator iter = __rollovers.listIterator();
-                    while (iter.hasNext())
-                    {
-                        WeakReference ref =
-                            (WeakReference)iter.next();
-                        RolloverFileOutputStream rfos =
-                            (RolloverFileOutputStream)ref.get();
+                RolloverFileOutputStream.this.setFile();
+                RolloverFileOutputStream.this.removeOldFiles();
 
-                        if (rfos==null)
-                            iter.remove();
-                        else
-                        {
-                            try
-                            {
-                                rfos.setFile();
-                                rfos.removeOldFiles();
-                            }
-                            catch(IOException e)
-                            {
-                                if (!timeToStop)
-                                    e.printStackTrace();
-                            }
-                        }
-                    }
-                }
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
             }
         }
     }
