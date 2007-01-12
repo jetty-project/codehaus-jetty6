@@ -88,7 +88,7 @@ public class FileStore implements Store
 
     public void remove(String id)
     {
-        File sessionFile = new File(_sessions.getAbsolutePath()+id);
+        File sessionFile = new File(_sessions.getAbsolutePath()+"/"+id);
         if (sessionFile.exists())
         {
             sessionFile.delete();
