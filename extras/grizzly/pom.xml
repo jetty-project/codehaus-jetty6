@@ -110,6 +110,6 @@
     </dependency>
   </dependencies>
   <properties>
-    <grizzly-version>1.0.7</grizzly-version>
+    <grizzly-version>1.0.9</grizzly-version>
   </properties>
 </project>
