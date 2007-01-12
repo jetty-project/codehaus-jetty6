@@ -130,7 +130,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         //find out if we need to process annotations
         //  servlet 2.5 web.xml && metadata-complete==false
         if (_version == 25)
-            _metadataComplete = Boolean.parseBoolean(config.getAttribute("metadata-complete", "false"));
+            _metadataComplete = Boolean.valueOf((String)config.getAttribute("metadata-complete", "false")).booleanValue();
     }
     
     
