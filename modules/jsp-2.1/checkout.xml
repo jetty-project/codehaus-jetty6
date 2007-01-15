@@ -118,7 +118,6 @@
         <exclude name="**/resources/*"/>
         <exclude name="**/CVS/*"/>
         <exclude name="**/Jsr199JavaCompiler.java"/>
-        <exclude name="**/JDTJavaCompiler.java"/>
       </fileset>
     </copy>
     <copy todir="${generated.resources}/org/apache/jasper/resources">
