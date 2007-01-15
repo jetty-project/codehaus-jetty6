@@ -1112,9 +1112,11 @@ public class Request implements HttpServletRequest
             if (r!=null)
                 role=r;
         }
+
+        Principal principal = getUserPrincipal();
         
-        if (_userRealm!=null && _userPrincipal!=null)
-            return _userRealm.isUserInRole(_userPrincipal, role);
+        if (_userRealm!=null && principal!=null)
+            return _userRealm.isUserInRole(principal, role);
         
         return false;
     }
