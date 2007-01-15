@@ -163,6 +163,16 @@
       <groupId>tomcat</groupId>
       <artifactId>jasper-compiler</artifactId>
       <version>${jasper-version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>javax.servlet</groupId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>jsp-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
@@ -179,6 +189,12 @@
       <groupId>tomcat</groupId>
       <artifactId>jasper-runtime</artifactId>
       <version>${jasper-version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>javax.servlet</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
