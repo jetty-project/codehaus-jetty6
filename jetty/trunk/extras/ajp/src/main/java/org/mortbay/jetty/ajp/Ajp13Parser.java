@@ -34,19 +34,7 @@ import org.mortbay.log.Log;
  */
 public class Ajp13Parser implements Parser
 {
-    private final static int STATE_START = -7;
-
-    private final static int STATE_AJP13HEADER_PACKET_LENGTH = -6;
-
-    private final static int STATE_AJP13HEADER_PACKET_TYPE = -5;
-
-    private final static int STATE_AJP13HEADER_REQUEST_ATTR = -4;
-
-    private final static int STATE_AJP13HEADER_REQUEST_ATTR_VALUE = -3;
-
-    private final static int STATE_AJP13HEADER_REQUEST_HEADER_NAME = -2;
-
-    private final static int STATE_AJP13HEADER_REQUEST_METHOD = -1;
+    private final static int STATE_START = -1;
 
     private final static int STATE_END = 0;
 
@@ -95,6 +83,8 @@ public class Ajp13Parser implements Parser
     // response code
 
     protected int _length;
+    protected int _packetLength;
+    
 
     /* ------------------------------------------------------------------------------- */
     public Ajp13Parser(Buffers buffers, EndPoint endPoint, EventHandler handler, Ajp13Generator generator)
@@ -185,6 +175,8 @@ public class Ajp13Parser implements Parser
             len = parseNext();
             if (len > 0)
                 total += len;
+            else
+                break;
         }
         return total;
     }
@@ -217,10 +209,8 @@ public class Ajp13Parser implements Parser
             return total_filled;
         }
 
-        int length = _buffer.length();
-
         // Fill buffer if we can
-        if (length == 0)
+        if (_buffer.space()>0)
         {
             int filled = -1;
             if (_body != null && _buffer != _body)
@@ -274,41 +264,43 @@ public class Ajp13Parser implements Parser
                 reset(true);
                 throw new EofException();
             }
-            length = _buffer.length();
         }
-
-        // Parse Header
-        Buffer bufHeaderName = null;
-        Buffer bufHeaderValue = null;
-        int attr_type = 0;
-
-        while (_state < STATE_END)
+        
+        if (_state < 0)
         {
-
-            switch (_state)
+            if (_packetLength<=0)
             {
-            case STATE_START:
+                if (_buffer.length()<4)
+                    return total_filled;
+                
                 _contentLength = HttpTokens.UNKNOWN_CONTENT;
                 int _magic = Ajp13RequestPacket.getInt(_buffer);
                 if (_magic != Ajp13RequestHeaders.MAGIC)
-                {
                     throw new IOException("Bad AJP13 rcv packet: " + "0x" + Integer.toHexString(_magic) + " expected " + "0x" + Integer.toHexString(Ajp13RequestHeaders.MAGIC) + " " + this);
-                }
-                _state = STATE_AJP13HEADER_PACKET_LENGTH;
 
-            case STATE_AJP13HEADER_PACKET_LENGTH:
-                int packetLength = Ajp13RequestPacket.getInt(_buffer);
-                if (packetLength > Ajp13Packet.MAX_PACKET_SIZE)
-                    throw new IOException("AJP13 packet (" + packetLength + "bytes) too large for buffer");
-                _state = STATE_AJP13HEADER_PACKET_TYPE;
+                _packetLength = Ajp13RequestPacket.getInt(_buffer);
+                if (_packetLength > Ajp13Packet.MAX_PACKET_SIZE)
+                    throw new IOException("AJP13 packet (" + _packetLength + "bytes) too large for buffer");
+                
+            }
+            
+            System.err.println("_buffer.length()="+_buffer.length());
+            System.err.println("_packetLength="+_packetLength);
+            
+            if (_buffer.length() < _packetLength)
+                return total_filled;
 
-            case STATE_AJP13HEADER_PACKET_TYPE:
-                byte packetType = Ajp13RequestPacket.getByte(_buffer);
-                switch (packetType)
-                {
+            // Parse Header
+            Buffer bufHeaderName = null;
+            Buffer bufHeaderValue = null;
+            int attr_type = 0;
+
+            byte packetType = Ajp13RequestPacket.getByte(_buffer);
+            
+            switch (packetType)
+            {
                 case Ajp13Packet.FORWARD_REQUEST_ORDINAL:
                     _handler.startForwardRequest();
-                    _state = STATE_AJP13HEADER_REQUEST_METHOD;
                     break;
                 case Ajp13Packet.SHUTDOWN_ORDINAL:
                     // Log.warn("AJP13 SHUTDOWN not
@@ -321,27 +313,24 @@ public class Ajp13Parser implements Parser
                     // XXX Throw an Exception here?? Close
                     // connection!
                     Log.warn("AJP13 message type ({SHUTDOWN, CPING, PING}) not supported/recognized as a " + "container request", Integer.toString(packetType));
-                    throw new IllegalStateException("SHUTDOWN, CPING, PING is not implemented");
-                   
+                throw new IllegalStateException("SHUTDOWN, CPING, PING is not implemented");
+            }
 
-                }
-                break;
 
-            case STATE_AJP13HEADER_REQUEST_METHOD:
-                _handler.parsedMethod(Ajp13RequestPacket.getMethod(_buffer));
-                _handler.parsedProtocol(Ajp13RequestPacket.getString(_buffer, _tok0));
-                _handler.parsedUri(Ajp13RequestPacket.getString(_buffer, _tok1));
-                _handler.parsedRemoteAddr(Ajp13RequestPacket.getString(_buffer, _tok1));
-                _handler.parsedRemoteHost(Ajp13RequestPacket.getString(_buffer, _tok1));
-                _handler.parsedServerName(Ajp13RequestPacket.getString(_buffer, _tok1));
-                _handler.parsedServerPort(Ajp13RequestPacket.getInt(_buffer));
-                _handler.parsedSslSecure(Ajp13RequestPacket.getBool(_buffer));
+            _handler.parsedMethod(Ajp13RequestPacket.getMethod(_buffer));
+            _handler.parsedProtocol(Ajp13RequestPacket.getString(_buffer, _tok0));
+            _handler.parsedUri(Ajp13RequestPacket.getString(_buffer, _tok1));
+            _handler.parsedRemoteAddr(Ajp13RequestPacket.getString(_buffer, _tok1));
+            _handler.parsedRemoteHost(Ajp13RequestPacket.getString(_buffer, _tok1));
+            _handler.parsedServerName(Ajp13RequestPacket.getString(_buffer, _tok1));
+            _handler.parsedServerPort(Ajp13RequestPacket.getInt(_buffer));
+            _handler.parsedSslSecure(Ajp13RequestPacket.getBool(_buffer));
 
-                _headers = Ajp13RequestPacket.getInt(_buffer);
-                _state = _headers == 0 ? STATE_AJP13HEADER_REQUEST_ATTR : STATE_AJP13HEADER_REQUEST_HEADER_NAME;
-                break;
 
-            case STATE_AJP13HEADER_REQUEST_HEADER_NAME:
+            _headers = Ajp13RequestPacket.getInt(_buffer);
+
+            for (int h=0;h<_headers;h++)
+            {
                 bufHeaderName = Ajp13RequestPacket.getHeaderName(_buffer, _tok0);
                 bufHeaderValue = Ajp13RequestPacket.getString(_buffer, _tok1);
 
@@ -353,128 +342,115 @@ public class Ajp13Parser implements Parser
                 }
 
                 _handler.parsedHeader(bufHeaderName, bufHeaderValue);
-
-                _state = --_headers == 0 ? STATE_AJP13HEADER_REQUEST_ATTR : STATE_AJP13HEADER_REQUEST_HEADER_NAME;
-
-                break;
-
-            case STATE_AJP13HEADER_REQUEST_ATTR:
-                attr_type = Ajp13RequestPacket.getByte(_buffer) & 0xff;
-                if (attr_type == 0xFF)
-                {
-                    _contentPosition = 0;
-                    switch ((int) _contentLength)
-                    {
-                    case HttpTokens.UNKNOWN_CONTENT:
-                    case HttpTokens.NO_CONTENT:
-                        _state = STATE_END;
-                        _generator.setNeedMore(false);
-                        _handler.headerComplete();
-                        _handler.messageComplete(_contentPosition);
-
-                        break;
-
-                    default:
-
-                        if (_buffers != null && _body == null && _buffer == _header && _contentLength > (_header.capacity() - _header.getIndex()))
-                        {
-                            _body = _buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
-                            _body.clear();
-
-                        }
-                        _state = STATE_AJP13CHUNK_START;
-                        _handler.headerComplete(); // May
-                        // recurse
-                        // here!
-                        break;
-                    }
-                    return total_filled;
-                }
-
-                _state = STATE_AJP13HEADER_REQUEST_ATTR_VALUE;
-
-            case STATE_AJP13HEADER_REQUEST_ATTR_VALUE:
-
-                _state = STATE_AJP13HEADER_REQUEST_ATTR;
-                switch (attr_type)
-                {
-                // XXX How does this plug into the web
-                // containers
-                // authentication?
-                case Ajp13RequestHeaders.REMOTE_USER_ATTR:
-                case Ajp13RequestHeaders.AUTH_TYPE_ATTR:
-                    break;
-
-                case Ajp13RequestHeaders.QUERY_STRING_ATTR:
-                    _handler.parsedQueryString(Ajp13RequestPacket.getString(_buffer, _tok1));
-                    break;
-
-                case Ajp13RequestHeaders.JVM_ROUTE_ATTR:
-                    // XXX Using old Jetty 5 key,
-                    // should change!
-                    // Note used in
-                    // org.mortbay.jetty.servlet.HashSessionIdManager
-                    _handler.parsedRequestAttribute("org.mortbay.http.ajp.JVMRoute", Ajp13RequestPacket.getString(_buffer, _tok1));
-                    break;
-
-                case Ajp13RequestHeaders.SSL_CERT_ATTR:
-                    _handler.parsedRequestAttribute("javax.servlet.request.X509Certificate", Ajp13RequestPacket.getString(_buffer, _tok1));
-                    break;
-
-                case Ajp13RequestHeaders.SSL_CIPHER_ATTR:
-                    _handler.parsedRequestAttribute("javax.servlet.request.cipher_suite", Ajp13RequestPacket.getString(_buffer, _tok1));
-                    // SslSocketConnector.customize()
-                    break;
-
-                case Ajp13RequestHeaders.SSL_SESSION_ATTR:
-                    _handler.parsedRequestAttribute("javax.servlet.request.ssl_session", Ajp13RequestPacket.getString(_buffer, _tok1));
-                    break;
-
-                case Ajp13RequestHeaders.REQUEST_ATTR:
-                    _handler.parsedRequestAttribute(Ajp13RequestPacket.getString(_buffer, _tok0).toString(), Ajp13RequestPacket.getString(_buffer, _tok1));
-                    break;
-
-                // New Jk API?
-                // Check if experimental or can they
-                // assumed to be
-                // supported
-                case Ajp13RequestHeaders.SSL_KEYSIZE_ATTR:
-                    _handler.parsedRequestAttribute("javax.servlet.request.key_size", Ajp13RequestPacket.getString(_buffer, _tok1));
-                    break;
-
-                // Used to lock down jk requests with a
-                // secreate
-                // key.
-                case Ajp13RequestHeaders.SECRET_ATTR:
-                    // XXX Investigate safest way to
-                    // deal with
-                    // this...
-                    // should this tie into shutdown
-                    // packet?
-                    break;
-
-                case Ajp13RequestHeaders.STORED_METHOD_ATTR:
-                    // XXX Confirm this should
-                    // really overide
-                    // previously parsed method?
-                    // _handler.parsedMethod(Ajp13PacketMethods.CACHE.get(Ajp13RequestPacket.getString()));
-                    break;
-
-                // Legacy codes, simply ignore
-                case Ajp13RequestHeaders.CONTEXT_ATTR:
-                case Ajp13RequestHeaders.SERVLET_PATH_ATTR:
-                default:
-                    Log.warn("Unsupported Ajp13 Request Attribute {}", new Integer(attr_type));
-                    break;
-                }
-
-                break;
-
-            default:
-                throw new IllegalStateException("State not regonised {" + _state + "}");
             }
 
-        } // end of HEADER states loop
+
+            attr_type = Ajp13RequestPacket.getByte(_buffer) & 0xff;
+
+            while (attr_type != 0xFF)
+            {
+
+                switch (attr_type)
+                {
+                    // XXX How does this plug into the web
+                    // containers
+                    // authentication?
+                    case Ajp13RequestHeaders.REMOTE_USER_ATTR:
+                    case Ajp13RequestHeaders.AUTH_TYPE_ATTR:
+                        break;
+
+                    case Ajp13RequestHeaders.QUERY_STRING_ATTR:
+                        _handler.parsedQueryString(Ajp13RequestPacket.getString(_buffer, _tok1));
+                        break;
+
+                    case Ajp13RequestHeaders.JVM_ROUTE_ATTR:
+                        // XXX Using old Jetty 5 key,
+                        // should change!
+                        // Note used in
+                        // org.mortbay.jetty.servlet.HashSessionIdManager
+                        _handler.parsedRequestAttribute("org.mortbay.http.ajp.JVMRoute", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        break;
+
+                    case Ajp13RequestHeaders.SSL_CERT_ATTR:
+                        _handler.parsedRequestAttribute("javax.servlet.request.X509Certificate", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        break;
+
+                    case Ajp13RequestHeaders.SSL_CIPHER_ATTR:
+                        _handler.parsedRequestAttribute("javax.servlet.request.cipher_suite", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        // SslSocketConnector.customize()
+                        break;
+
+                    case Ajp13RequestHeaders.SSL_SESSION_ATTR:
+                        _handler.parsedRequestAttribute("javax.servlet.request.ssl_session", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        break;
+
+                    case Ajp13RequestHeaders.REQUEST_ATTR:
+                        _handler.parsedRequestAttribute(Ajp13RequestPacket.getString(_buffer, _tok0).toString(), Ajp13RequestPacket.getString(_buffer, _tok1));
+                        break;
+
+                        // New Jk API?
+                        // Check if experimental or can they
+                        // assumed to be
+                        // supported
+                    case Ajp13RequestHeaders.SSL_KEYSIZE_ATTR:
+                        _handler.parsedRequestAttribute("javax.servlet.request.key_size", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        break;
+
+                        // Used to lock down jk requests with a
+                        // secreate
+                        // key.
+                    case Ajp13RequestHeaders.SECRET_ATTR:
+                        // XXX Investigate safest way to
+                        // deal with
+                        // this...
+                        // should this tie into shutdown
+                        // packet?
+                        break;
+
+                    case Ajp13RequestHeaders.STORED_METHOD_ATTR:
+                        // XXX Confirm this should
+                        // really overide
+                        // previously parsed method?
+                        // _handler.parsedMethod(Ajp13PacketMethods.CACHE.get(Ajp13RequestPacket.getString()));
+                        break;
+
+                        // Legacy codes, simply ignore
+                    case Ajp13RequestHeaders.CONTEXT_ATTR:
+                    case Ajp13RequestHeaders.SERVLET_PATH_ATTR:
+                    default:
+                        Log.warn("Unsupported Ajp13 Request Attribute {}", new Integer(attr_type));
+                    break;
+                }
+
+                attr_type = Ajp13RequestPacket.getByte(_buffer) & 0xff;
+            }
+
+
+            _contentPosition = 0;
+            switch ((int) _contentLength)
+            {
+                case HttpTokens.UNKNOWN_CONTENT:
+                case HttpTokens.NO_CONTENT:
+                    _state = STATE_END;
+                    _generator.setNeedMore(false);
+                    _handler.headerComplete();
+                    _handler.messageComplete(_contentPosition);
+
+                    break;
+
+                default:
+
+                    if (_buffers != null && _body == null && _buffer == _header && _contentLength > (_header.capacity() - _header.getIndex()))
+                    {
+                        _body = _buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+                        _body.clear();
+
+                    }
+                _state = STATE_AJP13CHUNK_START;
+                _handler.headerComplete(); // May recurse here!
+                return total_filled;
+            }
+        }
 
         Buffer chunk;
 
@@ -484,7 +460,8 @@ public class Ajp13Parser implements Parser
             switch (_state)
             {
             case STATE_AJP13CHUNK_START:
-
+                if (_buffer.length()<6)
+                    return total_filled;
                 int _magic = Ajp13RequestPacket.getInt(_buffer);
                 if (_magic != Ajp13RequestHeaders.MAGIC)
                 {
@@ -513,6 +490,9 @@ public class Ajp13Parser implements Parser
                 _state = STATE_AJP13CHUNK;
 
             case STATE_AJP13CHUNK:
+                if (_buffer.length()<_chunkLength)
+                    return total_filled;
+                
                 int remaining = _chunkLength - _chunkPosition;
 
                 if (remaining == 0)
