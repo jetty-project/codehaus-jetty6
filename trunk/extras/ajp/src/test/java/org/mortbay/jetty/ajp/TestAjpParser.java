@@ -30,7 +30,22 @@ public class TestAjpParser extends TestCase
         parser.parseAvailable();
         
         assertTrue(true);
+    }    
+    
+    public void testPacket2() throws Exception
+    {
+        String packet="1234020102020008485454502f312e3100000f2f6363632d7777777777772f61616100000c38382e3838382e38382e383830ffff00116363632e6363636363636363632e636f6d0001bb010009a00b00116363632e6363636363636363632e636f6d00a00e005a4d6f7a696c6c612f352e30202857696e646f77733b20553b2057696e646f7773204e5420352e313b20656e2d55533b2072763a312e382e312e3129204765636b6f2f32303036313230342046697265666f782f322e302e302e3100a0010063746578742f786d6c2c6170706c69636174696f6e2f786d6c2c6170706c69636174696f6e2f7868746d6c2b786d6c2c746578742f68746d6c3b713d302e392c746578742f706c61696e3b713d302e382c696d6167652f706e672c2a2f2a3b713d302e3500a004000e656e2d75732c656e3b713d302e3500a003000c677a69702c6465666c61746500a002001e49534f2d383835392d312c7574662d383b713d302e372c2a3b713d302e3700000a4b6565702d416c69766500000333303000a006000a6b6565702d616c69766500000c4d61782d466f7277617264730000023130000800124448452d5253412d4145533235362d5348410009004039324643303544413043444141443232303137413743443141453939353132413330443938363838423843433041454643364231363035323543433232353341000b0100ff";
+        byte[] src=TypeUtil.fromHexString(packet);
+        ByteArrayBuffer buffer=new ByteArrayBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
+        { buffer });
+        EndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
+        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        parser.parse();
+        assertTrue(true);
     }
+
+
     
     public void testPacketFragment() throws Exception
     {
@@ -143,6 +158,12 @@ public class TestAjpParser extends TestCase
         }
 
         public void startForwardRequest() throws IOException
+        {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void parsedRequestAttribute(String key, int value) throws IOException
         {
             // TODO Auto-generated method stub
             

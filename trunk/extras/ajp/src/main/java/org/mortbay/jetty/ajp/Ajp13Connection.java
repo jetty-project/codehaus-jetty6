@@ -158,6 +158,11 @@ public class Ajp13Connection extends HttpConnection
         {
             _request.setAttribute(key, value.toString());
         }
+        
+        public void parsedRequestAttribute(String key, int value) throws IOException
+        {
+            _request.setAttribute(key, Integer.toString(value));
+        }
 
         public void headerComplete() throws IOException
         {
