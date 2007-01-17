@@ -389,13 +389,30 @@ public class Ajp13Parser implements Parser
                         // Check if experimental or can they
                         // assumed to be
                         // supported
+                        
                     case Ajp13RequestHeaders.SSL_KEYSIZE_ATTR:
-                        _handler.parsedRequestAttribute("javax.servlet.request.key_size", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        
+                        // This has been implemented as either a string or a integer.
+                        
+                        // Does it look like a string containing digits?
+                        int length = Ajp13RequestPacket.getInt(_buffer);
+                        
+                        if (length>0 && length<16)
+                        {
+                            // this must be a string length rather than a key length
+                            _buffer.skip(-2);
+                            _handler.parsedRequestAttribute("javax.servlet.request.key_size", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        }
+                        else
+                            _handler.parsedRequestAttribute("javax.servlet.request.key_size",length);
+                        
                         break;
 
+                        
                         // Used to lock down jk requests with a
                         // secreate
                         // key.
+                        
                     case Ajp13RequestHeaders.SECRET_ATTR:
                         // XXX Investigate safest way to
                         // deal with
@@ -646,6 +663,8 @@ public class Ajp13Parser implements Parser
         public void parsedRemoteHost(Buffer host) throws IOException;
 
         public void parsedRequestAttribute(String key, Buffer value) throws IOException;
+        
+        public void parsedRequestAttribute(String key, int value) throws IOException;
 
         public void parsedServerName(Buffer name) throws IOException;
 
