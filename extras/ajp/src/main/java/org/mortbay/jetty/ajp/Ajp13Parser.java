@@ -284,9 +284,6 @@ public class Ajp13Parser implements Parser
                 
             }
             
-            System.err.println("_buffer.length()="+_buffer.length());
-            System.err.println("_packetLength="+_packetLength);
-            
             if (_buffer.length() < _packetLength)
                 return total_filled;
 
