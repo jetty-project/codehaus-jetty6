@@ -29,17 +29,17 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     private static ByteBuffer __EMPTY=ByteBuffer.allocate(0);
     private static SSLEngineResult _result;
     
-    private final SSLEngine _engine;
-    private final ByteBuffer _inBuffer;
-    private final NIOBuffer _inNIOBuffer;
-    private final ByteBuffer _outBuffer;
-    private final NIOBuffer _outNIOBuffer;
+    private SSLEngine _engine;
+    private ByteBuffer _inBuffer;
+    private NIOBuffer _inNIOBuffer;
+    private ByteBuffer _outBuffer;
+    private NIOBuffer _outNIOBuffer;
 
     private ByteBuffer _reuseBuffer;    
-    private final ByteBuffer[] _outBuffers=new ByteBuffer[3];
+    private ByteBuffer[] _outBuffers=new ByteBuffer[3];
 
     // ssl
-    private final SSLSession _session;
+    protected SSLSession _session;
 
     /* ------------------------------------------------------------ */
     public SslHttpChannelEndPoint(SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
@@ -47,7 +47,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     {
         super(channel,selectSet,key);
 
-        
         // ssl
         _engine=engine;
         _engine.setUseClientMode(false);
@@ -57,7 +56,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         _outBuffer=_outNIOBuffer.getByteBuffer();
         _inNIOBuffer=new NIOBuffer(_session.getPacketBufferSize(),true);
         _inBuffer=_inNIOBuffer.getByteBuffer();
-
     }
 
     /* ------------------------------------------------------------ */
