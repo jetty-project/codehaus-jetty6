@@ -44,6 +44,20 @@ public class TestAjpParser extends TestCase
         parser.parse();
         assertTrue(true);
     }
+    
+    
+    public void testPacketWithBody() throws Exception
+    {
+        String packet=getPacketWithBody();
+        byte[] src=TypeUtil.fromHexString(packet);
+        ByteArrayBuffer buffer=new ByteArrayBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
+        { buffer });
+        EndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
+        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        parser.parse();
+        assertTrue(true);
+    }
 
 
     
@@ -73,6 +87,143 @@ public class TestAjpParser extends TestCase
         }
         
         assertTrue(true);
+    }
+    
+    
+    
+    public void testPacketFragmentWithBody() throws Exception
+    {
+        String packet = getPacketWithBody();
+        byte[] src = TypeUtil.fromHexString(packet);
+        
+        for (int f=1;f<src.length;f++)
+        {
+            byte[] frag0=new byte[src.length-f];
+            byte[] frag1=new byte[f];
+            
+            System.arraycopy(src,0,frag0,0,src.length-f);
+            System.arraycopy(src,src.length-f,frag1,0,f);
+        
+            ByteArrayBuffer buffer= new ByteArrayBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+            SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
+        
+            ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
+        
+            Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+            parser.parseNext();
+            
+            endp.setIn(new ByteArrayBuffer(frag1));
+            parser.parseAvailable();
+        }
+        
+        assertTrue(true);
+    }
+    
+    
+    private String getPacketWithBody()
+    {
+        StringBuffer header = new StringBuffer("");
+        StringBuffer body = new StringBuffer("");
+        
+        
+        header.append("1234026902040008485454502f31");
+        header.append("2e310000162f61646d696e2f496d6167");
+        header.append("6555706c6f61642e68746d00000a3130");
+        header.append("2e34382e31302e3100ffff000a31302e");
+        header.append("34382e31302e3200005000000da00b00");
+        header.append("0a31302e34382e31302e3200a00e005a");
+        header.append("4d6f7a696c6c612f352e30202857696e");
+        header.append("646f77733b20553b2057696e646f7773");
+        header.append("204e5420352e313b20656e2d55533b20");
+        header.append("72763a312e382e312e3129204765636b");
+        header.append("6f2f3230303631323034204669726566");
+        header.append("6f782f322e302e302e3100a001006374");
+        header.append("6578742f786d6c2c6170706c69636174");
+        header.append("696f6e2f786d6c2c6170706c69636174");
+        header.append("696f6e2f7868746d6c2b786d6c2c7465");
+        header.append("78742f68746d6c3b713d302e392c7465");
+        header.append("78742f706c61696e3b713d302e382c69");
+        header.append("6d6167652f706e672c2a2f2a3b713d30");
+        header.append("2e3500a004000e656e2d75732c656e3b");
+        header.append("713d302e3500a003000c677a69702c64");
+        header.append("65666c61746500a002001e49534f2d38");
+        header.append("3835392d312c7574662d383b713d302e");
+        header.append("372c2a3b713d302e3700000a4b656570");
+        header.append("2d416c69766500000333303000a00600");
+        header.append("0a6b6565702d616c69766500a00d003f");
+        header.append("687474703a2f2f31302e34382e31302e");
+        header.append("322f61646d696e2f496d61676555706c");
+        header.append("6f61642e68746d3f6964303d4974656d");
+        header.append("266964313d32266964323d696d673200");
+        header.append("a00900174a53455353494f4e49443d75");
+        header.append("383977733070696168746d00a0070046");
+        header.append("6d756c7469706172742f666f726d2d64");
+        header.append("6174613b20626f756e646172793d2d2d");
+        header.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        header.append("2d2d2d2d2d2d2d2d2d39343338333235");
+        header.append("34323630383700a00800033735390000");
+        header.append("0c4d61782d466f727761726473000002");
+        header.append("3130000500176964303d4974656d2669");
+        header.append("64313d32266964323d696d673200ff");
+
+        
+        
+        
+        
+        body.append("123402f902f72d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d3934333833323534323630");
+        body.append("38370d0a436f6e74656e742d44697370");
+        body.append("6f736974696f6e3a20666f726d2d6461");
+        body.append("74613b206e616d653d227265636f7264");
+        body.append("4964220d0a0d0a320d0a2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d393433383332353432");
+        body.append("363038370d0a436f6e74656e742d4469");
+        body.append("73706f736974696f6e3a20666f726d2d");
+        body.append("646174613b206e616d653d226e616d65");
+        body.append("220d0a0d0a4974656d0d0a2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d3934333833323534");
+        body.append("32363038370d0a436f6e74656e742d44");
+        body.append("6973706f736974696f6e3a20666f726d");
+        body.append("2d646174613b206e616d653d22746e49");
+        body.append("6d674964220d0a0d0a696d67320d0a2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d39343338");
+        body.append("3332353432363038370d0a436f6e7465");
+        body.append("6e742d446973706f736974696f6e3a20");
+        body.append("666f726d2d646174613b206e616d653d");
+        body.append("227468756d624e61696c496d61676546");
+        body.append("696c65223b2066696c656e616d653d22");
+        body.append("6161612e747874220d0a436f6e74656e");
+        body.append("742d547970653a20746578742f706c61");
+        body.append("696e0d0a0d0a61616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("0d0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d39");
+        body.append("3433383332353432363038370d0a436f");
+        body.append("6e74656e742d446973706f736974696f");
+        body.append("6e3a20666f726d2d646174613b206e61");
+        body.append("6d653d226c61726765496d6167654669");
+        body.append("6c65223b2066696c656e616d653d2261");
+        body.append("61612e747874220d0a436f6e74656e74");
+        body.append("2d547970653a20746578742f706c6169");
+        body.append("6e0d0a0d0a6161616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("61616161616161616161616161616161");
+        body.append("6161616161616161616161616161610d");
+        body.append("0a2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d");
+        body.append("2d2d2d2d2d2d2d2d2d2d2d2d2d2d3934");
+        body.append("33383332353432363038372d2d0d0a");
+        
+       
+        
+        
+        return header.toString() + body.toString();
+        
     }
     
     
