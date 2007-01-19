@@ -19,13 +19,14 @@ import java.util.Random;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 
 import org.mortbay.jetty.plus.naming.EnvEntry;
 import org.mortbay.jetty.plus.naming.NamingEntry;
 import org.mortbay.jetty.plus.naming.Resource;
 import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.log.Log;
-import org.mortbay.naming.NamingUtil;
+
 
 /**
  * Configuration
@@ -45,25 +46,15 @@ public class Configuration extends AbstractConfiguration
      */
     public void bindEnvEntry(String name, Object value) throws Exception
     {    
-        EnvEntry envEntry = EnvEntry.getEnvEntry(NamingEntry.SCOPE_LOCAL, name);
-        if ((envEntry != null) && envEntry.isOverrideWebXml())
-            return; //already bound a locally scoped value which should override web.xml
-        
-        envEntry = EnvEntry.getEnvEntry(NamingEntry.SCOPE_GLOBAL, name);
-        if ((envEntry == null) || !envEntry.isOverrideWebXml())
-        {
-            
-            //if either there isn't an env-entry in jetty-env.xml or a global one,
-            //or there is one and it isn't set to override the web.xml one, then
-            //bind the web.xml one
-            InitialContext ic = new InitialContext();
-            Context envCtx = (Context)ic.lookup("java:comp/env");
-            NamingUtil.bind(envCtx, name, value);
-            Log.debug("Bound java:comp/env/"+name+"="+value);  
-        }
+        EnvEntry.bindToENC(name, name, value);
     }
 
     /** 
+     * Bind a resource reference.
+     * 
+     * If a resource reference with the same name is in a jetty-env.xml
+     * file, it will already have been bound.
+     * 
      * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#bindResourceRef(java.lang.String)
      * @param name
      * @throws Exception
@@ -71,24 +62,7 @@ public class Configuration extends AbstractConfiguration
     public void bindResourceRef(String name, Class typeClass)
     throws Exception
     {
-        
-        Resource resource = Resource.getResource(NamingEntry.SCOPE_LOCAL, name);
-        
-        if (resource != null)
-            return; //already bound the locally scoped resource of that name
-        
-        resource = Resource.getResource(NamingEntry.SCOPE_GLOBAL, name);
-        if (resource != null)
-        {
-            //no locally scoped overrides, so bind the global one, if the
-            //TODO: check type is appropriate
-            resource.bindToEnv();
-            Log.debug("Bound resourceref java:comp/env/"+name);
-        }
-        else
-        {
-            Log.warn("No resource to bind matching name="+name);
-        }
+        NamingEntry.bindToENC(name, name, Resource.class);
     }
 
     /** 
@@ -99,54 +73,26 @@ public class Configuration extends AbstractConfiguration
     public void bindResourceEnvRef(String name, Class typeClass)
     throws Exception
     {
-        
-        Resource resource = Resource.getResource(NamingEntry.SCOPE_LOCAL, name);
-        if (resource != null)
-            return; //already bound
-        resource = Resource.getResource(NamingEntry.SCOPE_GLOBAL, name);
-        if (resource != null)
-        {
-            resource.bindToEnv();
-            Log.debug("Bound resource-env-ref java:comp/env/"+name);
-        }
-        else
-            Log.warn("No resource to bind matching name="+name);
+        NamingEntry.bindToENC(name, name, Resource.class);
     }
     
     
     public void bindMessageDestinationRef(String name, Class typeClass)
     throws Exception
     {
-        Resource resource = Resource.getResource(NamingEntry.SCOPE_LOCAL, name);
-        if (resource != null)
-            return; //already bound
-        resource = Resource.getResource(NamingEntry.SCOPE_GLOBAL, name);
-        if (resource != null)
-        {
-            resource.bindToEnv();
-            Log.debug("Bound message-destination-ref java:comp/env/"+name);
-        }
-        else
-            Log.warn("No resource to bind matching name="+name);
+        NamingEntry.bindToENC(name, name, Resource.class);
     }
     
     public void bindUserTransaction ()
     throws Exception
     {
-        Transaction transaction = Transaction.getTransaction (NamingEntry.SCOPE_LOCAL);
-        if (transaction != null)
+        try
         {
-            //special case, still need to bind it because it has to be bound to java:comp instead
-            //of java:comp/env
-            transaction.bindToEnv();
-            return;
+            NamingEntry.bindToENC(Transaction.USER_TRANSACTION,Transaction.USER_TRANSACTION, Transaction.class);
         }
-        
-        transaction = Transaction.getTransaction(NamingEntry.SCOPE_GLOBAL);
-        if (transaction != null)
+        catch (NameNotFoundException e)
         {
-            transaction.bindToEnv();
-            Log.debug("Bound UserTransaction to java:comp/"+transaction.getJndiName());
+            Log.info("No Transaction manager found - if your webapp requires one, please configure one.");
         }
     }
     
@@ -201,4 +147,13 @@ public class Configuration extends AbstractConfiguration
         Context compCtx = (Context)context.lookup("java:comp");
         compCtx.addToEnvironment("org.mortbay.jndi.unlock", _key);        
     }
+
+    /** 
+     * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#parseAnnotations()
+     */
+    protected void parseAnnotations() throws Exception
+    {
+        Log.info(getClass().getCanonicalName()+" does not support annotations on source. Use org.mortbay.jetty.annotations.Configuration instead");
+    }
+    
 }

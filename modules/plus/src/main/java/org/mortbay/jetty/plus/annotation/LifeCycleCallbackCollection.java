@@ -15,7 +15,10 @@
 
 package org.mortbay.jetty.plus.annotation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.mortbay.log.Log;
@@ -32,12 +35,21 @@ public class LifeCycleCallbackCollection
     private HashMap preDestroyCallbacksMap = new HashMap();
     
     
+ 
+    
+    
+    /**
+     * Add a Callback to the list of callbacks.
+     * 
+     * @param callback
+     */
     public void add (LifeCycleCallback callback)
     {
-        if ((callback==null) || (callback.getClassName()==null) || (callback.getTarget()==null))
+        if ((callback==null) || (callback.getTargetClass()==null) || (callback.getTarget()==null))
             return;
 
-        Log.debug("Adding callback for class="+callback.getClassName()+ " of type "+callback.getClass().getName());
+        if (Log.isDebugEnabled())
+            Log.debug("Adding callback for class="+callback.getTargetClass()+ " on "+callback.getTarget());
         Map map = null;
         if (callback instanceof PreDestroyCallback)
             map = preDestroyCallbacksMap;
@@ -47,12 +59,17 @@ public class LifeCycleCallbackCollection
         if (map == null)
             throw new IllegalArgumentException ("Unsupported lifecycle callback type: "+callback);
 
-        //check that there is not already a callback of the same type
-        //already registered for this class
-        LifeCycleCallback existing = (LifeCycleCallback)map.get(callback.getClassName());
-        if ( existing != null)
-            throw new IllegalStateException("Callback already registered for class "+callback.getClassName() + " on method "+existing.getTarget().getName());
-        map.put(callback.getClassName(), callback);
+     
+        List callbacks = (List)map.get(callback.getTargetClass());
+        if (callbacks==null)
+        {
+            callbacks = new ArrayList();
+            map.put(callback.getTargetClass(), callbacks);
+        }
+       
+        //don't add another callback for exactly the same method
+        if (!callbacks.contains(callback))
+            callbacks.add(callback);
     }
 
     
@@ -68,13 +85,13 @@ public class LifeCycleCallbackCollection
         if (o == null)
             return;
         
-        LifeCycleCallback callback = (LifeCycleCallback)postConstructCallbacksMap.get(o.getClass().getName());
+        List callbacks = (List)postConstructCallbacksMap.get(o.getClass());
         
-        Log.debug("Got callback="+callback+" for class: "+o.getClass().getName());
-        if (callback == null)
+        if (callbacks == null)
             return;
         
-        callback.callback(o);
+        for (int i=0;i<callbacks.size();i++)
+            ((LifeCycleCallback)callbacks.get(i)).callback(o);
     }
     
     
@@ -84,14 +101,16 @@ public class LifeCycleCallbackCollection
      * @param o the object on which to attempt the callback
      */
     public void callPreDestroyCallback (Object o)
+    throws Exception
     {
         if (o == null)
             return;
 
-        PreDestroyCallback callback = (PreDestroyCallback)preDestroyCallbacksMap.get(o.getClass().getName());
-        Log.debug("Got callback="+callback+" for class: "+o.getClass().getName());
-        if (callback == null)
+        List callbacks = (List)preDestroyCallbacksMap.get(o.getClass());
+        if (callbacks == null)
             return;
-        callback.callback(o);
+        
+        for (int i=0;i<callbacks.size();i++)
+            ((LifeCycleCallback)callbacks.get(i)).callback(o);
     }
 }

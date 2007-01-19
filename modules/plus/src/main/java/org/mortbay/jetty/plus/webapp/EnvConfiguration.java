@@ -168,7 +168,7 @@ public class EnvConfiguration implements Configuration
         {
             EnvEntry ee = (EnvEntry)itor.next();
             Log.debug("configuring env entry "+ee.getJndiName());
-            ee.bindToEnv();
+            ee.bindToENC();
         }
     }
     
@@ -190,8 +190,8 @@ public class EnvConfiguration implements Configuration
         {
             NamingEntry ne = (NamingEntry)itor.next();
             Log.debug("Unbinding naming entry "+ne.getJndiName());
-            ne.unbindEnv();
-            ne.unbind();
+            ne.unbindENC();
+            ne.release();
         }
     }
     

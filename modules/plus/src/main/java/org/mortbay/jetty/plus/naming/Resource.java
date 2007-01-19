@@ -15,12 +15,10 @@
 
 package org.mortbay.jetty.plus.naming;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NameNotFoundException;
+
 import javax.naming.NamingException;
 
-import org.mortbay.log.Log;
+
 
 /**
  * Resource
@@ -35,6 +33,9 @@ public class Resource extends NamingEntry
     {
         return (Resource)lookupNamingEntry (scopeType, Resource.class, jndiName);
     }
+    
+    
+    
     
     /**
      * @param jndiName

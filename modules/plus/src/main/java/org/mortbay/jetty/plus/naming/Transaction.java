@@ -18,7 +18,6 @@ package org.mortbay.jetty.plus.naming;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
-import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
@@ -32,6 +31,11 @@ import org.mortbay.naming.NamingUtil;
  * 
  * 
  */
+/**
+ * Transaction
+ *
+ *
+ */
 public class Transaction extends NamingEntry
 {
     public static final String USER_TRANSACTION = "UserTransaction";
@@ -43,6 +47,8 @@ public class Transaction extends NamingEntry
        return (Transaction)lookupNamingEntry(scopeType, Transaction.class, USER_TRANSACTION);
     }
     
+
+
     
     
     public Transaction (UserTransaction userTransaction)
@@ -52,7 +58,7 @@ public class Transaction extends NamingEntry
     }
     
     
-    public void bindToEnv ()
+    public void bindToENC ()
     throws NamingException
     {   
         InitialContext ic = new InitialContext();
@@ -61,10 +67,12 @@ public class Transaction extends NamingEntry
         NamingUtil.bind(env, getJndiName(), new LinkRef(absoluteObjectNameString));
     }
     
+    
+    
     /**
      * Unbind this Transaction from a java:comp
      */
-    public void unbindEnv ()
+    public void unbindENC ()
     {
         try
         {
