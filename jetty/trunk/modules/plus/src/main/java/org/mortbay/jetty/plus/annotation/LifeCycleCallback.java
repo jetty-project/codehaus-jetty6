@@ -32,7 +32,7 @@ public abstract class LifeCycleCallback
 {
     public static final Object[] __EMPTY_ARGS = new Object[] {};
     private Method _target;
-    private String _className;
+    private Class _targetClass;
     
     
     public LifeCycleCallback()
@@ -41,20 +41,20 @@ public abstract class LifeCycleCallback
 
 
     /**
-     * @return the _className
+     * @return the _targetClass
      */
-    public String getClassName()
+    public Class getTargetClass()
     {
-        return _className;
+        return _targetClass;
     }
 
 
     /**
-     * @param name the _className to set
+     * @param name the class to set
      */
-    public void setClassName(String name)
+    public void setTargetClass(Class clazz)
     {
-        _className = name;
+        _targetClass = clazz;
     }
     
     
@@ -84,7 +84,7 @@ public abstract class LifeCycleCallback
             Method method = IntrospectionUtil.findMethod(clazz, methodName, null, true, true);
             validate(clazz, method);
             _target = method;
-            _className = clazz.getName();
+            _targetClass = clazz;
         }
         catch (NoSuchMethodException e)
         {
@@ -143,5 +143,31 @@ public abstract class LifeCycleCallback
         }
     }
 
+    public boolean equals (Object o)
+    {
+        if (o==null)
+            return false;
+        if (!(o instanceof LifeCycleCallback))
+            return false;
+        LifeCycleCallback callback = (LifeCycleCallback)o;
+        
+        if (callback.getTargetClass()==null)
+        {
+            if (getTargetClass() != null)
+                return false;
+        }
+        else if(!callback.getTargetClass().equals(getTargetClass()))
+           return false;
+        if (callback.getTarget()==null)
+        {
+            if (getTarget() != null)
+                return false;
+        }
+        else if (!callback.getTarget().equals(getTarget()))
+            return false;
+        
+        return true;
+    }
+    
     public abstract void validate (Class clazz, Method m);
 }

@@ -19,6 +19,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * IntrospectionUtil
@@ -27,6 +29,23 @@ import java.lang.reflect.Modifier;
  */
 public class IntrospectionUtil
 {
+    
+    public static boolean isJavaBeanCompliantSetter (Method method)
+    {
+        if (method == null)
+            return false;
+        
+        if (method.getReturnType() != Void.TYPE)
+            return false;
+        
+        if (!method.getName().startsWith("set"))
+            return false;
+        
+        if (method.getParameterTypes().length != 1)
+            return false;
+        
+        return true;
+    }
     
     public static Method findMethod (Class clazz, String methodName, Class[] args, boolean checkInheritance, boolean strictArgs)
     throws NoSuchMethodException
@@ -99,7 +118,7 @@ public class IntrospectionUtil
     
     
     
-    public static boolean checkInheritable (Package pack, Member member)
+    public static boolean isInheritable (Package pack, Member member)
     {
         if (pack==null)
             return false;
@@ -116,6 +135,8 @@ public class IntrospectionUtil
        
         return false;
     }
+    
+   
     
     
     public static boolean checkParams (Class[] formalParams, Class[] actualParams, boolean strict)
@@ -155,7 +176,26 @@ public class IntrospectionUtil
         return true;
     }
     
-    public static boolean checkType (Class formalType, Class actualType, boolean strict)
+    
+    public static boolean isSameSignature (Method methodA, Method methodB)
+    {
+        if (methodA==null)
+            return false;
+        if (methodB==null)
+            return false;
+        
+        List parameterTypesA = Arrays.asList(methodA.getParameterTypes());
+        List parameterTypesB = Arrays.asList(methodB.getParameterTypes());
+       
+        if (methodA.getName().equals(methodB.getName())
+            &&
+            parameterTypesA.containsAll(parameterTypesB))
+            return true;
+        
+        return false;
+    }
+    
+    public static boolean isTypeCompatible (Class formalType, Class actualType, boolean strict)
     {
         if (formalType==null && actualType != null)
             return false;
@@ -171,6 +211,47 @@ public class IntrospectionUtil
     }
 
     
+    
+    
+    public static boolean containsSameMethodSignature (Method method, Class c, boolean checkPackage)
+    {
+        if (checkPackage)
+        {
+            if (!c.getPackage().equals(method.getDeclaringClass().getPackage()))
+                return false;
+        }
+        
+        boolean samesig = false;
+        Method[] methods = c.getDeclaredMethods();
+        for (int i=0; i<methods.length && !samesig; i++)
+        {
+            if (IntrospectionUtil.isSameSignature(method, methods[i]))
+                samesig = true;
+        }
+        return samesig;
+    }
+    
+    
+    public static boolean containsSameFieldName(Field field, Class c, boolean checkPackage)
+    {
+        if (checkPackage)
+        {
+            if (!c.getPackage().equals(field.getDeclaringClass().getPackage()))
+                return false;
+        }
+        
+        boolean sameName = false;
+        Field[] fields = c.getDeclaredFields();
+        for (int i=0;i<fields.length && !sameName; i++)
+        {
+            if (fields[i].getName().equals(field.getName()))
+                sameName = true;
+        }
+        return sameName;
+    }
+    
+    
+    
     protected static Method findInheritedMethod (Package pack, Class clazz, String methodName, Class[] args, boolean strictArgs)
     throws NoSuchMethodException
     {
@@ -184,7 +265,7 @@ public class IntrospectionUtil
         for (int i=0;i<methods.length && method==null;i++)
         {
             if (methods[i].getName().equals(methodName) 
-                    && checkInheritable(pack,methods[i])
+                    && isInheritable(pack,methods[i])
                     && checkParams(methods[i].getParameterTypes(), args, strictArgs))
                 method = methods[i];
         }
@@ -206,7 +287,7 @@ public class IntrospectionUtil
         try
         {
             Field field = clazz.getDeclaredField(fieldName);
-            if (checkInheritable(pack, field) && checkType(fieldType, field.getType(), strictType))
+            if (isInheritable(pack, field) && isTypeCompatible(fieldType, field.getType(), strictType))
                 return field;
             else
                 return findInheritedField(clazz.getPackage(), clazz.getSuperclass(),fieldName, fieldType, strictType);

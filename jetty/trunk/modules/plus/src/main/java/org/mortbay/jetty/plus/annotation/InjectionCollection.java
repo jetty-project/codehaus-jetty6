@@ -34,34 +34,86 @@ import org.mortbay.log.Log;
  */
 public class InjectionCollection
 {
-    private HashMap fieldInjectionsMap = new HashMap();
-    private HashMap methodInjectionsMap = new HashMap();
+    private HashMap fieldInjectionsMap = new HashMap();//map of classname to field injections
+    private HashMap methodInjectionsMap = new HashMap();//map of classname to method injections
     
     
     public void add (Injection injection)
     {
-        if ((injection==null) || (injection.getTarget()==null) || (injection.getClassName()==null)) 
+        if ((injection==null) || (injection.getTarget()==null) || (injection.getTargetClass()==null)) 
             return;
         
-        Log.debug("Adding injection for class="+injection.getClassName()+ " on a "+injection.getTarget().getClass());
+        if (Log.isDebugEnabled())
+            Log.debug("Adding injection for class="+injection.getTargetClass()+ " on a "+injection.getTarget());
         Map injectionsMap = null;
         if (injection.getTarget() instanceof Field)
             injectionsMap = fieldInjectionsMap;
         if (injection.getTarget() instanceof Method)
             injectionsMap = methodInjectionsMap;
         
-        List injections = (List)injectionsMap.get(injection.getClassName());
+        List injections = (List)injectionsMap.get(injection.getTargetClass());
         if (injections==null)
         {
             injections = new ArrayList();
-            injectionsMap.put(injection.getClassName(), injections);
+            injectionsMap.put(injection.getTargetClass(), injections);
         }
         
         injections.add(injection);
     }
 
+    public List getFieldInjections (Class clazz)
+    {
+        if (clazz==null)
+            return null;
+        List list = (List)fieldInjectionsMap.get(clazz);
+        return (list==null?Collections.EMPTY_LIST:list);
+    }
     
+    public List getMethodInjections (Class clazz)
+    {
+        if (clazz==null)
+            return null;
+        List list = (List)methodInjectionsMap.get(clazz);
+        return (list==null?Collections.EMPTY_LIST:list);
+    }
  
+    public List getInjections (Class clazz)
+    {
+        if (clazz==null)
+            return null;
+        
+        List results = new ArrayList();
+        results.addAll(getFieldInjections(clazz));
+        results.addAll(getMethodInjections(clazz));
+        return results;
+    }
+    
+    public Injection getInjection (Class clazz, Member member)
+    {
+        if (clazz==null)
+            return null;
+        if (member==null)
+            return null;
+        Map map = null;
+        if (member instanceof Field)
+            map = fieldInjectionsMap;
+        else if (member instanceof Method)
+            map = methodInjectionsMap;
+        
+        if (map==null)
+            return null;
+        
+        List injections = (List)map.get(clazz);
+        Injection injection = null;
+        for (int i=0;injections!=null && i<injections.size() && injection==null;i++)
+        {
+            Injection candidate = (Injection)injections.get(i);
+            if (candidate.getTarget().equals(member))
+                injection = candidate;
+        }
+        return injection;
+    }
+    
     
     public void inject (Object injectable)
     throws Exception
@@ -69,44 +121,14 @@ public class InjectionCollection
         if (injectable==null)
             return;
 
-        //TODO: ensure that overridden methods and fields are correctly visible
+        //Do field injections
+        List list = getFieldInjections(injectable.getClass());
+        for (int i=0; list!=null && i<list.size();i++)        
+            ((Injection)list.get(i)).inject(injectable);
         
-        ArrayList injections = new ArrayList();
-        injections.addAll(getMatchingInjections (injectable.getClass().getDeclaredFields(), 
-                (List)fieldInjectionsMap.get(injectable.getClass().getName())));
-
-        injections.addAll(getMatchingInjections (injectable.getClass().getDeclaredMethods(), 
-                (List)methodInjectionsMap.get(injectable.getClass().getName())));
-        
-        Iterator itor = injections.iterator();
-        while (itor.hasNext())
-            ((Injection)itor.next()).inject(injectable);
-    }
-    
-    
-    
-    public List getMatchingInjections (Member[] members, List injections)
-    {
-        if ((injections==null) || (members==null))
-            return Collections.EMPTY_LIST;
-        
-        List results = new ArrayList();
-
-        Iterator itor = injections.iterator();
-        while (itor.hasNext())
-        {
-            Injection injection = (Injection)itor.next();
-            //find the member in the injectable matching
-            boolean found = false;
-            for (int i=0;i<members.length && !found; i++)
-            {
-                if (members[i].equals(injection.getTarget()))
-                {
-                    found = true;
-                    results.add(injection);
-                }
-            }
-        }
-        return results;
+        //Do method injections
+        list = getMethodInjections(injectable.getClass());
+        for (int i=0; list!=null && i<list.size();i++)
+            ((Injection)list.get(i)).inject(injectable);
     }
 }

@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 
 
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
@@ -36,7 +37,7 @@ import org.mortbay.util.IntrospectionUtil;
  */
 public class Injection
 {
-    private String _className;
+    private Class _targetClass;
     private String _jndiName;
     private String _mappingName;
     private Member _target;
@@ -49,18 +50,18 @@ public class Injection
     /**
      * @return the _className
      */
-    public String getClassName()
+    public Class getTargetClass()
     {
-        return _className;
+        return _targetClass;
     }
 
 
     /**
      * @param name the _className to set
      */
-    public void setClassName(String name)
+    public void setTargetClass(Class clazz)
     {
-        _className = name;
+        _targetClass = clazz;
     }
     
     /**
@@ -108,7 +109,7 @@ public class Injection
         this._target = target;
     }
 
-    
+    //TODO: define an equals method
     
     public void setTarget (Class clazz, String targetName, Class targetType)
     {
@@ -118,7 +119,7 @@ public class Injection
         {
             Log.debug("Looking for method for setter: "+setter+" with arg "+targetType);
             _target = IntrospectionUtil.findMethod(clazz, setter, new Class[] {targetType}, true, false); 
-            _className = clazz.getName();
+            _targetClass = clazz;
         }
         catch (NoSuchMethodException me)
         {
@@ -126,11 +127,11 @@ public class Injection
             try
             {
                 _target = IntrospectionUtil.findField(clazz, targetName, targetType, true, false);
-                _className = clazz.getName();
+                _targetClass = clazz;
             }
             catch (NoSuchFieldException fe)
             {
-                throw new IllegalArgumentException("No such field or method "+targetName+" on class "+_className);
+                throw new IllegalArgumentException("No such field or method "+targetName+" on class "+_targetClass);
             }
         }
     }
@@ -142,7 +143,6 @@ public class Injection
      * @throws Exception
      */
     public void inject (Object injectable)
-    throws Exception
     {
         Member theTarget = getTarget(); 
         if (theTarget instanceof Field)
@@ -162,7 +162,7 @@ public class Injection
      * @throws Exception
      */
     public Object lookupInjectedValue ()
-    throws Exception
+    throws NamingException
     {
         InitialContext context = new InitialContext();
         return context.lookup("java:comp/env/"+getJndiName());
@@ -174,32 +174,42 @@ public class Injection
      * Inject value from jndi into a field of an instance
      * @param field
      * @param injectable
-     * @throws Exception
      */
     public void injectField (Field field, Object injectable)
-    throws Exception
-    {               
-        //validateInjection(field, injectable);
-        boolean accessibility = field.isAccessible();
-        field.setAccessible(true);
-        field.set(injectable, lookupInjectedValue());
-        field.setAccessible(accessibility);
+    {           
+        try
+        {
+            //validateInjection(field, injectable);
+            boolean accessibility = field.isAccessible();
+            field.setAccessible(true);
+            field.set(injectable, lookupInjectedValue());
+            field.setAccessible(accessibility);
+        }
+        catch (Exception e)
+        {
+            throw new IllegalStateException(e);
+        }
     }
     
     /**
      * Inject value from jndi into a setter method of an instance
      * @param method
      * @param injectable
-     * @throws Exception
      */
     public void injectMethod (Method method, Object injectable)
-    throws Exception
     {
         //validateInjection(method, injectable);
-        boolean accessibility = method.isAccessible();
-        method.setAccessible(true);
-        method.invoke(injectable, new Object[] {lookupInjectedValue()});
-        method.setAccessible(accessibility);
+        try
+        {
+            boolean accessibility = method.isAccessible();
+            method.setAccessible(true);
+            method.invoke(injectable, new Object[] {lookupInjectedValue()});
+            method.setAccessible(accessibility);
+        }
+        catch (Exception e)
+        {
+            throw new IllegalStateException(e);
+        }
     }
     
   

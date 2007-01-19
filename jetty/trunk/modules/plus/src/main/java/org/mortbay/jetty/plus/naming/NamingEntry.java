@@ -27,8 +27,6 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.naming.Referenceable;
 
 import org.mortbay.log.Log;
 import org.mortbay.naming.NamingUtil;
@@ -50,12 +48,12 @@ public abstract class NamingEntry
 {
     public static final int SCOPE_GLOBAL = 0;
     public static final int SCOPE_LOCAL = 1;
-    protected String jndiName;
-    protected Object objectToBind;
-    protected String absoluteObjectNameString;
-    protected String namingEntryNameString;
-    protected String objectNameString;
-    protected Context context;
+    protected String jndiName;  //the name representing the object associated with the NamingEntry
+    protected Object objectToBind; //the object associated with the NamingEntry
+    protected String absoluteObjectNameString; //the absolute name of the object
+    protected String namingEntryNameString; //the name of the NamingEntry relative to the context it is stored in
+    protected String objectNameString; //the name of the object relative to the context it is stored in
+    protected Context context; //the context in which both Naming Entry and object are saved
     protected boolean isGlobal;
     protected static ThreadLocal scope = new ThreadLocal();
     
@@ -72,8 +70,125 @@ public abstract class NamingEntry
     
     
     
+    /**
+     * Bind a NamingEntry into JNDI.
+     * 
+     * Locally scoped entries take precedence over globally scoped ones to
+     * allow webapps to override.
+     * 
+     * @param name the name of the NamingEntry from the runtime environment
+     * @param overrideName the name it should be bound as into java:comp/env
+     * @param namingEntryType
+     * @throws NamingException
+     */
+    public static void bindToENC (String name, String overrideName, Class namingEntryType)
+    throws NamingException
+    {  
+        if (name==null||name.trim().equals(""))
+            throw new NamingException ("No name for NamingEntry");
+        if (overrideName==null||overrideName.trim().equals(""))
+            overrideName=name;
+        
+        //locally scoped entries take precedence over globally scoped entries of the same name
+        NamingEntry entry = lookupNamingEntry (NamingEntry.SCOPE_LOCAL, namingEntryType, name);
+        if (entry!=null)
+        {
+            if (!overrideName.equals(name))
+                entry.bindToENC(overrideName);
+            else
+                entry.bindToENC();
+        }
+        else
+        {
+            entry = lookupNamingEntry (NamingEntry.SCOPE_GLOBAL, namingEntryType, name);
+            if (entry != null) 
+            {
+                if (!overrideName.equals(name))
+                    entry.bindToENC(overrideName);
+                else
+                    entry.bindToENC();
+            }
+            else
+                throw new NameNotFoundException("No resource to bind matching name="+name);
+        }
+    }
+
     
+    
+    
+    /**
+     * Check to see if a NamingEntry exists in the given 
+     * scope (local or global).
+     * 
+     * @param scopeType local or global
+     * @param namingEntryType the type of the  NamingEntry
+     * @param jndiName the name in jndi
+     * @return
+     */
+    public static boolean exists (int scopeType, Class namingEntryType, String jndiName)
+    {        
+        switch (scopeType)
+        {
+            case SCOPE_GLOBAL: 
+            {
+                try
+                {
+                    return ((NamingEntry)lookupNamingEntry (new InitialContext(), namingEntryType, jndiName) != null);
+                }
+                catch (NameNotFoundException e)
+                {
+                    return false;
+                } 
+                catch (NamingException e)
+                {
+                    Log.warn(e);
+                    return false;
+                }
+            }
+            case SCOPE_LOCAL:
+            {
+                //check to see if the current scope of the thread is a local (ie webapp specific scope)
+                if (getScope()==SCOPE_LOCAL)
+                {
+                    try
+                    {
+                        InitialContext ic = new InitialContext();
+                        return ((NamingEntry)lookupNamingEntry((Context)ic.lookup("java:comp/env"), namingEntryType, jndiName) != null);
+                    }
+                    catch (NameNotFoundException e)
+                    {
+                        return false;
+                    }
+                    catch (NamingException e)
+                    {
+                        Log.warn(e);
+                        return false;
+                    }
+                }
+                else
+                {
+                    //this thread is not in local scope
+                    return false;
+                }
+            }
+            default:
+            {
+               return false;
+            }
+        }
+    }
   
+    
+    
+    /**
+     * Find a NamingEntry of the given scope.
+     * 
+     * @param scopeType local or global
+     * @param clazz the type of the value stored by the NamingEntry
+     * @param jndiName the name in jndi
+     * @return
+     * @throws NamingException
+     */
     public static NamingEntry lookupNamingEntry (int scopeType, Class clazz, String jndiName)
     throws NamingException
     {
@@ -129,7 +244,9 @@ public abstract class NamingEntry
  
     
     
-    /** Get all NameEntries of a certain type in a context.
+    /** 
+     * Get all NameEntries of a certain type in either the local or global
+     * namespace.
      * 
      * @param scopeType local or global
      * @param clazz the type of the entry
@@ -152,8 +269,7 @@ public abstract class NamingEntry
                 //WARNING: you can only look up local scope if you are indeed in the scope
                 if (getScope()==SCOPE_LOCAL)
                 {
-                    InitialContext ic = new InitialContext();
-                    
+                    InitialContext ic = new InitialContext();                   
                     lookupNamingEntries(list, (Context)ic.lookup("java:comp/env"), clazz);
                 }
                 else
@@ -210,10 +326,19 @@ public abstract class NamingEntry
         Name name = parser.parse("");
         name.add(clazz.getName());
         name.addAll(parser.parse(jndiName));
-        
         return context.lookup(name);
     }
-    /** Constructor
+    
+    
+    
+    /** 
+     * Create a NamingEntry. 
+     * A NamingEntry is a name associated with a value which can later
+     * be looked up in JNDI by a webapp.
+     * 
+     * We create the NamingEntry and put it into JNDI where it can
+     * be linked to the webapp's env-entry, resource-ref etc entries.
+     * 
      * @param jndiName the name of the object which will eventually be in java:comp/env
      * @param object the object to be bound
      * @throws NamingException
@@ -223,52 +348,24 @@ public abstract class NamingEntry
     {
         this.jndiName = jndiName;
         this.objectToBind = object;
-        InitialContext icontext = new InitialContext();
-      
+        
         //if a threadlocal is set indicating we are inside a
-        //webapp, then bind naming entries to the webapp's
-        //context instead of the global context
+        //webapp, then save naming entries to the webapp's
+        //local context instead of the global context
         switch (getScope())
         {
             case SCOPE_GLOBAL: 
-            {
-                context = icontext;
+            {          
                 isGlobal = true;
                 break;
             }
             case SCOPE_LOCAL:
-            {
-                context = (Context)icontext.lookup("java:comp/env");
+            {               
                 isGlobal = false;
                 break;
             }
         }
-        
-       
-        NameParser parser = context.getNameParser("");
-        Name contextName = parser.parse(context.getNameInNamespace());
-        
-        Name name = parser.parse("");
-        name.add(getClass().getName());
-        name.add(getJndiName());
-        namingEntryNameString = name.toString();
-        //bind this NameEntry in the given context so we can access it later
-        NamingUtil.bind(context, namingEntryNameString, this);
-        String absoluteNamingEntryNameString = (isGlobal()?"":"java:")+name.addAll(0,contextName).toString();
-        
-        //bind the object itself in the given context so that we can get it later
-        Name objectName = parser.parse(getJndiName());
-        objectNameString = objectName.toString();
-        NamingUtil.bind(context, objectNameString, getObjectToBind());       
-       
-        //remember the full name of the bound object so that it can be used in
-        //link references later
-        Name fullName = objectName.addAll(0,contextName);
-        absoluteObjectNameString = (isGlobal()?"":"java:")+fullName.toString();
-        
-        
-        Log.debug("Bound "+absoluteObjectNameString);
-        Log.debug("Bound "+absoluteNamingEntryNameString);
+        save(); 
     }
 
     
@@ -278,11 +375,14 @@ public abstract class NamingEntry
      * this NamingEntry
      * @throws NamingException
      */
-    public void bindToEnv ()
+    public void bindToENC ()
     throws NamingException
     {
-        //don't bind local scope naming entries as they are already bound to java:comp/env
-        if (isGlobal())
+        if (isLocal())
+        {
+            //don't bind local scope naming entries as they are already bound to java:comp/env
+        }
+        else if (isGlobal())
         {
             InitialContext ic = new InitialContext();
             Context env = (Context)ic.lookup("java:comp/env");
@@ -293,9 +393,23 @@ public abstract class NamingEntry
     
     
     /**
+     * Add a java:comp/env binding for the object represented by this NamingEntry,
+     * but bind it as a different name to the one supplied
+     * @throws NamingException
+     */
+    public void bindToENC(String overrideName)
+    throws NamingException
+    {
+        InitialContext ic = new InitialContext();
+        Context env = (Context)ic.lookup("java:comp/env");
+        Log.info("Binding java:comp/env/"+overrideName+" to "+absoluteObjectNameString);
+        NamingUtil.bind(env, overrideName, new LinkRef(absoluteObjectNameString));
+    }
+    
+    /**
      * Unbind this NamingEntry from a java:comp/env
      */
-    public void unbindEnv ()
+    public void unbindENC ()
     {
         try
         {
@@ -313,12 +427,18 @@ public abstract class NamingEntry
     /**
      * Unbind this NamingEntry entirely
      */
-    public void unbind ()
+    public void release ()
     {
         try
         {
             context.unbind(objectNameString);
             context.unbind(namingEntryNameString);
+            this.absoluteObjectNameString=null;
+            this.jndiName=null;
+            this.namingEntryNameString=null;
+            this.objectNameString=null;
+            this.objectToBind=null;
+            this.context=null;
         }
         catch (NamingException e)
         {
@@ -354,4 +474,54 @@ public abstract class NamingEntry
         return this.isGlobal;
     }
     
+    public boolean isLocal()
+    {
+        return !this.isGlobal;
+    }
+    
+ 
+    
+    
+    /**
+     * Save the NamingEntry for later use.
+     * 
+     * Saving is done by binding the NamingEntry
+     * itself, and the value it represents into
+     * JNDI. In this way, we can link to the
+     * value it represents later, but also
+     * still retrieve the NamingEntry itself too.
+     * 
+     * @throws NamingException
+     */
+    private void save ()
+    throws NamingException
+    {
+        InitialContext icontext = new InitialContext();
+        if (isGlobal())
+            context = icontext;
+        else
+            context = (Context)icontext.lookup("java:comp/env");
+        
+        NameParser parser = context.getNameParser("");
+        Name contextName = parser.parse(context.getNameInNamespace());
+        
+        //save the NamingEntry itself so it can be accessed later       
+        Name name = parser.parse("");
+        name.add(getClass().getName());
+        name.add(getJndiName());
+        namingEntryNameString = name.toString();
+        NamingUtil.bind(context, namingEntryNameString, this);
+        Log.debug("Bound "+(isGlobal()?"":"java:")+name.addAll(0,contextName));
+        
+        //put the Object into JNDI so it can be linked to later  
+        Name objectName = parser.parse(getJndiName());
+        objectNameString = objectName.toString();
+        NamingUtil.bind(context, objectNameString, getObjectToBind());       
+       
+        //remember the full name of the bound object so that it can be used in
+        //link references later
+        Name fullName = objectName.addAll(0,contextName);
+        absoluteObjectNameString = (isGlobal()?"":"java:")+fullName.toString();       
+        Log.debug("Bound "+absoluteObjectNameString);
+    }
 }

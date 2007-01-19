@@ -18,6 +18,8 @@ package org.mortbay.jetty.plus.annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.mortbay.log.Log;
+
 /**
  * PostConstructCallback
  *
@@ -53,4 +55,10 @@ public class PostConstructCallback extends LifeCycleCallback
         super.callback(instance);
     }
 
+    public boolean equals (Object o)
+    {
+        if (super.equals(o) && (o instanceof PostConstructCallback))
+            return true;
+        return false;
+    }
 }
