@@ -15,12 +15,12 @@
 
 package org.mortbay.jetty.plus.webapp;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+
 import java.util.EventListener;
 import java.util.Iterator;
 
 import javax.servlet.UnavailableException;
+
 
 import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
@@ -44,8 +44,9 @@ import org.mortbay.xml.XmlParser;
  */
 public abstract class AbstractConfiguration extends WebXmlConfiguration
 {
-    private LifeCycleCallbackCollection _callbacks = new LifeCycleCallbackCollection();
-    private InjectionCollection _injections = new InjectionCollection();
+    
+    protected LifeCycleCallbackCollection _callbacks = new LifeCycleCallbackCollection();
+    protected InjectionCollection _injections = new InjectionCollection();
     private boolean _metadataComplete = true;
     
     public abstract void bindEnvEntry (String name, Object value) throws Exception;
@@ -158,6 +159,10 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
             //Again, we insist now that the name of the resource in jetty.xml is
             //the same as web.xml
             initResourceEnvRef(node);      
+        }
+        else if ("message-destination-ref".equals(element))
+        {
+            initMessageDestinationRef(node);
         }
         else if ("post-construct".equals(element))
         {
@@ -403,7 +408,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
             {
                 Class clazz = getWebAppContext().loadClass(targetClassName);
                 Injection injection = new Injection();
-                injection.setClassName(targetClassName);
+                injection.setTargetClass(clazz);
                 injection.setJndiName(jndiName);
                 injection.setTarget(clazz, targetName, valueClass);
                  _injections.add(injection);
@@ -424,11 +429,8 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
      * 
      * @throws Exception
      */
-    protected void parseAnnotations ()
-    throws Exception
-    {
-        Log.info("Class annotation processing is not currently implemented");
-    }
+    protected abstract void parseAnnotations () throws Exception;
+   
     
     
     protected void injectAndCallPostConstructCallbacks()
@@ -444,6 +446,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     
     
     protected void callPreDestroyCallbacks ()
+    throws Exception
     {
         EventListener[] listeners = getWebAppContext().getEventListeners();
         for (int i=0;i<listeners.length;i++)
