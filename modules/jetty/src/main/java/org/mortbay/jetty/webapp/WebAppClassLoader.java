@@ -46,8 +46,9 @@ import org.mortbay.util.LazyList;
  * 
  * @author Greg Wilkins (gregw)
  */
-public class WebAppClassLoader extends URLClassLoader implements Cloneable
+public class WebAppClassLoader extends URLClassLoader 
 {
+    private String _name;
     private WebAppContext _context;
     private ClassLoader _parent;
     
@@ -80,13 +81,23 @@ public class WebAppClassLoader extends URLClassLoader implements Cloneable
     }
     
     /* ------------------------------------------------------------ */
-    public Object clone() throws CloneNotSupportedException
+    /**
+     * @return the name of the classloader
+     */
+    public String getName()
     {
-        // TODO Auto-generated method stub
-        WebAppClassLoader clone = (WebAppClassLoader)super.clone();
-        
-        return clone;
+        return _name;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param name the name of the classloader
+     */
+    public void setName(String name)
+    {
+        _name=name;
+    }
+    
 
     /* ------------------------------------------------------------ */
     public WebAppContext getContext()
@@ -378,8 +389,8 @@ public class WebAppClassLoader extends URLClassLoader implements Cloneable
     public String toString()
     {
         if (Log.isDebugEnabled())
-            return "ContextLoader@" + hashCode() + "(" + LazyList.array2List(getURLs()) + ") / " + _parent;
-        return "ContextLoader@" + hashCode();
+            return "ContextLoader@" + _name + "(" + LazyList.array2List(getURLs()) + ") / " + _parent;
+        return "ContextLoader@" + _name;
     }
     
 }

@@ -53,6 +53,7 @@ import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.log.Log;
 import org.mortbay.log.Logger;
 import org.mortbay.resource.Resource;
@@ -819,6 +820,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     public void setDisplayName(String servletContextName)
     {
         _displayName = servletContextName;
+        if (_classLoader!=null && _classLoader instanceof WebAppClassLoader)
+            ((WebAppClassLoader)_classLoader).setName(servletContextName);
     }
     
     /* ------------------------------------------------------------ */
