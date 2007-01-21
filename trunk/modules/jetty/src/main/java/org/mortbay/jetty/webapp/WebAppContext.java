@@ -344,7 +344,17 @@ public class WebAppContext extends Context
         return (String)_resourceAliases.remove(alias);
     }
 
-
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see org.mortbay.jetty.handler.ContextHandler#setClassLoader(java.lang.ClassLoader)
+     */
+    public void setClassLoader(ClassLoader classLoader)
+    {
+        super.setClassLoader(classLoader);
+        if (classLoader!=null && classLoader instanceof WebAppClassLoader)
+            ((WebAppClassLoader)classLoader).setName(getDisplayName());
+    }
+    
     /* ------------------------------------------------------------ */
     public Resource getResource(String uriInContext) throws MalformedURLException
     {
