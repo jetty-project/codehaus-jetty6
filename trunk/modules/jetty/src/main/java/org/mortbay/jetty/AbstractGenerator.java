@@ -54,7 +54,7 @@ public abstract class AbstractGenerator implements Generator
     public final static int STATE_END = 4;
     
     private static byte[] NO_BYTES = {};
-    private static int MAX_OUTPUT_CHARS = 1024;
+    private static int MAX_OUTPUT_CHARS = 2048;
 
     private static Buffer[] __reasons = new Buffer[505];
     static
@@ -213,6 +213,7 @@ public abstract class AbstractGenerator implements Generator
             }
         }
     }
+    
     /* ------------------------------------------------------------ */    
     public Buffer getUncheckedBuffer()
     {
@@ -681,7 +682,7 @@ public abstract class AbstractGenerator implements Generator
             
             _out._characterEncoding = encoding;
             if (_out._bytes==null)
-                _out._bytes = new ByteArrayOutputStream2(MAX_OUTPUT_CHARS*6);
+                _out._bytes = new ByteArrayOutputStream2(MAX_OUTPUT_CHARS);
         }
 
         /* ------------------------------------------------------------ */
@@ -716,108 +717,144 @@ public abstract class AbstractGenerator implements Generator
         /* ------------------------------------------------------------ */
         public void write (char[] s,int offset, int length) throws IOException
         {      
-            while (length > MAX_OUTPUT_CHARS)
-            {
-                write(s, offset, MAX_OUTPUT_CHARS);
-                offset += MAX_OUTPUT_CHARS;
-                length -= MAX_OUTPUT_CHARS;
-            }
+            Output out = _out; 
+            while (length > 0)
+            {  
+                
+                int chunk = length>MAX_OUTPUT_CHARS?MAX_OUTPUT_CHARS:length;
 
-            Output out = _out;   
-
-            switch (_writeMode)
-            {
-                case WRITE_CONV:
+                switch (_writeMode)
                 {
-                    Writer converter=getConverter();
-                    converter.write(s, offset, length);
-                    converter.flush();
-                }
-                break;
-
-                case WRITE_ISO1:
-                {
-
-                    byte[] buffer=out._bytes.getBuf();
-                    int count=out._bytes.getCount();
-
-                    for (int i = 0; i < length; i++)
+                    case WRITE_CONV:
                     {
-                        int c = s[offset+i];
-                        buffer[count++]=(byte)((c>=0&&c<256)?c:'?'); // ISO-1 and UTF-8 match for 0 - 255
+                        Writer converter=getConverter();
+                        converter.write(s, offset, length);
+                        converter.flush();
                     }
-                    if (count>=0)
+                    break;
+
+                    case WRITE_ISO1:
+                    {
+                        byte[] buffer=out._bytes.getBuf();
+                        int count=out._bytes.getCount();
+                        
+                        if (chunk>buffer.length-count)
+                            chunk=buffer.length-count;
+
+                        for (int i = 0; i < chunk; i++)
+                        {
+                            int c = s[offset+i];
+                            buffer[count++]=(byte)((c>=0&&c<256)?c:'?'); // ISO-1 and UTF-8 match for 0 - 255
+                        }
+                        if (count>=0)
+                            out._bytes.setCount(count);
+
+                        break;
+                    }
+
+                    case WRITE_UTF8:
+                    {
+                        byte[] buffer=out._bytes.getBuf();
+                        int count=out._bytes.getCount();
+         
+                        if (chunk>buffer.length-count)
+                            chunk=buffer.length-count;
+                        
+                        for (int i = 0; i < chunk; i++)
+                        {
+                            int code = s[offset+i];
+
+                            if ((code & 0xffffff80) == 0) 
+                            {
+                                // 1b
+                                buffer[count++]=(byte)(code);
+                            }
+                            else if((code&0xfffff800)==0)
+                            {
+                                // 2b
+                                if (buffer.length-count<2)
+                                {
+                                    chunk=i;
+                                    break;
+                                }
+
+                                buffer[count++]=(byte)(0xc0|(code>>6));
+                                buffer[count++]=(byte)(0x80|(code&0x3f));
+                            }
+                            else if((code&0xffff0000)==0)
+                            {
+                                // 3b
+                                if (buffer.length-count<3)
+                                {
+                                    chunk=i;
+                                    break;
+                                }
+
+                                buffer[count++]=(byte)(0xe0|(code>>12));
+                                buffer[count++]=(byte)(0x80|((code>>6)&0x3f));
+                                buffer[count++]=(byte)(0x80|(code&0x3f));
+                            }
+                            else if((code&0xff200000)==0)
+                            {
+                                // 4b
+                                if (buffer.length-count<4)
+                                {
+                                    chunk=i;
+                                    break;
+                                }
+
+                                buffer[count++]=(byte)(0xf0|(code>>18));
+                                buffer[count++]=(byte)(0x80|((code>>12)&0x3f));
+                                buffer[count++]=(byte)(0x80|((code>>6)&0x3f));
+                                buffer[count++]=(byte)(0x80|(code&0x3f));
+                            }
+                            else if((code&0xf4000000)==0)
+                            {
+                                // 5
+                                if (buffer.length-count<5)
+                                {
+                                    chunk=i;
+                                    break;
+                                }
+
+                                buffer[count++]=(byte)(0xf8|(code>>24));
+                                buffer[count++]=(byte)(0x80|((code>>18)&0x3f));
+                                buffer[count++]=(byte)(0x80|((code>>12)&0x3f));
+                                buffer[count++]=(byte)(0x80|((code>>6)&0x3f));
+                                buffer[count++]=(byte)(0x80|(code&0x3f));
+                            }
+                            else if((code&0x80000000)==0)
+                            {
+                                // 6b
+                                if (buffer.length-count<6)
+                                {
+                                    chunk=i;
+                                    break;
+                                }
+
+                                buffer[count++]=(byte)(0xfc|(code>>30));
+                                buffer[count++]=(byte)(0x80|((code>>24)&0x3f));
+                                buffer[count++]=(byte)(0x80|((code>>18)&0x3f));
+                                buffer[count++]=(byte)(0x80|((code>>12)&0x3f));
+                                buffer[count++]=(byte)(0x80|((code>>6)&0x3f));
+                                buffer[count++]=(byte)(0x80|(code&0x3f));
+                            }
+                            else
+                            {
+                                buffer[count++]=(byte)('?');
+                            }
+                        }
                         out._bytes.setCount(count);
-
-                    break;
-                }
-
-                case WRITE_UTF8:
-                {
-                    byte[] buffer=out._bytes.getBuf();
-                    int count=out._bytes.getCount();
-                    for (int i = 0; i < length; i++)
-                    {
-                        int code = s[offset+i];
-
-                        if ((code & 0xffffff80) == 0) 
-                        {
-                            // 1b
-                            buffer[count++]=(byte)(code);
-                        }
-                        else if((code&0xfffff800)==0)
-                        {
-                            // 2b
-                            buffer[count++]=(byte)(0xc0|(code>>6));
-                            buffer[count++]=(byte)(0x80|(code&0x3f));
-                        }
-                        else if((code&0xffff0000)==0)
-                        {
-                            // 3b
-                            buffer[count++]=(byte)(0xe0|(code>>12));
-                            buffer[count++]=(byte)(0x80|((code>>6)&0x3f));
-                            buffer[count++]=(byte)(0x80|(code&0x3f));
-                        }
-                        else if((code&0xff200000)==0)
-                        {
-                            // 4b
-                            buffer[count++]=(byte)(0xf0|(code>>18));
-                            buffer[count++]=(byte)(0x80|((code>>12)&0x3f));
-                            buffer[count++]=(byte)(0x80|((code>>6)&0x3f));
-                            buffer[count++]=(byte)(0x80|(code&0x3f));
-                        }
-                        else if((code&0xf4000000)==0)
-                        {
-                            // 5
-                            buffer[count++]=(byte)(0xf8|(code>>24));
-                            buffer[count++]=(byte)(0x80|((code>>18)&0x3f));
-                            buffer[count++]=(byte)(0x80|((code>>12)&0x3f));
-                            buffer[count++]=(byte)(0x80|((code>>6)&0x3f));
-                            buffer[count++]=(byte)(0x80|(code&0x3f));
-                        }
-                        else if((code&0x80000000)==0)
-                        {
-                            // 6b
-                            buffer[count++]=(byte)(0xfc|(code>>30));
-                            buffer[count++]=(byte)(0x80|((code>>24)&0x3f));
-                            buffer[count++]=(byte)(0x80|((code>>18)&0x3f));
-                            buffer[count++]=(byte)(0x80|((code>>12)&0x3f));
-                            buffer[count++]=(byte)(0x80|((code>>6)&0x3f));
-                            buffer[count++]=(byte)(0x80|(code&0x3f));
-                        }
-                        else
-                        {
-                            buffer[count++]=(byte)('?');
-                        }
+                        break;
                     }
-                    out._bytes.setCount(count);
-                    break;
+                    default:
+                        throw new IllegalStateException();
                 }
-                default:
-                    throw new IllegalStateException();
+                out._bytes.writeTo(out);
+                out._bytes.reset();
+                length-=chunk;
+                offset+=chunk;
             }
-            out._bytes.writeTo(out);
-            out._bytes.reset();
         }
 
         /* ------------------------------------------------------------ */
