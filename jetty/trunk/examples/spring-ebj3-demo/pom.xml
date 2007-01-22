@@ -18,14 +18,20 @@
   </licenses>
   <repositories>
     <repository>
+      <snapshots><enabled>false</enabled></snapshots>
+      <id>jetty-repository</id>
+      <url>http://repository.codehaus.org/</url>
+    </repository>
+    <repository>
+      <snapshots><enabled>true</enabled></snapshots>
+      <id>jetty-snapshot-repository</id>
+      <url>http://snapshots.repository.codehaus.org/</url>
+    </repository>
+    <repository>
       <snapshots><enabled>true</enabled></snapshots>
       <id>apache-snapshot-repo</id>
       <name>apache-snapshot-repo</name>
       <url>http://people.apache.org/maven-snapshot-repository</url>
-    </repository>
-    <repository>
-      <id>jetty-snapshot-repository</id>
-      <url>http://jetty4.inetu.net/home/ftp/pub/maven2/snapshot</url>
     </repository>
   </repositories>
   <build>
