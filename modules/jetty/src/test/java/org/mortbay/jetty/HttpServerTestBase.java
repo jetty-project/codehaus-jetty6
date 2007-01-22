@@ -353,22 +353,23 @@ public class HttpServerTestBase extends TestCase
         Server server=startServer(new DataHandler());
         try
         {   
-            String[] encoding = {"NONE","UTF-8","ISO-8859-1","ISO-8859-2","JIS"};
+            String[] encoding = {"NONE","UTF-8","ISO-8859-1","ISO-8859-2"};
 
 
             for (int e =0; e<encoding.length;e++)
             {
-                for (int b=1;b<100;b+=50)
+                for (int b=1;b<=128;b=b==1?2:b==2?32:b==32?128:129)
                 {
-                    for (int w=1024;w<10000;w+=4096)
+                    for (int w=41;w<42;w+=4096)
                     {
-                        for (int c=0;c<2;c++)
+                        for (int c=0;c<1;c++)
                         {
-                            String test=encoding[e]+"x"+b+"x"+w+"x"+"x"+c;
+                            String test=encoding[e]+"x"+b+"x"+w+"x"+c;
                             URL url=new URL("http://"+HOST+":"+port+"/?writes="+w+"&block="+b+ (e==0?"":("&encoding="+encoding[e]))+(c==0?"&chars=true":""));
                             InputStream in = (InputStream)url.getContent();
-                            String response=IO.toString(in);
-
+                            String response=IO.toString(in,e==0?null:encoding[e]);
+                            
+                            // System.err.println(test+": "+(b*w)+" "+response.length()+" "+(response.length()-(b*w))/w);
                             assertEquals(test,b*w,response.length());
                         }
                     }
@@ -539,7 +540,7 @@ public class HttpServerTestBase extends TestCase
             String encoding=request.getParameter("encoding");
             String chars=request.getParameter("chars");
             
-            String chunk = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+            String chunk = "ઇ0123456789AઇCDEFGHIJKLMNOPQRSTUVWXYZɐbcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
                 .substring(0,block);
             response.setContentType("text/plain");
             if (encoding==null)

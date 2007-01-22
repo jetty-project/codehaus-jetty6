@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.io.StringWriter;
+import java.io.InputStreamReader;
 
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
@@ -297,9 +299,20 @@ public class IO extends BoundedThreadPool
     public static String toString(InputStream in)
         throws IOException
     {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        copy(in,out);
-        return new String(out.toByteArray());
+        return toString(in,null);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Read input stream to string.
+     */
+    public static String toString(InputStream in,String encoding)
+        throws IOException
+    {
+        StringWriter writer=new StringWriter();
+        InputStreamReader reader = encoding==null?new InputStreamReader(in):new InputStreamReader(in,encoding);
+        
+        copy(reader,writer);
+        return writer.toString();
     }
 
 
