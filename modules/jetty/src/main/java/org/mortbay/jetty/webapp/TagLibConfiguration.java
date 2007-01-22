@@ -175,7 +175,7 @@ public class TagLibConfiguration implements Configuration
         if (web_inf!=null)
         {
             String[] contents = web_inf.list();
-            for (int i=0;i<contents.length;i++)
+            for (int i=0;contents!=null && i<contents.length;i++)
             {
                 if (contents[i]!=null && contents[i].toLowerCase().endsWith(".tld"))
                 {
