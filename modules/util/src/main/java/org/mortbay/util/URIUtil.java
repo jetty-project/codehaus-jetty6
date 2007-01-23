@@ -224,6 +224,21 @@ public class URIUtil
 
         if (chars==null)
             return path;
+
+        if (b>0)
+        {
+            String s;
+            try
+            {
+                s=new String(bytes,0,b,__CHARSET);
+            }
+            catch (UnsupportedEncodingException e)
+            {       
+                s=new String(bytes,0,b);
+            }
+            s.getChars(0,s.length(),chars,n);
+            n+=s.length();
+        }
         
         return new String(chars,0,n);
     }
