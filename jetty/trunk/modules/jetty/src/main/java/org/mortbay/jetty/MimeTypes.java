@@ -18,11 +18,13 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.io.BufferCache.CachedBuffer;
+import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 
 
@@ -88,22 +90,39 @@ public class MimeTypes
     private final static Map __encodings = new HashMap();
     static
     {
-        ResourceBundle mime = ResourceBundle.getBundle("org/mortbay/jetty/mime");
-        Enumeration i = mime.getKeys();
-        while(i.hasMoreElements())
+        try
         {
-            String ext = (String)i.nextElement();
-            String m = mime.getString(ext);
-            __dftMimeMap.put(StringUtil.asciiToLowerCase(ext),normalizeMimeType(m));
+            ResourceBundle mime = ResourceBundle.getBundle("org/mortbay/jetty/mime");
+            Enumeration i = mime.getKeys();
+            while(i.hasMoreElements())
+            {
+                String ext = (String)i.nextElement();
+                String m = mime.getString(ext);
+                __dftMimeMap.put(StringUtil.asciiToLowerCase(ext),normalizeMimeType(m));
+            }
         }
-        
-        ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/jetty/encoding");
-        i = encoding.getKeys();
-        while(i.hasMoreElements())
+        catch(MissingResourceException e)
         {
-            Buffer type = normalizeMimeType((String)i.nextElement());
-            __encodings.put(type,encoding.getString(type.toString()));
+            Log.warn(e.toString());
+            Log.debug(e);
         }
+
+        try
+        {
+            ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/jetty/encoding");
+            Enumeration i = encoding.getKeys();
+            while(i.hasMoreElements())
+            {
+                Buffer type = normalizeMimeType((String)i.nextElement());
+                __encodings.put(type,encoding.getString(type.toString()));
+            }
+        }
+        catch(MissingResourceException e)
+        {
+            Log.warn(e.toString());
+            Log.debug(e);
+        }
+
         
         TEXT_HTML_BUFFER.setAssociate("ISO-8859-1",TEXT_HTML_8859_1_BUFFER);
         TEXT_HTML_BUFFER.setAssociate("ISO_8859_1",TEXT_HTML_8859_1_BUFFER);
