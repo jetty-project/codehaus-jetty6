@@ -172,7 +172,7 @@ public class Server extends HandlerWrapper implements Attributes
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
-        if (this.getClass().getPackage().getImplementationVersion()!=null)
+        if (this.getClass().getPackage()!=null && this.getClass().getPackage().getImplementationVersion()!=null)
             _version=this.getClass().getPackage().getImplementationVersion();
         Log.info("jetty-"+_version);
         HttpGenerator.setServerVersion(_version);
