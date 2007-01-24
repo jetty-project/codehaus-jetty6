@@ -42,8 +42,6 @@ import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-
 /* ------------------------------------------------------------ */
 /**
  * Multipart Form Data Filter.
