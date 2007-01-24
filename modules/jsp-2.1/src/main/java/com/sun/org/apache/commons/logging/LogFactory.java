@@ -41,7 +41,13 @@ public class LogFactory
     
     public static Log getLog (String str)
     {
-        return (Log)_logs.get(str);
+        Log log = (Log)_logs.get(str);
+        if (log == null)
+        {
+            log = new JettyLog(str);
+            _logs.put(str, log);
+        }
+        return log;
     }
     
     public static void release (URLClassLoader cl)
