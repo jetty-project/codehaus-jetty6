@@ -159,7 +159,6 @@ public class Ajp13Parser implements Parser
     {
         // TODO may need to case where we have to copy partial buffer in header to body buffer ??????????
         
-        
         int filled = -1;
         if (_body != null && _buffer != _body)
         {
@@ -195,14 +194,12 @@ public class Ajp13Parser implements Parser
         
         if (filled < 0)
         {
-            /* 
             if (_state > STATE_END)
             {
                 _state = STATE_END;
                 _handler.messageComplete(_contentPosition);
-                return total_filled;
+                return filled;
             }
-            */
             reset(true);
             throw new EofException();
         }

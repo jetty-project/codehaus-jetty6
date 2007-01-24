@@ -30,6 +30,7 @@ public class ByteArrayEndPoint implements EndPoint
     ByteArrayBuffer _in;
     ByteArrayBuffer _out;
     boolean _closed;
+    boolean _nonBlocking;
 
     /* ------------------------------------------------------------ */
     /**
@@ -39,6 +40,24 @@ public class ByteArrayEndPoint implements EndPoint
     {
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the nonBlocking
+     */
+    public boolean isNonBlocking()
+    {
+        return _nonBlocking;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param nonBlocking the nonBlocking to set
+     */
+    public void setNonBlocking(boolean nonBlocking)
+    {
+        _nonBlocking=nonBlocking;
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * 
@@ -97,7 +116,7 @@ public class ByteArrayEndPoint implements EndPoint
      */
     public boolean isBlocking()
     {
-        return false;
+        return !_nonBlocking;
     }
 
     /* ------------------------------------------------------------ */
@@ -129,8 +148,10 @@ public class ByteArrayEndPoint implements EndPoint
     {
         if (_closed)
             throw new IOException("CLOSED");
-        if (_in.length()<=0)
+        if (_in==null)
             return -1;
+        if (_in.length()<=0)
+            return _nonBlocking?0:-1;
         int len = buffer.put(_in);
         _in.skip(len);
         return len;
