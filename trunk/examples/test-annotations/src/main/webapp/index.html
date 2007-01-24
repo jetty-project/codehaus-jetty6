@@ -10,7 +10,7 @@
 <h1>Jetty 6 and Annotations</h1>
 
 <p>
-This example shows how to configure and lookup resources such as DataSources and a JTA transaction manager using annotations and JNDI lookups. The demo shows you how to perform a distributed transaction across two different databases.
+This example shows how to use annotations.
 </p>
 
 <h2>Preparation</h2>
@@ -31,7 +31,6 @@ This example shows how to configure and lookup resources such as DataSources and
 <pre>
   +  cd $JETTY_HOME/contexts
   +  edit annotations-context.xml and uncomment one of the transaction manager setups
-  +  edit test-annotations.d/WEB-INF/jetty-env.xml and uncomment one of the transaction manager setups
 </pre>
 </blockquote>
 </ol>
@@ -40,18 +39,14 @@ This example shows how to configure and lookup resources such as DataSources and
 Now you can start the demo:
 <blockquote>
 <pre>
-  > java -jar start.jar 
+   java -jar start.jar 
 </pre>
 </blockquote>
-<h2>The Datasources/Transaction Demo</h2>
+<h2>The Test</h2>
 <p>
-Click <code>Commit</code> to make a distributed update to 2 different databases, or <code>Rollback</code> to prevent the update from happening.
 </p>
 <form action="test" method="post">
-      <input type="radio" name="completion" value="commit" checked="true"> Commit<BR>
-      <input type="radio" name="completion" value="rollback"> Rollback<BR>
-      <P>
-      <button type="submit">Completion</button>
+  <button type="submit">Do It</button>
 </form>
 </BODY>
 </HTML>

@@ -23,6 +23,7 @@ import javax.transaction.UserTransaction;
 import javax.annotation.Resource;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.security.RunAs;
 
 /**
  * AnnotationTest
@@ -33,69 +34,85 @@ import javax.annotation.PreDestroy;
  * to set up some of the JNDI resources.
  *
  */
-public class AnnotationTest extends HttpServlet {
-    public static final String DATE_FORMAT = "EEE, d MMM yy HH:mm:ss Z";
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
-    
-    private static final String TABLE1 = "mytestdata1";
-    private static final String TABLE2 = "mytestdata2";
-    
-    private static boolean setupDone = false;
-    
+@RunAs("special")
+public class AnnotationTest extends HttpServlet 
+{
+    private String postConstructResult = "";
+    private String dsResult = "";
+    private String envResult = "";
+    private String envLookupResult = "";
+    private String dsLookupResult = "";
+    private String txResult = "";
+    private String txLookupResult = "";
     private DataSource myDS;
-    private DataSource myDS2;
-    private DataSource myDS99;
-
-
-    @Resource(mappedName="wiggle")
-    private Double wiggle;
-
-    @Resource(mappedName="woggle")
-    private Integer woggle;
     
+    @Resource(mappedName="UserTransaction")
+    private UserTransaction myUserTransaction;
+
+
+    @Resource(mappedName="maxAmount")
+    private Double maxAmount;
+
+   
     @Resource(mappedName="jdbc/mydatasource")
     public void setMyDatasource(DataSource ds)
     {
         myDS=ds;
     }
-    
-    @Resource(mappedName="jdbc/mydatasource2")
-    public void setMyDatasource2(DataSource ds)
-    {
-        myDS2=ds;
-    }
-
-    @Resource(mappedName="jdbc/mydatasource99")
-    public void setMyDatasource99(DataSource ds)
-    {
-        myDS99=ds;
-    }
+  
     
     @PostConstruct
-    private void postConstruct ()
-    {
+    private void myPostConstructMethod ()
+    {       
+        postConstructResult = "Called";
        try 
        {
-        System.err.println("mydatasource="+myDS);
-        System.err.println("mydatasource2="+myDS2);
-        System.err.println("mydatasource99="+myDS99);
-        System.err.println("wiggle="+wiggle);
-        InitialContext ic = new InitialContext();
-        System.err.println("java:comp/env/com.acme.AnnotationTest.wiggle="+ic.lookup("java:comp/env/com.acme.AnnotationTest.wiggle"));
-        System.err.println("java:comp/env/com.acme.AnnotationTest.woggle="+ic.lookup("java:comp/env/com.acme.AnnotationTest.woggle"));
-        System.err.println("java:comp/env/com.acme.AnnotationTest.myDatasource="+ic.lookup("java:comp/env/com.acme.AnnotationTest.myDatasource"));
-        System.err.println("java:comp/env/com.acme.AnnotationTest.myDatasource2="+ic.lookup("java:comp/env/com.acme.AnnotationTest.myDatasource2"));
-        System.err.println("java:comp/env/com.acme.AnnotationTest.myDatasource99="+ic.lookup("java:comp/env/com.acme.AnnotationTest.myDatasource99"));
+           dsResult = (myDS==null?"FAIL":"myDS="+myDS.toString());
        }
        catch (Exception e)
        {
-         e.printStackTrace();
+           dsResult = "FAIL: "+e;
+       }
+
+
+       envResult = (maxAmount==null?"FAIL":"maxAmount="+maxAmount.toString());
+       
+       try
+       {
+           InitialContext ic = new InitialContext();
+           envLookupResult = "java:comp/env/com.acme.AnnotationTest.maxAmount="+ic.lookup("java:comp/env/com.acme.AnnotationTest.maxAmount");
+       }
+       catch (Exception e)
+       {
+           envLookupResult = "FAIL: "+e;
+       }
+
+      
+       try
+       {
+           InitialContext ic = new InitialContext();
+           dsLookupResult = "java:comp/env/com.acme.AnnotationTest.myDatasource="+ic.lookup("java:comp/env/com.acme.AnnotationTest.myDatasource");
+       }
+       catch (Exception e)
+       {
+           dsLookupResult = "FAIL: "+e;
+       }
+       
+       txResult = (myUserTransaction==null?"FAIL":"myUserTransaction="+myUserTransaction);
+       try
+       {
+           InitialContext ic = new InitialContext();
+           txLookupResult = "java:comp/env/com.acme.AnnotationTest.myUserTransaction="+ic.lookup("java:comp/env/com.acme.AnnotationTest.myUserTransaction");
+       }
+       catch (Exception e)
+       {
+           txLookupResult = "FAIL: "+e;
        }
     }
     
     @PreDestroy
-    private void preDestroy()
+    private void myPreDestroyMethod()
     {
         System.err.println("PreDestroy called");
     }
@@ -103,15 +120,6 @@ public class AnnotationTest extends HttpServlet {
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
-        try
-        {
-            InitialContext ic = new InitialContext();
-            doSetup();
-        }
-        catch (Exception e)
-        {
-            throw new ServletException(e);
-        }
     }
 
     
@@ -124,35 +132,56 @@ public class AnnotationTest extends HttpServlet {
 
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-    {
-        boolean doCommit = true;
-        
-        String complete = request.getParameter("completion");
-        
-        if (complete != null)
-        {
-            complete = complete.trim();
-            if (complete.trim().equals("commit"))
-                doCommit = true;
-            else
-                doCommit = false;
-        }
-       
-        
+    {      
         try
         {
             response.setContentType("text/html");
             ServletOutputStream out = response.getOutputStream();
             out.println("<html>");
-            out.println("<h1>Jetty6 JNDI & Transaction Tests</h1>");
+            out.println("<h1>Jetty6 Annotation Results</h1>");
             out.println("<body>");
-            if (complete != null)
-            {
-              doTransaction(out, doCommit);
-              out.println("<p>Value of foo in myDS after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS)+"</p>");
-              out.println("<p>Value of foo in myDS2 after "+(doCommit?"commit":"rollback")+": <b>"+getFoo(myDS2)+"</p>");
-            }
-            out.println("<a href=\"index.html\">Try again?</a>");
+            
+            out.println("<h2>@PostConstruct Callback</h2>");
+            out.println("<pre>");
+            out.println("@PostConstruct");
+            out.println("private void myPostConstructMethod ()");
+            out.println("{}"); 
+            out.println("</pre>");
+            out.println("<br/><b>Result: "+postConstructResult+"</b>");
+           
+            
+            out.println("<h2>@Resource Injection for DataSource</h2>");    
+            out.println("<pre>");         
+            out.println("@Resource(mappedName=\"jdbc/mydatasource\");");
+            out.println("public void setMyDatasource(DataSource ds)");
+            out.println("{");
+            out.println("myDS=ds;");
+            out.println("}");
+            out.println("</pre>");
+            out.println("<br/><b>Result: "+dsResult+"</b>");
+            out.println("<br/><b>JNDI Lookup Result: "+dsLookupResult+"</b>");
+
+            
+            out.println("<h2>@Resource Injection for env-entry </h2>");
+            out.println("<pre>");
+            out.println("@Resource(mappedName=\"maxAmount\")");
+            out.println("private Double maxAmount;");
+            out.println("</pre>");
+            out.println("<br/><b>Result: "+envResult+"</b>");
+            out.println("<br/><b>JNDI Lookup Result: "+envLookupResult+"</b>");
+         
+            out.println("<h2>@Resource Injection for UserTransaction </h2>");
+            out.println("<pre>");
+            out.println("@Resource(mappedName=\"UserTransaction\")");
+            out.println("private UserTransaction myUserTransaction;");
+            out.println("</pre>");
+            out.println("<br/><b>Result: "+txResult+"</b>");
+            out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
+            
+            out.println("<h2>@RunAs</h2>");
+            out.println("<br/><b>Result: isUserInRole(\"special\")="+request.isUserInRole("special")+"</b>");            
+            out.println("<br/><b>Result: isUserInRole(\"other\")="+request.isUserInRole("other")+"</b>");
+            
             
             out.println("</body>");            
             out.println("</html>");
@@ -165,167 +194,6 @@ public class AnnotationTest extends HttpServlet {
     }
     
 
-    public void doTransaction(ServletOutputStream out, boolean doCommit)
-    throws Exception
-    {
-        //check DataSource and Transactions
-        Connection c1 = null; 
-        Connection c2 = null;
-        Statement s1 = null;
-        Statement s2 = null;
-        UserTransaction utx = null;
-        try
-        {
-            doSetup();
-            
-            InitialContext ic = new InitialContext();
-            utx = (UserTransaction)ic.lookup("java:comp/UserTransaction");
-            
-            utx.begin();
-            
-            c1 = myDS.getConnection();
-            c2 = myDS2.getConnection();
-            
-            s1 = c1.createStatement();
-            s2 = c2.createStatement();
-            
-            s1.executeUpdate("update "+TABLE1+" set foo=foo + 1 where id=1");
-            s2.executeUpdate("update "+TABLE2+" set foo=foo + 1 where id=1");
-            
-            s1.close();
-            s2.close();
-            
-            c1.close();
-            c2.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            doCommit = false;
-        }
-        finally
-        {
-           if (doCommit)
-               utx.commit();
-           else
-               utx.rollback();
-        }
-        
-    }
-    
-    private Integer getFoo (DataSource ds)
-    throws Exception
-    {
-        Connection c = null;
-        Statement s = null;
-        Integer value = null;
-        try
-        {
-            c = ds.getConnection();
-            s = c.createStatement();
-            String tablename = (ds.equals(myDS)?TABLE1:TABLE2);
-            ResultSet results = s.executeQuery("select foo from "+tablename+" where id=1");
-            if (results.next())
-                value = new Integer(results.getInt(1));
-            
-            results.close();
-            
-            return value;
-        }
-        finally
-        {
-            if (s != null) s.close();
-            if (c != null) c.close();
-        }
-    }
-    
-    private void doSetup ()
-    throws Exception
-    {
-        
-        if (setupDone)
-            return;
-        
-        
-        Connection c1=null;
-        Connection c2=null;
-        Statement s1=null;
-        Statement s2=null;
-        try
-        {
-            c1 = myDS.getConnection();
-            c2 = myDS2.getConnection();
-            
-            s1 = c1.createStatement();
-            s2 = c2.createStatement();
-            
-            s1.execute("create table "+TABLE1+" ( id INTEGER, foo INTEGER )");
-            s1.executeUpdate("insert into "+TABLE1+" (id, foo) values (1, 1)");
-            c1.commit();
-            s2.execute("create table "+TABLE2+" ( id INTEGER, foo INTEGER )");
-            s2.executeUpdate("insert into "+TABLE2+" (id, foo) values (1, 1)");
-            c2.commit();
-            
-            setupDone = true;
-        }
-        finally
-        {
-            if (s1 != null) s1.close();
-            if (s2 != null) s2.close();
-            if (c1 != null) c1.close();
-            if (c2 != null) c2.close();
-        }
-    }
-    
-    private void doTearDown()
-    throws Exception
-    {
-        Connection c1=null;
-        Connection c2=null;
-        Statement s1=null;
-        Statement s2=null;
-        try
-        {
-            c1 = myDS.getConnection();
-            c2 = myDS2.getConnection();
-            
-            s1 = c1.createStatement();
-            s2 = c2.createStatement();
-            
-            s1.execute("drop table "+TABLE1);
-            c1.commit();
-            s2.execute("drop table "+TABLE2);
-            c2.commit();
-            
-        }
-        catch (IllegalStateException e)
-        {
-            System.err.println("Caught expected IllegalStateException from Atomikos on doTearDown");
-            doTearDown();
-        }
-        finally
-        {
-            if (s1 != null) s1.close();
-            if (s2 != null) s2.close();
-            if (c1 != null) c1.close();
-            if (c2 != null) c2.close();
-        }
-    }
-    
-    public void destroy ()
-    {
-        
-        try
-        {
-            doTearDown();     
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-        finally
-        {
-            super.destroy();
-        }
-    }
+  
+   
 }

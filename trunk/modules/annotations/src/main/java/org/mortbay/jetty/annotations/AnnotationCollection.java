@@ -26,14 +26,21 @@ import javax.annotation.Resource;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resources;
+import javax.annotation.security.RunAs;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
+import javax.servlet.Servlet;
+import javax.transaction.UserTransaction;
 
 import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
+import org.mortbay.jetty.plus.naming.EnvEntry;
+import org.mortbay.jetty.plus.naming.Transaction;
+import org.mortbay.jetty.servlet.Holder;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
 
@@ -116,6 +123,38 @@ public class AnnotationCollection
     public List getFields()
     {
         return _fields;
+    }
+    
+    
+    
+    public void processRunAsAnnotations (Holder holder)
+    {
+        //if no Holder we can't process runAs annotations
+        if (holder==null)
+            return;
+        
+        //there's a holder, but it isn't for a Servlet, so don't process runAs annotations
+        if (!(holder instanceof ServletHolder))
+            return;
+        
+        for (int i=0; i<_classes.size();i++)
+        {
+            Class clazz = (Class)_classes.get(i);
+            
+            //if this implements javax.servlet.Servlet check for run-as
+            if (Servlet.class.isAssignableFrom(clazz))
+            { 
+                RunAs runAs = (RunAs)clazz.getAnnotation(RunAs.class);
+                if (runAs != null)
+                {
+                    String role = runAs.value();
+                    if (role != null)
+                        ((ServletHolder)holder).setRunAs(role);                  
+                }
+            }
+            
+            
+          } 
     }
     
     
@@ -312,8 +351,7 @@ public class AnnotationCollection
                 {
                     try
                     {
-                        org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), 
-                                name, (isEnvEntryType(type)?org.mortbay.jetty.plus.naming.EnvEntry.class:org.mortbay.jetty.plus.naming.Resource.class));
+                        org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
                         Log.info("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it
                         Injection injection = new Injection();
@@ -403,8 +441,7 @@ public class AnnotationCollection
                     try
                     {
                         //Check there is a JNDI entry for this annotation 
-                        org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), 
-                                name, (isEnvEntryType(type)?org.mortbay.jetty.plus.naming.EnvEntry.class:org.mortbay.jetty.plus.naming.Resource.class));
+                        org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
                         Log.info("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it if the binding succeeded
                         Injection injection = new Injection();
@@ -516,6 +553,7 @@ public class AnnotationCollection
         }
     }
     
+ 
     private static boolean isEnvEntryType (Class type)
     {
         boolean result = false;
@@ -524,5 +562,19 @@ public class AnnotationCollection
             result = (type.equals(__envEntryTypes[i]));
         }
         return result;
+    }
+    
+    private static Class getNamingEntryType (Class type)
+    {
+        if (type==null)
+            return null;
+        
+        if (UserTransaction.class.isAssignableFrom(type))
+            return Transaction.class;
+        
+        if (isEnvEntryType(type))
+            return EnvEntry.class;
+        else
+            return org.mortbay.jetty.plus.naming.Resource.class;
     }
 }

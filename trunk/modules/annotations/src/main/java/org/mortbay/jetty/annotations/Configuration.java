@@ -45,7 +45,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
             ServletHolder holder = (ServletHolder)itor.next();
             Class servlet = getWebAppContext().loadClass(holder.getClassName());
             processor.processClass(servlet);
-            processor.processAnnotations(servlet, _injections, _callbacks);
+            processor.processAnnotations(holder, servlet, _injections, _callbacks);
         }
         
         //look thru _filters
@@ -55,7 +55,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
             FilterHolder holder = (FilterHolder)itor.next();
             Class filter = getWebAppContext().loadClass(holder.getClassName());
             processor.processClass(filter);
-            processor.processAnnotations(filter, _injections, _callbacks);
+            processor.processAnnotations(null, filter, _injections, _callbacks);
         }
         
         //look thru _listeners
@@ -64,7 +64,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
         {
             Class listener = (Class)itor.next();
             processor.processClass(listener);
-            processor.processAnnotations(listener, _injections, _callbacks);
+            processor.processAnnotations(null, listener, _injections, _callbacks);
         }
     }
 }
