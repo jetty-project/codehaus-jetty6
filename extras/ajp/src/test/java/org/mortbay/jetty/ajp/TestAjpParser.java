@@ -43,6 +43,19 @@ public class TestAjpParser extends TestCase
         Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
         parser.parse();
         assertTrue(true);
+    }    
+    
+    public void testPacket3() throws Exception
+    {
+        String packet="1234028f02020008485454502f312e3100000d2f666f726d746573742e6a737000000d3139322e3136382e342e31383000ffff00107777772e777265636b6167652e6f726700005000000aa0010063746578742f786d6c2c6170706c69636174696f6e2f786d6c2c6170706c69636174696f6e2f7868746d6c2b786d6c2c746578742f68746d6c3b713d302e392c746578742f706c61696e3b713d302e382c696d6167652f706e672c2a2f2a3b713d302e3500a00200075554462d382c2a00a003000c677a69702c6465666c61746500a004000e656e2d67622c656e3b713d302e3500a006000a6b6565702d616c69766500a00900f95048505345535349443d37626361383232616638333466316465373663633630336366636435313938633b20667041757468436f6f6b69653d433035383430394537393344364245434633324230353234344242303039343230383344443645443533304230454637464137414544413745453231313538333745363033454435364332364446353531383635333335423433374531423637414641343533364345304546323342333642323133374243423932333943363631433131443330393842333938414546334546334146454344423746353842443b204a53455353494f4e49443d7365366331623864663432762e6a657474793300a00b00107777772e777265636b6167652e6f726700000a6b6565702d616c69766500000333303000a00e00654d6f7a696c6c612f352e3020285831313b20553b204c696e7578207838365f36343b20656e2d55533b2072763a312e382e302e3929204765636b6f2f3230303631323035202844656269616e2d312e382e302e392d3129204570697068616e792f322e313400a008000130000600066a657474793300ff";
+        byte[] src=TypeUtil.fromHexString(packet);
+        ByteArrayBuffer buffer=new ByteArrayBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
+        { buffer });
+        EndPoint endp=new ByteArrayEndPoint(src,Ajp13Packet.MAX_PACKET_SIZE);
+        Ajp13Parser parser=new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
+        parser.parse();
+        assertTrue(true);
     }
     
     
@@ -280,92 +293,86 @@ public class TestAjpParser extends TestCase
 
         public void content(Buffer ref) throws IOException
         {
-            // System.err.println(ref);
+            System.err.println(ref);
         }
 
         public void headerComplete() throws IOException
         {
-            // System.err.println();
+            System.err.println("--");
         }
 
         public void messageComplete(long contextLength) throws IOException
         {
-            // TODO Auto-generated method stub
+            System.err.println("==");
         }
 
         public void parsedHeader(Buffer name, Buffer value) throws IOException
         {
-            // System.err.println(name+": "+value);
+            System.err.println(name+": "+value);
         }
 
         public void parsedMethod(Buffer method) throws IOException
         {
-            // System.err.println(method);
+            System.err.println(method);
         }
 
         public void parsedProtocol(Buffer protocol) throws IOException
         {
-            // System.err.println(protocol);
+            System.err.println(protocol);
             
         }
 
         public void parsedQueryString(Buffer value) throws IOException
         {
-            // System.err.println("?"+value);
+            System.err.println("?"+value);
         }
 
         public void parsedRemoteAddr(Buffer addr) throws IOException
         {
-            // System.err.println("addr="+addr);
+            System.err.println("addr="+addr);
             
         }
 
         public void parsedRemoteHost(Buffer host) throws IOException
         {
-            // System.err.println("host="+host);
+            System.err.println("host="+host);
             
         }
 
         public void parsedRequestAttribute(String key, Buffer value) throws IOException
         {
-            // System.err.println(key+":: "+value);
+            System.err.println(key+":: "+value);
             
         }
 
         public void parsedServerName(Buffer name) throws IOException
         {
-            // TODO Auto-generated method stub
-            
+            System.err.println("Server:: "+name); 
         }
 
         public void parsedServerPort(int port) throws IOException
         {
-            // TODO Auto-generated method stub
-            
+            System.err.println("Port:: "+port);
         }
 
         public void parsedSslSecure(boolean secure) throws IOException
         {
-            // TODO Auto-generated method stub
-            
+            System.err.println("Secure:: "+secure);     
         }
 
         public void parsedUri(Buffer uri) throws IOException
         {
-            // System.err.println(uri);
-            
+            System.err.println(uri);
         }
 
         public void startForwardRequest() throws IOException
         {
-            // TODO Auto-generated method stub
-            
+            System.err.println("..");
         }
 
         public void parsedRequestAttribute(String key, int value) throws IOException
         {
-            // TODO Auto-generated method stub
-            
+            System.err.println(key+":: "+value);
         }
         
     }
