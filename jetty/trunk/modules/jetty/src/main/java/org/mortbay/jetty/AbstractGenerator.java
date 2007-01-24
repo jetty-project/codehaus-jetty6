@@ -736,18 +736,18 @@ public abstract class AbstractGenerator implements Generator
                     case WRITE_ISO1:
                     {
                         byte[] buffer=out._bytes.getBuf();
-                        int count=out._bytes.getCount();
+                        int bytes=out._bytes.getCount();
                         
-                        if (chunk>buffer.length-count)
-                            chunk=buffer.length-count;
+                        if (chunk>buffer.length-bytes)
+                            chunk=buffer.length-bytes;
 
                         for (int i = 0; i < chunk; i++)
                         {
                             int c = s[offset+i];
-                            buffer[count++]=(byte)((c>=0&&c<256)?c:'?'); // ISO-1 and UTF-8 match for 0 - 255
+                            buffer[bytes++]=(byte)(c<256?c:'?'); // ISO-1 and UTF-8 match for 0 - 255
                         }
-                        if (count>=0)
-                            out._bytes.setCount(count);
+                        if (bytes>=0)
+                            out._bytes.setCount(bytes);
 
                         break;
                     }
