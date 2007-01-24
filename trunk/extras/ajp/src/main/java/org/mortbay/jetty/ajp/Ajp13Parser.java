@@ -35,53 +35,26 @@ import org.mortbay.log.Log;
 public class Ajp13Parser implements Parser
 {
     private final static int STATE_START = -1;
-
     private final static int STATE_END = 0;
-
     private final static int STATE_AJP13CHUNK_START = 1;
-
-    private final static int STATE_AJP13CHUNK_LENGTH = 2;
-
-    private final static int STATE_AJP13CHUNK_LENGTH2 = 3;
-
-    private final static int STATE_AJP13CHUNK = 4;
+    private final static int STATE_AJP13CHUNK = 2;
 
     private int _state = STATE_START;
-
     private long _contentLength;
-
     private long _contentPosition;
-
     private int _chunkLength;
-
     private int _chunkPosition;
-
     private int _headers;
-
     private Buffers _buffers;
-
     private EndPoint _endp;
-
     private Buffer _buffer;
-
     private Buffer _header; // Buffer for header data (and small _content)
-
     private Buffer _body; // Buffer for large content
-
     private View _contentView = new View();
-
     private EventHandler _handler;
-
     private Ajp13Generator _generator;
-
-    private View _tok0; // Saved token: header name, request method or
-
-    // response version
-
-    private View _tok1; // Saved token: header value, request URI or
-
-    // response code
-
+    private View _tok0; // Saved token: header name, request method or response version
+    private View _tok1; // Saved token: header value, request URI orresponse code
     protected int _length;
     protected int _packetLength;
     
@@ -182,6 +155,62 @@ public class Ajp13Parser implements Parser
     }
 
     /* ------------------------------------------------------------------------------- */
+    private int fill() throws IOException
+    {
+        // TODO may need to case where we have to copy partial buffer in header to body buffer ??????????
+        
+        
+        int filled = -1;
+        if (_body != null && _buffer != _body)
+        {
+            _buffer = _body;
+            filled = _buffer.length();
+            return filled;
+        }
+
+        if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
+            throw new IOException("FULL");
+        if (_endp != null && filled <= 0)
+        {
+            // Compress buffer if handling _content buffer
+            // TODO check this is not moving data too much
+            if (_buffer == _body)
+                _buffer.compact();
+
+            if (_buffer.space() == 0)
+                throw new IOException("FULL");
+
+            try
+            {
+                filled = _endp.fill(_buffer);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                Log.debug(e);
+                reset(true);
+                throw (e instanceof EofException) ? e : new EofException(e);
+            }
+        }
+        
+        if (filled < 0)
+        {
+            /* 
+            if (_state > STATE_END)
+            {
+                _state = STATE_END;
+                _handler.messageComplete(_contentPosition);
+                return total_filled;
+            }
+            */
+            reset(true);
+            throw new EofException();
+        }
+    
+        return filled;
+    }
+    
+    /* ------------------------------------------------------------------------------- */
     public long parseNext() throws IOException
     {
         long total_filled = -1;
@@ -208,70 +237,20 @@ public class Ajp13Parser implements Parser
             _handler.messageComplete(_contentPosition);
             return total_filled;
         }
-
-        // Fill buffer if we can
-        if (_buffer.space()>0)
-        {
-            int filled = -1;
-            if (_body != null && _buffer != _body)
-            {
-                _buffer = _body;
-                filled = _buffer.length();
-            }
-
-            if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
-                throw new IOException("FULL");
-            if (_endp != null && filled <= 0)
-            {
-                // Compress buffer if handling _content buffer
-                // TODO check this is not moving data too much
-                if (_buffer == _body)
-                    _buffer.compact();
-
-                if (_buffer.space() == 0)
-                {
-                    throw new IOException("FULL");
-                }
-
-                try
-                {
-                    if (total_filled < 0)
-                        total_filled = 0;
-
-                    filled = _endp.fill(_buffer);
-
-                    if (filled > 0)
-                        total_filled += filled;
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                    Log.debug(e);
-                    reset(true);
-                    throw (e instanceof EofException) ? e : new EofException(e);
-                }
-            }
-
-            if (filled < 0)
-            {
-
-                if (_state > STATE_END)
-                {
-                    _state = STATE_END;
-                    _handler.messageComplete(_contentPosition);
-                    return total_filled;
-                }
-                reset(true);
-                throw new EofException();
-            }
-        }
         
         if (_state < 0)
         {
+            // have we seen a packet?
             if (_packetLength<=0)
             {
                 if (_buffer.length()<4)
-                    return total_filled;
+                {
+                    if (total_filled<0) 
+                        total_filled=0;
+                    total_filled+=fill();
+                    if (_buffer.length()<4)
+                        return total_filled;
+                }
                 
                 _contentLength = HttpTokens.UNKNOWN_CONTENT;
                 int _magic = Ajp13RequestPacket.getInt(_buffer);
@@ -285,7 +264,13 @@ public class Ajp13Parser implements Parser
             }
             
             if (_buffer.length() < _packetLength)
-                return total_filled;
+            {
+                if (total_filled<0) 
+                    total_filled=0;
+                total_filled+=fill();
+                if (_buffer.length() < _packetLength)
+                    return total_filled;
+            }
 
             // Parse Header
             Buffer bufHeaderName = null;
@@ -468,101 +453,105 @@ public class Ajp13Parser implements Parser
 
         Buffer chunk;
 
-        while (_state > STATE_END)
+        while (_state>STATE_END)
         {
-
             switch (_state)
             {
-            case STATE_AJP13CHUNK_START:
-                if (_buffer.length()<6)
-                    return total_filled;
-                int _magic = Ajp13RequestPacket.getInt(_buffer);
-                if (_magic != Ajp13RequestHeaders.MAGIC)
-                {
-                    throw new IOException("Bad AJP13 rcv packet: " + "0x" + Integer.toHexString(_magic) + " expected " + "0x" + Integer.toHexString(Ajp13RequestHeaders.MAGIC) + " " + this);
-                }
-                _chunkLength = 0;
-                _chunkPosition = 0;
-                _state = STATE_AJP13CHUNK_LENGTH;
-
-            case STATE_AJP13CHUNK_LENGTH:
-                _chunkLength = Ajp13RequestPacket.getInt(_buffer) - 2;
-                _state = STATE_AJP13CHUNK_LENGTH2;
-
-            case STATE_AJP13CHUNK_LENGTH2:
-                Ajp13RequestPacket.getInt(_buffer);
-                if (_chunkLength == 0)
-                {
-
-                    // _buffer.clear();
-                    _state = STATE_END;
-                    _generator.setNeedMore(false);
-                    _generator.setExpectMore(false);
-                    _handler.messageComplete(_contentPosition);
-                    return total_filled;
-                }
-                _state = STATE_AJP13CHUNK;
-
-            case STATE_AJP13CHUNK:
-                if (_buffer.length()<_chunkLength)
-                    return total_filled;
-                
-                int remaining = _chunkLength - _chunkPosition;
-
-                if (remaining == 0)
-                {
-                    _state = STATE_AJP13CHUNK_START;
-                    if (_contentPosition < _contentLength)
+                case STATE_AJP13CHUNK_START:
+                    if (_buffer.length()<6)
+                    {
+                        if (total_filled<0) 
+                            total_filled=0;
+                        total_filled+=fill();
+                        if (_buffer.length()<6)
+                            return total_filled;
+                    }
+                    int _magic=Ajp13RequestPacket.getInt(_buffer);
+                    if (_magic!=Ajp13RequestHeaders.MAGIC)
+                    {
+                        throw new IOException("Bad AJP13 rcv packet: "+"0x"+Integer.toHexString(_magic)+" expected "+"0x"
+                                +Integer.toHexString(Ajp13RequestHeaders.MAGIC)+" "+this);
+                    }
+                    _chunkPosition=0;
+                    _chunkLength=Ajp13RequestPacket.getInt(_buffer)-2;
+                    Ajp13RequestPacket.getInt(_buffer);
+                    if (_chunkLength==0)
                     {
 
-                        _generator.setNeedMore(true);
+                        // _buffer.clear();
+                        _state=STATE_END;
+                        _generator.setNeedMore(false);
+                        _generator.setExpectMore(false);
+                        _handler.messageComplete(_contentPosition);
+                        return total_filled;
+                    }
+                    _state=STATE_AJP13CHUNK;
+
+                case STATE_AJP13CHUNK:
+                    if (_buffer.length()<_chunkLength)
+                    {
+                        if (total_filled<0) 
+                            total_filled=0;
+                        total_filled+=fill();
+                        if (_buffer.length()<_chunkLength)
+                            return total_filled;
+                    }
+
+                    int remaining=_chunkLength-_chunkPosition;
+
+                    if (remaining==0)
+                    {
+                        _state=STATE_AJP13CHUNK_START;
+                        if (_contentPosition<_contentLength)
+                        {
+
+                            _generator.setNeedMore(true);
+                        }
+                        else
+                        {
+                            // _state=STATE_END;
+                            _generator.setNeedMore(false);
+                            _generator.setExpectMore(false);
+                        }
+
+                        return total_filled;
+                    }
+
+                    if (_buffer.length()<remaining)
+                    {
+                        remaining=_buffer.length();
+                    }
+
+                    chunk=Ajp13RequestPacket.get(_buffer,(int)remaining);
+                    _contentPosition+=chunk.length();
+                    _chunkPosition+=chunk.length();
+                    _contentView.update(chunk);
+                    // _contentView.put(chunk);
+
+                    remaining=_chunkLength-_chunkPosition;
+
+                    if (remaining==0)
+                    {
+                        _state=STATE_AJP13CHUNK_START;
+                        if (_contentPosition<_contentLength)
+                        {
+
+                            _generator.setNeedMore(true);
+                        }
+                        else
+                        {
+
+                            // _state=STATE_END;
+                            _generator.setNeedMore(false);
+                            _generator.setExpectMore(false);
+                        }
                     }
                     else
                     {
-                        // _state=STATE_END;
-                        _generator.setNeedMore(false);
-                        _generator.setExpectMore(false);
+
                     }
 
-                    return total_filled;
-                }
-
-                if (_buffer.length() < remaining)
-                {
-                    remaining = _buffer.length();
-
-                }
-
-                chunk = Ajp13RequestPacket.get(_buffer, (int) remaining);
-                _contentPosition += chunk.length();
-                _chunkPosition += chunk.length();
-                _contentView.update(chunk);
-                // _contentView.put(chunk);
-
-                remaining = _chunkLength - _chunkPosition;
-
-                if (remaining == 0)
-                {
-                    _state = STATE_AJP13CHUNK_START;
-                    if (_contentPosition < _contentLength)
-                    {
-
-                        _generator.setNeedMore(true);
-                    }
-                    else
-                    {
-
-                        // _state=STATE_END;
-                        _generator.setNeedMore(false);
-                        _generator.setExpectMore(false);
-                    }
-                }
-                else
-                {
-
-                }
-
-                _handler.content(chunk);
+                    _handler.content(chunk);
 
                 return total_filled;
 
