@@ -27,6 +27,8 @@ import java.util.ListIterator;
 
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
+import org.mortbay.jetty.servlet.Holder;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
 
@@ -117,7 +119,7 @@ public class AnnotationProcessor
     }
 
 
-    public  void processAnnotations(Class clazz, InjectionCollection webXmlInjections, LifeCycleCallbackCollection webXmlCallbacks)
+    public  void processAnnotations(Holder holder, Class clazz, InjectionCollection webXmlInjections, LifeCycleCallbackCollection webXmlCallbacks)
     {
         if (clazz==null)
             return;
@@ -128,8 +130,8 @@ public class AnnotationProcessor
             Log.warn("No annotations for class "+clazz);
             return;
         }
-        
-        //now do any JNDI bindings and create any Injections and LifeCycleCallbacks from the annotations
+
+        collection.processRunAsAnnotations(holder);
         collection.processResourcesAnnotations();       
         collection.processResourceAnnotations(webXmlInjections);        
         collection.processLifeCycleCallbackAnnotations(webXmlCallbacks);

@@ -102,7 +102,7 @@ public class TestAnnotationInheritance extends TestCase
         processor.processClass(ResourceB.class);
         InjectionCollection injections = new InjectionCollection();
         LifeCycleCallbackCollection callbacks = new LifeCycleCallbackCollection();
-        processor.processAnnotations(ResourceB.class, injections, callbacks);
+        processor.processAnnotations(null, ResourceB.class, injections, callbacks);
        
         AnnotationCollection collection = processor.getAnnotationCollection(ResourceB.class);
         
