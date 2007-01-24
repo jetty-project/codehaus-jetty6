@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-216 handle AJP packet fragmentation
  + JETTY-218 handle AJP ssl key size and integer
  + JETTY-219 fixed trailing encoded chars in cookies
+ + JETTY-220 fixed AJP content 
  + add support for Annotations in servlet, filter and listener sources
  + improved writer buffering
 
