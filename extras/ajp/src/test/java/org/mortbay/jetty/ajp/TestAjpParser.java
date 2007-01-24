@@ -94,6 +94,7 @@ public class TestAjpParser extends TestCase
             SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
         
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
+            endp.setNonBlocking(true);
         
             Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
@@ -139,6 +140,7 @@ public class TestAjpParser extends TestCase
             SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
         
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
+            endp.setNonBlocking(true);
         
             Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
@@ -169,6 +171,7 @@ public class TestAjpParser extends TestCase
             SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
         
             ByteArrayEndPoint endp = new ByteArrayEndPoint(frag0,Ajp13Packet.MAX_PACKET_SIZE);
+            endp.setNonBlocking(true);
         
             Ajp13Parser parser = new Ajp13Parser(buffers,endp,new EH(),new Ajp13Generator(buffers,endp,0,0));
             parser.parseNext();
@@ -293,86 +296,86 @@ public class TestAjpParser extends TestCase
 
         public void content(Buffer ref) throws IOException
         {
-            System.err.println(ref);
+            // System.err.println(ref);
         }
 
         public void headerComplete() throws IOException
         {
-            System.err.println("--");
+            // System.err.println("--");
         }
 
         public void messageComplete(long contextLength) throws IOException
         {
-            System.err.println("==");
+            // System.err.println("==");
         }
 
         public void parsedHeader(Buffer name, Buffer value) throws IOException
         {
-            System.err.println(name+": "+value);
+            // System.err.println(name+": "+value);
         }
 
         public void parsedMethod(Buffer method) throws IOException
         {
-            System.err.println(method);
+            // System.err.println(method);
         }
 
         public void parsedProtocol(Buffer protocol) throws IOException
         {
-            System.err.println(protocol);
+            // System.err.println(protocol);
             
         }
 
         public void parsedQueryString(Buffer value) throws IOException
         {
-            System.err.println("?"+value);
+            // System.err.println("?"+value);
         }
 
         public void parsedRemoteAddr(Buffer addr) throws IOException
         {
-            System.err.println("addr="+addr);
+            // System.err.println("addr="+addr);
             
         }
 
         public void parsedRemoteHost(Buffer host) throws IOException
         {
-            System.err.println("host="+host);
+            // System.err.println("host="+host);
             
         }
 
         public void parsedRequestAttribute(String key, Buffer value) throws IOException
         {
-            System.err.println(key+":: "+value);
+            // System.err.println(key+":: "+value);
             
         }
 
         public void parsedServerName(Buffer name) throws IOException
         {
-            System.err.println("Server:: "+name); 
+            // System.err.println("Server:: "+name); 
         }
 
         public void parsedServerPort(int port) throws IOException
         {
-            System.err.println("Port:: "+port);
+            // System.err.println("Port:: "+port);
         }
 
         public void parsedSslSecure(boolean secure) throws IOException
         {
-            System.err.println("Secure:: "+secure);     
+            // System.err.println("Secure:: "+secure);     
         }
 
         public void parsedUri(Buffer uri) throws IOException
         {
-            System.err.println(uri);
+            // System.err.println(uri);
         }
 
         public void startForwardRequest() throws IOException
         {
-            System.err.println("..");
+            // System.err.println("..");
         }
 
         public void parsedRequestAttribute(String key, int value) throws IOException
         {
-            System.err.println(key+":: "+value);
+            // System.err.println(key+":: "+value);
         }
         
     }
