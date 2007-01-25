@@ -511,10 +511,12 @@ public class ServletHolder extends Holder
                 request.setAttribute("javax.servlet.error.servlet_name",getName());
 
             // Return to singleThreaded pool
-            synchronized(this)
+            if (_servlets!=null && servlet!=null)
             {
-                if (_servlets!=null && servlet!=null)
+                synchronized(this)
+                {
                     _servlets.push(servlet);
+                }
             }
         }
     }
