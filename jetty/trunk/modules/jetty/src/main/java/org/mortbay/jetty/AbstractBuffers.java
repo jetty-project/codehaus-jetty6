@@ -14,6 +14,7 @@ import org.mortbay.io.Buffers;
  */
 public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffers
 {
+    private static ThreadLocal _headerBuffer = new ThreadLocal();
     private int _headerBufferSize=8*1024;
     private int _requestBufferSize=32*1024;
     private int _responseBufferSize=64*1024;
@@ -39,8 +40,6 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     {
         _headerBufferSize = headerBufferSize;
     }
-    
-
     
     /* ------------------------------------------------------------ */
     /**
@@ -88,10 +87,19 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     {
         if (size==_headerBufferSize)
         {
+            Buffer buffer = (Buffer) _headerBuffer.get();
+            if (buffer!=null)
+            {
+                _headerBuffer.set(null);
+                return buffer;
+            }
+            
             synchronized(_headerBuffers)
             {
                 if (_headerBuffers.size()==0)
+                {
                     return newBuffer(size);
+                }
                 return (Buffer) _headerBuffers.remove(_headerBuffers.size()-1);
             }
         }
@@ -122,14 +130,23 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     public void returnBuffer(Buffer buffer)
     {
         buffer.clear();
+        
         if (!buffer.isVolatile() && !buffer.isImmutable())
         {
             int c=buffer.capacity();
             if (c==_headerBufferSize)
             {
-                synchronized(_headerBuffers)
+                Buffer b2 = (Buffer) _headerBuffer.get();
+                if (b2==null)
                 {
-                    _headerBuffers.add(buffer);
+                    _headerBuffer.set(buffer);
+                }
+                else
+                {
+                    synchronized(_headerBuffers)
+                    {
+                        _headerBuffers.add(buffer);
+                    }
                 }
             }
             else if (c==_responseBufferSize)
