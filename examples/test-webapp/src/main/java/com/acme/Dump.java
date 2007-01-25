@@ -13,11 +13,13 @@
 // ========================================================================
 
 package com.acme;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -251,6 +253,8 @@ public class Dump extends HttpServlet
             throw new RuntimeException("test");
         }
 
+
+        String buffered= request.getParameter("buffered");
         
         PrintWriter pout=null;
         
@@ -262,7 +266,8 @@ public class Dump extends HttpServlet
         {
             pout=new PrintWriter(new OutputStreamWriter(response.getOutputStream(),charset));
         }
-        
+        if (buffered!=null)
+            pout = new PrintWriter(new BufferedWriter(pout,Integer.parseInt(buffered)));
         
         try
         {
@@ -420,16 +425,13 @@ public class Dump extends HttpServlet
                 pout.write("<th align=\"left\" valign=\"top\" colspan=\"2\"><big><br/>Content:</big></th>");
                 pout.write("</tr><tr>\n");
                 pout.write("<td><pre>");
-                byte[] content= new byte[4096];
+                char[] content= new char[4096];
                 int len;
                 try{
-                    InputStream in=request.getInputStream();
+                    Reader in=request.getReader();
                     
                     while((len=in.read(content))>=0)
-                        pout.write(new String(content,0,len));
-                    // int b;
-                    // while ((b=in.read())>=0)
-                    //    pout.write((char)b);
+                        pout.write(content,0,len);
                 }
                 catch(IOException e)
                 {
@@ -584,7 +586,14 @@ public class Dump extends HttpServlet
             continuation.suspend(Long.parseLong(request.getParameter("stream")));
         }
 
-
+        String lines= request.getParameter("lines");
+        if (lines!=null)
+        {
+            char[] line = "<span>A line of characters. Blah blah blah blah.  blooble blooble</span></br>\n".toCharArray();
+            for (int l=Integer.parseInt(lines);l-->0;)
+                pout.write(line);
+        }
+        
         pout.write("</body>\n</html>\n");
         
         pout.close();
