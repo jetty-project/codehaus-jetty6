@@ -194,6 +194,9 @@ public class Holder extends AbstractLifeCycle implements Serializable
     
     /* ------------------------------------------------------------ */
     /**
+     * The name is a primary key for the held object.
+     * Ensure that the name is set BEFORE adding a Holder
+     * (eg ServletHolder or FilterHolder) to a ServletHandler.
      * @param name The name to set.
      */
     public void setName(String name)
