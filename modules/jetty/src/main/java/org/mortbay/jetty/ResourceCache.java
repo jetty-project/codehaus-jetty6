@@ -126,7 +126,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 _leastRecentlyUsed=null;
             }
         }
-        System.gc();
     }
 
     /* ------------------------------------------------------------ */
