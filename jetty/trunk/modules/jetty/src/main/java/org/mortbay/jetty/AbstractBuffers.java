@@ -14,7 +14,6 @@ import org.mortbay.io.Buffers;
  */
 public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffers
 {
-    private static ThreadLocal _headerBuffer = new ThreadLocal();
     private int _headerBufferSize=8*1024;
     private int _requestBufferSize=32*1024;
     private int _responseBufferSize=64*1024;
@@ -86,14 +85,7 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     public Buffer getBuffer(int size)
     {
         if (size==_headerBufferSize)
-        {
-            Buffer buffer = (Buffer) _headerBuffer.get();
-            if (buffer!=null)
-            {
-                _headerBuffer.set(null);
-                return buffer;
-            }
-            
+        {   
             synchronized(_headerBuffers)
             {
                 if (_headerBuffers.size()==0)
@@ -136,17 +128,9 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
             int c=buffer.capacity();
             if (c==_headerBufferSize)
             {
-                Buffer b2 = (Buffer) _headerBuffer.get();
-                if (b2==null)
+                synchronized(_headerBuffers)
                 {
-                    _headerBuffer.set(buffer);
-                }
-                else
-                {
-                    synchronized(_headerBuffers)
-                    {
-                        _headerBuffers.add(buffer);
-                    }
+                    _headerBuffers.add(buffer);
                 }
             }
             else if (c==_responseBufferSize)
