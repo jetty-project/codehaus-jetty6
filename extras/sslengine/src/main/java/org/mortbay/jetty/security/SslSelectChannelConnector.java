@@ -73,6 +73,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
     /** Set to true if we require client certificate authentication. */
     private boolean _needClientAuth = false;
+    private boolean _wantClientAuth = false;
 
     private transient Password _password;
     private transient Password _keyPassword;
@@ -161,6 +162,11 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         
         try
         {
+            if (_wantClientAuth)
+            	sslEngine.setWantClientAuth(_wantClientAuth);
+            if (_needClientAuth)
+            	sslEngine.setNeedClientAuth(_needClientAuth);
+
             SSLSession sslSession = sslEngine.getSession();
             String cipherSuite = sslSession.getCipherSuite();
             Integer keySize;
@@ -182,8 +188,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
             if (certs != null)
                 request.setAttribute("javax.servlet.request.X509Certificate", certs);
-            else if (_needClientAuth) // Sanity check
-                throw new IllegalStateException("no client auth");
 
             request.setAttribute("javax.servlet.request.cipher_suite", cipherSuite);
             request.setAttribute("javax.servlet.request.key_size", keySize);
@@ -284,6 +288,12 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     }
 
     /* ------------------------------------------------------------ */
+    public boolean getWantClientAuth()
+    {
+        return _wantClientAuth;
+    }
+
+    /* ------------------------------------------------------------ */
     /**
      * Set the value of the needClientAuth property
      * 
@@ -292,6 +302,11 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     public void setNeedClientAuth(boolean needClientAuth)
     {
         _needClientAuth = needClientAuth;
+    }
+
+    public void setWantClientAuth(boolean wantClientAuth)
+    {
+        _wantClientAuth = wantClientAuth;
     }
 
     /* ------------------------------------------------------------ */
