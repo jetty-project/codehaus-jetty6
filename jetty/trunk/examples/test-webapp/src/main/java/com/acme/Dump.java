@@ -418,8 +418,10 @@ public class Dump extends HttpServlet
                 pout.write("<td>"+cookie.getValue()+"</td>");
             }
             
-
-            if (!"application/x-www-form-urlencoded".equals(request.getContentType()))
+            String content_type=request.getContentType();
+            if (content_type!=null &&
+                !content_type.startsWith("application/x-www-form-urlencoded") &&
+                !content_type.startsWith("multipart/form-data"))
             {
                 pout.write("</tr><tr>\n");
                 pout.write("<th align=\"left\" valign=\"top\" colspan=\"2\"><big><br/>Content:</big></th>");
