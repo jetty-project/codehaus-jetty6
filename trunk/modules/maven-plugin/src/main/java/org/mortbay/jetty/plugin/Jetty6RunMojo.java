@@ -55,7 +55,7 @@ import org.mortbay.xml.XmlConfiguration;
  * 
  * @goal run
  * @requiresDependencyResolution runtime
- * @execute phase="compile"
+ * @execute phase="test-compile"
  * @description Runs jetty6 directly from a maven project
  */
 public class Jetty6RunMojo extends AbstractJettyRunMojo
