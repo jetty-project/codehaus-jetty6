@@ -1,4 +1,6 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.2pre0 1 Feb 2007
  + Fixed 1.4 method in jetty plus
  + Fixed generation of errors during jsp compilation for jsp-2.1
  + Added cometd jsonp transport from aabeling
