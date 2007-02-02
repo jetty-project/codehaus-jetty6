@@ -462,7 +462,9 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         }
         catch (Exception e)
         {
-            Log.debug(e);
+            Log.warn("Error creating sslEngine -- closing this connector",e);
+            close();
+            throw new IllegalStateException(e);
         }
         return engine;
     }
