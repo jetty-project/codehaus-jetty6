@@ -57,7 +57,7 @@ public class ContextHandlerCollection extends HandlerCollection
     {
         Handler[] handlers = getChildHandlersByClass(ContextHandler.class);
         PathMap contextMap = new PathMap();
-
+        
         for (int i=0;i<handlers.length;i++)
         {
             ContextHandler handler=(ContextHandler)handlers[i];
@@ -94,9 +94,9 @@ public class ContextHandlerCollection extends HandlerCollection
                     contextMap.put(contextPath, hosts);
                 }
                 
-                for (i=0;i<vhosts.length;i++)
+                for (int j=0;j<vhosts.length;j++)
                 {
-                    String vhost=vhosts[i];
+                    String vhost=vhosts[j];
                     contexts=hosts.get(vhost);
                     contexts=LazyList.add(contexts,handler);
                     hosts.put(vhost,contexts);
@@ -117,7 +117,7 @@ public class ContextHandlerCollection extends HandlerCollection
         }
 
         _contextMap=contextMap;
-                
+        
     }
     
 
