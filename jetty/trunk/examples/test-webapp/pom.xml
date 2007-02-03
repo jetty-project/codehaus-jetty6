@@ -43,6 +43,7 @@
                   <fileset dir="target/${project.artifactId}-${project.version}" includes="**" />
 		</copy>
 		<chmod dir="../../webapps/test/cgi-bin" perm="ugo+rx" includes="**/*.sh" />
+		<touch file="../../contexts/test.xml"/>
               </tasks>
             </configuration>
           </execution>

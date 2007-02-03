@@ -494,22 +494,22 @@ public class Dump extends HttpServlet
             if (res != null && res.length() > 0)
             {
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"left\" colspan=\"2\"><big><br/>Get Resource:</big></th>");
+                pout.write("<th align=\"left\" colspan=\"2\"><big><br/>Get Resource: \""+res+"\"</big></th>");
                 
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">this.getClass():&nbsp;</th>");
+                pout.write("<th align=\"right\">this.getClass().getResource(...):&nbsp;</th>");
                 pout.write("<td>"+this.getClass().getResource(res)+"</td>");
 
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">this.getClass().getClassLoader():&nbsp;</th>");
+                pout.write("<th align=\"right\">this.getClass().getClassLoader().getResource(...):&nbsp;</th>");
                 pout.write("<td>"+this.getClass().getClassLoader().getResource(res)+"</td>");
 
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">Thread.currentThread().getContextClassLoader():&nbsp;</th>");
+                pout.write("<th align=\"right\">Thread.currentThread().getContextClassLoader().getResource(...):&nbsp;</th>");
                 pout.write("<td>"+Thread.currentThread().getContextClassLoader().getResource(res)+"</td>");
 
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">getServletContext():&nbsp;</th>");
+                pout.write("<th align=\"right\">getServletContext().getResource(...):&nbsp;</th>");
                 try{pout.write("<td>"+getServletContext().getResource(res)+"</td>");}
                 catch(Exception e) {pout.write("<td>"+"" +e+"</td>");}
             }
