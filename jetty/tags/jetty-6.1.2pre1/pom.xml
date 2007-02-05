@@ -224,6 +224,7 @@
     <module>extras/sslengine</module>
     <module>extras/ajp</module>
     <module>extras/setuid</module>
+    <module>extras/win32service</module>
     <!-- <module>extras/client</module> -->
     <module>extras/gwt</module>
     <module>extras/threadpool</module>
