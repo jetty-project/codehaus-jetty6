@@ -2,6 +2,8 @@ jetty-6.1-SNAPSHOT
  + JETTY-224 run build up to process-test before invoking jetty:run
  + Added error handling for incorrect keystore/truststore password in SslSelectChannelConnector
  + fixed bug with virtual host handling in ContextHandlerCollection
+ + added win32service to standard build
+ + refactored cometd to be continuation independent
  
 jetty-6.1.2pre0 1 Feb 2007
  + Fixed 1.4 method in jetty plus
