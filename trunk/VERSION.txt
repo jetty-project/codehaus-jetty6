@@ -1,4 +1,7 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-226 Fixed SSLEngine close issue
+
+jetty-6.1.2pre1 5 Feb 2007
  + JETTY-224 run build up to process-test before invoking jetty:run
  + Added error handling for incorrect keystore/truststore password in SslSelectChannelConnector
  + fixed bug with virtual host handling in ContextHandlerCollection
