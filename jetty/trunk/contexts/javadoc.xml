@@ -24,3 +24,22 @@ to serve static html files and images.
   </Call>
 
 </Configure>
+
+<!-- 
+      An alternate way to configure static content: use a 
+      ContextHandler and a ResourceHandler combined 
+-->
+<!-- 
+<Configure class="org.mortbay.jetty.handler.ContextHandler">
+   <Set name="contextPath">/javadoc</Set>
+   <Set name="resourceBase"><SystemProperty name="jetty.home" default="."/>/javadoc</Set>
+     <Call name="addHandler">
+        <Arg>
+            <New class="org.mortbay.jetty.handler.ResourceHandler">
+            </New>
+        </Arg>
+     </Call>
+  </New>
+
+</Configure>
+-->
