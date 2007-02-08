@@ -29,6 +29,7 @@ import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.TypeUtil;
@@ -47,12 +48,22 @@ import org.mortbay.util.URIUtil;
  */
 public class ResourceHandler extends AbstractHandler
 {
+    ContextHandler _context;
     Resource _baseResource;
     String[] _welcomeFiles={"index.html"};
     MimeTypes _mimeTypes = new MimeTypes();
     
     public ResourceHandler()
     {
+    }
+    
+    
+    public void doStart()
+    throws Exception
+    {
+        SContext scontext = ContextHandler.getCurrentContext();
+        _context = (scontext==null?null:scontext.getContextHandler());
+        super.doStart();
     }
 
     /* ------------------------------------------------------------ */
@@ -112,13 +123,22 @@ public class ResourceHandler extends AbstractHandler
         if (path==null || !path.startsWith("/"))
             throw new MalformedURLException(path);
         
-        if (_baseResource==null)
-            return null;
+        Resource base = _baseResource;
+        if (base==null)
+        {
+            if (_context==null)
+                return null;
+            
+            base=_context.getBaseResource();
+            System.err.println("The base resource="+base);
+            if (base==null)
+                return null;
+        }
 
         try
         {
             path=URIUtil.canonicalPath(path);
-            Resource resource=_baseResource.addPath(path);
+            Resource resource=base.addPath(path);
             return resource;
         }
         catch(Exception e)
