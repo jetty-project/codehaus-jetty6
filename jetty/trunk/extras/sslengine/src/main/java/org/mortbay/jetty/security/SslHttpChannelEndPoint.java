@@ -2,6 +2,7 @@ package org.mortbay.jetty.security;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
@@ -40,7 +41,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
 
     // ssl
     protected SSLSession _session;
-
+    
     /* ------------------------------------------------------------ */
     public SslHttpChannelEndPoint(SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
             throws SSLException, IOException
@@ -187,7 +188,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             bbuf.position(0);
         }
         
-        return buffer.length()-size;
+        return buffer.length()-size; 
     }
 
     /* ------------------------------------------------------------ */
@@ -302,10 +303,10 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         }
         else
         {
-        	if (_reuseBuffer == null)
-        	{
-        		_reuseBuffer = ByteBuffer.allocateDirect(_session.getPacketBufferSize());
-        	}
+            if (_reuseBuffer == null)
+            {
+                _reuseBuffer = ByteBuffer.allocateDirect(_session.getPacketBufferSize());
+            }
             _reuseBuffer.put(buffer.asArray());
             src = _reuseBuffer;
         }
@@ -331,7 +332,11 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             {
                 int len=super.fill(_inNIOBuffer);
                 if (len<=0)
-                    break;
+                {
+                    if (len==0 || in_len>0)
+                        break;
+                    throw new IOException("EOF");
+                }
                 in_len+=len;
             }
         }
