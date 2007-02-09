@@ -127,10 +127,8 @@ public class ResourceHandler extends AbstractHandler
         if (base==null)
         {
             if (_context==null)
-                return null;
-            
+                return null;            
             base=_context.getBaseResource();
-            System.err.println("The base resource="+base);
             if (base==null)
                 return null;
         }
