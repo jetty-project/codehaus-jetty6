@@ -373,7 +373,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     }
                     catch (CancelledKeyException e)
                     {
-                        // TODO investigate if this actually is a problem?
                         if (isRunning())
                             Log.warn(e);
                         else
@@ -423,6 +422,13 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             task=_retryTimeout.expired();
                     }
                 }
+            }
+            catch (CancelledKeyException e)
+            {
+                if (isRunning())
+                    Log.warn(e);
+                else
+                    Log.ignore(e);
             }
             finally
             {
