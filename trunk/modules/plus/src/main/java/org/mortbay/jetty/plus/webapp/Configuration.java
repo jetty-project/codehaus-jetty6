@@ -25,6 +25,8 @@ import org.mortbay.jetty.plus.naming.EnvEntry;
 import org.mortbay.jetty.plus.naming.NamingEntry;
 import org.mortbay.jetty.plus.naming.Resource;
 import org.mortbay.jetty.plus.naming.Transaction;
+import org.mortbay.jetty.plus.servlet.ServletHandler;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.log.Log;
 
 
@@ -37,6 +39,12 @@ public class Configuration extends AbstractConfiguration
 {
 
     private Integer _key;
+    
+    
+    public Configuration ()
+    {
+
+    }
     
     /** 
      * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#bindEnvEntry(java.lang.String, java.lang.String)
