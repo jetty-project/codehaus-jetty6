@@ -114,6 +114,10 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             }
             
         }
+        catch(IOException e)
+        {
+            Log.ignore(e);
+        }
         finally
         {
             super.close();
