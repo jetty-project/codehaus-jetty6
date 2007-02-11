@@ -30,6 +30,11 @@ import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
 import org.mortbay.jetty.plus.servlet.ServletHandler;
 import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterMapping;
+import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.log.Log;
 import org.mortbay.util.TypeUtil;
@@ -60,6 +65,21 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     public abstract void bindMessageDestinationRef (String name, Class type)  throws Exception;
     
     
+    public void setWebAppContext (WebAppContext context)
+    {
+        super.setWebAppContext(context);
+        
+        //set up our special ServletHandler to remember injections and lifecycle callbacks
+        ServletHandler servletHandler = new ServletHandler();
+        SecurityHandler securityHandler = getWebAppContext().getSecurityHandler();        
+        org.mortbay.jetty.servlet.ServletHandler existingHandler = getWebAppContext().getServletHandler();       
+        servletHandler.setFilterMappings(existingHandler.getFilterMappings());
+        servletHandler.setFilters(existingHandler.getFilters());
+        servletHandler.setServlets(existingHandler.getServlets());
+        servletHandler.setServletMappings(existingHandler.getServletMappings());
+        getWebAppContext().setServletHandler(servletHandler);
+        securityHandler.setHandler(servletHandler);
+    }
     
     public void configureDefaults ()
     throws Exception
@@ -107,20 +127,6 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     protected void initialize(XmlParser.Node config) 
     throws ClassNotFoundException,UnavailableException
     {
-        //set up our special ServletHandler to remember injections and lifecycle callbacks
-        ServletHandler servletHandler = new ServletHandler();
-        SecurityHandler securityHandler = getWebAppContext().getSecurityHandler();
-        
-        org.mortbay.jetty.servlet.ServletHandler existingHandler = getWebAppContext().getServletHandler();
-       
-        servletHandler.setFilterMappings(existingHandler.getFilterMappings());
-        servletHandler.setFilters(existingHandler.getFilters());
-        servletHandler.setServlets(existingHandler.getServlets());
-        servletHandler.setServletMappings(existingHandler.getServletMappings());
-        getWebAppContext().setServletHandler(servletHandler);
-        securityHandler.setHandler(servletHandler);
-        
-        
         super.initialize(config);
         
         //configure injections and callbacks to be called by the FilterHolder and ServletHolder

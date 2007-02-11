@@ -170,7 +170,7 @@ public class WebXmlConfiguration implements Configuration
         if (_context.isStarted())
         {
             if (Log.isDebugEnabled())
-		Log.debug("Cannot configure webapp after it is started");
+                Log.debug("Cannot configure webapp after it is started");
             return;
         }
 
@@ -199,7 +199,7 @@ public class WebXmlConfiguration implements Configuration
             if (web.exists()&& !web.isDirectory())
                 return web.getURL();
         }
-        
+
         Resource web_inf=getWebAppContext().getWebInf();
         if(web_inf!=null && web_inf.isDirectory())
         {
@@ -207,8 +207,8 @@ public class WebXmlConfiguration implements Configuration
             Resource web=web_inf.addPath("web.xml");
             if(web.exists()) 
                 return web.getURL();
-	    Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
-		    +". Serving files and default/dynamic servlets only");
+            Log.debug("No WEB-INF/web.xml in "+getWebAppContext().getWar()
+                    +". Serving files and default/dynamic servlets only");
         }
         return null;
     }
@@ -297,7 +297,7 @@ public class WebXmlConfiguration implements Configuration
                 throw new UnavailableException("Configuration problem");
             }
         }
-
+        
         _servletHandler.setFilters((FilterHolder[])LazyList.toArray(_filters,FilterHolder.class));
         _servletHandler.setFilterMappings((FilterMapping[])LazyList.toArray(_filterMappings,FilterMapping.class));
         _servletHandler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
