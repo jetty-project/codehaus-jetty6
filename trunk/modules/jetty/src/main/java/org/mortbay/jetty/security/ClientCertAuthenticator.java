@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.security.Principal;
 
 import javax.net.ssl.SSLSocket;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
@@ -41,7 +42,6 @@ public class ClientCertAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     public ClientCertAuthenticator()
     {
-        Log.warn("Client Cert Authentication is EXPERIMENTAL");
     }
     
     /* ------------------------------------------------------------ */
@@ -77,43 +77,12 @@ public class ClientCertAuthenticator implements Authenticator
             (java.security.cert.X509Certificate[])
             request.getAttribute("javax.servlet.request.X509Certificate");
             
-        if (response!=null && (certs==null || certs.length==0 || certs[0]==null))
-        {
-            // No certs available so lets try and force the issue
-            
-            // Get the SSLSocket
-            HttpConnection connection = HttpConnection.getCurrentConnection();
-            if (!connection.getConnector().isConfidential(request))
-                return null;
-            
-            Object s = connection.getEndPoint().getTransport();
-            if (!(s instanceof SSLSocket))
-                return null;
-            SSLSocket socket = (SSLSocket)s;
-            
-            if (!socket.getNeedClientAuth())
-            {
-                // Need to re-handshake
-                socket.setNeedClientAuth(true);
-                socket.startHandshake();
-
-                // Need to wait here - but not forever. The Handshake
-                // Listener API does not look like a good option to
-                // avoid waiting forever.  So we will take a slightly
-                // busy timelimited approach. For now:
-                for (int i=(_maxHandShakeSeconds*4);i-->0;)
-                {
-                    certs = (java.security.cert.X509Certificate[])
-                        request.getAttribute("javax.servlet.request.X509Certificate");
-                    if (certs!=null && certs.length>0 && certs[0]!=null)
-                        break;
-                    try{Thread.sleep(250);} catch (Exception e) {break;}
-                }
-            }
-        }
-
+        // Need certificates.
         if (certs==null || certs.length==0 || certs[0]==null)
+        {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
             return null;
+        }
         
         Principal principal = certs[0].getSubjectDN();
         if (principal==null)
@@ -121,6 +90,11 @@ public class ClientCertAuthenticator implements Authenticator
         String username=principal==null?"clientcert":principal.getName();
         
         Principal user = realm.authenticate(username,certs,request);
+        if (user == null)
+        {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"The provided client certificate does not correspond to a trusted user.");
+            return null;
+        }
         
         request.setAuthType(Constraint.__CERT_AUTH);
         request.setUserPrincipal(user);                
