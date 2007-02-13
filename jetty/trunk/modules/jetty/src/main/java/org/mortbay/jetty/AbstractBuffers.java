@@ -14,7 +14,6 @@ import org.mortbay.io.Buffers;
  */
 public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffers
 {
-    private static int BUFFER_POOLS=4;
     private static int BUFFER_LOSS_RATE=256; // Leak buffers to shrink pools
     
     private int _headerBufferSize=8*1024;
@@ -22,8 +21,7 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     private int _responseBufferSize=64*1024;
 
     // Use and array of buffers to avoid contention
-    private transient ArrayList[] _headerBuffers=new ArrayList[BUFFER_POOLS];
-    private transient int _header;
+    private transient ArrayList _headerBuffers=new ArrayList();
     private transient int _loss;
     private transient ArrayList _requestBuffers;
     private transient ArrayList _responseBuffers;
@@ -92,14 +90,12 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     {
         if (size==_headerBufferSize)
         {   
-            int h=_header++ % BUFFER_POOLS;
-            
-            synchronized(_headerBuffers[h])
+            synchronized(_headerBuffers)
             {
-                if (_headerBuffers[h].size()==0)
-                    return newBuffer(size);
-                return (Buffer) _headerBuffers[h].remove(_headerBuffers[h].size()-1);
+                if (_headerBuffers.size()>0)
+                    return (Buffer) _headerBuffers.remove(_headerBuffers.size()-1);
             }
+            return newBuffer(size);
         }
         else if (size==_responseBufferSize)
         {
@@ -127,19 +123,12 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     /* ------------------------------------------------------------ */
     public void returnBuffer(Buffer buffer)
     {
-        int h=_header;
-        if (h>=BUFFER_LOSS_RATE)
+        buffer.clear();
+        if (_loss++>BUFFER_LOSS_RATE)
         {
-            int l=_loss++;
-            if (l>BUFFER_POOLS)
-                _loss=0;
-            if (h>=BUFFER_LOSS_RATE+l)
-            {
-                _header=0;
-                return;
-            }
+            _loss=0;
+            return;
         }
-        h=h%BUFFER_POOLS;
 
         buffer.clear();
         if (!buffer.isVolatile() && !buffer.isImmutable())
@@ -147,9 +136,9 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
             int c=buffer.capacity();
             if (c==_headerBufferSize)
             {
-                synchronized(_headerBuffers[h])
+                synchronized(_headerBuffers)
                 {
-                    _headerBuffers[h].add(buffer);
+                    _headerBuffers.add(buffer);
                 }
             }
             else if (c==_responseBufferSize)
@@ -174,17 +163,16 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     {
         super.doStart();
 
-        for (int i=0;i<_headerBuffers.length;i++)
-        {
-            if (_headerBuffers[i]!=null)
-                _headerBuffers[i].clear();
-            else
-                _headerBuffers[i]=new ArrayList();
-        }
+        if (_headerBuffers!=null)
+            _headerBuffers.clear();
+        else
+            _headerBuffers=new ArrayList();
+
         if (_requestBuffers!=null)
             _requestBuffers.clear();
         else
             _requestBuffers=new ArrayList();
+        
         if (_responseBuffers!=null)
             _responseBuffers.clear();
         else
