@@ -26,6 +26,7 @@ import org.mortbay.jetty.annotations.resources.ResourceA;
 import org.mortbay.jetty.annotations.resources.ResourceB;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
+import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.naming.NamingEntry;
 
 
@@ -44,9 +45,9 @@ public class TestAnnotationInheritance extends TestCase
     {        
         NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
         
-        AnnotationProcessor processor = new AnnotationProcessor();
-        processor.processClass(ClassB.class);
-        AnnotationCollection collection = processor.getAnnotationCollection(ClassB.class);
+        AnnotationParser processor = new AnnotationParser();
+        AnnotationCollection collection = processor.processClass(ClassB.class);
+        
         List classes = collection.getClasses();
         assertEquals(2, classes.size());
         
@@ -98,17 +99,19 @@ public class TestAnnotationInheritance extends TestCase
         
         NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
         
-        AnnotationProcessor processor = new AnnotationProcessor();
+        AnnotationParser processor = new AnnotationParser();
         processor.processClass(ResourceB.class);
         InjectionCollection injections = new InjectionCollection();
         LifeCycleCallbackCollection callbacks = new LifeCycleCallbackCollection();
-        processor.processAnnotations(null, ResourceB.class, injections, callbacks);
+        RunAsCollection runAses = new RunAsCollection();
        
-        AnnotationCollection collection = processor.getAnnotationCollection(ResourceB.class);
-        
+        AnnotationCollection collection = processor.processClass(ResourceB.class); 
         assertEquals(1, collection.getClasses().size());
         assertEquals(3, collection.getMethods().size());
         assertEquals(6, collection.getFields().size());
+        
+        //process with all the specific annotations turned into injections, callbacks etc
+        processor.parseAnnotations(ResourceB.class, runAses, injections, callbacks);
         
         //processing classA should give us these jndi name bindings:
         // java:comp/env/myf

@@ -27,13 +27,14 @@ import java.util.ListIterator;
 
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
+import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.servlet.Holder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
 
 /**
- * AnnotationProcessor
+ * AnnotationParser
  *
  * None of the common annotations are inheritable, thus
  * calling getAnnotations() is exactly equivalent to 
@@ -71,26 +72,45 @@ import org.mortbay.util.IntrospectionUtil;
  *  Member-level annotations on a hidden or overridden member are 
  *  always ignored
  */
-public class AnnotationProcessor
+public class AnnotationParser
 {
-    private  HashMap annotationCollections = new HashMap();//a map of classes to their AnnotationCollection
-
-    
-    
     /**
-     * Examine the class hierarchy for this class looking for annotations.
+     * Examine the class hierarchy for a class, finding all annotations. Then, merge any 
+     * servlet2.5 spec annotations found with those already existing (from parsing web.xml)
+     * respecting the overriding rules found in the spec.
      * 
-     * Then, process any annotations found by creating Injections and Callbacks
-     * as necessary.
-     * 
-     * @param clazz
+     * @param clazz the class to inspect
+     * @param runAs any run-as elements from web.xml
+     * @param injections any injections specified in web.xml
+     * @param callbacks any postconstruct/predestroy callbacks in web.xml
      */
-    public  void processClass (Class clazz)
+    public static void parseAnnotations (Class clazz, RunAsCollection runAs, InjectionCollection injections, LifeCycleCallbackCollection callbacks)
     {
         if (clazz==null)
             return;
+        AnnotationCollection annotations = processClass(clazz);       
+        annotations.processRunAsAnnotations(runAs);
+        annotations.processResourcesAnnotations();
+        annotations.processResourceAnnotations(injections);
+        annotations.processLifeCycleCallbackAnnotations(callbacks);
+    }
+    
+    
+
+    /**
+     * Examine the class hierarchy for this class looking for annotations.
+     * 
+     * @param clazz
+     * @return AnnotationCollection
+     */
+    static AnnotationCollection processClass (Class clazz)
+    { 
+        AnnotationCollection collection = new AnnotationCollection();
+        if (clazz==null)
+            return collection;
        
-        AnnotationCollection collection = getAnnotationCollection(clazz);
+        collection.setTargetClass(clazz);
+        
         //add any class level annotations
         collection.addClass(clazz);
        
@@ -111,58 +131,15 @@ public class AnnotationProcessor
         
         //process the inheritance hierarchy for the class
         Class ancestor = clazz.getSuperclass();
-        while (!ancestor.equals(Object.class))
+        while (ancestor!=null && (!ancestor.equals(Object.class)))
         {
             processHierarchy (clazz, ancestor, collection);
             ancestor = ancestor.getSuperclass();
         } 
-    }
-
-
-    public  void processAnnotations(Holder holder, Class clazz, InjectionCollection webXmlInjections, LifeCycleCallbackCollection webXmlCallbacks)
-    {
-        if (clazz==null)
-            return;
         
-        AnnotationCollection collection = getAnnotationCollection(clazz);
-        if (collection==null)
-        {
-            Log.warn("No annotations for class "+clazz);
-            return;
-        }
-
-        collection.processRunAsAnnotations(holder);
-        collection.processResourcesAnnotations();       
-        collection.processResourceAnnotations(webXmlInjections);        
-        collection.processLifeCycleCallbackAnnotations(webXmlCallbacks);
+        return collection;
     }
     
-
-    
-    /**
-     * Get all of the collected annotations for a class and its members
-     * @param clazz
-     * @return
-     */
-    public  AnnotationCollection getAnnotationCollection (Class clazz)
-    {
-        if (clazz==null)
-            return null;
-        
-        synchronized (AnnotationProcessor.class)
-        {
-            AnnotationCollection collection = (AnnotationCollection)annotationCollections.get(clazz);
-            if (collection == null)
-            {
-                collection = new AnnotationCollection();
-                collection.setTargetClass(clazz);
-                annotationCollections.put(clazz, collection);
-            }
-            return collection;
-        }
-    }
-    
-  
     
     
     /**
@@ -173,7 +150,7 @@ public class AnnotationProcessor
      * @param ancestor
      * @param targetClazzMethods
      */
-    private  void processHierarchy (Class targetClazz, Class ancestor, AnnotationCollection collection)
+    private static void processHierarchy (Class targetClazz, Class ancestor, AnnotationCollection collection)
     {
         if (targetClazz==null)
             return;
@@ -242,7 +219,7 @@ public class AnnotationProcessor
      * @param derivedClass the most derived class we are processing
      * @param superclassMethod a method to check for being overridden or hidden
      */
-    private boolean isOverriddenOrHidden (Class derivedClass, Method superclassMethod)
+    private static boolean isOverriddenOrHidden (Class derivedClass, Method superclassMethod)
     {
         if (Modifier.isPrivate(superclassMethod.getModifiers()))
             return false; //private methods cannot be inherited therefore cannot be overridden
@@ -285,7 +262,7 @@ public class AnnotationProcessor
      * @param superclassField
      * @return
      */
-    private boolean isHidden (Class derivedClass, Field superclassField)
+    private static boolean isHidden (Class derivedClass, Field superclassField)
     {
         if (Modifier.isPrivate(superclassField.getModifiers()))
             return false; //private methods are never inherited therefore never hidden

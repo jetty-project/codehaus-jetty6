@@ -89,6 +89,7 @@ public abstract class NamingEntry
         if (overrideName==null||overrideName.trim().equals(""))
             overrideName=name;
         
+        
         //locally scoped entries take precedence over globally scoped entries of the same name
         NamingEntry entry = lookupNamingEntry (NamingEntry.SCOPE_LOCAL, namingEntryType, name);
         if (entry!=null)
@@ -109,7 +110,23 @@ public abstract class NamingEntry
                     entry.bindToENC();
             }
             else
-                throw new NameNotFoundException("No resource to bind matching name="+name);
+            {
+                //last ditch effort, check if something has been locally bound in java:comp/env
+                try
+                {
+                    InitialContext ic = new InitialContext();
+                    Context envContext = (Context)ic.lookup("java:comp/env");
+                    envContext.lookup(name);
+                    
+                    if (!overrideName.equals(name))
+                        NamingUtil.bind(envContext, overrideName, new LinkRef("."+name));
+                        
+                }
+                catch (NamingException e)
+                {
+                    throw new NameNotFoundException("No resource to bind matching name="+name);
+                }
+            }   
         }
     }
 
