@@ -30,6 +30,8 @@ import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 
+import org.mortbay.jetty.deployer.WebAppDeployer;
+
 /**
  * @author Greg Wilkins
  * @author Markus Kobler markus(at)inquisitive-mind.com
@@ -83,34 +85,4 @@ public class Ajp13SocketConnector extends SocketConnector
         Log.debug(Log.IGNORED);
     }
 
-    /* TODO temp main - just to help testing */
-    public static void main(String[] args) throws Exception
-    {
-        Server server=new Server();
-
-        SocketConnector socketConnector=new SocketConnector();
-        socketConnector.setPort(8080);
-
-        Ajp13SocketConnector connector=new Ajp13SocketConnector();
-
-        connector.setPort(8009);
-        server.setConnectors(new Connector[]
-        { socketConnector, connector });
-        HandlerCollection handlers=new HandlerCollection();
-        ContextHandlerCollection contexts=new ContextHandlerCollection();
-        handlers.setHandlers(new Handler[]
-        { contexts, new DefaultHandler() });
-        server.setHandler(handlers);
-
-        HashUserRealm userRealm=new HashUserRealm();
-        userRealm.setName("Test Realm");
-        userRealm.setConfig("../../etc/realm.properties");
-        server.setUserRealms(new UserRealm[]
-        { userRealm });
-
-        WebAppContext.addWebApplications(server,"../../webapps","../../etc/webdefault.xml",false,false);
-
-        server.start();
-        server.join();
-    }
 }

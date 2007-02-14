@@ -157,11 +157,18 @@ public class Ajp13Parser implements Parser
     /* ------------------------------------------------------------------------------- */
     private int fill() throws IOException
     {
-        // TODO may need to case where we have to copy partial buffer in header to body buffer ??????????
-        
         int filled = -1;
         if (_body != null && _buffer != _body)
         {
+            // mod_jk implementations may have some partial data from header
+            // check if there are partial contents in the header
+            // copy it to the body if there are any
+            if(_header.length() > 0)
+            {
+                // copy the patial data from the header to the body
+                _body.put(_header);
+            }
+
             _buffer = _body;
             filled = _buffer.length();
             return filled;
@@ -428,7 +435,6 @@ public class Ajp13Parser implements Parser
                 case HttpTokens.UNKNOWN_CONTENT:
                 case HttpTokens.NO_CONTENT:
                     _state = STATE_END;
-                    _generator.setNeedMore(false);
                     _handler.headerComplete();
                     _handler.messageComplete(_contentPosition);
 
@@ -474,11 +480,7 @@ public class Ajp13Parser implements Parser
                     Ajp13RequestPacket.getInt(_buffer);
                     if (_chunkLength==0)
                     {
-
-                        // _buffer.clear();
                         _state=STATE_END;
-                        _generator.setNeedMore(false);
-                        _generator.setExpectMore(false);
                         _handler.messageComplete(_contentPosition);
                         return total_filled;
                     }
@@ -501,14 +503,11 @@ public class Ajp13Parser implements Parser
                         _state=STATE_AJP13CHUNK_START;
                         if (_contentPosition<_contentLength)
                         {
-
-                            _generator.setNeedMore(true);
+                            _generator.getBodyChunk();
                         }
                         else
                         {
-                            // _state=STATE_END;
-                            _generator.setNeedMore(false);
-                            _generator.setExpectMore(false);
+                            _generator.gotBody();
                         }
 
                         return total_filled;
@@ -523,7 +522,6 @@ public class Ajp13Parser implements Parser
                     _contentPosition+=chunk.length();
                     _chunkPosition+=chunk.length();
                     _contentView.update(chunk);
-                    // _contentView.put(chunk);
 
                     remaining=_chunkLength-_chunkPosition;
 
@@ -532,20 +530,12 @@ public class Ajp13Parser implements Parser
                         _state=STATE_AJP13CHUNK_START;
                         if (_contentPosition<_contentLength)
                         {
-
-                            _generator.setNeedMore(true);
+                            _generator.getBodyChunk();
                         }
                         else
                         {
-
-                            // _state=STATE_END;
-                            _generator.setNeedMore(false);
-                            _generator.setExpectMore(false);
+                            _generator.gotBody();
                         }
-                    }
-                    else
-                    {
-
                     }
 
                     _handler.content(chunk);
@@ -672,11 +662,8 @@ public class Ajp13Parser implements Parser
     public static class Input extends ServletInputStream
     {
         private Ajp13Parser _parser;
-
         private EndPoint _endp;
-
         private long _maxIdleTime;
-
         private View _content;
 
         /* ------------------------------------------------------------ */
