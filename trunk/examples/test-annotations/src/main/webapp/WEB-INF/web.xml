@@ -21,5 +21,11 @@
   </servlet-mapping>
 
 
+  <env-entry>
+    <env-entry-name>someAmount</env-entry-name>
+    <env-entry-value>0.99</env-entry-value>
+    <env-entry-type>java.lang.Double</env-entry-type>
+  </env-entry>
+
 
 </web-app>

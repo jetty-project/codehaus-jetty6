@@ -28,6 +28,7 @@ import org.mortbay.jetty.plus.annotation.LifeCycleCallback;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
+import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.servlet.ServletHandler;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
@@ -52,6 +53,8 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     
     protected LifeCycleCallbackCollection _callbacks = new LifeCycleCallbackCollection();
     protected InjectionCollection _injections = new InjectionCollection();
+    protected RunAsCollection _runAsCollection = new RunAsCollection();
+    
     private boolean _metadataComplete = true;
     
     public abstract void bindEnvEntry (String name, Object value) throws Exception;
@@ -78,7 +81,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         servletHandler.setServlets(existingHandler.getServlets());
         servletHandler.setServletMappings(existingHandler.getServletMappings());
         getWebAppContext().setServletHandler(servletHandler);
-        securityHandler.setHandler(servletHandler);
+        securityHandler.setHandler(servletHandler);       
     }
     
     public void configureDefaults ()
@@ -210,7 +213,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
             Log.warn("No value for env-entry-name "+name);
             return;
         }
-
+      
         //the javaee_5.xsd says that the env-entry-type is optional
         //if there is an <injection> element, because you can get
         //type from the element, but what to do if there is more
@@ -219,7 +222,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         
         //check for <injection> elements
         initInjection (node, name, TypeUtil.fromName(type));
-        
+       
         //bind the entry into jndi
         Object value = TypeUtil.valueOf(type,valueStr);
         bindEnvEntry(name, value);
@@ -431,7 +434,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
      * Parse all classes that are mentioned in web.xml (servlets, filters, listeners)
      * for annotations.
      * 
-     * TODO
+     * 
      * 
      * @throws Exception
      */
@@ -442,6 +445,15 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     protected void injectAndCallPostConstructCallbacks()
     throws Exception
     {
+        //look thru the servlets to apply any runAs annotations
+        //NOTE: that any run-as in web.xml will already have been applied
+        ServletHolder[] holders = getWebAppContext().getServletHandler().getServlets();
+        for (int i=0;holders!=null && i<holders.length;i++)
+        {
+            _runAsCollection.setRunAs(holders[i]);
+        }
+        
+        
         EventListener[] listeners = getWebAppContext().getEventListeners();
         for (int i=0;i<listeners.length;i++)
         {
