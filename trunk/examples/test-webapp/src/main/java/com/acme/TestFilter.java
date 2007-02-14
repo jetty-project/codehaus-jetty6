@@ -23,6 +23,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -53,9 +54,14 @@ public class TestFilter implements Filter
             throws IOException, ServletException
     {
         Integer old_value=null;
+        ServletRequest r = request;
+        while (r instanceof ServletRequestWrapper)
+            r=((ServletRequestWrapper)r).getRequest();
+        
         try
         {
             old_value=(Integer)request.getAttribute("testFilter");
+            
             Integer value=(old_value==null)?new Integer(1):new Integer(old_value.intValue()+1);
                         
             request.setAttribute("testFilter", value);
@@ -65,14 +71,14 @@ public class TestFilter implements Filter
             {
                 request=new HttpServletRequestWrapper((HttpServletRequest)request);
             }
-            _context.setAttribute("request"+request.hashCode(),value);
+            _context.setAttribute("request"+r.hashCode(),value);
             
             chain.doFilter(request, response);
         }
         finally
         {
             request.setAttribute("testFilter", old_value);
-            _context.setAttribute("request"+request.hashCode(),old_value);
+            _context.setAttribute("request"+r.hashCode(),old_value);
         }
     }
 
