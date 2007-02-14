@@ -902,13 +902,13 @@ public class HttpParser implements Parser
             {
                 try
                 {
-                    long filled=_parser.parseNext();
+                    _parser.parseNext();
 
                     // parse until some progress is made (or IOException thrown for timeout)
-                    while(_content.length() == 0 && filled!=0 && !_parser.isState(HttpParser.STATE_END))
+                    while(_content.length() == 0 && !_parser.isState(HttpParser.STATE_END))
                     {
                         // Try to get more _parser._content
-                        filled=_parser.parseNext();
+                        _parser.parseNext();
                     }
                 }
                 catch(IOException e)
@@ -917,8 +917,7 @@ public class HttpParser implements Parser
                     throw e;
                 }
             }
-            // Handle non-blocking end point
-            else
+            else // Handle non-blocking end point
             {
                 _parser.parseNext();
                 
