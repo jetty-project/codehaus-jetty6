@@ -37,6 +37,7 @@ import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
+import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.naming.EnvEntry;
 import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.jetty.servlet.Holder;
@@ -127,20 +128,12 @@ public class AnnotationCollection
     
     
     
-    public void processRunAsAnnotations (Holder holder)
+    public void processRunAsAnnotations (RunAsCollection runAsCollection)
     {
-        //if no Holder we can't process runAs annotations
-        if (holder==null)
-            return;
-        
-        //there's a holder, but it isn't for a Servlet, so don't process runAs annotations
-        if (!(holder instanceof ServletHolder))
-            return;
-        
         for (int i=0; i<_classes.size();i++)
         {
             Class clazz = (Class)_classes.get(i);
-            
+
             //if this implements javax.servlet.Servlet check for run-as
             if (Servlet.class.isAssignableFrom(clazz))
             { 
@@ -149,12 +142,15 @@ public class AnnotationCollection
                 {
                     String role = runAs.value();
                     if (role != null)
-                        ((ServletHolder)holder).setRunAs(role);                  
+                    {
+                        org.mortbay.jetty.plus.annotation.RunAs ra = new org.mortbay.jetty.plus.annotation.RunAs();
+                        ra.setTargetClass(clazz);
+                        ra.setRoleName(role);
+                        runAsCollection.add(ra);
+                    }
                 }
             }
-            
-            
-          } 
+        } 
     }
     
     
@@ -163,12 +159,11 @@ public class AnnotationCollection
      * Process @Resource annotations at the class, method and field level.
      * @return
      */
-    public InjectionCollection processResourceAnnotations(InjectionCollection webXmlInjections)
+    public InjectionCollection processResourceAnnotations(InjectionCollection injections)
     {      
-        InjectionCollection injections = new InjectionCollection();
         processClassResourceAnnotations();
-        processMethodResourceAnnotations(webXmlInjections);
-        processFieldResourceAnnotations(webXmlInjections);
+        processMethodResourceAnnotations(injections);
+        processFieldResourceAnnotations(injections);
         
         return injections;
     }
@@ -178,12 +173,11 @@ public class AnnotationCollection
      * Process @PostConstruct and @PreDestroy annotations.
      * @return
      */
-    public LifeCycleCallbackCollection processLifeCycleCallbackAnnotations(LifeCycleCallbackCollection webXmlCallbacks)
+    public LifeCycleCallbackCollection processLifeCycleCallbackAnnotations(LifeCycleCallbackCollection callbacks)
     {
-        LifeCycleCallbackCollection collection = new LifeCycleCallbackCollection();   
-        processPostConstructAnnotations(webXmlCallbacks);
-        processPreDestroyAnnotations(webXmlCallbacks);
-        return collection;
+        processPostConstructAnnotations(callbacks);
+        processPreDestroyAnnotations(callbacks);
+        return callbacks;
     }
     
     
@@ -440,8 +434,9 @@ public class AnnotationCollection
                 {
                     try
                     {
-                        //Check there is a JNDI entry for this annotation 
+                         //Check there is a JNDI entry for this annotation 
                         org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
+                        
                         Log.info("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it if the binding succeeded
                         Injection injection = new Injection();

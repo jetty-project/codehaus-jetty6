@@ -42,6 +42,8 @@ public class AnnotationTest extends HttpServlet
     private String dsResult = "";
     private String envResult = "";
     private String envLookupResult = "";
+    private String envResult2 ="";
+    private String envLookupResult2 = "";
     private String dsLookupResult = "";
     private String txResult = "";
     private String txLookupResult = "";
@@ -53,6 +55,9 @@ public class AnnotationTest extends HttpServlet
 
     @Resource(mappedName="maxAmount")
     private Double maxAmount;
+    
+    @Resource(name="someAmount")
+    private Double minAmount;
 
    
     @Resource(mappedName="jdbc/mydatasource")
@@ -88,6 +93,16 @@ public class AnnotationTest extends HttpServlet
            envLookupResult = "FAIL: "+e;
        }
 
+      envResult2 = (minAmount==null?"FAIL":"minAmount="+minAmount.toString());
+      try
+      {
+          InitialContext ic = new InitialContext();
+          envLookupResult2 = "java:comp/env/someAmount="+ic.lookup("java:comp/env/someAmount");
+      }
+      catch (Exception e)
+      {
+          envLookupResult2 = "FAIL: "+e;
+      }
       
        try
        {
@@ -166,9 +181,14 @@ public class AnnotationTest extends HttpServlet
             out.println("<pre>");
             out.println("@Resource(mappedName=\"maxAmount\")");
             out.println("private Double maxAmount;");
+            out.println("@Resource(name=\"minAmount\")");
+            out.println("private Double minAmount;");
             out.println("</pre>");
-            out.println("<br/><b>Result: "+envResult+"</b>");
+            out.println("<br/><b>Result: "+envResult+": "+(maxAmount.compareTo(new Double(55))==0?" PASS":" FAIL")+"</b>");     
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult+"</b>");
+            out.println("<br/><b>Result: "+envResult2+": "+(minAmount.compareTo(new Double("0.99"))==0?" PASS":" FAIL")+"</b>");     
+            out.println("<br/><b>JNDI Lookup Result: "+envLookupResult2+"</b>");
+            
          
             out.println("<h2>@Resource Injection for UserTransaction </h2>");
             out.println("<pre>");
@@ -179,8 +199,10 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+txLookupResult+"</b>");
             
             out.println("<h2>@RunAs</h2>");
-            out.println("<br/><b>Result: isUserInRole(\"special\")="+request.isUserInRole("special")+"</b>");            
-            out.println("<br/><b>Result: isUserInRole(\"other\")="+request.isUserInRole("other")+"</b>");
+            boolean result = request.isUserInRole("special");
+            out.println("<br/><b>Result: isUserInRole(\"special\")="+result+":"+(result==true?" PASS":" FAIL")+"</b>");    
+            result = request.isUserInRole("other");
+            out.println("<br/><b>Result: isUserInRole(\"other\")="+result+":"+ (result==false?" PASS":" FAIL")+"</b>");
             
             
             out.println("</body>");            
