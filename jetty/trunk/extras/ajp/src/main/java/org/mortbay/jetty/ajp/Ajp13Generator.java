@@ -694,26 +694,18 @@ public class Ajp13Generator extends AbstractGenerator
     }
 
     /* ------------------------------------------------------------ */
-    public boolean isNeedMore()
+    public void getBodyChunk() throws IOException
     {
-        // TODO - this is not correct. See setNeedMore
-        return _expectMore;
+        _needMore = true;
+        _expectMore = true;
+        flush();
     }
 
     /* ------------------------------------------------------------ */
-    public void setNeedMore(boolean needMore) throws IOException
+    public void gotBody()
     {
-        _needMore = needMore;
-        if (needMore)
-        {
-            _expectMore = true;
-            flush();
-        }
-    }
-
-    public void setExpectMore(boolean expectMore)
-    {
-        _expectMore = expectMore;
+        _needMore = false;
+        _expectMore = false;
     }
 
 }

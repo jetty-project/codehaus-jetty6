@@ -397,9 +397,10 @@ public abstract class AbstractGenerator implements Generator
     public boolean isBufferFull()
     {
         // Should we flush the buffers?
-        boolean full = (
-             _state == STATE_FLUSHING || 
-             (_buffer != null && _buffer.space() == 0));
+        boolean full =  
+            (_buffer != null && _buffer.space() == 0) ||
+            (_content!=null && _content.length()>0);
+             
         return full;
     }
     
