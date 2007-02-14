@@ -4,7 +4,8 @@ jetty-6.1-SNAPSHOT
  + JETTY-226 Fixed SSLEngine close issue
  + JETTY-232 Fixed use of override web.xml
  + JETTY-236 Buffer leak
- + JETTY-238 JETTY-237 AJPParser Buffer Data Handling
+ + JETTY-237 AJPParser Buffer Data Handling
+ + JETTY-238 prevent form truncation
 
 jetty-6.1.2pre1 5 Feb 2007
  + JETTY-224 run build up to process-test before invoking jetty:run

@@ -593,7 +593,10 @@ public class Dump extends HttpServlet
         {
             char[] line = "<span>A line of characters. Blah blah blah blah.  blooble blooble</span></br>\n".toCharArray();
             for (int l=Integer.parseInt(lines);l-->0;)
+            {
+                pout.write("<span>"+l+" </span>");
                 pout.write(line);
+            }
         }
         
         pout.write("</body>\n</html>\n");

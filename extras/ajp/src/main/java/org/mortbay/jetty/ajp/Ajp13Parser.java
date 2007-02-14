@@ -711,19 +711,16 @@ public class Ajp13Parser implements Parser
             // Handle blocking end points
             else if (_endp.isBlocking())
             {
-                long filled = _parser.parseNext();
-
-                // parse until some progress is made (or
-                // IOException thrown for timeout)
-                while (_content.length() == 0 && filled != 0 && !_parser.isState(Ajp13Parser.STATE_END))
+                _parser.parseNext();
+                
+                // parse until some progress is made (or IOException thrown for timeout)
+                while (_content.length() == 0 && !_parser.isState(Ajp13Parser.STATE_END))
                 {
                     // Try to get more _parser._content
-                    filled = _parser.parseNext();
+                    _parser.parseNext();
                 }
-
             }
-            // Handle non-blocking end point
-            else
+            else // Handle non-blocking end point
             {
                 long filled = _parser.parseNext();
                 boolean blocked = false;
