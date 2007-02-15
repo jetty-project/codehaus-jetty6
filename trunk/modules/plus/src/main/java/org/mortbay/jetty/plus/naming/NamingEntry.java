@@ -164,27 +164,18 @@ public abstract class NamingEntry
             }
             case SCOPE_LOCAL:
             {
-                //check to see if the current scope of the thread is a local (ie webapp specific scope)
-                if (getScope()==SCOPE_LOCAL)
+                try
                 {
-                    try
-                    {
-                        InitialContext ic = new InitialContext();
-                        return ((NamingEntry)lookupNamingEntry((Context)ic.lookup("java:comp/env"), namingEntryType, jndiName) != null);
-                    }
-                    catch (NameNotFoundException e)
-                    {
-                        return false;
-                    }
-                    catch (NamingException e)
-                    {
-                        Log.warn(e);
-                        return false;
-                    }
+                    InitialContext ic = new InitialContext();
+                    return ((NamingEntry)lookupNamingEntry((Context)ic.lookup("java:comp/env"), namingEntryType, jndiName) != null);
                 }
-                else
+                catch (NameNotFoundException e)
                 {
-                    //this thread is not in local scope
+                    return false;
+                }
+                catch (NamingException e)
+                {
+                    Log.warn(e);
                     return false;
                 }
             }
@@ -227,23 +218,14 @@ public abstract class NamingEntry
             }
             case SCOPE_LOCAL:
             {
-                if (getScope()==SCOPE_LOCAL)
+                try
                 {
-                    //NOTE: LOCAL scope will only work if you are actually in the webapp scope itself
-                    try
-                    {
-                        InitialContext ic = new InitialContext();
-                        namingEntry = (NamingEntry)lookupNamingEntry((Context)ic.lookup("java:comp/env"), clazz, jndiName);
-                    }
-                    catch (NameNotFoundException e)
-                    {
-                        namingEntry = null;
-                    }
+                    InitialContext ic = new InitialContext();
+                    namingEntry = (NamingEntry)lookupNamingEntry((Context)ic.lookup("java:comp/env"), clazz, jndiName);
                 }
-                else
+                catch (NameNotFoundException e)
                 {
-                    Log.warn("Can't lookup locally scoped naming entries outside of scope");
-                    throw new NamingException("Can't lookup locally scoped naming entries outside of scope");
+                    namingEntry = null;
                 }
                 break;
             }
@@ -284,16 +266,9 @@ public abstract class NamingEntry
             case SCOPE_LOCAL:
             {
                 //WARNING: you can only look up local scope if you are indeed in the scope
-                if (getScope()==SCOPE_LOCAL)
-                {
-                    InitialContext ic = new InitialContext();                   
-                    lookupNamingEntries(list, (Context)ic.lookup("java:comp/env"), clazz);
-                }
-                else
-                {
-                    Log.warn("Can't lookup local scope naming entries outside of local scope");
-                    throw new NamingException("Can't lookup locally scoped naming entries outside of scope");
-                }
+                InitialContext ic = new InitialContext();                   
+                lookupNamingEntries(list, (Context)ic.lookup("java:comp/env"), clazz);
+
                 break;
             }
         }
