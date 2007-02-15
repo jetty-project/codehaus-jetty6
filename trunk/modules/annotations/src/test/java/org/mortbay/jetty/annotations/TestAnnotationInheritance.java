@@ -115,20 +115,20 @@ public class TestAnnotationInheritance extends TestCase
         
         //processing classA should give us these jndi name bindings:
         // java:comp/env/myf
-        // java:comp/env/org.mortbay.jetty.annotations.resources.ResourceA.g
+        // java:comp/env/org.mortbay.jetty.annotations.resources.ResourceA/g
         // java:comp/env/mye
-        // java:comp/env/org.mortbay.jetty.annotations.resources.ResourceA.h
+        // java:comp/env/org.mortbay.jetty.annotations.resources.ResourceA/h
         // java:comp/env/resA
-        // java:comp/env/org.mortbay.jetty.annotations.resources.ResourceB.f
-        // java:comp/env/org.mortbay.jetty.annotations.resources.ResourceA.n
+        // java:comp/env/org.mortbay.jetty.annotations.resources.ResourceB/f
+        // java:comp/env/org.mortbay.jetty.annotations.resources.ResourceA/n
         // 
         assertEquals(resourceB.getObjectToBind(), env.lookup("myf"));
         assertEquals(resourceA.getObjectToBind(), env.lookup("mye"));
         assertEquals(resourceA.getObjectToBind(), env.lookup("resA"));
-        assertEquals(resourceA.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceA.g")); 
-        assertEquals(resourceA.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceA.h"));
-        assertEquals(resourceB.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceB.f"));
-        assertEquals(resourceB.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceA.n"));
+        assertEquals(resourceA.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceA/g")); 
+        assertEquals(resourceA.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceA/h"));
+        assertEquals(resourceB.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceB/f"));
+        assertEquals(resourceB.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceA/n"));
         
         //we should have these Injections
         assertNotNull(injections);

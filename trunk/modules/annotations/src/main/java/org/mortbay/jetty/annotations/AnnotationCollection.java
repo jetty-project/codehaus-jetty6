@@ -321,7 +321,7 @@ public class AnnotationCollection
                 //default name is the javabean property name
                 String name = m.getName().substring(3);
                 name = name.substring(0,1).toLowerCase()+name.substring(1);
-                name = m.getDeclaringClass().getCanonicalName()+"."+name;
+                name = m.getDeclaringClass().getCanonicalName()+"/"+name;
                 //allow default name to be overridden
                 name = (resource.name()!=null && !resource.name().trim().equals("")? resource.name(): name);
                 //get the mappedName if there is one
@@ -410,7 +410,7 @@ public class AnnotationCollection
                     throw new IllegalStateException(f+" cannot be final");
                 
                 //work out default name
-                String name = f.getDeclaringClass().getCanonicalName()+"."+f.getName();
+                String name = f.getDeclaringClass().getCanonicalName()+"/"+f.getName();
                 //allow @Resource name= to override the field name
                 name = (resource.name()!=null && !resource.name().trim().equals("")? resource.name(): name);
                 
