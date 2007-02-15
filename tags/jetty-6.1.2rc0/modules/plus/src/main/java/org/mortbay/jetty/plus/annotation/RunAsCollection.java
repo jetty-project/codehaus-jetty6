@@ -19,7 +19,7 @@ import java.util.HashMap;
 
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
-import org.mortbay.util.Loader;
+
 
 /**
  * RunAsCollection
@@ -38,7 +38,7 @@ public class RunAsCollection
         
         if (Log.isDebugEnabled())
             Log.debug("Adding run-as for class="+runAs.getTargetClass());
-        _runAsMap.put(runAs.getTargetClass(), runAs);
+        _runAsMap.put(runAs.getTargetClass().getName(), runAs);
     }
 
     
@@ -49,25 +49,14 @@ public class RunAsCollection
         
         if (!(o instanceof ServletHolder))
             return;
-   
-        
+
         ServletHolder holder = (ServletHolder)o;
-        Class servletClass = holder.getHeldClass();
 
-        try
-        {
-            if (servletClass==null)
-                servletClass = Loader.loadClass(this.getClass(), holder.getClassName());
-            RunAs runAs = (RunAs)_runAsMap.get(servletClass);
-            if (runAs == null)
-                return;
+        RunAs runAs = (RunAs)_runAsMap.get(holder.getClassName());
+        if (runAs == null)
+            return;
 
-            runAs.setRunAs((ServletHolder)o); 
-        }
-        catch (Exception e)
-        {
-            Log.warn("Problem setting run-as on "+o.getClass().getName(), e);
-        }
+        runAs.setRunAs(holder); 
     }
 
 }
