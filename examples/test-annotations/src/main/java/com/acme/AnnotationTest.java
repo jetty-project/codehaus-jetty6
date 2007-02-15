@@ -44,6 +44,8 @@ public class AnnotationTest extends HttpServlet
     private String envLookupResult = "";
     private String envResult2 ="";
     private String envLookupResult2 = "";
+    private String envResult3 = "";
+    private String envLookupResult3 = "";
     private String dsLookupResult = "";
     private String txResult = "";
     private String txLookupResult = "";
@@ -58,6 +60,9 @@ public class AnnotationTest extends HttpServlet
     
     @Resource(name="someAmount")
     private Double minAmount;
+
+    @Resource
+    private Double avgAmount;
 
    
     @Resource(mappedName="jdbc/mydatasource")
@@ -86,7 +91,7 @@ public class AnnotationTest extends HttpServlet
        try
        {
            InitialContext ic = new InitialContext();
-           envLookupResult = "java:comp/env/com.acme.AnnotationTest.maxAmount="+ic.lookup("java:comp/env/com.acme.AnnotationTest.maxAmount");
+           envLookupResult = "java:comp/env/com.acme.AnnotationTest/maxAmount="+ic.lookup("java:comp/env/com.acme.AnnotationTest/maxAmount");
        }
        catch (Exception e)
        {
@@ -103,11 +108,23 @@ public class AnnotationTest extends HttpServlet
       {
           envLookupResult2 = "FAIL: "+e;
       }
+      envResult3 = (minAmount==null?"FAIL":"avgAmount="+avgAmount.toString());
+      try
+      {
+          InitialContext ic = new InitialContext();
+          envLookupResult3 = "java:comp/env/com.acme.AnnotationTest/avgAmount="+ic.lookup("java:comp/env/com.acme.AnnotationTest/avgAmount");
+      }
+      catch (Exception e)
+      {
+          envLookupResult3 = "FAIL: "+e;
+      }
+      
+      
       
        try
        {
            InitialContext ic = new InitialContext();
-           dsLookupResult = "java:comp/env/com.acme.AnnotationTest.myDatasource="+ic.lookup("java:comp/env/com.acme.AnnotationTest.myDatasource");
+           dsLookupResult = "java:comp/env/com.acme.AnnotationTest/myDatasource="+ic.lookup("java:comp/env/com.acme.AnnotationTest/myDatasource");
        }
        catch (Exception e)
        {
@@ -118,7 +135,7 @@ public class AnnotationTest extends HttpServlet
        try
        {
            InitialContext ic = new InitialContext();
-           txLookupResult = "java:comp/env/com.acme.AnnotationTest.myUserTransaction="+ic.lookup("java:comp/env/com.acme.AnnotationTest.myUserTransaction");
+           txLookupResult = "java:comp/env/com.acme.AnnotationTest/myUserTransaction="+ic.lookup("java:comp/env/com.acme.AnnotationTest/myUserTransaction");
        }
        catch (Exception e)
        {
@@ -188,7 +205,8 @@ public class AnnotationTest extends HttpServlet
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult+"</b>");
             out.println("<br/><b>Result: "+envResult2+": "+(minAmount.compareTo(new Double("0.99"))==0?" PASS":" FAIL")+"</b>");     
             out.println("<br/><b>JNDI Lookup Result: "+envLookupResult2+"</b>");
-            
+            out.println("<br/><b>Result: "+envResult3+": "+(avgAmount.compareTo(new Double("1.25"))==0?" PASS":" FAIL")+"</b>");     
+            out.println("<br/><b>JNDI Lookup Result: "+envLookupResult3+"</b>");          
          
             out.println("<h2>@Resource Injection for UserTransaction </h2>");
             out.println("<pre>");
