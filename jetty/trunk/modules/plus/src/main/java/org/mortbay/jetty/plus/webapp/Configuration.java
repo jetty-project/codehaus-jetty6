@@ -151,9 +151,12 @@ public class Configuration extends AbstractConfiguration
     protected void unlockCompEnv ()
     throws Exception
     {
-        Context context = new InitialContext();
-        Context compCtx = (Context)context.lookup("java:comp");
-        compCtx.addToEnvironment("org.mortbay.jndi.unlock", _key);        
+        if (_key!=null)
+        {
+            Context context = new InitialContext();
+            Context compCtx = (Context)context.lookup("java:comp");
+            compCtx.addToEnvironment("org.mortbay.jndi.unlock", _key); 
+        }
     }
 
     /** 

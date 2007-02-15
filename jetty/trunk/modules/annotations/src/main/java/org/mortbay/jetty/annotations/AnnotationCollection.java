@@ -44,6 +44,7 @@ import org.mortbay.jetty.servlet.Holder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
+import org.mortbay.util.Loader;
 
 
 
@@ -71,6 +72,7 @@ public class AnnotationCollection
     private static Class[] __envEntryTypes = 
         new Class[] {String.class, Character.class, Integer.class, Boolean.class, Double.class, Byte.class, Short.class, Long.class, Float.class};
    
+  
     /**
      * Get the class which is the subject of these annotations
      * @return the clazz
@@ -564,11 +566,11 @@ public class AnnotationCollection
         if (type==null)
             return null;
         
-        if (UserTransaction.class.isAssignableFrom(type))
-            return Transaction.class;
-        
         if (isEnvEntryType(type))
             return EnvEntry.class;
+        
+        if (type.getName().equals("javax.transaction.UserTransaction"))
+                return Transaction.class;
         else
             return org.mortbay.jetty.plus.naming.Resource.class;
     }
