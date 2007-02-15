@@ -20,6 +20,11 @@
     <url-pattern>/test/*</url-pattern>
   </servlet-mapping>
 
+  <env-entry>
+    <env-entry-name>com.acme.AnnotationTest/avgAmount</env-entry-name>
+    <env-entry-value>1.25</env-entry-value>
+    <env-entry-type>java.lang.Double</env-entry-type>
+  </env-entry>
 
   <env-entry>
     <env-entry-name>someAmount</env-entry-name>
