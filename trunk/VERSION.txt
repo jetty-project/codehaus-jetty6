@@ -1,11 +1,13 @@
 jetty-6.1-SNAPSHOT
- + Patches from sybase for ClientCertAuthenticator
  + JETTY-223 Fix disassociate of UserPrincipal on dispatches
  + JETTY-226 Fixed SSLEngine close issue
  + JETTY-232 Fixed use of override web.xml
  + JETTY-236 Buffer leak
  + JETTY-237 AJPParser Buffer Data Handling
  + JETTY-238 prevent form truncation
+ + Patches from sybase for ClientCertAuthenticator
+ + Coma separated cookies
+ + Cometd timeout clients
 
 jetty-6.1.2pre1 5 Feb 2007
  + JETTY-224 run build up to process-test before invoking jetty:run
