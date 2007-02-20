@@ -251,12 +251,12 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
     
             if (rs.next())
             {
-                Object key = rs.getObject(_userTableKey);
+                int key = rs.getInt(_userTableKey);
                 put(username, rs.getString(_userTablePasswordField));
                 stat.close();
                 
                 stat = _con.prepareStatement(_roleSql);
-                stat.setObject(1, key);
+                stat.setInt(1, key);
                 rs = stat.executeQuery();
 
                 while (rs.next())
