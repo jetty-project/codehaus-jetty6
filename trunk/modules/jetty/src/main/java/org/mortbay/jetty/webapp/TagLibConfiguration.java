@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,17 +59,20 @@ public class TagLibConfiguration implements Configuration
         "com.sun.faces.config.ConfigureListener", //find tlds from sun's jsf impl
         "org.apache.myfaces.webapp.MyFacesServlet" //find tlds from myfaces impl
     };
-    
+
+    /* ------------------------------------------------------------ */
     public void setWebAppContext(WebAppContext context)
     {
         _context=context;
     }
 
+    /* ------------------------------------------------------------ */
     public WebAppContext getWebAppContext()
     {
         return _context;
     }
 
+    /* ------------------------------------------------------------ */
     public void configureClassLoader() throws Exception
     {
     }
@@ -81,38 +85,8 @@ public class TagLibConfiguration implements Configuration
     {
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return List of {@link Resource}s for jar files in which to search for TLDs
-     * @throws IOException 
-     * @throws MalformedURLException 
-     */
-    protected List getJarResourceList() throws MalformedURLException, IOException
-    {
-        List list = new ArrayList();
 
-        Resource web_inf=_context.getWebInf();
-        if (web_inf!=null && web_inf.exists())
-        {
-            Resource lib=web_inf.addPath("lib/");
-            if (lib.exists() && lib.isDirectory())
-            {
-                String[] contents = lib.list();
-                for (int i=0;i<contents.length;i++)
-                {
-                    if (contents[i]!=null && contents[i].toLowerCase().endsWith(".jar"))
-                        list.add(lib.addPath(contents[i]));
-                }
-            }
-        }
-        
-        list.addAll(getServerJarResourceList());
-        
-        Log.debug("TLD search {}",list);
-        return list;
-        
-    }
-    
+    /* ------------------------------------------------------------ */
     protected List getServerJarResourceList () throws MalformedURLException, IOException
     {
         List list = new ArrayList();
@@ -145,7 +119,7 @@ public class TagLibConfiguration implements Configuration
      * @see org.mortbay.jetty.servlet.WebAppContext.Configuration#configureWebApp()
      */
     public void configureWebApp() throws Exception
-    {
+    {   
         Set tlds = new HashSet();
         
         // Find tld's from web.xml
@@ -187,11 +161,10 @@ public class TagLibConfiguration implements Configuration
         }
         
         // Look for tlds in any jars
-        List jars = getJarResourceList();
-        for (int i=0;i<jars.size();i++)
+        Enumeration meta_infs = Thread.currentThread().getContextClassLoader().getResources("META-INF");
+        while(meta_infs!=null && meta_infs.hasMoreElements())
         {
-            Resource jar=(Resource)jars.get(i);
-            Resource meta=Resource.newResource("jar:"+jar.getURL()+"!/META-INF/",false);
+            Resource meta=Resource.newResource((URL)meta_infs.nextElement());
             if (meta.exists())
                 findTLDs(tlds,meta);
         }
