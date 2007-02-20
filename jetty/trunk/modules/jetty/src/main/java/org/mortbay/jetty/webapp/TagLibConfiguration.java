@@ -214,7 +214,7 @@ public class TagLibConfiguration implements Configuration
                 Resource tld = (Resource)iter.next();
                 if (Log.isDebugEnabled()) Log.debug("TLD="+tld);
                 
-                XmlParser.Node root = parser.parse(tld.getURL().toString());
+                XmlParser.Node root = parser.parse(tld.getInputStream());
 
 		if (root==null)
 		{
