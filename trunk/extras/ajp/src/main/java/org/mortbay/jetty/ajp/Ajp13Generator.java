@@ -153,6 +153,12 @@ public class Ajp13Generator extends AbstractGenerator
         }
         _last = last;
 
+        if(!_endp.isOpen())
+        {
+            _state = STATE_END;
+            return;
+        }
+
         // Handle any unfinished business?
         if (_content != null && _content.length() > 0)
         {
@@ -212,6 +218,13 @@ public class Ajp13Generator extends AbstractGenerator
         if (_last || _state == STATE_END)
             throw new IllegalStateException("Closed");
 
+
+        if(!_endp.isOpen())
+        {
+            _state = STATE_END;
+            return false;
+        }
+
         // Handle any unfinished business?
         if (_content != null && _content.length() > 0)
         {
@@ -251,6 +264,13 @@ public class Ajp13Generator extends AbstractGenerator
 
         if (_last || _state == STATE_END)
             throw new IllegalStateException("Closed");
+
+
+        if(!_endp.isOpen())
+        {
+            _state = STATE_END;
+            return -1;
+        }
 
         // Handle any unfinished business?
         Buffer content = _content;
