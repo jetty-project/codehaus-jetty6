@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
  + Improved handling of early close in AJP
  + JETTY-175 JDBCUserRealm use getInt instead of getObject
  + add ajp connector jar to jetty-jboss sar
+ + Improved Context setters for wadi support
 
 jetty-6.1.2rc0 - 15 February 2007
  + JETTY-223 Fix disassociate of UserPrincipal on dispatches

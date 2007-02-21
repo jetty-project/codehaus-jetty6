@@ -243,7 +243,7 @@ public class WebAppDeployer extends AbstractLifeCycle
     {
         for (int i=_deployed.size();i-->0;)
         {
-            WebAppContext wac = (WebAppContext)_deployed.get(i);
+            ContextHandler wac = (ContextHandler)_deployed.get(i);
             wac.stop();// TODO Multi exception
         }
     }

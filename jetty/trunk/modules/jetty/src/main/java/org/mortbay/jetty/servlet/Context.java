@@ -214,6 +214,77 @@ public class Context extends ContextHandler
         return _servletHandler.addFilterWithMapping(filterClass,pathSpec,dispatches);
     }
     
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param sessionHandler The sessionHandler to set.
+     */
+    public void setSessionHandler(SessionHandler sessionHandler)
+    {
+        if (_sessionHandler==sessionHandler)
+            return;
+        
+        if (_sessionHandler!=null)
+            _sessionHandler.setHandler(null);
+
+        _sessionHandler = sessionHandler;
+        
+        setHandler(_sessionHandler);
+        
+        if (_securityHandler!=null)
+            _sessionHandler.setHandler(_securityHandler);
+        else if (_servletHandler!=null)
+            _sessionHandler.setHandler(_servletHandler);
+            
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param securityHandler The {@link SecurityHandler} to set on this context.
+     */
+    public void setSecurityHandler(SecurityHandler securityHandler)
+    {
+        if(_securityHandler==securityHandler)
+            return;
+        
+        if (_securityHandler!=null)
+            _securityHandler.setHandler(null);
+            
+        _securityHandler = securityHandler;
+        
+        if (_sessionHandler!=null)
+            _sessionHandler.setHandler(_securityHandler);
+        else 
+            setHandler(_securityHandler);
+        
+        if (_servletHandler!=null)
+            _securityHandler.setHandler(_sessionHandler);
+            
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param servletHandler The servletHandler to set.
+     */
+    public void setServletHandler(ServletHandler servletHandler)
+    {
+        if (_servletHandler==servletHandler)
+            return;
+        
+        _servletHandler = servletHandler;
+
+        if (_securityHandler!=null)
+            _securityHandler.setHandler(_sessionHandler);
+        else if (_sessionHandler!=null)
+            _sessionHandler.setHandler(_securityHandler);
+        else 
+            setHandler(_securityHandler);
+        
+    }
+
+    /* ------------------------------------------------------------ */
     public class SContext extends ContextHandler.SContext
     {
 
