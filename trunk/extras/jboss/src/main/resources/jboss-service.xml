@@ -98,6 +98,14 @@
       </Arg>
     </Call>
 
+    <!-- Call name="addConnector">
+        <Arg>
+            <New class="org.mortbay.jetty.ajp.Ajp13SocketConnector">
+                <Set name="port">8009</Set>
+            </New>
+        </Arg>
+    </Call -->
+
     <Set name="handler">
       <New id="Handlers" class="org.mortbay.jetty.handler.HandlerCollection">
         <Set name="handlers">
