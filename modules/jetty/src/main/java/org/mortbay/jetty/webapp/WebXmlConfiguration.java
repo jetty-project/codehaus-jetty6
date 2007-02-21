@@ -874,11 +874,13 @@ public class WebXmlConfiguration implements Configuration
             getWebAppContext().getSecurityHandler().setAuthenticator(authenticator);
         }
         XmlParser.Node name=node.get("realm-name");
+
+        UserRealm[] realms=ContextHandler.getCurrentContext().getContextHandler().getServer().getUserRealms();
+        
         if(name!=null)
         {
             String realm_name=name.toString(false,true);
 
-            UserRealm[] realms=ContextHandler.getCurrentContext().getContextHandler().getServer().getUserRealms();
             UserRealm realm=getWebAppContext().getSecurityHandler().getUserRealm();
             for (int i=0;realm==null && realms!=null && i<realms.length; i++)
             {
@@ -894,6 +896,10 @@ public class WebXmlConfiguration implements Configuration
             else
                 getWebAppContext().getSecurityHandler().setUserRealm(realm);
         }
+        else if (realms!=null && realms.length>0)
+            getWebAppContext().getSecurityHandler().setUserRealm(realms[0]);
+            
+        
         XmlParser.Node formConfig=node.get("form-login-config");
         if(formConfig!=null)
         {
