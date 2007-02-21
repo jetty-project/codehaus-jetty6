@@ -24,6 +24,7 @@ import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.util.StringTokenizer;
 
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.IO;
@@ -100,7 +101,7 @@ public class WebAppClassLoader extends URLClassLoader
     
 
     /* ------------------------------------------------------------ */
-    public WebAppContext getContext()
+    public ContextHandler getContext()
     {
         return _context;
     }

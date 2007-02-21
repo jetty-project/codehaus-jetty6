@@ -100,14 +100,14 @@ public class WebAppContext extends Context
     private transient boolean _ownClassLoader=false;
     private transient boolean _unavailable;
 
-    public static WebAppContext getCurrentWebAppContext()
+    public static ContextHandler getCurrentWebAppContext()
     {
         ContextHandler.SContext context=ContextHandler.getCurrentContext();
         if (context!=null)
         {
             ContextHandler handler = context.getContextHandler();
             if (handler instanceof WebAppContext)
-                return (WebAppContext)handler;
+                return (ContextHandler)handler;
         }
         return null;   
     }
@@ -1065,38 +1065,11 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /**
-     * @param securityHandler The {@link SecurityHandler} to set on this context.
-     */
-    public void setSecurityHandler(SecurityHandler securityHandler)
-    {
-        _securityHandler = securityHandler;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
      * @param serverClasses The serverClasses to set.
      */
     public void setServerClasses(String[] serverClasses) 
     {
         _serverClasses = serverClasses==null?null:(String[])serverClasses.clone();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param servletHandler The servletHandler to set.
-     */
-    public void setServletHandler(ServletHandler servletHandler)
-    {
-        _servletHandler = servletHandler;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param sessionHandler The sessionHandler to set.
-     */
-    public void setSessionHandler(SessionHandler sessionHandler)
-    {
-        _sessionHandler = sessionHandler;
     }
     
     /* ------------------------------------------------------------ */
