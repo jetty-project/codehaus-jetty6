@@ -57,7 +57,6 @@
         
 
     <!-- Use this connector if NIO is not available.
-    -->
     <Call name="addConnector">
       <Arg>
           <New class="org.mortbay.jetty.bio.SocketConnector">
@@ -67,6 +66,7 @@
           </New>
       </Arg>
     </Call>
+    -->
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- To add a HTTPS SSL listener                                     -->
