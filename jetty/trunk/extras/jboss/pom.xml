@@ -78,6 +78,11 @@
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-ajp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-management</artifactId>
       <version>${project.version}</version>
       <exclusions>
