@@ -24,8 +24,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.BufferCache;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
@@ -77,7 +79,6 @@ public class HttpConnection implements Connection
     
     private Object _associatedObject; // associated object
     
-    private transient int _connection = UNKNOWN;
     private transient int _expect = UNKNOWN;
     private transient int _version = UNKNOWN;
     private transient boolean _head = false;
@@ -606,7 +607,6 @@ public class HttpConnection implements Connection
         {
             _host = false;
             _expect = UNKNOWN;
-            _connection = UNKNOWN;
             _delayedHandling=false;
             _charset=null;
 
@@ -669,24 +669,49 @@ public class HttpConnection implements Connection
                     break;
 
                 case HttpHeaders.CONNECTION_ORDINAL:
-                    
-                    _connection = HttpHeaderValues.CACHE.getOrdinal(value);
-                    switch(_connection)
+                    //looks rather clumsy, but the idea is to optimize for a single valued header
+                    int ordinal = HttpHeaderValues.CACHE.getOrdinal(value);
+                    switch(ordinal)
                     {
                         case -1:
-                        {
-                            // TODO coma list of connections ???
+                        { 
+                            String[] values = value.toString().split(",");
+                            for  (int i=0;values!=null && i<values.length;i++)
+                            {
+                                CachedBuffer cb = HttpHeaderValues.CACHE.get(values[0].trim());
+
+                                if (cb!=null)
+                                {
+                                    switch(cb.getOrdinal())
+                                    {
+                                        case HttpHeaderValues.CLOSE_ORDINAL:
+                                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
+                                            break;
+
+                                        case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
+                                            if (_version==HttpVersions.HTTP_1_0_ORDINAL)
+                                                _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE);
+                                            break;
+                                        case HttpHeaderValues.TE_ORDINAL:
+                                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.TE);
+                                            break;
+                                    }
+                                }
+                            }
                             break;
                         }
-
                         case HttpHeaderValues.CLOSE_ORDINAL:
                             _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
                             break;
-                            
+
                         case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
                             if (_version==HttpVersions.HTTP_1_0_ORDINAL)
                                 _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE);
-                    }
+                            break;
+                        case HttpHeaderValues.TE_ORDINAL:
+                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.TE);
+                            break;
+                    } 
             }
 
             _requestFields.add(name, value);

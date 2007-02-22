@@ -402,13 +402,19 @@ public class HttpGenerator extends AbstractGenerator
                         connection = field;
 
                         int connection_value = field.getValueOrdinal();
-
-                        // TODO handle multivalue HttpConnection
-                        _close = _method==null && HttpHeaderValues.CLOSE_ORDINAL == connection_value;
-                        keep_alive = HttpHeaderValues.KEEP_ALIVE_ORDINAL == connection_value;
-                        if (keep_alive && _version == HttpVersions.HTTP_1_0_ORDINAL && _method==null) _close = false;
-                        
-                        if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) _contentLength = HttpTokens.EOF_CONTENT;
+                        switch (connection_value)
+                        {
+                            case -1:
+                                break;
+                            case HttpHeaderValues.CLOSE_ORDINAL:
+                                _close = _method==null;
+                                if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) _contentLength = HttpTokens.EOF_CONTENT;
+                                break;
+                            case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
+                                keep_alive = true;
+                                if (keep_alive && _version == HttpVersions.HTTP_1_0_ORDINAL && _method==null) _close = false;
+                                break;
+                        }
 
                         // Do NOT add yet!
                         break;
