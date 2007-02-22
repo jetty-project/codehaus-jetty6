@@ -876,29 +876,24 @@ public class WebXmlConfiguration implements Configuration
         XmlParser.Node name=node.get("realm-name");
 
         UserRealm[] realms=ContextHandler.getCurrentContext().getContextHandler().getServer().getUserRealms();
-        
-        if(name!=null)
+
+        String realm_name=name==null?"default":name.toString(false,true);
+
+        UserRealm realm=getWebAppContext().getSecurityHandler().getUserRealm();
+        for (int i=0;realm==null && realms!=null && i<realms.length; i++)
         {
-            String realm_name=name.toString(false,true);
-
-            UserRealm realm=getWebAppContext().getSecurityHandler().getUserRealm();
-            for (int i=0;realm==null && realms!=null && i<realms.length; i++)
-            {
-                if (realms[i]!=null && realm_name.equals(realms[i].getName()))
-                    realm=realms[i];
-            }
-
-            if (realm==null)
-            {
-                String msg = "Unknown realm: "+realm_name;
-                Log.warn(msg);
-            }
-            else
-                getWebAppContext().getSecurityHandler().setUserRealm(realm);
+            if (realms[i]!=null && realm_name.equals(realms[i].getName()))
+                realm=realms[i];
         }
-        else if (realms!=null && realms.length>0)
-            getWebAppContext().getSecurityHandler().setUserRealm(realms[0]);
-            
+
+        if (realm==null)
+        {
+            String msg = "Unknown realm: "+realm_name;
+            Log.warn(msg);
+        }
+        else
+            getWebAppContext().getSecurityHandler().setUserRealm(realm);
+
         
         XmlParser.Node formConfig=node.get("form-login-config");
         if(formConfig!=null)
