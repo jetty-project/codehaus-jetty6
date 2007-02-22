@@ -30,7 +30,8 @@ public class HttpHeaderValues extends BufferCache
         IDENTITY="identity",
         KEEP_ALIVE="keep-alive",
         CONTINUE="100-continue",
-        PROCESSING="102-processing";
+        PROCESSING="102-processing",
+        TE="TE";
 
     public final static int
         CLOSE_ORDINAL=1,
@@ -39,7 +40,8 @@ public class HttpHeaderValues extends BufferCache
         IDENTITY_ORDINAL=4,
         KEEP_ALIVE_ORDINAL=5,
         CONTINUE_ORDINAL=6,
-        PROCESSING_ORDINAL=7;
+        PROCESSING_ORDINAL=7,
+        TE_ORDINAL=8;
     
     public final static HttpHeaderValues CACHE= new HttpHeaderValues();
 
@@ -50,7 +52,8 @@ public class HttpHeaderValues extends BufferCache
         IDENTITY_BUFFER=CACHE.add(IDENTITY,IDENTITY_ORDINAL),
         KEEP_ALIVE_BUFFER=CACHE.add(KEEP_ALIVE,KEEP_ALIVE_ORDINAL),
         CONTINUE_BUFFER=CACHE.add(CONTINUE, CONTINUE_ORDINAL),
-        PROCESSING_BUFFER=CACHE.add(PROCESSING, PROCESSING_ORDINAL);
+        PROCESSING_BUFFER=CACHE.add(PROCESSING, PROCESSING_ORDINAL),
+        TE_BUFFER=CACHE.add(TE,TE_ORDINAL);
         
     static
     {  
