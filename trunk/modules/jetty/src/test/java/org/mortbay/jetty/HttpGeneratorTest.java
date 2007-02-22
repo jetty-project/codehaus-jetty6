@@ -35,7 +35,7 @@ import org.mortbay.io.View;
 public class HttpGeneratorTest extends TestCase
 {
     public final static String CONTENT="The quick brown fox jumped over the lazy dog.\nNow is the time for all good men to come to the aid of the party\nThe moon is blue to a fish in love.\n";
-    public final static String[] connect={null,"keep-alive","close"};
+    public final static String[] connect={null,"keep-alive","close","TE, close"};
 
     public HttpGeneratorTest(String arg0)
     {
@@ -68,8 +68,9 @@ public class HttpGeneratorTest extends TestCase
                 for (int chunks=1;chunks<=6;chunks++)
                 {
                     // For none, keep-alive, close
-                    for (int c=0;c<connect.length;c++)
+                    for (int c=0;c<(v==11?connect.length:(connect.length-1));c++)
                     {
+                        
                         String t="v="+v+",r="+r+",chunks="+chunks+",connect="+connect[c]+",tr="+tr[r];
                         // System.err.println(t);
                         
@@ -106,7 +107,7 @@ public class HttpGeneratorTest extends TestCase
                         if (v==10)
                             assertTrue(t,hb.isPersistent() || tr[r].values[1]==null || c==2 || c==0);
                         else
-                            assertTrue(t,hb.isPersistent() ||  c==2);
+                            assertTrue(t,hb.isPersistent() ||  c==2 || c==3);
                         
                         assertTrue(t,tr[r].values[1]==null || content.length()==Integer.parseInt(tr[r].values[1]));
                     }
