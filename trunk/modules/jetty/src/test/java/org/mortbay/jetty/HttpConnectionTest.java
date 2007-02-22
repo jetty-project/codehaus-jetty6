@@ -180,6 +180,38 @@ public class HttpConnectionTest extends TestCase
         }
     }
 
+    
+    public void testConnection ()
+    { 
+        String response=null;
+        try
+        {
+            int offset=0;
+           
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: TE, close"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"Connection: TE");
+            offset = checkContains(response,offset,"Connection: close");
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+            if (response!=null)
+                System.err.println(response);
+        }
+    }
+    
+    
+    
     private int checkContains(String s,int offset,String c)
     {
         int o=s.indexOf(c,offset);
