@@ -415,7 +415,7 @@ public class HttpConnection implements Connection
     }
 
     /* ------------------------------------------------------------ */
-    protected void reset(boolean returnBuffers)
+    public void reset(boolean returnBuffers)
     {
         _parser.reset(returnBuffers); // TODO maybe only release when low on resources
         _requestFields.clear();
