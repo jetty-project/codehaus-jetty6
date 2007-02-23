@@ -19,6 +19,7 @@ import com.sun.enterprise.web.connector.grizzly.DefaultReadTask;
 import com.sun.enterprise.web.portunif.ProtocolHandler;
 import com.sun.enterprise.web.portunif.util.ProtocolInfo;
 import java.io.IOException;
+import java.nio.channels.SelectionKey;
 
 /** 
  * Simple Protocol handler that redirect http request from GlassFish to Jetty.
@@ -69,4 +70,13 @@ public class JettyProtocolHandler implements ProtocolHandler
         selectorThread.returnTask(readTask);
     }
     
+    
+    /**
+     * Invoked when the SelectorThread is about to expire a SelectionKey.
+     * @return true if the SelectorThread should expire the SelectionKey, false
+     *              if not.
+     */
+    public boolean expireKey(SelectionKey key){
+        return true;
+    }    
 }

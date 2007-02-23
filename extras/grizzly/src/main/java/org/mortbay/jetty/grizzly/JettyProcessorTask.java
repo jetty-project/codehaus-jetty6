@@ -43,7 +43,6 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
 
     private boolean keepAlive=true;
     private GrizzlyEndPoint endPoint;
-    private GrizzlySocketChannel socketChannel;
     private ByteBuffer jettyByteBuffer;
     HttpParser parser;
     boolean isError = false;
@@ -60,14 +59,11 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         {
             throw new RuntimeException(ex);
         }
-
-        if (((JettySelectorThread)selectorThread).isUseTemporarySelector()){
-            socketChannel=new GrizzlySocketChannel();
-        }
     }
 
     public boolean process(InputStream input, OutputStream output) throws Exception
     {
+        isError = false;
         boolean blockReading=((JettySelectorThread)selectorThread).isUseTemporarySelector();
         ByteBuffer bb = ((ByteBufferInputStream)input).getByteBuffer();   
         NIOBuffer buffer = (NIOBuffer)parser.getHeaderBuffer();
@@ -75,37 +71,38 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
         buffer.setPutIndex(bb.limit());
         buffer.setGetIndex(bb.position());
         buffer.setByteBuffer(bb);
-        SocketChannel channel = (SocketChannel)key.channel();
-
-        if (blockReading)
-        {
-            socketChannel.setSelectionKey(key);
-            socketChannel.setSocketChannel((SocketChannel)channel);
-            endPoint.setChannel(socketChannel);
-
-            while (continueBlocking())
+        endPoint.setSelectionKey(key);
+        endPoint.setChannel((SocketChannel)key.channel());    
+        
+        try{
+            if (blockReading)
             {
-                // We are already using a Grizzly WorkerThread, so no need to
-                // invoke Jetty Thread Pool
+                while (continueBlocking())
+                {
+                    // We are already using a Grizzly WorkerThread, so no need to
+                    // invoke Jetty Thread Pool
+                    endPoint.handle();
+                }
+
+            }
+            else
+            {
                 endPoint.handle();
+            }
+        }catch(Throwable t){
+            isError = true;
+            SelectorThread.logger().log(Level.FINE,"endPoint.handler",t);
+            return false;
+        } finally{
+            buffer.setByteBuffer(jettyByteBuffer);
+            if (isError){
+                endPoint.getHttpConnection().reset(true);
             }
 
-            socketChannel.setSelectionKey(null);
-            socketChannel.setSocketChannel(null);
+            endPoint.setSelectionKey(null);
+            endPoint.setChannel(null);
         }
-        else
-        {
-            endPoint.setChannel(channel);
-            try{
-                endPoint.handle();
-            }catch(Throwable t){
-                isError = true;
-                SelectorThread.logger().log(Level.FINE,"endPoint.handler");
-                return false;
-            } finally{
-                buffer.setByteBuffer(jettyByteBuffer);
-            }
-        }      
+              
         return endPoint.keepAlive();
     }
 
@@ -121,7 +118,7 @@ public class JettyProcessorTask extends TaskBase implements ProcessorTask
 
     public boolean isError()
     {
-        return !(parser.getState() == HttpParser.STATE_START) && isError;
+        return !(parser.getState() == HttpParser.STATE_START);
     }
 
     // ----------------------------------------------- Not Used for now ---//
