@@ -232,13 +232,12 @@ public class HttpGenerator extends AbstractGenerator
         
         return _buffer.space()-(_contentLength == HttpTokens.CHUNKED_CONTENT?CHUNK_SPACE:0);
     }
-
     
     /* ------------------------------------------------------------ */
     public boolean isBufferFull()
     {
         // Should we flush the buffers?
-        boolean full = super.isBufferFull() || _bypass || (_contentLength == HttpTokens.CHUNKED_CONTENT && _buffer != null && _buffer.space() < CHUNK_SPACE);
+        boolean full = super.isBufferFull() || _bufferChunked || _bypass  || (_contentLength == HttpTokens.CHUNKED_CONTENT && _buffer != null && _buffer.space() < CHUNK_SPACE);
         return full;
     }
     
