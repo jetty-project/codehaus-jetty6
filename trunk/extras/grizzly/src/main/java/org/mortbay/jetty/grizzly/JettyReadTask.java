@@ -65,14 +65,10 @@ public class JettyReadTask extends XAReadTask
         catch (Exception e)
         {
             SelectorThread.logger().log(Level.SEVERE,"readTask.processException",e);
-            registerKey=true;
+            registerKey=false;
         }
         finally
         {
-
-            // if registerKey, that means we were'nt able to parse the request
-            // properly because the bytes were not all read, so we need to
-            // call again the Selector.
             if (registerKey){
                 inKeepAliveProcess=false;
                 if (processorTask.isError())
