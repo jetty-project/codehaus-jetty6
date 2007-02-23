@@ -131,7 +131,12 @@ public class GrizzlySocketChannel implements ByteChannel
     {
         return (int)OutputWriter.flushChannel(socketChannel,src, writeTimeout);
     }
-
+    
+    public int write(ByteBuffer[] src) throws IOException
+    {
+        return (int)OutputWriter.flushChannel(socketChannel,src, writeTimeout);
+    }
+    
     public SocketChannel getSocketChannel()
     {
         return socketChannel;

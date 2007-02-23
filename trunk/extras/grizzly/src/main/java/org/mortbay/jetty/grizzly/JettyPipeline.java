@@ -19,6 +19,7 @@ package org.mortbay.jetty.grizzly;
 import com.sun.enterprise.web.connector.grizzly.Pipeline;
 import com.sun.enterprise.web.connector.grizzly.PipelineStatistic;
 import com.sun.enterprise.web.connector.grizzly.Task;
+import java.nio.channels.SelectionKey;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 
@@ -34,10 +35,21 @@ public class JettyPipeline implements Pipeline
     
     private BoundedThreadPool _threadPool;
     
+    
     public JettyPipeline()
     {
     }
 
+    /**
+     * Invoked when the SelectorThread is about to expire a SelectionKey.
+     * @return true if the SelectorThread should expire the SelectionKey, false
+     *              if not.
+     */
+    public boolean expireKey(SelectionKey key)
+    {
+        return true;
+    }
+    
     public void setThreadPool(BoundedThreadPool threadPool)
     {
         _threadPool = threadPool;

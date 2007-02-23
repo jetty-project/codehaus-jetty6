@@ -14,11 +14,11 @@
 
 package org.mortbay.jetty.grizzly;
 
-import com.sun.enterprise.web.connector.grizzly.OutputWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.GatheringByteChannel;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import org.mortbay.io.Buffer;
 
@@ -44,6 +44,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         
         //System.err.println("\nnew GrizzlyEndPoint channel="+channel);
         _connection = new HttpConnection(connector,this,connector.getServer());
+        _blockingChannel = new GrizzlySocketChannel();
     }
 
     public void handle()
@@ -106,7 +107,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
                     bbuf.position(buffer.getIndex());
                     bbuf.limit(buffer.putIndex());
                     len = bbuf.remaining();
-                    OutputWriter.flushChannel((SocketChannel)_channel,bbuf);
+                    _blockingChannel.write(bbuf);
                 }
                 finally
                 {
@@ -121,7 +122,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         {
             ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
             len = b.remaining();
-            OutputWriter.flushChannel((SocketChannel)_channel,b);
+            _blockingChannel.write(b);
             if (!buffer.isImmutable())
                 buffer.setGetIndex(b.position());
         }
@@ -183,7 +184,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
                                 _gather2[1]=bbuf1;
 
                                 // do the gathering write.
-                                length = (int)OutputWriter.flushChannel((SocketChannel)_channel,_gather2);
+                                length = _blockingChannel.write(_gather2);
                             }
                         }
                         else
@@ -206,7 +207,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
                                         _gather3[1]=bbuf1;
                                         _gather3[2]=bbuf2;
                                         // do the gathering write.
-                                        length = (int)OutputWriter.flushChannel((SocketChannel)_channel,_gather3);
+                                        length = (int)_blockingChannel.write(_gather3);
                                     }
                                 }
                                 finally
@@ -324,10 +325,17 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         return false;
     }
     
-    public void setChannel(ByteChannel channel)
+    
+    public void setSelectionKey(SelectionKey key)
+    {
+        _blockingChannel.setSelectionKey(key);
+    }    
+   
+    
+    public void setChannel(SocketChannel channel)
     {
         _channel = channel;
-        _blockingChannel=new GrizzlySocketChannel(); 
+        _blockingChannel.setSocketChannel(channel);
     }
     
     public void recycle()
