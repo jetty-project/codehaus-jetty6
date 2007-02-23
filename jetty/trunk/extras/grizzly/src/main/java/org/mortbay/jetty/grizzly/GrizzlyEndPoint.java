@@ -106,13 +106,12 @@ public class GrizzlyEndPoint extends ChannelEndPoint
                 {
                     bbuf.position(buffer.getIndex());
                     bbuf.limit(buffer.putIndex());
-                    len = bbuf.remaining();
-                    _blockingChannel.write(bbuf);
+                    len=_blockingChannel.write(bbuf);
                 }
                 finally
                 {
-                    if (!buffer.isImmutable())
-                        buffer.setGetIndex(bbuf.position());
+                    if (len>0)
+                        buffer.skip(len);
                     bbuf.position(0);
                     bbuf.limit(bbuf.capacity());
                 }
@@ -121,16 +120,14 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         else if (buffer.array()!=null)
         {
             ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
-            len = b.remaining();
-            _blockingChannel.write(b);
-            if (!buffer.isImmutable())
-                buffer.setGetIndex(b.position());
+            len=_blockingChannel.write(b);
+            if (len>0)
+                buffer.skip(len);
         }
         else
         {
             throw new IOException("Not Implemented");
         }
-        
         return len;
     }
     
@@ -145,7 +142,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         Buffer buf0 = header==null?null:header.buffer();
         Buffer buf1 = buffer==null?null:buffer.buffer();
         Buffer buf2 = trailer==null?null:trailer.buffer();
-        if (_channel instanceof GatheringByteChannel &&
+        if (_blockingChannel.getSocketChannel() instanceof GatheringByteChannel &&
             header!=null && header.length()!=0 && header instanceof NIOBuffer && 
             buffer!=null && buffer.length()!=0 && buffer instanceof NIOBuffer)
         {
@@ -334,7 +331,7 @@ public class GrizzlyEndPoint extends ChannelEndPoint
     
     public void setChannel(SocketChannel channel)
     {
-        _channel = channel;
+        _channel = _blockingChannel;
         _blockingChannel.setSocketChannel(channel);
     }
     
@@ -347,11 +344,5 @@ public class GrizzlyEndPoint extends ChannelEndPoint
         return _connection;
     }
 
-    /* (non-Javadoc)
-     * @see org.mortbay.io.EndPoint#close()
-     */
-    public void close() throws IOException
-    {
-        ; // Do nothing as this will be handled by Grizzly.
-    }    
+
 }
