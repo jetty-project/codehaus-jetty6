@@ -111,6 +111,9 @@ public class GrizzlyConnector extends AbstractNIOConnector
         {
             _selectorThread.setPort(getPort());
             _selectorThread.setGrizzlyConnector(this);
+            // XXX Not sure it will works all the time
+            _selectorThread.setRootFolder(
+                   System.getProperty("jetty.home") + "webapps");
             
             ThreadPool threadPool = getServer().getThreadPool();
             _selectorThread.setThreadPool(threadPool);  
