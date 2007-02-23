@@ -1,12 +1,13 @@
 jetty-6.1-SNAPSHOT
  + TagLibConfiguration uses resource input stream
  + Improved handling of early close in AJP
- + JETTY-175 JDBCUserRealm use getInt instead of getObject
  + add ajp connector jar to jetty-jboss sar
  + Improved Context setters for wadi support
- + JETTY-235 default realm name
  + fix Dump servlet to handle primitive array types
  + handle comma separated values for the Connection: header
+ + JETTY-175 JDBCUserRealm use getInt instead of getObject
+ + JETTY-235 default realm name
+ + JETTY-243 FULL
 
 jetty-6.1.2rc0 - 15 February 2007
  + JETTY-223 Fix disassociate of UserPrincipal on dispatches
