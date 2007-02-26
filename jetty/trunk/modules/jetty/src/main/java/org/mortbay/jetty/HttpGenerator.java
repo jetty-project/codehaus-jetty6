@@ -15,6 +15,7 @@
 
 package org.mortbay.jetty;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -116,6 +117,8 @@ public class HttpGenerator extends AbstractGenerator
         // Handle any unfinished business?
         if (_content!=null && _content.length()>0 || _bufferChunked)
         {
+            if (!_endp.isOpen())
+                throw new EofException();
             flush();
             if (_content != null && _content.length()>0 || _bufferChunked) 
                 throw new IllegalStateException("FULL");
