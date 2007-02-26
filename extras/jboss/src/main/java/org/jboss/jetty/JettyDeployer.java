@@ -85,6 +85,16 @@ public class JettyDeployer extends AbstractWebDeployer
             app.setConfigurationClasses (new String[]{ "org.mortbay.jetty.webapp.WebInfConfiguration","org.jboss.jetty.JBossWebXmlConfiguration", "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",  "org.mortbay.jetty.webapp.TagLibConfiguration"});
             app.setExtractWAR(getUnpackWars());
             app.setParentLoaderPriority(getJava2ClassLoadingCompliance());
+            
+            //permit urls without a trailing '/' even though it is not a valid url
+            //as the jboss webservice client tests seem to use these invalid urls
+            if (webApp.getMetaData().isWebServiceDeployment())
+            {
+                if (_log.isDebugEnabled())
+                    _log.debug("Setting setAllowNullPathInfo(true) for webservices war");
+                app.setAllowNullPathInfo(true);
+            }
+                 
             Manager manager = (Manager) getDistributableSessionManagerPrototype();
             if (manager != null)
             {
