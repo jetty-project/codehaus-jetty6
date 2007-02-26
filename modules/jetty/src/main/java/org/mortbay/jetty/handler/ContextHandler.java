@@ -117,6 +117,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     private EventListener[] _eventListeners;
     private Logger _logger;
     private boolean _shutdown;
+    private boolean _allowNullPathInfo;
     private int _maxFormContentSize=Integer.getInteger("org.mortbay.jetty.Request.maxFormContentSize",200000).intValue();;
 
     private Object _contextListeners;
@@ -173,6 +174,24 @@ public class ContextHandler extends HandlerWrapper implements Attributes
     public SContext getServletContext()
     {
         return _scontext;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the allowNullPathInfo true if /context is not redirected to /context/
+     */
+    public boolean getAllowNullPathInfo()
+    {
+        return _allowNullPathInfo;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param allowNullPathInfo  true if /context is not redirected to /context/
+     */
+    public void setAllowNullPathInfo(boolean allowNullPathInfo)
+    {
+        _allowNullPathInfo=allowNullPathInfo;
     }
 
     /* ------------------------------------------------------------ */
@@ -615,8 +634,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             {
                 if (target.equals(_contextPath))
                 {
-                    target=_contextPath;
-                    if (!target.endsWith("/"))
+                    if (!_allowNullPathInfo && !target.endsWith("/"))
                     {
                         base_request.setHandled(true);
                         if (request.getQueryString()!=null)
@@ -625,6 +643,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                             response.sendRedirect(target+"/");
                         return;
                     }
+                    target="/";
                 }
                 else if (target.startsWith(_contextPath) && (_contextPath.length()==1 || target.charAt(_contextPath.length())=='/'))
                 {
@@ -1428,6 +1447,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         }
 
     }
+
 
 
 }
