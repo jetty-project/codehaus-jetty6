@@ -188,15 +188,10 @@ public class SecurityHandler extends HandlerWrapper
         {
             if (_userRealm!=null)
             {
-                if (base_request.getUserPrincipal()!=null)
+                if (dispatch==REQUEST)
                 {
-                    if (dispatch==REQUEST)
-                    {
-                        _userRealm.disassociate(base_request.getUserPrincipal());
-                    }
-                      
+                    _userRealm.disassociate(base_request.getUserPrincipal());
                 }
-                    
             }   
             base_request.setUserRealm(old_realm);
         }

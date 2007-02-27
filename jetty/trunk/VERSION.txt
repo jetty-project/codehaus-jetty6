@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
  + Added option to allow null pathInfo within context
  + BoundedThreadPool queues rather than blocks excess jobs.
  + Support null pathInfo option for webservices deployed to jetty/jboss
+ + Workaround to call SecurityAssocation.clear() for jboss webservices calls to ejbs
  + JETTY-175 JDBCUserRealm use getInt instead of getObject
  + JETTY-235 default realm name
  + JETTY-243 FULL
