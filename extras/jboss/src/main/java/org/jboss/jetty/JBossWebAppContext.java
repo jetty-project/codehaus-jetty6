@@ -119,20 +119,28 @@ public class JBossWebAppContext extends J2EEWebAppContext
         //in other parts of the startup
         setUpENC(getClassLoader());      
         super.startContext();
-        if (_realm!=null)
+        
+        //ensure there is always a realm
+        //this is primarily so that jboss's webservices impl will work, as it
+        //sets up a SecurityAssociation that can only be cleared by jetty if
+        //there is a realm
+        if (_realm == null)
         {
-            //start the realm from within the webapp's classloader as it wants
-            //to do JNDI lookups
-            ClassLoader currentLoader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(getClassLoader());
-            try
-            {
-                _realm.init();
-            }
-            finally
-            {
-                Thread.currentThread().setContextClassLoader(currentLoader);
-            }
+            _realm = new JBossUserRealm("other", getSubjectAttribute());
+            getSecurityHandler().setUserRealm(_realm);
+        }
+
+        //start the realm from within the webapp's classloader as it wants
+        //to do JNDI lookups
+        ClassLoader currentLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClassLoader());
+        try
+        {
+            _realm.init();
+        }
+        finally
+        {
+            Thread.currentThread().setContextClassLoader(currentLoader);
         }
     }
     
