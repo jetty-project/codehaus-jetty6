@@ -6,6 +6,7 @@ jetty-6.1-SNAPSHOT
  + fix Dump servlet to handle primitive array types
  + handle comma separated values for the Connection: header
  + Added option to allow null pathInfo within context
+ + BoundedThreadPool queues rather than blocks excess jobs.
  + Support null pathInfo option for webservices deployed to jetty/jboss
  + JETTY-175 JDBCUserRealm use getInt instead of getObject
  + JETTY-235 default realm name
