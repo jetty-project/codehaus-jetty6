@@ -25,8 +25,7 @@
 
       <!-- Optional Java 5 bounded threadpool with job queue 
       <New class="org.mortbay.thread.concurrent.ThreadPool">
-        <Arg type="int">0</Arg>
-        <Set name="corePoolSize">10</Set>
+        <Set name="corePoolSize">250</Set>
         <Set name="maximumPoolSize">250</Set>
       </New>
       -->
