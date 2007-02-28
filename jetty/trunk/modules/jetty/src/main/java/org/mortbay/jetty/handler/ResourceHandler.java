@@ -202,9 +202,9 @@ public class ResourceHandler extends AbstractHandler
         
         if (resource.isDirectory())
         {
-            if (!request.getPathInfo().endsWith("/"))
+            if (!request.getPathInfo().endsWith(URIUtil.SLASH))
             {
-                response.sendRedirect(request.getRequestURI()+"/");
+                response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH));
                 return;
             }
             resource=getWelcome(resource);

@@ -456,7 +456,7 @@ public abstract class Resource implements Serializable
             String path=URIUtil.addPaths(base,encoded);
             
             if (item.isDirectory() && !path.endsWith("/"))
-                path=URIUtil.addPaths(path,"/");
+                path=URIUtil.addPaths(path,URIUtil.SLASH);
             buf.append(path);
             buf.append("\">");
             buf.append(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));

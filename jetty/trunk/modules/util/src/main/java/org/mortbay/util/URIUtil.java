@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 public class URIUtil
     implements Cloneable
 {
+    public static final String SLASH="/";
     public static final String HTTP="http";
     public static final String HTTP_COLON="http:";
     public static final String HTTPS="https";
@@ -325,7 +326,7 @@ public class URIUtil
         
         if (buf.charAt(split-1)=='/')
         {
-            if (p2.startsWith("/"))
+            if (p2.startsWith(URIUtil.SLASH))
             {
                 buf.deleteCharAt(split-1);
                 buf.insert(split-1,p2);
@@ -335,7 +336,7 @@ public class URIUtil
         }
         else
         {
-            if (p2.startsWith("/"))
+            if (p2.startsWith(URIUtil.SLASH))
                 buf.insert(split,p2);
             else
             {
@@ -353,7 +354,7 @@ public class URIUtil
      */
     public static String parentPath(String p)
     {
-        if (p==null || "/".equals(p))
+        if (p==null || URIUtil.SLASH.equals(p))
             return null;
         int slash=p.lastIndexOf('/',p.length()-2);
         if (slash>=0)
