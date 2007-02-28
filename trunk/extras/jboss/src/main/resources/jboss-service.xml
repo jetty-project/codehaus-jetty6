@@ -44,7 +44,7 @@
     <!-- first (for "non-system" classes)                                   -->
     <!-- ================================================================== -->
 
-    <attribute name="Java2ClassLoadingCompliance">true</attribute>
+    <attribute name="Java2ClassLoadingCompliance">false</attribute>
 
     <!-- ================================================================= -->
     <!-- If you require JAAS authentication, configure the name of the     -->

@@ -129,6 +129,13 @@ public class JettyDeployer extends AbstractWebDeployer
 
             // Add the webapp to jetty 
             _contexts.addHandler(app);
+            
+
+            //tell jboss about the classloader the webapp is using - ensure
+            //this is done before the context is started, because webservices
+            //want to get access to this classloader
+            System.err.println("In JettyDeployer, setting webapp.metadata.contextloader="+app.getClassLoader());
+            webApp.getMetaData().setContextLoader(app.getClassLoader());
 
             //if jetty has been started, then start the
             //handler just added
@@ -157,8 +164,6 @@ public class JettyDeployer extends AbstractWebDeployer
                 _deploymentInfo.mbeans.add((ObjectName) iterator.next());
             }
 
-            //tell jboss about the classloader the webapp is using
-            webApp.getMetaData().setContextLoader(app.getClassLoader());
 
             _log.info("successfully deployed " + warUrl + " to " + contextPath);
         }
