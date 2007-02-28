@@ -20,6 +20,7 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
+import org.mortbay.util.URIUtil;
 
 public class Main
 {
@@ -66,10 +67,10 @@ public class Main
             if (args.length<3)
             {
                 ContextHandler context = new ContextHandler();
-                context.setContextPath("/");
+                context.setContextPath(URIUtil.SLASH);
                 context.setResourceBase(args.length==1?".":args[1]);
                 ServletHandler servlet = new ServletHandler();
-                servlet.addServletWithMapping("org.mortbay.jetty.servlet.DefaultServlet", "/");
+                servlet.addServletWithMapping("org.mortbay.jetty.servlet.DefaultServlet", URIUtil.SLASH);
                 context.setHandler(servlet);
                 contexts.addHandler(context);
             }
@@ -81,7 +82,7 @@ public class Main
             {
                 WebAppContext webapp = new WebAppContext();
                 webapp.setResourceBase(args[2]);
-                webapp.setContextPath("/");
+                webapp.setContextPath(URIUtil.SLASH);
                 contexts.addHandler(webapp);
                 
             }

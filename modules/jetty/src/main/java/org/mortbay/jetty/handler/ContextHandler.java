@@ -634,16 +634,20 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             {
                 if (target.equals(_contextPath))
                 {
-                    if (!_allowNullPathInfo && !target.endsWith("/"))
+                    if (!_allowNullPathInfo && !target.endsWith(URIUtil.SLASH))
                     {
                         base_request.setHandled(true);
                         if (request.getQueryString()!=null)
-                            response.sendRedirect(target+"/?"+request.getQueryString());
+                            response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH)+"?"+request.getQueryString());
                         else 
-                            response.sendRedirect(target+"/");
+                            response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH));
                         return;
                     }
-                    target="/";
+                    if (_contextPath.length()>1)
+                    {
+                        target=URIUtil.SLASH;
+                        request.setAttribute("org.mortbay.jetty.nullPathInfo",target);
+                    }
                 }
                 else if (target.startsWith(_contextPath) && (_contextPath.length()==1 || target.charAt(_contextPath.length())=='/'))
                 {
@@ -1034,7 +1038,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
      */
     public Resource getResource(String path) throws MalformedURLException
     {
-        if (path==null || !path.startsWith("/"))
+        if (path==null || !path.startsWith(URIUtil.SLASH))
             throw new MalformedURLException(path);
         
         if (_baseResource==null)
@@ -1067,8 +1071,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
             
             if (resource!=null && resource.exists())
             {
-                if (!path.endsWith("/"))
-                    path=path+"/";
+                if (!path.endsWith(URIUtil.SLASH))
+                    path=path+URIUtil.SLASH;
                 
                 String[] l=resource.list();
                 if (l!=null)
@@ -1192,8 +1196,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes
                 return null;
             path=URIUtil.canonicalPath(path);
             
-            if (!path.startsWith("/"))
-                path="/"+path;
+            if (!path.startsWith(URIUtil.SLASH))
+                path=URIUtil.SLASH+path;
             if (File.separatorChar!='/')
                 path =path.replace('/', File.separatorChar);
             
@@ -1433,7 +1437,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
          */
         public String getContextPath()
         {
-            if ((_contextPath != null) && _contextPath.equals("/"))
+            if ((_contextPath != null) && _contextPath.equals(URIUtil.SLASH))
                 return "";
             
             return _contextPath;
@@ -1443,7 +1447,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?"/":getContextPath())+","+getBaseResource()+"}";
+            return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?URIUtil.SLASH:getContextPath())+","+getBaseResource()+"}";
         }
 
     }

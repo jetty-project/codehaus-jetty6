@@ -147,7 +147,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         {
             try
             {
-                _resourceBase=Resource.newResource(_context.getResource("/")).addPath(rrb);
+                _resourceBase=Resource.newResource(_context.getResource(URIUtil.SLASH)).addPath(rrb);
             }
             catch (Exception e) 
             {
@@ -172,7 +172,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         try
         {
             if (_resourceBase==null)
-                _resourceBase=Resource.newResource(_context.getResource("/"));
+                _resourceBase=Resource.newResource(_context.getResource(URIUtil.SLASH));
 
             int max_cache_size=getInitInt("maxCacheSize", -2);
             if (max_cache_size==-2 || max_cache_size>0)
@@ -292,7 +292,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
-        boolean endsWithSlash=pathInContext.endsWith("/");
+        boolean endsWithSlash=pathInContext.endsWith(URIUtil.SLASH);
         
         // Can we gzip this request?
         String pathInContextGz=null;
@@ -375,10 +375,14 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             {
                 String welcome=null;
                 
-                if (!endsWithSlash && !pathInContext.equals("/"))
+                if (!endsWithSlash || (pathInContext.length()==1 && request.getAttribute("org.mortbay.jetty.nullPathInfo")!=null))
                 {
                     StringBuffer buf=request.getRequestURL();
-                    buf.append('/');
+                    int param=buf.lastIndexOf(";");
+                    if (param<0)
+                        buf.append('/');
+                    else
+                        buf.insert(param,'/');
                     String q=request.getQueryString();
                     if (q!=null&&q.length()!=0)
                     {
@@ -542,7 +546,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         
         byte[] data=null;
-        String base = URIUtil.addPaths(request.getRequestURI(),"/");
+        String base = URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH);
         String dir = resource.getListHTML(base,parent);
         if (dir==null)
         {
