@@ -129,15 +129,17 @@ public class NIOBuffer extends AbstractBuffer
                 if (src_bytebuf==_buf)
                     src_bytebuf=_buf.duplicate();
                 try
-                {
+                {   
+                    _buf.position(index);
+                    int space = _buf.remaining();
+                    
                     int length=src.length();
-                    if (length>space())    
-                        length=space();
+                    if (length>space)    
+                        length=space;
                     
                     src_bytebuf.position(src.getIndex());
                     src_bytebuf.limit(src.getIndex()+length);
                     
-                    _buf.position(index);
                     _buf.put(src_bytebuf);
                     return length;
                 }
@@ -160,10 +162,10 @@ public class NIOBuffer extends AbstractBuffer
         {
             _buf.position(index);
             
-            int r=_buf.remaining();
+            int space=_buf.remaining();
             
-            if (length>r)
-                length=r;
+            if (length>space)
+                length=space;
             if (length>0)
                 _buf.put(b,offset,length);
             return length;
