@@ -54,7 +54,7 @@ public abstract class AbstractGenerator implements Generator
     public final static int STATE_END = 4;
     
     private static byte[] NO_BYTES = {};
-    private static int MAX_OUTPUT_CHARS = 2048;
+    private static int MAX_OUTPUT_CHARS = 128; // TODO put back to 2048 once fixed
 
     private static Buffer[] __reasons = new Buffer[505];
     static
@@ -721,8 +721,7 @@ public abstract class AbstractGenerator implements Generator
             Output out = _out; 
             while (length > 0)
             {  
-                
-                int chunk = length>MAX_OUTPUT_CHARS?MAX_OUTPUT_CHARS:length;
+                int chars = length>MAX_OUTPUT_CHARS?MAX_OUTPUT_CHARS:length;
 
                 switch (_writeMode)
                 {
@@ -739,10 +738,10 @@ public abstract class AbstractGenerator implements Generator
                         byte[] buffer=out._bytes.getBuf();
                         int bytes=out._bytes.getCount();
                         
-                        if (chunk>buffer.length-bytes)
-                            chunk=buffer.length-bytes;
+                        if (chars>buffer.length-bytes)
+                            chars=buffer.length-bytes;
 
-                        for (int i = 0; i < chunk; i++)
+                        for (int i = 0; i < chars; i++)
                         {
                             int c = s[offset+i];
                             buffer[bytes++]=(byte)(c<256?c:'?'); // ISO-1 and UTF-8 match for 0 - 255
@@ -758,10 +757,10 @@ public abstract class AbstractGenerator implements Generator
                         byte[] buffer=out._bytes.getBuf();
                         int bytes=out._bytes.getCount();
          
-                        if (chunk>buffer.length-bytes)
-                            chunk=buffer.length-bytes;
+                        if (bytes+chars>buffer.length)
+                            chars=buffer.length-bytes;
                         
-                        for (int i = 0; i < chunk; i++)
+                        for (int i = 0; i < chars; i++)
                         {
                             int code = s[offset+i];
 
@@ -773,54 +772,54 @@ public abstract class AbstractGenerator implements Generator
                             else if((code&0xfffff800)==0)
                             {
                                 // 2b
-                                if (buffer.length-bytes<2)
+                                if (bytes+2>buffer.length)
                                 {
-                                    chunk=i;
+                                    chars=i;
                                     break;
                                 }
                                 buffer[bytes++]=(byte)(0xc0|(code>>6));
                                 buffer[bytes++]=(byte)(0x80|(code&0x3f));
-                                
-                                if (chunk-i>buffer.length-bytes)
-                                    chunk=buffer.length-bytes+i;
+
+                                if (bytes+chars-i-1>buffer.length)
+                                    chars-=1;
                             }
                             else if((code&0xffff0000)==0)
                             {
                                 // 3b
-                                if (buffer.length-bytes<3)
+                                if (bytes+3>buffer.length)
                                 {
-                                    chunk=i;
+                                    chars=i;
                                     break;
                                 }
                                 buffer[bytes++]=(byte)(0xe0|(code>>12));
                                 buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
                                 buffer[bytes++]=(byte)(0x80|(code&0x3f));
 
-                                if (chunk-i>buffer.length-bytes)
-                                    chunk=buffer.length-bytes+i;
+                                if (bytes+chars-i-1>buffer.length)
+                                    chars-=2;
                             }
                             else if((code&0xff200000)==0)
                             {
                                 // 4b
-                                if (buffer.length-bytes<4)
+                                if (bytes+4>buffer.length)
                                 {
-                                    chunk=i;
+                                    chars=i;
                                     break;
                                 }
                                 buffer[bytes++]=(byte)(0xf0|(code>>18));
                                 buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
                                 buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
                                 buffer[bytes++]=(byte)(0x80|(code&0x3f));
-                                
-                                if (chunk-i>buffer.length-bytes)
-                                    chunk=buffer.length-bytes+i;
+
+                                if (bytes+chars-i-1>buffer.length)
+                                    chars-=3;
                             }
                             else if((code&0xf4000000)==0)
                             {
-                                // 5
-                                if (buffer.length-bytes<5)
+                                // 5b
+                                if (bytes+5>buffer.length)
                                 {
-                                    chunk=i;
+                                    chars=i;
                                     break;
                                 }
                                 buffer[bytes++]=(byte)(0xf8|(code>>24));
@@ -828,16 +827,16 @@ public abstract class AbstractGenerator implements Generator
                                 buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
                                 buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
                                 buffer[bytes++]=(byte)(0x80|(code&0x3f));
-                                
-                                if (chunk-i>buffer.length-bytes)
-                                    chunk=buffer.length-bytes+i;
+
+                                if (bytes+chars-i-1>buffer.length)
+                                    chars-=4;
                             }
                             else if((code&0x80000000)==0)
                             {
                                 // 6b
-                                if (buffer.length-bytes<6)
+                                if (bytes+6>buffer.length)
                                 {
-                                    chunk=i;
+                                    chars=i;
                                     break;
                                 }
                                 buffer[bytes++]=(byte)(0xfc|(code>>30));
@@ -846,9 +845,9 @@ public abstract class AbstractGenerator implements Generator
                                 buffer[bytes++]=(byte)(0x80|((code>>12)&0x3f));
                                 buffer[bytes++]=(byte)(0x80|((code>>6)&0x3f));
                                 buffer[bytes++]=(byte)(0x80|(code&0x3f));
-                                
-                                if (chunk-i>buffer.length-bytes)
-                                    chunk=buffer.length-bytes+i;
+
+                                if (bytes+chars-i-1>buffer.length)
+                                    chars-=5;
                             }
                             else
                             {
@@ -863,8 +862,8 @@ public abstract class AbstractGenerator implements Generator
                 }
                 out._bytes.writeTo(out);
                 out._bytes.reset();
-                length-=chunk;
-                offset+=chunk;
+                length-=chars;
+                offset+=chars;
             }
         }
 
