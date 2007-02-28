@@ -322,7 +322,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /* ------------------------------------------------------------ */
     /* 
      */
-    public void run()
+    public synchronized void run()
     {
         try
         {
