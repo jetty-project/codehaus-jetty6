@@ -9,6 +9,7 @@ jetty-6.1-SNAPSHOT
  + BoundedThreadPool queues rather than blocks excess jobs.
  + Support null pathInfo option for webservices deployed to jetty/jboss
  + Workaround to call SecurityAssocation.clear() for jboss webservices calls to ejbs
+ + Ensure jetty/jboss uses servlet-spec classloading order
  + JETTY-175 JDBCUserRealm use getInt instead of getObject
  + JETTY-235 default realm name
  + JETTY-243 FULL
