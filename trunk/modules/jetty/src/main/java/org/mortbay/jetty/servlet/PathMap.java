@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
+import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.
@@ -176,7 +177,7 @@ public class PathMap extends HashMap implements Externalizable
                 }
                 else if (spec.startsWith("*."))
                     _suffixMap.put(spec.substring(2),entry);
-                else if (spec.equals("/"))
+                else if (spec.equals(URIUtil.SLASH))
                 {    
                     if (_nodefault)
                         _exactMap.put(spec,entry);
@@ -340,7 +341,7 @@ public class PathMap extends HashMap implements Externalizable
             }
             else if (spec.startsWith("*."))
                 _suffixMap.remove(spec.substring(2));
-            else if (spec.equals("/"))
+            else if (spec.equals(URIUtil.SLASH))
             {
                 _default=null;
                 _defaultSingletonList=null;
@@ -480,16 +481,16 @@ public class PathMap extends HashMap implements Externalizable
 
         if( info.startsWith( "./"))
             info = info.substring( 2);
-        if( base.endsWith( "/"))
-            if( info.startsWith( "/"))
+        if( base.endsWith( URIUtil.SLASH))
+            if( info.startsWith( URIUtil.SLASH))
                 path = base + info.substring(1);
             else
                 path = base + info;
         else
-            if( info.startsWith( "/"))
+            if( info.startsWith( URIUtil.SLASH))
                 path = base + info;
             else
-                path = base + "/" + info;
+                path = base + URIUtil.SLASH + info;
         return path;
     }
  

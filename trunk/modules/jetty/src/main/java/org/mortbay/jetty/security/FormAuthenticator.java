@@ -143,7 +143,7 @@ public class FormAuthenticator implements Authenticator
             {
                 nuri=request.getContextPath();
                 if (nuri.length()==0)
-                    nuri="/";
+                    nuri=URIUtil.SLASH;
             }
             
             if (form_cred._userPrincipal!=null)

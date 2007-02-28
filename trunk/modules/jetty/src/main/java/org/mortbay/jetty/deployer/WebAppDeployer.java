@@ -24,6 +24,7 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.URIUtil;
 
 /**
  * Web Application Deployer.
@@ -177,7 +178,7 @@ public class WebAppDeployer extends AbstractLifeCycle
                 continue;
 
             if (context.equalsIgnoreCase("root")||context.equalsIgnoreCase("root/"))
-                context="/";
+                context=URIUtil.SLASH;
             else
                 context="/"+context;
             if (context.endsWith("/")&&context.length()>0)

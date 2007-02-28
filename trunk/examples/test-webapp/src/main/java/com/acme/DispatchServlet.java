@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.mortbay.util.URIUtil;
+
 
 /* ------------------------------------------------------------ */
 /** Test Servlet RequestDispatcher.
@@ -176,7 +178,7 @@ public class DispatchServlet extends HttpServlet
             {
                 sres.setContentType("text/html");
                 PrintWriter pout= sres.getWriter();
-                pout.write("<H1>No dispatcher for: " + cpath + "/" + info + "</H1><HR>");
+                pout.write("<H1>No dispatcher for: " + cpath + URIUtil.SLASH + info + "</H1><HR>");
                 pout.flush();
             }
         }
@@ -184,8 +186,8 @@ public class DispatchServlet extends HttpServlet
         {
             sres.setContentType("text/html");
             info= info.substring(10);
-            if (info.indexOf("/") >= 0)
-                info= info.substring(0, info.indexOf("/"));
+            if (info.indexOf(URIUtil.SLASH) >= 0)
+                info= info.substring(0, info.indexOf(URIUtil.SLASH));
             
             PrintWriter pout;
             if (info.startsWith("/null"))
@@ -211,8 +213,8 @@ public class DispatchServlet extends HttpServlet
         else if (info.startsWith("/forwardN/"))
         {
             info= info.substring(10);
-            if (info.indexOf("/") >= 0)
-                info= info.substring(0, info.indexOf("/"));
+            if (info.indexOf(URIUtil.SLASH) >= 0)
+                info= info.substring(0, info.indexOf(URIUtil.SLASH));
             RequestDispatcher dispatch= getServletContext().getNamedDispatcher(info);
             if (dispatch != null)
                 dispatch.forward(sreq, sres);
