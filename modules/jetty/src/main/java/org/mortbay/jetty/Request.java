@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -414,7 +415,8 @@ public class Request implements HttpServletRequest
                             continue;
                         }
 
-                        v = URIUtil.decodePath(v);
+                        v = URLDecoder.decode(v,StringUtil.__ISO_8859_1);
+                        
                         cookie = new Cookie(n, v);
                         if (version > 0) cookie.setVersion(version);
                         cookies = LazyList.add(cookies, cookie);

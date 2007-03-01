@@ -226,18 +226,11 @@ public class Dump extends HttpServlet
         }
 
         String cn= request.getParameter("cookie");
-        String cv=request.getParameter("value");
-        String v=request.getParameter("version");
+        String cv=request.getParameter("cookiev");
         if (cn!=null && cv!=null)
         {
             Cookie cookie= new Cookie(cn, cv);
             cookie.setComment("Cookie from dump servlet");
-            if (v!=null)
-            {
-                cookie.setMaxAge(300);
-                cookie.setPath("/");
-                cookie.setVersion(Integer.parseInt(v));
-            }
             response.addCookie(cookie);
         }
 
@@ -569,6 +562,13 @@ public class Dump extends HttpServlet
             pout.write("<input type=\"submit\" name=\"Action\" value=\"Submit\"><br/>");
             pout.write("</form>");
 
+            pout.write("<h2>Form to set Cookie</h2>");
+            pout.write("<form method=\"POST\" action=\""+response.encodeURL(getURI(request))+"\">");
+            pout.write("cookie: <input type=\"text\" name=\"cookie\" /><br/>\n");
+            pout.write("value: <input type=\"text\" name=\"cookiev\" /><br/>\n");
+            pout.write("<input type=\"submit\" name=\"Action\" value=\"setCookie\">");
+            pout.write("</form>\n");
+            
             pout.write("<h2>Form to get Resource</h2>");
             pout.write("<form method=\"POST\" action=\""+response.encodeURL(getURI(request))+"\">");
             pout.write("resource: <input type=\"text\" name=\"resource\" /><br/>\n");
