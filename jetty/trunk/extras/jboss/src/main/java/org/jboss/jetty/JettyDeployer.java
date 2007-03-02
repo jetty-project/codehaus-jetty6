@@ -88,12 +88,9 @@ public class JettyDeployer extends AbstractWebDeployer
             
             //permit urls without a trailing '/' even though it is not a valid url
             //as the jboss webservice client tests seem to use these invalid urls
-            if (webApp.getMetaData().isWebServiceDeployment())
-            {
-                if (_log.isDebugEnabled())
-                    _log.debug("Setting setAllowNullPathInfo(true) for webservices war");
-                app.setAllowNullPathInfo(true);
-            }
+            if (_log.isDebugEnabled())
+                _log.debug("Allowing non-trailing '/' on context path");
+            app.setAllowNullPathInfo(true);
                  
             Manager manager = (Manager) getDistributableSessionManagerPrototype();
             if (manager != null)
