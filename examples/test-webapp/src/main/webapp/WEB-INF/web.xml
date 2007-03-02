@@ -222,6 +222,10 @@
       </taglib-location>
     </taglib>
   </jsp-config>
+  
+  <session-config>
+    <session-timeout>5</session-timeout>
+  </session-config>
 
 </web-app>
 
