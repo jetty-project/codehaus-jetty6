@@ -70,6 +70,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     {
         protected SocketChannel acceptChannel(SelectionKey key) throws IOException
         {
+            // TODO handle max connections
             SocketChannel channel = ((ServerSocketChannel)key.channel()).accept();
             if (channel==null)
                 return null;
@@ -86,11 +87,13 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         protected void endPointClosed(SelectChannelEndPoint endpoint)
         {
+            // TODO handle max connections and low resources
             connectionClosed((HttpConnection)endpoint.getConnection());
         }
 
         protected void endPointOpened(SelectChannelEndPoint endpoint)
         {
+            // TODO handle max connections and low resources
             connectionOpened((HttpConnection)endpoint.getConnection());
         }
 
