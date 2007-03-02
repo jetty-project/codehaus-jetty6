@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,8 +35,9 @@ import org.mortbay.util.LazyList;
  */
 public class HashSessionManager extends AbstractSessionManager
 {
+    private Timer _timer;
+    private TimerTask _task;
     private int _scavengePeriodMs=30000;
-    private Thread _scavenger=null;
     protected Map _sessions;
     
     /* ------------------------------------------------------------ */
@@ -52,8 +55,9 @@ public class HashSessionManager extends AbstractSessionManager
         _sessions=new HashMap();
         super.doStart();
 
-        // Start the session scavenger if we haven't already
-        getSessionHandler().getServer().getThreadPool().dispatch(new SessionScavenger());
+        _timer=new Timer();
+        
+        setScavengePeriod(getScavengePeriod());
 
     }
 
@@ -68,11 +72,14 @@ public class HashSessionManager extends AbstractSessionManager
         _sessions=null;
 
         // stop the scavenger
-        Thread scavenger=_scavenger;
-        _scavenger=null;
-        if (scavenger!=null)
-            scavenger.interrupt();
-
+        synchronized(this)
+        {
+            if (_task!=null)
+                _task.cancel();
+            if (_timer!=null)
+                _timer.cancel();
+            _timer=null;
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -123,13 +130,21 @@ public class HashSessionManager extends AbstractSessionManager
         if (period<1000)
             period=1000;
 
-        if (period!=old_period)
+        _scavengePeriodMs=period;
+        if (_timer!=null && (period!=old_period || _task==null))
         {
             synchronized (this)
             {
-                _scavengePeriodMs=period;
-                if (_scavenger!=null)
-                    _scavenger.interrupt();
+                if (_task!=null)
+                    _task.cancel();
+                _task = new TimerTask()
+                {
+                    public void run()
+                    {
+                        scavenge();
+                    }   
+                };
+                _timer.schedule(_task,_scavengePeriodMs,_scavengePeriodMs);
             }
         }
     }
@@ -264,63 +279,6 @@ public class HashSessionManager extends AbstractSessionManager
         }
     }
     
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* -------------------------------------------------------------- */
-    /** SessionScavenger is a background thread that kills off old sessions */
-    class SessionScavenger implements Runnable
-    {
-        public void run()
-        {
-            _scavenger=Thread.currentThread();
-            String name=Thread.currentThread().getName();
-            if (_context!=null)
-                Thread.currentThread().setName(name+" - Invalidator - "+_context.getContextPath());
-            int period=-1;
-            try
-            {
-                do
-                {
-                    try
-                    {
-                        if (period!=_scavengePeriodMs)
-                        {
-                            if (Log.isDebugEnabled())
-                                Log.debug("Session scavenger period = "+_scavengePeriodMs/1000+"s");
-                            period=_scavengePeriodMs;
-                        }
-                        Thread.sleep(period>1000?period:1000);
-                        HashSessionManager.this.scavenge();
-                    }
-                    catch (InterruptedException ex)
-                    {
-                        continue;
-                    }
-                    catch (Error e)
-                    {
-                        Log.warn(Log.EXCEPTION,e);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.warn(Log.EXCEPTION,e);
-                    }
-                }
-                while (isStarted());
-            }
-            finally
-            {
-                HashSessionManager.this._scavenger=null;
-                String exit="Session scavenger exited";
-                if (isStarted())
-                    Log.warn(exit);
-                else
-                    Log.debug(exit);
-                Thread.currentThread().setName(name);
-            }
-        }
-
-    } // SessionScavenger
 
     
 }
