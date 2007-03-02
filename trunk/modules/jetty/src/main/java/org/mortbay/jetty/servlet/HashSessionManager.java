@@ -141,6 +141,10 @@ public class HashSessionManager extends AbstractSessionManager
      */
     private void scavenge()
     {
+        //don't attempt to scavenge if we are shutting down
+        if (isStopping() || isStopped())
+            return;
+        
         Thread thread=Thread.currentThread();
         ClassLoader old_loader=thread.getContextClassLoader();
         try
