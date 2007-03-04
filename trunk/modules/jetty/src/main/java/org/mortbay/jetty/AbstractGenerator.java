@@ -407,7 +407,6 @@ public abstract class AbstractGenerator implements Generator
     /* ------------------------------------------------------------ */
     public boolean isContentWritten()
     {
-        System.err.println("contentLength="+_contentLength);
         return _contentLength>=0 && _contentWritten>=_contentLength;
     }
     
