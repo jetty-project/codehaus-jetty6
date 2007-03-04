@@ -56,6 +56,8 @@ public interface Generator
     int getContentBufferSize();
 
     long getContentWritten();
+    
+    boolean isContentWritten();
 
     void increaseContentBufferSize(int size);
     
