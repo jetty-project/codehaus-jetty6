@@ -666,6 +666,22 @@ public class Response implements HttpServletResponse
             return;
         _connection._generator.setContentLength(len);
         _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
+        if (_connection._generator.isContentWritten())
+        {
+            if (_outputState==WRITER)
+                _writer.close();
+            else if (_outputState==STREAM)
+            {
+                try
+                {
+                    getOutputStream().close();
+                }
+                catch(IOException e)
+                {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */

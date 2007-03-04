@@ -13,10 +13,12 @@ jetty-6.1-SNAPSHOT
  + Use timer for session scavaging
  + JETTY-175 JDBCUserRealm use getInt instead of getObject
  + JETTY-235 default realm name
+ + JETTY-242 fix race condition with scavenging sessions when stopping
  + JETTY-243 FULL
  + JETTY-244 Fixed UTF-8 buffer overflow
+ + JETTY-245 Client API improvements
  + JETTY-246 spaces in cookies
- + JETTY-242 fix race condition with scavenging sessions when stopping
+ + JETTY-248 setContentLength after content written
 
 jetty-6.1.2rc0 - 15 February 2007
  + JETTY-223 Fix disassociate of UserPrincipal on dispatches
