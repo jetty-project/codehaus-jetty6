@@ -198,6 +198,14 @@ public class HttpGenerator extends AbstractGenerator
 
 
     /* ------------------------------------------------------------ */
+    public void setContentLength(long value)
+    {
+        if (value<_contentWritten)
+            throw new IllegalArgumentException();
+        super.setContentLength(value);
+    }
+
+    /* ------------------------------------------------------------ */
     /** Prepare buffer for unchecked writes.
      * Prepare the generator buffer to receive unchecked writes
      * @return the available space in the buffer.
@@ -209,10 +217,7 @@ public class HttpGenerator extends AbstractGenerator
             return -1;
         
         if (_last || _state==STATE_END) 
-        {
-            Log.debug("Ignoring extra content {}");
             return -1;
-        }
 
         // Handle any unfinished business?
         Buffer content = _content;
