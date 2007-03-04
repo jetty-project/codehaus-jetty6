@@ -21,7 +21,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
@@ -201,7 +200,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             _acceptChannel.socket().bind(addr,getAcceptQueueSize());
 
             // Register accepts on the server socket with the selector.
-            _manager.register(_acceptChannel,SelectionKey.OP_ACCEPT);
+            _manager.register(_acceptChannel,SelectionKey.OP_ACCEPT,null);
         }
     }
 

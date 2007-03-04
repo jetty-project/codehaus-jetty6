@@ -3,6 +3,7 @@ package org.mortbay.io.nio;
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -43,29 +44,66 @@ public abstract class SelectorManager extends AbstractLifeCycle
     {
         return _maxIdleTime;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
     public int getSelectSets()
     {
         return _selectSets;
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
     public boolean isDelaySelectKeyUpdate()
     {
         return _delaySelectKeyUpdate;
     }
 
-    public SelectionKey register(ServerSocketChannel acceptChannel, int op_accept) throws ClosedChannelException
+    /* ------------------------------------------------------------ */
+    /**
+     * @param connectChannel
+     * @param interestedOps
+     * @param attchmt
+     * @return
+     * @throws ClosedChannelException
+     */
+    public SelectionKey register(SocketChannel connectChannel, int interestedOps, Object attchmt) throws ClosedChannelException
     {
         int set=0; // TODO next set?
         
         synchronized (_selectSet[set])
         {
-            SelectionKey key = acceptChannel.register(_selectSet[set].getSelector(), SelectionKey.OP_ACCEPT);
+            SelectionKey key = connectChannel.register(_selectSet[set].getSelector(), interestedOps, attchmt);
             return key;
         }
-        // TODO Auto-generated method stub
-        
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param acceptChannel
+     * @return
+     * @throws ClosedChannelException
+     */
+    public SelectionKey register(ServerSocketChannel acceptChannel, int interestedOps, Object attchmt) throws ClosedChannelException
+    {
+        int set=0; // TODO next set?
+        
+        synchronized (_selectSet[set])
+        {
+            SelectionKey key = acceptChannel.register(_selectSet[set].getSelector(),interestedOps , attchmt);
+            return key;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param acceptorID
+     * @throws IOException
+     */
     public void doSelect(int acceptorID) throws IOException
     {
         
@@ -75,6 +113,10 @@ public abstract class SelectorManager extends AbstractLifeCycle
     }
 
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @param delaySelectKeyUpdate
+     */
     public void setDelaySelectKeyUpdate(boolean delaySelectKeyUpdate)
     {
         _delaySelectKeyUpdate=delaySelectKeyUpdate;
@@ -89,11 +131,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
         _maxIdleTime=maxIdleTime;
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param selectSets
+     */
     public void setSelectSets(int selectSets)
     {
         _selectSets=selectSets;
     }
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -106,6 +151,10 @@ public abstract class SelectorManager extends AbstractLifeCycle
     /* ------------------------------------------------------------------------------- */
     protected abstract boolean dispatch(Runnable task) throws IOException;
 
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see org.mortbay.component.AbstractLifeCycle#doStart()
+     */
     protected void doStart() throws Exception
     {
         _selectSet = new SelectSet[_selectSets];
@@ -361,6 +410,15 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 if (endpoint != null)
                                     doDispatch(endpoint);
                             }
+                        }
+                        else if (key.isConnectable())
+                        {
+                            SocketChannel channel = (SocketChannel) key.channel();
+                            channel.finishConnect();
+                            SelectionKey cKey = channel.register(_selectSet[_nextSet].getSelector(), SelectionKey.OP_READ, key.attachment());
+                            SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
+                            if (endpoint != null)
+                                doDispatch(endpoint);
                         }
                         else
                         {
