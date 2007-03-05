@@ -38,7 +38,7 @@ import org.mortbay.util.StringUtil;
 /**
  * CGI Servlet.
  * 
- * The cgi bin directory can be set with the cgibinResourceBase init parameter
+ * The cgi bin directory can be set with the "cgibinResourceBase" init parameter
  * or it will default to the resource base of the context.
  * 
  * The "commandPrefix" init parameter may be used to set a prefix to all
@@ -281,8 +281,7 @@ public class CGI extends HttpServlet
 
         // hook processes output to browser's input (sync)
         // if browser closes stream, we should detect it and kill process...
-        BufferedReader br=null;
-        PrintWriter writer=null;
+        OutputStream os = null;
         try
         {
             // read any headers off the top of our input stream
@@ -290,38 +289,38 @@ public class CGI extends HttpServlet
             String line=null;
             InputStream inFromCgi=p.getInputStream();
 
-            br=new BufferedReader(new InputStreamReader(inFromCgi));
-            while ((line=br.readLine())!=null)
+            //br=new BufferedReader(new InputStreamReader(inFromCgi));
+            //while ((line=br.readLine())!=null)
+            while( (line = getTextLineFromStream( inFromCgi )).length() > 0 )
             {
-                // check for end of header
-                if (line.trim().length()==0)
-                    break;
                 if (!line.startsWith("HTTP"))
                 {
                     int k=line.indexOf(':');
                     if (k>0)
                     {
                         String key=line.substring(0,k).trim();
+                        String value = line.substring(k+1).trim();
                         if ("Location".equals(key))
                         {
-                            res.sendRedirect(line.substring(k+1).trim());
+                            res.sendRedirect(value);
                         }
                         else if ("Status".equals(key))
                         {
-                            int status=Integer.parseInt(line.substring(k+1).trim());
+                        	String[] token = value.split( " " );
+                            int status=Integer.parseInt(token[0]);
                             res.setStatus(status);
                         }
                         else
                         {
                             // add remaining header items to our response header
-                            res.addHeader(key,line.substring(k+1));
+                            res.addHeader(key,value);
                         }
                     }
                 }
             }
             // copy cgi content to response stream...
-            writer=res.getWriter();
-            IO.copy(br,writer);
+            os = res.getOutputStream();
+            IO.copy(inFromCgi, os);
             p.waitFor();
 
             if (!_ignoreExitState)
@@ -347,23 +346,29 @@ public class CGI extends HttpServlet
         }
         finally
         {
-            if (br!=null)
-                try
-                {
-                    br.close();
-                }
-                catch (IOException ioe)
-                {
-                }
-            if (writer!=null)
-                writer.close();
-            br=null;
-            writer=null;
+            if( os != null )
+            	os.close();
+            os = null;
             p.destroy();
             // Log.debug("CGI: terminated!");
         }
     }
 
+    /**
+     * Utility method to get a line of text from the input stream.
+     * @param is the input stream
+     * @return the line of text
+     * @throws IOException
+     */
+    private String getTextLineFromStream( InputStream is ) throws IOException {
+        StringBuffer buffer = new StringBuffer();
+        int b;
+
+       	while( (b = is.read()) != -1 && b != (int) '\n' ) {
+       		buffer.append( (char) b );
+       	}
+       	return buffer.toString().trim();
+    }
     /* ------------------------------------------------------------ */
     /**
      * private utility class that manages the Environment passed to exec.
