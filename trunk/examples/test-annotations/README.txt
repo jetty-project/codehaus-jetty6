@@ -1,14 +1,8 @@
 After Building
 --------------
-After you have built the example, you will need to edit a couple
-of files to uncomment the appropriate  configuration for the
-transaction manager you are using.
-
-+ edit contexts/annotations-context.xml and uncomment one of the transaction
-  manager setups.
-
-+ edit contexts/test-annotations.d/WEB-INF/jetty-env.xml and uncomment
-  one of the transaction manager setups.
+After you have built the example, you will need to 
+edit contexts/annotations-context.xml and uncomment 
+one of the transaction manager setups.
 
 
 Running the Demo

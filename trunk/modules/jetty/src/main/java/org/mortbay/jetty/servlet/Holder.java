@@ -152,6 +152,11 @@ public class Holder extends AbstractLifeCycle implements Serializable
         return _class.newInstance();
     }
     
+    public void destroyInstance(Object instance)
+    throws Exception
+    {
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param className The className to set.
