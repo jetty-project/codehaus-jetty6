@@ -288,16 +288,15 @@ public class ServletHolder extends Holder
                 user=_realm.pushRole(null,_runAs);
                 
             if (_servlet!=null)
-            {   
+            {                  
                 try
                 {
-                    getServletHandler().customizeServletDestroy(_servlet);
+                    destroyInstance(_servlet);
                 }
                 catch (Exception e)
                 {
                     Log.warn(e);
                 }
-                _servlet.destroy();
             }
             
             if (!_extInstance)
@@ -305,16 +304,15 @@ public class ServletHolder extends Holder
             
             while (_servlets!=null && _servlets.size()>0)
             {
-                Servlet s = (Servlet)_servlets.pop();
+                Servlet s = (Servlet)_servlets.pop();              
                 try
                 {
-                    getServletHandler().customizeServletDestroy(s);
+                    destroyInstance(s);
                 }
                 catch (Exception e)
                 {
                     Log.warn(e);
                 }
-                s.destroy();
             }
             _config=null;
         }
@@ -327,6 +325,15 @@ public class ServletHolder extends Holder
         }
     }
 
+    public void destroyInstance (Object o)
+    throws Exception
+    {
+        if (o==null)
+            return;
+        Servlet servlet =  ((Servlet)o);
+        servlet.destroy();
+        getServletHandler().customizeServletDestroy(servlet);
+    }
 
     /* ------------------------------------------------------------ */
     /** Get the servlet.
