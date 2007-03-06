@@ -106,19 +106,28 @@ public class FilterHolder
         {
             try
             {
-                getServletHandler().customizeFilterDestroy(_filter);
+                destroyInstance(_filter);
             }
             catch (Exception e)
             {
                 Log.warn(e);
             }
-            _filter.destroy();
         }
         if (!_extInstance)
             _filter=null;
         
         _config=null;
         super.doStop();   
+    }
+    
+    public void destroyInstance (Object o)
+    throws Exception
+    {
+        if (o==null)
+            return;
+        Filter f = (Filter)o;
+        f.destroy();
+        getServletHandler().customizeFilterDestroy(f);
     }
 
     /* ------------------------------------------------------------ */
