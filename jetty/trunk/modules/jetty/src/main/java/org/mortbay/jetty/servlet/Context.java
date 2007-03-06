@@ -248,20 +248,29 @@ public class Context extends ContextHandler
     {
         if(_securityHandler==securityHandler)
             return;
-        
+                    
         if (_securityHandler!=null)
             _securityHandler.setHandler(null);
-            
+        
         _securityHandler = securityHandler;
         
-        if (_sessionHandler!=null)
-            _sessionHandler.setHandler(_securityHandler);
-        else 
-            setHandler(_securityHandler);
-        
-        if (_servletHandler!=null)
-            _securityHandler.setHandler(_sessionHandler);
-            
+        if (_securityHandler==null)
+        {
+            if (_sessionHandler!=null)
+                _sessionHandler.setHandler(_servletHandler);
+            else 
+                setHandler(_servletHandler);
+        }
+        else
+        {
+            if (_sessionHandler!=null)
+                _sessionHandler.setHandler(_securityHandler);
+            else 
+                setHandler(_securityHandler);
+
+            if (_servletHandler!=null)
+                _securityHandler.setHandler(_servletHandler);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -276,11 +285,11 @@ public class Context extends ContextHandler
         _servletHandler = servletHandler;
 
         if (_securityHandler!=null)
-            _securityHandler.setHandler(_sessionHandler);
+            _securityHandler.setHandler(_servletHandler);
         else if (_sessionHandler!=null)
-            _sessionHandler.setHandler(_securityHandler);
+            _sessionHandler.setHandler(_servletHandler);
         else 
-            setHandler(_securityHandler);
+            setHandler(_servletHandler);
         
     }
 
