@@ -59,7 +59,7 @@ public class Constraint implements Cloneable, Serializable
     public Constraint(String name, String role)
     {
         setName(name);
-        _roles=new String[]{role};
+        setRoles(new String[]{role});
     }
 
     /* ------------------------------------------------------------ */
