@@ -13,6 +13,7 @@ jetty-6.1-SNAPSHOT
  + call preDestroy() after servlet/filter destroy()
  + Use timer for session scavaging
  + Fix constructor for Constraint to detect wildcard role
+ + JETTY-157 make CGI handle binary data
  + JETTY-175 JDBCUserRealm use getInt instead of getObject
  + JETTY-235 default realm name
  + JETTY-242 fix race condition with scavenging sessions when stopping
@@ -21,8 +22,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-245 Client API improvements
  + JETTY-246 spaces in cookies
  + JETTY-248 setContentLength after content written
- + JETTY-157 make CGI handle binary data
- + JETTY-254 problem with TagLibConfiguration and jar file inputstream with xerces on apple
+ + JETTY-254 prevent close of jar file by bad JVMs
 
 jetty-6.1.2rc0 - 15 February 2007
  + JETTY-223 Fix disassociate of UserPrincipal on dispatches

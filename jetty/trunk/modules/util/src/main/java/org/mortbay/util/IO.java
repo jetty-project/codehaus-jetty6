@@ -56,7 +56,8 @@ public class IO extends BoundedThreadPool
             catch(Exception e){Log.warn(e); System.exit(1);}
         }
     }
-    
+
+    /* ------------------------------------------------------------------- */
     public static IO instance()
     {
         return Singleton.__instance;
@@ -389,6 +390,15 @@ public class IO extends BoundedThreadPool
     {
         return __nullStream;
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return An outputstream to nowhere
+     */
+    public static InputStream getClosedStream()
+    {
+        return __closedStream;
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -401,6 +411,18 @@ public class IO extends BoundedThreadPool
         public void write(int b){}
     }
     private static NullOS __nullStream = new NullOS();
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class ClosedIS extends InputStream                                    
+    {
+        public int read() throws IOException
+        {
+            return -1;
+        }
+    }
+    private static ClosedIS __closedStream = new ClosedIS();
     
     /* ------------------------------------------------------------ */
     /** 
