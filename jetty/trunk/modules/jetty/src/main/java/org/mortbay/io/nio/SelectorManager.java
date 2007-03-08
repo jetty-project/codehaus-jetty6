@@ -32,9 +32,32 @@ public abstract class SelectorManager extends AbstractLifeCycle
 {
     private boolean _delaySelectKeyUpdate=true;
     private long _maxIdleTime;
+    private long _lowResourcesConnections;
+    private long _lowResourcesMaxIdleTime;
     private transient SelectSet[] _selectSet;
     private int _selectSets=1;
     
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param maxIdleTime The maximum period in milli seconds that a connection may be idle before it is closed.
+     * @see {@link #setLowResourcesMaxIdleTime(long)}
+     */
+    public void setMaxIdleTime(long maxIdleTime)
+    {
+        _maxIdleTime=maxIdleTime;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param selectSets
+     */
+    public void setSelectSets(int selectSets)
+    {
+        long lrc = _lowResourcesConnections * _selectSets; 
+        _selectSets=selectSets;
+        _lowResourcesConnections=lrc/_selectSets;
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -99,6 +122,47 @@ public abstract class SelectorManager extends AbstractLifeCycle
         }
     }
     
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the lowResourcesConnections
+     */
+    public long getLowResourcesConnections()
+    {
+        return _lowResourcesConnections*_selectSets;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the number of connections, which if exceeded places this manager in low resources state.
+     * This is not an exact measure as the connection count is averaged over the select sets.
+     * @param lowResourcesConnections the number of connections
+     * @see {@link #setLowResourcesMaxIdleTime(long)}
+     */
+    public void setLowResourcesConnections(long lowResourcesConnections)
+    {
+        _lowResourcesConnections=(lowResourcesConnections+_selectSets-1)/_selectSets;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the lowResourcesMaxIdleTime
+     */
+    public long getLowResourcesMaxIdleTime()
+    {
+        return _lowResourcesMaxIdleTime;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param lowResourcesMaxIdleTime the period in ms that a connection is allowed to be idle when this SelectSet has more connections than {@link #getLowResourcesConnections()}
+     * @see {@link #setMaxIdleTime(long)}
+     */
+    public void setLowResourcesMaxIdleTime(long lowResourcesMaxIdleTime)
+    {
+        _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param acceptorID
@@ -120,24 +184,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
     public void setDelaySelectKeyUpdate(boolean delaySelectKeyUpdate)
     {
         _delaySelectKeyUpdate=delaySelectKeyUpdate;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param maxIdleTime
-     */
-    public void setMaxIdleTime(long maxIdleTime)
-    {
-        _maxIdleTime=maxIdleTime;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param selectSets
-     */
-    public void setSelectSets(int selectSets)
-    {
-        _selectSets=selectSets;
     }
 
     /* ------------------------------------------------------------ */
@@ -453,6 +499,11 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     now = System.currentTimeMillis();
                     _retryTimeout.setNow(now);
                     _idleTimeout.setNow(now);
+                    
+                    if (_lowResourcesConnections>0 && _selector.keys().size()>_lowResourcesConnections)
+                        _idleTimeout.setDuration(_lowResourcesMaxIdleTime);
+                    else 
+                        _idleTimeout.setDuration(_maxIdleTime);
 
                     task=_idleTimeout.expired();
                     if (task==null)
@@ -587,4 +638,5 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
         }
     }
+
 }

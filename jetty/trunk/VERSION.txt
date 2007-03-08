@@ -13,6 +13,7 @@ jetty-6.1-SNAPSHOT
  + call preDestroy() after servlet/filter destroy()
  + Use timer for session scavaging
  + Fix constructor for Constraint to detect wildcard role
+ + Added support for lowResourcesIdleTime to SelectChannelConnector
  + JETTY-157 make CGI handle binary data
  + JETTY-175 JDBCUserRealm use getInt instead of getObject
  + JETTY-235 default realm name
