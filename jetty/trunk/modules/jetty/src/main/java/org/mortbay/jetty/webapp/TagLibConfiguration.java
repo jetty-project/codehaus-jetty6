@@ -187,7 +187,19 @@ public class TagLibConfiguration implements Configuration
                 Resource tld = (Resource)iter.next();
                 if (Log.isDebugEnabled()) Log.debug("TLD="+tld);
                 
-                XmlParser.Node root = parser.parse(tld.getInputStream());
+                XmlParser.Node root;
+                
+                try
+                {
+                    //xerces on apple appears to sometimes close the zip file instead
+                    //of the inputstream, so try opening the input stream, but if
+                    //that doesn't work, fallback to opening a new url
+                    root = parser.parse(tld.getInputStream());
+                }
+                catch (Exception e)
+                {
+                    root = parser.parse(tld.getURL().toString());
+                }
 
 		if (root==null)
 		{
