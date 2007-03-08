@@ -303,7 +303,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class ConnectorEndPoint extends SelectChannelEndPoint
+    public static class ConnectorEndPoint extends SelectChannelEndPoint
     {
         public ConnectorEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
         {
