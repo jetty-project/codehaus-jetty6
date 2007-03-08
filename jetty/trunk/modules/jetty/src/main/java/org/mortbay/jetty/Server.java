@@ -608,7 +608,7 @@ public class Server extends HandlerWrapper implements Attributes
      */
     public Enumeration getAttributeNames()
     {
-        return _attributes.getAttributeNames();
+        return AttributesMap.getAttributeNamesCopy(_attributes);
     }
 
     /* ------------------------------------------------------------ */

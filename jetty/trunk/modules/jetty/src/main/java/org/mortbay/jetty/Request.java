@@ -260,7 +260,7 @@ public class Request implements HttpServletRequest
     {
         if (_attributes==null)
             return Collections.enumeration(Collections.EMPTY_LIST);
-        return _attributes.getAttributeNames();
+        return AttributesMap.getAttributeNamesCopy(_attributes);
     }
 
     /* ------------------------------------------------------------ */

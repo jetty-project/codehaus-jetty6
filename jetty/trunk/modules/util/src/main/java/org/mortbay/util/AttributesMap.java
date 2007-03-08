@@ -15,6 +15,7 @@
 
 package org.mortbay.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -78,6 +79,21 @@ public class AttributesMap implements Attributes
     public Enumeration getAttributeNames()
     {
         return Collections.enumeration(_map.keySet());
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.util.Attributes#getAttributeNames()
+     */
+    public static Enumeration getAttributeNamesCopy(Attributes attrs)
+    {
+        if (attrs instanceof AttributesMap)
+            return Collections.enumeration(((AttributesMap)attrs)._map.keySet());
+        ArrayList names = new ArrayList();
+        Enumeration e = attrs.getAttributeNames();
+        while (e.hasMoreElements())
+            names.add(e.nextElement());
+        return Collections.enumeration(names);
     }
 
     /* ------------------------------------------------------------ */
