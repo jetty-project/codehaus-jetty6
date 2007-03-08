@@ -15,6 +15,7 @@ package org.mortbay.resource;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
@@ -106,7 +107,10 @@ public class JarResource extends URLResource
             return super.getInputStream();
                     
         URL url = new URL(_urlString.substring(4,_urlString.length()-2));      
-        InputStream is = url.openStream();
+        InputStream is = new FilterInputStream(url.openStream())
+        {
+            public void close() throws IOException {this.in=IO.getClosedStream();}
+        };
         return is;
     }
     
@@ -132,8 +136,8 @@ public class JarResource extends URLResource
         
         InputStream is = jarFileURL.openConnection().getInputStream();
         JarInputStream jin = new JarInputStream(is);
-        JarEntry entry=null;
-        boolean shouldExtract = true;
+        JarEntry entry;
+        boolean shouldExtract;
         while((entry=jin.getNextJarEntry())!=null)
         {
             String entryName = entry.getName();
