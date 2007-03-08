@@ -158,11 +158,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
             try
             {
                 _dispatched = false;
-
-                if (getChannel().isOpen())
-                {
-                    updateKey();
-                }
+                updateKey();
             }
             catch (Exception e)
             {
@@ -225,7 +221,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                     }
                     catch (InterruptedException e)
                     {
-                        e.printStackTrace();
+                        Log.warn(e);
                     }
                 }
             }
@@ -261,7 +257,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                     }
                     catch (InterruptedException e)
                     {
-                        e.printStackTrace();
+                        Log.warn(e);
                     }
                 }
             }
@@ -277,17 +273,21 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /**
      * Updates selection key. Adds operations types to the selection key as needed. No operations
      * are removed as this is only done during dispatch. This method records the new key and
-     * schedules a call to syncKey to do the keyChange
+     * schedules a call to doUpdateKey to do the keyChange
      */
     private void updateKey()
     {
         synchronized (this)
         {
-            int ops = _key == null ? 0 : _key.interestOps();
-            _interestOps = ops | ((!_dispatched || _readBlocked) ? SelectionKey.OP_READ : 0) | ((!_writable || _writeBlocked) ? SelectionKey.OP_WRITE : 0);
-            _writable = true; // Once writable is in ops, only removed with dispatch.
-
-            if (_interestOps != ops)
+            int ops=-1;
+            if (_key!=null && _key.isValid())
+            {
+                ops = _key.interestOps();
+                _interestOps = ops | ((!_dispatched || _readBlocked) ? SelectionKey.OP_READ : 0) | ((!_writable || _writeBlocked) ? SelectionKey.OP_WRITE : 0);
+                _writable = true; // Once writable is in ops, only removed with dispatch.
+            }
+            
+            if (_interestOps != ops || !getChannel().isOpen())
             {
                 _selectSet.addChange(this);
                 _selectSet.wakeup();
@@ -299,23 +299,30 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /**
      * Synchronize the interestOps with the actual key. Call is scheduled by a call to updateKey
      */
-    public void syncKey()
+    void doUpdateKey()
     {
         synchronized (this)
         {
-            if (_key != null && _key.isValid())
+            if (_key != null)
             {
-                if (_interestOps >= 0)
-                    _key.interestOps(_interestOps);
-                else
+                if (!_key.isValid())
                 {
-                    _key.cancel();
+                    cancelIdle();
                     _manager.endPointClosed(this);
                     _key = null;
                 }
+                else if (!getChannel().isOpen())
+                {
+                    // TODO Should not be needed, but leaving for a while just in case!
+                    Log.warn("PLEASE report issue JETTY-252 to mortbay@mortbay.com");
+                    _key.cancel();
+                    cancelIdle();
+                    _manager.endPointClosed(this);
+                    _key = null;
+                }
+                else if (_interestOps >= 0)
+                    _key.interestOps(_interestOps);
             }
-            else
-                _key = null;
         }
     }
 
@@ -362,15 +369,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
      */
     public void close() throws IOException
     {
-        synchronized (this)
-        {
-            if (_key != null)
-            {
-                _key.cancel();
-            }
-            _key = null;
-        }
-        
         try
         {
             super.close();
@@ -378,8 +376,11 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         catch (IOException e)
         {
             Log.ignore(e);
+        }   
+        finally
+        {
+            updateKey();
         }
-        
     }
     
     /* ------------------------------------------------------------ */

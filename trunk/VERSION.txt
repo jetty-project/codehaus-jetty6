@@ -22,6 +22,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-245 Client API improvements
  + JETTY-246 spaces in cookies
  + JETTY-248 setContentLength after content written
+ + JETTY-252 Fixed stats handling of close connection
  + JETTY-254 prevent close of jar file by bad JVMs
 
 jetty-6.1.2rc0 - 15 February 2007

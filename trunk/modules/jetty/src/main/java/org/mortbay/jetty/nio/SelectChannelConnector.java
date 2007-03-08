@@ -255,7 +255,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public static class ConnectorEndPoint extends SelectChannelEndPoint
+    public class ConnectorEndPoint extends SelectChannelEndPoint
     {
         public ConnectorEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
         {
@@ -272,6 +272,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             super.close();
         }
 
+        /* ------------------------------------------------------------ */
         public void undispatch()
         {
             RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
@@ -287,6 +288,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             {
                 super.undispatch();
             }
+               
         }
     }
 
