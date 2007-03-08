@@ -705,7 +705,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------ */
     protected void connectionClosed(HttpConnection connection)
-    {
+    {   
         if (_statsStartedAt>=0)
         {
             synchronized(_statsLock)

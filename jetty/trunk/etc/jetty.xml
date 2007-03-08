@@ -49,6 +49,7 @@
             <Set name="maxIdleTime">30000</Set>
             <Set name="Acceptors">2</Set>
             <Set name="confidentialPort">8443</Set>
+            <Set name="statsOn">true</Set>
           </New>
       </Arg>
     </Call>
