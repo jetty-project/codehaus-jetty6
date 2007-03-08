@@ -300,7 +300,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         {
                             // Update the operatios for a key.
                             SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
-                            endpoint.syncKey();
+                            endpoint.doUpdateKey();
                         }
                         else if (o instanceof SocketChannel)
                         {
@@ -376,10 +376,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             key.cancel();
                             SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
                             if (endpoint != null)
-                            {
-                                endpoint.close();
-                                endPointClosed(endpoint);
-                            }
+                                endpoint.doUpdateKey();
                             continue;
                         }
 
