@@ -64,6 +64,8 @@ import org.mortbay.util.ajax.Continuation;
 public class SelectChannelConnector extends AbstractNIOConnector 
 {
     private transient ServerSocketChannel _acceptChannel;
+    private long _lowResourcesConnections;
+    private long _lowResourcesMaxIdleTime;
 
     private SelectorManager _manager = new SelectorManager()
     {
@@ -223,6 +225,50 @@ public class SelectChannelConnector extends AbstractNIOConnector
         super.setMaxIdleTime(maxIdleTime);
     }
 
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the lowResourcesConnections
+     */
+    public long getLowResourcesConnections()
+    {
+        return _lowResourcesConnections;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the number of connections, which if exceeded places this manager in low resources state.
+     * This is not an exact measure as the connection count is averaged over the select sets.
+     * @param lowResourcesConnections the number of connections
+     * @see {@link #setLowResourcesMaxIdleTime(long)}
+     */
+    public void setLowResourcesConnections(long lowResourcesConnections)
+    {
+        _lowResourcesConnections=lowResourcesConnections;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the lowResourcesMaxIdleTime
+     */
+    public long getLowResourcesMaxIdleTime()
+    {
+        return _lowResourcesMaxIdleTime;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the period in ms that a connection is allowed to be idle when this there are more
+     * than {@link #getLowResourcesConnections()} connections.  This allows the server to rapidly close idle connections
+     * in order to gracefully handle high load situations.
+     * @param lowResourcesMaxIdleTime the period in ms that a connection is allowed to be idle when resources are low.
+     * @see {@link #setMaxIdleTime(long)}
+     */
+    public void setLowResourcesMaxIdleTime(long lowResourcesMaxIdleTime)
+    {
+        _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
+    }
+    
     /* ------------------------------------------------------------ */
     /*
      * @see org.mortbay.jetty.AbstractConnector#doStart()
@@ -231,6 +277,8 @@ public class SelectChannelConnector extends AbstractNIOConnector
     {
         _manager.setSelectSets(getAcceptors());
         _manager.setMaxIdleTime(getMaxIdleTime());
+        _manager.setLowResourcesConnections(getLowResourcesConnections());
+        _manager.setLowResourcesMaxIdleTime(getLowResourcesMaxIdleTime());
         _manager.start();
         super.doStart();
     }
