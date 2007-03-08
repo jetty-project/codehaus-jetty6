@@ -1,0 +1,464 @@
+Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 1630)
++++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(working copy)
+@@ -25,7 +25,7 @@
+ import org.mortbay.jetty.SessionIdManager;
+ import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
+ import org.mortbay.log.Log;
+-import org.mortbay.util.MultiMap;
++import org.mortbay.util.ConcurrentMultiMap;
+ 
+ /* ------------------------------------------------------------ */
+ /**
+@@ -37,7 +37,7 @@
+     protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
+     protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
+ 
+-    MultiMap _sessions;
++    ConcurrentMultiMap _sessions;
+     protected Random _random;
+     private boolean _weakRandom;
+     private String _workerName;
+@@ -103,7 +103,7 @@
+             }
+         }
+         _random.setSeed(_random.nextLong()^System.currentTimeMillis()^hashCode()^Runtime.getRuntime().freeMemory());
+-        _sessions=new MultiMap();
++        _sessions=new ConcurrentMultiMap();
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -129,10 +129,7 @@
+      */
+     public void addSession(HttpSession session)
+     {
+-        synchronized (this)
+-        {
+-            _sessions.add(session.getId(),session);
+-        }
++        _sessions.add(session.getId(),session);
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -141,10 +138,7 @@
+      */
+     public void removeSession(HttpSession session)
+     {
+-        synchronized (this)
+-        {
+-            _sessions.removeValue(session.getId(),session);
+-        }
++        _sessions.removeValue(session.getId(),session);
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -153,19 +147,16 @@
+      */
+     public void invalidateAll(String id)
+     {
+-        synchronized (this)
+-        {
+-            // Do not use interators as this method tends to be called recursively 
+-            // by the invalidate calls.
+-            while (_sessions.containsKey(id))
+-            {
+-                Session session=(Session)_sessions.getValue(id,0);
+-                if (session.isValid())
+-                    session.invalidate();
+-                else
+-                    _sessions.removeValue(id,session);
+-            }
+-        }
++	// Do not use interators as this method tends to be called recursively 
++	// by the invalidate calls.
++	while (_sessions.containsKey(id))
++	{
++	    Session session=(Session)_sessions.getValue(id,0);
++	    if (session.isValid())
++		session.invalidate();
++	    else
++		_sessions.removeValue(id,session);
++	}
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -224,4 +215,4 @@
+         _weakRandom=false;
+     }
+ 
+-}
+\ No newline at end of file
++}
+Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 1630)
++++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(working copy)
+@@ -20,6 +20,8 @@
+ import java.util.Iterator;
+ import java.util.Map;
+ 
++import java.util.concurrent.ConcurrentHashMap;
++
+ import javax.servlet.http.HttpServletRequest;
+ 
+ import org.mortbay.log.Log;
+@@ -49,7 +51,7 @@
+      */
+     public void doStart() throws Exception
+     {
+-        _sessions=new HashMap();
++        _sessions=new ConcurrentHashMap(); // TODO: use syncronizedMap for JDK 1.4
+         super.doStart();
+ 
+         // Start the session scavenger if we haven't already
+Index: modules/jetty/pom.xml
+===================================================================
+--- modules/jetty/pom.xml	(revision 1630)
++++ modules/jetty/pom.xml	(working copy)
+@@ -24,6 +24,13 @@
+     </testResources>
+     <plugins>
+       <plugin>
++        <artifactId>maven-compiler-plugin</artifactId>
++        <configuration>
++          <source>1.5</source>
++          <target>1.5</target>
++        </configuration>
++      </plugin>
++      <plugin>
+         <artifactId>maven-antrun-plugin</artifactId>
+         <executions>
+           <execution>
+Index: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java	(revision 0)
++++ modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java	(revision 0)
+@@ -0,0 +1,303 @@
++// ========================================================================
++// Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
++// ------------------------------------------------------------------------
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at 
++// http://www.apache.org/licenses/LICENSE-2.0
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++// ========================================================================
++
++package org.mortbay.util;
++
++import java.util.Arrays;
++import java.util.concurrent.ConcurrentHashMap;
++import java.util.HashMap;
++import java.util.Iterator;
++import java.util.List;
++import java.util.Map;
++
++/* ------------------------------------------------------------ */
++/** A multi valued Map.
++ * This Map specializes HashMap and provides methods
++ * that operate on multi valued items. 
++ * <P>
++ * Implemented as a map of LazyList values
++ *
++ * @see LazyList
++ * @author Greg Wilkins (gregw)
++ */
++public class ConcurrentMultiMap extends ConcurrentHashMap
++    implements Cloneable
++{
++    /* ------------------------------------------------------------ */
++    /** Constructor. 
++     */
++    public ConcurrentMultiMap()
++    {}
++    
++    /* ------------------------------------------------------------ */
++    /** Constructor. 
++     * @param size Capacity of the map
++     */
++    public ConcurrentMultiMap(int size)
++    {
++        super(size);
++    }
++    
++    /* ------------------------------------------------------------ */
++    /** Constructor. 
++     * @param map 
++     */
++    public ConcurrentMultiMap(Map map)
++    {
++        super((map.size()*3)/2);
++        putAll(map);
++    }
++    
++    /* ------------------------------------------------------------ */
++    /** Get multiple values.
++     * Single valued entries are converted to singleton lists.
++     * @param name The entry key. 
++     * @return Unmodifieable List of values.
++     */
++    public List getValues(Object name)
++    {
++        return LazyList.getList(super.get(name),true);
++    }
++    
++    /* ------------------------------------------------------------ */
++    /** Get a value from a multiple value.
++     * If the value is not a multivalue, then index 0 retrieves the
++     * value or null.
++     * @param name The entry key.
++     * @param i Index of element to get.
++     * @return Unmodifieable List of values.
++     */
++    public Object getValue(Object name,int i)
++    {
++        Object l=super.get(name);
++        if (i==0 && LazyList.size(l)==0)
++            return null;
++        return LazyList.get(l,i);
++    }
++    
++    
++    /* ------------------------------------------------------------ */
++    /** Get value as String.
++     * Single valued items are converted to a String with the toString()
++     * Object method. Multi valued entries are converted to a comma separated
++     * List.  No quoting of commas within values is performed.
++     * @param name The entry key. 
++     * @return String value.
++     */
++    public String getString(Object name)
++    {
++        Object l=super.get(name);
++        switch(LazyList.size(l))
++        {
++          case 0:
++              return null;
++          case 1:
++              Object o=LazyList.get(l,0);
++              return o==null?null:o.toString();
++          default:
++              StringBuffer values=new StringBuffer(128);
++              synchronized(values)
++              {
++                  for (int i=0; i<LazyList.size(l); i++)              
++                  {
++                      Object e=LazyList.get(l,i);
++                      if (e!=null)
++                      {
++                          if (values.length()>0)
++                              values.append(',');
++                          values.append(e.toString());
++                      }
++                  }   
++                  return values.toString();
++              }
++        }
++    }
++    
++    /* ------------------------------------------------------------ */
++    public Object get(Object name) 
++    {
++        Object l=super.get(name);
++        switch(LazyList.size(l))
++        {
++          case 0:
++              return null;
++          case 1:
++              Object o=LazyList.get(l,0);
++              return o;
++          default:
++              return LazyList.getList(l,true);
++        }
++    }
++    
++    /* ------------------------------------------------------------ */
++    /** Put and entry into the map.
++     * @param name The entry key. 
++     * @param value The entry value.
++     * @return The previous value or null.
++     */
++    public Object put(Object name, Object value) 
++    {
++        return super.put(name,LazyList.add(null,value));
++    }
++
++    /* ------------------------------------------------------------ */
++    /** Put multi valued entry.
++     * @param name The entry key. 
++     * @param values The List of multiple values.
++     * @return The previous value or null.
++     */
++    public Object putValues(Object name, List values) 
++    {
++        return super.put(name,values);
++    }
++    
++    /* ------------------------------------------------------------ */
++    /** Put multi valued entry.
++     * @param name The entry key. 
++     * @param values The String array of multiple values.
++     * @return The previous value or null.
++     */
++    public Object putValues(Object name, String[] values) 
++    {
++        Object list=null;
++        for (int i=0;i<values.length;i++)
++            list=LazyList.add(list,values[i]);
++        return put(name,list);
++    }
++    
++    
++    /* ------------------------------------------------------------ */
++    /** Add value to multi valued entry.
++     * If the entry is single valued, it is converted to the first
++     * value of a multi valued entry.
++     * @param name The entry key. 
++     * @param value The entry value.
++     */
++    public void add(Object name, Object value) 
++    {
++        Object lo = super.get(name);
++        Object ln = LazyList.add(lo,value);
++        if (lo!=ln)
++            super.put(name,ln);
++    }
++
++    /* ------------------------------------------------------------ */
++    /** Add values to multi valued entry.
++     * If the entry is single valued, it is converted to the first
++     * value of a multi valued entry.
++     * @param name The entry key. 
++     * @param values The List of multiple values.
++     */
++    public void addValues(Object name, List values) 
++    {
++        Object lo = super.get(name);
++        Object ln = LazyList.addCollection(lo,values);
++        if (lo!=ln)
++            super.put(name,ln);
++    }
++    
++    /* ------------------------------------------------------------ */
++    /** Add values to multi valued entry.
++     * If the entry is single valued, it is converted to the first
++     * value of a multi valued entry.
++     * @param name The entry key. 
++     * @param values The String array of multiple values.
++     */
++    public void addValues(Object name, String[] values) 
++    {
++        Object lo = super.get(name);
++        Object ln = LazyList.addCollection(lo,Arrays.asList(values));
++        if (lo!=ln)
++            super.put(name,ln);
++    }
++    
++    /* ------------------------------------------------------------ */
++    /** Remove value.
++     * @param name The entry key. 
++     * @param value The entry value. 
++     * @return true if it was removed.
++     */
++    public boolean removeValue(Object name,Object value)
++    {
++        Object lo = super.get(name);
++        Object ln=lo;
++        int s=LazyList.size(lo);
++        if (s>0)
++        {
++            ln=LazyList.remove(lo,value);
++            if (ln==null)
++                super.remove(name);
++            else
++                super.put(name, ln);
++        }
++        return LazyList.size(ln)!=s;
++    }
++    
++    /* ------------------------------------------------------------ */
++    /** Put all contents of map.
++     * @param m Map
++     */
++    public void putAll(Map m)
++    {
++        Iterator i = m.entrySet().iterator();
++        boolean multi=m instanceof MultiMap;
++        while(i.hasNext())
++        {
++            Map.Entry entry =
++                (Map.Entry)i.next();
++            if (multi)
++                super.put(entry.getKey(),LazyList.clone(entry.getValue()));
++            else
++                put(entry.getKey(),entry.getValue());
++        }
++    }
++
++    /* ------------------------------------------------------------ */
++    /** 
++     * @return Map of String arrays
++     */
++    public Map toStringArrayMap()
++    {
++        HashMap map = new HashMap(size()*3/2);
++        
++        Iterator i = super.entrySet().iterator();
++        while(i.hasNext())
++        {
++            Map.Entry entry = (Map.Entry)i.next();
++            Object l = entry.getValue();
++            String[] a = LazyList.toStringArray(l);
++            // for (int j=a.length;j-->0;)
++            //    if (a[j]==null)
++            //         a[j]="";
++            map.put(entry.getKey(),a);
++        }
++        return map;
++    }
++    
++    /* ------------------------------------------------------------ */
++    public Object clone()
++        throws CloneNotSupportedException
++    {
++        ConcurrentMultiMap mm = (ConcurrentMultiMap) super.clone();
++        
++        Iterator iter = mm.entrySet().iterator();
++        while (iter.hasNext())
++        {
++            Map.Entry entry = (Map.Entry)iter.next();
++            entry.setValue(LazyList.clone(entry.getValue()));
++        }
++        
++        return mm;
++    }
++}
+
+Property changes on: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Index: modules/util/pom.xml
+===================================================================
+--- modules/util/pom.xml	(revision 1630)
++++ modules/util/pom.xml	(working copy)
+@@ -36,6 +36,13 @@
+     </testResources>
+     <plugins>
+       <plugin>
++        <artifactId>maven-compiler-plugin</artifactId>
++        <configuration>
++          <source>1.5</source>
++          <target>1.5</target>
++        </configuration>
++      </plugin>
++      <plugin>
+         <artifactId>maven-antrun-plugin</artifactId>
+         <executions>
+           <execution>
