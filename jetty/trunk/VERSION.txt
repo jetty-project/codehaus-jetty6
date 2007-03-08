@@ -1,4 +1,6 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.2rc1 - 8 March 2007
  + TagLibConfiguration uses resource input stream
  + Improved handling of early close in AJP
  + add ajp connector jar to jetty-jboss sar
