@@ -104,13 +104,13 @@ public class JarResource extends URLResource
     {     
         checkConnection();
         if (!_urlString.endsWith("!/"))
-            return super.getInputStream();
-                    
+            return new FilterInputStream(super.getInputStream()) 
+            {
+                public void close() throws IOException {this.in=IO.getClosedStream();}
+            };
+
         URL url = new URL(_urlString.substring(4,_urlString.length()-2));      
-        InputStream is = new FilterInputStream(url.openStream())
-        {
-            public void close() throws IOException {this.in=IO.getClosedStream();}
-        };
+        InputStream is = url.openStream();
         return is;
     }
     
