@@ -403,13 +403,15 @@ public class ServletHandler extends AbstractHandler
             if (th instanceof HttpException)
                 throw (HttpException)th;
             else if (Log.isDebugEnabled() || !( th instanceof java.io.IOException))
-            {
-                Log.warn(request.getRequestURI()+": ",th);
+            { 
+                Log.warn(request.getRequestURI(), th); 
                 if(Log.isDebugEnabled())
-                    Log.debug(request.toString());   
+                    Log.debug(request.toString()); 
             }
-            // TODO clean up
-            Log.warn(request.getRequestURI(), th);
+            else
+            {
+                Log.warn(request.getRequestURI()+": "+th);
+            }
             
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
