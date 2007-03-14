@@ -1,6 +1,7 @@
-<beans xmlns="http://mortbay.com/schemas/jetty/1.0">
+<beans>
   <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
-  <jetty>
+
+  <jetty xmlns="http://mortbay.com/schemas/jetty/1.0">
       <connectors>
         <nioConnector port="8181" />
       </connectors>
@@ -9,7 +10,8 @@
         <handlers>
           <webAppContext contextPath="/test" 
                          resourceBase="${java.io.tmpdir}/webapp" 
-                         parentLoaderPriority="false" />
+                         parentLoaderPriority="false"
+                         logUrlOnStart="true"/>
        </handlers>
       </contexts>
       <defaultHandler serveIcon="true"/>
