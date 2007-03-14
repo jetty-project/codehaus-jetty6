@@ -87,6 +87,7 @@ public class WebAppContext extends Context
     private boolean _distributable=false;
     private boolean _extractWAR=true;
     private boolean _copyDir=false;
+    private boolean _logUrlOnStart =false;
     private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
     private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c.", "org.apache.commons.logging.", "org.apache.log4j."};
@@ -442,6 +443,10 @@ public class WebAppContext extends Context
             getTempDirectory();
 
             super.doStart();
+
+            if (isLogUrlOnStart()) {
+                dumpUrl();
+            }
         }
         catch (Exception e)
         {
@@ -451,7 +456,23 @@ public class WebAppContext extends Context
         }
 
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /*
+     * Dumps the current web app name and URL to the log
+     */
+    public void dumpUrl() {
+        Connector[] connectors = getServer().getConnectors();
+        for (Connector connector : connectors) {
+            String connectorName = connector.getName();
+            String displayName = getDisplayName();
+            if (displayName == null) {
+                displayName = "Web Application";
+            }
+            Log.info(displayName + " running at: http://" + connectorName + getContextPath());
+        }
+    }
+
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.thread.AbstractLifeCycle#doStop()
@@ -1143,6 +1164,20 @@ public class WebAppContext extends Context
     public void setExtraClasspath(String extraClasspath)
     {
         _extraClasspath=extraClasspath;
+    }
+
+    public boolean isLogUrlOnStart() {
+        return _logUrlOnStart;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Sets whether or not the web app name and URL is logged on startup
+     *
+     * @param logOnStart whether or not the log message is created
+     */
+    public void setLogUrlOnStart(boolean logOnStart) {
+        this._logUrlOnStart = logOnStart;
     }
 
     /* ------------------------------------------------------------ */
