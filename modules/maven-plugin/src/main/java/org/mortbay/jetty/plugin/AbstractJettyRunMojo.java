@@ -388,9 +388,9 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         for ( Iterator iter = getProject().getArtifacts().iterator(); iter.hasNext(); )
         {
             Artifact artifact = (Artifact) iter.next();
-            
             // Include runtime and compile time libraries, and possibly test libs too
-            if ((!Artifact.SCOPE_TEST.equals( artifact.getScope())) ||
+            if (((!Artifact.SCOPE_PROVIDED.equals(artifact.getScope())) && (!Artifact.SCOPE_TEST.equals( artifact.getScope()))) 
+                    ||
                 (useTestClasspath && Artifact.SCOPE_TEST.equals( artifact.getScope())))
             {
                 dependencyFiles.add(artifact.getFile());
