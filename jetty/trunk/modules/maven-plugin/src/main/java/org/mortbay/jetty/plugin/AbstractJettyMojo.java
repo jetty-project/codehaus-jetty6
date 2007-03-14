@@ -55,7 +55,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     /**
      * The maven project.
      *
-     * @parameter expression="${project}"
+     * @parameter expression="${executedProject}"
      * @required
      * @readonly
      */
