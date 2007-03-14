@@ -313,8 +313,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 }
                 else if (!getChannel().isOpen())
                 {
-                    // TODO Should not be needed, but leaving for a while just in case!
-                    Log.warn("PLEASE report issue JETTY-252 to mortbay@mortbay.com");
+                    // TODO Should not be needed, but have had 1 report - need to investigate why/how
                     _key.cancel();
                     cancelIdle();
                     _manager.endPointClosed(this);
