@@ -230,6 +230,8 @@ public class Dump extends HttpServlet
         if (cn!=null && cv!=null)
         {
             Cookie cookie= new Cookie(cn, cv);
+            if (request.getParameter("version")!=null)
+                cookie.setVersion(Integer.parseInt(request.getParameter("version")));
             cookie.setComment("Cookie from dump servlet");
             response.addCookie(cookie);
         }

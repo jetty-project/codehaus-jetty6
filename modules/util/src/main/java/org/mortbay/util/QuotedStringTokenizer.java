@@ -349,6 +349,84 @@ public class QuotedStringTokenizer
                 }
             }
             buf.append('"');
+        } 
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Quote a string into a StringBuffer.
+     * The characters ", \, \n, \r, \t, \f and \b are escaped
+     * @param buf The StringBuffer
+     * @param s The String to quote.
+     */
+    public static void quoteIfNeeded(StringBuffer buf, String s)
+    {
+        synchronized(buf)
+        {
+            int e=-1;
+            
+            search: for (int i=0;i<s.length();i++)
+            {
+                char c = s.charAt(i);
+                switch(c)
+                {
+                    case '"':
+                    case '\\':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                    case '\f':
+                    case '\b':
+                    case ' ':
+                        e=i;
+                        buf.append('"');
+                        buf.append(s,0,e);
+                        break search;
+                        
+                    default:
+                        continue;
+                }
+            }
+            
+            if (e<0)
+            {
+                buf.append(s);
+                return;
+            }
+            
+            for (int i=e;i<s.length();i++)
+            {
+                char c = s.charAt(i);
+                switch(c)
+                {
+                    case '"':
+                        buf.append("\\\"");
+                        continue;
+                    case '\\':
+                        buf.append("\\\\");
+                        continue;
+                    case '\n':
+                        buf.append("\\n");
+                        continue;
+                    case '\r':
+                        buf.append("\\r");
+                        continue;
+                    case '\t':
+                        buf.append("\\t");
+                        continue;
+                    case '\f':
+                        buf.append("\\f");
+                        continue;
+                    case '\b':
+                        buf.append("\\b");
+                        continue;
+                        
+                    default:
+                        buf.append(c);
+                        continue;
+                }
+            }
+            buf.append('"');
         }
     }
     
