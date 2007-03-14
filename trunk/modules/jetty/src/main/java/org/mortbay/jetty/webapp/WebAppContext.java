@@ -444,9 +444,8 @@ public class WebAppContext extends Context
 
             super.doStart();
 
-            if (isLogUrlOnStart()) {
+            if (isLogUrlOnStart()) 
                 dumpUrl();
-            }
         }
         catch (Exception e)
         {
@@ -454,22 +453,23 @@ public class WebAppContext extends Context
             Log.warn("Failed startup of context "+this, e);
             _unavailable = true;
         }
-
     }
 
     /* ------------------------------------------------------------ */
     /*
      * Dumps the current web app name and URL to the log
      */
-    public void dumpUrl() {
+    public void dumpUrl() 
+    {
         Connector[] connectors = getServer().getConnectors();
-        for (Connector connector : connectors) {
-            String connectorName = connector.getName();
+        for (int i=0;i<connectors.length;i++) 
+        {
+            String connectorName = connectors[i].getName();
             String displayName = getDisplayName();
-            if (displayName == null) {
-                displayName = "Web Application";
-            }
-            Log.info(displayName + " running at: http://" + connectorName + getContextPath());
+            if (displayName == null)
+                displayName = "WebApp@"+connectors.hashCode();
+           
+            Log.info(displayName + " at http://" + connectorName + getContextPath());
         }
     }
 
@@ -1166,7 +1166,9 @@ public class WebAppContext extends Context
         _extraClasspath=extraClasspath;
     }
 
-    public boolean isLogUrlOnStart() {
+    /* ------------------------------------------------------------ */
+    public boolean isLogUrlOnStart() 
+    {
         return _logUrlOnStart;
     }
 
@@ -1176,7 +1178,8 @@ public class WebAppContext extends Context
      *
      * @param logOnStart whether or not the log message is created
      */
-    public void setLogUrlOnStart(boolean logOnStart) {
+    public void setLogUrlOnStart(boolean logOnStart) 
+    {
         this._logUrlOnStart = logOnStart;
     }
 
