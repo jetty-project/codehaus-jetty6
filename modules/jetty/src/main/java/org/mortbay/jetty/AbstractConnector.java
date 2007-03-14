@@ -55,6 +55,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     private int _confidentialPort=0;
     private int _acceptQueueSize=0;
     private int _acceptors=1;
+    private int _acceptorPriorityOffset=0;
     private boolean _useDNS;
     
     protected int _maxIdleTime=30000; 
@@ -487,10 +488,11 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
             _acceptorThread[_acceptor]=current;
             String name =_acceptorThread[_acceptor].getName();
             current.setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
-            Log.debug("Starting " + this);
+            int old_priority=current.getPriority();
+            
             try
             {
-                current.setPriority(current.getPriority()-1);
+                current.setPriority(old_priority-_acceptorPriorityOffset);
                 while (isRunning())
                 {
                     try
@@ -513,8 +515,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
             }
             finally
             {   
-                Log.debug("Stopping " + this);
-                current.setPriority(current.getPriority()+1);
+                current.setPriority(old_priority);
                 current.setName(name);
                 try
                 {
@@ -529,6 +530,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         }
     }
 
+    /* ------------------------------------------------------------ */
     public String getName()
     {
         if (_name==null)
@@ -536,6 +538,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         return _name;
     }
 
+    /* ------------------------------------------------------------ */
     public void setName(String name)
     {
         _name = name;
@@ -732,6 +735,27 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         }
         
         connection.destroy();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the acceptorPriority
+     */
+    public int getAcceptorPriorityOffset()
+    {
+        return _acceptorPriorityOffset;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the priority offset of the acceptor threads. The priority is adjusted by
+     * this amount (default 0) to either favour the acceptance of new threads and newly active
+     * connections or to favour the handling of already dispatched connections.
+     * @param offset the amount to alter the priority of the acceptor threads.
+     */
+    public void setAcceptorPriorityOffset(int offset)
+    {
+        _acceptorPriorityOffset=offset;
     }
 
 }
