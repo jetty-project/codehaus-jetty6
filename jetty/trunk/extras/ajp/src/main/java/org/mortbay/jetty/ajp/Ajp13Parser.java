@@ -288,18 +288,20 @@ public class Ajp13Parser implements Parser
                 case Ajp13Packet.FORWARD_REQUEST_ORDINAL:
                     _handler.startForwardRequest();
                     break;
-                case Ajp13Packet.SHUTDOWN_ORDINAL:
-                    // Log.warn("AJP13 SHUTDOWN not
-                    // supported!");
-                    // break;
                 case Ajp13Packet.CPING_REQUEST_ORDINAL:
-                    // handler.cpingRequest();
-                    // break;
+                    _state = STATE_END;
+                    Log.info("AJP13: CPING is sent by peer :-) ");
+                    ((Ajp13Generator) _generator).sendCPong();
+                    return -1;
+                case Ajp13Packet.SHUTDOWN_ORDINAL:
+                    shutdownRequest();
+                    return -1;
+
                 default:
                     // XXX Throw an Exception here?? Close
                     // connection!
-                    Log.warn("AJP13 message type ({SHUTDOWN, CPING, PING}) not supported/recognized as a " + "container request", Integer.toString(packetType));
-                throw new IllegalStateException("SHUTDOWN, CPING, PING is not implemented");
+                    Log.warn("AJP13 message type ({PING}) not supported/recognized as a " + "container request", Integer.toString(packetType));
+                throw new IllegalStateException("PING is not implemented");
             }
 
 
@@ -341,8 +343,12 @@ public class Ajp13Parser implements Parser
                     // XXX How does this plug into the web
                     // containers
                     // authentication?
+
                     case Ajp13RequestHeaders.REMOTE_USER_ATTR:
+                        _handler.parsedRemoteUser(Ajp13RequestPacket.getString(_buffer, _tok1));
+                        break;
                     case Ajp13RequestHeaders.AUTH_TYPE_ATTR:
+                        _handler.parsedAuthorizationType(Ajp13RequestPacket.getString(_buffer, _tok1));
                         break;
 
                     case Ajp13RequestHeaders.QUERY_STRING_ATTR:
@@ -358,16 +364,16 @@ public class Ajp13Parser implements Parser
                         break;
 
                     case Ajp13RequestHeaders.SSL_CERT_ATTR:
-                        _handler.parsedRequestAttribute("javax.servlet.request.X509Certificate", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        _handler.parsedSslCert(Ajp13RequestPacket.getString(_buffer, _tok1));
                         break;
 
                     case Ajp13RequestHeaders.SSL_CIPHER_ATTR:
-                        _handler.parsedRequestAttribute("javax.servlet.request.cipher_suite", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        _handler.parsedSslCipher(Ajp13RequestPacket.getString(_buffer, _tok1));
                         // SslSocketConnector.customize()
                         break;
 
                     case Ajp13RequestHeaders.SSL_SESSION_ATTR:
-                        _handler.parsedRequestAttribute("javax.servlet.request.ssl_session", Ajp13RequestPacket.getString(_buffer, _tok1));
+                        _handler.parsedSslSession(Ajp13RequestPacket.getString(_buffer, _tok1));
                         break;
 
                     case Ajp13RequestHeaders.REQUEST_ATTR:
@@ -417,9 +423,14 @@ public class Ajp13Parser implements Parser
                         // _handler.parsedMethod(Ajp13PacketMethods.CACHE.get(Ajp13RequestPacket.getString()));
                         break;
 
-                        // Legacy codes, simply ignore
+
                     case Ajp13RequestHeaders.CONTEXT_ATTR:
+                        _handler.parsedContextPath(Ajp13RequestPacket.getString(_buffer, _tok1));
+                        break;
                     case Ajp13RequestHeaders.SERVLET_PATH_ATTR:
+                        _handler.parsedServletPath(Ajp13RequestPacket.getString(_buffer, _tok1));
+
+                        break;
                     default:
                         Log.warn("Unsupported Ajp13 Request Attribute {}", new Integer(attr_type));
                     break;
@@ -613,6 +624,46 @@ public class Ajp13Parser implements Parser
         return _buffer;
     }
 
+    private void shutdownRequest()
+    {
+        _state = STATE_END;
+
+        if(!Ajp13SocketConnector.__allowShutdown)
+        {
+            Log.warn("AJP13: Shutdown Request is Denied, allowShutdown is set to false!!!");
+            return;
+        }
+
+        if(Ajp13SocketConnector.__secretWord != null)
+        {
+            Log.warn("AJP13: Validating Secret Word");
+            try
+            {
+                String secretWord = Ajp13RequestPacket.getString(_buffer, _tok1).toString();
+
+                if(!Ajp13SocketConnector.__secretWord.equals(secretWord))
+                {
+                    Log.warn("AJP13: Shutdown Request Denied, Invalid Sercret word!!!");
+                    throw new IllegalStateException("AJP13: Secret Word is Invalid: Peer has requested shutdown but, Secret Word did not match");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.warn("AJP13: Secret Word is Required!!!");
+                Log.debug(e);
+                throw new IllegalStateException("AJP13: Secret Word is Required: Peer has requested shutdown but, has not provided a Secret Word");
+            }
+
+
+            Log.warn("AJP13: Shutdown Request is Denied, allowShutdown is set to false!!!");
+            return;
+        }
+
+        Log.warn("AJP13: Peer Has Requested for Shutdown!!!");
+        Log.warn("AJP13: Jetty 6 is shutting down !!!");
+        System.exit(0);
+    }
+
     /* ------------------------------------------------------------------------------- */
     public interface EventHandler
     {
@@ -651,6 +702,26 @@ public class Ajp13Parser implements Parser
         public void parsedUri(Buffer uri) throws IOException;
 
         public void startForwardRequest() throws IOException;
+
+        public void parsedAuthorizationType(Buffer authType) throws IOException;
+        
+        public void parsedRemoteUser(Buffer remoteUser) throws IOException;
+
+        public void parsedServletPath(Buffer servletPath) throws IOException;
+        
+        public void parsedContextPath(Buffer context) throws IOException;
+
+        public void parsedSslCert(Buffer sslCert) throws IOException;
+
+        public void parsedSslCipher(Buffer sslCipher) throws IOException;
+
+        public void parsedSslSession(Buffer sslSession) throws IOException;
+
+
+
+
+
+
 
     }
 
