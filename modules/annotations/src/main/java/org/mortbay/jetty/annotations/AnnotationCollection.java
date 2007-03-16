@@ -348,7 +348,7 @@ public class AnnotationCollection
                     try
                     {
                         org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
-                        Log.info("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
+                        Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it
                         Injection injection = new Injection();
                         injection.setTargetClass(getTargetClass());
@@ -439,7 +439,7 @@ public class AnnotationCollection
                          //Check there is a JNDI entry for this annotation 
                         org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
                         
-                        Log.info("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
+                        Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it if the binding succeeded
                         Injection injection = new Injection();
                         injection.setTargetClass(getTargetClass());
