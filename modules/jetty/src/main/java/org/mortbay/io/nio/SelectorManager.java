@@ -593,36 +593,36 @@ public abstract class SelectorManager extends AbstractLifeCycle
             while(selecting)
             {
                 wakeup();
-                Thread.yield();
                 synchronized (this)
                 {
                     selecting=_selecting;
                 }
             }
             
-            synchronized (this)
+            ArrayList keys=new ArrayList(_selector.keys());
+            Iterator iter =keys.iterator();
+
+            while (iter.hasNext())
             {
-                Iterator iter =_selector.keys().iterator();
-                while (iter.hasNext())
+                SelectionKey key = (SelectionKey)iter.next();
+                if (key==null)
+                    continue;
+                EndPoint endpoint = (EndPoint)key.attachment();
+                if (endpoint!=null)
                 {
-                    SelectionKey key = (SelectionKey)iter.next();
-                    if (key==null)
-                        continue;
-                    EndPoint endpoint = (EndPoint)key.attachment();
-                    if (endpoint!=null)
+                    try
                     {
-                        try
-                        {
-                            endpoint.close();
-                        }
-                        catch(IOException e)
-                        {
-                            Log.ignore(e);
-                        }
+                        endpoint.close();
+                    }
+                    catch(IOException e)
+                    {
+                        Log.ignore(e);
                     }
                 }
-
-
+            }
+            
+            synchronized (this)
+            {
                 _idleTimeout.cancelAll();
                 _retryTimeout.cancelAll();
                 try

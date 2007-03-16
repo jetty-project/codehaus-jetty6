@@ -287,12 +287,11 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 _writable = true; // Once writable is in ops, only removed with dispatch.
             }
             
-            if (_interestOps != ops || !getChannel().isOpen())
-            {
-                _selectSet.addChange(this);
-                _selectSet.wakeup();
-            }
+            if(_interestOps == ops && getChannel().isOpen())
+                return;
         }
+        _selectSet.addChange(this);
+        _selectSet.wakeup();
     }
     
     /* ------------------------------------------------------------ */
