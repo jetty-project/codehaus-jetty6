@@ -39,7 +39,8 @@ import org.mortbay.jetty.deployer.WebAppDeployer;
  */
 public class Ajp13SocketConnector extends SocketConnector
 {
-
+    static String __secretWord = null;
+    static boolean __allowShutdown = false;
     public Ajp13SocketConnector()
     {
         super.setHeaderBufferSize(Ajp13Packet.MAX_DATA_SIZE);
@@ -83,6 +84,18 @@ public class Ajp13SocketConnector extends SocketConnector
     public void setResponseBufferSize(int responseBufferSize)
     {
         Log.debug(Log.IGNORED);
+    }
+
+    public void setAllowShutdown(boolean allowShutdown)
+    {
+        Log.warn("AJP13: Shutdown Request is: " + allowShutdown);
+        __allowShutdown = allowShutdown;
+    }
+
+    public void setSecretWord(String secretWord)
+    {
+        Log.warn("AJP13: Shutdown Request secret word is : " + secretWord);
+        __secretWord = secretWord;
     }
 
 }
