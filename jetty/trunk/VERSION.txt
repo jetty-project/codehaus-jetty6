@@ -10,6 +10,7 @@ jetty-6.1-SNAPSHOT
  + AJP13 Shutdown Request from peer implemented
  + AJP13 remoteUser, contextPath, servletPath requests implemented
  + Change some JNDI logging to debug level instead of info
+ + Update jasper to glassfish tag SJSAS-9_1-B39-RC-14_Mar_2007
  
 jetty-6.1.2rc1 - 8 March 2007
  + TagLibConfiguration uses resource input stream
