@@ -373,6 +373,41 @@ public class TestAjpParser extends TestCase
             // System.err.println("..");
         }
 
+        public void parsedAuthorizationType(Buffer authType) throws IOException
+        {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void parsedRemoteUser(Buffer remoteUser) throws IOException
+        {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void parsedServletPath(Buffer servletPath) throws IOException
+        {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void parsedContextPath(Buffer context) throws IOException
+        {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void parsedSslCert(Buffer sslCert) throws IOException
+        {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void parsedSslCipher(Buffer sslCipher) throws IOException
+        {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void parsedSslSession(Buffer sslSession) throws IOException
+        {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
         public void parsedRequestAttribute(String key, int value) throws IOException
         {
             // System.err.println(key+":: "+value);

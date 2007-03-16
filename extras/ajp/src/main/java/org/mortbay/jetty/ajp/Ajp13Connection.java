@@ -15,28 +15,15 @@
 package org.mortbay.jetty.ajp;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.ServletInputStream;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpException;
-import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.EofException;
-import org.mortbay.jetty.HttpStatus;
-import org.mortbay.log.Log;
-import org.mortbay.util.URIUtil;
-import org.mortbay.util.ajax.Continuation;
 
 /**
  * Connection implementation of the Ajp13 protocol. <p/> XXX Refactor to remove
@@ -88,6 +75,42 @@ public class Ajp13Connection extends HttpConnection
             _sslSecure = false;
             _request.setTimeStamp(System.currentTimeMillis());
             _request.setUri(_uri);
+            
+        }
+
+        public void parsedAuthorizationType(Buffer authType) throws IOException
+        {
+            _request.setAuthType(authType.toString());
+        }
+
+        public void parsedRemoteUser(Buffer remoteUser) throws IOException
+        {
+            ((Ajp13Request)_request).setRemoteUser(remoteUser.toString());
+        }
+
+        public void parsedServletPath(Buffer servletPath) throws IOException
+        {
+            _request.setServletPath(servletPath.toString());
+        }
+
+        public void parsedContextPath(Buffer context) throws IOException
+        {
+            _request.setContextPath(context.toString());
+        }
+
+        public void parsedSslCert(Buffer sslCert) throws IOException
+        {
+            _request.setAttribute("javax.servlet.request.X509Certificate", sslCert.toString());
+        }
+
+        public void parsedSslCipher(Buffer sslCipher) throws IOException
+        {
+            _request.setAttribute("javax.servlet.request.cipher_suite", sslCipher.toString());
+        }
+
+        public void parsedSslSession(Buffer sslSession) throws IOException
+        {
+            _request.setAttribute("javax.servlet.request.ssl_session", sslSession.toString());
         }
 
         public void parsedMethod(Buffer method) throws IOException
@@ -97,8 +120,7 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedUri(Buffer uri) throws IOException
         {
-            // TODO avoid this copy.
-            _uri.parse(uri.asArray(), 0, uri.length());
+            _uri.parse(uri.toString());
         }
 
         public void parsedProtocol(Buffer protocol) throws IOException

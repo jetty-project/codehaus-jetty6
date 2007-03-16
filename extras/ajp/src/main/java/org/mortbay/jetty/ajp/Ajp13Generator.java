@@ -33,7 +33,7 @@ import org.mortbay.util.TypeUtil;
 /**
  * @author lagdeppa (at) exist.com
  * @author Greg Wilkins
- */
+ */                                                                                                       
 public class Ajp13Generator extends AbstractGenerator
 {
     private static HashMap __headerHash = new HashMap();
@@ -76,6 +76,12 @@ public class Ajp13Generator extends AbstractGenerator
 
     }
 
+    // A, B ajp response header
+    // 0, 1 ajp int 1 packet length
+    // 9 CPONG response Code
+    private static final byte[] AJP13_CPONG_RESPONSE =
+    { 'A', 'B', 0, 1, 9};
+
     private static final byte[] AJP13_END_RESPONSE =
     { 'A', 'B', 0, 2, 5, 1 };
 
@@ -99,6 +105,8 @@ public class Ajp13Generator extends AbstractGenerator
     private boolean _needMore = false;
 
     private boolean _needEOC = false;
+
+    private boolean _needCPong = false;
 
     private boolean _bufferPrepared = false;
 
@@ -427,7 +435,7 @@ public class Ajp13Generator extends AbstractGenerator
             if (_endp == null)
             {
                 // TODO - probably still needed!
-                // if (_needMore && _buffer != null)
+                // if (_rneedMore && _buffe != null)
                 // {
                 // if(!_hasSentEOC)
                 // _buffer.put(AJP13_MORE_CONTENT);
@@ -553,6 +561,27 @@ public class Ajp13Generator extends AbstractGenerator
     {
         if (!_bufferPrepared)
         {
+            if(_needCPong)
+            {
+                if (_header == null)
+                {
+                    _header = _buffers.getBuffer(AJP13_CPONG_RESPONSE.length);
+                }
+
+                _needMore = false;
+                _expectMore = false;
+                _needEOC = false;
+                _needCPong = false;
+                _header.put(AJP13_CPONG_RESPONSE);
+                _bufferPrepared = true;
+                _state = STATE_END;
+
+                Log.info("AJP13: CPONG is sent to peer ;) ");
+
+                return;
+            }
+
+
             // Refill buffer if possible
             if (_content != null && _content.length() > 0 && _buffer != null && _buffer.space() > 0)
             {
@@ -727,5 +756,15 @@ public class Ajp13Generator extends AbstractGenerator
         _needMore = false;
         _expectMore = false;
     }
+
+
+    public void sendCPong() throws IOException
+    {
+        // set expect and need to false just tobe sure
+        _needCPong = true;
+        flush();
+    }
+
+
 
 }
