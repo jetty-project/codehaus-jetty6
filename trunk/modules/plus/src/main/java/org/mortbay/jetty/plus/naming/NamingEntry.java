@@ -231,7 +231,7 @@ public abstract class NamingEntry
             }
             default:
             {
-                Log.info("No scope to lookup name: "+jndiName);
+                Log.debug("No scope to lookup name: "+jndiName);
             }
         }
         return namingEntry;
@@ -378,7 +378,7 @@ public abstract class NamingEntry
         {
             InitialContext ic = new InitialContext();
             Context env = (Context)ic.lookup("java:comp/env");
-            Log.info("Binding java:comp/env/"+getJndiName()+" to "+absoluteObjectNameString);
+            Log.debug("Binding java:comp/env/"+getJndiName()+" to "+absoluteObjectNameString);
             NamingUtil.bind(env, getJndiName(), new LinkRef(absoluteObjectNameString));
         }
     }
@@ -394,7 +394,7 @@ public abstract class NamingEntry
     {
         InitialContext ic = new InitialContext();
         Context env = (Context)ic.lookup("java:comp/env");
-        Log.info("Binding java:comp/env/"+overrideName+" to "+absoluteObjectNameString);
+        Log.debug("Binding java:comp/env/"+overrideName+" to "+absoluteObjectNameString);
         NamingUtil.bind(env, overrideName, new LinkRef(absoluteObjectNameString));
     }
     
@@ -407,7 +407,7 @@ public abstract class NamingEntry
         {
             InitialContext ic = new InitialContext();
             Context env = (Context)ic.lookup("java:comp/env");
-            Log.info("Unbinding java:comp/env/"+getJndiName());
+            Log.debug("Unbinding java:comp/env/"+getJndiName());
             env.unbind(getJndiName());
         }
         catch (NamingException e)
