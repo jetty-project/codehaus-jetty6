@@ -137,6 +137,6 @@
     </dependency>
   </dependencies>
     <properties>
-     <glassfish.version.tag>SJSAS-9_1-B27-EA-07_Dec_2006</glassfish.version.tag>
+     <glassfish.version.tag>SJSAS-9_1-B39-RC-14_Mar_2007</glassfish.version.tag>
   </properties>
 </project>
