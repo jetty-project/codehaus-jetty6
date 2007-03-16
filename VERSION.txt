@@ -4,6 +4,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-258 duplicate log message in ServletHandler
  + JETTY-262 Allow acceptor thread priority to be adjusted
  + JETTY-265 Only quote cookie values if needed
+ + Enable the SharedStoreContextualiser for the WadiSessionManager(Database store for clustering)
 
 jetty-6.1.2rc1 - 8 March 2007
  + TagLibConfiguration uses resource input stream
