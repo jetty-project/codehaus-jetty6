@@ -19,7 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.AbstractHandler;
+import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.util.IO;
 
 /**
@@ -388,7 +390,14 @@ public class HttpServerTestBase extends TestCase
     }
 
     
-    
+    public void testStoppable() throws Exception
+    {
+        Server server=startServer(null);
+        server.setThreadPool(new BoundedThreadPool());
+        server.start();
+        Thread.sleep(1000);
+        server.stop();
+    }
     
     
     /**
