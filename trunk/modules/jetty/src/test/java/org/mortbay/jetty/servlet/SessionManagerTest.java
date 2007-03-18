@@ -20,6 +20,8 @@ package org.mortbay.jetty.servlet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionEvent;
 
 import junit.framework.TestCase;
 
@@ -27,6 +29,7 @@ import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
 
 /**
  * @version $Revision$
@@ -71,6 +74,35 @@ public class SessionManagerTest extends TestCase
         session.setAttribute("foo", null);
         assertNull(session.getAttribute("foo"));
         assertFalse(session.getAttributeNames().hasMoreElements());
+    }
+    
+    public void testSessionPassivation() throws Exception 
+    {
+        HttpSession session = sessionManager.newHttpSession(null);
+
+        TestListener listener = new TestListener();
+        session.setAttribute("key", listener);
+        
+        sessionManager.removeSession((Session) session, false);
+
+        assertNull(listener.activateEvent);
+        assertNotNull(listener.passivateEvent);
+    }
+    
+    public void testSessionActivation() throws Exception
+    {
+        HttpSession session = sessionManager.newHttpSession(null);
+
+        TestListener listener = new TestListener();
+        session.setAttribute("key", listener);
+
+        sessionManager.removeSession((Session) session, false);
+        listener.passivateEvent = null;
+        
+        sessionManager.addSession((Session) session, false);
+
+        assertNotNull(listener.activateEvent);
+        assertNull(listener.passivateEvent);
     }
     
     public void testWorker() throws Exception
@@ -135,5 +167,22 @@ public class SessionManagerTest extends TestCase
             return _worker;
         }
 
+    }
+    
+    class TestListener implements HttpSessionActivationListener
+    {
+        private HttpSessionEvent activateEvent;
+        private HttpSessionEvent passivateEvent;
+        
+        public void sessionDidActivate(HttpSessionEvent event)
+        {
+            activateEvent = event;
+        }
+
+        public void sessionWillPassivate(HttpSessionEvent event)
+        {
+            passivateEvent = event;
+        }
+        
     }
 }
