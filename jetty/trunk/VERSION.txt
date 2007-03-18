@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-125 maven plugin: ensure test dependencies on classpath for <useTestClasspath>
  + JETTY-254 prevent close of jar entry by bad JVMs
  + JETTY-258 duplicate log message in ServletHandler
+ + JETTY-260 Close connector before stop
  + JETTY-262 Allow acceptor thread priority to be adjusted
  + JETTY-263 Added implementation for authorizationType Packets
  + JETTY-265 Only quote cookie values if needed

@@ -275,6 +275,8 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     protected void doStop() throws Exception
     {
+        try{close();} catch(IOException e) {Log.warn(e);}
+        
         if (_threadPool==_server.getThreadPool())
             _threadPool=null;
         else if (_threadPool instanceof LifeCycle)
@@ -291,8 +293,6 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
                     thread.interrupt();
             }
         }
-        
-        try{close();} catch(IOException e) {Log.warn(e);}
 
         super.doStop();
     }
