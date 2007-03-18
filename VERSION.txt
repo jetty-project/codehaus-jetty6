@@ -13,6 +13,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-263 Added implementation for authorizationType Packets
  + JETTY-265 Only quote cookie values if needed
  + JETTY-266 Fix deadlock with shutdown
+ + JETTY-272 Activate and Passivate events for sessions
  
 jetty-6.1.2rc1 - 8 March 2007
  + TagLibConfiguration uses resource input stream

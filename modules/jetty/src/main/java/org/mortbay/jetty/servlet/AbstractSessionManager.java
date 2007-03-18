@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
@@ -537,8 +538,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                     this._maxSessions=getSessions();
             }
         }
-        
-        if (created && _sessionListeners!=null)
+
+        if (!created)
+        {
+            session.didActivate();
+        }
+        else if (_sessionListeners!=null)
         {
             HttpSessionEvent event=new HttpSessionEvent(session);
             for (int i=0; i<LazyList.size(_sessionListeners); i++)
@@ -584,6 +589,10 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             HttpSessionEvent event=new HttpSessionEvent(session);
             for (int i=LazyList.size(_sessionListeners); i-->0;)
                 ((HttpSessionListener)LazyList.get(_sessionListeners,i)).sessionDestroyed(event);
+        }
+        if (!invalidate)
+        {
+            session.willPassivate();
         }
         
         // Remove session from context and global maps
@@ -1002,6 +1011,36 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         {
             if (value!=null&&value instanceof HttpSessionBindingListener)
                 ((HttpSessionBindingListener)value).valueUnbound(new HttpSessionBindingEvent(this,name));
+        }
+
+        /* ------------------------------------------------------------- */
+        protected void willPassivate() 
+        {
+            HttpSessionEvent event = new HttpSessionEvent(this);
+            for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
+            {
+                Object value = iter.next();
+                if (value instanceof HttpSessionActivationListener) 
+                {
+                    HttpSessionActivationListener listener = (HttpSessionActivationListener) value;
+                    listener.sessionWillPassivate(event);
+                }
+            }
+        }
+
+        /* ------------------------------------------------------------- */
+        protected void didActivate() 
+        {
+            HttpSessionEvent event = new HttpSessionEvent(this);
+            for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
+            {
+                Object value = iter.next();
+                if (value instanceof HttpSessionActivationListener) 
+                {
+                    HttpSessionActivationListener listener = (HttpSessionActivationListener) value;
+                    listener.sessionDidActivate(event);
+                }
+            }
         }
     }
 
