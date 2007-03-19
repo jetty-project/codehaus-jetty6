@@ -400,9 +400,6 @@ public class Request implements HttpServletRequest
                             v = "";
                         }
 
-                        // Handle quoted values
-                        if (version > 0) v = StringUtil.unquote(v);
-
                         // Ignore $ names
                         if (n.startsWith("$"))
                         {
@@ -411,11 +408,11 @@ public class Request implements HttpServletRequest
                             else if ("$path".equalsIgnoreCase(n) && cookie != null)
                                 cookie.setPath(v);
                             else if ("$domain".equalsIgnoreCase(n) && cookie != null)
-                                    cookie.setDomain(v);
+                                cookie.setDomain(v);
                             continue;
                         }
 
-                        v = URLDecoder.decode(v,StringUtil.__ISO_8859_1);
+                        v = URIUtil.decodePath(v);
                         
                         cookie = new Cookie(n, v);
                         if (version > 0) cookie.setVersion(version);

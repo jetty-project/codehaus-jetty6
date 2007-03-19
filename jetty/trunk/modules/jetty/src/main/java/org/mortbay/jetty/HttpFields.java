@@ -46,6 +46,7 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /**
@@ -958,21 +959,7 @@ public class HttpFields
             buf.append('=');
             if (value != null && value.length() > 0)
             {
-                if (version == 0)
-                {
-                    try
-                    {
-                        buf.append(URLEncoder.encode(value, StringUtil.__ISO_8859_1));
-                    }
-                    catch (UnsupportedEncodingException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                else
-                {
-                    QuotedStringTokenizer.quoteIfNeeded(buf, value);
-                }
+                URIUtil.encodePath(buf,value);
             }
 
             if (version > 0)
@@ -990,7 +977,7 @@ public class HttpFields
             if (path != null && path.length() > 0)
             {
                 buf.append(";Path=");
-                buf.append(path);
+                buf.append(URIUtil.encodePath(path));
             }
             String domain = cookie.getDomain();
             if (domain != null && domain.length() > 0)
