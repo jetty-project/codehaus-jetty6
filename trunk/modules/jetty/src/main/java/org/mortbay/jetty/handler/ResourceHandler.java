@@ -229,7 +229,9 @@ public class ResourceHandler extends AbstractHandler
             response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
         }
         
-        Buffer mime=_mimeTypes.getMimeByExtension(request.getPathInfo());
+        Buffer mime=_mimeTypes.getMimeByExtension(resource.toString());
+        if (mime==null)
+            mime=_mimeTypes.getMimeByExtension(request.getPathInfo());
         if (mime!=null)
             response.setContentType(mime.toString());
 
