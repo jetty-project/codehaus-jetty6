@@ -18,6 +18,7 @@ import java.io.IOException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 /** Dump Servlet Request.
  * 
  */
-public class HelloWorld extends HttpServlet
+public class HelloWorld extends HttpServlet implements SingleThreadModel
 {
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config) throws ServletException
@@ -50,6 +51,15 @@ public class HelloWorld extends HttpServlet
         out.println("<h1>Hello World</h1>");
         out.println("</html>");
         out.flush();
+        
+        try
+        {
+            Thread.sleep(200);
+        }
+        catch (InterruptedException e)
+        {
+            getServletContext().log("exception",e);
+        }
     }
 
     

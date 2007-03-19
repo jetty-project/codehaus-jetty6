@@ -52,7 +52,6 @@ public class ServletHolder extends Holder
     implements Comparable
 {
     /* ---------------------------------------------------------------- */
-    
     private int _initOrder;
     private boolean _initOnStartup=false;
     private Map _roleMap; 
@@ -60,7 +59,6 @@ public class ServletHolder extends Holder
     private String _runAs;
     private UserRealm _realm;    
     
-    private transient Stack _servlets;
     private transient Servlet _servlet;
     private transient Config _config;
     private transient long _unavailable;
@@ -246,9 +244,8 @@ public class ServletHolder extends Holder
             _realm=((SecurityHandler)(ContextHandler.getCurrentContext()
                     .getContextHandler().getChildHandlerByClass(SecurityHandler.class))).getUserRealm();
 
-        if (javax.servlet.SingleThreadModel.class
-                .isAssignableFrom(_class))
-            _servlets=new Stack();
+        if (javax.servlet.SingleThreadModel.class.isAssignableFrom(_class))
+            _servlet = new SingleThreadedWrapper();
 
         if (_extInstance || _initOnStartup)
         {
@@ -268,12 +265,7 @@ public class ServletHolder extends Holder
                     throw (Error)e;
                 else
                     throw new ServletException(e);
-            }            
-
-            if(_servlets != null)
-            {
-                _servlets.push(_servlet);
-            }
+            } 
         }  
     }
 
@@ -301,19 +293,7 @@ public class ServletHolder extends Holder
             
             if (!_extInstance)
                 _servlet=null;
-            
-            while (_servlets!=null && _servlets.size()>0)
-            {
-                Servlet s = (Servlet)_servlets.pop();              
-                try
-                {
-                    destroyInstance(s);
-                }
-                catch (Exception e)
-                {
-                    Log.warn(e);
-                }
-            }
+           
             _config=null;
         }
         finally
@@ -325,6 +305,7 @@ public class ServletHolder extends Holder
         }
     }
 
+    /* ------------------------------------------------------------ */
     public void destroyInstance (Object o)
     throws Exception
     {
@@ -352,23 +333,7 @@ public class ServletHolder extends Holder
         }
         
         try
-        {
-            if (_servlets!=null)
-            {
-                Servlet servlet=null;
-                if (_servlets.size()==0)
-                {
-                    servlet= (Servlet)newInstance();
-                    if (_config==null)
-                    	_config=new Config();
-                    initServlet(servlet,_config);
-                }
-                else
-                    servlet = (Servlet)_servlets.pop();
-
-                return servlet;
-            }
-            
+        {   
             if (_servlet==null)
             {
                 _servlet=(Servlet)newInstance();
@@ -405,7 +370,7 @@ public class ServletHolder extends Holder
      * @throws UnavailableException
      */
     public void checkServletType ()
-    throws UnavailableException
+        throws UnavailableException
     {
         if (!javax.servlet.Servlet.class.isAssignableFrom(_class))
         {
@@ -472,9 +437,13 @@ public class ServletHolder extends Holder
         if (_class==null)
             throw new UnavailableException("Servlet Not Initialized");
         
-        Servlet servlet=(!_initOnStartup||_servlets!=null)?getServlet():_servlet;
-        if (servlet==null)
-            throw new UnavailableException("Could not instantiate "+_class);
+        Servlet servlet=_servlet;
+        if (!_initOnStartup)
+        {
+            servlet=getServlet();
+            if (servlet==null)
+                throw new UnavailableException("Could not instantiate "+_class);
+        }
 
         // Service the request
         boolean servlet_error=true;
@@ -500,7 +469,7 @@ public class ServletHolder extends Holder
         }
         catch(UnavailableException e)
         {
-            if (_servlets!=null && servlet!=null)
+            if (servlet!=null)
                 try{stop();}catch(Exception e2){Log.ignore(e2);}
             makeUnavailable(e);
         }
@@ -516,15 +485,6 @@ public class ServletHolder extends Holder
             // Handle error params.
             if (servlet_error)
                 request.setAttribute("javax.servlet.error.servlet_name",getName());
-
-            // Return to singleThreaded pool
-            if (_servlets!=null && servlet!=null)
-            {
-                synchronized(this)
-                {
-                    _servlets.push(servlet);
-                }
-            }
         }
     }
 
@@ -559,6 +519,95 @@ public class ServletHolder extends Holder
         }
     }
 
+    /* -------------------------------------------------------- */
+    /* -------------------------------------------------------- */
+    /* -------------------------------------------------------- */
+    private class SingleThreadedWrapper implements Servlet
+    {
+        Stack _stack=new Stack();
+        
+        public void destroy()
+        {
+            synchronized(this)
+            {
+                while(_stack.size()>0)
+                    try { ((Servlet)_stack.pop()).destroy(); } catch (Exception e) { Log.warn(e); }
+            }
+        }
+
+        public ServletConfig getServletConfig()
+        {
+            return _config;
+        }
+
+        public String getServletInfo()
+        {
+            return null;
+        }
+
+        public void init(ServletConfig config) throws ServletException
+        {
+            synchronized(this)
+            {
+                if(_stack.size()==0)
+                {
+                    try
+                    {
+                        Servlet s = (Servlet) newInstance();
+                        s.init(config);
+                        _stack.push(s);
+                    }
+                    catch(IllegalAccessException e)
+                    {
+                        throw new ServletException(e);
+                    }
+                    catch (InstantiationException e)
+                    {
+                        throw new ServletException(e);
+                    }
+                }
+            }
+        }
+
+        public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException
+        {
+            Servlet s;
+            synchronized(this)
+            {
+                if(_stack.size()>0)
+                    s=(Servlet)_stack.pop();
+                else
+                {
+                    try
+                    {
+                        s = (Servlet) newInstance();
+                        s.init(_config);
+                    }
+                    catch(IllegalAccessException e)
+                    {
+                        throw new ServletException(e);
+                    }
+                    catch (InstantiationException e)
+                    {
+                        throw new ServletException(e);
+                    }
+                }
+            }
+            
+            try
+            {
+                s.service(req,res);
+            }
+            finally
+            {
+                synchronized(this)
+                {
+                    _stack.push(s);
+                }
+            }
+        }
+        
+    }
 }
 
 
