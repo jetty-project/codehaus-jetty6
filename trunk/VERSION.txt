@@ -31,11 +31,11 @@ jetty-6.1.2rc1 - 8 March 2007
  + Workaround to call SecurityAssocation.clear() for jboss webservices calls to ejbs
  + Ensure jetty/jboss uses servlet-spec classloading order
  + call preDestroy() after servlet/filter destroy()
- + Use timer for session scavaging
  + Fix constructor for Constraint to detect wildcard role
  + Added support for lowResourcesIdleTime to SelectChannelConnector
  + JETTY-157 make CGI handle binary data
  + JETTY-175 JDBCUserRealm use getInt instead of getObject
+ + JETTY-188 Use timer for session scavaging
  + JETTY-235 default realm name
  + JETTY-242 fix race condition with scavenging sessions when stopping
  + JETTY-243 FULL
