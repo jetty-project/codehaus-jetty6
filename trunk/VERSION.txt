@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
  + Update jasper to glassfish tag SJSAS-9_1-B39-RC-14_Mar_2007
  + Optimized multi threaded init on startup servlets
  + JETTY-125 maven plugin: ensure test dependencies on classpath for <useTestClasspath>
+ + JETTY-246 path encode cookies rather than quote
  + JETTY-254 prevent close of jar entry by bad JVMs
  + JETTY-258 duplicate log message in ServletHandler
  + JETTY-260 Close connector before stop
