@@ -10,6 +10,9 @@
   <short-name>acme</short-name>
   <uri>http://www.acme.com/taglib</uri>
   <description>taglib example</description>
+  <listener>
+    <listener-class>com.acme.TagListener</listener-class>
+  </listener>
 
   <tag>
     <name>date</name>
