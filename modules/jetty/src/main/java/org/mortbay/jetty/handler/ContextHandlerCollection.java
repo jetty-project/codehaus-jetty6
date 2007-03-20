@@ -16,6 +16,8 @@ package org.mortbay.jetty.handler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.servlet.PathMap;
@@ -40,7 +43,7 @@ import org.mortbay.util.LazyList;
  * on the context path and virtual hosts of any contained {@link org.mortbay.jetty.handler.ContextHandler}s.
  * The contexts do not need to be directly contained, only children of the contained handlers.
  * Multiple contexts may have the same context path and they are called in order until one
- * handles the request.  The contexts are directly called and any intervening handlers are skipped.
+ * handles the request.  
  * 
  * @org.apache.xbean.XBean element="contexts"
  */
@@ -55,69 +58,85 @@ public class ContextHandlerCollection extends HandlerCollection
      */
     public void mapContexts()
     {
-        Handler[] handlers = getChildHandlersByClass(ContextHandler.class);
         PathMap contextMap = new PathMap();
+        Handler[] branches = getHandlers();
         
-        for (int i=0;i<handlers.length;i++)
+        for (int b=0;b<branches.length;b++)
         {
-            ContextHandler handler=(ContextHandler)handlers[i];
-
-            String contextPath=handler.getContextPath();
-
-            if (contextPath==null || contextPath.indexOf(',')>=0 || contextPath.startsWith("*"))
-                throw new IllegalArgumentException ("Illegal context spec:"+contextPath);
-
-            if(!contextPath.startsWith("/"))
-                contextPath='/'+contextPath;
-
-            if (contextPath.length()>1)
+            Handler[] handlers=null;
+            
+            if (branches[b] instanceof ContextHandler)
             {
-                if (contextPath.endsWith("/"))
-                    contextPath+="*";
-                else if (!contextPath.endsWith("/*"))
-                    contextPath+="/*";
+                handlers = new Handler[]{ branches[b] };
             }
-
-            Object contexts=contextMap.get(contextPath);
-            String[] vhosts=handler.getVirtualHosts();
-            
-            if (vhosts!=null && vhosts.length>0)
+            else if (branches[b] instanceof HandlerContainer)
             {
-                Map hosts;
+                handlers = ((HandlerContainer)branches[b]).getChildHandlersByClass(ContextHandler.class);
+            }
+            else 
+                continue;
             
-                if (contexts instanceof Map)
-                    hosts=(Map)contexts;
+            for (int i=0;i<handlers.length;i++)
+            {
+                ContextHandler handler=(ContextHandler)handlers[i];
+
+                String contextPath=handler.getContextPath();
+
+                if (contextPath==null || contextPath.indexOf(',')>=0 || contextPath.startsWith("*"))
+                    throw new IllegalArgumentException ("Illegal context spec:"+contextPath);
+
+                if(!contextPath.startsWith("/"))
+                    contextPath='/'+contextPath;
+
+                if (contextPath.length()>1)
+                {
+                    if (contextPath.endsWith("/"))
+                        contextPath+="*";
+                    else if (!contextPath.endsWith("/*"))
+                        contextPath+="/*";
+                }
+
+                Object contexts=contextMap.get(contextPath);
+                String[] vhosts=handler.getVirtualHosts();
+
+                
+                if (vhosts!=null && vhosts.length>0)
+                {
+                    Map hosts;
+
+                    if (contexts instanceof Map)
+                        hosts=(Map)contexts;
+                    else
+                    {
+                        hosts=new HashMap(); 
+                        hosts.put("*",contexts);
+                        contextMap.put(contextPath, hosts);
+                    }
+
+                    for (int j=0;j<vhosts.length;j++)
+                    {
+                        String vhost=vhosts[j];
+                        contexts=hosts.get(vhost);
+                        contexts=LazyList.add(contexts,branches[b]);
+                        hosts.put(vhost,contexts);
+                    }
+                }
+                else if (contexts instanceof Map)
+                {
+                    Map hosts=(Map)contexts;
+                    contexts=hosts.get("*");
+                    contexts= LazyList.add(contexts, branches[b]);
+                    hosts.put("*",contexts);
+                }
                 else
                 {
-                    hosts=new HashMap(); 
-                    hosts.put("*",contexts);
-                    contextMap.put(contextPath, hosts);
+                    contexts= LazyList.add(contexts, branches[b]);
+                    contextMap.put(contextPath, contexts);
                 }
-                
-                for (int j=0;j<vhosts.length;j++)
-                {
-                    String vhost=vhosts[j];
-                    contexts=hosts.get(vhost);
-                    contexts=LazyList.add(contexts,handler);
-                    hosts.put(vhost,contexts);
-                }
-            }
-            else if (contexts instanceof Map)
-            {
-                Map hosts=(Map)contexts;
-                contexts=hosts.get("*");
-                contexts= LazyList.add(contexts, handler);
-                hosts.put("*",contexts);
-            }
-            else
-            {
-                contexts= LazyList.add(contexts, handler);
-                contextMap.put(contextPath, contexts);
             }
         }
-
         _contextMap=contextMap;
-        
+
     }
     
 
