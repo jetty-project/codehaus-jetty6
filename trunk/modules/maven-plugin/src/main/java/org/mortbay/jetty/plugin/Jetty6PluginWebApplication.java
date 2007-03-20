@@ -22,6 +22,7 @@ import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plus.webapp.EnvConfiguration;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
+import org.mortbay.jetty.webapp.TagLibConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebInfConfiguration;
 
@@ -40,7 +41,7 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
     private File overrideWebXmlFile;
     private File jettyEnvXmlFile;
     private List classpathFiles;
-    private Configuration[] configurations = {new WebInfConfiguration(), new EnvConfiguration(), new Jetty6MavenConfiguration(), new JettyWebXmlConfiguration(), new Jetty6MavenTagLibConfiguration()};
+    private Configuration[] configurations = {new WebInfConfiguration(), new EnvConfiguration(), new Jetty6MavenConfiguration(), new JettyWebXmlConfiguration(), new TagLibConfiguration()};
     
     protected Jetty6PluginWebApplication()
     {
@@ -114,10 +115,6 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
                 {
                     throw new RuntimeException(e);
                 }
-            }
-            else if (configurations[i] instanceof Jetty6MavenTagLibConfiguration)
-            {
-                ((Jetty6MavenTagLibConfiguration)configurations[i]).setClassPathFiles(classpathFiles);
             }
         }
             
