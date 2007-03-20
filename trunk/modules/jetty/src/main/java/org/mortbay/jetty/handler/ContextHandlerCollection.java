@@ -61,7 +61,8 @@ public class ContextHandlerCollection extends HandlerCollection
         PathMap contextMap = new PathMap();
         Handler[] branches = getHandlers();
         
-        for (int b=0;b<branches.length;b++)
+        
+        for (int b=0;branches!=null && b<branches.length;b++)
         {
             Handler[] handlers=null;
             
@@ -263,7 +264,6 @@ public class ContextHandlerCollection extends HandlerCollection
     }
 
 
-
     /* ------------------------------------------------------------ */
     /**
      * @param contextClass The class to use to add new Contexts
@@ -275,7 +275,5 @@ public class ContextHandlerCollection extends HandlerCollection
         _contextClass = contextClass;
     }
     
-    
-
     
 }

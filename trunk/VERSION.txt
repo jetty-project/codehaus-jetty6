@@ -6,7 +6,6 @@ jetty-6.1-SNAPSHOT
  + Change some JNDI logging to debug level instead of info
  + Update jasper to glassfish tag SJSAS-9_1-B39-RC-14_Mar_2007
  + Optimized multi threaded init on startup servlets
- + Improved ContextHandlerCollection
  + Removed unneeded specialized TagLibConfiguration class from maven plugin
  + JETTY-125 maven plugin: ensure test dependencies on classpath for <useTestClasspath>
  + JETTY-246 path encode cookies rather than quote
@@ -19,6 +18,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-266 Fix deadlock with shutdown
  + JETTY-271 ResourceHandler uses resource for MimeType mapping
  + JETTY-272 Activate and Passivate events for sessions
+ + JETTY-277 Improved ContextHandlerCollection
  
 jetty-6.1.2rc1 - 8 March 2007
  + TagLibConfiguration uses resource input stream
