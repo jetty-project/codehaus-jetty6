@@ -600,7 +600,6 @@ public abstract class AbstractGenerator implements Generator
            
             if (_generator.isContentWritten())
             {
-                System.err.println("CONTENT WRITTEN");
                 flush();
                 close();
             }
