@@ -19,6 +19,8 @@ package org.mortbay.jetty.plugin;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -28,7 +30,7 @@ import org.apache.maven.project.MavenProject;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
-import org.mortbay.jetty.plugin.util.Scanner;
+import org.mortbay.util.Scanner;
 import org.mortbay.jetty.plugin.util.SystemProperty;
 
 
@@ -130,7 +132,10 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     private String jettyConfig;
   
     
-
+    /**
+     * A scanner to check for changes to the webapp
+     */
+    private Scanner scanner;
     
     /**
      *  List of files and directories to scan
@@ -268,6 +273,10 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         return this.scannerListeners;
     }
     
+    public Scanner getScanner ()
+    {
+        return scanner;
+    }
     
     public void execute() throws MojoExecutionException, MojoFailureException
     {
@@ -388,10 +397,14 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         // check if scanning is enabled
         if (getScanIntervalSeconds() <= 0) return;
 
-        Scanner scanner = new Scanner();
+        scanner = new Scanner();
+        scanner.setReportExistingFilesOnStartup(false);
         scanner.setScanInterval(getScanIntervalSeconds());
-        scanner.setRoots(getScanList());
-        scanner.setListeners(getScannerListeners());
+        scanner.setScanDirs(getScanList());
+        List listeners = getScannerListeners();
+        Iterator itor = (listeners==null?null:listeners.iterator());
+        while (itor!=null && itor.hasNext())
+            scanner.addListener((Scanner.Listener)itor.next());
         getLog().info("Starting scanner at interval of " + getScanIntervalSeconds()+ " seconds.");
         scanner.start();
     }
