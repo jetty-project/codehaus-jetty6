@@ -315,6 +315,17 @@ public class IO extends BoundedThreadPool
         copy(reader,writer);
         return writer.toString();
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Read input stream to string.
+     */
+    public static String toString(Reader in)
+        throws IOException
+    {
+        StringWriter writer=new StringWriter();
+        copy(in,writer);
+        return writer.toString();
+    }
 
 
     /* ------------------------------------------------------------ */
