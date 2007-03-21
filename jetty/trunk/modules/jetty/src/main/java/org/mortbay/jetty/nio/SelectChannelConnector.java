@@ -391,7 +391,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         public boolean isResumed()
         {
-            return _pending;
+            return _resumed;
         }
 
         public void reset()
