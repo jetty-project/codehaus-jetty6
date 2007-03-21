@@ -140,6 +140,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public void complete(HttpSession session)
     {
+        Session s =(Session)session;
+        s.complete();
     }
 
     /* ------------------------------------------------------------ */
@@ -664,10 +666,13 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         final long _created;
         long _cookieSet;
         long _accessed;
+        long _lastAccessed;
         boolean _invalid;
+        boolean _doInvalidate;
         long _maxIdleMs=_dftMaxIdleSecs*1000;
         boolean _newSession;
         Map _values;
+        int _requests;
 
         /* ------------------------------------------------------------- */
         protected Session(HttpServletRequest request)
@@ -677,6 +682,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             _clusterId=_sessionIdManager.newSessionId(request,_created);
             _id=getId(request);
             _accessed=_created;
+            _requests=1;
         }
 
         /* ------------------------------------------------------------- */
@@ -756,7 +762,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         {
             if (_invalid)
                 throw new IllegalStateException();
-            return _accessed;
+            return _lastAccessed;
         }
 
         /* ------------------------------------------------------------- */
@@ -812,16 +818,61 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             return (String[])_values.keySet().toArray(a);
         }
 
+        /* ------------------------------------------------------------ */
+        protected void access(long time)
+        {
+            synchronized(this)
+            {
+                _newSession=false;
+                _lastAccessed=_accessed;
+                _accessed=time;
+                _requests++;
+                System.err.println("++ "+_requests);
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        protected void complete()
+        {
+            synchronized(this)
+            {
+                _requests--;
+                System.err.println("-- "+_requests);
+                if (_doInvalidate && _requests<=0  )
+                    doInvalidate();
+            }
+        }
+        
+        
+        /* ------------------------------------------------------------- */
+        protected void timeout() throws IllegalStateException
+        {
+            // remove session from context and invalidate other sessions with same ID.
+            removeSession(this,true);
+
+            // Notify listeners and unbind values
+            synchronized (this)
+            {
+                if (_requests<=0)
+                    doInvalidate();
+                else
+                    _doInvalidate=true;
+            }
+        }
+        
         /* ------------------------------------------------------------- */
         public void invalidate() throws IllegalStateException
         {
-            if (Log.isDebugEnabled())
-                Log.debug("Invalidate session "+getId());
+            // remove session from context and invalidate other sessions with same ID.
+            removeSession(this,true);
+            doInvalidate();
+        }
+        
+        /* ------------------------------------------------------------- */
+        protected void doInvalidate() throws IllegalStateException
+        {
             try
             {
-                // remove session from context and invalidate other sessions with same ID.
-                removeSession(this,true);
-                
                 // Notify listeners and unbind values
                 synchronized (this)
                 {
@@ -967,13 +1018,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         public String toString()
         {
             return this.getClass().getName()+":"+getId()+"@"+hashCode();
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void access(long time)
-        {
-            _newSession=false;
-            _accessed=time;
         }
 
         /* ------------------------------------------------------------- */
