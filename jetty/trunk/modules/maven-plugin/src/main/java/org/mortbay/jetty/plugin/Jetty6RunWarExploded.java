@@ -22,7 +22,7 @@ import java.util.List;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.plugin.util.Scanner;
+import org.mortbay.util.Scanner;
 import org.mortbay.jetty.security.UserRealm;
 
 /**
@@ -92,9 +92,9 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
         setScanList(scanList);
         
         ArrayList listeners = new ArrayList();
-        listeners.add(new Scanner.Listener()
+        listeners.add(new Scanner.BulkListener()
         {
-            public void changesDetected(Scanner scanner, List changes)
+            public void filesChanged(List changes)
             {
                 try
                 {
@@ -124,7 +124,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
                         scanList.add(new File(webInfDir, "classes"));
                         scanList.add(new File(webInfDir, "lib"));
                         setScanList(scanList);
-                        scanner.setRoots(scanList);
+                        getScanner().setScanDirs(scanList);
                     }
 
                     getLog().debug("Restarting webapp ...");
