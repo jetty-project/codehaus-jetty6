@@ -827,7 +827,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 _lastAccessed=_accessed;
                 _accessed=time;
                 _requests++;
-                System.err.println("++ "+_requests);
             }
         }
 
@@ -837,7 +836,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             synchronized(this)
             {
                 _requests--;
-                System.err.println("-- "+_requests);
                 if (_doInvalidate && _requests<=0  )
                     doInvalidate();
             }
