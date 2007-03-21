@@ -76,7 +76,7 @@ public class ContextDeployer extends AbstractLifeCycle
     private ConfigurationManager _configMgr;
 
     /* ------------------------------------------------------------ */
-    protected class ScannerListener implements Scanner.Listener
+    protected class ScannerListener implements Scanner.DiscreteListener
     {
         /**
          * Handle a new deployment

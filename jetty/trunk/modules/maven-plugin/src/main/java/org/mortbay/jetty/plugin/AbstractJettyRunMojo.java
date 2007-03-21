@@ -27,7 +27,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
-import org.mortbay.jetty.plugin.util.Scanner;
+import org.mortbay.util.Scanner;
 
 
 /**
@@ -339,9 +339,9 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         scanList.addAll(getClassPathFiles());
         setScanList(scanList);
         ArrayList listeners = new ArrayList();
-        listeners.add(new Scanner.Listener()
+        listeners.add(new Scanner.BulkListener()
         {
-            public void changesDetected(Scanner scanner, List changes)
+            public void filesChanged (List changes)
             {
                 try
                 {
@@ -365,7 +365,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                         scanList.addAll(getExtraScanTargets());
                         scanList.add(getProject().getFile());
                         scanList.addAll(getClassPathFiles());
-                        scanner.setRoots(scanList);
+                        getScanner().setScanDirs(scanList);
                     }
 
                     getLog().debug("Restarting webapp ...");
@@ -377,6 +377,8 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                     getLog().error("Error reconfiguring/restarting webapp after change in watched files",e);
                 }
             }
+
+
         });
         setScannerListeners(listeners);
     }
