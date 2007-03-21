@@ -197,7 +197,7 @@ public class HashSessionManager extends AbstractSessionManager
                 long idleTime=session._maxIdleMs;
                 if (idleTime>0&&session._accessed+idleTime<System.currentTimeMillis())
                 {
-                    session.invalidate();
+                    ((Session)session).timeout();
                     int nbsess=this._sessions.size();
                     if (nbsess<this._minSessions)
                         this._minSessions=nbsess;
