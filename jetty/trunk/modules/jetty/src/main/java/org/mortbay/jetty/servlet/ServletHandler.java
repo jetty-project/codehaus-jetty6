@@ -391,13 +391,12 @@ public class ServletHandler extends AbstractHandler
             }
             
             Throwable th=e;
-            while (th instanceof ServletException)
+            if (th instanceof ServletException)
             {
                 Log.warn(th);
                 Throwable cause=((ServletException)th).getRootCause();
-                if (cause==th || cause==null)
-                    break;
-                th=cause;
+                if (cause!=th && cause!=null)
+                    th=cause;
             }
             
             if (th instanceof HttpException)
