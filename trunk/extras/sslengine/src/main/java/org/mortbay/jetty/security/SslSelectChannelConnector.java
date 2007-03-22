@@ -382,6 +382,34 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         _truststoreType = truststoreType;
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * By default, we're confidential, given we speak SSL. But, if we've been told about an
+     * confidential port, and said port is not our port, then we're not. This allows separation of
+     * listeners providing INTEGRAL versus CONFIDENTIAL constraints, such as one SSL listener
+     * configured to require client certs providing CONFIDENTIAL, whereas another SSL listener not
+     * requiring client certs providing mere INTEGRAL constraints.
+     */
+    public boolean isConfidential(Request request)
+    {
+        final int confidentialPort = getConfidentialPort();
+        return confidentialPort == 0 || confidentialPort == request.getServerPort();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * By default, we're integral, given we speak SSL. But, if we've been told about an integral
+     * port, and said port is not our port, then we're not. This allows separation of listeners
+     * providing INTEGRAL versus CONFIDENTIAL constraints, such as one SSL listener configured to
+     * require client certs providing CONFIDENTIAL, whereas another SSL listener not requiring
+     * client certs providing mere INTEGRAL constraints.
+     */
+    public boolean isIntegral(Request request)
+    {
+        final int integralPort = getIntegralPort();
+        return integralPort == 0 || integralPort == request.getServerPort();
+    }
+
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
         return new SslHttpChannelEndPoint(channel, selectSet, key, createSSLEngine());
