@@ -9,6 +9,7 @@ jetty-6.1-SNAPSHOT
  + Optimized multi threaded init on startup servlets
  + Removed unneeded specialized TagLibConfiguration class from maven plugin
  + Refactor Scanner to increase code reuse with maven/ant plugins
+ + Added RestFilter for PUT and DELETE from Aleksi Kallio
  + JETTY-125 maven plugin: ensure test dependencies on classpath for <useTestClasspath>
  + JETTY-246 path encode cookies rather than quote
  + JETTY-254 prevent close of jar entry by bad JVMs

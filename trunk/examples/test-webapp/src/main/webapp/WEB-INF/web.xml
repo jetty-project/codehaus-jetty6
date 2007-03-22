@@ -60,6 +60,23 @@
     <url-pattern>/dump/throttle/*</url-pattern>
   </filter-mapping>
 
+  <!-- Comment out to support PUT and DELETE
+  <filter>
+    <filter-name>RestFilter</filter-name>
+    <filter-class>org.mortbay.servlet.RestFilter</filter-class>
+    <init-param>
+      <param-name>maxPutSize</param-name><param-value>1024</param-value>
+    </init-param>
+  </filter>
+  
+  <filter-mapping>
+    <filter-name>RestFilter</filter-name>
+    <servlet-name>default</servlet-name>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+  -->
+
+
   <servlet>
     <servlet-name>Hello</servlet-name>
     <servlet-class>com.acme.HelloWorld</servlet-class>
