@@ -254,6 +254,10 @@ public class HttpGenerator extends AbstractGenerator
     {
         if (_state != STATE_HEADER) 
             return;
+        
+        // handle a reset 
+        if (_method==null && _status==0)
+            throw new EofException();
 
         if (_last && !allContentAdded) 
             throw new IllegalStateException("last?");
