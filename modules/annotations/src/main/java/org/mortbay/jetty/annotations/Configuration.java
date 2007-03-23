@@ -18,7 +18,6 @@ package org.mortbay.jetty.annotations;
 import java.util.Iterator;
 
 
-import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.util.LazyList;
@@ -34,17 +33,15 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
     /** 
      * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#parseAnnotations()
      */
-    protected void parseAnnotations() throws Exception
+    public void parseAnnotations() throws Exception
     {
-        AnnotationParser processor = new AnnotationParser();
-        
         //look thru _servlets
         Iterator itor = LazyList.iterator(_servlets);
         while (itor.hasNext())
         {
             ServletHolder holder = (ServletHolder)itor.next();
             Class servlet = getWebAppContext().loadClass(holder.getClassName());
-            processor.parseAnnotations(servlet, _runAsCollection,  _injections, _callbacks);
+            AnnotationParser.parseAnnotations(servlet, _runAsCollection,  _injections, _callbacks);
         }
         
         //look thru _filters
@@ -53,15 +50,15 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
         {
             FilterHolder holder = (FilterHolder)itor.next();
             Class filter = getWebAppContext().loadClass(holder.getClassName());
-            processor.parseAnnotations(filter, null, _injections, _callbacks);
+            AnnotationParser.parseAnnotations(filter, null, _injections, _callbacks);
         }
         
         //look thru _listeners
         itor = LazyList.iterator(_listeners);
         while (itor.hasNext())
         {
-            Class listener = (Class)itor.next();
-            processor.parseAnnotations(listener, null, _injections, _callbacks);
+            Object listener = itor.next();
+            AnnotationParser.parseAnnotations(listener.getClass(), null, _injections, _callbacks);
         }
     }
 }

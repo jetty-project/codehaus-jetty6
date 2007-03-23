@@ -8,6 +8,10 @@
 
   <display-name>Test Annotations WebApp</display-name>
   
+  <listener>
+    <listener-class>com.acme.TestListener</listener-class>
+  </listener>
+
 
   <servlet>
     <servlet-name>AnnotationTest</servlet-name>
