@@ -16,14 +16,21 @@
 package org.mortbay.jetty.plugin;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Iterator;
 import java.util.List;
 
-import org.mortbay.jetty.plugin.util.PluginLog;
+import org.mortbay.jetty.plus.annotation.InjectionCollection;
+import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
+import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.webapp.Configuration;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.resource.Resource;
+import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 public class Jetty6MavenConfiguration extends Configuration 
@@ -55,71 +62,86 @@ public class Jetty6MavenConfiguration extends Configuration
      */
     public void configureClassLoader() throws Exception 
     {
-        PluginLog.getLog().debug("Setting up classpath ...");
+        Log.debug("Setting up classpath ...");
       
         //put the classes dir and all dependencies into the classpath
         Iterator itor = classPathFiles.iterator();
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
         
-        PluginLog.getLog().info("Classpath = "+LazyList.array2List(((URLClassLoader)getWebAppContext().getClassLoader()).getURLs()));
+        if (Log.isDebugEnabled())
+            Log.debug("Classpath = "+LazyList.array2List(((URLClassLoader)getWebAppContext().getClassLoader()).getURLs()));
     }
 
     
-    /** Parse the default webapp descriptor
-     * @see org.mortbay.jetty.webapp.Configuration#configureDefaults()
-     */
-    public void configureDefaults() throws Exception 
+    public void configureWebApp() throws Exception
     {
-        super.configureDefaults();
-
+        Log.debug("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
+        getWebAppContext().setResourceBase(webAppDir.getCanonicalPath());
+        super.configureWebApp();
+        Log.debug("Finished configuring web.xml");
     }
-
-    /** Prepare webapp for starting by parsing web.xml
-     * @see org.mortbay.jetty.webapp.Configuration#configureWebApp()
-     */
-    public void configureWebApp() throws Exception 
+    
+    
+    protected URL findWebXml () throws  MalformedURLException
     {
-        //cannot configure if the context is already started
-        if (getWebAppContext().isStarted())
+        if (webXmlFile.exists())
+            return webXmlFile.toURL();
+        
+        return null;
+    }
+    
+    
+    
+    public void parseAnnotations()
+    throws Exception
+    {
+        String v = System.getProperty("java.version");
+        String[] version = v.split("\\.");
+        if (version==null)
         {
-            PluginLog.getLog().error("Cannot configure webapp after it is started");
+            Log.info("Unable to determine jvm version, annotations will not be supported");
             return;
         }
-        
-        PluginLog.getLog().debug("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
-        getWebAppContext().setResourceBase(webAppDir.getCanonicalPath());
-        if (webXmlFile.exists())
-            configure(webXmlFile.toURL().toString());
-        PluginLog.getLog().debug("Finished configuring web.xml");
-        
-        //apply any override file
-        String overrideDescriptor=getWebAppContext().getOverrideDescriptor();
-        if(overrideDescriptor!=null&&overrideDescriptor.length()>0)
-        {
-            PluginLog.getLog().debug("Applying override web.xml file at="+overrideDescriptor);
-            Resource orideResource=Resource.newSystemResource(overrideDescriptor);
-            if(orideResource==null)
-                orideResource=Resource.newResource(overrideDescriptor);
-            //ensure we don't validate the override web.xml as it probably 
-            //only contains a partial web.xml file
-            _xmlParser.setValidating(false);
-            configure(orideResource.getURL().toString());
-            PluginLog.getLog().debug("Finished applying override web.xml");
-        }
-        
-        bindUserTransaction();
-        lockCompEnv();
-    }
+        int  major = Integer.parseInt(version[0]);
+        int minor = Integer.parseInt(version[1]);
+        if ((major >= 1) && (minor >= 5))
+        {     
+            //TODO it would be nice to be able to re-use the parseAnnotations() method on 
+            //the org.mortbay.jetty.annotations.Configuration class, but it's too difficult?
+            
+            //able to use annotations on on jdk1.5 and above
+            Class annotationParserClass = Thread.currentThread().getContextClassLoader().loadClass("org.mortbay.jetty.annotations.AnnotationParser");
+            Method parseAnnotationsMethod = 
+                annotationParserClass.getMethod("parseAnnotations", new Class[] {Class.class, RunAsCollection.class, InjectionCollection.class, LifeCycleCallbackCollection.class });
 
-    
-    
-    /** Prepare webapp for stopping
-     * @see org.mortbay.jetty.webapp.Configuration#deconfigureWebApp()
-     */
-    public void deconfigureWebApp() throws Exception 
-    {
-       super.deconfigureWebApp();
+            //look thru _servlets
+            Iterator itor = LazyList.iterator(_servlets);
+            while (itor.hasNext())
+            {
+                ServletHolder holder = (ServletHolder)itor.next();
+                Class servlet = getWebAppContext().loadClass(holder.getClassName());
+                parseAnnotationsMethod.invoke(null, new Object[] {servlet, _runAsCollection,  _injections, _callbacks});
+            }
+
+            //look thru _filters
+            itor = LazyList.iterator(_filters);
+            while (itor.hasNext())
+            {
+                FilterHolder holder = (FilterHolder)itor.next();
+                Class filter = getWebAppContext().loadClass(holder.getClassName());
+                parseAnnotationsMethod.invoke(null, new Object[] {filter, null, _injections, _callbacks});
+            }
+
+            //look thru _listeners
+            itor = LazyList.iterator(_listeners);
+            while (itor.hasNext())
+            {
+                Object listener = itor.next();
+                parseAnnotationsMethod.invoke(null, new Object[] {listener.getClass(), null, _injections, _callbacks});
+            }
+        }
+        else
+            Log.info("Annotations are not supported on jvms prior to jdk1.5");
     }
-    
 }

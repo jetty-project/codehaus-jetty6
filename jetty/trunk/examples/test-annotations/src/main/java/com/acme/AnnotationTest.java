@@ -4,11 +4,6 @@
 package com.acme;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.naming.InitialContext;
 import javax.servlet.ServletConfig;
@@ -18,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import javax.sql.XADataSource;
 import javax.transaction.UserTransaction;
 import javax.annotation.Resource;
 import javax.annotation.PostConstruct;
