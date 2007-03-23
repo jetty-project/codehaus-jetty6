@@ -162,7 +162,7 @@ public class Configuration extends AbstractConfiguration
     /** 
      * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#parseAnnotations()
      */
-    protected void parseAnnotations() throws Exception
+    public void parseAnnotations() throws Exception
     {
         Log.info(getClass().getCanonicalName()+" does not support annotations on source. Use org.mortbay.jetty.annotations.Configuration instead");
     }
