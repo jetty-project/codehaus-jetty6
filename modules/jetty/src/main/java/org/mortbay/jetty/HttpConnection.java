@@ -336,7 +336,7 @@ public class HttpConnection implements Connection
         boolean more_in_buffer =true; // assume true until proven otherwise
         int no_progress=0;
         
-        while (more_in_buffer && _endp.isOpen())
+        while (more_in_buffer)
         {
             try
             {
@@ -514,6 +514,10 @@ public class HttpConnection implements Connection
                                 _response.sendError(HttpServletResponse.SC_NOT_FOUND);
                             _response.complete();
                         }
+                    }
+                    else
+                    {
+                        _response.complete(); // TODO ????????????
                     }
                 }
             }

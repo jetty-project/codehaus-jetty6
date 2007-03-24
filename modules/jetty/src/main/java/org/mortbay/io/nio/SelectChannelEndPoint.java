@@ -1,7 +1,9 @@
 package org.mortbay.io.nio;
 
 import java.io.IOException;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
@@ -280,15 +282,18 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         synchronized (this)
         {
             int ops=-1;
-            if (_key!=null && _key.isValid())
+            if (getChannel().isOpen())
             {
-                ops = _key.interestOps();
-                _interestOps = ops | ((!_dispatched || _readBlocked) ? SelectionKey.OP_READ : 0) | ((!_writable || _writeBlocked) ? SelectionKey.OP_WRITE : 0);
+                ops = ((_key!=null && _key.isValid())?_key.interestOps():-1);
+                _interestOps = 
+                    ((!_dispatched || _readBlocked)  ? SelectionKey.OP_READ  : 0) 
+                |   ((!_writable   || _writeBlocked) ? SelectionKey.OP_WRITE : 0);
                 _writable = true; // Once writable is in ops, only removed with dispatch.
             }
             
             if(_interestOps == ops && getChannel().isOpen())
                 return;
+            
         }
         _selectSet.addChange(this);
         _selectSet.wakeup();
@@ -302,24 +307,49 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         synchronized (this)
         {
-            if (_key != null)
+            if (getChannel().isOpen())
             {
-                if (!_key.isValid())
+                if (_interestOps>0)
                 {
-                    cancelIdle();
-                    _manager.endPointClosed(this);
-                    _key = null;
+                    if (_key==null || !_key.isValid())
+                    {
+                        SelectableChannel sc = (SelectableChannel)getChannel();
+                        if (sc.isRegistered())
+                        {
+                            updateKey();   
+                        }
+                        else
+                        {
+                            try
+                            {
+                                _key=((SelectableChannel)getChannel()).register(_selectSet.getSelector(),_interestOps,this);
+                            }
+                            catch (Exception e)
+                            {
+                                Log.ignore(e);
+                                if (_key!=null && _key.isValid())
+                                    _key.cancel();
+                                cancelIdle();
+                                _manager.endPointClosed(this);
+                                _key = null;
+                            }
+                        }
+                    }
+                    else
+                        _key.interestOps(_interestOps);
                 }
-                else if (!getChannel().isOpen())
+                else
                 {
-                    // TODO Should not be needed, but have had 1 report - need to investigate why/how
                     _key.cancel();
-                    cancelIdle();
-                    _manager.endPointClosed(this);
-                    _key = null;
                 }
-                else if (_interestOps >= 0)
-                    _key.interestOps(_interestOps);
+            }
+            else    
+            {
+                if (_key!=null && _key.isValid())
+                    _key.cancel();
+                cancelIdle();
+                _manager.endPointClosed(this);
+                _key = null;
             }
         }
     }
