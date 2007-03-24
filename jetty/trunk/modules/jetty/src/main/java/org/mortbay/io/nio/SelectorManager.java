@@ -285,6 +285,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         private transient Selector _selector;
         private transient int _setID;
         private transient boolean _selecting;
+        private transient int _jvmBug;
         
         /* ------------------------------------------------------------ */
         SelectSet(int acceptorID) throws Exception
@@ -389,24 +390,49 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 if (wait < 0 || retry_next >= 0 && wait > retry_next)
                     wait = retry_next;
 
+                long now=System.currentTimeMillis();
+                int selected=0;
+                
                 // Do the select.
                 if (wait > 0)
-                    _selector.select(wait);
+                    selected=_selector.select(wait);
                 else if (wait == 0)
-                    _selector.selectNow();
+                    selected=_selector.selectNow();
                 else
-                    _selector.select();
+                    selected=_selector.select();
 
-                long now=-1;
 
                 // have we been destroyed while sleeping\
                 if (_selector==null || !_selector.isOpen())
                     return;
 
                 // update the timers for task schedule in this loop
+                long before=now;
                 now = System.currentTimeMillis();
                 _idleTimeout.setNow(now);
                 _retryTimeout.setNow(now);
+                
+                // Look for JVM bug 
+                if (selected==0 && wait>0 && (now-before)<wait/2 && _selector.selectedKeys().size()==0)
+                {
+                    if (_jvmBug++>10)
+                    {
+                        // Probably JVM BUG!
+                        
+                        Iterator iter = _selector.keys().iterator();
+                        while(iter.hasNext())
+                        {
+                            SelectionKey key = (SelectionKey) iter.next();
+                            if (key.isValid()&&key.interestOps()==0)
+                            {
+                                key.cancel();
+                            }
+                        }
+                        Thread.yield();
+                    } 
+                }
+                else
+                    _jvmBug=0;
 
                 // Look for things to do
                 Iterator iter = _selector.selectedKeys().iterator();
@@ -414,7 +440,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 {
                     SelectionKey key = (SelectionKey) iter.next();
                     iter.remove();
-
+                    
+                    
                     try
                     {
                         if (!key.isValid())
@@ -428,7 +455,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
                         if (key.isAcceptable())
                         {
-
                             SocketChannel channel = acceptChannel(key);
                             if (channel==null)
                                 continue;
@@ -467,7 +493,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         {
                             SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
                             if (endpoint != null)
+                            {
                                 doDispatch(endpoint);
+                            }
                         }
 
                         key = null;
