@@ -149,7 +149,13 @@ public class SocketConnector extends AbstractConnector
     protected void doStop() throws Exception
     {
         super.doStop();
-        Set set = new HashSet(_connections);
+        Set set=null;
+
+        synchronized(_connections)
+        {
+            set= new HashSet(_connections);
+        }
+        
         Iterator iter=set.iterator();
         while(iter.hasNext())
         {
@@ -198,7 +204,10 @@ public class SocketConnector extends AbstractConnector
             try
             {
                 connectionOpened(_connection);
-                _connections.add(this);
+                synchronized(_connections)
+                {
+                    _connections.add(this);
+                }
                 
                 while (isStarted() && !isClosed())
                 {
@@ -236,9 +245,12 @@ public class SocketConnector extends AbstractConnector
                 catch(IOException e2){Log.ignore(e2);}
             }
             finally
-            {
+            { 
                 connectionClosed(_connection);
-                _connections.remove(this);
+                synchronized(_connections)
+                {
+                    _connections.remove(this);
+                }
             }
         }
     }
