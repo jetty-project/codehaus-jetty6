@@ -524,9 +524,11 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 Timeout.Task task=null;
                 synchronized (this)
                 {
+                    /*
                     now = System.currentTimeMillis();
                     _retryTimeout.setNow(now);
                     _idleTimeout.setNow(now);
+                    */
                     
                     if (_lowResourcesConnections>0 && _selector.keys().size()>_lowResourcesConnections)
                         _idleTimeout.setDuration(_lowResourcesMaxIdleTime);
