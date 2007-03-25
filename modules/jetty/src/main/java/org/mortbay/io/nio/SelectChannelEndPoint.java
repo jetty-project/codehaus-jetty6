@@ -340,7 +340,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 }
                 else
                 {
-                    _key.cancel();
+                    _key.interestOps(0);
+                    //_key.cancel();
                 }
             }
             else    
