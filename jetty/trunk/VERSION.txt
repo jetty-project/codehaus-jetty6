@@ -23,6 +23,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-266 Fix deadlock with shutdown
  + JETTY-271 ResourceHandler uses resource for MimeType mapping
  + JETTY-272 Activate and Passivate events for sessions
+ + JETTY-274 Improve flushing at end of request for blocking
  + JETTY-276 Partial fix for reset/close race
  + JETTY-277 Improved ContextHandlerCollection
  + JETTY-278 Session invalidation delay until no requests

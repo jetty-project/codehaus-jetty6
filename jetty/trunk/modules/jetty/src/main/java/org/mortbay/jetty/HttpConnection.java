@@ -357,14 +357,25 @@ public class HttpConnection implements Connection
                     if (!_parser.isComplete()) 
                         io=_parser.parseAvailable();
                     
-                    // Do we have more writting to do?
-                    if (_generator.isCommitted() && !_generator.isComplete()) 
-                        io+=_generator.flush();
+                    // Do we have more generating to do?
+                    // Loop here because some writes may take multiple steps and
+                    // we need to flush them all before potentially blocking in the
+                    // next loop.
+                    while (_generator.isCommitted() && !_generator.isComplete())
+                    {
+                        long written=_generator.flush();
+                        io+=written;
+                        if (written<=0)
+                            break;
+                        else if (_endp.isBufferingOutput())
+                            _endp.flush();
+                    }
                     
+                    // Flush buffers
                     if (_endp.isBufferingOutput())
                     {
                         _endp.flush();
-                        if (_endp.isBufferingOutput())
+                        if (!_endp.isBufferingOutput())
                             no_progress=0;
                     }
                     
