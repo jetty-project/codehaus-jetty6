@@ -458,9 +458,10 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             continue;
                         }
 
-                        SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
-                        if (endpoint != null)
+                        Object att = key.attachment();
+                        if (att instanceof SelectChannelEndPoint)
                         {
+                            SelectChannelEndPoint endpoint = (SelectChannelEndPoint)att;
                             doDispatch(endpoint);
                         }
                         else if (key.isAcceptable())
@@ -479,7 +480,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             {
                                 // bind connections to this select set.
                                 SelectionKey cKey = channel.register(_selectSet[_nextSet].getSelector(), SelectionKey.OP_READ);
-                                endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
+                                SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
                                 if (endpoint != null)
                                     doDispatch(endpoint);
                             }
@@ -495,7 +496,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             SocketChannel channel = (SocketChannel) key.channel();
                             channel.finishConnect();
                             SelectionKey cKey = channel.register(_selectSet[_nextSet].getSelector(), SelectionKey.OP_READ, key.attachment());
-                            endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
+                            SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
                             if (endpoint != null)
                                 doDispatch(endpoint);
                         }
