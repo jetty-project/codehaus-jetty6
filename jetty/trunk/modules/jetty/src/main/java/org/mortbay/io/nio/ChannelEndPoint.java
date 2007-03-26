@@ -38,7 +38,7 @@ import org.mortbay.io.Portable;
 public class ChannelEndPoint implements EndPoint
 {
     protected ByteChannel _channel;
-    protected ByteBuffer[] _gather2;
+    protected ByteBuffer[] _gather2=new ByteBuffer[2];;
     protected ByteBuffer[] _gather3;
     protected Socket _socket;
     protected InetSocketAddress _local;
@@ -197,47 +197,42 @@ public class ChannelEndPoint implements EndPoint
         Buffer buf0 = header==null?null:header.buffer();
         Buffer buf1 = buffer==null?null:buffer.buffer();
         Buffer buf2 = trailer==null?null:trailer.buffer();
+        
         if (_channel instanceof GatheringByteChannel &&
             header!=null && header.length()!=0 && header instanceof NIOBuffer && 
             buffer!=null && buffer.length()!=0 && buffer instanceof NIOBuffer)
         {
             NIOBuffer nbuf0 = (NIOBuffer)buf0;
-            NIOBuffer nbuf1 = (NIOBuffer)buf1;
-            NIOBuffer nbuf2 = buf2==null?null:(NIOBuffer)buf2;
-            
-            // Get the underlying NIO buffers
             ByteBuffer bbuf0=nbuf0.getByteBuffer();
+            NIOBuffer nbuf1 = (NIOBuffer)buf1;
             ByteBuffer bbuf1=nbuf1.getByteBuffer();
-            ByteBuffer bbuf2=nbuf2==null?null:nbuf2.getByteBuffer();
-            
-            
-            // We must sync because buffers may be shared (eg nbuf1 is likely to be cached content).
-            synchronized(nbuf0)
+            NIOBuffer nbuf2 =(NIOBuffer)buf2;
+            ByteBuffer bbuf2=null;
+
+            synchronized(this)
             {
-                synchronized(nbuf1)
+                // We must sync because buffers may be shared (eg nbuf1 is likely to be cached content).
+                synchronized(nbuf0)
                 {
-                    try
+                    synchronized(nbuf1)
                     {
-                        // Adjust position indexs of buf0 and buf1
-                        bbuf0.position(header.getIndex());
-                        bbuf0.limit(header.putIndex());
-                        bbuf1.position(buffer.getIndex());
-                        bbuf1.limit(buffer.putIndex());
-                        
-                        // if we don't have a buf2
-                        if (bbuf2==null)
+                        try
                         {
-                            synchronized(this)
+                            // Adjust position indexs of buf0 and buf1
+                            bbuf0.position(header.getIndex());
+                            bbuf0.limit(header.putIndex());
+                            bbuf1.position(buffer.getIndex());
+                            bbuf1.limit(buffer.putIndex());
+
+                            // if we don't have a buf2
+                            if (bbuf2==null)
                             {
-                                // create a gether array for 2 buffers
-                                if (_gather2==null)
-                                    _gather2=new ByteBuffer[2];
                                 _gather2[0]=bbuf0;
                                 _gather2[1]=bbuf1;
-
+                                
                                 // do the gathering write.
                                 length=(int)((GatheringByteChannel)_channel).write(_gather2);
-                                
+
                                 int hl=header.length();
                                 if (length>hl)
                                 {
@@ -249,20 +244,17 @@ public class ChannelEndPoint implements EndPoint
                                     header.skip(length);
                                 }
                             }
-                        }
-                        else
-                        {
-                            // we have a third buffer, so sync on it as well
-                            synchronized(nbuf2)
+                            else
                             {
-                                try
+                                // we have a third buffer, so sync on it as well
+                                synchronized(nbuf2)
                                 {
-                                    // Adjust position indexs of buf2
-                                    bbuf2.position(trailer.getIndex());
-                                    bbuf2.limit(trailer.putIndex());
-
-                                    synchronized(this)
+                                    try
                                     {
+                                        // Adjust position indexs of buf2
+                                        bbuf2.position(trailer.getIndex());
+                                        bbuf2.limit(trailer.putIndex());
+
                                         // create a gether array for 3 buffers
                                         if (_gather3==null)
                                             _gather3=new ByteBuffer[3];
@@ -289,31 +281,32 @@ public class ChannelEndPoint implements EndPoint
                                         {
                                             header.skip(length);
                                         }
+
                                     }
-                                }
-                                finally
-                                {
-                                    // adjust buffer 2.
-                                    if (!trailer.isImmutable())
-                                        trailer.setGetIndex(bbuf2.position());
-                                    bbuf2.position(0);
-                                    bbuf2.limit(bbuf2.capacity());
+                                    finally
+                                    {
+                                        // adjust buffer 2.
+                                        if (!trailer.isImmutable())
+                                            trailer.setGetIndex(bbuf2.position());
+                                        bbuf2.position(0);
+                                        bbuf2.limit(bbuf2.capacity());
+                                    }
                                 }
                             }
                         }
-                    }
-                    finally
-                    {
-                        // adjust buffer 0 and 1
-                        if (!header.isImmutable())
-                            header.setGetIndex(bbuf0.position());
-                        if (!buffer.isImmutable())
-                            buffer.setGetIndex(bbuf1.position());
-                       
-                        bbuf0.position(0);
-                        bbuf1.position(0);
-                        bbuf0.limit(bbuf0.capacity());
-                        bbuf1.limit(bbuf1.capacity());
+                        finally
+                        {
+                            // adjust buffer 0 and 1
+                            if (!header.isImmutable())
+                                header.setGetIndex(bbuf0.position());
+                            if (!buffer.isImmutable())
+                                buffer.setGetIndex(bbuf1.position());
+
+                            bbuf0.position(0);
+                            bbuf1.position(0);
+                            bbuf0.limit(bbuf0.capacity());
+                            bbuf1.limit(bbuf1.capacity());
+                        }
                     }
                 }
             }
@@ -321,7 +314,6 @@ public class ChannelEndPoint implements EndPoint
         else
         {
             // TODO - consider copying buffers buffer and trailer into header if there is space!
-            
             
             // flush header
             if (header!=null && header.length()>0)
