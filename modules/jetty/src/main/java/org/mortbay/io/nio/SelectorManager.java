@@ -324,9 +324,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
         /* ------------------------------------------------------------ */
         public void doSelect() throws IOException
         {
-            long idle_next = 0;
-            long retry_next = 0;
-
             try
             {
                 List changes;
@@ -376,71 +373,79 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 }
                 changes.clear();
 
+                long idle_next = 0;
+                long retry_next = 0;
+                long now=System.currentTimeMillis();
                 synchronized (this)
                 {
-                    _idleTimeout.setDuration(getMaxIdleTime());
+                    _idleTimeout.setNow(now);
+                    _retryTimeout.setNow(now);
+                    if (_lowResourcesConnections>0 && _selector.keys().size()>_lowResourcesConnections)
+                        _idleTimeout.setDuration(_lowResourcesMaxIdleTime);
+                    else 
+                        _idleTimeout.setDuration(_maxIdleTime);
                     idle_next=_idleTimeout.getTimeToNext();
                     retry_next=_retryTimeout.getTimeToNext();
                 }
 
                 // workout how low to wait in select
                 long wait = 1000L;  // not getMaxIdleTime() as the now value of the idle timers needs to be updated.
-                if (wait < 0 || idle_next >= 0 && wait > idle_next)
+                if (idle_next >= 0 && wait > idle_next)
                     wait = idle_next;
-                if (wait < 0 || retry_next >= 0 && wait > retry_next)
+                if (wait > 0 && retry_next >= 0 && wait > retry_next)
                     wait = retry_next;
-
-                long now=System.currentTimeMillis();
-                int selected=0;
-                
+    
                 // Do the select.
-                if (wait > 0)
-                    selected=_selector.select(wait);
-                else if (wait == 0)
-                    selected=_selector.selectNow();
-                else
-                    selected=_selector.select();
+                if (wait > 10) // TODO tune or configure this
+                {
+                    long before=now;
+                    int selected=_selector.select(wait);
+                    now = System.currentTimeMillis();
+                    _idleTimeout.setNow(now);
+                    _retryTimeout.setNow(now);
 
+                    // Look for JVM bug 
+                    if (selected==0 && wait>0 && (now-before)<wait/2 && _selector.selectedKeys().size()==0)
+                    {
+                        if (_jvmBug++>5)  // TODO tune or configure this
+                        {
+                            // Probably JVM BUG!
+                            
+                            Iterator iter = _selector.keys().iterator();
+                            while(iter.hasNext())
+                            {
+                                SelectionKey key = (SelectionKey) iter.next();
+                                if (key.isValid()&&key.interestOps()==0)
+                                    key.cancel();
+                            }
+                            try
+                            {
+                                Thread.sleep(20);  // tune or configure this
+                            }
+                            catch (InterruptedException e)
+                            {
+                                Log.ignore(e);
+                            }
+                        } 
+                    }
+                    else
+                        _jvmBug=0;
+                }
+                else 
+                {
+                    _selector.selectNow();
+                    _jvmBug=0;
+                }
 
                 // have we been destroyed while sleeping\
                 if (_selector==null || !_selector.isOpen())
                     return;
-
-                // update the timers for task schedule in this loop
-                long before=now;
-                now = System.currentTimeMillis();
-                _idleTimeout.setNow(now);
-                _retryTimeout.setNow(now);
-                
-                // Look for JVM bug 
-                if (selected==0 && wait>0 && (now-before)<wait/2 && _selector.selectedKeys().size()==0)
-                {
-                    if (_jvmBug++>10)
-                    {
-                        // Probably JVM BUG!
-                        
-                        Iterator iter = _selector.keys().iterator();
-                        while(iter.hasNext())
-                        {
-                            SelectionKey key = (SelectionKey) iter.next();
-                            if (key.isValid()&&key.interestOps()==0)
-                            {
-                                key.cancel();
-                            }
-                        }
-                        Thread.yield();
-                    } 
-                }
-                else
-                    _jvmBug=0;
 
                 // Look for things to do
                 Iterator iter = _selector.selectedKeys().iterator();
                 while (iter.hasNext())
                 {
                     SelectionKey key = (SelectionKey) iter.next();
-                    iter.remove();
-                    
                     
                     try
                     {
@@ -453,7 +458,12 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             continue;
                         }
 
-                        if (key.isAcceptable())
+                        SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
+                        if (endpoint != null)
+                        {
+                            doDispatch(endpoint);
+                        }
+                        else if (key.isAcceptable())
                         {
                             SocketChannel channel = acceptChannel(key);
                             if (channel==null)
@@ -465,19 +475,19 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             _nextSet=++_nextSet%_selectSet.length;
 
                             // Is this for this selectset
-                            if (_nextSet!=_setID)
+                            if (_nextSet==_setID)
+                            {
+                                // bind connections to this select set.
+                                SelectionKey cKey = channel.register(_selectSet[_nextSet].getSelector(), SelectionKey.OP_READ);
+                                endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
+                                if (endpoint != null)
+                                    doDispatch(endpoint);
+                            }
+                            else
                             {
                                 // nope - give it to another.
                                 _selectSet[_nextSet].addChange(channel);
                                 _selectSet[_nextSet].wakeup();
-                            }
-                            else
-                            {
-                                // bind connections to this select set.
-                                SelectionKey cKey = channel.register(_selectSet[_nextSet].getSelector(), SelectionKey.OP_READ);
-                                SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
-                                if (endpoint != null)
-                                    doDispatch(endpoint);
                             }
                         }
                         else if (key.isConnectable())
@@ -485,17 +495,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             SocketChannel channel = (SocketChannel) key.channel();
                             channel.finishConnect();
                             SelectionKey cKey = channel.register(_selectSet[_nextSet].getSelector(), SelectionKey.OP_READ, key.attachment());
-                            SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
+                            endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
                             if (endpoint != null)
                                 doDispatch(endpoint);
-                        }
-                        else
-                        {
-                            SelectChannelEndPoint endpoint = (SelectChannelEndPoint)key.attachment();
-                            if (endpoint != null)
-                            {
-                                doDispatch(endpoint);
-                            }
                         }
 
                         key = null;
@@ -518,23 +520,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         } 
                     }
                 }
-
+                
+                // Everything always handled
+                _selector.selectedKeys().clear();
 
                 // tick over the timers
                 Timeout.Task task=null;
                 synchronized (this)
                 {
-                    /*
-                    now = System.currentTimeMillis();
-                    _retryTimeout.setNow(now);
-                    _idleTimeout.setNow(now);
-                    */
-                    
-                    if (_lowResourcesConnections>0 && _selector.keys().size()>_lowResourcesConnections)
-                        _idleTimeout.setDuration(_lowResourcesMaxIdleTime);
-                    else 
-                        _idleTimeout.setDuration(_maxIdleTime);
-
                     task=_idleTimeout.expired();
                     if (task==null)
                         task=_retryTimeout.expired();
