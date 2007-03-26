@@ -133,9 +133,12 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
-        if (_acceptChannel != null)
-            _acceptChannel.close();
-        _acceptChannel = null;
+        synchronized(this)
+        {
+            if (_acceptChannel != null)
+                _acceptChannel.close();
+            _acceptChannel = null;
+        }
 
     }
     
@@ -174,9 +177,12 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public int getLocalPort()
     {
-        if (_acceptChannel==null || !_acceptChannel.isOpen())
-            return -1;
-        return _acceptChannel.socket().getLocalPort();
+        synchronized(this)
+        {
+            if (_acceptChannel==null || !_acceptChannel.isOpen())
+                return -1;
+            return _acceptChannel.socket().getLocalPort();
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -191,18 +197,21 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     public void open() throws IOException
     {
-        if (_acceptChannel == null)
+        synchronized(this)
         {
-            // Create a new server socket and set to non blocking mode
-            _acceptChannel = ServerSocketChannel.open();
-            _acceptChannel.configureBlocking(false);
+            if (_acceptChannel == null)
+            {
+                // Create a new server socket and set to non blocking mode
+                _acceptChannel = ServerSocketChannel.open();
+                _acceptChannel.configureBlocking(false);
 
-            // Bind the server socket to the local host and port
-            InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
-            _acceptChannel.socket().bind(addr,getAcceptQueueSize());
+                // Bind the server socket to the local host and port
+                InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
+                _acceptChannel.socket().bind(addr,getAcceptQueueSize());
 
-            // Register accepts on the server socket with the selector.
-            _manager.register(_acceptChannel,SelectionKey.OP_ACCEPT,null);
+                // Register accepts on the server socket with the selector.
+                _manager.register(_acceptChannel,SelectionKey.OP_ACCEPT,null);
+            }
         }
     }
 
