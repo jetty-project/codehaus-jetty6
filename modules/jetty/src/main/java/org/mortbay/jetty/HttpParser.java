@@ -15,7 +15,6 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -69,7 +68,7 @@ public class HttpParser implements Parser
     private View _tok0; // Saved token: header name, request method or response version
     private View _tok1; // Saved token: header value, request URI or response code
     private String _multiLineValue;
-    private boolean _response=false; // true if parsing a HTTP response
+    private int _responseStatus; // If >0 then we are parsing a response
     /* ------------------------------------------------------------------------------- */
     protected int _state=STATE_START;
     protected byte _eol;
@@ -345,7 +344,6 @@ public class HttpParser implements Parser
                     {
                         _buffer.mark();
                         _state=STATE_FIELD1;
-                        _response=ch >= '1' && ch <= '5';
                     }
                     else if (ch < HttpTokens.SPACE)
                     {
@@ -392,12 +390,14 @@ public class HttpParser implements Parser
                 case STATE_FIELD2:
                     if (ch == HttpTokens.CARRIAGE_RETURN || ch == HttpTokens.LINE_FEED)
                     {
-                        if (_response)
-                            _handler.startResponse(HttpVersions.CACHE.lookup(_tok0), BufferUtil
-                                    .toInt(_tok1), _buffer.sliceFromMark());
+                        byte digit=_tok1.peek(_tok1.getIndex());
+                        if (digit>='1'&&digit<='5')
+                        {
+			    _responseStatus = BufferUtil.toInt(_tok1);
+                            _handler.startResponse(HttpVersions.CACHE.lookup(_tok0), _responseStatus,_buffer.sliceFromMark());
+                        } 
                         else
-                            _handler.startRequest(HttpMethods.CACHE.lookup(_tok0), _tok1,
-                                    HttpVersions.CACHE.lookup(_buffer.sliceFromMark()));
+                            _handler.startRequest(HttpMethods.CACHE.lookup(_tok0), _tok1,HttpVersions.CACHE.lookup(_buffer.sliceFromMark()));
                         _eol=ch;
                         _state=STATE_HEADER;
                         _tok0.setPutIndex(_tok0.getIndex());
@@ -472,7 +472,15 @@ public class HttpParser implements Parser
 
                             // work out the _content demarcation
                             if (_contentLength == HttpTokens.UNKNOWN_CONTENT)
-                                _contentLength=_response?HttpTokens.EOF_CONTENT:HttpTokens.NO_CONTENT;
+			    {
+			    	if (_responseStatus == 0  // request
+				|| _responseStatus == 304 // not-modified response
+				|| _responseStatus == 204 // no-content response
+				|| _responseStatus < 200) // 1xx response
+                                    _contentLength=HttpTokens.NO_CONTENT;
+				else
+                                    _contentLength=HttpTokens.EOF_CONTENT;
+			    }
 
                             _contentPosition=0;
                             _eol=ch;
@@ -727,7 +735,7 @@ public class HttpParser implements Parser
             _contentLength=HttpTokens.UNKNOWN_CONTENT;
             _contentPosition=0;
             _length=0;
-            _response=false;
+            _responseStatus=0;
 
             if (_buffer!=null && _buffer.length()>0 && _eol == HttpTokens.CARRIAGE_RETURN && _buffer.peek() == HttpTokens.LINE_FEED)
             {
