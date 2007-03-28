@@ -74,6 +74,7 @@ public class Jetty6RunWar extends AbstractJetty6Mojo
         super.configureWebApplication();
         
         getWebApplication().setWebAppSrcDir(webApp);
+        getWebApplication().configure();
     }
  
 

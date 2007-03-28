@@ -16,6 +16,7 @@
 package org.mortbay.jetty.plugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,7 +38,7 @@ public class Jetty6MavenConfiguration extends Configuration
 {
     private List classPathFiles;
     private File webXmlFile;
-    private File webAppDir;
+    
     
    
     public Jetty6MavenConfiguration()
@@ -45,9 +46,8 @@ public class Jetty6MavenConfiguration extends Configuration
         super();
     }
 
-    public void setClassPathConfiguration(File webAppDir, List classPathFiles)
+    public void setClassPathConfiguration(List classPathFiles)
     {
-        this.webAppDir = webAppDir;
         this.classPathFiles = classPathFiles;
     }
     
@@ -62,33 +62,35 @@ public class Jetty6MavenConfiguration extends Configuration
      */
     public void configureClassLoader() throws Exception 
     {
-        Log.debug("Setting up classpath ...");
-      
-        //put the classes dir and all dependencies into the classpath
-        Iterator itor = classPathFiles.iterator();
-        while (itor.hasNext())
-            ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
-        
-        if (Log.isDebugEnabled())
-            Log.debug("Classpath = "+LazyList.array2List(((URLClassLoader)getWebAppContext().getClassLoader()).getURLs()));
+        if (classPathFiles != null)
+        {
+            Log.debug("Setting up classpath ...");
+
+            //put the classes dir and all dependencies into the classpath
+            Iterator itor = classPathFiles.iterator();
+            while (itor.hasNext())
+                ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
+
+            if (Log.isDebugEnabled())
+                Log.debug("Classpath = "+LazyList.array2List(((URLClassLoader)getWebAppContext().getClassLoader()).getURLs()));
+        }
+        else
+            super.configureClassLoader();
     }
 
     
-    public void configureWebApp() throws Exception
-    {
-        Log.debug("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
-        getWebAppContext().setResourceBase(webAppDir.getCanonicalPath());
-        super.configureWebApp();
-        Log.debug("Finished configuring web.xml");
-    }
+
     
-    
-    protected URL findWebXml () throws  MalformedURLException
+    protected URL findWebXml () throws IOException, MalformedURLException
     {
-        if (webXmlFile.exists())
+        //if an explicit web.xml file has been set (eg for jetty:run) then use it
+        if (webXmlFile != null && webXmlFile.exists())
             return webXmlFile.toURL();
         
-        return null;
+        //if we haven't overridden location of web.xml file, use the
+        //standard way of finding it
+        Log.debug("Looking for web.xml file in WEB-INF");
+        return super.findWebXml();
     }
     
     

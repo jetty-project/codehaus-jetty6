@@ -101,7 +101,7 @@ class Jetty6PluginWebApplication implements JettyPluginWebApplication
         {
             if (configurations[i] instanceof Jetty6MavenConfiguration)
             {
-                ((Jetty6MavenConfiguration)configurations[i]).setClassPathConfiguration (webAppDir, classpathFiles);
+                ((Jetty6MavenConfiguration)configurations[i]).setClassPathConfiguration (classpathFiles);
                 ((Jetty6MavenConfiguration)configurations[i]).setWebXml (webXmlFile);              
             }
             else if (configurations[i] instanceof EnvConfiguration)
