@@ -361,6 +361,85 @@ public class HttpParserTest extends TestCase
         }
     }
 
+    public void testResponseParse0()
+	throws Exception
+    {
+        StringEndPoint io=new StringEndPoint();
+        io.setInput(
+	    "HTTP/1.1 200 Correct\015\012" 
+	    + "Content-Length: 10\015\012"
+	    + "Content-Type: text/plain\015\012"
+	    + "\015\012"
+	    + "0123456789\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
+
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffers,io, handler, buffer.capacity(), 0);
+        parser.parse();
+        assertEquals("HTTP/1.1", f0);
+        assertEquals("200", f1);
+        assertEquals("Correct", f2);
+	assertEquals(_content.length(), 10);
+	assertTrue(headerCompleted);
+	assertTrue(messageCompleted);
+    }
+
+    public void testResponseParse1()
+	throws Exception
+    {
+        StringEndPoint io=new StringEndPoint();
+        io.setInput(
+	    "HTTP/1.1 304 Not-Modified\015\012" 
+	    + "Connection: close\015\012"
+	    + "\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
+
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffers,io, handler, buffer.capacity(), 0);
+        parser.parse();
+        assertEquals("HTTP/1.1", f0);
+        assertEquals("304", f1);
+        assertEquals("Not-Modified", f2);
+	assertTrue(headerCompleted);
+	assertTrue(messageCompleted);
+    }
+
+    public void testResponseParse2()
+	throws Exception
+    {
+        StringEndPoint io=new StringEndPoint();
+        io.setInput(
+	    "HTTP/1.1 204 No-Content\015\012" 
+	    + "Connection: close\015\012"
+	    + "\015\012"
+	    + "HTTP/1.1 200 Correct\015\012" 
+	    + "Content-Length: 10\015\012"
+	    + "Content-Type: text/plain\015\012"
+	    + "\015\012"
+	    + "0123456789\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
+
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffers,io, handler, buffer.capacity(), 0);
+        parser.parse();
+        assertEquals("HTTP/1.1", f0);
+        assertEquals("204", f1);
+        assertEquals("No-Content", f2);
+	assertTrue(headerCompleted);
+	assertTrue(messageCompleted);
+
+        parser.parse();
+        assertEquals("HTTP/1.1", f0);
+        assertEquals("200", f1);
+        assertEquals("Correct", f2);
+	assertEquals(_content.length(), 10);
+	assertTrue(headerCompleted);
+	assertTrue(messageCompleted);
+    }
+
     String _content;
     String f0;
     String f1;
@@ -369,6 +448,9 @@ public class HttpParserTest extends TestCase
     String[] val;
     int h;
     
+    boolean headerCompleted;
+    boolean messageCompleted;
+
     class Handler extends HttpParser.EventHandler
     {   
         HttpFields fields;
@@ -402,6 +484,9 @@ public class HttpParserTest extends TestCase
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+
+	    messageCompleted = false;
+	    headerCompleted = false;
         }
 
         public void parsedHeader(Buffer name, Buffer value)
@@ -422,20 +507,28 @@ public class HttpParserTest extends TestCase
                 //System.err.println(s1);
                 throw new IllegalStateException();
             }
+
+	    headerCompleted = true;
         }
 
         public void messageComplete(long contentLength)
         {
+	    messageCompleted = true;
         }
 
 
-        /* (non-Javadoc)
-         * @see org.mortbay.jetty.EventHandler#startResponse(org.mortbay.io.Buffer, int, org.mortbay.io.Buffer)
-         */
         public void startResponse(Buffer version, int status, Buffer reason)
         {
-            // TODO Auto-generated method stub
-            
+            f0 = version.toString();
+	    f1 = Integer.toString(status);
+	    f2 = reason.toString();
+
+            fields=new HttpFields();
+            hdr= new String[9];
+            val= new String[9];
+
+	    messageCompleted = false;
+	    headerCompleted = false;
         }
     }
 }
