@@ -155,6 +155,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
     {
         super.configureWebApplication();        
         getWebApplication().setWebAppSrcDir(webApp);
+        getWebApplication().configure();
     }
     
     public void execute () throws MojoExecutionException, MojoFailureException
