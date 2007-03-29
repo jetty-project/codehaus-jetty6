@@ -855,6 +855,7 @@ public class HttpParser implements Parser
     /* ------------------------------------------------------------ */
     public static class Input extends ServletInputStream
     {
+
         protected HttpParser _parser;
         protected EndPoint _endp;
         protected long _maxIdleTime;
@@ -944,7 +945,21 @@ public class HttpParser implements Parser
             }
             
             return _content.length()>0; 
-        }       
+        }   
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#available()
+         */
+        public int available() throws IOException
+        {
+            if (_content!=null && _content.length()>0)
+                return _content.length();
+            if (!_endp.isBlocking())
+                _parser.parseNext();
+            
+            return _content==null?0:_content.length();
+        }
     } 
     
     
