@@ -93,13 +93,14 @@ public abstract class SelectorManager extends AbstractLifeCycle
      * @param att Attached Object
      * @throws IOException
      */
-    public void register(SocketChannel channel, Object att) throws IOException
+    public SelectionKey register(SocketChannel channel, Object att) throws IOException
     {
         int s=_set++; 
         s=s%_selectSets;
         SelectSet set=_selectSet[s];
-        channel.register(set.getSelector(),channel.isConnected()?SelectionKey.OP_READ:SelectionKey.OP_CONNECT,att);
+        SelectionKey key=channel.register(set.getSelector(),channel.isConnected()?SelectionKey.OP_READ:SelectionKey.OP_CONNECT,att);
         set.wakeup();
+        return key;
     }
     
     /* ------------------------------------------------------------ */
@@ -462,7 +463,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 while (iter.hasNext())
                 {
                     SelectionKey key = (SelectionKey) iter.next();
-                    
+                                        
                     try
                     {
                         if (!key.isValid())
