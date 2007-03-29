@@ -210,7 +210,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 _acceptChannel.socket().bind(addr,getAcceptQueueSize());
 
                 // Register accepts on the server socket with the selector.
-                _manager.register(_acceptChannel,SelectionKey.OP_ACCEPT,null);
+                _manager.register(_acceptChannel);
             }
         }
     }
