@@ -55,10 +55,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         _manager.endPointOpened(this); // TODO not here!
         
         _key = key;
-        _key.attach(this); // TODO not here!
-        
     }
-
     
     /* ------------------------------------------------------------ */
     /**
