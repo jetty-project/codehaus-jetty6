@@ -96,6 +96,15 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+  <repositories>
+   <repository>
+    <id>codehaus.org</id>
+    <name>Jetty snapshots</name>
+    <layout>default</layout>
+    <url>http://snapshots.repository.codehaus.org</url>
+    <snapshots><enabled>true</enabled></snapshots>
+   </repository>
+  </repositories>
   <scm>
     <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
     <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
