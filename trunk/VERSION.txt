@@ -3,7 +3,6 @@ jetty-6.1-SNAPSHOT
  + JETTY-285 enable jndi for mvn jetty:run-war and jetty:run-exploded
 
 jetty-6.1.2rc2 - 27 March 2007
- + isIntegral and isConfidential methods overridden in SslSelectChannelConnector
  + Enable the SharedStoreContextualiser for the WadiSessionManager(Database store for clustering)
  + AJP13 CPING request and CPONG response implemented
  + AJP13 Shutdown Request from peer implemented
@@ -34,7 +33,8 @@ jetty-6.1.2rc2 - 27 March 2007
  + JETTY-278 Only unwrap one layer of ServletExceptions
  + JETTY-280 Fixed deadlock with two flushing threads
  + JETTY-284 Fixed stop connector race
- 
+ + JETTY-286 isIntegral and isConfidential methods overridden in SslSelectChannelConnector
+
 jetty-6.1.2rc1 - 8 March 2007
  + TagLibConfiguration uses resource input stream
  + Improved handling of early close in AJP
