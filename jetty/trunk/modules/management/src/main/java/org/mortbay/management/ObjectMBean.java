@@ -505,25 +505,25 @@ public class ObjectMBean implements DynamicMBean
     public MBeanAttributeInfo defineAttribute(String name, String metaData)
     {
         String description = "";
-        boolean writable = false;
+        boolean writable = true;
         boolean onMBean = false;
         boolean convert = false;
 
-        String[] tokens = metaData.split(":", 3);
-        if (tokens.length > 0)
+        if (metaData!= null)
         {
-            int index = tokens.length - 1;
-            description = tokens[index--];
-            if (index >= 0)
+            String[] tokens = metaData.split(":", 3);
+            for (int t=0;t<tokens.length-1;t++)
             {
-                writable = "RW".equalsIgnoreCase(tokens[index--]);
-                if (index >= 0)
-                {
-                    onMBean = "MMBean".equalsIgnoreCase(tokens[index]) || "MBean".equalsIgnoreCase(tokens[index]);
-                    convert = "MMBean".equalsIgnoreCase(tokens[index]) || "MObject".equalsIgnoreCase(tokens[index]);
-                }
+                if ("RO".equals(tokens[t]))
+                    writable=false;
+                else if ("MMBean".equalsIgnoreCase(tokens[t]) || "MBean".equalsIgnoreCase(tokens[t]))
+                    onMBean=true;
+                else if ("MMBean".equalsIgnoreCase(tokens[t]) || "MObject".equalsIgnoreCase(tokens[t]))
+                    convert=true;
             }
+            description=tokens[tokens.length-1];
         }
+        
 
         String uName = name.substring(0, 1).toUpperCase() + name.substring(1);
         Class oClass = onMBean ? this.getClass() : _managed.getClass();
@@ -573,7 +573,7 @@ public class ObjectMBean implements DynamicMBean
                 type = methods[m].getParameterTypes()[0];
             }
         }
-
+        
         if (convert && type.isPrimitive() && !type.isArray())
             throw new IllegalArgumentException("Cannot convert primative " + name);
 

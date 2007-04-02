@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + MBean properties assume writeable unless marked RO
  + JETTY-283 Parse 206 and 304 responses in client
  + JETTY-285 enable jndi for mvn jetty:run-war and jetty:run-exploded
  + slight refactor of SessionManager and SessionIdManager to improve subclassability
