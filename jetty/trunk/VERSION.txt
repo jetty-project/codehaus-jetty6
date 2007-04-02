@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JETTY-283 Parse 206 and 304 responses in client
  + JETTY-285 enable jndi for mvn jetty:run-war and jetty:run-exploded
+ + slight refactor of SessionManager and SessionIdManager to improve subclassability
 
 jetty-6.1.2rc2 - 27 March 2007
  + Enable the SharedStoreContextualiser for the WadiSessionManager(Database store for clustering)
