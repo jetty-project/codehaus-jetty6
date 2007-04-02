@@ -150,7 +150,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _context=ContextHandler.getCurrentContext();
         _loader=Thread.currentThread().getContextClassLoader();
 
-        newSessionMap();
+        
 
         if (_sessionIdManager==null)
         {
@@ -387,6 +387,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         return ((Session)session).isValid();
     }
+    
+    /* ------------------------------------------------------------ */
+    public String getClusterId(HttpSession session)
+    {
+        return ((Session)session).getClusterId();
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -559,7 +565,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      * @param idInCluster The session ID in the cluster, stripped of any worker name.
      * @return A Session or null if none exists.
      */
-    protected abstract Session getSession(String idInCluster);
+    public abstract Session getSession(String idInCluster);
 
     protected abstract void invalidateSessions();
 
@@ -573,10 +579,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     protected abstract Session newSession(HttpServletRequest request);
     
 
-    // TODO delete this 
-    protected final void newSessionMap()
-    {
-    }
 
     /* ------------------------------------------------------------ */
     /** Remove session from manager 
@@ -584,8 +586,32 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      * @param invalidate True if {@link HttpSessionListener#sessionDestroyed(HttpSessionEvent)} and
      * {@link SessionIdManager#invalidateAll(String)} should be called.
      */
-    protected void removeSession(Session session, boolean invalidate)
+    public void removeSession(Session session, boolean invalidate)
     {
+        // Remove session from context and global maps
+        synchronized (_sessionIdManager)
+        {
+            boolean removed = false;
+            
+            synchronized (this)
+            {
+                //take this session out of the map of sessions for this context
+                if (getSession(session.getClusterId()) != null)
+                {
+                    removed = true;
+                    removeSession(session.getClusterId());
+                }
+            }   
+            
+            if (removed)
+            {
+                // Remove session from all context and global id maps
+                _sessionIdManager.removeSession(session);
+                if (invalidate)
+                    _sessionIdManager.invalidateAll(session.getClusterId());
+            }
+        }
+        
         if (invalidate && _sessionListeners!=null)
         {
             HttpSessionEvent event=new HttpSessionEvent(session);
@@ -595,20 +621,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         if (!invalidate)
         {
             session.willPassivate();
-        }
-        
-        // Remove session from context and global maps
-        synchronized (_sessionIdManager)
-        {
-            String id=session.getClusterId();
-            _sessionIdManager.removeSession(session);
-            
-            synchronized (this)
-            {
-                removeSession(id);
-            }
-            if (invalidate)
-                _sessionIdManager.invalidateAll(id);
         }
     }
 
