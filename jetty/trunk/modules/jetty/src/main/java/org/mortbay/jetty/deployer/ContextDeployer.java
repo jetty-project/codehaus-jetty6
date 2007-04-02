@@ -348,8 +348,12 @@ public class ContextDeployer extends AbstractLifeCycle
             return null;
 
         XmlConfiguration xmlConfiguration=new XmlConfiguration(hotDeployXmlFile.toURL());
+        HashMap properties = new HashMap();
+        properties.put("Server", _contexts.getServer());
         if (_configMgr!=null)
-            xmlConfiguration.setProperties(_configMgr.getProperties());
+            properties.putAll(_configMgr.getProperties());
+           
+        xmlConfiguration.setProperties(properties);
         ContextHandler context=(ContextHandler)xmlConfiguration.configure();
         return context;
     }
