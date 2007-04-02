@@ -217,7 +217,7 @@ public class HashSessionManager extends AbstractSessionManager
     }
     
     /* ------------------------------------------------------------ */
-    protected AbstractSessionManager.Session getSession(String idInCluster)
+    public AbstractSessionManager.Session getSession(String idInCluster)
     {
         return (Session)_sessions.get(idInCluster);
     }
