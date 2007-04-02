@@ -214,26 +214,29 @@ public class SessionHandler extends HandlerWrapper
         SessionManager sessionManager = getSessionManager();
         boolean requested_session_id_from_cookie=false;
         
-        // Look for session id cookie     
-        Cookie[] cookies=request.getCookies();
-        if (cookies!=null && cookies.length>0)
+        // Look for session id cookie    
+        if (_sessionManager.isUsingCookies())
         {
-            for (int i=0;i<cookies.length;i++)
+            Cookie[] cookies=request.getCookies();
+            if (cookies!=null && cookies.length>0)
             {
-                if (sessionManager.getSessionCookie().equalsIgnoreCase(cookies[i].getName()))
+                for (int i=0;i<cookies.length;i++)
                 {
-                    if (requested_session_id!=null)
+                    if (sessionManager.getSessionCookie().equalsIgnoreCase(cookies[i].getName()))
                     {
-                        // Multiple jsessionid cookies. Probably due to
-                        // multiple paths and/or domains. Pick the first
-                        // known session or the last defined cookie.
-                        if (sessionManager.getHttpSession(requested_session_id)!=null)
-                            break;
+                        if (requested_session_id!=null)
+                        {
+                            // Multiple jsessionid cookies. Probably due to
+                            // multiple paths and/or domains. Pick the first
+                            // known session or the last defined cookie.
+                            if (sessionManager.getHttpSession(requested_session_id)!=null)
+                                break;
+                        }
+
+                        requested_session_id=cookies[i].getValue();
+                        requested_session_id_from_cookie = true;
+                        if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from cookie");
                     }
-                    
-                    requested_session_id=cookies[i].getValue();
-                    requested_session_id_from_cookie = true;
-                    if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from cookie");
                 }
             }
         }

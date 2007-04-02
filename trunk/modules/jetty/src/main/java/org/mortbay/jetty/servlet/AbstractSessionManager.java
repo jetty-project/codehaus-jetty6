@@ -41,7 +41,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
@@ -68,6 +67,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     private static final HttpSessionContext __nullSessionContext=new NullSessionContext();
 
     private boolean _usingCookies=true;
+    
     /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
@@ -91,6 +91,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     protected String _sessionPath;
     protected int _maxCookieAge=-1;
     protected int _refreshCookieAge;
+    protected boolean _nodeIdInSessionId;
 
     /* ------------------------------------------------------------ */
     public AbstractSessionManager()
@@ -229,20 +230,21 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    public HttpSession getHttpSession(String id)
+    public HttpSession getHttpSession(String nodeId)
     {
-        int dot=id.lastIndexOf('.');
-        String cluster_id=(dot>0)?id.substring(0,dot):id;
+        String cluster_id = getIdManager().getClusterId(nodeId);
         
         synchronized (this)
         {
             Session session = getSession(cluster_id);
             
-            if (session!=null && !session.getId().equals(id))
+            if (session!=null && !session.getNodeId().equals(nodeId))
                 session.setIdChanged(true);
             return session;
         }
     }
+
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the metaManager used for cross context session management
@@ -315,7 +317,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         if (isUsingCookies())
         {
-            Cookie cookie=getHttpOnly()?new HttpOnlyCookie(_sessionCookie,session.getId()):new Cookie(_sessionCookie,session.getId());
+            String id = getNodeId(session);
+            Cookie cookie=getHttpOnly()?new HttpOnlyCookie(_sessionCookie,id):new Cookie(_sessionCookie,id);
 
             cookie.setPath((contextPath==null||contextPath.length()==0)?"/":contextPath);
             cookie.setMaxAge(getMaxCookieAge());
@@ -392,6 +395,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public String getClusterId(HttpSession session)
     {
         return ((Session)session).getClusterId();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getNodeId(HttpSession session)
+    {
+        return ((Session)session).getNodeId();
     }
 
     /* ------------------------------------------------------------ */
@@ -507,11 +516,13 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _sessionHandler=sessionHandler;
     }
 
+    /* ------------------------------------------------------------ */
     public void setSessionPath(String path)
     {
         _sessionPath=path;
     }
 
+    /* ------------------------------------------------------------ */
     public void setSessionURL(String url)
     {
         _sessionURL=url;
@@ -578,6 +589,25 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      */
     protected abstract Session newSession(HttpServletRequest request);
     
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return true if the cluster node id (worker id) is returned as part of the session id by {@link HttpSession#getId()}. Default is false. 
+     */
+    public boolean isNodeIdInSessionId()
+    {
+        return _nodeIdInSessionId;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param nodeIdInSessionId true if the cluster node id (worker id) will be returned as part of the session id by {@link HttpSession#getId()}. Default is false.
+     */
+    public void setNodeIdInSessionId(boolean nodeIdInSessionId)
+    {
+        _nodeIdInSessionId=nodeIdInSessionId;
+    }
 
 
     /* ------------------------------------------------------------ */
@@ -673,7 +703,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public abstract class Session implements HttpSession, Serializable
     {
         final String _clusterId;
-        final String _id;
+        final String _nodeId;
         boolean _idChanged;
         final long _created;
         long _cookieSet;
@@ -692,7 +722,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             _newSession=true;
             _created=System.currentTimeMillis();
             _clusterId=_sessionIdManager.newSessionId(request,_created);
-            _id=getId(request);
+            _nodeId=_sessionIdManager.getNodeId(_clusterId,request);
             _accessed=_created;
             _requests=1;
         }
@@ -702,7 +732,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         {
             _created=created;
             _clusterId=clusterId;
-            _id=getId(null);
+            _nodeId=_sessionIdManager.getNodeId(_clusterId,null);
             _accessed=_created;
         }
 
@@ -710,24 +740,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         protected void initValues() 
         {
             _values=newAttributeMap();
-        }
-
-        /* ------------------------------------------------------------ */
-        /** Get the session ID with any worker ID.
-         * 
-         * @param request
-         * @return sessionId plus any worker ID.
-         */
-        protected String getId(HttpServletRequest request) 
-        {
-            String worker=request==null?null:(String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
-            if (worker!=null) 
-                return _clusterId+'.'+worker; 
-            
-            if (_sessionIdManager.getWorkerName()!=null) 
-                return _clusterId+'.'+_sessionIdManager.getWorkerName();
-           
-            return _clusterId;
         }
 
         /* ------------------------------------------------------------ */
@@ -763,10 +775,22 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             return _created;
         }
 
-        /* ------------------------------------------------------------- */
+        /* ------------------------------------------------------------ */
         public String getId() throws IllegalStateException
         {
-            return _id;
+            return _nodeIdInSessionId?_nodeId:_clusterId;
+        }
+
+        /* ------------------------------------------------------------- */
+        protected String getNodeId()
+        {
+            return _nodeId;
+        }
+        
+        /* ------------------------------------------------------------- */
+        protected String getClusterId()
+        {
+            return _clusterId;
         }
 
         /* ------------------------------------------------------------- */
@@ -1038,12 +1062,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 ((HttpSessionBindingListener)value).valueBound(new HttpSessionBindingEvent(this,name));
         }
 
-        /* ------------------------------------------------------------- */
-        protected String getClusterId()
-        {
-            return _clusterId;
-        }
-
         /* ------------------------------------------------------------ */
         protected boolean isValid()
         {
@@ -1097,5 +1115,4 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             }
         }
     }
-
 }

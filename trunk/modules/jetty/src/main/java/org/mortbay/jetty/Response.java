@@ -134,10 +134,27 @@ public class Response implements HttpServletResponse
     public String encodeURL(String url)
     {
         Request request=_connection.getRequest();
-
+        SessionManager sessionManager = request.getSessionManager();
+        if (sessionManager==null)
+            return url;
+        String sessionURLPrefix = sessionManager.getSessionURLPrefix();
+        
         // should not encode if cookies in evidence
         if (url==null || request==null || request.isRequestedSessionIdFromCookie())
+        {
+            int prefix=url.indexOf(sessionURLPrefix);
+            if (prefix!=-1)
+            {
+                int suffix=url.indexOf("?",prefix);
+                if (suffix<0)
+                    suffix=url.indexOf("#",prefix);
+
+                if (suffix<=prefix)
+                    return url.substring(0,prefix);
+                return url.substring(0,prefix)+url.substring(suffix);
+            }
             return url;
+        }
 
         // get session;
         HttpSession session=request.getSession(false);
@@ -146,15 +163,15 @@ public class Response implements HttpServletResponse
         if (session == null)
             return url;
 
-        SessionManager sessionManager = request.getSessionManager();
         
         // invalid session
         if (!sessionManager.isValid(session))
             return url;
-        String id=session.getId();
+        
+        String id=sessionManager.getNodeId(session);
+        
         
         // TODO Check host and port are for this server
-        String sessionURLPrefix = sessionManager.getSessionURLPrefix();
         // Already encoded
         int prefix=url.indexOf(sessionURLPrefix);
         if (prefix!=-1)

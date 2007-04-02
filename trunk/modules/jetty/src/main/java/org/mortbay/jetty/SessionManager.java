@@ -138,6 +138,13 @@ public interface SessionManager extends LifeCycle
     /**
      * @return the cross context session meta manager.
      */
+    public SessionIdManager getIdManager();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the cross context session id manager.
+     * @deprecated use {@link #getIdManager()}
+     */
     public SessionIdManager getMetaManager();
     
     /* ------------------------------------------------------------ */
@@ -148,6 +155,20 @@ public interface SessionManager extends LifeCycle
     
     /* ------------------------------------------------------------ */
     public boolean isValid(HttpSession session);
+    
+    /* ------------------------------------------------------------ */
+    /** Get the session node id
+     * @param session
+     * @return The unique id of the session within the cluster, extended with an optional node id.
+     */
+    public String getNodeId(HttpSession session);
+    
+    /* ------------------------------------------------------------ */
+    /** Get the session cluster id
+     * @param session
+     * @return The unique id of the session within the cluster (without a node id extension)
+     */
+    public String getClusterId(HttpSession session);
     
     /* ------------------------------------------------------------ */
     /** Called by the {@link SessionHandler} when a session is access by a request
@@ -186,5 +207,7 @@ public interface SessionManager extends LifeCycle
     public void setMaxCookieAge (int maxCookieAgeInSeconds);
     
     public int getMaxCookieAge();
+    
+    public boolean isUsingCookies();
     
 }
