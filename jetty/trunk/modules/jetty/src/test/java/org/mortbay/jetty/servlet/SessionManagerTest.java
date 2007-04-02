@@ -18,6 +18,7 @@
 
 package org.mortbay.jetty.servlet;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionActivationListener;
@@ -109,33 +110,37 @@ public class SessionManagerTest extends TestCase
     {
         try
         {
-            idManager._worker="node0";
+            idManager.setWorkerName("node0");
             HttpSession session = sessionManager.newHttpSession(null);
             
-            assertTrue(session.getId().endsWith("node0"));
-            String id0=session.getId();
-            String clusterId=id0.substring(0,id0.lastIndexOf('.'));
+            assertTrue(!session.getId().endsWith(".node0"));
+            String nodeId=sessionManager.getNodeId(session);
+            String clusterId=session.getId();
             String id1=clusterId+".node1";
+            
+            assertEquals(session.getId()+".node0",nodeId);
             
             assertTrue(sessionManager.getSessionCookie(session,"/context",false)!=null);
             
-            assertEquals(session,sessionManager.getHttpSession(session.getId()));
+            assertEquals(session,sessionManager.getHttpSession(nodeId));
             assertTrue(sessionManager.access(session,false)==null);
             
             assertEquals(session,sessionManager.getHttpSession(id1));
-            assertTrue(sessionManager.access(session,false)!=null);
+            Cookie cookie = sessionManager.access(session,false);
+            assertTrue(cookie!=null);
+            assertEquals("JSESSIONID",cookie.getName());
+            assertEquals(nodeId,cookie.getValue());
             
         }
         finally
         {
-            idManager._worker=null;
+            idManager.setWorkerName(null);
         }
     }
     
     
-    class TestSessionIdManager extends AbstractLifeCycle implements SessionIdManager
+    class TestSessionIdManager extends HashSessionIdManager
     {
-        String _worker;
         
         public boolean idInUse(String id)
         {
@@ -160,11 +165,6 @@ public class SessionManagerTest extends TestCase
         public void removeSession(HttpSession session)
         {
             // ignore
-        }
-
-        public String getWorkerName()
-        {
-            return _worker;
         }
 
     }

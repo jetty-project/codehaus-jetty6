@@ -79,6 +79,36 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     }
 
     /* ------------------------------------------------------------ */
+    /** Get the session ID with any worker ID.
+     * 
+     * @param request
+     * @return sessionId plus any worker ID.
+     */
+    public String getNodeId(String clusterId,HttpServletRequest request) 
+    {
+        String worker=request==null?null:(String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
+        if (worker!=null) 
+            return clusterId+'.'+worker; 
+        
+        if (_workerName!=null) 
+            return clusterId+'.'+_workerName;
+       
+        return clusterId;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the session ID with any worker ID.
+     * 
+     * @param request
+     * @return sessionId plus any worker ID.
+     */
+    public String getClusterId(String nodeId) 
+    {
+        int dot=nodeId.lastIndexOf('.');
+        return (dot>0)?nodeId.substring(0,dot):nodeId;
+    }
+    
+    /* ------------------------------------------------------------ */
     protected void doStart()
     {
         if (_random==null)
@@ -131,7 +161,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     {
         synchronized (this)
         {
-            _sessions.add(session.getId(),session);
+            _sessions.add(getClusterId(session.getId()),session);
         }
     }
 
@@ -143,7 +173,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     {
         synchronized (this)
         {
-            _sessions.removeValue(session.getId(),session);
+            _sessions.removeValue(getClusterId(session.getId()),session);
         }
     }
 
@@ -183,8 +213,13 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
         {
             // A requested session ID can only be used if it is in use already.
             String requested_id=request.getRequestedSessionId();
-            if (requested_id!=null&&idInUse(requested_id))
-                return requested_id;
+
+            if (requested_id!=null)
+            {
+                String cluster_id=getClusterId(requested_id);
+                if (idInUse(cluster_id))
+                    return cluster_id;
+            }
 
             // Else reuse any new session ID already defined for this request.
             String new_id=(String)request.getAttribute(__NEW_SESSION_ID);
