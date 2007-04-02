@@ -292,7 +292,6 @@ public class HttpGenerator extends AbstractGenerator
                 _header.put((byte)' ');
                 _header.put(_version==HttpVersions.HTTP_1_0_ORDINAL?HttpVersions.HTTP_1_0_BUFFER:HttpVersions.HTTP_1_1_BUFFER);
                 _header.put(HttpTokens.CRLF);
-                System.err.println("[request] "+_header);
             }
         }
         else

@@ -243,9 +243,9 @@ public class HashSessionManager extends AbstractSessionManager
     }
     
     /* ------------------------------------------------------------ */
-    protected void removeSession(String idInCluster)
+    protected void removeSession(String clusterId)
     {
-        _sessions.remove(idInCluster);
+        _sessions.remove(clusterId);
     }
     
     

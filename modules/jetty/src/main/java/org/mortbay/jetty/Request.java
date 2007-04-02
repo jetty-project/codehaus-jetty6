@@ -1086,8 +1086,11 @@ public class Request implements HttpServletRequest
      */
     public boolean isRequestedSessionIdValid()
     {	
-        HttpSession session=null;
-        return _requestedSessionId!=null && (session=getSession(false))!=null && _requestedSessionId.equals(session.getId());
+        if (_requestedSessionId==null)
+            return false;
+        
+        HttpSession session=getSession(false);
+        return _sessionManager.getIdManager().getClusterId(_requestedSessionId).equals(_sessionManager.getClusterId(session));
     }
 
     /* ------------------------------------------------------------ */

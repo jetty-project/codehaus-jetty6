@@ -10,10 +10,15 @@ import org.mortbay.component.LifeCycle;
  * @author gregw
  *
  */
+/* ------------------------------------------------------------ */
+/**
+ * @author gregw
+ *
+ */
 public interface SessionIdManager extends LifeCycle
 {
     /**
-     * @param id
+     * @param id The session ID without any cluster node extension
      * @return True if the session ID is in use by at least one context.
      */
     public boolean idInUse(String id);
@@ -32,7 +37,7 @@ public interface SessionIdManager extends LifeCycle
     
     /**
      * Call {@link HttpSession#invalidate()} on all known sessions for the given id.
-     * @param id
+     * @param id The session ID without any cluster node extension
      */
     public void invalidateAll(String id);
     
@@ -43,6 +48,23 @@ public interface SessionIdManager extends LifeCycle
      */
     public String newSessionId(HttpServletRequest request,long created);
     
-    
     public String getWorkerName();
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Get a cluster ID from a node ID.
+     * Strip node identifier from a located session ID.
+     * @param nodeId
+     * @return
+     */
+    public String getClusterId(String nodeId);
+    
+    /* ------------------------------------------------------------ */
+    /** Get a node ID from a cluster ID and a request
+     * @param clusterId The ID of the session
+     * @param request The request that for the session (or null)
+     * @return The session ID qualified with the node ID.
+     */
+    public String getNodeId(String clusterId,HttpServletRequest request);
+    
 }
