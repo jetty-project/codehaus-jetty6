@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + MBean properties assume writeable unless marked RO
  + refactor of SessionManager and SessionIdManager for clustering 
+ + Improvements to allow simple setting of Cache-Control headers
  + JETTY-283 Parse 206 and 304 responses in client
  + JETTY-285 enable jndi for mvn jetty:run-war and jetty:run-exploded
 
