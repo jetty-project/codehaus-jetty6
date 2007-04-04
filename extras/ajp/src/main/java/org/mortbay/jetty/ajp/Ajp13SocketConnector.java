@@ -14,10 +14,13 @@
 
 package org.mortbay.jetty.ajp;
 
+import java.io.IOException;
+
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
@@ -53,45 +56,66 @@ public class Ajp13SocketConnector extends SocketConnector
         Log.info("AJP13 is not a secure protocol. Please protect port {}",Integer.toString(getPort()));
         super.doStart();
     }
+    
+    
 
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see org.mortbay.jetty.bio.SocketConnector#customize(org.mortbay.io.EndPoint, org.mortbay.jetty.Request)
+     */
+    public void customize(EndPoint endpoint, Request request) throws IOException
+    {
+        super.customize(endpoint,request);
+        if (request.isSecure())
+            request.setScheme(HttpSchemes.HTTPS);
+    }
+
+    /* ------------------------------------------------------------ */
     protected HttpConnection newHttpConnection(EndPoint endpoint)
     {
         return new Ajp13Connection(this,endpoint,getServer());
     }
 
+    /* ------------------------------------------------------------ */
     // Secured on a packet by packet bases not by connection
     public boolean isConfidential(Request request)
     {
         throw new UnsupportedOperationException();
     }
 
+    /* ------------------------------------------------------------ */
     // Secured on a packet by packet bases not by connection
     public boolean isIntegral(Request request)
     {
         throw new UnsupportedOperationException();
     }
 
+    /* ------------------------------------------------------------ */
     public void setHeaderBufferSize(int headerBufferSize)
     {
         Log.debug(Log.IGNORED);
     }
 
+    /* ------------------------------------------------------------ */
     public void setRequestBufferSize(int requestBufferSize)
     {
         Log.debug(Log.IGNORED);
     }
 
+    /* ------------------------------------------------------------ */
     public void setResponseBufferSize(int responseBufferSize)
     {
         Log.debug(Log.IGNORED);
     }
 
+    /* ------------------------------------------------------------ */
     public void setAllowShutdown(boolean allowShutdown)
     {
         Log.warn("AJP13: Shutdown Request is: " + allowShutdown);
         __allowShutdown = allowShutdown;
     }
 
+    /* ------------------------------------------------------------ */
     public void setSecretWord(String secretWord)
     {
         Log.warn("AJP13: Shutdown Request secret word is : " + secretWord);
