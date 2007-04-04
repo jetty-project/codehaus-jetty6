@@ -502,33 +502,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         super.doStart();
     }
     
-    /* TODO temp main - just to help testing */
-    public static void main(String[] args)
-        throws Exception
-    {
-        Server server = new Server();
-        SslSelectChannelConnector connector=new SslSelectChannelConnector();  
-        connector.setKeystore("C:/jeprox/jetty_6.0/etc/keystore");
-        connector.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-        connector.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
-        
-        connector.setPort(8443);
-        server.setConnectors(new Connector[]{connector});
-        HandlerCollection handlers = new HandlerCollection();
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        handlers.setHandlers(new Handler[]{contexts,new DefaultHandler()});
-        server.setHandler(handlers);
-        
-        HashUserRealm userRealm = new HashUserRealm();
-        userRealm.setName("Test Realm");
-        userRealm.setConfig("C:/jeprox/jetty_6.0/etc/realm.properties");
-        server.setUserRealms(new UserRealm[]{userRealm});
-        
-        WebAppContext.addWebApplications(server,"C:/jeprox/jetty_6.0/webapps","C:/jeprox/jetty_6.0/etc/webdefault.xml",false,false);
-        System.setProperty("DEBUG","true");
-        server.start();
-        server.join();
-    }
     /**
      * Simple bundle of information that is cached in the SSLSession. Stores the effective keySize
      * and the client certificate chain.
