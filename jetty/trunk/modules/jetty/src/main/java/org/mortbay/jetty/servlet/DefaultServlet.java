@@ -95,9 +95,12 @@ import org.mortbay.util.URIUtil;
  *                    when using NIO connector. Setting this value to false means that
  *                    a direct buffer will be used instead of a mapped file buffer. 
  *                    By default, this is set to true.
+ *                    
+ *  cacheControl      If set, all static content will have this value set as the cache-control
+ *                    header.
+ * 
  * </PRE>
- *                                                               
- * The MOVE method is allowed if PUT and DELETE are allowed             
+ *                                                                    
  *
  * @author Greg Wilkins (gregw)
  * @author Nigel Canonizado
@@ -120,6 +123,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private String[] _welcomes;
     private boolean _aliases=false;
     private boolean _useFileMappedBuffer=false;
+    ByteArrayBuffer _cacheControl;
     
     
     /* ------------------------------------------------------------ */
@@ -163,11 +167,16 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         if (rb!=null)
         {
             try{_resourceBase=Resource.newResource(rb);}
-            catch (Exception e) {
+            catch (Exception e) 
+            {
                 Log.warn(Log.EXCEPTION,e);
                 throw new UnavailableException(e.toString()); 
             }
         }
+        
+        String t=getInitParameter("cacheControl");
+        if (t!=null)
+            _cacheControl=new ByteArrayBuffer(t);
         
         try
         {
@@ -198,6 +207,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 
                 _cache.start();
             }
+            
+           
         }
         catch (Exception e) 
         {
@@ -589,6 +600,13 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 // See if a short direct method can be used?
                 if (out instanceof HttpConnection.Output)
                 {
+                    if (_cacheControl!=null)
+                    {
+                        if (response instanceof Response)
+                            ((Response)response).getHttpFields().put(HttpHeaders.CACHE_CONTROL_BUFFER,_cacheControl);
+                        else
+                            response.setHeader(HttpHeaders.CACHE_CONTROL,_cacheControl.toString());
+                    }
                     ((HttpConnection.Output)out).sendContent(content);
                 }
                 else
@@ -703,22 +721,26 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         if (response instanceof Response)
         {
             Response r=(Response)response;
-            HttpFields headers = r.getHttpFields();
+            HttpFields fields = r.getHttpFields();
 
             if (content.getLastModified()!=null)  
-                headers.put(HttpHeaders.LAST_MODIFIED_BUFFER,content.getLastModified());
+                fields.put(HttpHeaders.LAST_MODIFIED_BUFFER,content.getLastModified());
             else if (content.getResource()!=null)
             {
                 long lml=content.getResource().lastModified();
                 if (lml!=-1)
-                    headers.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER,lml);
+                    fields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER,lml);
             }
                 
             if (count != -1)
                 r.setLongContentLength(count);
 
             if (_acceptRanges)
-                headers.put(HttpHeaders.ACCEPT_RANGES_BUFFER,BYTE_RANGES);
+                fields.put(HttpHeaders.ACCEPT_RANGES_BUFFER,BYTE_RANGES);
+
+            if (_cacheControl!=null)
+                fields.put(HttpHeaders.CACHE_CONTROL_BUFFER,_cacheControl);
+            
         }
         else
         {
@@ -737,6 +759,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
 
             if (_acceptRanges)
                 response.setHeader(HttpHeaders.ACCEPT_RANGES,"bytes");
+            
+            if (_cacheControl!=null)
+                response.setHeader(HttpHeaders.CACHE_CONTROL,_cacheControl.toString());
         }
     }
 

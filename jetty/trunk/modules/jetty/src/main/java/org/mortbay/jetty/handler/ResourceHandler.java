@@ -23,12 +23,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.WriterOutputStream;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
@@ -52,12 +55,14 @@ public class ResourceHandler extends AbstractHandler
     Resource _baseResource;
     String[] _welcomeFiles={"index.html"};
     MimeTypes _mimeTypes = new MimeTypes();
-    
+    ByteArrayBuffer _cacheControl;
+
+    /* ------------------------------------------------------------ */
     public ResourceHandler()
     {
     }
     
-    
+    /* ------------------------------------------------------------ */
     public void doStart()
     throws Exception
     {
@@ -113,6 +118,24 @@ public class ResourceHandler extends AbstractHandler
             Log.warn(e);
             throw new IllegalArgumentException(resourceBase);
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the cacheControl header to set on all static content.
+     */
+    public String getCacheControl()
+    {
+        return _cacheControl.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param cacheControl the cacheControl header to set on all static content.
+     */
+    public void setCacheControl(String cacheControl)
+    {
+        _cacheControl=cacheControl==null?null:new ByteArrayBuffer(cacheControl);
     }
 
     /* ------------------------------------------------------------ */
@@ -232,16 +255,13 @@ public class ResourceHandler extends AbstractHandler
         Buffer mime=_mimeTypes.getMimeByExtension(resource.toString());
         if (mime==null)
             mime=_mimeTypes.getMimeByExtension(request.getPathInfo());
-        if (mime!=null)
-            response.setContentType(mime.toString());
-
-        long length=resource.length();
-        if (length>0)
-            response.setHeader(HttpHeaders.CONTENT_LENGTH,TypeUtil.toString(length));
         
+        // set the headers
+        doResponseHeaders(response,resource,mime!=null?mime.toString():null);
+
         // Send the content
         OutputStream out =null;
-        try{out = response.getOutputStream();}
+        try {out = response.getOutputStream();}
         catch(IllegalStateException e) {out = new WriterOutputStream(response.getWriter());}
         
         // See if a short direct method can be used?
@@ -253,8 +273,43 @@ public class ResourceHandler extends AbstractHandler
         else
         {
             // Write content normally
-            resource.writeTo(out,0,length);
+            resource.writeTo(out,0,resource.length());
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set the response headers.
+     * This method is called to set the response headers such as content type and content length.
+     * May be extended to add additional headers.
+     * @param response
+     * @param resource
+     * @param mimeType
+     */
+    protected void doResponseHeaders(HttpServletResponse response, Resource resource, String mimeType)
+    {
+        if (mimeType!=null)
+            response.setContentType(mimeType);
+
+        long length=resource.length();
+        
+        if (response instanceof Response)
+        {
+            HttpFields fields = ((Response)response).getHttpFields();
+
+            if (length>0)
+                fields.putLongField(HttpHeaders.CONTENT_LENGTH_BUFFER,length);
+                
+            if (_cacheControl!=null)
+                fields.put(HttpHeaders.CACHE_CONTROL_BUFFER,_cacheControl);
+        }
+        else
+        {
+            if (length>0)
+                response.setHeader(HttpHeaders.CONTENT_LENGTH,TypeUtil.toString(length));
+                
+            if (_cacheControl!=null)
+                response.setHeader(HttpHeaders.CACHE_CONTROL,_cacheControl.toString());
+        }
+        
+    }
 }

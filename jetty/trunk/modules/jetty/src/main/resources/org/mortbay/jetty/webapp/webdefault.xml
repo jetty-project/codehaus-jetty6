@@ -85,6 +85,9 @@
   <!--                    to false means that a direct buffer will be used  -->
   <!--                    instead. If you are having trouble with Windows   -->
   <!--                    file locking, set this to false.                  -->
+  <!--                                                                      -->
+  <!--  cacheControl      If set, all static content will have this value   -->
+  <!--                    set as the cache-control header.                  -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
     <servlet-name>default</servlet-name>
@@ -121,6 +124,12 @@
       <param-name>useFileMappedBuffer</param-name>
       <param-value>false</param-value>
     </init-param>  
+    <!--
+    <init-param>
+      <param-name>cacheControl</param-name>
+      <param-value>max-age=3600,public</param-value>
+    </init-param>
+    -->
     <load-on-startup>0</load-on-startup>
   </servlet> 
 
