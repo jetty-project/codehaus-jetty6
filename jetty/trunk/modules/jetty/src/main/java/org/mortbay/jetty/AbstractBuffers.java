@@ -16,9 +16,9 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
 {
     private static int BUFFER_LOSS_RATE=256; // Leak buffers to shrink pools
     
-    private int _headerBufferSize=8*1024;
-    private int _requestBufferSize=16*1024;
-    private int _responseBufferSize=32*1024;
+    private int _headerBufferSize=4*1024;
+    private int _requestBufferSize=8*1024;
+    private int _responseBufferSize=24*1024;
 
     // Use and array of buffers to avoid contention
     private transient ArrayList _headerBuffers=new ArrayList();
