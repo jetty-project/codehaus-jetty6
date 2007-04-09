@@ -738,7 +738,7 @@ public abstract class AbstractGenerator implements Generator
                     case WRITE_CONV:
                     {
                         Writer converter=getConverter();
-                        converter.write(s, offset, length);
+                        converter.write(s, offset, chars);
                         converter.flush();
                     }
                     break;
