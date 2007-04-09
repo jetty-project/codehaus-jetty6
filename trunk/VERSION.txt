@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
  + refactor of SessionManager and SessionIdManager for clustering 
  + Improvements to allow simple setting of Cache-Control headers
  + AJP redirects https requests correctly
+ + Fixed writes of unencoded char arrays.
  + JETTY-283 Parse 206 and 304 responses in client
  + JETTY-285 enable jndi for mvn jetty:run-war and jetty:run-exploded
 
