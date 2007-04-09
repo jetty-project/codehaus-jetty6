@@ -289,8 +289,6 @@ public class ObjectMBean implements DynamicMBean
     /* ------------------------------------------------------------ */
     public Object getAttribute(String name) throws AttributeNotFoundException, MBeanException, ReflectionException
     {
-        if (Log.isDebugEnabled())
-            Log.debug("getAttribute " + name);
         Method getter = (Method) _getters.get(name);
         if (getter == null)
             throw new AttributeNotFoundException(name);
@@ -338,7 +336,6 @@ public class ObjectMBean implements DynamicMBean
     /* ------------------------------------------------------------ */
     public AttributeList getAttributes(String[] names)
     {
-        Log.debug("getAttributes");
         AttributeList results = new AttributeList(names.length);
         for (int i = 0; i < names.length; i++)
         {
@@ -361,7 +358,7 @@ public class ObjectMBean implements DynamicMBean
             return;
 
         if (Log.isDebugEnabled())
-            Log.debug("setAttribute " + attr.getName() + "=" + attr.getValue());
+            Log.debug("setAttribute " + _managed + ":" +attr.getName() + "=" + attr.getValue());
         Method setter = (Method) _setters.get(attr.getName());
         if (setter == null)
             throw new AttributeNotFoundException(attr.getName());
