@@ -269,14 +269,11 @@ public class Scanner
         while (itor.hasNext())
         {
             File dir = (File)itor.next();
-            Log.debug("Scanning directory "+dir);
             
             if ((dir != null) && (dir.exists()))
                 scanFile(dir, scanInfo);
         }
         
-
-        Log.debug("Scan complete at "+new Date());
         return scanInfo;
     }
 
@@ -346,11 +343,8 @@ public class Scanner
 
             if (f.isFile())
             {
-                Log.debug("Checking file "+f.getName());
-                if ((_filter == null) ||
-                        ((_filter != null) && _filter.accept(f.getParentFile(), f.getName())))
+                if ((_filter == null) || ((_filter != null) && _filter.accept(f.getParentFile(), f.getName())))
                 {
-                    Log.debug("File accepted");
                     String name = f.getCanonicalPath();
                     long lastModified = f.lastModified();
                     scanInfoMap.put(name, new Long(lastModified));
