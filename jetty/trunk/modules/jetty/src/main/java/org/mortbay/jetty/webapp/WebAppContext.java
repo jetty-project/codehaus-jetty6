@@ -22,6 +22,8 @@ import java.security.PermissionCollection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -96,6 +98,7 @@ public class WebAppContext extends Context
     private boolean _isExistingTmpDir;
     private String _war;
     private String _extraClasspath;
+    
     
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
@@ -1295,4 +1298,5 @@ public class WebAppContext extends Context
         canonicalName.append(hash);
         return canonicalName.toString();
     }
+
 }
