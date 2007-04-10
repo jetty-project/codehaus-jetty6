@@ -18,18 +18,20 @@ package org.mortbay.jetty.webapp;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+import java.util.jar.JarFile;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
-import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
 
 /* ------------------------------------------------------------ */
@@ -53,13 +55,7 @@ import org.mortbay.xml.XmlParser;
 public class TagLibConfiguration implements Configuration
 {
     WebAppContext _context;
-    String[] _serverTagLibClasses=
-    { 
-        "org.apache.jasper.servlet.JspServlet", //find tlds bundled with jasper (jstl)
-        "com.sun.faces.config.ConfigureListener", //find tlds from sun's jsf impl
-        "org.apache.myfaces.webapp.MyFacesServlet" //find tlds from myfaces impl
-    };
-
+    
     /* ------------------------------------------------------------ */
     public void setWebAppContext(WebAppContext context)
     {
@@ -85,34 +81,6 @@ public class TagLibConfiguration implements Configuration
     {
     }
 
-
-    /* ------------------------------------------------------------ */
-    protected List getServerJarResourceList () throws MalformedURLException, IOException
-    {
-        List list = new ArrayList();
-        
-        for (int i=0;_serverTagLibClasses!=null && i<_serverTagLibClasses.length;i++)
-        {
-            URL jar = TypeUtil.jarFor(_serverTagLibClasses[i]);
-            if (jar!=null)
-                list.add(Resource.newResource(jar));       
-        }
-        return list;
-    }
-
-    /* ------------------------------------------------------------ */
-    private void findTLDs(Set tlds,Resource dir) throws MalformedURLException, IOException
-    {
-        String[] meta_contents=dir.list();          
-        for (int j=0;j<meta_contents.length;j++)
-        {
-            Resource r=dir.addPath(meta_contents[j]);
-            if (r.isDirectory())
-                findTLDs(tlds,r);
-            else if (meta_contents[j].toLowerCase().endsWith(".tld"))
-                tlds.add(r);
-        }
-    }
     
     /* ------------------------------------------------------------ */
     /* 
@@ -121,6 +89,7 @@ public class TagLibConfiguration implements Configuration
     public void configureWebApp() throws Exception
     {   
         Set tlds = new HashSet();
+        Set jars = new HashSet();
         
         // Find tld's from web.xml
         // When the XMLConfigurator (or other configurator) parsed the web.xml,
@@ -160,13 +129,66 @@ public class TagLibConfiguration implements Configuration
             }
         }
         
+        // Get the pattern for noTLDJars
+        String no_TLD_attr = _context.getInitParameter("org.mortbay.jetty.webapp.NoTLDJarPattern");
+        Pattern no_TLD_pattern = no_TLD_attr==null?null:Pattern.compile(no_TLD_attr);
+        
         // Look for tlds in any jars
-        Enumeration meta_infs = Thread.currentThread().getContextClassLoader().getResources("META-INF");
-        while(meta_infs!=null && meta_infs.hasMoreElements())
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        boolean parent=false;
+        
+        while (loader!=null)
         {
-            Resource meta=Resource.newResource((URL)meta_infs.nextElement());
-            if (meta.exists())
-                findTLDs(tlds,meta);
+            if (loader instanceof URLClassLoader)
+            {
+                URL[] urls = ((URLClassLoader)loader).getURLs();
+                if (urls!=null)
+                {
+                    for (int i=0;i<urls.length;i++)
+                    {
+                        if (urls[i].toString().toLowerCase().endsWith(".jar"))
+                        {
+                            String jar = urls[i].toString();
+                            int slash=jar.lastIndexOf('/');
+                            jar=jar.substring(slash+1);
+                            
+                            if (parent && ( 
+                                    (!_context.isParentLoaderPriority() && jars.contains(jar)) || 
+                                    (no_TLD_pattern!=null && no_TLD_pattern.matcher(jar).matches())))
+                                continue;
+                            jars.add(jar);
+                            
+                            Log.debug("TLD search of {}",urls[i]);
+                            
+                            JarFile jarfile = new JarFile(Resource.newResource(urls[i]).getFile());
+                            try
+                            {
+                                Enumeration e = jarfile.entries();
+                                while (e.hasMoreElements())
+                                {
+                                    ZipEntry entry = (ZipEntry)e.nextElement();
+                                    String name = entry.getName();
+                                    if (name.startsWith("META-INF/") && name.toLowerCase().endsWith(".tld"))
+                                    {
+                                        Resource tld=Resource.newResource("jar:"+urls[i]+"!/"+name);
+                                        tlds.add(tld);
+                                        Log.debug("TLD found {}",tld);
+                                    }
+                                }
+                            }
+                            finally
+                            {
+                                jarfile.close();
+                            }   
+                        }
+                    }
+                }
+                
+                
+                loader=loader.getParent();
+                parent=true;
+            }
+            
         }
         
         // Create a TLD parser
@@ -226,7 +248,13 @@ public class TagLibConfiguration implements Configuration
                             }
                             catch(Exception e)
                             {
-                                Log.warn("Could not instantiate listener "+className,e);
+                                Log.warn("Could not instantiate listener "+className+": "+e);
+                                Log.debug(e);
+                            }
+                            catch(Error e)
+                            {
+                                Log.warn("Could not instantiate listener "+className+": "+e);
+                                Log.debug(e);
                             }
                         }
                     }
@@ -243,24 +271,6 @@ public class TagLibConfiguration implements Configuration
     public void deconfigureWebApp() throws Exception
     {
     }
+    
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return
-     */
-    public String[] getServerTagLibClasses()
-    {
-        return _serverTagLibClasses;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param serverTagLibClasses An array of class names. The jars that these 
-     * classes are loaded from will be examined for TLD files (even if these jars 
-     * are on the server or system classpath).
-     */
-    public void setServerTagLibClasses(String[] serverTagLibClasses)
-    {
-        _serverTagLibClasses=serverTagLibClasses;
-    }
 }
