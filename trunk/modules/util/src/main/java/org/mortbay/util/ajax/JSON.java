@@ -290,6 +290,9 @@ public class JSON
                     case 'f' : 
                         complete("false",source);
                         return Boolean.FALSE;
+                    case 'u' : 
+                        complete("undefined",source);
+                        return null;
                         
                     case '/' :
                         comment_state=1;
