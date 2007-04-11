@@ -80,8 +80,8 @@ public class MultiPartFilter implements Filter
      * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
      *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
-    public void doFilter(ServletRequest request,ServletResponse response,FilterChain chain) throws IOException,
-            ServletException
+    public void doFilter(ServletRequest request,ServletResponse response,FilterChain chain) 
+        throws IOException, ServletException
     {
         HttpServletRequest srequest=(HttpServletRequest)request;
         if(srequest.getContentType()==null||!srequest.getContentType().startsWith("multipart/form-data"))
