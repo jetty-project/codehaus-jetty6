@@ -86,11 +86,32 @@ public class JSON
 
     /**
      * @param s String containing JSON object or array.
+     * @param stripOuterComment If true, an outer comment around the JSON is ignored.
+     * @return A Map, Object array or primitive array parsed from the JSON.
+     */
+    public static Object parse(String s,boolean stripOuterComment)
+    {
+        return parse(new Source(s),stripOuterComment);
+    }
+
+    /**
+     * @param s Stream containing JSON object or array.
+     * @param stripOuterComment If true, an outer comment around the JSON is ignored.
+     * @return A Map, Object array or primitive array parsed from the JSON.
+     */
+    public static Object parse(InputStream in,boolean stripOuterComment) throws IOException
+    {
+        String s=IO.toString(in);
+        return parse(new Source(s),stripOuterComment);
+    }
+    
+    /**
+     * @param s String containing JSON object or array.
      * @return A Map, Object array or primitive array parsed from the JSON.
      */
     public static Object parse(String s)
     {
-        return parse(new Source(s));
+        return parse(new Source(s),false);
     }
 
     /**
@@ -100,7 +121,7 @@ public class JSON
     public static Object parse(InputStream in) throws IOException
     {
         String s=IO.toString(in);
-        return parse(new Source(s));
+        return parse(new Source(s),false);
     }
     
     /**
@@ -216,9 +237,10 @@ public class JSON
         QuotedStringTokenizer.quote(buffer,string);
     }
     
-    private static Object parse(Source source)
+    private static Object parse(Source source,boolean stripOuterComment)
     {
-        int comment_state=0;
+        int comment_state=0;                   // 0=no comment, 1="/", 2="/*", 3="/* *" -1="//"
+        int strip_state=stripOuterComment?1:0; // 0=no strip, 1=wait for /*, 2= wait for */
         
         while(source.hasNext())
         {
@@ -234,6 +256,11 @@ public class JSON
                             break;
                     case '*' : 
                         comment_state=2;
+                        if (strip_state==1)
+                        {
+                            comment_state=0;
+                            strip_state=2;
+                        }
                 }
             }
             // handle /* */ comment
@@ -298,6 +325,14 @@ public class JSON
                         comment_state=1;
                         break;
 
+                    case '*' : 
+                        if (strip_state==2)
+                        {
+                            complete("*/",source);
+                            strip_state=0;
+                        }
+                        return null;
+                        
                     default : 
                         if (Character.isDigit(c))
                             return parseNumber(source);
@@ -333,7 +368,7 @@ public class JSON
             seekTo(':',source);
             source.next();
             
-            Object value=parse(source);
+            Object value=parse(source,false);
             map.put(name,value);
             
             seekTo(",}",source);
@@ -376,7 +411,7 @@ public class JSON
                     else
                     {
                         coma=false;
-                        list.add(parse(source));
+                        list.add(parse(source,false));
                     }
             }
 
