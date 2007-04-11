@@ -220,6 +220,9 @@ public class HttpParser implements Parser
     public long parseNext() throws IOException
     {
         long total_filled=-1;
+
+        if (_state == STATE_END) 
+            return -1;
         
         if (_buffer==null)
         {
@@ -234,8 +237,7 @@ public class HttpParser implements Parser
             _tok1.setPutIndex(_tok1.getIndex());
         }
         
-        if (_state == STATE_END) 
-            throw new IllegalStateException("STATE_END");
+        
         if (_state == STATE_CONTENT && _contentPosition == _contentLength)
         {
             _state=STATE_END;
