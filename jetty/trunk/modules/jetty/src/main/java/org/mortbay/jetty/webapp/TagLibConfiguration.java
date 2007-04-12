@@ -15,6 +15,7 @@
 
 package org.mortbay.jetty.webapp;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -160,7 +161,11 @@ public class TagLibConfiguration implements Configuration
                             
                             Log.debug("TLD search of {}",urls[i]);
                             
-                            JarFile jarfile = new JarFile(Resource.newResource(urls[i]).getFile());
+                            File file=Resource.newResource(urls[i]).getFile();
+                            if (file==null || !file.exists() || !file.canRead())
+                                continue;
+                            
+                            JarFile jarfile = new JarFile(file);
                             try
                             {
                                 Enumeration e = jarfile.entries();
