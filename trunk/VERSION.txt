@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
  + Fixed writes of unencoded char arrays.
  + JETTY-283 Parse 206 and 304 responses in client
  + JETTY-285 enable jndi for mvn jetty:run-war and jetty:run-exploded
+ + JETTY-294 Response.reset() resets headers as well as content
  + JETTY-295 Optional support of authenticated welcome files
 
 

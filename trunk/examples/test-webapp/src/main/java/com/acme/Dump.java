@@ -178,6 +178,16 @@ public class Dump extends HttpServlet
                 throw new ServletException(th);
             }
         }
+
+        // test a reset
+        String reset= request.getParameter("reset");
+        if (reset != null && reset.length() > 0)
+        {
+            response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
+            response.setHeader("SHOULD_NOT","BE SEEN");
+            response.reset();
+        }
+        
         
         // handle an redirect
         String redirect= request.getParameter("redirect");
