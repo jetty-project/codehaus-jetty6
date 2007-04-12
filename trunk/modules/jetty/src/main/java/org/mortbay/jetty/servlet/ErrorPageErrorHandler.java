@@ -153,7 +153,7 @@ public class ErrorPageErrorHandler extends ErrorHandler
     {
         if (_errorPages==null)
             _errorPages=new HashMap();
-        _errorPages.put(HttpStatus.CACHE.get(code).toString(),uri);
+        _errorPages.put(TypeUtil.toString(code),uri);
     }
 
     /* ------------------------------------------------------------ */
