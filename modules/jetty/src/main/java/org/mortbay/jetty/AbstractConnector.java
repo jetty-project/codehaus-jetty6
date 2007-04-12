@@ -259,13 +259,17 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
             ((LifeCycle)_threadPool).start();
         
         // Start selector thread
-        _acceptorThread=new Thread[getAcceptors()];
-        for (int i=0;i<_acceptorThread.length;i++)
+        synchronized(this)
         {
-            if (!_threadPool.dispatch(new Acceptor(i)))
+            _acceptorThread=new Thread[getAcceptors()];
+
+            for (int i=0;i<_acceptorThread.length;i++)
             {
-                Log.warn("insufficient maxThreads configured for {}",this);
-                break;
+                if (!_threadPool.dispatch(new Acceptor(i)))
+                {
+                    Log.warn("insufficient maxThreads configured for {}",this);
+                    break;
+                }
             }
         }
         
@@ -282,8 +286,12 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         else if (_threadPool instanceof LifeCycle)
             ((LifeCycle)_threadPool).stop();
         
-        Thread[] acceptors=_acceptorThread;
-        _acceptorThread=null;
+        Thread[] acceptors=null;
+        synchronized(this)
+        {
+            acceptors=_acceptorThread;
+            _acceptorThread=null;
+        }
         if (acceptors != null)
         {
             for (int i=0;i<acceptors.length;i++)
@@ -340,7 +348,8 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     {      
     }
     
-    
+
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Connector#getConfidentialPort()
@@ -349,7 +358,8 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     {
         return _confidentialPort;
     }
-    
+
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Connector#getConfidentialScheme()
@@ -485,7 +495,13 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         public void run()
         {   
             Thread current = Thread.currentThread();
-            _acceptorThread[_acceptor]=current;
+            synchronized(AbstractConnector.this)
+            {
+                if (_acceptorThread==null)
+                    return;
+                
+                _acceptorThread[_acceptor]=current;
+            }
             String name =_acceptorThread[_acceptor].getName();
             current.setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
             int old_priority=current.getPriority();
@@ -525,6 +541,12 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
                 catch (IOException e)
                 {
                     Log.warn(e);
+                }
+                
+                synchronized(AbstractConnector.this)
+                {
+                    if (_acceptorThread!=null)
+                        _acceptorThread[_acceptor]=null;
                 }
             }
         }
