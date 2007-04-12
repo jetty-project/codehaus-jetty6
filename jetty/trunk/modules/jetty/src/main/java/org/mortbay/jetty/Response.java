@@ -918,7 +918,37 @@ public class Response implements HttpServletResponse
     public void reset()
     {
         resetBuffer();
+        
+        HttpFields response_fields=_connection.getResponseFields();
+        response_fields.clear();
+        String connection=_connection.getRequestFields().getStringField(HttpHeaders.CONNECTION_BUFFER);
+        if (connection!=null)
+        {
+            String[] values = connection.split(",");
+            for  (int i=0;values!=null && i<values.length;i++)
+            {
+                CachedBuffer cb = HttpHeaderValues.CACHE.get(values[0].trim());
 
+                if (cb!=null)
+                {
+                    switch(cb.getOrdinal())
+                    {
+                        case HttpHeaderValues.CLOSE_ORDINAL:
+                            response_fields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
+                            break;
+
+                        case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
+                            if (HttpVersions.HTTP_1_0.equalsIgnoreCase(_connection.getRequest().getProtocol()))
+                                response_fields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE);
+                            break;
+                        case HttpHeaderValues.TE_ORDINAL:
+                            response_fields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.TE);
+                            break;
+                    }
+                }
+            }
+        }
+        
         _status=200;
         _reason=null;
         _mimeType=null;
