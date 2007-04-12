@@ -43,10 +43,11 @@ detected.
   <Get name="securityHandler">
     <Set name="userRealm">
       <New class="org.mortbay.jetty.security.HashUserRealm">
-	<Set name="name">Test Realm</Set>
-	<Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
+	    <Set name="name">Test Realm</Set>
+	    <Set name="config"><SystemProperty name="jetty.home" default="."/>/etc/realm.properties</Set>
       </New>
     </Set>
+    <Set name="checkWelcomeFiles">true</Set>
   </Get>
 
 </Configure>

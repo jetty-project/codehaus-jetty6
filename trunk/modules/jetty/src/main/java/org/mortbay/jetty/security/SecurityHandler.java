@@ -46,7 +46,9 @@ public class SecurityHandler extends HandlerWrapper
     private PathMap _constraintMap=new PathMap();
     private Authenticator _authenticator;
     private NotChecked _notChecked=new NotChecked();
+    private boolean _checkWelcomeFiles=false;
     
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the authenticator.
@@ -132,7 +134,24 @@ public class SecurityHandler extends HandlerWrapper
     {
         return _constraintMappings != null && _constraintMappings.length > 0;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if forwards to welcome files are authenticated
+     */
+    public boolean isCheckWelcomeFiles()
+    {
+        return _checkWelcomeFiles;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param authenticateWelcomeFiles True if forwards to welcome files are authenticated
+     */
+    public void setCheckWelcomeFiles(boolean authenticateWelcomeFiles)
+    {
+        _checkWelcomeFiles=authenticateWelcomeFiles;
+    }
     /* ------------------------------------------------------------ */
     public void doStart()
         throws Exception
@@ -174,6 +193,17 @@ public class SecurityHandler extends HandlerWrapper
                 return;
             }
             
+            if (dispatch==FORWARD && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome")!=null)
+            {
+                request.removeAttribute("org.mortbay.jetty.welcome");
+                if (!checkSecurityConstraints(target,base_request,base_response))
+                {
+                    base_request.setHandled(true);
+                    return;
+                }
+            }
+                    
+                    
             if (_authenticator instanceof FormAuthenticator && target.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
             {
                 _authenticator.authenticate(getUserRealm(),target,base_request,base_response);

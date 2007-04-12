@@ -426,7 +426,10 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                             if (included.booleanValue())
                                 dispatcher.include(request,response);
                             else
+                            {
+                                request.setAttribute("org.mortbay.jetty.welcome",ipath);
                                 dispatcher.forward(request,response);
+                            }
                         }
                     }
                 }
