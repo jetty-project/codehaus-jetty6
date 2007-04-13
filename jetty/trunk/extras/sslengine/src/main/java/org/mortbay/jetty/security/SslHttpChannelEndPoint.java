@@ -331,7 +331,11 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         
         if (!_inNIOBuffer.hasContent() || (_result != null && _result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW))
         {
-            _inNIOBuffer.clear();
+            if (_result != null && _result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW)
+                _inNIOBuffer.compact();
+            else 
+                _inNIOBuffer.clear();
+            
             while (_inNIOBuffer.space()>0)
             {
                 int len=super.fill(_inNIOBuffer);
