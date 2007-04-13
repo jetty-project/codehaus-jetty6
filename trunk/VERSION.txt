@@ -11,6 +11,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-293 fixed NPE on fast init
  + JETTY-294 Response.reset() resets headers as well as content
  + JETTY-295 Optional support of authenticated welcome files
+ + JETTY-296 Close direct content inputstreams
 
 
 jetty-6.1.2rc2 - 27 March 2007

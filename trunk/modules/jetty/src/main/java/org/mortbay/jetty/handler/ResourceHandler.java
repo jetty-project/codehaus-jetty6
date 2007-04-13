@@ -249,7 +249,6 @@ public class ResourceHandler extends AbstractHandler
                 response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 return;
             }
-            response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
         }
         
         Buffer mime=_mimeTypes.getMimeByExtension(resource.toString());
@@ -268,11 +267,13 @@ public class ResourceHandler extends AbstractHandler
         if (out instanceof HttpConnection.Output)
         {
             // TODO file mapped buffers
+            response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
             ((HttpConnection.Output)out).sendContent(resource.getInputStream());
         }
         else
         {
             // Write content normally
+            response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
             resource.writeTo(out,0,resource.length());
         }
     }

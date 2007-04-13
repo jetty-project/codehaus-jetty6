@@ -29,6 +29,7 @@ import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
 
@@ -883,6 +884,8 @@ public class HttpConnection implements Connection
         /* ------------------------------------------------------------ */
         public void sendContent(Object content) throws IOException
         {
+            Resource resource=null;
+            
             if (_closed)
                 throw new IOException("Closed");
             
@@ -905,11 +908,17 @@ public class HttpConnection implements Connection
                         _responseFields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER, lml);
                 }
                     
-                
                 content = c.getBuffer();
                 if (content==null)
                     content=c.getInputStream();
             }
+            else if (content instanceof Resource)
+            {
+                resource=(Resource)content;
+                _responseFields.putLongField(HttpHeaders.LAST_MODIFIED_BUFFER, resource.lastModified());
+                content=resource.getInputStream();
+            }
+            
             
             
             if (content instanceof Buffer)
@@ -921,25 +930,38 @@ public class HttpConnection implements Connection
             {
                 InputStream in = (InputStream)content;
                 
-                int max = _generator.prepareUncheckedAddContent();
-                Buffer buffer = _generator.getUncheckedBuffer();
-                
-                int len=buffer.readFrom(in,max);
-                
-                while (len>=0)
+                try
                 {
+                    int max = _generator.prepareUncheckedAddContent();
+                    Buffer buffer = _generator.getUncheckedBuffer();
+
+                    int len=buffer.readFrom(in,max);
+
+                    while (len>=0)
+                    {
+                        _generator.completeUncheckedAddContent();
+                        _out.flush();
+
+                        max = _generator.prepareUncheckedAddContent();
+                        buffer = _generator.getUncheckedBuffer();
+                        len=buffer.readFrom(in,max);
+                    }
                     _generator.completeUncheckedAddContent();
-                    _out.flush();
-                    
-                    max = _generator.prepareUncheckedAddContent();
-                    buffer = _generator.getUncheckedBuffer();
-                    len=buffer.readFrom(in,max);
+                    _out.flush();   
                 }
-                _generator.completeUncheckedAddContent();
-                _out.flush();        
+                finally
+                {
+                    if (resource!=null)
+                        resource.release();
+                    else
+                        in.close();
+                      
+                }
             }
             else
                 throw new IllegalArgumentException("unknown content type?");
+            
+            
         }     
     }
 
