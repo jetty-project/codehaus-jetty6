@@ -499,8 +499,11 @@ public class WebAppContext extends Context
             }
             
             // delete temp directory if we had to create it or if it isn't called work
-            if (!_isExistingTmpDir && !isTempWorkDirectory())//_tmpDir!=null && !"work".equals(_tmpDir.getName()))
+            if (!_isExistingTmpDir && !isTempWorkDirectory()) //_tmpDir!=null && !"work".equals(_tmpDir.getName()))
+            {
                 IO.delete(_tmpDir);
+                _tmpDir=null;
+            }
         }
         finally
         {
@@ -618,7 +621,7 @@ public class WebAppContext extends Context
      */
     public File getTempDirectory()
     {
-        if (_tmpDir!=null)
+        if (_tmpDir!=null && _tmpDir.isDirectory() && _tmpDir.canWrite())
             return _tmpDir;
 
         // Initialize temporary directory
