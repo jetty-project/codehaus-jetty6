@@ -339,6 +339,22 @@ public class StringUtil
     {
         return charset==__UTF8 || __UTF8.equalsIgnoreCase(charset);
     }
+
+
+    /* ------------------------------------------------------------ */
+    public static String printable(String name)
+    {
+        if (name==null)
+            return null;
+        StringBuffer buf = new StringBuffer(name.length());
+        for (int i=0;i<name.length())
+        {
+            char c=name.charAt(i);
+            if (!Character.isISOControl(c))
+                buf.append(c);
+        }
+        return buf.toString();
+    }
     
     
 }

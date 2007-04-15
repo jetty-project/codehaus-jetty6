@@ -30,6 +30,7 @@ import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -466,7 +467,7 @@ public class SecurityHandler extends HandlerWrapper
 
                 if (!inRole)
                 {
-                    Log.warn("AUTH FAILURE: incorrect role for " + user.getName());
+                    Log.warn("AUTH FAILURE: incorrect role for " + StringUtil.printable(user.getName()));
                     /* if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
                          ((BasicAuthenticator)authenticator).sendChallenge(realm, response);
                     else for TCK */

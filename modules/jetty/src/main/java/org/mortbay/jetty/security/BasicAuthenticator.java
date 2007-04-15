@@ -62,7 +62,8 @@ public class BasicAuthenticator implements Authenticator
                 user = realm.authenticate(username,password,request);
                 
                 if (user==null)
-                    Log.warn("AUTH FAILURE: user {}",username);
+                    Log.warn("AUTH FAILURE: user {}",StringUtil.printable(username));
+                
                 else
                 {
                     request.setAuthType(Constraint.__BASIC_AUTH);
