@@ -118,7 +118,7 @@ public class DigestAuthenticator implements Authenticator
                 stale = true;
             
             if (user==null)
-                Log.warn("AUTH FAILURE: user "+digest.username);
+                Log.warn("AUTH FAILURE: user "+StringUtil.printable(digest.username));
             else    
             {
                 request.setAuthType(Constraint.__DIGEST_AUTH);
