@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
 
@@ -165,7 +166,7 @@ public class FormAuthenticator implements Authenticator
             }   
             else
             {
-                if(Log.isDebugEnabled())Log.debug("Form authentication FAILED for "+form_cred._jUserName);
+                if(Log.isDebugEnabled())Log.debug("Form authentication FAILED for "+StringUtil.printable(form_cred._jUserName));
                 if (_formErrorPage==null)
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 else
