@@ -7,12 +7,13 @@ jetty-6.1-SNAPSHOT
  + Fixed writes of unencoded char arrays.
  + JETTY-283 Parse 206 and 304 responses in client
  + JETTY-285 enable jndi for mvn jetty:run-war and jetty:run-exploded
+ + JETTY-289 fixed javax.net.ssl.SSLException on binary file upload
  + JETTY-292 Fixed error page handler error pages
  + JETTY-293 fixed NPE on fast init
  + JETTY-294 Response.reset() resets headers as well as content
  + JETTY-295 Optional support of authenticated welcome files
  + JETTY-296 Close direct content inputstreams
- + JETTY-289 fixed javax.net.ssl.SSLException on binary file upload
+ + JETTY-297 Recreate tmp dir on stop/start
 
 jetty-6.1.2rc2 - 27 March 2007
  + Enable the SharedStoreContextualiser for the WadiSessionManager(Database store for clustering)
