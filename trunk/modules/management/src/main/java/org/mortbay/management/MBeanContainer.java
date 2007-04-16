@@ -220,6 +220,7 @@ public class MBeanContainer implements Container.Listener
                     name = ((ObjectMBean)mbean).getObjectNameBasis();
                     if (name!=null)
                     {
+                        name=name.replace('\\','/');
                         if (name.endsWith("/"))
                             name=name.substring(0,name.length()-1);
 
@@ -230,9 +231,7 @@ public class MBeanContainer implements Container.Listener
                         if (dot>0)
                             name=name.substring(0,dot);
 
-                        name=name.replace('=','_');
-                        name=name.replace(',','_');
-                        name=name.replace(' ','_');
+                        name=name.replace(':','_').replace('*','_').replace('?','_').replace('=','_').replace(',','_').replace(' ','_');
                     }
                 }
                 
