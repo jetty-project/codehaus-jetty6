@@ -14,14 +14,27 @@
 
 package org.mortbay.jetty.servlet.management;
 
-import javax.management.ObjectName;
-
+import org.mortbay.jetty.servlet.Holder;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.management.ObjectMBean;
 
-public class ServletHolderMBean extends ObjectMBean
+public class HolderMBean extends ObjectMBean
 {
-    public ServletHolderMBean(Object managedObject)
+    public HolderMBean(Object managedObject)
     {
         super(managedObject);
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getObjectNameBasis()
+    {
+        if (_managed!=null && _managed instanceof Holder)
+        {
+            Holder holder = (Holder)_managed;
+            String name = holder.getName();
+            if (name!=null)
+                return name;
+        }
+        return super.getObjectNameBasis();
     }
 }

@@ -209,22 +209,46 @@ public class MBeanContainer implements Container.Listener
             //no override mbean object name, so make a generic one
             if (oname == null)
             {
-                String name = obj.getClass().getName().toLowerCase();
-                int dot = name.lastIndexOf('.');
+                String type=obj.getClass().getName().toLowerCase();
+                int dot = type.lastIndexOf('.');
                 if (dot >= 0)
-                    name = name.substring(dot + 1);
-                Integer count = (Integer) _unique.get(name);
+                    type = type.substring(dot + 1);
+                
+                String name=null;
+                if (mbean instanceof ObjectMBean)
+                {
+                    name = ((ObjectMBean)mbean).getObjectNameBasis();
+                    if (name!=null)
+                    {
+                        if (name.endsWith("/"))
+                            name=name.substring(0,name.length()-1);
+
+                        int slash=name.lastIndexOf('/',name.length()-1);
+                        if (slash>0)
+                            name=name.substring(slash+1);
+                        dot=name.lastIndexOf('.');
+                        if (dot>0)
+                            name=name.substring(0,dot);
+
+                        name=name.replace('=','_');
+                        name=name.replace(',','_');
+                        name=name.replace(' ','_');
+                    }
+                }
+                
+                String basis=(name!=null&&name.length()>1)?("type="+type+",name="+name):("type="+type);
+                
+                Integer count = (Integer) _unique.get(basis);
                 count = TypeUtil.newInteger(count == null ? 0 : (1 + count.intValue()));
-                _unique.put(name, count);
+                _unique.put(basis, count);
 
                 //if no explicit domain, create one
                 String domain = _domain;
                 if (domain==null)
                     domain = obj.getClass().getPackage().getName();
 
-                oname = ObjectName.getInstance(domain+":type="+name+",id="+count);
+                oname = ObjectName.getInstance(domain+":"+basis+",id="+count);
             }
-            
             
             ObjectInstance oinstance = _server.registerMBean(mbean, oname);
             Log.debug("Registered {}" , oinstance.getObjectName());
