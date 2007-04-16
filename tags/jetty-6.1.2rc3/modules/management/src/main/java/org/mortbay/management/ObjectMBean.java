@@ -67,7 +67,7 @@ public class ObjectMBean implements DynamicMBean
 {
     private static Class[] OBJ_ARG = new Class[]{Object.class};
 
-    private Object _managed;
+    protected Object _managed;
     private MBeanInfo _info;
     private Map _getters=new HashMap();
     private Map _setters=new HashMap();
@@ -78,8 +78,6 @@ public class ObjectMBean implements DynamicMBean
 
     private static String OBJECT_NAME_CLASS = ObjectName.class.getName();
     private static String OBJECT_NAME_ARRAY_CLASS = ObjectName[].class.getName();
-
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -174,7 +172,17 @@ public class ObjectMBean implements DynamicMBean
         _loader = Thread.currentThread().getContextClassLoader();
     }
     
+    public Object getManagedObject()
+    {
+        return _managed;
+    }
+    
     public ObjectName getObjectName()
+    {
+        return null;
+    }
+    
+    public String getObjectNameBasis()
     {
         return null;
     }
