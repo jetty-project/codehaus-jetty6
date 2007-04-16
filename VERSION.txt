@@ -1,4 +1,6 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.2rc3 - 16 April 2007
  + Improved performance and exclusions for TLD scanning
  + MBean properties assume writeable unless marked RO
  + refactor of SessionManager and SessionIdManager for clustering 
