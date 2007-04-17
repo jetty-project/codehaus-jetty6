@@ -66,7 +66,7 @@ public class HttpServerTestBase extends TestCase
             +RESPONSE2_CONTENT;
 
     // Useful constants
-    private static final long PAUSE=5L;
+    private static final long PAUSE=15L;
     private static final int LOOPS=20;
     private static final String HOST="localhost";
 
@@ -389,6 +389,58 @@ public class HttpServerTestBase extends TestCase
 
     }
 
+    /**
+     * After several iterations, I generated some known bad fragment points.
+     * 
+     * @throws Exception
+     */
+    public void testWriteBlocking() throws Exception
+    {
+        Server server=startServer(new DataHandler());
+        try
+        {   
+            Socket client=new Socket(HOST,port);
+            OutputStream os=client.getOutputStream();
+            InputStream is=client.getInputStream();
+
+            os.write((
+                    "GET /data?writes=1024&block=256 HTTP/1.1\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
+                    "connection: close\r\n"+
+                    "content-type: unknown\r\n"+
+                    "content-length: 10\r\n"+
+                    "\r\n"
+            ).getBytes());
+            os.flush();
+            Thread.sleep(200);
+            os.write((
+                    "\r\n0123456 \r\n"
+            ).getBytes());
+            os.flush();
+           
+            int total=0;
+            int len=0;
+            byte[] buf=new byte[1024*64];
+            
+            while(len>=0)
+            {
+                Thread.sleep(500);
+                len=is.read(buf);
+                if (len>0)
+                    total+=len;
+            }
+            
+            assertTrue(total>(1024*256));
+            
+        }
+        finally
+        {
+            // Shut down
+            server.stop();
+            Thread.yield();
+        }
+
+    }
     
     public void testStoppable() throws Exception
     {
@@ -542,6 +594,9 @@ public class HttpServerTestBase extends TestCase
             base_request.setHandled(true);
             response.setStatus(200);
             
+            InputStream in = request.getInputStream();
+            String input=IO.toString(in);
+            
             String tmp = request.getParameter("writes");
             int writes=Integer.parseInt(tmp==null?"10":tmp);
             tmp = request.getParameter("block");
@@ -549,7 +604,7 @@ public class HttpServerTestBase extends TestCase
             String encoding=request.getParameter("encoding");
             String chars=request.getParameter("chars");
             
-            String chunk = "ઇ0123456789AઇCDEFGHIJKLMNOPQRSTUVWXYZɐbcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+            String chunk = (input+"ઇ0123456789AઇCDEFGHIJKLMNOPQRSTUVWXYZɐbcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
                 .substring(0,block);
             response.setContentType("text/plain");
             if (encoding==null)
@@ -574,6 +629,7 @@ public class HttpServerTestBase extends TestCase
                 for (int i=0;i<writes;i++)
                     out.write(chunk);
             }
+            
         }
     }
 
