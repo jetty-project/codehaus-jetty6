@@ -25,6 +25,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 
 
@@ -266,30 +267,69 @@ public class MimeTypes
             }
         }
         
-        String charset = value.toString();
-        int i = charset.indexOf(';');
-        if (i>0)
+        int i=value.getIndex();
+        int end=value.putIndex();
+        int state=0;
+        int start=0;
+        boolean quote=false;
+        for (;i<end;i++)
         {
-            i=charset.indexOf("charset",i);
-            if (i>0)
+            byte b = value.peek(i);
+            
+            if (quote && state!=10)
             {
-                i=charset.indexOf('=',i+6);
-                if (i>0)
-                {
-                    int s=i+1;
-                    while (s<charset.length() && charset.charAt(s)==' ')
-                        s++;
-                    i=charset.indexOf(' ',s);
-                    if (i<0)
-                        i=charset.indexOf(';',s);
-                    if (i<0)
-                        return charset.substring(s);
-                    return charset.substring(s,i);
-                }
+                if ('"'==b)
+                    quote=false;
+                continue;
             }
-        }
+                
+            switch(state)
+            {
+                case 0:
+                    if ('"'==b)
+                    {
+                        quote=true;
+                        break;
+                    }
+                    if (';'==b)
+                        state=1;
+                    break;
+
+                case 1: if ('c'==b) state=2; else if (' '!=b) state=0; break;
+                case 2: if ('h'==b) state=3; else state=0;break;
+                case 3: if ('a'==b) state=4; else state=0;break;
+                case 4: if ('r'==b) state=5; else state=0;break;
+                case 5: if ('s'==b) state=6; else state=0;break;
+                case 6: if ('e'==b) state=7; else state=0;break;
+                case 7: if ('t'==b) state=8; else state=0;break;
+
+                case 8: if ('='==b) state=9; else if (' '!=b) state=0; break;
+                
+                case 9: 
+                    if (' '==b) 
+                        break;
+                    if ('"'==b) 
+                    {
+                        quote=true;
+                        start=i+1;
+                        state=10;
+                        break;
+                    }
+                    start=i;
+                    state=10;
+                    break;
+                    
+                case 10:
+                    if (!quote && (';'==b || ' '==b )||
+                        (quote && '"'==b ))
+                        return CACHE.lookup(value.peek(start,i-start)).toString();
+            }
+        }    
         
+        if (state==10)
+            return CACHE.lookup(value.peek(start,i-start)).toString();
         return null;
+        
     }
 
 
