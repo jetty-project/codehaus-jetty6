@@ -394,11 +394,12 @@ public class HttpServerTestBase extends TestCase
      * 
      * @throws Exception
      */
-    public void testWriteBlocking() throws Exception
+    public void testReadWriteBlocking() throws Exception
     {
         Server server=startServer(new DataHandler());
         try
         {   
+            long start=System.currentTimeMillis();
             Socket client=new Socket(HOST,port);
             OutputStream os=client.getOutputStream();
             InputStream is=client.getInputStream();
@@ -408,13 +409,23 @@ public class HttpServerTestBase extends TestCase
                     "host: "+HOST+":"+port+"\r\n"+
                     "connection: close\r\n"+
                     "content-type: unknown\r\n"+
-                    "content-length: 10\r\n"+
+                    "content-length: 30\r\n"+
                     "\r\n"
             ).getBytes());
             os.flush();
             Thread.sleep(200);
             os.write((
-                    "\r\n0123456 \r\n"
+                    "\r\n23456890"
+            ).getBytes());
+            os.flush();
+            Thread.sleep(1000);
+            os.write((
+                    "abcdefghij"
+            ).getBytes());
+            os.flush();
+            Thread.sleep(1000);
+            os.write((
+                    "0987654321\r\n"
             ).getBytes());
             os.flush();
            
@@ -431,6 +442,7 @@ public class HttpServerTestBase extends TestCase
             }
             
             assertTrue(total>(1024*256));
+            assertTrue(30000L>(System.currentTimeMillis()-start));
             
         }
         finally
