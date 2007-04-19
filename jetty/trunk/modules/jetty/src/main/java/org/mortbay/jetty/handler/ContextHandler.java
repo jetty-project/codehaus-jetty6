@@ -63,9 +63,6 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.URIUtil;
 
-import com.sun.org.apache.xerces.internal.dom.AttributeMap;
-
-
 /* ------------------------------------------------------------ */
 /** ContextHandler.
  * 
