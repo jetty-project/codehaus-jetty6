@@ -280,7 +280,7 @@ public class Dump extends HttpServlet
         {
             pout.write("<html>\n<body>\n");
             pout.write("<h1>Dump Servlet</h1>\n");
-            pout.write("<table>");
+            pout.write("<table width=\"95%\">");
             pout.write("<tr>\n");
             pout.write("<th align=\"right\">getMethod:&nbsp;</th>");
             pout.write("<td>" + request.getMethod()+"</td>");
