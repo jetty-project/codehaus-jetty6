@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-294 Fixed authentication reset
  + JETTY-299 handle win32 paths for object naming
  + JETTY-300 removed synchronized on dispatch
  + JETTY-302 correctly parse quoted content encodings

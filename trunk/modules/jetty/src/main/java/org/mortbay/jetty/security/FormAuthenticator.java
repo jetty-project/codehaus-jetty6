@@ -279,6 +279,11 @@ public class FormAuthenticator implements Authenticator
             _userPrincipal = realm.authenticate(user, password, request);
             if (_userPrincipal!=null)
                 _realm=realm;
+            else
+            {
+                Log.warn("AUTH FAILURE: user {}",StringUtil.printable(user));
+                request.setUserPrincipal(null);
+            }
         }
 
         void authenticate(UserRealm realm,Request request)
@@ -286,6 +291,11 @@ public class FormAuthenticator implements Authenticator
             _userPrincipal = realm.authenticate(_jUserName, _jPassword, request);
             if (_userPrincipal!=null)
                 _realm=realm;
+            else
+            {
+                Log.warn("AUTH FAILURE: user {}",StringUtil.printable(_jUserName));
+                request.setUserPrincipal(null);
+            }
         }
         
 
