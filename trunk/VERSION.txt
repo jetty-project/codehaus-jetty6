@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-299 handle win32 paths for object naming
  + JETTY-300 removed synchronized on dispatch
  + JETTY-302 correctly parse quoted content encodings
+ + JETTY-303 fixed dual reset of generator
 
 jetty-6.1.2rc3 - 16 April 2007
  + Improved performance and exclusions for TLD scanning
