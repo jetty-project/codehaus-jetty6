@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + removed some compile warnings
+ + JETTY-305 delayed connection destroy
 
 jetty-6.1.2rc4 19 April 2007
  + JETTY-294 Fixed authentication reset
@@ -8,6 +9,7 @@ jetty-6.1.2rc4 19 April 2007
  + JETTY-302 correctly parse quoted content encodings
  + JETTY-303 fixed dual reset of generator
  + JETTY-304 Fixed authentication reset
+
 
 jetty-6.1.2rc3 - 16 April 2007
  + Improved performance and exclusions for TLD scanning

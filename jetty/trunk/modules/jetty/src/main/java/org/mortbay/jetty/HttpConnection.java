@@ -24,7 +24,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferCache;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.BufferCache.CachedBuffer;
@@ -57,6 +56,9 @@ public class HttpConnection implements Connection
 
     private long _timeStamp=System.currentTimeMillis();
     private int _requests;
+    private boolean _handling;
+    private boolean _destroy;
+    
     
     protected Connector _connector;
     protected EndPoint _endp;
@@ -119,19 +121,26 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        if (_parser!=null)
-            _parser.reset(true);
-        
-        if (_generator!=null)
-            _generator.reset(true);
-        
-        if (_requestFields!=null)
-            _requestFields.destroy();
-        
-        if (_responseFields!=null)
-            _responseFields.destroy();
-        
-        _server=null;
+        synchronized(this)
+        {
+            _destroy=true;
+            if (!_handling)   
+            {
+                if (_parser!=null)
+                    _parser.reset(true);
+
+                if (_generator!=null)
+                    _generator.reset(true);
+
+                if (_requestFields!=null)
+                    _requestFields.destroy();
+
+                if (_responseFields!=null)
+                    _responseFields.destroy();
+
+                _server=null;
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -331,7 +340,7 @@ public class HttpConnection implements Connection
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized void handle() throws IOException
+    public void handle() throws IOException
     {
         // Loop while more in buffer
         boolean more_in_buffer =true; // assume true until proven otherwise
@@ -341,6 +350,15 @@ public class HttpConnection implements Connection
         {
             try
             {
+                synchronized(this)
+                {
+                    if (_handling)
+                    {
+                        throw new IllegalStateException(); // TODO delete this check
+                    }
+                    _handling=true;
+                }
+                
                 setCurrentConnection(this);
                 long io=0;
                 
@@ -403,6 +421,18 @@ public class HttpConnection implements Connection
             finally
             {
                 setCurrentConnection(null);
+                
+                synchronized(this)
+                {
+                    _handling=false;
+                    
+                    if (_destroy)
+                    { 
+                        destroy();
+                        return;
+                    }
+                    
+                }
                 
                 more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
                 
