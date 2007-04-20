@@ -338,7 +338,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             {
                 // We have a continuation
                 Log.debug("continuation {}", continuation);
-                if (!continuation.schedule())
+                if (continuation.undispatch())
                     super.undispatch();
             }
             else
@@ -359,24 +359,10 @@ public class SelectChannelConnector extends AbstractNIOConnector
         Object _object;
         boolean _pending = false;   // waiting for resume or timeout
         boolean _resumed = false;   // resume called.
-        boolean _scheduled =false;  // Either dispatched or timeout set.
+        boolean _parked =false;     // end point dispatched, but undispatch called.
         RetryRequest _retry;
         long _timeout;
-        
-        public void expire()
-        {
-            boolean redispatch=false;
-            synchronized (this)
-            {
-                redispatch=_scheduled && _pending && !_resumed;
-            }
-            if (redispatch)
-            {
-                _endPoint.scheduleIdle();  // TODO maybe not needed?
-                _endPoint.getSelectSet().addChange(this);
-                _endPoint.getSelectSet().wakeup();
-            }
-        }
+
         
         public Object getObject()
         {
@@ -409,7 +395,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             {
                 _resumed = false;
                 _pending = false;
-                _scheduled = false;
+                _parked = false;
             }
             
             synchronized (_endPoint.getSelectSet())
@@ -417,6 +403,39 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 this.cancel();   
             }
         } 
+
+        public boolean suspend(long timeout)
+        {
+            boolean resumed=false;
+            synchronized (this)
+            {
+                resumed=_resumed;
+                _resumed=false;
+                _new = false;
+                if (!_pending && !resumed && timeout >= 0)
+                {
+                    _pending=true;
+                    _parked = false;
+                    _timeout = timeout;
+                    if (_retry==null)
+                     _retry = new RetryRequest();
+                    throw _retry;
+                }
+                
+                // here only if suspend called on pending continuation.
+                // acts like a reset
+                _resumed = false;
+                _pending = false;
+                _parked =false;
+            }
+
+            synchronized (_endPoint.getSelectSet())
+            {
+                this.cancel();   
+            }
+
+            return resumed;
+        }
         
         public void resume()
         {
@@ -426,7 +445,8 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 if (_pending && !isExpired())
                 {
                     _resumed = true;
-                    redispatch=_scheduled;
+                    redispatch=_parked;
+                    _parked=false;
                 }
             }
 
@@ -445,24 +465,42 @@ public class SelectChannelConnector extends AbstractNIOConnector
             }
         }
         
+        public void expire()
+        {
+            boolean redispatch=false;
+            synchronized (this)
+            {
+                redispatch=_parked && _pending && !_resumed;
+                _parked=false;
+            }
+            if (redispatch)
+            {
+                _endPoint.scheduleIdle();  // TODO maybe not needed?
+                _endPoint.getSelectSet().addChange(this);
+                _endPoint.getSelectSet().wakeup();
+            }
+        }
+
+        
         public void run()
         {
             _endPoint.run();
         }
         
-        /* schedule continuation.
-         * Called when a run exits.  
+        /* undispatch continuation.
+         * Called when an endppoint is undispatched.  
          * Either sets timeout or dispatches if already resumed or expired */
-        public boolean schedule()
+        public boolean undispatch()
         {
             boolean redispatch=false;
         
             synchronized (this)
             {
                 if (!_pending)
-                    return false;
-                _scheduled = true;
+                    return true;
+                
                 redispatch=isExpired() || _resumed;
+                _parked=!redispatch;
             }
             
             if (redispatch)
@@ -474,7 +512,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 _endPoint.getSelectSet().scheduleTimeout(this,_timeout);
             
             _endPoint.getSelectSet().wakeup();
-            return true;
+            return false;
         }
 
         public void setObject(Object object)
@@ -482,37 +520,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
             _object = object;
         }
 
-        public boolean suspend(long timeout)
-        {
-            boolean resumed=false;
-            synchronized (this)
-            {
-                resumed=_resumed;
-                _resumed=false;
-                _new = false;
-                if (!_pending && !resumed && timeout >= 0)
-                {
-                    _pending=true;
-                    _scheduled = false;
-                    _timeout = timeout;
-                    if (_retry==null)
-                     _retry = new RetryRequest();
-                    throw _retry;
-                }
-                
-                // here only if suspend called on pending continuation.
-                // acts like a reset
-                _resumed = false;
-                _pending = false;
-            }
-
-            synchronized (_endPoint.getSelectSet())
-            {
-                this.cancel();   
-            }
-
-            return resumed;
-        }
     }
 
 }

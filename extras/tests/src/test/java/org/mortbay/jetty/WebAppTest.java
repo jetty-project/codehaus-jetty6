@@ -116,7 +116,7 @@ public class WebAppTest extends TestCase
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/d.txt");
         assertTrue(IO.toString(url.openStream()).startsWith("0000"));
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/data.txt");
-        System.err.println("9999 3333333333333333333333333333333333333333333333333333333\n");
+        
         String result = IO.toString(url.openStream());
         if (result.endsWith("\r\n")) {
             //windows
@@ -129,16 +129,19 @@ public class WebAppTest extends TestCase
             assertTrue(false);
         }
         assertTrue(result.endsWith("9999 3333333333333333333333333333333333333333333333333333333"));
-        
+
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dispatch/forward/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+        
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dispatch/includeW/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<H1>"));
+        
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dispatch/includeS/dump/info?query=foo");
         assertTrue(IO.toString(url.openStream()).startsWith("<H1>"));
-        
+
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?continue=1000");
         assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+
     }
     
     public void testDoPost() throws Exception
