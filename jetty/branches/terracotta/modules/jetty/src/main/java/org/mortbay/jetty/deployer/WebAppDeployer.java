@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
@@ -52,6 +54,7 @@ public class WebAppDeployer extends AbstractLifeCycle
     private boolean _parentLoaderPriority;
     private boolean _allowDuplicates;
     private ArrayList _deployed;
+    private SessionManager _sessionManager;
 
     public String[] getConfigurationClasses()
     {
@@ -63,6 +66,16 @@ public class WebAppDeployer extends AbstractLifeCycle
         _configurationClasses=configurationClasses;
     }
 
+    public SessionManager getSessionManager()
+    {
+        return _sessionManager;
+    }
+    
+    public void setSessionManager (SessionManager manager)
+    {
+        _sessionManager = manager;
+    }
+    
     public HandlerContainer getContexts()
     {
         return _contexts;
@@ -230,7 +243,8 @@ public class WebAppDeployer extends AbstractLifeCycle
             wah.setExtractWAR(_extract);
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(_parentLoaderPriority);
-            
+            if (_sessionManager!=null)
+                wah.setSessionHandler(new SessionHandler(_sessionManager));
             // add it
             _contexts.addHandler(wah);
             _deployed.add(wah);
