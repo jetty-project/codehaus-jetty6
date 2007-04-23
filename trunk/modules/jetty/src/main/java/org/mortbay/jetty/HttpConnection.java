@@ -27,6 +27,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.BufferCache.CachedBuffer;
+import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
@@ -431,7 +432,6 @@ public class HttpConnection implements Connection
                         destroy();
                         return;
                     }
-                    
                 }
                 
                 more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
@@ -452,6 +452,8 @@ public class HttpConnection implements Connection
                 {
                     break;
                 }
+                else if (_generator.isCommitted() && !_generator.isComplete())
+                    ((SelectChannelEndPoint)_endp).setWritable(false);
             }
         }
     }

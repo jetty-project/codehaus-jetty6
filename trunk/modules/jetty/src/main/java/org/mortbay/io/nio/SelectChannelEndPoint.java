@@ -269,6 +269,12 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
 
     /* ------------------------------------------------------------ */
+    public void setWritable(boolean writable)
+    {
+        _writable=writable;
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * Updates selection key. Adds operations types to the selection key as needed. No operations
      * are removed as this is only done during dispatch. This method records the new key and
