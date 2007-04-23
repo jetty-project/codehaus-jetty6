@@ -789,6 +789,7 @@ public class RFC2616Test extends TestCase
             "GET /R2 HTTP/1.0\n"+"Host: localhost\n"+"Connection: close\n"+"\n"+
 
             "GET /R3 HTTP/1.0\n"+"Host: localhost\n"+"Connection: close\n"+"\n");
+            
             offset=checkContains(response,offset,"HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 1")+1;
             offset=checkContains(response,offset,"Connection: keep-alive","19.6.2 Keep-alive 1")+1;
 

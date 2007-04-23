@@ -15,7 +15,6 @@
 
 package org.mortbay.jetty;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -24,6 +23,7 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
@@ -41,6 +41,8 @@ public class HttpGenerator extends AbstractGenerator
     private static byte[] CONTENT_LENGTH_0 = Portable.getBytes("Content-Length: 0\015\012");
     private static byte[] CONNECTION_KEEP_ALIVE = Portable.getBytes("Connection: keep-alive\015\012");
     private static byte[] CONNECTION_CLOSE = Portable.getBytes("Connection: close\015\012");
+    private static byte[] CONNECTION_ = Portable.getBytes("Connection: ");
+    private static byte[] CRLF = Portable.getBytes("\015\012");
     private static byte[] TRANSFER_ENCODING_CHUNKED = Portable.getBytes("Transfer-Encoding: chunked\015\012");
     private static byte[] SERVER = Portable.getBytes("Server: Jetty(6.0.x)\015\012");
 
@@ -373,8 +375,9 @@ public class HttpGenerator extends AbstractGenerator
         // key field values
         HttpFields.Field content_length = null;
         HttpFields.Field transfer_encoding = null;
-        HttpFields.Field connection = null;
         boolean keep_alive = false;
+        boolean close=false;
+        StringBuffer connection = null;
 
         if (fields != null)
         {
@@ -410,21 +413,86 @@ public class HttpGenerator extends AbstractGenerator
                         break;
 
                     case HttpHeaders.CONNECTION_ORDINAL:
-                        connection = field;
-
+                        
                         int connection_value = field.getValueOrdinal();
                         switch (connection_value)
                         {
                             case -1:
+                            { 
+                                String[] values = field.getValue().split(",");
+                                for  (int i=0;values!=null && i<values.length;i++)
+                                {
+                                    CachedBuffer cb = HttpHeaderValues.CACHE.get(values[i].trim());
+
+                                    if (cb!=null)
+                                    {
+                                        switch(cb.getOrdinal())
+                                        {
+                                            case HttpHeaderValues.CLOSE_ORDINAL:
+                                                close=true;
+                                                if (_method==null)
+                                                    _close=true;
+                                                keep_alive=false;
+                                                if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
+                                                    _contentLength = HttpTokens.EOF_CONTENT;
+                                                break;
+
+                                            case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
+                                                if (_version == HttpVersions.HTTP_1_0_ORDINAL)
+                                                {
+                                                    keep_alive = true;
+                                                    if (_method==null) 
+                                                        _close = false;
+                                                }
+                                                break;
+                                            
+                                            default:
+                                                if (connection==null)
+                                                    connection=new StringBuffer();
+                                                else
+                                                    connection.append(',');
+                                                connection.append(values[i]);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (connection==null)
+                                            connection=new StringBuffer();
+                                        else
+                                            connection.append(',');
+                                        connection.append(values[i]);
+                                    }
+                                }
+                                
                                 break;
+                            }
                             case HttpHeaderValues.CLOSE_ORDINAL:
-                                _close = _method==null;
-                                if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) _contentLength = HttpTokens.EOF_CONTENT;
+                            {
+                                close=true;
+                                if (_method==null)
+                                    _close=true;
+                                if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
+                                    _contentLength = HttpTokens.EOF_CONTENT;
                                 break;
+                            }
                             case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
-                                keep_alive = true;
-                                if (keep_alive && _version == HttpVersions.HTTP_1_0_ORDINAL && _method==null) _close = false;
+                            {
+                                if (_version == HttpVersions.HTTP_1_0_ORDINAL)
+                                {
+                                    keep_alive = true;
+                                    if (_method==null) 
+                                        _close = false;
+                                }
                                 break;
+                            }
+                            default:
+                            {
+                                if (connection==null)
+                                    connection=new StringBuffer();
+                                else
+                                    connection.append(',');
+                                connection.append(field.getValue());
+                            }
                         }
 
                         // Do NOT add yet!
@@ -519,16 +587,41 @@ public class HttpGenerator extends AbstractGenerator
         }
 
         // Handle connection if need be
-        if ((_close || _contentLength==HttpTokens.EOF_CONTENT))
+        if (_contentLength==HttpTokens.EOF_CONTENT)
         {
-            if (_version>HttpVersions.HTTP_1_0_ORDINAL || connection!=null)
-                _header.put(CONNECTION_CLOSE);
+            keep_alive=false;
             _close=true;
         }
-        else if (keep_alive && _version == HttpVersions.HTTP_1_0_ORDINAL)
+                
+        if (_close && (close || _version > HttpVersions.HTTP_1_0_ORDINAL))
+        {
+            _header.put(CONNECTION_CLOSE);
+            if (connection!=null)
+            {
+                _header.setPutIndex(_header.putIndex()-2);
+                _header.put((byte)',');
+                _header.put(connection.toString().getBytes());
+                _header.put(CRLF);
+            }
+        }
+        else if (keep_alive)
+        {
             _header.put(CONNECTION_KEEP_ALIVE);
-        else if (connection != null) connection.put(_header);
-
+            if (connection!=null)
+            {
+                _header.setPutIndex(_header.putIndex()-2);
+                _header.put((byte)',');
+                _header.put(connection.toString().getBytes());
+                _header.put(CRLF);
+            }
+        }
+        else if (connection!=null)
+        {
+            _header.put(CONNECTION_);
+            _header.put(connection.toString().getBytes());
+            _header.put(CRLF);
+        }
+        
         if (!has_server && _status>100 && getSendServerVersion())
             _header.put(SERVER);
 
