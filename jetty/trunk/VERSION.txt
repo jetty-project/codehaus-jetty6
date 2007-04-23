@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + removed some compile warnings
  + JETTY-305 delayed connection destroy
+ + JETTY-309 handle close in multivalue connection fields.
  + JETTY-314 fix for possible NPE in Request.isRequestedSessionIdValid
 
 jetty-6.1.2rc4 19 April 2007
