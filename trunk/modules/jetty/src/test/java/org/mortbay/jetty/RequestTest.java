@@ -85,9 +85,9 @@ public class RequestTest extends TestCase
     	throws Exception
     {
         final ArrayList results = new ArrayList();
-        _handler._checker = new RequestChecker()
+        _handler._checker = new RequestTester()
         {
-            public boolean check(HttpServletRequest request)
+            public boolean check(HttpServletRequest request,HttpServletResponse response)
             {
                 results.add(request.getContentType());
                 results.add(request.getCharacterEncoding());
@@ -133,19 +133,143 @@ public class RequestTest extends TestCase
         
     }
     
-    interface RequestChecker
+
+    
+    public void testConnectionClose()
+        throws Exception
     {
-        boolean check(HttpServletRequest request);
+        String response;
+
+        _handler._checker = new RequestTester()
+        {
+            public boolean check(HttpServletRequest request,HttpServletResponse response) throws IOException
+            {
+                response.getOutputStream().println("Hello World");
+                return true;
+            }  
+        };
+
+        _connector.reopen();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.1\n"+
+                    "Host: whatever\n"+
+                    "\n"
+                    );
+        assertTrue(response.indexOf("200")>0);
+        assertFalse(response.indexOf("Connection: close")>0);
+        assertTrue(response.indexOf("Hello World")>0);
+        
+        _connector.reopen();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.1\n"+
+                    "Host: whatever\n"+
+                    "Connection: close\n"+
+                    "\n"
+                    );
+        assertTrue(response.indexOf("200")>0);
+        assertTrue(response.indexOf("Connection: close")>0);
+        assertTrue(response.indexOf("Hello World")>0);
+        
+        _connector.reopen();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.1\n"+
+                    "Host: whatever\n"+
+                    "Connection: Other, close\n"+
+                    "\n"
+                    );
+
+        assertTrue(response.indexOf("200")>0);
+        assertTrue(response.indexOf("Connection: close")>0);
+        assertTrue(response.indexOf("Hello World")>0);
+        
+        
+
+        _connector.reopen();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.0\n"+
+                    "Host: whatever\n"+
+                    "\n"
+                    );
+        assertTrue(response.indexOf("200")>0);
+        assertFalse(response.indexOf("Connection: close")>0);
+        assertTrue(response.indexOf("Hello World")>0);
+        
+        _connector.reopen();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.0\n"+
+                    "Host: whatever\n"+
+                    "Connection: Other, close\n"+
+                    "\n"
+                    );
+        assertTrue(response.indexOf("200")>0);
+        assertTrue(response.indexOf("Connection: close")>0);
+        assertTrue(response.indexOf("Hello World")>0);
+
+        _connector.reopen();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.0\n"+
+                    "Host: whatever\n"+
+                    "Connection: Other, keep-alive\n"+
+                    "\n"
+                    );
+        assertTrue(response.indexOf("200")>0);
+        assertTrue(response.indexOf("Connection: keep-alive")>0);
+        assertTrue(response.indexOf("Hello World")>0);
+        
+        
+        
+
+        _handler._checker = new RequestTester()
+        {
+            public boolean check(HttpServletRequest request,HttpServletResponse response) throws IOException
+            {
+                response.setHeader("Connection","TE");
+                response.addHeader("Connection","Other");
+                response.getOutputStream().println("Hello World");
+                return true;
+            }  
+        };
+        
+        _connector.reopen();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.1\n"+
+                    "Host: whatever\n"+
+                    "\n"
+                    );
+        assertTrue(response.indexOf("200")>0);
+        assertTrue(response.indexOf("Connection: TE,Other")>0);
+        assertTrue(response.indexOf("Hello World")>0);
+        
+        _connector.reopen();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.1\n"+
+                    "Host: whatever\n"+
+                    "Connection: close\n"+
+                    "\n"
+                    );
+        assertTrue(response.indexOf("200")>0);
+        assertTrue(response.indexOf("Connection: close")>0);
+        assertTrue(response.indexOf("Hello World")>0);
+
+        
+        
+        
+    }
+    
+    
+    interface RequestTester
+    {
+        boolean check(HttpServletRequest request,HttpServletResponse response) throws IOException;
     }
     
     class RequestHandler extends AbstractHandler
     {
-        RequestChecker _checker;
+        RequestTester _checker;
         
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             ((Request)request).setHandled(true);
-            if (_checker!=null && _checker.check(request))
+            if (_checker!=null && _checker.check(request,response))
                 response.setStatus(200);
             else
                 response.sendError(500);   

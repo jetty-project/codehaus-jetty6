@@ -724,22 +724,20 @@ public class HttpConnection implements Connection
                             String[] values = value.toString().split(",");
                             for  (int i=0;values!=null && i<values.length;i++)
                             {
-                                CachedBuffer cb = HttpHeaderValues.CACHE.get(values[0].trim());
+                                CachedBuffer cb = HttpHeaderValues.CACHE.get(values[i].trim());
 
                                 if (cb!=null)
                                 {
                                     switch(cb.getOrdinal())
                                     {
                                         case HttpHeaderValues.CLOSE_ORDINAL:
-                                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
+                                            _responseFields.add(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
+                                            _generator.setPersistent(false);
                                             break;
 
                                         case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
                                             if (_version==HttpVersions.HTTP_1_0_ORDINAL)
-                                                _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE);
-                                            break;
-                                        case HttpHeaderValues.TE_ORDINAL:
-                                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.TE);
+                                                _responseFields.add(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE_BUFFER);
                                             break;
                                     }
                                 }
@@ -748,15 +746,14 @@ public class HttpConnection implements Connection
                         }
                         case HttpHeaderValues.CLOSE_ORDINAL:
                             _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
+                            _generator.setPersistent(false);
                             break;
 
                         case HttpHeaderValues.KEEP_ALIVE_ORDINAL:
                             if (_version==HttpVersions.HTTP_1_0_ORDINAL)
-                                _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE);
+                                _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE_BUFFER);
                             break;
-                        case HttpHeaderValues.TE_ORDINAL:
-                            _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.TE);
-                            break;
+                            
                     } 
             }
 
