@@ -15,6 +15,7 @@
 package org.mortbay.jetty.security;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -71,6 +72,10 @@ public class SslSocketConnector extends SocketConnector
      */
     static final String CACHED_INFO_ATTR = CachedInfo.class.getName();
 
+    /** Default value for the keystore location path. */
+    public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator
+            + ".keystore";
+
     /** String name of key password property. */
     public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
 
@@ -124,7 +129,8 @@ public class SslSocketConnector extends SocketConnector
     /** Default value for the cipher Suites. */
     private String _excludeCipherSuites[] = null;
     
-    private String _keystore=null ;
+    /** Default value for the keystore location path. */
+    private String _keystore=DEFAULT_KEYSTORE ;
     private String _keystoreType = "JKS"; // type of the key store
     
     /** Set to true if we require client certificate authentication. */
@@ -173,6 +179,12 @@ public class SslSocketConnector extends SocketConnector
             _keyPassword=_password;
         if (_trustPassword==null)
             _trustPassword=_password;
+
+        if (_truststore==null)
+        {
+            _truststore=_keystore;
+            _truststoreType=_keystoreType;
+        }
 
         KeyManager[] keyManagers = null;
         if (_keystore != null)
