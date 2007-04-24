@@ -1,19 +1,21 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.2rc5 - 24 April 2007
  + set default keystore for SslSocketConnector
  + removed some compile warnings
+ + Allow jsp-file to be / or /*
  + JETTY-305 delayed connection destroy
  + JETTY-309 handle close in multivalue connection fields.
  + JETTY-309 force writable status of endpoints.
  + JETTY-314 fix for possible NPE in Request.isRequestedSessionIdValid
 
-jetty-6.1.2rc4 19 April 2007
+jetty-6.1.2rc4 - 19 April 2007
  + JETTY-294 Fixed authentication reset
  + JETTY-299 handle win32 paths for object naming
  + JETTY-300 removed synchronized on dispatch
  + JETTY-302 correctly parse quoted content encodings
  + JETTY-303 fixed dual reset of generator
  + JETTY-304 Fixed authentication reset
-
 
 jetty-6.1.2rc3 - 16 April 2007
  + Improved performance and exclusions for TLD scanning
