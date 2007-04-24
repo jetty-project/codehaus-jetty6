@@ -583,9 +583,9 @@ public class ServletHandler extends AbstractHandler
                     if (servlets[i].getClassName()==null && servlets[i].getForcedPath()!=null)
                     {
                         ServletHolder forced_holder = (ServletHolder)_servletPathMap.match(servlets[i].getForcedPath());
-                        if (forced_holder==null)
+                        if (forced_holder==null || forced_holder.getClassName()==null)
                         {    
-                            mx.add(new IllegalStateException("No servlet for "+servlets[i].getForcedPath()));
+                            mx.add(new IllegalStateException("No forced path servlet for "+servlets[i].getForcedPath()));
                             continue;
                         }
                         servlets[i].setClassName(forced_holder.getClassName());
