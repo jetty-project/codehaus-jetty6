@@ -67,6 +67,7 @@ public class WebXmlConfiguration implements Configuration
     protected Map _errorPages;
     protected boolean _hasJSP;
     protected String _jspServletName;
+    protected String _jspServletClass;
     protected boolean _defaultWelcomeFileList;
     protected ServletHandler _servletHandler;
     protected int _version;
@@ -502,6 +503,7 @@ public class WebXmlConfiguration implements Configuration
         if (id!=null && id.equals("jsp"))
         {
             _jspServletName=servlet_name;
+            _jspServletClass=servlet_class;
             try
             {
                 Loader.loadClass(this.getClass(), servlet_class);
@@ -537,7 +539,10 @@ public class WebXmlConfiguration implements Configuration
         // Handler JSP file
         String jsp_file=node.getString("jsp-file",false,true);
         if (jsp_file!=null)
+        {
             holder.setForcedPath(jsp_file);
+            holder.setClassName(_jspServletClass);
+        }
 
         // handle startup
         XmlParser.Node startup=node.get("load-on-startup");
