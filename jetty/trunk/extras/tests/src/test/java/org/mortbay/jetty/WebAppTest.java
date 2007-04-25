@@ -49,6 +49,7 @@ public class WebAppTest extends TestCase
     ContextHandlerCollection contexts = new ContextHandlerCollection();
     HashUserRealm userRealm = new HashUserRealm();
     RequestLogHandler requestLogHandler = new RequestLogHandler();
+    WebAppContext context;
     
     protected void setUp() throws Exception
     {
@@ -67,8 +68,7 @@ public class WebAppTest extends TestCase
         handlers.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
         server.setHandler(handlers);
         
-        // TODO add javadoc context to contexts
-        WebAppContext.addWebApplications(server, dir.getAbsolutePath()+"/webapps", "org/mortbay/jetty/webapp/webdefault.xml", true, false);
+        context=new WebAppContext(contexts,dir.getAbsolutePath()+"/webapps/test","/test");
         
         userRealm.setName("Test Realm");
         userRealm.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
@@ -88,9 +88,9 @@ public class WebAppTest extends TestCase
     
     protected void tearDown() throws Exception
     {
-        Thread.sleep(1000);
+        Thread.sleep(100);
         server.stop();
-        Thread.sleep(1000);
+        Thread.sleep(100);
     }
     
 
@@ -181,6 +181,21 @@ public class WebAppTest extends TestCase
     }
     
 
+    public void testUnavailable() throws Exception
+    {
+        URL url = null;
+        
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?query=foo");
+        assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+        assertTrue(context.getServletHandler().isAvailable());
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/ex2/2");
+        try{IO.toString(url.openStream());} catch(IOException e){}
+        assertFalse(context.getServletHandler().isAvailable());
+        Thread.sleep(4000);
+        assertTrue(context.getServletHandler().isAvailable());
+    }
+    
+
     private void assertNotFound(String resource) throws MalformedURLException, IOException
     {
         try
@@ -214,4 +229,6 @@ public class WebAppTest extends TestCase
         url = new URL("http://127.0.0.1:" + connector.getLocalPort() + "/test/" + resource);
         url.openStream();
     }   
+    
+    
 }

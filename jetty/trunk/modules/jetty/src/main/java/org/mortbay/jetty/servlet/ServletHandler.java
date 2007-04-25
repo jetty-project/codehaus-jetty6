@@ -393,7 +393,7 @@ public class ServletHandler extends AbstractHandler
             Throwable th=e;
             if (th instanceof ServletException)
             {
-                Log.warn(th);
+                Log.debug(th);
                 Throwable cause=((ServletException)th).getRootCause();
                 if (cause!=th && cause!=null)
                     th=cause;
@@ -401,6 +401,11 @@ public class ServletHandler extends AbstractHandler
             
             if (th instanceof HttpException)
                 throw (HttpException)th;
+            else if (th instanceof UnavailableException)
+            {
+                Log.warn(request.getRequestURI()+": "+th);
+                Log.debug(th); 
+            }
             else if (Log.isDebugEnabled() || !( th instanceof java.io.IOException))
             { 
                 Log.warn(request.getRequestURI(), th); 
@@ -553,6 +558,24 @@ public class ServletHandler extends AbstractHandler
      */
     public void setInitializeAtStart(boolean initializeAtStart)
     {
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return true if the handler is started and there are no unavailable servlets 
+     */
+    public boolean isAvailable()
+    {
+        if (!isStarted())
+            return false;
+        ServletHolder[] holders = getServlets();
+        for (int i=0;i<holders.length;i++)
+        {
+            ServletHolder holder = holders[i];
+            if (holder!=null && !holder.isAvailable())
+                return false;
+        }
+        return true;
     }
     
     /* ------------------------------------------------------------ */

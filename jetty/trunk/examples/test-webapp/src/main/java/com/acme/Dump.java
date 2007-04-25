@@ -253,10 +253,12 @@ public class Dump extends HttpServlet
             out.write("</H1>This text should be reset</H1>".getBytes());
             if ("/ex0".equals(pi))
                 throw new ServletException("test ex0", new Throwable());
-            if ("/ex1".equals(pi))
+            else if ("/ex1".equals(pi))
                 throw new IOException("test ex1");
-            if ("/ex2".equals(pi))
+            else if ("/ex2".equals(pi))
                 throw new UnavailableException("test ex2");
+            else if (pi.startsWith("/ex2/"))
+                throw new UnavailableException("test ex2",Integer.parseInt(pi.substring(5)));
             throw new RuntimeException("test");
         }
 

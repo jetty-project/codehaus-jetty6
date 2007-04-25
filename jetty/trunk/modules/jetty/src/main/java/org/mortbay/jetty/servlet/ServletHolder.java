@@ -377,7 +377,26 @@ public class ServletHolder extends Holder
             throw new UnavailableException("Servlet "+_class+" is not a javax.servlet.Servlet");
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return true if the holder is started and is not unavailable
+     */
+    public boolean isAvailable()
+    {
+        if (isStarted()&& _unavailable==0)
+            return true;
+        try 
+        {
+            getServlet();
+        }
+        catch(Exception e)
+        {
+            Log.ignore(e);
+        }
+
+        return isStarted()&& _unavailable==0;
+    }
     
     /* ------------------------------------------------------------ */
     private Servlet makeUnavailable(UnavailableException e) 
@@ -438,13 +457,14 @@ public class ServletHolder extends Holder
             throw new UnavailableException("Servlet Not Initialized");
         
         Servlet servlet=_servlet;
-        if (!_initOnStartup)
+        synchronized(this)
         {
+            if (_unavailable!=0 || !_initOnStartup)
             servlet=getServlet();
             if (servlet==null)
                 throw new UnavailableException("Could not instantiate "+_class);
         }
-
+        
         // Service the request
         boolean servlet_error=true;
         Principal user=null;
@@ -469,8 +489,6 @@ public class ServletHolder extends Holder
         }
         catch(UnavailableException e)
         {
-            if (servlet!=null)
-                try{stop();}catch(Exception e2){Log.ignore(e2);}
             makeUnavailable(e);
         }
         finally
