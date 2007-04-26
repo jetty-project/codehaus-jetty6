@@ -236,6 +236,7 @@ public class Response implements HttpServletResponse
             Log.warn("Committed before "+code+" "+message);
 
         resetBuffer();
+        _outputState=NONE;
         setStatus(code,message);
         
         if (message==null)
