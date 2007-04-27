@@ -135,6 +135,7 @@ public class TagLibConfiguration implements Configuration
         Pattern no_TLD_pattern = no_TLD_attr==null?null:Pattern.compile(no_TLD_attr);
         
         // Look for tlds in any jars
+ 
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         boolean parent=false;
         
@@ -143,16 +144,18 @@ public class TagLibConfiguration implements Configuration
             if (loader instanceof URLClassLoader)
             {
                 URL[] urls = ((URLClassLoader)loader).getURLs();
+
                 if (urls!=null)
                 {
                     for (int i=0;i<urls.length;i++)
-                    {
+                    {   
                         if (urls[i].toString().toLowerCase().endsWith(".jar"))
                         {
+
                             String jar = urls[i].toString();
                             int slash=jar.lastIndexOf('/');
                             jar=jar.substring(slash+1);
-                            
+
                             if (parent && ( 
                                     (!_context.isParentLoaderPriority() && jars.contains(jar)) || 
                                     (no_TLD_pattern!=null && no_TLD_pattern.matcher(jar).matches())))
@@ -188,11 +191,10 @@ public class TagLibConfiguration implements Configuration
                         }
                     }
                 }
-                
-                
-                loader=loader.getParent();
-                parent=true;
             }
+
+            loader=loader.getParent();
+            parent=true;
             
         }
         
