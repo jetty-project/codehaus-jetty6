@@ -1,6 +1,9 @@
 jetty-6.1-SNAPSHOT
  + Improved unavailabile handling
  + sendError resets output state
+ + Fixed session invalidation error in WadiSessionManager
+ + Updated Wadi to version 2.0-M3
+ + Added static member definition in WadiSessionManager
 
 jetty-6.1.2rc5 - 24 April 2007
  + set default keystore for SslSocketConnector
