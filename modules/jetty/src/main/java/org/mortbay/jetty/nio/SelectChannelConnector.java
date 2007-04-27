@@ -201,14 +201,16 @@ public class SelectChannelConnector extends AbstractNIOConnector
         {
             if (_acceptChannel == null)
             {
-                // Create a new server socket and set to non blocking mode
+                // Create a new server socket
                 _acceptChannel = ServerSocketChannel.open();
-                _acceptChannel.configureBlocking(false);
 
                 // Bind the server socket to the local host and port
                 InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
                 _acceptChannel.socket().bind(addr,getAcceptQueueSize());
 
+                // Set to non blocking mode
+                _acceptChannel.configureBlocking(false);
+                
                 // Register accepts on the server socket with the selector.
                 _manager.register(_acceptChannel);
             }
