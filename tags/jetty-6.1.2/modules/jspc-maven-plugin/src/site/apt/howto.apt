@@ -1,0 +1,75 @@
+Jetty JSPC Usage Guide
+
+ To use the jetty jspc plugin, you need to put a \<plugin\> element in your pom.xml for it, and also to configure the <<<war>>> plugin so that it uses the <<<web.xml>>> file produced by the jspc plugin.
+
+ Your pom.xml will look like this:
+
++--------+
+        <plugin>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>maven-jetty-jspc-plugin</artifactId>
+          <version>6.1-SNAPSHOT</version>
+          <executions>
+            <execution>
+              <id>jspc</id>
+              <goals>
+                <goal>jspc</goal>
+              </goals>
+              <configuration>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <configuration>
+            <webXml>${baseidr}/target/web.xml</webXml>
+          </configuration>
+        </plugin>
++--------+
+ Note: change the \<version\> tag value to match your prefered jetty jspc plugin release.
+
+ For a full listing of the \<configuration\> items supported by this plugin, see {{{jspc-mojo.html}Configuration}}.
+
+ Invoking the plugin will now be done by simply building your webapp to at least the <<<package>>> phase:
+
++--------+
+  mvn package
++--------+
+
+ However, as compiling jsps is usually done during preparation for a production release and not usually done during development, it is more convenient to put the plugin setup inside a \<profile\> which which can be deliberately invoked during prep for production .
+ 
+ For example, the following profile will only be invoked if the flag <<<-Dprod>>> is present on the run line:
+
++--------+
+  <profiles>
+    <profile>
+      <id>prod</id>
+      <activation>
+        <property><name>prod</name></property>
+      </activation>
+      <build>
+      <plugins>
+        <plugin>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>maven-jetty-jspc-plugin</artifactId>
+          <version>6.1-SNAPSHOT</version>
+          . . .
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          . . .
+        </plugin>
+      </plugins>
+      </build>
+    </profile>
+  </profiles>
++--------+
+
+ So, the following invocation would cause your code to be compiled, the jsps to be compiled, the \<servlet\> and \<servlet-mapping\>s inserted in the web.xml and your webapp assembled into a war:
+
++--------+
+ mvn -Dprod package
++--------+
