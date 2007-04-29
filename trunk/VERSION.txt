@@ -6,7 +6,8 @@ jetty-6.1.2
  + Fixed session invalidation error in WadiSessionManager
  + Updated Wadi to version 2.0-M3
  + Added static member definition in WadiSessionManager
- + JETTY-324 fix ant plugin 
+ + JETTY-324 fix ant plugin
+ + JETTY-322 fix ajp cpong response
 
 jetty-6.1.2rc5 - 24 April 2007
  + set default keystore for SslSocketConnector
