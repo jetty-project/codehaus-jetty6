@@ -427,9 +427,10 @@ public class Ajp13Generator extends AbstractGenerator
     {
         try
         {
-            if (!_expectMore && _state == STATE_HEADER)
+            if (_state == STATE_HEADER  && !_expectMore && !_needCPong)
+            {
                 throw new IllegalStateException("State==HEADER");
-
+            }
             prepareBuffers();
 
             if (_endp == null)
@@ -758,9 +759,9 @@ public class Ajp13Generator extends AbstractGenerator
     }
 
 
+    /* ------------------------------------------------------------ */
     public void sendCPong() throws IOException
     {
-        // set expect and need to false just tobe sure
         _needCPong = true;
         flush();
     }
