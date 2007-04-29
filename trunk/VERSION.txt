@@ -1,4 +1,6 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.2
  + Improved unavailabile handling
  + sendError resets output state
  + Fixed session invalidation error in WadiSessionManager
