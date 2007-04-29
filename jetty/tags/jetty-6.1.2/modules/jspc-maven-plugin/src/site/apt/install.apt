@@ -1,0 +1,35 @@
+Installing the Jetty JSPC Plugin
+
+  If you wish to use a released version of the plugin, then all you have to do is reference it in the <<<plugins>>> section of your pom.
+
+  For example:
+
++--------+
+    </plugins>
+       ...
+        <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty-jspc-plugin</artifactId>
+        <version>6.1</version>
+        <configuration>
+           ...
+        </configuration>
+      </plugin>
+      ...
+    </plugins>
++--------+
+
+  If instead you want to use a SNAPSHOT version of the plugin, you will also need to reference MortBay's snapshot repository in the <<<pluginRepositories>>> section of your project's <<<pom.xml>>>:  
+
++--------+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>mortbay-repo</id>
+      <name>mortbay-repo</name>
+      <url>http://jetty.mortbay.org/maven2/snapshot</url>
+    </pluginRepository>
+  </pluginRepositories>
++--------+
+
+  NB: Don't forget to change the \<version/> in the \<plugin\> element to the SNAPSHOT version. 
+
