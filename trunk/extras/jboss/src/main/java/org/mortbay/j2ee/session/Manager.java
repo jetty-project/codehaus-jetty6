@@ -50,7 +50,7 @@ import org.mortbay.log.Log;
 
 //----------------------------------------
 
-// TODO
+// TODO This class needs a lot of work to make it run.
 //-----
 
 // we need a SnapshotInterceptor
@@ -90,6 +90,12 @@ public class Manager implements org.mortbay.jetty.SessionManager
 {
     // ----------------------------------------
     protected WebAppContext _context;
+    
+    /**
+     * Whether or not the session manager will use cookies
+     * or URLs only.
+     */
+    protected boolean _usingCookies = true;
 
     public WebAppContext getContext()
     {
@@ -989,5 +995,46 @@ public class Manager implements org.mortbay.jetty.SessionManager
 
         /* ------------------------------------------------------------ */
         public void access();
+    }
+
+    /** 
+     * @see org.mortbay.jetty.SessionManager#getClusterId(javax.servlet.http.HttpSession)
+     */
+    public String getClusterId(HttpSession session)
+    {
+        // TODO check that this is correct. There does not
+        // seem to be any difference between the id as the
+        // node knows it and the id within the cluster, so 
+        // we presume that the id is unique within the cluster.
+        return session.getId();
+    }
+
+    /** 
+     * @see org.mortbay.jetty.SessionManager#getIdManager()
+     */
+    public SessionIdManager getIdManager()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /** 
+     * @see org.mortbay.jetty.SessionManager#getNodeId(javax.servlet.http.HttpSession)
+     */
+    public String getNodeId(HttpSession session)
+    {
+        // TODO check that this is correct. There does not
+        // seem to be any difference between the id as the
+        // node knows it and the id within the cluster, so 
+        // we presume that the id is unique within the cluster.
+        return session.getId();
+    }
+
+    /** 
+     * @see org.mortbay.jetty.SessionManager#isUsingCookies()
+     */
+    public boolean isUsingCookies()
+    {
+        return _usingCookies;
     }
 }
