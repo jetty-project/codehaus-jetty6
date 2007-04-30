@@ -50,7 +50,8 @@ import org.mortbay.log.Log;
 
 //----------------------------------------
 
-// TODO This class needs a lot of work to make it run.
+// TODO 
+// This class needs a lot of work to make it run.
 //-----
 
 // we need a SnapshotInterceptor
