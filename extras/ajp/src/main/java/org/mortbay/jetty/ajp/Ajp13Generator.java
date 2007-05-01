@@ -114,6 +114,7 @@ public class Ajp13Generator extends AbstractGenerator
     public Ajp13Generator(Buffers buffers, EndPoint io, int headerBufferSize, int contentBufferSize)
     {
         super(buffers, io, headerBufferSize, contentBufferSize);
+        setPersistent(true);
     }
 
     /* ------------------------------------------------------------ */
@@ -124,6 +125,8 @@ public class Ajp13Generator extends AbstractGenerator
         _needMore = false;
         _expectMore = false;
         _bufferPrepared = false;
+        _needCPong = false;
+        setPersistent(true);
     }
 
     /* ------------------------------------------------------------ */
@@ -428,9 +431,7 @@ public class Ajp13Generator extends AbstractGenerator
         try
         {
             if (_state == STATE_HEADER  && !_expectMore && !_needCPong)
-            {
                 throw new IllegalStateException("State==HEADER");
-            }
             prepareBuffers();
 
             if (_endp == null)
@@ -441,7 +442,7 @@ public class Ajp13Generator extends AbstractGenerator
                 // if(!_hasSentEOC)
                 // _buffer.put(AJP13_MORE_CONTENT);
                 // }
-                if (!_expectMore && _needEOC && _buffer != null)
+                if (!_needCPong && !_expectMore && _needEOC && _buffer != null)
                 {
                     _buffer.put(AJP13_END_RESPONSE);
                 }
@@ -519,13 +520,18 @@ public class Ajp13Generator extends AbstractGenerator
 
                     }
 
+
+
+
                     // Are we completely finished for now?
-                    if (!_expectMore && !_needEOC && (_content == null || _content.length() == 0))
+                    if (!_needCPong && !_expectMore && !_needEOC && (_content == null || _content.length() == 0))
                     {
                         if (_state == STATE_FLUSHING)
                             _state = STATE_END;
-                        if (_state == STATE_END/* &&_close */)
+                        /*
+                        if (_state == STATE_END)
                             _endp.close();
+                        */
 
                         break Flushing;
                     }
@@ -546,6 +552,8 @@ public class Ajp13Generator extends AbstractGenerator
                 last_len = len;
                 total += len;
             }
+
+
 
             return total;
         }
@@ -573,11 +581,8 @@ public class Ajp13Generator extends AbstractGenerator
                 _expectMore = false;
                 _needEOC = false;
                 _needCPong = false;
-                _header.put(AJP13_CPONG_RESPONSE);
+                _header.put(AJP13_CPONG_RESPONSE);  // TODO will there always be room?
                 _bufferPrepared = true;
-                _state = STATE_END;
-
-                Log.info("AJP13: CPONG is sent to peer ;) ");
 
                 return;
             }
