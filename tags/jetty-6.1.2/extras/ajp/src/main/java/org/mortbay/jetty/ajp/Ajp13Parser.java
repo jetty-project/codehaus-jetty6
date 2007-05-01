@@ -192,7 +192,7 @@ public class Ajp13Parser implements Parser
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                // This is normal in AJP since the socket closes on timeout only
                 Log.debug(e);
                 reset(true);
                 throw (e instanceof EofException) ? e : new EofException(e);
@@ -290,7 +290,6 @@ public class Ajp13Parser implements Parser
                     break;
                 case Ajp13Packet.CPING_REQUEST_ORDINAL:
                     _state = STATE_END;
-                    Log.info("AJP13: CPING is sent by peer :-) ");
                     ((Ajp13Generator) _generator).sendCPong();
                     return -1;
                 case Ajp13Packet.SHUTDOWN_ORDINAL:
@@ -300,7 +299,7 @@ public class Ajp13Parser implements Parser
                 default:
                     // XXX Throw an Exception here?? Close
                     // connection!
-                    Log.warn("AJP13 message type ({PING}) not supported/recognized as a " + "container request", Integer.toString(packetType));
+                    Log.warn("AJP13 message type ({PING}: "+packetType+" ) not supported/recognized as an AJP request");
                 throw new IllegalStateException("PING is not implemented");
             }
 
@@ -570,6 +569,7 @@ public class Ajp13Parser implements Parser
         _contentLength = HttpTokens.UNKNOWN_CONTENT;
         _contentPosition = 0;
         _length = 0;
+        _packetLength = 0;
 
         if (_body != null)
         {
