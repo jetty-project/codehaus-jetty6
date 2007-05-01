@@ -1,13 +1,14 @@
 jetty-6.1-SNAPSHOT
 
-jetty-6.1.2
+jetty-6.1.2 - 1 May 2007
  + Improved unavailabile handling
  + sendError resets output state
  + Fixed session invalidation error in WadiSessionManager
  + Updated Wadi to version 2.0-M3
  + Added static member definition in WadiSessionManager
- + JETTY-324 fix ant plugin
  + JETTY-322 fix ajp cpong response and close handling
+ + JETTY-324 fix ant plugin
+ + JETTY-328 updated jboss
 
 jetty-6.1.2rc5 - 24 April 2007
  + set default keystore for SslSocketConnector
