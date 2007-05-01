@@ -7,7 +7,7 @@ jetty-6.1.2
  + Updated Wadi to version 2.0-M3
  + Added static member definition in WadiSessionManager
  + JETTY-324 fix ant plugin
- + JETTY-322 fix ajp cpong response
+ + JETTY-322 fix ajp cpong response and close handling
 
 jetty-6.1.2rc5 - 24 April 2007
  + set default keystore for SslSocketConnector
