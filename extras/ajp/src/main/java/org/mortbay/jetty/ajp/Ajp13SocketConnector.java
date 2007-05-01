@@ -49,6 +49,9 @@ public class Ajp13SocketConnector extends SocketConnector
         super.setHeaderBufferSize(Ajp13Packet.MAX_DATA_SIZE);
         super.setRequestBufferSize(Ajp13Packet.MAX_DATA_SIZE);
         super.setResponseBufferSize(Ajp13Packet.MAX_DATA_SIZE);
+        // IN AJP protocol the socket stay open, so
+        // by default the time out is set to 900 seconds
+        super.setMaxIdleTime(900000);
     }
 
     protected void doStart() throws Exception
