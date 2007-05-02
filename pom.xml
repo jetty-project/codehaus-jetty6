@@ -234,7 +234,7 @@
     <module>extras/ajp</module>
     <module>extras/setuid</module>
     <module>extras/win32service</module>
-    <module>extras/gwt</module>
+    <!--module>extras/gwt</module-->
     <module>extras/threadpool</module>
 
     <module>examples/test-webapp</module>
