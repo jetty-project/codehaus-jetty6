@@ -225,6 +225,7 @@
     <module>modules/plus</module>
     <module>modules/html</module>
     <module>modules/annotations</module>
+
     <module>extras/servlet-tester</module>
     <module>extras/xbean</module>
     <module>extras/spring</module>
@@ -233,21 +234,22 @@
     <module>extras/ajp</module>
     <module>extras/setuid</module>
     <module>extras/win32service</module>
-    <!-- <module>extras/client</module> -->
     <module>extras/gwt</module>
     <module>extras/threadpool</module>
+    <module>extras/tests</module>
+
+    <module>examples/test-webapp</module>
+    <module>examples/test-jaas-webapp</module>
+    <module>examples/test-jndi-webapp</module>
+    <module>examples/embedded</module>
+    <!-- <module>examples/spring-ebj3-demo</module> -->
+
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
     <module>contrib/wadi</module>
     <module>contrib/client</module>
     <module>contrib/terracotta</module>
-    <module>examples/test-webapp</module>
-    <module>examples/test-jaas-webapp</module>
-    <module>examples/test-jndi-webapp</module>
-    <module>examples/embedded</module>
-    <module>examples/cometd-demo</module>
-    <!-- <module>examples/spring-ebj3-demo</module> -->
-    <module>extras/tests</module>
+    <module>contrib/cometd-demo</module>
   </modules>
 
   <reporting>
