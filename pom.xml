@@ -236,13 +236,14 @@
     <module>extras/win32service</module>
     <module>extras/gwt</module>
     <module>extras/threadpool</module>
-    <module>extras/tests</module>
 
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
     <module>examples/test-jndi-webapp</module>
     <module>examples/embedded</module>
     <!-- <module>examples/spring-ebj3-demo</module> -->
+
+    <module>extras/tests</module>
 
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
