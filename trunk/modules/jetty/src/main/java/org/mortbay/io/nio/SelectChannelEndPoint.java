@@ -111,6 +111,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 // Remove writeable op
                 _interestOps = _key.interestOps() & ~SelectionKey.OP_WRITE;
                 _key.interestOps(_interestOps);
+                _writable = true; // Once writable is in ops, only removed with dispatch.
             }
 
             _dispatched = true;
@@ -291,7 +292,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 _interestOps = 
                     ((!_dispatched || _readBlocked)  ? SelectionKey.OP_READ  : 0) 
                 |   ((!_writable   || _writeBlocked) ? SelectionKey.OP_WRITE : 0);
-                _writable = true; // Once writable is in ops, only removed with dispatch.
             }
             
             if(_interestOps == ops && getChannel().isOpen())
