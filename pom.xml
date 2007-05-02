@@ -376,10 +376,10 @@
     <commons-el-version>1.0</commons-el-version>
     <jasper-version>5.5.15</jasper-version>
     <jta-spec-version>1.0.1B-rc4</jta-spec-version>
-    <junit-version>3.8.1</junit-version>
+    <junit-version>3.8.2</junit-version>
     <mail-version>1.4</mail-version>
     <mx4j-version>3.0.1</mx4j-version>
-    <slf4j-version>1.0.1</slf4j-version>
-    <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
+    <slf4j-version>1.3.1</slf4j-version>
+    <eclipse-compiler-version>3.2.0.666</eclipse-compiler-version>
   </properties>
 </project>
