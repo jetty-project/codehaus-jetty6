@@ -4,7 +4,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.nio.SelectChannelConnector;
@@ -26,8 +28,11 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
             {
                 return new ConnectorEndPoint(channel,selectSet,key)
                 {
-
-                    int c;
+                    int write;
+                    int read;
+                    NIOBuffer one = new NIOBuffer(1,false);
+                    NIOBuffer two = new NIOBuffer(2,false);
+                    NIOBuffer three = new NIOBuffer(3,false);
                     
                     /* ------------------------------------------------------------ */
                     /* (non-Javadoc)
@@ -35,7 +40,7 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                      */
                     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
                     {
-                        int x=c++&0xff;
+                        int x=write++&0xff;
                         if (x<16)
                             return 0;
                         if (x<128)
@@ -49,7 +54,7 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                      */
                     public int flush(Buffer buffer) throws IOException
                     {
-                        int x=c++&0xff;
+                        int x=write++&0xff;
                         if (x<16)
                             return 0;
                         if (x<96)
@@ -62,6 +67,52 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
                             return l;
                         }
                         return super.flush(buffer);
+                    }
+
+                    /* ------------------------------------------------------------ */
+                    /* (non-Javadoc)
+                     * @see org.mortbay.io.nio.ChannelEndPoint#fill(org.mortbay.io.Buffer)
+                     */
+                    public int fill(Buffer buffer) throws IOException
+                    {
+                        int x=read++&0xff;
+                        if (x<32)
+                            return 0;
+                        
+                        if (x<64 & buffer.space()>0)
+                        {
+                            one.clear();
+                            int l=super.fill(one);
+                            if (l>0)
+                                buffer.put(one.peek(0));
+                            return l;
+                        }
+                        
+                        if (x<96 & buffer.space()>0)
+                        {
+                            two.clear();
+                            int l=super.fill(two);
+                            if (l>0)
+                                buffer.put(two.peek(0));
+                            if (l>1)
+                                buffer.put(two.peek(1));
+                            return l;
+                        }
+                        
+                        if (x<128 & buffer.space()>0)
+                        {
+                            three.clear();
+                            int l=super.fill(three);
+                            if (l>0)
+                                buffer.put(three.peek(0));
+                            if (l>1)
+                                buffer.put(three.peek(1));
+                            if (l>2)
+                                buffer.put(three.peek(2));
+                            return l;
+                        }
+                        
+                        return super.fill(buffer);
                     }
                     
                 };
