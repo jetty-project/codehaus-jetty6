@@ -4,7 +4,6 @@ jetty-6.1-SNAPSHOT
  + Unified JMX configuration
  + Updated slf4j version to 1.3.1
  + Updated junit to 3.8.2
- + Updated eclispe jdt compiler to 3.2.0.666
 
 jetty-6.1.2 - 1 May 2007
  + Improved unavailabile handling
