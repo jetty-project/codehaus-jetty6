@@ -1,5 +1,6 @@
 jetty-6.1.3rc0
  + JETTY-309 don't clear writable status until dispatch
+ + Fixed CRLF issue with content in header optimization
 
 jetty-6.1.2 - 1 May 2007
  + Improved unavailabile handling

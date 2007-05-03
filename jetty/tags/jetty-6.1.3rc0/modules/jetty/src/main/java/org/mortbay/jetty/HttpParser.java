@@ -517,8 +517,8 @@ public class HttpParser implements Parser
                                 default:
                                     _state=STATE_CONTENT;
 
-                                	if(_buffers!=null && _body==null && _buffer==_header && _contentLength>(_header.capacity()-_header.getIndex()))
-                                	    _body=_buffers.getBuffer(_contentBufferSize);
+                                    if(_buffers!=null && _body==null && _buffer==_header && _contentLength>=(_header.capacity()-_header.getIndex()))
+                                       _body=_buffers.getBuffer(_contentBufferSize);
                                     _handler.headerComplete(); // May recurse here !
                                     break;
                             }
