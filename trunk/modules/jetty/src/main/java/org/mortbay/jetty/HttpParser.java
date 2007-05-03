@@ -259,6 +259,7 @@ public class HttpParser implements Parser
                 
             if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
                     throw new IOException("FULL");
+            
             if (_endp != null && filled<=0)
             {
                 // Compress buffer if handling _content buffer
@@ -267,9 +268,7 @@ public class HttpParser implements Parser
                     _buffer.compact();
 
                 if (_buffer.space() == 0) 
-                {   
-                    throw new IOException("FULL");
-                }
+                    throw new IOException("FULL "+(_buffer==_body?"body":"head"));
                 
                 try
                 {
@@ -513,9 +512,9 @@ public class HttpParser implements Parser
                                     
                                 default:
                                     _state=STATE_CONTENT;
-
-                                	if(_buffers!=null && _body==null && _buffer==_header && _contentLength>(_header.capacity()-_header.getIndex()))
-                                	    _body=_buffers.getBuffer(_contentBufferSize);
+                                    if(_buffers!=null && _body==null && _buffer==_header && _contentLength>=(_header.capacity()-_header.getIndex()))
+                                        _body=_buffers.getBuffer(_contentBufferSize);
+                                    
                                     _handler.headerComplete(); // May recurse here !
                                     break;
                             }
@@ -611,7 +610,7 @@ public class HttpParser implements Parser
                     chunk=_buffer.get(_buffer.length());
                     _contentPosition += chunk.length();
                     _contentView.update(chunk);
-                    _handler.content(chunk);
+                    _handler.content(chunk); // May recurse here 
                     // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
 
@@ -635,7 +634,7 @@ public class HttpParser implements Parser
                     chunk=_buffer.get(length);
                     _contentPosition += chunk.length();
                     _contentView.update(chunk);
-                    _handler.content(chunk);
+                    _handler.content(chunk); // May recurse here 
                     
                     // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
@@ -717,7 +716,7 @@ public class HttpParser implements Parser
                     _contentPosition += chunk.length();
                     _chunkPosition += chunk.length();
                     _contentView.update(chunk);
-                    _handler.content(chunk);
+                    _handler.content(chunk); // May recurse here 
                     // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
                 }

@@ -32,6 +32,8 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.HashSessionManager;
+import org.mortbay.util.IO;
+
 import java.util.Locale;
 
 import junit.framework.TestCase;
@@ -47,6 +49,12 @@ public class RequestTest extends TestCase
     Server _server = new Server();
     LocalConnector _connector = new LocalConnector();
     RequestHandler _handler = new RequestHandler();
+    
+    {
+        _connector.setHeaderBufferSize(512);
+        _connector.setRequestBufferSize(1024);
+        _connector.setResponseBufferSize(2048);
+    }
     
     public RequestTest(String arg0)
     {
@@ -134,6 +142,41 @@ public class RequestTest extends TestCase
     }
     
 
+    
+    public void testContent()
+        throws Exception
+    {
+        final int[] length=new int[1];
+        
+        _handler._checker = new RequestTester()
+        {
+            public boolean check(HttpServletRequest request,HttpServletResponse response)
+            {
+                length[0]=request.getContentLength();
+                return true;
+            }  
+        };
+        
+        String content="";
+        
+        for (int l=0;l<1025;l++)
+        {
+            String request="POST / HTTP/1.1\r\n"+
+            "Host: whatever\r\n"+
+            "Content-Type: text/test\r\n"+
+            "Content-Length: "+l+"\r\n"+
+            "Connection: close\r\n"+
+            "\r\n"+
+            content;
+            content+="x";
+            
+            _connector.reopen();
+            String response = _connector.getResponses(request);
+            assertEquals(l,length[0]);
+            if (l>0)
+                assertEquals(l,_handler._content.length());
+        }
+    }
     
     public void testConnectionClose()
         throws Exception
@@ -265,14 +308,21 @@ public class RequestTest extends TestCase
     class RequestHandler extends AbstractHandler
     {
         RequestTester _checker;
+        String _content;
         
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
             ((Request)request).setHandled(true);
+            
+            if (request.getContentLength()>0)
+                _content=IO.toString(request.getInputStream());
+            
             if (_checker!=null && _checker.check(request,response))
                 response.setStatus(200);
             else
-                response.sendError(500);   
+                response.sendError(500); 
+            
+            
         }   
     }
 
