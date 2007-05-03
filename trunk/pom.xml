@@ -380,6 +380,6 @@
     <mail-version>1.4</mail-version>
     <mx4j-version>3.0.1</mx4j-version>
     <slf4j-version>1.3.1</slf4j-version>
-    <eclipse-compiler-version>3.2.0.666</eclipse-compiler-version>
+    <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
   </properties>
 </project>
