@@ -268,6 +268,9 @@ public class HttpParser implements Parser
 
                 if (_buffer.space() == 0) 
                 {   
+		    System.err.println("_header="+_header.toDetailString());
+		    if (_body!=null) System.err.println("_body="+_body.toDetailString());
+		    System.err.println("_buffer="+_buffer.toDetailString());
                     throw new IOException("FULL");
                 }
                 
