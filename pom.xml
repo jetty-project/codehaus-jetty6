@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Server Project</name>
-  <version>6.1-SNAPSHOT</version>
+  <version>6.1.3rc0</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -225,32 +225,25 @@
     <module>modules/plus</module>
     <module>modules/html</module>
     <module>modules/annotations</module>
-
     <module>extras/servlet-tester</module>
     <module>extras/xbean</module>
+    <module>extras/cometd</module>
     <module>extras/spring</module>
     <module>extras/grizzly</module>
     <module>extras/sslengine</module>
     <module>extras/ajp</module>
     <module>extras/setuid</module>
     <module>extras/win32service</module>
-    <!--module>extras/gwt</module-->
+    <!-- <module>extras/client</module> -->
+    <module>extras/gwt</module>
     <module>extras/threadpool</module>
-
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
     <module>examples/test-jndi-webapp</module>
     <module>examples/embedded</module>
+    <module>examples/cometd-demo</module>
     <!-- <module>examples/spring-ebj3-demo</module> -->
-
     <module>extras/tests</module>
-
-    <module>contrib/cometd</module>
-    <module>contrib/jetty-ant</module>
-    <!--module>contrib/wadi</module-->
-    <!--module>contrib/client</module-->
-    <!--module>contrib/terracotta</module-->
-    <module>contrib/cometd-demo</module>
   </modules>
 
   <reporting>
@@ -376,10 +369,10 @@
     <commons-el-version>1.0</commons-el-version>
     <jasper-version>5.5.15</jasper-version>
     <jta-spec-version>1.0.1B-rc4</jta-spec-version>
-    <junit-version>3.8.2</junit-version>
+    <junit-version>3.8.1</junit-version>
     <mail-version>1.4</mail-version>
     <mx4j-version>3.0.1</mx4j-version>
-    <slf4j-version>1.3.1</slf4j-version>
+    <slf4j-version>1.0.1</slf4j-version>
     <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
   </properties>
 </project>

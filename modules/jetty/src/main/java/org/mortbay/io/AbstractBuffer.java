@@ -123,7 +123,6 @@ public abstract class AbstractBuffer implements Buffer
 
     public void clear()
     {
-        setMarkIndex(-1);
         setGetIndex(0);
         setPutIndex(0);
     }
