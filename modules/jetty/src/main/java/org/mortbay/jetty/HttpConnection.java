@@ -452,7 +452,7 @@ public class HttpConnection implements Connection
                 {
                     break;
                 }
-                else if (_generator.isCommitted() && !_generator.isComplete())
+                else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint)
                     ((SelectChannelEndPoint)_endp).setWritable(false);
             }
         }

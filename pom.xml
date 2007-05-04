@@ -235,7 +235,7 @@
     <module>extras/setuid</module>
     <module>extras/win32service</module>
     <!-- <module>extras/client</module> -->
-    <module>extras/gwt</module>
+    <!-- <module>extras/gwt</module> -->
     <module>extras/threadpool</module>
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
