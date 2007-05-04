@@ -261,6 +261,7 @@ public class Ajp13Parser implements Parser
                 if (_magic != Ajp13RequestHeaders.MAGIC)
                     throw new IOException("Bad AJP13 rcv packet: " + "0x" + Integer.toHexString(_magic) + " expected " + "0x" + Integer.toHexString(Ajp13RequestHeaders.MAGIC) + " " + this);
 
+
                 _packetLength = Ajp13RequestPacket.getInt(_buffer);
                 if (_packetLength > Ajp13Packet.MAX_PACKET_SIZE)
                     throw new IOException("AJP13 packet (" + _packetLength + "bytes) too large for buffer");
@@ -282,18 +283,35 @@ public class Ajp13Parser implements Parser
             int attr_type = 0;
 
             byte packetType = Ajp13RequestPacket.getByte(_buffer);
-            
+
             switch (packetType)
             {
                 case Ajp13Packet.FORWARD_REQUEST_ORDINAL:
                     _handler.startForwardRequest();
                     break;
                 case Ajp13Packet.CPING_REQUEST_ORDINAL:
-                    _state = STATE_END;
                     ((Ajp13Generator) _generator).sendCPong();
+                    
+                    if(_header != null)
+                    {
+                        _buffers.returnBuffer(_header);
+                        _header = null;
+                    }
+
+                    if(_body != null)
+                    {
+                        _buffers.returnBuffer(_body);
+                        _body = null;
+                    }
+
+                    _buffer= null;
+
+                    reset(true);
+
                     return -1;
                 case Ajp13Packet.SHUTDOWN_ORDINAL:
                     shutdownRequest();
+
                     return -1;
 
                 default:
@@ -332,8 +350,8 @@ public class Ajp13Parser implements Parser
             }
 
 
-            attr_type = Ajp13RequestPacket.getByte(_buffer) & 0xff;
 
+            attr_type = Ajp13RequestPacket.getByte(_buffer) & 0xff;
             while (attr_type != 0xFF)
             {
 
@@ -439,6 +457,10 @@ public class Ajp13Parser implements Parser
             }
 
 
+
+
+
+
             _contentPosition = 0;
             switch ((int) _contentLength)
             {
@@ -463,6 +485,7 @@ public class Ajp13Parser implements Parser
                 return total_filled;
             }
         }
+
 
         Buffer chunk;
 

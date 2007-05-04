@@ -22,10 +22,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.jetty.AbstractGenerator;
-import org.mortbay.jetty.EofException;
-import org.mortbay.jetty.HttpFields;
-import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.*;
 import org.mortbay.jetty.HttpFields.Field;
 import org.mortbay.log.Log;
 import org.mortbay.util.TypeUtil;
@@ -106,27 +103,50 @@ public class Ajp13Generator extends AbstractGenerator
 
     private boolean _needEOC = false;
 
-    private boolean _needCPong = false;
-
     private boolean _bufferPrepared = false;
 
     /* ------------------------------------------------------------ */
     public Ajp13Generator(Buffers buffers, EndPoint io, int headerBufferSize, int contentBufferSize)
     {
         super(buffers, io, headerBufferSize, contentBufferSize);
-        setPersistent(true);
     }
 
     /* ------------------------------------------------------------ */
     public void reset(boolean returnBuffers)
     {
         super.reset(returnBuffers);
+
         _needEOC = false;
         _needMore = false;
         _expectMore = false;
         _bufferPrepared = false;
-        _needCPong = false;
-        setPersistent(true);
+        _last=false;
+
+
+
+        _state = STATE_HEADER;
+
+        _status = 0;
+        _version = HttpVersions.HTTP_1_1_ORDINAL;
+        _reason = null;
+        _method = null;
+        _uri = null;
+
+        _contentWritten = 0;
+        _contentLength = HttpTokens.UNKNOWN_CONTENT;
+        _last = false;
+        _head = false;
+        _noContent = false;
+        _close = false;
+
+
+       
+
+       _header = null; // Buffer for HTTP header (and maybe small _content)
+       _buffer = null; // Buffer for copy of passed _content
+       _content = null; // Buffer passed to addContent
+
+
     }
 
     /* ------------------------------------------------------------ */
@@ -146,7 +166,6 @@ public class Ajp13Generator extends AbstractGenerator
      */
     public void addContent(Buffer content, boolean last) throws IOException
     {
-
         if (_noContent)
         {
             content.clear();
@@ -223,6 +242,7 @@ public class Ajp13Generator extends AbstractGenerator
      */
     public boolean addContent(byte b) throws IOException
     {
+
         if (_noContent)
             return false;
 
@@ -345,6 +365,7 @@ public class Ajp13Generator extends AbstractGenerator
                 _content = null;
             }
 
+
             // allocate 2 bytes for number of headers
             int field_index = _buffer.putIndex();
             addInt(0);
@@ -399,6 +420,7 @@ public class Ajp13Generator extends AbstractGenerator
             _buffer = tmpbuf;
         }
 
+
         _state = STATE_CONTENT;
 
     }
@@ -430,7 +452,7 @@ public class Ajp13Generator extends AbstractGenerator
     {
         try
         {
-            if (_state == STATE_HEADER  && !_expectMore && !_needCPong)
+            if (_state == STATE_HEADER  && !_expectMore)
                 throw new IllegalStateException("State==HEADER");
             prepareBuffers();
 
@@ -442,7 +464,7 @@ public class Ajp13Generator extends AbstractGenerator
                 // if(!_hasSentEOC)
                 // _buffer.put(AJP13_MORE_CONTENT);
                 // }
-                if (!_needCPong && !_expectMore && _needEOC && _buffer != null)
+                if (!_expectMore && _needEOC && _buffer != null)
                 {
                     _buffer.put(AJP13_END_RESPONSE);
                 }
@@ -458,6 +480,7 @@ public class Ajp13Generator extends AbstractGenerator
             {
                 int len = -1;
                 int to_flush = ((_header != null && _header.length() > 0) ? 4 : 0) | ((_buffer != null && _buffer.length() > 0) ? 2 : 0);
+                
 
                 switch (to_flush)
                 {
@@ -522,16 +545,17 @@ public class Ajp13Generator extends AbstractGenerator
 
 
 
-
                     // Are we completely finished for now?
-                    if (!_needCPong && !_expectMore && !_needEOC && (_content == null || _content.length() == 0))
+                    if (!_expectMore && !_needEOC && (_content == null || _content.length() == 0))
                     {
                         if (_state == STATE_FLUSHING)
                             _state = STATE_END;
-                        /*
-                        if (_state == STATE_END)
-                            _endp.close();
-                        */
+
+//                        if (_state == STATE_END)
+//                        {
+//                            _endp.close();
+//                        }
+//
 
                         break Flushing;
                     }
@@ -570,23 +594,6 @@ public class Ajp13Generator extends AbstractGenerator
     {
         if (!_bufferPrepared)
         {
-            if(_needCPong)
-            {
-                if (_header == null)
-                {
-                    _header = _buffers.getBuffer(AJP13_CPONG_RESPONSE.length);
-                }
-
-                _needMore = false;
-                _expectMore = false;
-                _needEOC = false;
-                _needCPong = false;
-                _header.put(AJP13_CPONG_RESPONSE);  // TODO will there always be room?
-                _bufferPrepared = true;
-
-                return;
-            }
-
 
             // Refill buffer if possible
             if (_content != null && _content.length() > 0 && _buffer != null && _buffer.space() > 0)
@@ -767,8 +774,21 @@ public class Ajp13Generator extends AbstractGenerator
     /* ------------------------------------------------------------ */
     public void sendCPong() throws IOException
     {
-        _needCPong = true;
-        flush();
+
+        Buffer buff = _buffers.getBuffer(AJP13_CPONG_RESPONSE.length);
+        buff.put(AJP13_CPONG_RESPONSE);
+
+        // flushing cpong response
+        do
+        {
+            _endp.flush(buff);
+
+        }
+        while(buff.length() >0);
+        _buffers.returnBuffer(buff);
+
+        reset(true);
+
     }
 
 
