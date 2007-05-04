@@ -595,10 +595,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
             }
             catch (CancelledKeyException e)
             {
-                if (isRunning())
-                    Log.warn(e);
-                else
-                    Log.ignore(e);
+                Log.ignore(e);
             }
             finally
             {
