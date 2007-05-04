@@ -247,6 +247,8 @@ public class XmlConfiguration
                     newArray(obj, node);
                 else if ("Ref".equals(tag))
                     refObj(obj, node);
+                else if ("Property".equals(tag))
+                    propertyObj(obj, node);
                 else
                     throw new IllegalStateException("Unknown tag: " + tag);
             }
@@ -735,6 +737,34 @@ public class XmlConfiguration
 
     /* ------------------------------------------------------------ */
     /*
+     * Create a new value object.
+     *
+     * @param obj @param node @return @exception Exception
+     */
+    private Object propertyObj(Object obj, XmlParser.Node node) throws Exception
+    {
+        String id = node.getAttribute("id");
+        String name = node.getAttribute("name");
+        Object defval = node.getAttribute("default");
+        Object prop=null;
+        if (_propertyMap!=null && _propertyMap.containsKey(name))
+        {
+            prop=_propertyMap.get(name);
+        }
+        else if (defval != null)
+            prop=defval;
+        else
+            throw new Exception ("Unresolved property name="+name);
+
+        if (id != null) 
+            _idMap.put(id, prop);
+        if (prop!=null)
+            configure(prop, node, 0);
+        return prop;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /*
      * Get the value of an element. If no value type is specified, then white space is trimmed out
      * of the value. If it contains multiple value elements they are added as strings before being
      * converted to any specified type. @param node
@@ -877,6 +907,7 @@ public class XmlConfiguration
         if ("Ref".equals(tag)) return refObj(obj, node);
         if ("Array".equals(tag)) return newArray(obj, node);
         if ("Map".equals(tag)) return newMap(obj, node);
+        if ("Property".equals(tag)) return propertyObj(obj,node);
 
         if ("SystemProperty".equals(tag))
         {
@@ -884,20 +915,7 @@ public class XmlConfiguration
             String defaultValue = node.getAttribute("default");
             return System.getProperty(name, defaultValue);
         }
-        if ("Property".equals(tag))
-        {
-            String name = node.getAttribute("name");
-            Object defval = node.getAttribute("default");
-            if (_propertyMap!=null && _propertyMap.containsKey(name))
-            {
-                return _propertyMap.get(name);
-            }
-            else if (defval != null)
-                return defval;
-            else
-                throw new Exception ("Unresolved property name="+name);
-        }
-
+        
         Log.warn("Unknown value tag: " + node, new Throwable());
         return null;
     }
