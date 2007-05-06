@@ -59,6 +59,11 @@
                   <version>${slf4j-version}</version>
                 </artifactItem>
                 <artifactItem>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>slf4j-api</artifactId>
+                  <version>${slf4j-version}</version>
+                </artifactItem>
+                <artifactItem>
                   <groupId>tomcat</groupId>
                   <artifactId>jasper-compiler-jdt</artifactId>
                   <version>${jasper-version}</version>
@@ -107,6 +112,12 @@
     </plugins>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j-version}</version>
+      <scope>runtime</scope>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
