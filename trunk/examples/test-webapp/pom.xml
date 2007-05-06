@@ -79,6 +79,29 @@
           </userRealms>
         </configuration>
       </plugin>
+      <!-- uncomment to precompile jsps -->
+      <!-- plugin>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>maven-jetty-jspc-plugin</artifactId>
+          <version></version>
+          <executions>
+            <execution>
+              <id>jspc</id>
+              <goals>
+                <goal>jspc</goal>
+              </goals>
+              <configuration>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <configuration>
+            <webXml>${basedir}/target/web.xml</webXml>
+          </configuration>
+       </plugin -->
     </plugins>
   </build>
   <dependencies>
