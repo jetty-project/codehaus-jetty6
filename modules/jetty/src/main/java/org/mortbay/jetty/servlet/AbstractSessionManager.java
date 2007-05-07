@@ -702,19 +702,19 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      */
     public abstract class Session implements HttpSession, Serializable
     {
-        final String _clusterId;
-        final String _nodeId;
-        boolean _idChanged;
-        final long _created;
-        long _cookieSet;
-        long _accessed;
-        long _lastAccessed;
-        boolean _invalid;
-        boolean _doInvalidate;
-        long _maxIdleMs=_dftMaxIdleSecs*1000;
-        boolean _newSession;
-        Map _values;
-        int _requests;
+        protected final String _clusterId;
+        protected final String _nodeId;
+        protected boolean _idChanged;
+        protected final long _created;
+        protected long _cookieSet;
+        protected long _accessed;
+        protected long _lastAccessed;
+        protected boolean _invalid;
+        protected boolean _doInvalidate;
+        protected long _maxIdleMs=_dftMaxIdleSecs*1000;
+        protected boolean _newSession;
+        protected Map _values;
+        protected int _requests;
 
         /* ------------------------------------------------------------- */
         protected Session(HttpServletRequest request)
