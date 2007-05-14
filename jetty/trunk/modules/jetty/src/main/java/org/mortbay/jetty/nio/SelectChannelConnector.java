@@ -274,10 +274,26 @@ public class SelectChannelConnector extends AbstractNIOConnector
      * in order to gracefully handle high load situations.
      * @param lowResourcesMaxIdleTime the period in ms that a connection is allowed to be idle when resources are low.
      * @see {@link #setMaxIdleTime(long)}
+     * @deprecated use {@link #setLowResourceMaxIdleTime(int)}
      */
     public void setLowResourcesMaxIdleTime(long lowResourcesMaxIdleTime)
     {
         _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
+        setLowResourceMaxIdleTime((int)lowResourcesMaxIdleTime); // TODO fix the name duplications
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the period in ms that a connection is allowed to be idle when this there are more
+     * than {@link #getLowResourcesConnections()} connections.  This allows the server to rapidly close idle connections
+     * in order to gracefully handle high load situations.
+     * @param lowResourcesMaxIdleTime the period in ms that a connection is allowed to be idle when resources are low.
+     * @see {@link #setMaxIdleTime(long)}
+     */
+    public void setLowResourceMaxIdleTime(int lowResourcesMaxIdleTime)
+    {
+        _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
+        setLowResourceMaxIdleTime(lowResourcesMaxIdleTime); 
     }
     
     /* ------------------------------------------------------------ */
