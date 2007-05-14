@@ -93,6 +93,13 @@
   <!--                                                                      -->
   <!--  cacheControl      If set, all static content will have this value   -->
   <!--                    set as the cache-control header.                  -->
+  <!--                                                                      -->
+  <!--  maxCacheSize      Maximum size of the static resource cache         -->
+  <!--                                                                      -->
+  <!--  maxCachedFileSize Maximum size of any single file in the cache      -->
+  <!--                                                                      -->
+  <!--  maxCachedFiles    Maximum number of files in the cache              -->
+  <!--                                                                      -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
     <servlet-name>default</servlet-name>
