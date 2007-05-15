@@ -279,7 +279,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     public void setLowResourcesMaxIdleTime(long lowResourcesMaxIdleTime)
     {
         _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
-        setLowResourceMaxIdleTime((int)lowResourcesMaxIdleTime); // TODO fix the name duplications
+        super.setLowResourceMaxIdleTime((int)lowResourcesMaxIdleTime); // TODO fix the name duplications
     }
 
     /* ------------------------------------------------------------ */
@@ -293,7 +293,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     public void setLowResourceMaxIdleTime(int lowResourcesMaxIdleTime)
     {
         _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
-        setLowResourceMaxIdleTime(lowResourcesMaxIdleTime); 
+        super.setLowResourceMaxIdleTime(lowResourcesMaxIdleTime); 
     }
     
     /* ------------------------------------------------------------ */
