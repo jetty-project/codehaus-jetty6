@@ -69,7 +69,7 @@
         <artifactId>maven-jetty-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
-          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <scanIntervalSeconds>1</scanIntervalSeconds>
           <contextPath>/test</contextPath>
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
