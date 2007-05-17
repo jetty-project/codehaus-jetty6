@@ -160,13 +160,23 @@ public class SslSocketConnector extends SocketConnector
         super();
     }
 
+
+    /* ------------------------------------------------------------ */
+    public void accept(int acceptorID)
+        throws IOException, InterruptedException
+    {   
+        Socket socket = _serverSocket.accept();
+        configure(socket);
+        
+        Connection connection=new SslConnection(socket);
+        connection.dispatch();
+    }
+    
     /* ------------------------------------------------------------ */
     protected void configure(Socket socket)
         throws IOException
     {   
         super.configure(socket);
-
-        ((SSLSocket)socket).startHandshake(); // block until SSL handshaking is done
     }
 
     /* ------------------------------------------------------------ */
@@ -572,6 +582,30 @@ public class SslSocketConnector extends SocketConnector
         Integer getKeySize()
         {
             return _keySize;
+        }
+    }
+    
+    
+    public class SslConnection extends Connection
+    {
+        public SslConnection(Socket socket) throws IOException
+        {
+            super(socket);
+        }
+        
+        public void run()
+        {
+            try
+            {
+                ((SSLSocket)_socket).startHandshake();
+            }
+            catch (IOException e)
+            {
+                Log.debug(e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
+            } 
+            super.run();
         }
     }
 
