@@ -375,11 +375,11 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     throw new IOException("sslEngine closed");
                     
                 case BUFFER_OVERFLOW:
-                    new Throwable().printStackTrace();
-                    Log.warn("unwrap "+_result);
+                    Log.debug("unwrap {}",_result);
                     break;
                     
                 case BUFFER_UNDERFLOW:
+                    Log.debug("unwrap {}",_result);
                     break;
                     
                 default:
