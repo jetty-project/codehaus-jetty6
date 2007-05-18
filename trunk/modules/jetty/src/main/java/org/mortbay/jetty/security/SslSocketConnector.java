@@ -149,6 +149,7 @@ public class SslSocketConnector extends SocketConnector
 
     /** Set to true if we would like client certificate authentication. */
     private boolean _wantClientAuth = false;
+    private int _handshakeTimeout = 0; //0 means use maxIdleTime
 
 
     /* ------------------------------------------------------------ */
@@ -560,6 +561,21 @@ public class SslSocketConnector extends SocketConnector
     }
 
     /**
+     * Set the time in milliseconds for so_timeout during ssl handshaking
+     * @param msec a non-zero value will be used to set so_timeout during
+     * ssl handshakes. A zero value means the maxIdleTime is used instead.
+     */
+    public void setHandshakeTimeout (int msec)
+    {
+        _handshakeTimeout = msec;
+    }
+    
+    
+    public int getHandshakeTimeout ()
+    {
+        return _handshakeTimeout;
+    }
+    /**
      * Simple bundle of information that is cached in the SSLSession. Stores the effective keySize
      * and the client certificate chain.
      */
@@ -597,7 +613,15 @@ public class SslSocketConnector extends SocketConnector
         {
             try
             {
+                int handshakeTimeout = getHandshakeTimeout();
+                int oldTimeout = _socket.getSoTimeout();
+                if (handshakeTimeout > 0)            
+                    _socket.setSoTimeout(handshakeTimeout);
+
                 ((SSLSocket)_socket).startHandshake();
+
+                if (handshakeTimeout>0)
+                    _socket.setSoTimeout(oldTimeout);
             }
             catch (IOException e)
             {
