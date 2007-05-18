@@ -950,6 +950,9 @@ public class Response implements HttpServletResponse
             }
         }
         
+        if (_connection.getConnector().getServer().getSendDateHeader())
+            response_fields.put(HttpHeaders.DATE_BUFFER, _connection.getRequest().getTimeStampStr());
+        
         _status=200;
         _reason=null;
         _mimeType=null;
