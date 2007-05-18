@@ -11,7 +11,7 @@ jetty-6.1-SNAPSHOT
  + Delay ssl handshake until after dispatch in sslSocketConnector
  + Set so_timeout during ssl handshake as an option on SslSocketConnector
  + JETTY-309 fix applied to sslEngine
- + JETTY-335 SslEngine underflow handling
+ + JETTY-335 SslEngine overflow fix
 
 jetty-6.1.3 - 4 May 2007
  + Handle CRLF for content in header optimization

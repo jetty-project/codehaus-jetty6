@@ -331,7 +331,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         
         if (!_inNIOBuffer.hasContent() || (_result != null && _result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW))
         {
-            if (_result != null && _result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW)
+            if (_inNIOBuffer.hasContent())
                 _inNIOBuffer.compact();
             else 
                 _inNIOBuffer.clear();
@@ -357,41 +357,35 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
             _result=_engine.unwrap(_inBuffer,buffer);
-
-            if (_result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW)
-            {
-                buffer.clear();
-                _result=_engine.unwrap(_inBuffer,buffer);
-            }
-            
-            if (_result != null)
-            {
-            	if (_result.getStatus() == SSLEngineResult.Status.OK)	
-            		_inNIOBuffer.skip(_result.bytesConsumed());
-            	else if (_result.getStatus() == SSLEngineResult.Status.CLOSED)
-            		throw new IOException("sslEngine closed");
-            }
-            
         }
         finally
         {
             _inBuffer.position(0);
             _inBuffer.limit(_inBuffer.capacity());
         }
-        
-        switch(_result.getStatus())
+
+        if (_result != null)
         {
-            case OK:
-            case CLOSED:
-                break;
-            case BUFFER_UNDERFLOW:
-            	break;
-            case BUFFER_OVERFLOW:
-            	buffer.clear();
-            	break;
-            default:
-                Log.warn("unwrap "+_result);
+            switch(_result.getStatus())
+            {
+                case OK:
+                    _inNIOBuffer.skip(_result.bytesConsumed());
+                    break;
+                case CLOSED:
+                    throw new IOException("sslEngine closed");
+                    
+                case BUFFER_OVERFLOW:
+                    new Throwable().printStackTrace();
+                    Log.warn("unwrap "+_result);
+                    break;
+                    
+                case BUFFER_UNDERFLOW:
+                    break;
+                    
+                default:
+                    Log.warn("unwrap "+_result);
                 throw new IOException(_result.toString());
+            }
         }
         
         return (_result.bytesProduced()+_result.bytesConsumed())>0;
