@@ -100,7 +100,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         protected Connection newConnection(SocketChannel channel,SelectChannelEndPoint endpoint)
         {
-            return new HttpConnection(SelectChannelConnector.this,endpoint,getServer());
+            return SelectChannelConnector.this.newConnection(channel,endpoint);
         }
 
         protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey sKey) throws IOException
@@ -325,7 +325,12 @@ public class SelectChannelConnector extends AbstractNIOConnector
     {
         return new ConnectorEndPoint(channel,selectSet,key);
     }
-    
+
+    /* ------------------------------------------------------------------------------- */
+    protected Connection newConnection(SocketChannel channel,SelectChannelEndPoint endpoint)
+    {
+        return new HttpConnection(SelectChannelConnector.this,endpoint,getServer());
+    }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
