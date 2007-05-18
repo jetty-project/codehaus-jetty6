@@ -1270,7 +1270,9 @@ public class Request implements HttpServletRequest
                         }
                         
                         if (content_length>maxFormContentSize && maxFormContentSize > 0)
-                                throw new IllegalStateException("Form too large");
+                        {
+                            throw new IllegalStateException("Form too large"+content_length+">"+maxFormContentSize);
+                        }
                         InputStream in = getInputStream();
                        
                         // Add form params to query params
