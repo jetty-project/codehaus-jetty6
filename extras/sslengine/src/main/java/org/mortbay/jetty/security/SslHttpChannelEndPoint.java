@@ -357,6 +357,13 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
             _result=_engine.unwrap(_inBuffer,buffer);
+
+            if (_result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW)
+            {
+                buffer.clear();
+                _result=_engine.unwrap(_inBuffer,buffer);
+            }
+            
             if (_result != null)
             {
             	if (_result.getStatus() == SSLEngineResult.Status.OK)	
@@ -391,28 +398,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * Updates selection key. Adds operations types to the selection key as needed. No operations
-     * are removed as this is only done during dispatch. This method records the new key and
-     * schedules a call to syncKey to do the keyChange
-     */
-    protected void updateKey()
-    {
-        synchronized (this)
-        {
-            int ops = _key == null ? 0 : _key.interestOps();
-            _interestOps = ops | ((!_dispatched || _readBlocked) ? SelectionKey.OP_READ : 0) | (_writable && !_writeBlocked && !isBufferingOutput() ? 0 : SelectionKey.OP_WRITE);
-            _writable = true; // Once writable is in ops, only removed with dispatch.
-
-            if (_interestOps != ops)
-            {
-                _selectSet.addChange(this);
-                _selectSet.wakeup();
-            }
-        }
-    }
-
-    /* ------------------------------------------------------------ */
     public boolean isBufferingInput()
     {
         return _inNIOBuffer.hasContent();
@@ -430,6 +415,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         return true;
     }
 
+    /* ------------------------------------------------------------ */
     public SSLEngine getSSLEngine()
     {
         return _engine;
