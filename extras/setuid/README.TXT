@@ -19,7 +19,7 @@ Install
 
 From this directory do: 
 
-  cp target/jetty-setuid-6.1.3.jar ../../lib/ext/
+  cp target/jetty-setuid-6.1.3z.jar ../../lib/ext/
   cp etc/jetty-setuid.xml ../../etc
 
 
