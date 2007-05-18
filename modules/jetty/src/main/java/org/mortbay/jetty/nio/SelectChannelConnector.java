@@ -100,7 +100,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         protected Connection newConnection(SocketChannel channel,SelectChannelEndPoint endpoint)
         {
-            return SelectChannelConnector.this.newConnection(channel,endpoint);
+            return new HttpConnection(SelectChannelConnector.this,endpoint,getServer());
         }
 
         protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey sKey) throws IOException
@@ -274,26 +274,10 @@ public class SelectChannelConnector extends AbstractNIOConnector
      * in order to gracefully handle high load situations.
      * @param lowResourcesMaxIdleTime the period in ms that a connection is allowed to be idle when resources are low.
      * @see {@link #setMaxIdleTime(long)}
-     * @deprecated use {@link #setLowResourceMaxIdleTime(int)}
      */
     public void setLowResourcesMaxIdleTime(long lowResourcesMaxIdleTime)
     {
         _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
-        super.setLowResourceMaxIdleTime((int)lowResourcesMaxIdleTime); // TODO fix the name duplications
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Set the period in ms that a connection is allowed to be idle when this there are more
-     * than {@link #getLowResourcesConnections()} connections.  This allows the server to rapidly close idle connections
-     * in order to gracefully handle high load situations.
-     * @param lowResourcesMaxIdleTime the period in ms that a connection is allowed to be idle when resources are low.
-     * @see {@link #setMaxIdleTime(long)}
-     */
-    public void setLowResourceMaxIdleTime(int lowResourcesMaxIdleTime)
-    {
-        _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
-        super.setLowResourceMaxIdleTime(lowResourcesMaxIdleTime); 
     }
     
     /* ------------------------------------------------------------ */
@@ -325,12 +309,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     {
         return new ConnectorEndPoint(channel,selectSet,key);
     }
-
-    /* ------------------------------------------------------------------------------- */
-    protected Connection newConnection(SocketChannel channel,SelectChannelEndPoint endpoint)
-    {
-        return new HttpConnection(SelectChannelConnector.this,endpoint,getServer());
-    }
+    
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

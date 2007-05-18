@@ -149,7 +149,6 @@ public class SslSocketConnector extends SocketConnector
 
     /** Set to true if we would like client certificate authentication. */
     private boolean _wantClientAuth = false;
-    private int _handshakeTimeout = 0; //0 means use maxIdleTime
 
 
     /* ------------------------------------------------------------ */
@@ -161,23 +160,13 @@ public class SslSocketConnector extends SocketConnector
         super();
     }
 
-
-    /* ------------------------------------------------------------ */
-    public void accept(int acceptorID)
-        throws IOException, InterruptedException
-    {   
-        Socket socket = _serverSocket.accept();
-        configure(socket);
-        
-        Connection connection=new SslConnection(socket);
-        connection.dispatch();
-    }
-    
     /* ------------------------------------------------------------ */
     protected void configure(Socket socket)
         throws IOException
     {   
         super.configure(socket);
+
+        ((SSLSocket)socket).startHandshake(); // block until SSL handshaking is done
     }
 
     /* ------------------------------------------------------------ */
@@ -561,21 +550,6 @@ public class SslSocketConnector extends SocketConnector
     }
 
     /**
-     * Set the time in milliseconds for so_timeout during ssl handshaking
-     * @param msec a non-zero value will be used to set so_timeout during
-     * ssl handshakes. A zero value means the maxIdleTime is used instead.
-     */
-    public void setHandshakeTimeout (int msec)
-    {
-        _handshakeTimeout = msec;
-    }
-    
-    
-    public int getHandshakeTimeout ()
-    {
-        return _handshakeTimeout;
-    }
-    /**
      * Simple bundle of information that is cached in the SSLSession. Stores the effective keySize
      * and the client certificate chain.
      */
@@ -598,39 +572,6 @@ public class SslSocketConnector extends SocketConnector
         Integer getKeySize()
         {
             return _keySize;
-        }
-    }
-    
-    
-    public class SslConnection extends Connection
-    {
-        public SslConnection(Socket socket) throws IOException
-        {
-            super(socket);
-        }
-        
-        public void run()
-        {
-            try
-            {
-                int handshakeTimeout = getHandshakeTimeout();
-                int oldTimeout = _socket.getSoTimeout();
-                if (handshakeTimeout > 0)            
-                    _socket.setSoTimeout(handshakeTimeout);
-
-                ((SSLSocket)_socket).startHandshake();
-
-                if (handshakeTimeout>0)
-                    _socket.setSoTimeout(oldTimeout);
-
-                super.run();
-            }
-            catch (IOException e)
-            {
-                Log.debug(e);
-                try{close();}
-                catch(IOException e2){Log.ignore(e2);}
-            } 
         }
     }
 

@@ -172,7 +172,7 @@ public class SocketConnector extends AbstractConnector
         boolean _dispatched=false;
         HttpConnection _connection;
         int _sotimeout;
-        protected Socket _socket;
+        Socket _socket;
         
         public Connection(Socket socket) throws IOException
         {

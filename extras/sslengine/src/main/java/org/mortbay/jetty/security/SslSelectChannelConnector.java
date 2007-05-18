@@ -24,15 +24,12 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
@@ -91,7 +88,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
     private String _truststore;
     private String _truststoreType = "JKS"; // type of the key store
-    private SSLContext context;
 
     /**
      * Return the chain of X509 certificates used to negotiate the SSL Session.
@@ -205,12 +201,8 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     /* ------------------------------------------------------------ */
     public SslSelectChannelConnector()
     {
-        // Buffer sizes should be from SSL session, but not known at this stage.
-        // size should be 16k, but appears to need 16k+1 byte?  Giving it 16k+2k just
-        // to be safe. TODO investigate
-        setHeaderBufferSize(18*1024);
-        setRequestBufferSize(18*1024);
-        setResponseBufferSize(18*1024);
+        setHeaderBufferSize(32768);
+        setRequestBufferSize(65536);
     }
     
     /* ------------------------------------------------------------ */
@@ -418,20 +410,11 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         return integralPort == 0 || integralPort == request.getServerPort();
     }
 
-    /* ------------------------------------------------------------------------------- */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
         return new SslHttpChannelEndPoint(channel, selectSet, key, createSSLEngine());
     }
 
-    /* ------------------------------------------------------------------------------- */
-    protected Connection newConnection(SocketChannel channel,SelectChannelEndPoint endpoint)
-    {
-        HttpConnection connection = (HttpConnection)super.newConnection(channel,endpoint);
-        ((HttpParser)connection.getParser()).setForceContentBuffer(true);
-        return connection;
-    }
-    
     /* ------------------------------------------------------------ */
     protected SSLEngine createSSLEngine() throws IOException
     {
@@ -516,49 +499,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     @Override
     protected void doStart() throws Exception
     {      
-        if (_password==null)
-            _password=new Password("");
-        if (_keyPassword==null)
-            _keyPassword=_password;
-        if (_trustPassword==null)
-            _trustPassword=_password;
-
-        if (_truststore==null)
-        {
-            _truststore=_keystore;
-            _truststoreType=_keystoreType;
-        }
-
-        KeyManager[] keyManagers = null;
-        if (_keystore != null)
-        {
-            KeyStore keyStore = KeyStore.getInstance(_keystoreType);
-            if (_password == null) 
-                throw new SSLException("_password is not set");
-            keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
-
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
-            if (_keyPassword == null) 
-                throw new SSLException("_keypassword is not set");
-            keyManagerFactory.init(keyStore,_keyPassword.toString().toCharArray());
-            keyManagers = keyManagerFactory.getKeyManagers();
-        }
-
-        TrustManager[] trustManagers = null;
-        if (_truststore != null)
-        {
-            KeyStore trustStore = KeyStore.getInstance(_truststoreType);
-            trustStore.load(Resource.newResource(_truststore).getInputStream(), _trustPassword.toString().toCharArray());
-
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
-            trustManagerFactory.init(trustStore);
-            trustManagers = trustManagerFactory.getTrustManagers();
-        }
-
-        SecureRandom secureRandom = _secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
-        context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
-        context.init(keyManagers, trustManagers, secureRandom);
-
         super.doStart();
     }
     

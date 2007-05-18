@@ -331,7 +331,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         
         if (!_inNIOBuffer.hasContent() || (_result != null && _result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW))
         {
-            if (_inNIOBuffer.hasContent())
+            if (_result != null && _result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW)
                 _inNIOBuffer.compact();
             else 
                 _inNIOBuffer.clear();
@@ -357,38 +357,59 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
             _result=_engine.unwrap(_inBuffer,buffer);
+            if (_result != null)
+            {
+            	if (_result.getStatus() == SSLEngineResult.Status.OK)	
+            		_inNIOBuffer.skip(_result.bytesConsumed());
+            	else if (_result.getStatus() == SSLEngineResult.Status.CLOSED)
+            		throw new IOException("sslEngine closed");
+            }
+            
         }
         finally
         {
             _inBuffer.position(0);
             _inBuffer.limit(_inBuffer.capacity());
         }
-
-        if (_result != null)
+        
+        switch(_result.getStatus())
         {
-            switch(_result.getStatus())
-            {
-                case OK:
-                    _inNIOBuffer.skip(_result.bytesConsumed());
-                    break;
-                case CLOSED:
-                    throw new IOException("sslEngine closed");
-                    
-                case BUFFER_OVERFLOW:
-                    new Throwable().printStackTrace();
-                    Log.warn("unwrap "+_result);
-                    break;
-                    
-                case BUFFER_UNDERFLOW:
-                    break;
-                    
-                default:
-                    Log.warn("unwrap "+_result);
+            case OK:
+            case CLOSED:
+                break;
+            case BUFFER_UNDERFLOW:
+            	break;
+            case BUFFER_OVERFLOW:
+            	buffer.clear();
+            	break;
+            default:
+                Log.warn("unwrap "+_result);
                 throw new IOException(_result.toString());
-            }
         }
         
         return (_result.bytesProduced()+_result.bytesConsumed())>0;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Updates selection key. Adds operations types to the selection key as needed. No operations
+     * are removed as this is only done during dispatch. This method records the new key and
+     * schedules a call to syncKey to do the keyChange
+     */
+    protected void updateKey()
+    {
+        synchronized (this)
+        {
+            int ops = _key == null ? 0 : _key.interestOps();
+            _interestOps = ops | ((!_dispatched || _readBlocked) ? SelectionKey.OP_READ : 0) | (_writable && !_writeBlocked && !isBufferingOutput() ? 0 : SelectionKey.OP_WRITE);
+            _writable = true; // Once writable is in ops, only removed with dispatch.
+
+            if (_interestOps != ops)
+            {
+                _selectSet.addChange(this);
+                _selectSet.wakeup();
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -409,7 +430,6 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         return true;
     }
 
-    /* ------------------------------------------------------------ */
     public SSLEngine getSSLEngine()
     {
         return _engine;
