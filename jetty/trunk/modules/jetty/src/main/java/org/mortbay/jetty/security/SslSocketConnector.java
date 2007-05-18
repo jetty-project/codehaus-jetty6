@@ -622,6 +622,8 @@ public class SslSocketConnector extends SocketConnector
 
                 if (handshakeTimeout>0)
                     _socket.setSoTimeout(oldTimeout);
+
+                super.run();
             }
             catch (IOException e)
             {
@@ -629,7 +631,6 @@ public class SslSocketConnector extends SocketConnector
                 try{close();}
                 catch(IOException e2){Log.ignore(e2);}
             } 
-            super.run();
         }
     }
 
