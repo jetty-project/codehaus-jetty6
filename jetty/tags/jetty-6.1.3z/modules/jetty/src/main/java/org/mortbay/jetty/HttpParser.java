@@ -69,6 +69,8 @@ public class HttpParser implements Parser
     private View _tok1; // Saved token: header value, request URI or response code
     private String _multiLineValue;
     private int _responseStatus; // If >0 then we are parsing a response
+    private boolean _forceContentBuffer;
+    
     /* ------------------------------------------------------------------------------- */
     protected int _state=STATE_START;
     protected byte _eol;
@@ -516,8 +518,8 @@ public class HttpParser implements Parser
                                     
                                 default:
                                     _state=STATE_CONTENT;
-
-                                    if(_buffers!=null && _body==null && _buffer==_header && _contentLength>=(_header.capacity()-_header.getIndex()))
+                                    if(_forceContentBuffer || 
+                                      (_buffers!=null && _body==null && _buffer==_header && _contentLength>=(_header.capacity()-_header.getIndex())))
                                        _body=_buffers.getBuffer(_contentBufferSize);
                                     _handler.headerComplete(); // May recurse here !
                                     break;
@@ -809,6 +811,7 @@ public class HttpParser implements Parser
         return "state=" + _state + " length=" + _length + " buf=" + buf.hashCode();
     }
 
+    /* ------------------------------------------------------------ */
     public Buffer getHeaderBuffer()
     {
         if (_header == null)
@@ -818,6 +821,15 @@ public class HttpParser implements Parser
         return _header;
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @param force True if a new buffer will be forced to be used for content and the header buffer will not be used.
+     */
+    public void setForceContentBuffer(boolean force)
+    {
+        _forceContentBuffer=force;
+    } 
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -965,7 +977,9 @@ public class HttpParser implements Parser
             
             return _content==null?0:_content.length();
         }
-    } 
-    
+    }
+
+
+
     
 }
