@@ -37,6 +37,7 @@ import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
+import org.mortbay.util.DateCache;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 
@@ -58,11 +59,11 @@ public class Server extends HandlerWrapper implements Attributes
     private UserRealm[] _realms;
     private Container _container=new Container();
     private SessionIdManager _sessionIdManager;
-    private boolean _sendServerVersion = true; //send Server: header by default
+    private boolean _sendServerVersion = true; //send Server: header
+    private boolean _sendDateHeader = false; //send Date: header 
     private AttributesMap _attributes = new AttributesMap();
     private String _version = "6.1.x";
     private List _dependentLifeCycles=new ArrayList();
-    
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -357,6 +358,21 @@ public class Server extends HandlerWrapper implements Attributes
     public String getVersion()
     {
         return _version;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param sendDateHeader
+     */
+    public void setSendDateHeader(boolean sendDateHeader)
+    {
+        _sendDateHeader = sendDateHeader;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getSendDateHeader()
+    {
+        return _sendDateHeader;
     }
     
     

@@ -30,6 +30,7 @@ import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.DateCache;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
 
@@ -755,7 +756,6 @@ public class HttpConnection implements Connection
                             if (_version==HttpVersions.HTTP_1_0_ORDINAL)
                                 _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.KEEP_ALIVE_BUFFER);
                             break;
-                            
                     } 
             }
 
@@ -778,6 +778,11 @@ public class HttpConnection implements Connection
                     break;
                 case HttpVersions.HTTP_1_1_ORDINAL:
                     _generator.setHead(_head);
+                    
+                    if (_server.getSendDateHeader())
+                        _responseFields.put(HttpHeaders.DATE_BUFFER, _request.getTimeStampStr());
+                   
+                    
                     if (!_host)
                     {
                         _generator.setResponse(HttpStatus.ORDINAL_400_Bad_Request, null);
@@ -809,6 +814,7 @@ public class HttpConnection implements Connection
                             return;
                         }
                     }
+                    
                     break;
                 default:
             }
