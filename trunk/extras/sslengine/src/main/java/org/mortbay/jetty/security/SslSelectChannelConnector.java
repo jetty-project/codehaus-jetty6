@@ -438,51 +438,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         SSLEngine engine = null;
         try
         {
-            if (_password==null)
-                _password=new Password("");
-            if (_keyPassword==null)
-                _keyPassword=_password;
-            if (_trustPassword==null)
-                _trustPassword=_password;
-            
-            if (_truststore==null)
-            {
-                _truststore=_keystore;
-                _truststoreType=_keystoreType;
-            }
-
-            KeyManager[] keyManagers = null;
-            if (_keystore != null)
-            {
-                KeyStore keyStore = KeyStore.getInstance(_keystoreType);
-                if (_password == null) 
-                    throw new SSLException("_password is not set");
-                keyStore.load(Resource.newResource(_keystore).getInputStream(), _password.toString().toCharArray());
-        
-                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
-                if (_keyPassword == null) 
-                    throw new SSLException("_keypassword is not set");
-                keyManagerFactory.init(keyStore,_keyPassword.toString().toCharArray());
-                keyManagers = keyManagerFactory.getKeyManagers();
-            }
-
-            TrustManager[] trustManagers = null;
-            if (_truststore != null)
-            {
-                KeyStore trustStore = KeyStore.getInstance(_truststoreType);
-                trustStore.load(Resource.newResource(_truststore).getInputStream(), _trustPassword.toString().toCharArray());
-                
-                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
-                trustManagerFactory.init(trustStore);
-                trustManagers = trustManagerFactory.getTrustManagers();
-            }
-
-            SecureRandom secureRandom = _secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
-
-            SSLContext context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
-
-            context.init(keyManagers, trustManagers, secureRandom);
-
             engine = context.createSSLEngine();
             
             if (_excludeCipherSuites != null && _excludeCipherSuites.length >0) 
