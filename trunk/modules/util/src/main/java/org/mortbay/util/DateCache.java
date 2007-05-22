@@ -55,10 +55,9 @@ public class DateCache
     private String _secFormatString0;
     private String _secFormatString1;
 
-    private boolean _millis=false;
-    private long _misses = 0;
     private long _lastMinutes = -1;
     private long _lastSeconds = -1;
+    private int _lastMs = -1;
     private String _lastResult = null;
 
     private Locale _locale	= null;
@@ -194,18 +193,14 @@ public class DateCache
         int i = _tzFormatString.indexOf("ss.SSS");
         int l = 6;
         if (i>=0)
-            _millis=true;
-        else
-        {
-            i = _tzFormatString.indexOf("ss");
-            l=2;
-        }
+            throw new IllegalStateException("ms not supported");
+        i = _tzFormatString.indexOf("ss");
+        l=2;
         
         // Build a formatter that formats a second format string
-        // Have to replace @ with ' later due to bug in SimpleDateFormat
         String ss1=_tzFormatString.substring(0,i);
         String ss2=_tzFormatString.substring(i+l);
-        _minFormatString =ss1+(_millis?"'ss.SSS'":"'ss'")+ss2;
+        _minFormatString =ss1+"'ss'"+ss2;
     }
 
     /* ------------------------------------------------------------ */
@@ -232,19 +227,14 @@ public class DateCache
             _lastSeconds>0 && seconds>_lastSeconds+__hitWindow)
         {
             // It's a cache miss
-            _misses++;
-            if (_misses<__MaxMisses)
-            {
-                Date d = new Date(inDate);
-                return _tzFormat.format(d);
-            }    
+            Date d = new Date(inDate);
+            return _tzFormat.format(d);
+            
         }
-        else if (_misses>0)
-            _misses--;
                                           
         // Check if we are in the same second
         // and don't care about millis
-        if (_lastSeconds==seconds && !_millis)
+        if (_lastSeconds==seconds )
             return _lastResult;
 
         Date d = new Date(inDate);
@@ -256,18 +246,8 @@ public class DateCache
             _lastMinutes = minutes;
             _secFormatString=_minFormat.format(d);
 
-            int i;
-            int l;
-            if (_millis)
-            {
-                i=_secFormatString.indexOf("ss.SSS");
-                l=6;
-            }
-            else
-            {
-                i=_secFormatString.indexOf("ss");
-                l=2;
-            }
+            int i=_secFormatString.indexOf("ss");
+            int l=2;
             _secFormatString0=_secFormatString.substring(0,i);
             _secFormatString1=_secFormatString.substring(i+l);
         }
@@ -282,17 +262,6 @@ public class DateCache
             if (s<10)
                 sb.append('0');
             sb.append(s);
-            if (_millis)
-            {
-                long millis = inDate%1000;
-                if (millis<10)
-                    sb.append(".00");
-                else if (millis<100)
-                    sb.append(".0");
-                else
-                    sb.append('.');
-                sb.append(millis);
-            }
             sb.append(_secFormatString1);
             _lastResult=sb.toString();
         }
@@ -327,6 +296,15 @@ public class DateCache
     /* ------------------------------------------------------------ */
     public String now()
     {
-        return format(System.currentTimeMillis());
+        long now=System.currentTimeMillis();
+        int n=0xfff&(int)now;
+        _lastMs=n%1000;
+        return format(now);
+    }
+
+    /* ------------------------------------------------------------ */
+    public int lastMs()
+    {
+        return _lastMs;
     }
 }

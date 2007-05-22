@@ -33,8 +33,9 @@ public class StdErrLog implements Logger
     {
         try
         {
-            _dateCache=new DateCache("yyyy-MM-dd HH:mm:ss.SSS");
-        }catch(Exception e)
+            _dateCache=new DateCache("yyyy-MM-dd HH:mm:ss");
+        }
+        catch(Exception e)
         {
             e.printStackTrace();
         }
@@ -63,14 +64,18 @@ public class StdErrLog implements Logger
     
     public void info(String msg,Object arg0, Object arg1)
     {
-        System.err.println(_dateCache.now()+":"+name+":INFO:  "+format(msg,arg0,arg1));
+        String d=_dateCache.now();
+        int ms=_dateCache.lastMs();
+        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":INFO:  "+format(msg,arg0,arg1));
     }
     
     public void debug(String msg,Throwable th)
     {
         if (debug)
         {
-            System.err.println(_dateCache.now()+":"+name+":DEBUG: "+msg);
+            String d=_dateCache.now();
+            int ms=_dateCache.lastMs();
+            System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":DEBUG: "+msg);
             if (th!=null) th.printStackTrace();
         }
     }
@@ -79,18 +84,24 @@ public class StdErrLog implements Logger
     {
         if (debug)
         {
-            System.err.println(_dateCache.now()+":"+name+":DEBUG: "+format(msg,arg0,arg1));
+            String d=_dateCache.now();
+            int ms=_dateCache.lastMs();
+            System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":DEBUG: "+format(msg,arg0,arg1));
         }
     }
     
     public void warn(String msg,Object arg0, Object arg1)
     {
-        System.err.println(_dateCache.now()+":"+name+":WARN:  "+format(msg,arg0,arg1));
+        String d=_dateCache.now();
+        int ms=_dateCache.lastMs();
+        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":WARN:  "+format(msg,arg0,arg1));
     }
     
     public void warn(String msg, Throwable th)
     {
-        System.err.println(_dateCache.now()+":"+name+":WARN:  "+msg);
+        String d=_dateCache.now();
+        int ms=_dateCache.lastMs();
+        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":WARN:  "+msg);
         if (th!=null)
             th.printStackTrace();
     }
