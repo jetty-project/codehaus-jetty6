@@ -713,10 +713,7 @@ public abstract class AbstractGenerator implements Generator
 
         /* ------------------------------------------------------------ */
         public void write (String s,int offset, int length) throws IOException
-        {      
-            if (_out._closed)
-                return;
-            
+        {   
             while (length > MAX_OUTPUT_CHARS)
             {
                 write(s, offset, MAX_OUTPUT_CHARS);
@@ -733,11 +730,9 @@ public abstract class AbstractGenerator implements Generator
 
         /* ------------------------------------------------------------ */
         public void write (char[] s,int offset, int length) throws IOException
-        {      
-            if (_out._closed)
-                return;
-            
+        {              
             Output out = _out; 
+            out._bytes.reset();
             
             while (length > 0)
             {  
@@ -881,7 +876,6 @@ public abstract class AbstractGenerator implements Generator
                         throw new IllegalStateException();
                 }
                 out._bytes.writeTo(out);
-                out._bytes.reset();
                 length-=chars;
                 offset+=chars;
             }
