@@ -320,7 +320,7 @@ public class HttpConnection implements Connection
                 {
                     try
                     {
-                        _out.close();
+                        out.close();
                     }
                     catch(IOException e)
                     {
