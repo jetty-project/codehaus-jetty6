@@ -324,6 +324,7 @@ public class Server extends HandlerWrapper implements Attributes
     }
 
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     /**
      * @return Returns the sessionIdManager.
      */
@@ -332,6 +333,7 @@ public class Server extends HandlerWrapper implements Attributes
         return _sessionIdManager;
     }
 
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /**
      * @param sessionIdManager The sessionIdManager to set.

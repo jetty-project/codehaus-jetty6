@@ -659,9 +659,9 @@ public class HttpConnection implements Connection
             _delayedHandling=false;
             _charset=null;
 
-            _request.setTimeStamp(System.currentTimeMillis());
+            if(_request.getTimeStamp()==0)
+                _request.setTimeStamp(System.currentTimeMillis());
             _request.setMethod(method.toString());
-            
 
             try
             {
@@ -780,7 +780,7 @@ public class HttpConnection implements Connection
                     _generator.setHead(_head);
                     
                     if (_server.getSendDateHeader())
-                        _responseFields.put(HttpHeaders.DATE_BUFFER, _request.getTimeStampStr());
+                        _responseFields.put(HttpHeaders.DATE_BUFFER, _request.getTimeStampBuffer());
                    
                     
                     if (!_host)

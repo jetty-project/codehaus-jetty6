@@ -38,6 +38,7 @@ import javax.servlet.http.Cookie;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
+import org.mortbay.io.BufferDateCache;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
@@ -162,7 +163,7 @@ public class HttpFields
 
     /* -------------------------------------------------------------- */
     private static TimeZone __GMT = TimeZone.getTimeZone("GMT");
-    public final static DateCache __dateCache = new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+    public final static BufferDateCache __dateCache = new BufferDateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 
     /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =

@@ -145,7 +145,9 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
     {
-        ((ConnectorEndPoint)endpoint).cancelIdle();
+        ConnectorEndPoint cep = ((ConnectorEndPoint)endpoint);
+        cep.cancelIdle();
+        request.setTimeStamp(cep.getSelectSet().getNow());
         super.customize(endpoint, request);
     }
     
