@@ -138,7 +138,7 @@ public class Request implements HttpServletRequest
     private Cookie[] _cookies;
     private String[] _lastCookies;
     private long _timeStamp;
-    private String _timeStampStr;
+    private Buffer _timeStampBuffer;
     private Continuation _continuation;
     private Object _requestAttributeListeners;
     private Map _savedNewSessions;
@@ -179,6 +179,8 @@ public class Request implements HttpServletRequest
         _requestURI=null;
         _scheme=URIUtil.HTTP;
         _servletPath=null;
+        _timeStamp=0;
+        _timeStampBuffer=null;
         _uri=null;
         _userPrincipal=null;
         if (_baseParameters!=null)
@@ -201,11 +203,11 @@ public class Request implements HttpServletRequest
      * 
      * @return The time that the request was received.
      */
-    public String getTimeStampStr()
+    public Buffer getTimeStampBuffer()
     {
-        if (_timeStampStr == null && _timeStamp > 0)
-                _timeStampStr = HttpFields.__dateCache.format(_timeStamp);
-        return _timeStampStr;
+        if (_timeStampBuffer == null && _timeStamp > 0)
+                _timeStampBuffer = HttpFields.__dateCache.formatBuffer(_timeStamp);
+        return _timeStampBuffer;
     }
 
     /* ------------------------------------------------------------ */

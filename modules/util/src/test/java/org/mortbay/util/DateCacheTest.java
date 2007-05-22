@@ -44,10 +44,6 @@ public class DateCacheTest extends junit.framework.TestCase
       junit.textui.TestRunner.run(suite());
     }    
     
-
-
-    
-
     /* ------------------------------------------------------------ */
     public void testDateCache() throws Exception
     {
