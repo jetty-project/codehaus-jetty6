@@ -279,10 +279,6 @@ public class Dispatcher implements RequestDispatcher
                 }
             }
         }
-        catch(Throwable th)
-        {
-            th.printStackTrace();
-        }
         finally
         {
             base_request.setRequestURI(old_uri);
