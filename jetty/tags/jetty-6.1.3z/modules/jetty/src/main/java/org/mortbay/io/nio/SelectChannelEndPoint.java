@@ -191,13 +191,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
 
     /* ------------------------------------------------------------ */
-    public boolean isOpen()
-    {
-        SelectionKey key=_key;
-        return super.isOpen() && key!=null && key.isValid();
-    }
-
-    /* ------------------------------------------------------------ */
     /*
      * Allows thread to block waiting for further events.
      */

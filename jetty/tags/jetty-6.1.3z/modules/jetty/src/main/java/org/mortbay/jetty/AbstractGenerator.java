@@ -54,7 +54,7 @@ public abstract class AbstractGenerator implements Generator
     public final static int STATE_END = 4;
     
     private static byte[] NO_BYTES = {};
-    private static int MAX_OUTPUT_CHARS = 128; // TODO put back to 2048 once fixed
+    private static int MAX_OUTPUT_CHARS = 2048; 
 
     private static Buffer[] __reasons = new Buffer[505];
     static
@@ -63,7 +63,7 @@ public abstract class AbstractGenerator implements Generator
         for (int i=0;i<fields.length;i++)
         {
             if ((fields[i].getModifiers()&Modifier.STATIC)!=0 &&
-                            fields[i].getName().startsWith("SC_"))
+                 fields[i].getName().startsWith("SC_"))
             {
                 try
                 {
