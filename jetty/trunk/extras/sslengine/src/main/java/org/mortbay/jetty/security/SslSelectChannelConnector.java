@@ -213,17 +213,33 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         setResponseBufferSize(18*1024);
     }
     
-    /* ------------------------------------------------------------ */
+   /**
+    *
+    * @deprecated   As of Java Servlet API 2.0, with no replacement.
+    *
+    */
     public String[] getCipherSuites()
+    {
+        return getExcludeCipherSuites();
+    }
+
+    public String[] getExcludeCipherSuites()
     {
         return _excludeCipherSuites;
     }
 
-    /* ------------------------------------------------------------ */
     /**
+     * 
+     * @deprecated   As of Java Servlet API 2.0, with no replacement.
+     * 
      * @author Tony Jiang
      */
     public void setCipherSuites(String[] cipherSuites)
+    {
+        setExcludeCipherSuites(cipherSuites);
+    }
+
+    public void setExcludeCipherSuites(String[] cipherSuites)
     {
         this._excludeCipherSuites = cipherSuites;
     }
