@@ -270,15 +270,8 @@ public class MultiPartFilter implements Filter
                     params.add(name,bytes);
                 }
             }
-        }
-        catch (IOException e)
-        {
-            deleteFiles(request);
-            throw e;
-        }
-
-        try
-        {
+        
+            // handle request
             chain.doFilter(new Wrapper(srequest,params),response);
         }
         finally
