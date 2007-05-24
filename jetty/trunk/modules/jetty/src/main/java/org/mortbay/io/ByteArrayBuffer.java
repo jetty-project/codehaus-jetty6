@@ -173,6 +173,8 @@ public class ByteArrayBuffer extends AbstractBuffer
             total += len;
             available -= len;
             setPutIndex(p);
+            if (in.available()<=0)
+                break;
         }
 
         return total;
