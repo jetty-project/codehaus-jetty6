@@ -15,6 +15,7 @@ jetty-6.1-SNAPSHOT
  + fixed JSP close handling
  + improved date header handling
  + JETTY-309 fix applied to sslEngine
+ + JETTY-318 Prevent meta channels being created
  + JETTY-335 SslEngine overflow fix
  + JETTY-338 protect isMoreInBuffer from destroy
  + JETTY-345 fixed lost content with blocked NIO.
