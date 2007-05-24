@@ -165,9 +165,16 @@ public class ByteArrayBuffer extends AbstractBuffer
         if (max>space())
             max=space();
         int p = putIndex();
-        int len = in.read(_bytes,p,max);
-        if (len>0)
-            setPutIndex(p+len);
-        return len;
+        
+        int len=0, total=0, available=max;
+        while (total<max && (len=in.read(_bytes,p,available)) > 0) 
+        {
+            p += len;
+            total += len;
+            available -= len;
+            setPutIndex(p);
+        }
+
+        return total;
     }
 }
