@@ -16,6 +16,7 @@ package org.mortbay.servlet;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -99,173 +100,181 @@ public class MultiPartFilter implements Filter
         byte[] byteBoundary=(boundary+"--").getBytes(StringUtil.__ISO_8859_1);
         MultiMap params = new MultiMap();
         
-        // Get first boundary
-        byte[] bytes=TypeUtil.readLine(in);
-        String line=bytes==null?null:new String(bytes,"UTF-8");
-        if(line==null || !line.equals(boundary))
+        try
         {
-            throw new IOException("Missing initial multi part boundary");
-        }
-        
-        // Read each part
-        boolean lastPart=false;
-        String content_disposition=null;
-        while(!lastPart)
-        {
-            while(true)
+            // Get first boundary
+            byte[] bytes=TypeUtil.readLine(in);
+            String line=bytes==null?null:new String(bytes,"UTF-8");
+            if(line==null || !line.equals(boundary))
             {
-                bytes=TypeUtil.readLine(in);
-                // If blank line, end of part headers
-                if(bytes==null || bytes.length==0)
-                    break;
-                line=new String(bytes,"UTF-8");
-                
-                // place part header key and value in map
-                int c=line.indexOf(':',0);
-                if(c>0)
-                {
-                    String key=line.substring(0,c).trim().toLowerCase();
-                    String value=line.substring(c+1,line.length()).trim();
-                    if(key.equals("content-disposition"))
-                        content_disposition=value;
-                }
-            }
-            // Extract content-disposition
-            boolean form_data=false;
-            if(content_disposition==null)
-            {
-                throw new IOException("Missing content-disposition");
+                throw new IOException("Missing initial multi part boundary");
             }
             
-            StringTokenizer tok=new StringTokenizer(content_disposition,";");
-            String name=null;
-            String filename=null;
-            while(tok.hasMoreTokens())
+            // Read each part
+            boolean lastPart=false;
+            String content_disposition=null;
+            while(!lastPart)
             {
-                String t=tok.nextToken().trim();
-                String tl=t.toLowerCase();
-                if(t.startsWith("form-data"))
-                    form_data=true;
-                else if(tl.startsWith("name="))
-                    name=value(t);
-                else if(tl.startsWith("filename="))
-                    filename=value(t);
-            }
-            
-            // Check disposition
-            if(!form_data)
-            {
-                continue;
-            }
-            if(name==null||name.length()==0)
-            {
-                continue;
-            }
-            
-            OutputStream out=null;
-            File file=null;
-            try
-            {
-                if (filename!=null && filename.length()>0)
-                {
-                    file = File.createTempFile("MultiPart", "", tempdir);
-                    out = new FileOutputStream(file);
-                    request.setAttribute(name,file);
-                    params.put(name, filename);
-                    
-                    if (_deleteFiles)
-                    {
-                        file.deleteOnExit();
-                        ArrayList files = (ArrayList)request.getAttribute(FILES);
-                        if (files==null)
-                        {
-                            files=new ArrayList();
-                            request.setAttribute(FILES,files);
-                        }
-                        files.add(file);
-                    }
-                    
-                }
-                else
-                    out=new ByteArrayOutputStream();
-                
-                int state=-2;
-                int c;
-                boolean cr=false;
-                boolean lf=false;
-                
-                // loop for all lines`
                 while(true)
                 {
-                    int b=0;
-                    while((c=(state!=-2)?state:in.read())!=-1)
+                    bytes=TypeUtil.readLine(in);
+                    // If blank line, end of part headers
+                    if(bytes==null || bytes.length==0)
+                        break;
+                    line=new String(bytes,"UTF-8");
+                    
+                    // place part header key and value in map
+                    int c=line.indexOf(':',0);
+                    if(c>0)
                     {
-                        state=-2;
-                        // look for CR and/or LF
-                        if(c==13||c==10)
+                        String key=line.substring(0,c).trim().toLowerCase();
+                        String value=line.substring(c+1,line.length()).trim();
+                        if(key.equals("content-disposition"))
+                            content_disposition=value;
+                    }
+                }
+                // Extract content-disposition
+                boolean form_data=false;
+                if(content_disposition==null)
+                {
+                    throw new IOException("Missing content-disposition");
+                }
+                
+                StringTokenizer tok=new StringTokenizer(content_disposition,";");
+                String name=null;
+                String filename=null;
+                while(tok.hasMoreTokens())
+                {
+                    String t=tok.nextToken().trim();
+                    String tl=t.toLowerCase();
+                    if(t.startsWith("form-data"))
+                        form_data=true;
+                    else if(tl.startsWith("name="))
+                        name=value(t);
+                    else if(tl.startsWith("filename="))
+                        filename=value(t);
+                }
+                
+                // Check disposition
+                if(!form_data)
+                {
+                    continue;
+                }
+                if(name==null||name.length()==0)
+                {
+                    continue;
+                }
+                
+                OutputStream out=null;
+                File file=null;
+                try
+                {
+                    if (filename!=null && filename.length()>0)
+                    {
+                        file = File.createTempFile("MultiPart", "", tempdir);
+                        out = new FileOutputStream(file);
+                        request.setAttribute(name,file);
+                        params.put(name, filename);
+                        
+                        if (_deleteFiles)
                         {
-                            if(c==13)
-                                state=in.read();
-                            break;
+                            file.deleteOnExit();
+                            ArrayList files = (ArrayList)request.getAttribute(FILES);
+                            if (files==null)
+                            {
+                                files=new ArrayList();
+                                request.setAttribute(FILES,files);
+                            }
+                            files.add(file);
                         }
-                        // look for boundary
-                        if(b>=0&&b<byteBoundary.length&&c==byteBoundary[b])
-                            b++;
-                        else
+                        
+                    }
+                    else
+                        out=new ByteArrayOutputStream();
+                    
+                    int state=-2;
+                    int c;
+                    boolean cr=false;
+                    boolean lf=false;
+                    
+                    // loop for all lines`
+                    while(true)
+                    {
+                        int b=0;
+                        while((c=(state!=-2)?state:in.read())!=-1)
                         {
-                            // this is not a boundary
+                            state=-2;
+                            // look for CR and/or LF
+                            if(c==13||c==10)
+                            {
+                                if(c==13)
+                                    state=in.read();
+                                break;
+                            }
+                            // look for boundary
+                            if(b>=0&&b<byteBoundary.length&&c==byteBoundary[b])
+                                b++;
+                            else
+                            {
+                                // this is not a boundary
+                                if(cr)
+                                    out.write(13);
+                                if(lf)
+                                    out.write(10);
+                                cr=lf=false;
+                                if(b>0)
+                                    out.write(byteBoundary,0,b);
+                                b=-1;
+                                out.write(c);
+                            }
+                        }
+                        // check partial boundary
+                        if((b>0&&b<byteBoundary.length-2)||(b==byteBoundary.length-1))
+                        {
                             if(cr)
                                 out.write(13);
                             if(lf)
                                 out.write(10);
                             cr=lf=false;
-                            if(b>0)
-                                out.write(byteBoundary,0,b);
+                            out.write(byteBoundary,0,b);
                             b=-1;
-                            out.write(c);
                         }
-                    }
-                    // check partial boundary
-                    if((b>0&&b<byteBoundary.length-2)||(b==byteBoundary.length-1))
-                    {
+                        // boundary match
+                        if(b>0||c==-1)
+                        {
+                            if(b==byteBoundary.length)
+                                lastPart=true;
+                            if(state==10)
+                                state=-2;
+                            break;
+                        }
+                        // handle CR LF
                         if(cr)
                             out.write(13);
                         if(lf)
                             out.write(10);
-                        cr=lf=false;
-                        out.write(byteBoundary,0,b);
-                        b=-1;
-                    }
-                    // boundary match
-                    if(b>0||c==-1)
-                    {
-                        if(b==byteBoundary.length)
-                            lastPart=true;
+                        cr=(c==13);
+                        lf=(c==10||state==10);
                         if(state==10)
                             state=-2;
-                        break;
                     }
-                    // handle CR LF
-                    if(cr)
-                        out.write(13);
-                    if(lf)
-                        out.write(10);
-                    cr=(c==13);
-                    lf=(c==10||state==10);
-                    if(state==10)
-                        state=-2;
+                }
+                finally
+                {
+                    out.close();
+                }
+                
+                if (file==null)
+                {
+                    bytes = ((ByteArrayOutputStream)out).toByteArray();
+                    params.add(name,bytes);
                 }
             }
-            finally
-            {
-                out.close();
-            }
-            
-            if (file==null)
-            {
-                bytes = ((ByteArrayOutputStream)out).toByteArray();
-                params.add(name,bytes);
-            }
+        }
+        catch (IOException e)
+        {
+            deleteFiles(request);
+            throw e;
         }
 
         try
@@ -274,27 +283,30 @@ public class MultiPartFilter implements Filter
         }
         finally
         {
-            ArrayList files = (ArrayList)request.getAttribute(FILES);
-            if (files!=null)
+            deleteFiles(request);
+        }
+    }
+
+    private void deleteFiles(ServletRequest request)
+    {
+        ArrayList files = (ArrayList)request.getAttribute(FILES);
+        if (files!=null)
+        {
+            Iterator iter = files.iterator();
+            while (iter.hasNext())
             {
-                Iterator iter = files.iterator();
-                while (iter.hasNext())
+                File file=(File)iter.next();
+                try
                 {
-                    File file=(File)iter.next();
-                    try
-                    {
-                        file.delete();
-                    }
-                    catch(Exception e)
-                    {
-                        _context.log("failed to delete "+file,e);
-                    }
+                    file.delete();
+                }
+                catch(Exception e)
+                {
+                    _context.log("failed to delete "+file,e);
                 }
             }
         }
     }
-
-
     /* ------------------------------------------------------------ */
     private String value(String nameEqualsValue)
     {
