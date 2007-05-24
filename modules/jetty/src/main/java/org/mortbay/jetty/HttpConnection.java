@@ -424,6 +424,8 @@ public class HttpConnection implements Connection
             {
                 setCurrentConnection(null);
                 
+                more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
+                
                 synchronized(this)
                 {
                     _handling=false;
@@ -434,8 +436,6 @@ public class HttpConnection implements Connection
                         return;
                     }
                 }
-                
-                more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();  
                 
                 if (_parser.isComplete() && _generator.isComplete() && !_endp.isBufferingOutput())
                 {  

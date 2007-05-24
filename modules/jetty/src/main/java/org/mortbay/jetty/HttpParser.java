@@ -161,7 +161,7 @@ public class HttpParser implements Parser
     throws IOException
     {
         if ( _header!=null && _header.hasContent() ||
-               _body!=null && _body.hasContent())
+             _body!=null && _body.hasContent())
             return true;
 
         return false;
