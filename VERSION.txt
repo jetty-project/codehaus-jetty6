@@ -17,9 +17,10 @@ jetty-6.1-SNAPSHOT
  + JETTY-309 fix applied to sslEngine
  + JETTY-318 Prevent meta channels being created
  + JETTY-335 SslEngine overflow fix
- + JETTY-338 protect isMoreInBuffer from destroy
- + JETTY-345 fixed lost content with blocked NIO.
  + JETTY-337 deprecated get/setCipherSuites and added get/setExcludeCipherSuites
+ + JETTY-338 protect isMoreInBuffer from destroy
+ + JETTY-339 MultiPartFiler deletes temp files on IOException
+ + JETTY-345 fixed lost content with blocked NIO.
 
 jetty-6.1.3 - 4 May 2007
  + Handle CRLF for content in header optimization
