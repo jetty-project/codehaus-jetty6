@@ -25,8 +25,6 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.log.Log;
 
-
-
 /* ------------------------------------------------------------ */
 /** Client Certificate Authenticator.
  * This Authenticator uses a client certificate to authenticate the user.
@@ -80,7 +78,8 @@ public class ClientCertAuthenticator implements Authenticator
         // Need certificates.
         if (certs==null || certs.length==0 || certs[0]==null)
         {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
+            if (response != null)
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,"A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
             return null;
         }
         
@@ -92,7 +91,8 @@ public class ClientCertAuthenticator implements Authenticator
         Principal user = realm.authenticate(username,certs,request);
         if (user == null)
         {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"The provided client certificate does not correspond to a trusted user.");
+            if (response != null)
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,"The provided client certificate does not correspond to a trusted user.");
             return null;
         }
         

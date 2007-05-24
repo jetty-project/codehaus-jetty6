@@ -161,18 +161,24 @@ public class FormAuthenticator implements Authenticator
                     ((SSORealm)realm).setSingleSignOn(request,response,form_cred._userPrincipal,new Password(form_cred._jPassword));
 
                 // Redirect to original request
-                response.setContentLength(0);
-                response.sendRedirect(response.encodeRedirectURL(nuri));
+                if (response != null) {
+                    response.setContentLength(0);
+                    response.sendRedirect(response.encodeRedirectURL(nuri));
+                }
             }   
             else
             {
                 if(Log.isDebugEnabled())Log.debug("Form authentication FAILED for "+StringUtil.printable(form_cred._jUserName));
                 if (_formErrorPage==null)
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                {
+                    if (response != null) 
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
                 else
                 {
-                    response.setContentLength(0);
-                    response.sendRedirect(response.encodeRedirectURL
+                    if (response != null)
+                        response.setContentLength(0);
+                        response.sendRedirect(response.encodeRedirectURL
                                           (URIUtil.addPaths(request.getContextPath(),
                                                         _formErrorPage)));
                 }
@@ -195,9 +201,8 @@ public class FormAuthenticator implements Authenticator
                 
                 // Sign-on to SSO mechanism
                 if (form_cred._userPrincipal!=null && realm instanceof SSORealm)
-                {
                     ((SSORealm)realm).setSingleSignOn(request,response,form_cred._userPrincipal,new Password(form_cred._jPassword));
-                }
+                
             }
             else if (!realm.reauthenticate(form_cred._userPrincipal))
                 // Else check that it is still authenticated.
