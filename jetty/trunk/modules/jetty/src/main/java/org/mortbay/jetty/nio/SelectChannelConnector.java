@@ -544,6 +544,19 @@ public class SelectChannelConnector extends AbstractNIOConnector
         {
             _object = object;
         }
+        
+        public String toString()
+        {
+            synchronized (this)
+            {
+                return "RetryContinuation@"+hashCode()+
+                (_new?",new":"")+
+                (_pending?",pending":"")+
+                (_resumed?",resumed":"")+
+                (isExpired()?",expired":"")+
+                (_parked?",parked":"");
+            }
+        }
 
     }
 
