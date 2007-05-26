@@ -14,6 +14,7 @@ jetty-6.1-SNAPSHOT
  + update etc/jetty-ssl.xml with new handshake timeout setting
  + fixed JSP close handling
  + improved date header handling
+ + fixed waiting continuation reset
  + JETTY-309 fix applied to sslEngine
  + JETTY-318 Prevent meta channels being created
  + JETTY-335 SslEngine overflow fix

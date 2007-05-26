@@ -182,6 +182,7 @@ public class ChatFilter extends AjaxFilter
             if (!member.hasMessages())
             {
                 Continuation continuation = ContinuationSupport.getContinuation(request, room);
+                System.err.println(continuation);
                 member.setContinuation(continuation);
                 continuation.suspend(timeoutMS);
             }
