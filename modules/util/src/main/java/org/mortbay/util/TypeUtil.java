@@ -110,7 +110,7 @@ public class TypeUtil
         class2Name.put(java.lang.Short.class,"java.lang.Short");
         
         class2Name.put(null,"void");
-        name2Class.put(java.lang.String.class,"java.lang.String");
+        class2Name.put(java.lang.String.class,"java.lang.String");
     }
     
     /* ------------------------------------------------------------ */
