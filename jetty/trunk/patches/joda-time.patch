@@ -1,8 +1,795 @@
+Index: patches/joda-time.patch
+===================================================================
+--- patches/joda-time.patch	(revision 1877)
++++ patches/joda-time.patch	(working copy)
+@@ -1,782 +0,0 @@
+-Index: pom.xml
+-===================================================================
+---- pom.xml	(revision 1720)
+-+++ pom.xml	(working copy)
+-@@ -345,6 +345,11 @@
+-         <artifactId>activation</artifactId>
+-         <version>${activation-version}</version>
+-       </dependency>
+-+      <dependency>
+-+        <groupId>joda-time</groupId>
+-+        <artifactId>joda-time</artifactId>
+-+        <version>${joda-version}</version>
+-+      </dependency>
+-     </dependencies>
+-   </dependencyManagement>
+-   <distributionManagement>
+-@@ -374,5 +379,6 @@
+-     <mx4j-version>3.0.1</mx4j-version>
+-     <slf4j-version>1.0.1</slf4j-version>
+-     <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
+-+    <joda-version>1.2.1</joda-version>
+-   </properties>
+- </project>
+-Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java
+-===================================================================
+---- modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java	(revision 1720)
+-+++ modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java	(working copy)
+-@@ -14,6 +14,7 @@
+- 
+- package org.mortbay.jetty;
+- 
+-+import java.util.Date;
+- import java.util.Enumeration;
+- 
+- import junit.framework.TestCase;
+-@@ -295,7 +296,7 @@
+-         fields.put("D1", "Fri, 31 Dec 1999 23:59:59 GMT");
+-         fields.put("D2", "Friday, 31-Dec-99 23:59:59 GMT");
+-         fields.put("D3", "Fri Dec 31 23:59:59 1999");
+--        fields.put("D4", "Mon Jan 1 2000 00:00:01");
+-+        fields.put("D4", "Sat Jan 1 2000 00:00:01");
+-         fields.put("D5", "Tue Feb 29 2000 12:00:00");
+-         
+-         long d1 = fields.getDateField("D1");
+-@@ -303,6 +304,13 @@
+-         long d3 = fields.getDateField("D3");
+-         long d4 = fields.getDateField("D4");
+-         long d5 = fields.getDateField("D5");
+-+        
+-+        System.err.println(new Date(d1));
+-+        System.err.println(new Date(d2));
+-+        System.err.println(new Date(d3));
+-+        System.err.println(new Date(d4));
+-+        System.err.println(new Date(d5));
+-+        
+-         assertTrue(d1>0);
+-         assertTrue(d2>0);
+-         assertEquals(d1,d2);
+-Index: modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java
+-===================================================================
+---- modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java	(revision 1720)
+-+++ modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java	(working copy)
+-@@ -80,7 +80,7 @@
+- 
+-             fields.put("D1","Sun, 6 Nov 1994 08:49:37 GMT");
+-             fields.put("D2","Sunday, 6-Nov-94 08:49:37 GMT");
+--            fields.put("D3","Sun Nov  6 08:49:37 1994");
+-+            fields.put("D3","Sun Nov 6 08:49:37 1994");
+-             Date d1=new Date(fields.getDateField("D1"));
+-             Date d2=new Date(fields.getDateField("D2"));
+-             Date d3=new Date(fields.getDateField("D3"));
+-Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
+-===================================================================
+---- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 1720)
+-+++ modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(working copy)
+-@@ -18,13 +18,9 @@
+- import java.io.UnsupportedEncodingException;
+- import java.io.Writer;
+- import java.net.URLEncoder;
+--import java.text.SimpleDateFormat;
+- import java.util.ArrayList;
+--import java.util.Calendar;
+- import java.util.Collections;
+--import java.util.Date;
+- import java.util.Enumeration;
+--import java.util.GregorianCalendar;
+- import java.util.HashMap;
+- import java.util.Iterator;
+- import java.util.List;
+-@@ -32,10 +28,12 @@
+- import java.util.Map;
+- import java.util.NoSuchElementException;
+- import java.util.StringTokenizer;
+--import java.util.TimeZone;
+- 
+- import javax.servlet.http.Cookie;
+- 
+-+import org.joda.time.DateTimeZone;
+-+import org.joda.time.format.DateTimeFormat;
+-+import org.joda.time.format.DateTimeFormatter;
+- import org.mortbay.io.Buffer;
+- import org.mortbay.io.BufferCache;
+- import org.mortbay.io.BufferUtil;
+-@@ -69,6 +67,13 @@
+-     private static String[] MONTHS =
+-     { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"};
+- 
+-+
+-+    /* -------------------------------------------------------------- */
+-+    private static DateTimeZone __GMT = DateTimeZone.forID("GMT");
+-+    private final static DateCache __dateCache = new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+-+    private static final DateTimeFormatter __httpDateFormat = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withZone(__GMT); 
+-+    private static final DateTimeFormatter __cookieDateFormat = DateTimeFormat.forPattern("EEE, dd-MMM-yy HH:mm:ss 'GMT'").withZone(__GMT); 
+-+    
+-     /* ------------------------------------------------------------ */
+-     /**
+-      * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
+-@@ -76,11 +81,7 @@
+-      */
+-     public static String formatDate(long date, boolean cookie)
+-     {
+--        StringBuffer buf = new StringBuffer(32);
+--        GregorianCalendar gc = new GregorianCalendar(__GMT);
+--        gc.setTimeInMillis(date);
+--        formatDate(buf, gc, cookie);
+--        return buf.toString();
+-+        return (cookie?__cookieDateFormat:__httpDateFormat).print(date);
+-     }
+- 
+-     /* ------------------------------------------------------------ */
+-@@ -88,82 +89,13 @@
+-      * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
+-      * cookies
+-      */
+--    public static String formatDate(Calendar calendar, boolean cookie)
+-+    public static void formatDate(StringBuffer buf, long date, boolean cookie)
+-     {
+--        StringBuffer buf = new StringBuffer(32);
+--        formatDate(buf, calendar, cookie);
+--        return buf.toString();
+-+        (cookie?__cookieDateFormat:__httpDateFormat).printTo(buf,date);
+-     }
+- 
+--    /* ------------------------------------------------------------ */
+--    /**
+--     * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
+--     * cookies
+--     */
+--    public static String formatDate(StringBuffer buf, long date, boolean cookie)
+--    {
+--        GregorianCalendar gc = new GregorianCalendar(__GMT);
+--        gc.setTimeInMillis(date);
+--        formatDate(buf, gc, cookie);
+--        return buf.toString();
+--    }
+- 
+--    /* ------------------------------------------------------------ */
+--    /**
+--     * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
+--     * cookies
+--     */
+--    public static void formatDate(StringBuffer buf, Calendar calendar, boolean cookie)
+--    {
+--        // "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
+--        // "EEE, dd-MMM-yy HH:mm:ss 'GMT'", cookie
+- 
+--        int day_of_week = calendar.get(Calendar.DAY_OF_WEEK);
+--        int day_of_month = calendar.get(Calendar.DAY_OF_MONTH);
+--        int month = calendar.get(Calendar.MONTH);
+--        int year = calendar.get(Calendar.YEAR);
+--        int century = year / 100;
+--        year = year % 100;
+--
+--        int epoch = (int) ((calendar.getTimeInMillis() / 1000) % (60 * 60 * 24));
+--        int seconds = epoch % 60;
+--        epoch = epoch / 60;
+--        int minutes = epoch % 60;
+--        int hours = epoch / 60;
+--
+--        buf.append(DAYS[day_of_week]);
+--        buf.append(',');
+--        buf.append(' ');
+--        StringUtil.append2digits(buf, day_of_month);
+--
+--        if (cookie)
+--        {
+--            buf.append('-');
+--            buf.append(MONTHS[month]);
+--            buf.append('-');
+--            StringUtil.append2digits(buf, year);
+--        }
+--        else
+--        {
+--            buf.append(' ');
+--            buf.append(MONTHS[month]);
+--            buf.append(' ');
+--            StringUtil.append2digits(buf, century);
+--            StringUtil.append2digits(buf, year);
+--        }
+--        buf.append(' ');
+--        StringUtil.append2digits(buf, hours);
+--        buf.append(':');
+--        StringUtil.append2digits(buf, minutes);
+--        buf.append(':');
+--        StringUtil.append2digits(buf, seconds);
+--        buf.append(" GMT");
+--    }
+--
+--    /* -------------------------------------------------------------- */
+--    private static TimeZone __GMT = TimeZone.getTimeZone("GMT");
+--    public final static DateCache __dateCache = new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+--
+-     /* ------------------------------------------------------------ */
+-     private final static String __dateReceiveFmt[] =
+-     {   "EEE, dd MMM yyyy HH:mm:ss zzz", 
+-@@ -178,18 +110,15 @@
+-         "EEE, MMM dd HH:mm:ss yyyy zzz", "EEE, MMM dd HH:mm:ss yyyy", "EEE, dd-MMM-yy HH:mm:ss zzz", 
+-         "EEE dd-MMM-yy HH:mm:ss zzz", "EEE dd-MMM-yy HH:mm:ss",
+-       };
+--    private  static int __dateReceiveInit=3;
+--    private  static SimpleDateFormat __dateReceive[];
+-+    private  static DateTimeFormatter __dateReceive[];
+-     static
+-     {
+--        __GMT.setID("GMT");
+-         __dateCache.setTimeZone(__GMT);
+--        __dateReceive = new SimpleDateFormat[__dateReceiveFmt.length];
+-+        __dateReceive = new DateTimeFormatter[__dateReceiveFmt.length];
+-         // Initialize only the standard formats here.
+--        for (int i = 0; i < __dateReceiveInit; i++)
+-+        for (int i = 0; i < __dateReceive.length; i++)
+-         {
+--            __dateReceive[i] = new SimpleDateFormat(__dateReceiveFmt[i], Locale.US);
+--            __dateReceive[i].setTimeZone(__GMT);
+-+            __dateReceive[i] = DateTimeFormat.forPattern(__dateReceiveFmt[i]).withLocale(Locale.US).withZone(__GMT);
+-         }
+-     }
+-     public final static String __01Jan1970 = formatDate(0, false);
+-@@ -199,9 +128,6 @@
+-     protected ArrayList _fields = new ArrayList(20);
+-     protected int _revision;
+-     protected HashMap _bufferMap = new HashMap(32);
+--    protected SimpleDateFormat _dateReceive[] = new SimpleDateFormat[__dateReceive.length];
+--    private StringBuffer _dateBuffer;
+--    private Calendar _calendar;
+- 
+-     /* ------------------------------------------------------------ */
+-     /**
+-@@ -749,14 +675,12 @@
+- 
+-         
+-         
+--        for (int i = 0; i < __dateReceiveInit; i++)
+-+        for (int i = 0; i < __dateReceive.length; i++)
+-         {
+--            if (_dateReceive[i] == null) _dateReceive[i] = (SimpleDateFormat) __dateReceive[i].clone();
+--
+-             try
+-             {
+--                Date date = (Date) _dateReceive[i].parseObject(val);
+--                return field._numValue = date.getTime();
+-+                field._numValue =__dateReceive[i].parseMillis(val);
+-+                return field._numValue;
+-             }
+-             catch (java.lang.Exception e)
+-             {
+-@@ -765,12 +689,12 @@
+-         if (val.endsWith(" GMT"))
+-         {
+-             val = val.substring(0, val.length() - 4);
+--            for (int i = 0; i < __dateReceiveInit; i++)
+-+            for (int i = 0; i < __dateReceive.length; i++)
+-             {
+-                 try
+-                 {
+--                    Date date = (Date) _dateReceive[i].parseObject(val);
+--                    return field._numValue = date.getTime();
+-+                    field._numValue =__dateReceive[i].parseMillis(val);
+-+                    return field._numValue;
+-                 }
+-                 catch (java.lang.Exception e)
+-                 {
+-@@ -778,49 +702,6 @@
+-             }
+-         }
+-         
+--        // The standard formats did not work.  So we will lock the common format array
+--        // and look at lazily creating the non-standard formats
+--        synchronized (__dateReceive)
+--        {
+--            for (int i = __dateReceiveInit; i < _dateReceive.length; i++)
+--            {
+--                if (_dateReceive[i] == null) 
+--                {
+--                    if (__dateReceive[i]==null)
+--                    {
+--                        __dateReceive[i] = new SimpleDateFormat(__dateReceiveFmt[i], Locale.US);
+--                        __dateReceive[i].setTimeZone(__GMT);
+--                    }
+--                    _dateReceive[i] = (SimpleDateFormat) __dateReceive[i].clone();
+--                }
+--                
+--                try
+--                {
+--                    Date date = (Date) _dateReceive[i].parseObject(val);
+--                    return field._numValue = date.getTime();
+--                }
+--                catch (java.lang.Exception e)
+--                {
+--                }
+--            }
+--            if (val.endsWith(" GMT"))
+--            {
+--                val = val.substring(0, val.length() - 4);
+--                for (int i = 0; i < _dateReceive.length; i++)
+--                {
+--                    try
+--                    {
+--                        Date date = (Date) _dateReceive[i].parseObject(val);
+--                        return field._numValue = date.getTime();
+--                    }
+--                    catch (java.lang.Exception e)
+--                    {
+--                    }
+--                }
+--            }
+--        }
+--        
+--
+-         throw new IllegalArgumentException("Cannot convert date: " + val);
+-     }
+- 
+-@@ -887,15 +768,8 @@
+-      */
+-     public void putDateField(Buffer name, long date)
+-     {
+--        if (_dateBuffer == null)
+--        {
+--            _dateBuffer = new StringBuffer(32);
+--            _calendar = new GregorianCalendar(__GMT);
+--        }
+--        _dateBuffer.setLength(0);
+--        _calendar.setTimeInMillis(date);
+--        formatDate(_dateBuffer, _calendar, false);
+--        Buffer v = new ByteArrayBuffer(_dateBuffer.toString());
+-+        String d = formatDate(date, false);
+-+        Buffer v = new ByteArrayBuffer(d);
+-         put(name, v, date);
+-     }
+- 
+-@@ -921,16 +795,9 @@
+-      */
+-     public void addDateField(String name, long date)
+-     {
+--        if (_dateBuffer == null)
+--        {
+--            _dateBuffer = new StringBuffer(32);
+--            _calendar = new GregorianCalendar(__GMT);
+--        }
+--        _dateBuffer.setLength(0);
+--        _calendar.setTimeInMillis(date);
+--        formatDate(_dateBuffer, _calendar, false);
+-+        String d =formatDate(date, false);
+-         Buffer n = HttpHeaders.CACHE.lookup(name);
+--        Buffer v = new ByteArrayBuffer(_dateBuffer.toString());
+-+        Buffer v = new ByteArrayBuffer(d);
+-         add(n, v, date);
+-     }
+- 
+-@@ -1096,9 +963,6 @@
+-             }
+-         }
+-         _fields = null;
+--        _dateBuffer = null;
+--        _calendar = null;
+--        _dateReceive = null;
+-     }
+- 
+-     /* ------------------------------------------------------------ */
+-Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
+-===================================================================
+---- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 1720)
+-+++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
+-@@ -201,19 +201,6 @@
+-      * 
+-      * @return The time that the request was received.
+-      */
+--    public String getTimeStampStr()
+--    {
+--        if (_timeStampStr == null && _timeStamp > 0)
+--                _timeStampStr = HttpFields.__dateCache.format(_timeStamp);
+--        return _timeStampStr;
+--    }
+--
+--    /* ------------------------------------------------------------ */
+--    /**
+--     * Get Request TimeStamp
+--     * 
+--     * @return The time that the request was received.
+--     */
+-     public long getTimeStamp()
+-     {
+-         return _timeStamp;
+-Index: modules/util/src/test/java/org/mortbay/util/DateCacheTest.java
+-===================================================================
+---- modules/util/src/test/java/org/mortbay/util/DateCacheTest.java	(revision 1720)
+-+++ modules/util/src/test/java/org/mortbay/util/DateCacheTest.java	(working copy)
+-@@ -17,6 +17,8 @@
+- import java.util.Locale;
+- import java.util.TimeZone;
+- 
+-+import org.joda.time.DateTimeZone;
+-+
+- import junit.framework.TestSuite;
+- 
+- 
+-@@ -55,7 +57,7 @@
+-         //                            012345678901234567890123456789
+-         DateCache dc = new DateCache("EEE, dd MMM yyyy HH:mm:ss zzz ZZZ",
+-                                      Locale.US);
+--            dc.setTimeZone(TimeZone.getTimeZone("GMT"));
+-+            dc.setTimeZone(DateTimeZone.forID("GMT"));
+-             String last=dc.format(System.currentTimeMillis());
+-             boolean change=false;
+-             for (int i=0;i<15;i++)
+-Index: modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java
+-===================================================================
+---- modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(revision 1720)
+-+++ modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(working copy)
+-@@ -20,17 +20,21 @@
+- import java.io.IOException;
+- import java.io.OutputStream;
+- import java.lang.ref.WeakReference;
+--import java.text.SimpleDateFormat;
+- import java.util.ArrayList;
+--import java.util.Calendar;
+- import java.util.Date;
+--import java.util.GregorianCalendar;
+- import java.util.ListIterator;
+- import java.util.StringTokenizer;
+- import java.util.TimeZone;
+- import java.util.Timer;
+- import java.util.TimerTask;
+- 
+-+import org.joda.time.DateMidnight;
+-+import org.joda.time.DateTime;
+-+import org.joda.time.DateTimeField;
+-+import org.joda.time.DateTimeZone;
+-+import org.joda.time.format.DateTimeFormat;
+-+import org.joda.time.format.DateTimeFormatter;
+-+
+- /** 
+-  * RolloverFileOutputStream
+-  * @author Greg Wilkins 
+-@@ -42,10 +46,9 @@
+-     final static String YYYY_MM_DD="yyyy_mm_dd";
+- 
+-     private RollTask _rollTask;
+--    private SimpleDateFormat _fileBackupFormat =
+--        new SimpleDateFormat(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS"));
+--    private SimpleDateFormat _fileDateFormat = 
+--        new SimpleDateFormat(System.getProperty("ROLLOVERFILE_DATE_FORMAT","yyyy_MM_dd"));
+-+    
+-+    private DateTimeFormatter _fileBackupFormat;
+-+    private DateTimeFormatter _fileDateFormat;
+- 
+-     private String _filename;
+-     private File _file;
+-@@ -84,8 +87,8 @@
+-     {
+-         super(null);
+-         
+--        _fileBackupFormat.setTimeZone(zone);
+--        _fileDateFormat.setTimeZone(zone);
+-+        _fileBackupFormat=DateTimeFormat.forPattern(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS")).withZone(DateTimeZone.forTimeZone(zone));
+-+        _fileDateFormat = DateTimeFormat.forPattern(System.getProperty("ROLLOVERFILE_DATE_FORMAT","yyyy_MM_dd")).withZone(DateTimeZone.forTimeZone(zone));
+-         
+-         if (filename!=null)
+-         {
+-@@ -108,17 +111,9 @@
+-             
+-             _rollTask=new RollTask();
+- 
+--             Calendar now = Calendar.getInstance();
+--             now.setTimeZone(zone);
+--
+--             GregorianCalendar midnight =
+--                 new GregorianCalendar(now.get(Calendar.YEAR),
+--                         now.get(Calendar.MONTH),
+--                         now.get(Calendar.DAY_OF_MONTH),
+--                         23,0);
+--             midnight.setTimeZone(zone);
+--             midnight.add(Calendar.HOUR,1);
+--             __rollover.scheduleAtFixedRate(_rollTask,midnight.getTime(),1000L*60*60*24);
+-+            DateMidnight midnight = new DateMidnight(DateTimeZone.forTimeZone(zone)).plusDays(1);
+-+            
+-+             __rollover.scheduleAtFixedRate(_rollTask,midnight.getMillis(),1000L*60*60*24);
+-         }
+-     }
+- 
+-@@ -154,7 +149,7 @@
+-         if (!dir.isDirectory() || !dir.canWrite())
+-             throw new IOException("Cannot write log directory "+dir);
+-             
+--        Date now=new Date();
+-+        long now=System.currentTimeMillis();
+-         
+-         // Is this a rollover file?
+-         String filename=file.getName();
+-@@ -163,7 +158,7 @@
+-         {
+-             file=new File(dir,
+-                           filename.substring(0,i)+
+--                          _fileDateFormat.format(now)+
+-+                          _fileDateFormat.print(now)+
+-                           filename.substring(i+YYYY_MM_DD.length()));
+-         }
+-             
+-@@ -176,7 +171,7 @@
+-             // Yep
+-             _file=file;
+-             if (!_append && file.exists())
+--                file.renameTo(new File(file.toString()+"."+_fileBackupFormat.format(now)));
+-+                file.renameTo(new File(file.toString()+"."+_fileBackupFormat.print(now)));
+-             OutputStream oldOut=out;
+-             out=new FileOutputStream(file.toString(),_append);
+-             if (oldOut!=null)
+-@@ -190,12 +185,13 @@
+-     {
+-         if (_retainDays>0)
+-         {
+--            Calendar retainDate = Calendar.getInstance();
+--            retainDate.add(Calendar.DATE,-_retainDays);
+--            int borderYear = retainDate.get(java.util.Calendar.YEAR);
+--            int borderMonth = retainDate.get(java.util.Calendar.MONTH) + 1;
+--            int borderDay = retainDate.get(java.util.Calendar.DAY_OF_MONTH);
+--
+-+            DateTime retainDate = new DateTime();
+-+            retainDate=retainDate.minusDays(getRetainDays());
+-+            
+-+            int borderYear = retainDate.getYear();
+-+            int borderMonth = retainDate.getMonthOfYear();
+-+            int borderDay = retainDate.getDayOfMonth();
+-+            
+-             File file= new File(_filename);
+-             File dir = new File(file.getParent());
+-             String fn=file.getName();
+-Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
+-===================================================================
+---- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 1720)
+-+++ modules/util/src/main/java/org/mortbay/util/DateCache.java	(working copy)
+-@@ -14,12 +14,15 @@
+- 
+- package org.mortbay.util;
+- 
+--import java.text.DateFormatSymbols;
+--import java.text.SimpleDateFormat;
+- import java.util.Date;
+- import java.util.Locale;
+- import java.util.TimeZone;
+- 
+-+import org.joda.time.DateTimeZone;
+-+import org.joda.time.format.DateTimeFormat;
+-+import org.joda.time.format.DateTimeFormatter;
+-+import org.joda.time.format.DateTimeFormatterBuilder;
+-+
+- /* ------------------------------------------------------------ */
+- /**  Date Format Cache.
+-  * Computes String representations of Dates and caches
+-@@ -46,10 +49,10 @@
+-     
+-     private String _formatString;
+-     private String _tzFormatString;
+--    private SimpleDateFormat _tzFormat;
+-+    private DateTimeFormatter _tzFormat;
+-     
+-     private String _minFormatString;
+--    private SimpleDateFormat _minFormat;
+-+    private DateTimeFormatter _minFormat;
+- 
+-     private String _secFormatString;
+-     private String _secFormatString0;
+-@@ -62,7 +65,6 @@
+-     private String _lastResult = null;
+- 
+-     private Locale _locale	= null;
+--    private DateFormatSymbols	_dfs	= null;
+- 
+-     /* ------------------------------------------------------------ */
+-     /** Constructor.
+-@@ -72,7 +74,6 @@
+-     public DateCache()
+-     {
+-         this("EEE MMM dd HH:mm:ss zzz yyyy");
+--        getFormat().setTimeZone(TimeZone.getDefault());
+-     }
+-     
+-     /* ------------------------------------------------------------ */
+-@@ -82,7 +83,7 @@
+-     public DateCache(String format)
+-     {
+-         _formatString=format;
+--        setTimeZone(TimeZone.getDefault());
+-+        setTimeZone(DateTimeZone.getDefault());
+-         
+-     }
+-     
+-@@ -91,49 +92,38 @@
+-     {
+-         _formatString=format;
+-         _locale = l;
+--        setTimeZone(TimeZone.getDefault());       
+-+        setTimeZone(DateTimeZone.getDefault());       
+-     }
+-     
+-     /* ------------------------------------------------------------ */
+--    public DateCache(String format,DateFormatSymbols s)
+--    {
+--        _formatString=format;
+--        _dfs = s;
+--        setTimeZone(TimeZone.getDefault());
+--    }
+--
+--    /* ------------------------------------------------------------ */
+-     /** Set the timezone.
+-      * @param tz TimeZone
+-      */
+--    public void setTimeZone(TimeZone tz)
+-+    public void setTimeZone(DateTimeZone tz)
+-     {
+--        setTzFormatString(tz);        
+--        if( _locale != null ) 
+-+        setTzFormatString(tz);  
+-+
+-+        _tzFormat=DateTimeFormat.forPattern(_tzFormatString);
+-+        _minFormat=DateTimeFormat.forPattern(_minFormatString);
+-+        if (_locale!=null)
+-         {
+--            _tzFormat=new SimpleDateFormat(_tzFormatString,_locale);
+--            _minFormat=new SimpleDateFormat(_minFormatString,_locale);
+-+            _tzFormat=_tzFormat.withLocale(_locale);
+-+            _minFormat=_minFormat.withLocale(_locale);
+-         }
+--        else if( _dfs != null ) 
+-+        if (tz!=null)
+-         {
+--            _tzFormat=new SimpleDateFormat(_tzFormatString,_dfs);
+--            _minFormat=new SimpleDateFormat(_minFormatString,_dfs);
+-+            _tzFormat=_tzFormat.withZone(tz);
+-+            _minFormat=_minFormat.withZone(tz);
+-         }
+--        else 
+--        {
+--            _tzFormat=new SimpleDateFormat(_tzFormatString);
+--            _minFormat=new SimpleDateFormat(_minFormatString);
+--        }
+--        _tzFormat.setTimeZone(tz);
+--        _minFormat.setTimeZone(tz);
+-+        
+-         _lastSeconds=-1;
+-         _lastMinutes=-1;        
+-     }
+- 
+-     /* ------------------------------------------------------------ */
+--    public TimeZone getTimeZone()
+-+    public DateTimeZone getTimeZone()
+-     {
+--        return _tzFormat.getTimeZone();
+-+        return _tzFormat.getZone();
+-     }
+-     
+-     /* ------------------------------------------------------------ */
+-@@ -143,18 +133,18 @@
+-      */
+-     public void setTimeZoneID(String timeZoneId)
+-     {
+--        setTimeZone(TimeZone.getTimeZone(timeZoneId));
+-+        setTimeZone(DateTimeZone.forID(timeZoneId));
+-     }
+-     
+-     /* ------------------------------------------------------------ */
+--    private void setTzFormatString(final  TimeZone tz )
+-+    private void setTzFormatString(final DateTimeZone tz )
+-     {
+-         int zIndex = _formatString.indexOf( "ZZZ" );
+-         if( zIndex >= 0 )
+-         {
+-             String ss1 = _formatString.substring( 0, zIndex );
+-             String ss2 = _formatString.substring( zIndex+3 );
+--            int tzOffset = tz.getRawOffset();
+-+            int tzOffset = tz.getOffset(0);
+-             
+-             StringBuffer sb = new StringBuffer(_formatString.length()+10);
+-             sb.append(ss1);
+-@@ -225,6 +215,8 @@
+-      */
+-     public synchronized String format(long inDate)
+-     {
+-+        // TODO - use version that uses StringBuffer
+-+        
+-         long seconds = inDate / 1000;
+- 
+-         // Is it not suitable to cache?
+-@@ -235,8 +227,7 @@
+-             _misses++;
+-             if (_misses<__MaxMisses)
+-             {
+--                Date d = new Date(inDate);
+--                return _tzFormat.format(d);
+-+                return _tzFormat.print(inDate);
+-             }    
+-         }
+-         else if (_misses>0)
+-@@ -247,14 +238,13 @@
+-         if (_lastSeconds==seconds && !_millis)
+-             return _lastResult;
+- 
+--        Date d = new Date(inDate);
+-         
+-         // Check if we need a new format string
+-         long minutes = seconds/60;
+-         if (_lastMinutes != minutes)
+-         {
+-             _lastMinutes = minutes;
+--            _secFormatString=_minFormat.format(d);
+-+            _secFormatString=_minFormat.print(inDate);
+- 
+-             int i;
+-             int l;
+-@@ -313,7 +303,7 @@
+-     /* ------------------------------------------------------------ */
+-     /** Get the format.
+-      */
+--    public SimpleDateFormat getFormat()
+-+    public DateTimeFormatter getFormat()
+-     {
+-         return _minFormat;
+-     }
+-Index: modules/util/pom.xml
+-===================================================================
+---- modules/util/pom.xml	(revision 1720)
+-+++ modules/util/pom.xml	(working copy)
+-@@ -64,6 +64,29 @@
+-           </execution>
+-         </executions>
+-       </plugin>
+-+
+-+      <plugin>
+-+        <groupId>org.codehaus.mojo</groupId>
+-+        <artifactId>dependency-maven-plugin</artifactId>
+-+        <executions>
+-+          <execution>
+-+            <phase>install</phase>
+-+            <goals>
+-+              <goal>copy</goal>
+-+            </goals>
+-+            <configuration>
+-+              <artifactItems>
+-+                <artifactItem>
+-+                  <groupId>joda-time</groupId>
+-+                  <artifactId>joda-time</artifactId>
+-+                  <version>${joda-version}</version>
+-+                </artifactItem>
+-+              </artifactItems>
+-+              <outputDirectory>${basedir}/../../lib</outputDirectory>
+-+            </configuration>
+-+          </execution>
+-+        </executions>
+-+      </plugin>
+-     </plugins>
+-   </build>
+-   <dependencies>
+-@@ -78,5 +101,9 @@
+-       <version>${project.version}</version>
+-       <scope>provided</scope>
+-     </dependency>
+-+    <dependency>
+-+      <groupId>joda-time</groupId>
+-+      <artifactId>joda-time</artifactId>
+-+    </dependency>
+-   </dependencies>
+- </project>
 Index: pom.xml
 ===================================================================
---- pom.xml	(revision 1720)
+--- pom.xml	(revision 1877)
 +++ pom.xml	(working copy)
-@@ -345,6 +345,11 @@
+@@ -352,6 +352,11 @@
          <artifactId>activation</artifactId>
          <version>${activation-version}</version>
        </dependency>
@@ -14,16 +801,16 @@ Index: pom.xml
      </dependencies>
    </dependencyManagement>
    <distributionManagement>
-@@ -374,5 +379,6 @@
+@@ -381,5 +386,6 @@
      <mx4j-version>3.0.1</mx4j-version>
-     <slf4j-version>1.0.1</slf4j-version>
+     <slf4j-version>1.3.1</slf4j-version>
      <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
 +    <joda-version>1.2.1</joda-version>
    </properties>
  </project>
 Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java	(revision 1720)
+--- modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java	(revision 1877)
 +++ modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java	(working copy)
 @@ -14,6 +14,7 @@
  
@@ -58,7 +845,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpHeaderTest.java
          assertEquals(d1,d2);
 Index: modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java	(revision 1720)
+--- modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java	(revision 1877)
 +++ modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java	(working copy)
 @@ -80,7 +80,7 @@
  
@@ -71,7 +858,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/RFC2616Test.java
              Date d3=new Date(fields.getDateField("D3"));
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 1720)
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 1877)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(working copy)
 @@ -18,13 +18,9 @@
  import java.io.UnsupportedEncodingException;
@@ -100,8 +887,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 +import org.joda.time.format.DateTimeFormatter;
  import org.mortbay.io.Buffer;
  import org.mortbay.io.BufferCache;
- import org.mortbay.io.BufferUtil;
-@@ -69,6 +67,13 @@
+ import org.mortbay.io.BufferDateCache;
+@@ -70,6 +68,13 @@
      private static String[] MONTHS =
      { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"};
  
@@ -115,7 +902,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      /* ------------------------------------------------------------ */
      /**
       * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
-@@ -76,11 +81,7 @@
+@@ -77,11 +82,7 @@
       */
      public static String formatDate(long date, boolean cookie)
      {
@@ -128,7 +915,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      }
  
      /* ------------------------------------------------------------ */
-@@ -88,82 +89,13 @@
+@@ -89,83 +90,12 @@
       * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
       * cookies
       */
@@ -141,7 +928,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 +        (cookie?__cookieDateFormat:__httpDateFormat).printTo(buf,date);
      }
  
--    /* ------------------------------------------------------------ */
+     /* ------------------------------------------------------------ */
 -    /**
 -     * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
 -     * cookies
@@ -153,7 +940,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 -        formatDate(buf, gc, cookie);
 -        return buf.toString();
 -    }
- 
+-
 -    /* ------------------------------------------------------------ */
 -    /**
 -     * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
@@ -163,7 +950,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 -    {
 -        // "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
 -        // "EEE, dd-MMM-yy HH:mm:ss 'GMT'", cookie
- 
+-
 -        int day_of_week = calendar.get(Calendar.DAY_OF_WEEK);
 -        int day_of_month = calendar.get(Calendar.DAY_OF_MONTH);
 -        int month = calendar.get(Calendar.MONTH);
@@ -208,12 +995,13 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 -
 -    /* -------------------------------------------------------------- */
 -    private static TimeZone __GMT = TimeZone.getTimeZone("GMT");
--    public final static DateCache __dateCache = new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+-    public final static BufferDateCache __dateCache = new BufferDateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 -
-     /* ------------------------------------------------------------ */
+-    /* ------------------------------------------------------------ */
      private final static String __dateReceiveFmt[] =
      {   "EEE, dd MMM yyyy HH:mm:ss zzz", 
-@@ -178,18 +110,15 @@
+         "EEE, dd-MMM-yy HH:mm:ss",
+@@ -179,18 +109,15 @@
          "EEE, MMM dd HH:mm:ss yyyy zzz", "EEE, MMM dd HH:mm:ss yyyy", "EEE, dd-MMM-yy HH:mm:ss zzz", 
          "EEE dd-MMM-yy HH:mm:ss zzz", "EEE dd-MMM-yy HH:mm:ss",
        };
@@ -236,7 +1024,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          }
      }
      public final static String __01Jan1970 = formatDate(0, false);
-@@ -199,9 +128,6 @@
+@@ -200,9 +127,6 @@
      protected ArrayList _fields = new ArrayList(20);
      protected int _revision;
      protected HashMap _bufferMap = new HashMap(32);
@@ -246,7 +1034,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
  
      /* ------------------------------------------------------------ */
      /**
-@@ -749,14 +675,12 @@
+@@ -750,14 +674,12 @@
  
          
          
@@ -264,7 +1052,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
              }
              catch (java.lang.Exception e)
              {
-@@ -765,12 +689,12 @@
+@@ -766,12 +688,12 @@
          if (val.endsWith(" GMT"))
          {
              val = val.substring(0, val.length() - 4);
@@ -280,7 +1068,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
                  }
                  catch (java.lang.Exception e)
                  {
-@@ -778,49 +702,6 @@
+@@ -779,49 +701,6 @@
              }
          }
          
@@ -330,7 +1118,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          throw new IllegalArgumentException("Cannot convert date: " + val);
      }
  
-@@ -887,15 +768,8 @@
+@@ -888,15 +767,8 @@
       */
      public void putDateField(Buffer name, long date)
      {
@@ -348,7 +1136,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          put(name, v, date);
      }
  
-@@ -921,16 +795,9 @@
+@@ -922,16 +794,9 @@
       */
      public void addDateField(String name, long date)
      {
@@ -367,7 +1155,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          add(n, v, date);
      }
  
-@@ -1096,9 +963,6 @@
+@@ -1097,9 +962,6 @@
              }
          }
          _fields = null;
@@ -377,33 +1165,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      }
  
      /* ------------------------------------------------------------ */
-Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
-===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 1720)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
-@@ -201,19 +201,6 @@
-      * 
-      * @return The time that the request was received.
-      */
--    public String getTimeStampStr()
--    {
--        if (_timeStampStr == null && _timeStamp > 0)
--                _timeStampStr = HttpFields.__dateCache.format(_timeStamp);
--        return _timeStampStr;
--    }
--
--    /* ------------------------------------------------------------ */
--    /**
--     * Get Request TimeStamp
--     * 
--     * @return The time that the request was received.
--     */
-     public long getTimeStamp()
-     {
-         return _timeStamp;
 Index: modules/util/src/test/java/org/mortbay/util/DateCacheTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/DateCacheTest.java	(revision 1720)
+--- modules/util/src/test/java/org/mortbay/util/DateCacheTest.java	(revision 1877)
 +++ modules/util/src/test/java/org/mortbay/util/DateCacheTest.java	(working copy)
 @@ -17,6 +17,8 @@
  import java.util.Locale;
@@ -414,7 +1178,7 @@ Index: modules/util/src/test/java/org/mortbay/util/DateCacheTest.java
  import junit.framework.TestSuite;
  
  
-@@ -55,7 +57,7 @@
+@@ -51,7 +53,7 @@
          //                            012345678901234567890123456789
          DateCache dc = new DateCache("EEE, dd MMM yyyy HH:mm:ss zzz ZZZ",
                                       Locale.US);
@@ -423,9 +1187,201 @@ Index: modules/util/src/test/java/org/mortbay/util/DateCacheTest.java
              String last=dc.format(System.currentTimeMillis());
              boolean change=false;
              for (int i=0;i<15;i++)
+Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 1877)
++++ modules/util/src/main/java/org/mortbay/util/DateCache.java	(working copy)
+@@ -14,12 +14,15 @@
+ 
+ package org.mortbay.util;
+ 
+-import java.text.DateFormatSymbols;
+-import java.text.SimpleDateFormat;
+ import java.util.Date;
+ import java.util.Locale;
+ import java.util.TimeZone;
+ 
++import org.joda.time.DateTimeZone;
++import org.joda.time.format.DateTimeFormat;
++import org.joda.time.format.DateTimeFormatter;
++import org.joda.time.format.DateTimeFormatterBuilder;
++
+ /* ------------------------------------------------------------ */
+ /**  Date Format Cache.
+  * Computes String representations of Dates and caches
+@@ -46,10 +49,10 @@
+     
+     private String _formatString;
+     private String _tzFormatString;
+-    private SimpleDateFormat _tzFormat;
++    private DateTimeFormatter _tzFormat;
+     
+     private String _minFormatString;
+-    private SimpleDateFormat _minFormat;
++    private DateTimeFormatter _minFormat;
+ 
+     private String _secFormatString;
+     private String _secFormatString0;
+@@ -61,7 +64,6 @@
+     private String _lastResult = null;
+ 
+     private Locale _locale	= null;
+-    private DateFormatSymbols	_dfs	= null;
+ 
+     /* ------------------------------------------------------------ */
+     /** Constructor.
+@@ -71,7 +73,6 @@
+     public DateCache()
+     {
+         this("EEE MMM dd HH:mm:ss zzz yyyy");
+-        getFormat().setTimeZone(TimeZone.getDefault());
+     }
+     
+     /* ------------------------------------------------------------ */
+@@ -81,7 +82,7 @@
+     public DateCache(String format)
+     {
+         _formatString=format;
+-        setTimeZone(TimeZone.getDefault());
++        setTimeZone(DateTimeZone.getDefault());
+         
+     }
+     
+@@ -90,49 +91,38 @@
+     {
+         _formatString=format;
+         _locale = l;
+-        setTimeZone(TimeZone.getDefault());       
++        setTimeZone(DateTimeZone.getDefault());       
+     }
+     
+     /* ------------------------------------------------------------ */
+-    public DateCache(String format,DateFormatSymbols s)
+-    {
+-        _formatString=format;
+-        _dfs = s;
+-        setTimeZone(TimeZone.getDefault());
+-    }
+-
+-    /* ------------------------------------------------------------ */
+     /** Set the timezone.
+      * @param tz TimeZone
+      */
+-    public void setTimeZone(TimeZone tz)
++    public void setTimeZone(DateTimeZone tz)
+     {
+-        setTzFormatString(tz);        
+-        if( _locale != null ) 
++        setTzFormatString(tz);  
++
++        _tzFormat=DateTimeFormat.forPattern(_tzFormatString);
++        _minFormat=DateTimeFormat.forPattern(_minFormatString);
++        if (_locale!=null)
+         {
+-            _tzFormat=new SimpleDateFormat(_tzFormatString,_locale);
+-            _minFormat=new SimpleDateFormat(_minFormatString,_locale);
++            _tzFormat=_tzFormat.withLocale(_locale);
++            _minFormat=_minFormat.withLocale(_locale);
+         }
+-        else if( _dfs != null ) 
++        if (tz!=null)
+         {
+-            _tzFormat=new SimpleDateFormat(_tzFormatString,_dfs);
+-            _minFormat=new SimpleDateFormat(_minFormatString,_dfs);
++            _tzFormat=_tzFormat.withZone(tz);
++            _minFormat=_minFormat.withZone(tz);
+         }
+-        else 
+-        {
+-            _tzFormat=new SimpleDateFormat(_tzFormatString);
+-            _minFormat=new SimpleDateFormat(_minFormatString);
+-        }
+-        _tzFormat.setTimeZone(tz);
+-        _minFormat.setTimeZone(tz);
++        
+         _lastSeconds=-1;
+         _lastMinutes=-1;        
+     }
+ 
+     /* ------------------------------------------------------------ */
+-    public TimeZone getTimeZone()
++    public DateTimeZone getTimeZone()
+     {
+-        return _tzFormat.getTimeZone();
++        return _tzFormat.getZone();
+     }
+     
+     /* ------------------------------------------------------------ */
+@@ -142,18 +132,18 @@
+      */
+     public void setTimeZoneID(String timeZoneId)
+     {
+-        setTimeZone(TimeZone.getTimeZone(timeZoneId));
++        setTimeZone(DateTimeZone.forID(timeZoneId));
+     }
+     
+     /* ------------------------------------------------------------ */
+-    private void setTzFormatString(final  TimeZone tz )
++    private void setTzFormatString(final DateTimeZone tz )
+     {
+         int zIndex = _formatString.indexOf( "ZZZ" );
+         if( zIndex >= 0 )
+         {
+             String ss1 = _formatString.substring( 0, zIndex );
+             String ss2 = _formatString.substring( zIndex+3 );
+-            int tzOffset = tz.getRawOffset();
++            int tzOffset = tz.getOffset(0);
+             
+             StringBuffer sb = new StringBuffer(_formatString.length()+10);
+             sb.append(ss1);
+@@ -220,6 +210,8 @@
+      */
+     public synchronized String format(long inDate)
+     {
++        // TODO - use version that uses StringBuffer
++        
+         long seconds = inDate / 1000;
+ 
+         // Is it not suitable to cache?
+@@ -227,9 +219,7 @@
+             _lastSeconds>0 && seconds>_lastSeconds+__hitWindow)
+         {
+             // It's a cache miss
+-            Date d = new Date(inDate);
+-            return _tzFormat.format(d);
+-            
++            return _tzFormat.print(inDate);
+         }
+                                           
+         // Check if we are in the same second
+@@ -237,14 +227,13 @@
+         if (_lastSeconds==seconds )
+             return _lastResult;
+ 
+-        Date d = new Date(inDate);
+         
+         // Check if we need a new format string
+         long minutes = seconds/60;
+         if (_lastMinutes != minutes)
+         {
+             _lastMinutes = minutes;
+-            _secFormatString=_minFormat.format(d);
++            _secFormatString=_minFormat.print(inDate);
+ 
+             int i=_secFormatString.indexOf("ss");
+             int l=2;
+@@ -282,7 +271,7 @@
+     /* ------------------------------------------------------------ */
+     /** Get the format.
+      */
+-    public SimpleDateFormat getFormat()
++    public DateTimeFormatter getFormat()
+     {
+         return _minFormat;
+     }
 Index: modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(revision 1720)
+--- modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(revision 1877)
 +++ modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(working copy)
 @@ -20,17 +20,21 @@
  import java.io.IOException;
@@ -545,200 +1501,9 @@ Index: modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java
              File file= new File(_filename);
              File dir = new File(file.getParent());
              String fn=file.getName();
-Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
-===================================================================
---- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 1720)
-+++ modules/util/src/main/java/org/mortbay/util/DateCache.java	(working copy)
-@@ -14,12 +14,15 @@
- 
- package org.mortbay.util;
- 
--import java.text.DateFormatSymbols;
--import java.text.SimpleDateFormat;
- import java.util.Date;
- import java.util.Locale;
- import java.util.TimeZone;
- 
-+import org.joda.time.DateTimeZone;
-+import org.joda.time.format.DateTimeFormat;
-+import org.joda.time.format.DateTimeFormatter;
-+import org.joda.time.format.DateTimeFormatterBuilder;
-+
- /* ------------------------------------------------------------ */
- /**  Date Format Cache.
-  * Computes String representations of Dates and caches
-@@ -46,10 +49,10 @@
-     
-     private String _formatString;
-     private String _tzFormatString;
--    private SimpleDateFormat _tzFormat;
-+    private DateTimeFormatter _tzFormat;
-     
-     private String _minFormatString;
--    private SimpleDateFormat _minFormat;
-+    private DateTimeFormatter _minFormat;
- 
-     private String _secFormatString;
-     private String _secFormatString0;
-@@ -62,7 +65,6 @@
-     private String _lastResult = null;
- 
-     private Locale _locale	= null;
--    private DateFormatSymbols	_dfs	= null;
- 
-     /* ------------------------------------------------------------ */
-     /** Constructor.
-@@ -72,7 +74,6 @@
-     public DateCache()
-     {
-         this("EEE MMM dd HH:mm:ss zzz yyyy");
--        getFormat().setTimeZone(TimeZone.getDefault());
-     }
-     
-     /* ------------------------------------------------------------ */
-@@ -82,7 +83,7 @@
-     public DateCache(String format)
-     {
-         _formatString=format;
--        setTimeZone(TimeZone.getDefault());
-+        setTimeZone(DateTimeZone.getDefault());
-         
-     }
-     
-@@ -91,49 +92,38 @@
-     {
-         _formatString=format;
-         _locale = l;
--        setTimeZone(TimeZone.getDefault());       
-+        setTimeZone(DateTimeZone.getDefault());       
-     }
-     
-     /* ------------------------------------------------------------ */
--    public DateCache(String format,DateFormatSymbols s)
--    {
--        _formatString=format;
--        _dfs = s;
--        setTimeZone(TimeZone.getDefault());
--    }
--
--    /* ------------------------------------------------------------ */
-     /** Set the timezone.
-      * @param tz TimeZone
-      */
--    public void setTimeZone(TimeZone tz)
-+    public void setTimeZone(DateTimeZone tz)
-     {
--        setTzFormatString(tz);        
--        if( _locale != null ) 
-+        setTzFormatString(tz);  
-+
-+        _tzFormat=DateTimeFormat.forPattern(_tzFormatString);
-+        _minFormat=DateTimeFormat.forPattern(_minFormatString);
-+        if (_locale!=null)
-         {
--            _tzFormat=new SimpleDateFormat(_tzFormatString,_locale);
--            _minFormat=new SimpleDateFormat(_minFormatString,_locale);
-+            _tzFormat=_tzFormat.withLocale(_locale);
-+            _minFormat=_minFormat.withLocale(_locale);
-         }
--        else if( _dfs != null ) 
-+        if (tz!=null)
-         {
--            _tzFormat=new SimpleDateFormat(_tzFormatString,_dfs);
--            _minFormat=new SimpleDateFormat(_minFormatString,_dfs);
-+            _tzFormat=_tzFormat.withZone(tz);
-+            _minFormat=_minFormat.withZone(tz);
-         }
--        else 
--        {
--            _tzFormat=new SimpleDateFormat(_tzFormatString);
--            _minFormat=new SimpleDateFormat(_minFormatString);
--        }
--        _tzFormat.setTimeZone(tz);
--        _minFormat.setTimeZone(tz);
-+        
-         _lastSeconds=-1;
-         _lastMinutes=-1;        
-     }
- 
-     /* ------------------------------------------------------------ */
--    public TimeZone getTimeZone()
-+    public DateTimeZone getTimeZone()
-     {
--        return _tzFormat.getTimeZone();
-+        return _tzFormat.getZone();
-     }
-     
-     /* ------------------------------------------------------------ */
-@@ -143,18 +133,18 @@
-      */
-     public void setTimeZoneID(String timeZoneId)
-     {
--        setTimeZone(TimeZone.getTimeZone(timeZoneId));
-+        setTimeZone(DateTimeZone.forID(timeZoneId));
-     }
-     
-     /* ------------------------------------------------------------ */
--    private void setTzFormatString(final  TimeZone tz )
-+    private void setTzFormatString(final DateTimeZone tz )
-     {
-         int zIndex = _formatString.indexOf( "ZZZ" );
-         if( zIndex >= 0 )
-         {
-             String ss1 = _formatString.substring( 0, zIndex );
-             String ss2 = _formatString.substring( zIndex+3 );
--            int tzOffset = tz.getRawOffset();
-+            int tzOffset = tz.getOffset(0);
-             
-             StringBuffer sb = new StringBuffer(_formatString.length()+10);
-             sb.append(ss1);
-@@ -225,6 +215,8 @@
-      */
-     public synchronized String format(long inDate)
-     {
-+        // TODO - use version that uses StringBuffer
-+        
-         long seconds = inDate / 1000;
- 
-         // Is it not suitable to cache?
-@@ -235,8 +227,7 @@
-             _misses++;
-             if (_misses<__MaxMisses)
-             {
--                Date d = new Date(inDate);
--                return _tzFormat.format(d);
-+                return _tzFormat.print(inDate);
-             }    
-         }
-         else if (_misses>0)
-@@ -247,14 +238,13 @@
-         if (_lastSeconds==seconds && !_millis)
-             return _lastResult;
- 
--        Date d = new Date(inDate);
-         
-         // Check if we need a new format string
-         long minutes = seconds/60;
-         if (_lastMinutes != minutes)
-         {
-             _lastMinutes = minutes;
--            _secFormatString=_minFormat.format(d);
-+            _secFormatString=_minFormat.print(inDate);
- 
-             int i;
-             int l;
-@@ -313,7 +303,7 @@
-     /* ------------------------------------------------------------ */
-     /** Get the format.
-      */
--    public SimpleDateFormat getFormat()
-+    public DateTimeFormatter getFormat()
-     {
-         return _minFormat;
-     }
 Index: modules/util/pom.xml
 ===================================================================
---- modules/util/pom.xml	(revision 1720)
+--- modules/util/pom.xml	(revision 1877)
 +++ modules/util/pom.xml	(working copy)
 @@ -64,6 +64,29 @@
            </execution>
