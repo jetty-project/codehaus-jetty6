@@ -83,7 +83,7 @@
       <!-- plugin>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>maven-jetty-jspc-plugin</artifactId>
-          <version></version>
+          <version>${project.version}</version>
           <executions>
             <execution>
               <id>jspc</id>
