@@ -26,6 +26,7 @@ import java.io.FilenameFilter;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,8 +37,6 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.util.IO;
 
 /**
@@ -57,7 +56,7 @@ import org.mortbay.util.IO;
  * 
  * @goal jspc
  * @phase process-classes
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution compile
  * @description Runs jspc compiler to produce .java and .class files
  */
 public class JspcMojo extends AbstractMojo
@@ -225,29 +224,25 @@ public class JspcMojo extends AbstractMojo
     throws Exception
     {
         ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
-        
-        WebAppContext webAppContext = new WebAppContext();
-        webAppContext.setContextPath("/");
-        webAppContext.setWar(webAppSourceDirectory);
-        
-        WebAppClassLoader webAppClassLoader = new WebAppClassLoader(currentClassLoader, webAppContext);
-        setUpClassPath(webAppClassLoader);
+
+        ArrayList urls = new ArrayList();
+        setUpClassPath(urls);
+        URLClassLoader ucl = new URLClassLoader((URL[])urls.toArray(new URL[0]), currentClassLoader);
         StringBuffer classpathStr = new StringBuffer();
-        URL[] urls = webAppClassLoader.getURLs();
-        for (int i=0; i< urls.length; i++)
+
+        for (int i=0; i<urls.size(); i++)
         {
-            if (getLog().isDebugEnabled()) getLog().debug("webappclassloader contains: "+urls[i]);
-            classpathStr.append(urls[i].getFile());
-            if (getLog().isDebugEnabled()) getLog().debug("added to classpath: "+urls[i].getFile());
+            if (getLog().isDebugEnabled()) getLog().debug("webappclassloader contains: "+urls.get(i));
+            classpathStr.append(((URL)urls.get(i)).getFile());
+            if (getLog().isDebugEnabled()) getLog().debug("added to classpath: "+((URL)urls.get(i)).getFile());
             classpathStr.append(System.getProperty("path.separator"));
         }
-        
-        Thread.currentThread().setContextClassLoader(webAppClassLoader);
-        
+
+        Thread.currentThread().setContextClassLoader(ucl);
         JspC jspc = new JspC();
         jspc.setWebXmlFragment(webXmlFragment);
         jspc.setUriroot(webAppSourceDirectory);
-        
+
         jspc.setPackage(packageRoot);
         jspc.setOutputDir(generatedClasses);
         jspc.setValidateXml(validateXml);
@@ -413,15 +408,16 @@ public class JspcMojo extends AbstractMojo
      * Put everything in the classesDirectory and all
      * of the dependencies on the classpath.
      * 
-     * @param classLoader we use a Jetty WebAppClassLoader to load the classes
+     * @param urls a list to which to add the urls of the dependencies
      * @throws Exception
      */
-    private void setUpClassPath(WebAppClassLoader classLoader)
+    private void setUpClassPath (List urls)
     throws Exception
     {       
         String classesDir = classesDirectory.getCanonicalPath();
         classesDir = classesDir + (classesDir.endsWith(File.pathSeparator)?"":File.separator);
-        classLoader.addClassPath(classesDir);
+        urls.add(new File(classesDir).toURL());
+        
         if (getLog().isDebugEnabled()) getLog().debug("Adding to classpath classes dir: "+classesDir);
         
         for ( Iterator iter = project.getArtifacts().iterator(); iter.hasNext(); )
@@ -434,8 +430,8 @@ public class JspcMojo extends AbstractMojo
                 String filePath = artifact.getFile().getCanonicalPath();
                 if (getLog().isDebugEnabled())
                     getLog().debug("Adding to classpath dependency file: "+filePath);
-                    
-                classLoader.addClassPath(filePath);
+
+               urls.add(artifact.getFile().toURL());
             }
         }
     }
