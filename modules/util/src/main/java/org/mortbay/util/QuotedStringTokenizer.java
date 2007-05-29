@@ -380,7 +380,9 @@ public class QuotedStringTokenizer
                     case ' ':
                         e=i;
                         buf.append('"');
-                        buf.append(s,0,e);
+                        // TODO when 1.4 support is dropped: buf.append(s,0,e);
+                        for (int j=0;j<e;j++)
+                            buf.append(s.charAt(j));
                         break search;
                         
                     default:
