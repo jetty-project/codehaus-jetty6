@@ -45,10 +45,10 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     private int _id;
     private List _idle;
 
-    private final String _joinLock = "JOIN";
+    private final Object _joinLock = new Object();
 
     private long _lastShrink;
-    private final String _lock = "LOCK";
+    private final Object _lock = new Object();
     private int _maxIdleTimeMs=60000;
     private int _maxThreads=255;
     private int _minThreads=1;
