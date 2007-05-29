@@ -28,6 +28,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-344 gready fill in ByteArrayBuffer.readFrom
  + JETTY-345 fixed lost content with blocked NIO.
  + JETTY-347 Fixed type util init
+ + JETTY-352 Object locks
 
 jetty-6.1.3 - 4 May 2007
  + Handle CRLF for content in header optimization
