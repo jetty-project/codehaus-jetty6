@@ -229,7 +229,7 @@
     <module>extras/servlet-tester</module>
     <module>extras/xbean</module>
     <module>extras/spring</module>
-    <module>extras/grizzly</module>
+    <!--module>extras/grizzly</module-->
     <module>extras/sslengine</module>
     <module>extras/ajp</module>
     <module>extras/setuid</module>
