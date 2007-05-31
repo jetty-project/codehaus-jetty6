@@ -28,7 +28,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.util.Scanner;
-
+import org.mortbay.jetty.plugin.util.ScanTargetPattern;
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * AbstractJettyRunMojo
@@ -102,6 +103,12 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      */
     private File[] scanTargets;
     
+    
+    /**
+     * 
+     * @parameter
+     */
+    private ScanTargetPattern[] scanTargetPatterns;
 
     /**
      * web.xml as a File
@@ -302,6 +309,48 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                 list.add(scanTargets[i]);
             }
             setExtraScanTargets(list);
+        }
+        
+        
+        if (scanTargetPatterns!=null)
+        {
+            for (int i=0;i<scanTargetPatterns.length; i++)
+            {
+                Iterator itor = scanTargetPatterns[i].getIncludes().iterator();
+                StringBuffer strbuff = new StringBuffer();
+                while (itor.hasNext())
+                {
+                    strbuff.append((String)itor.next());
+                    if (itor.hasNext())
+                        strbuff.append(",");
+                }
+                String includes = strbuff.toString();
+                
+                itor = scanTargetPatterns[i].getExcludes().iterator();
+                strbuff= new StringBuffer();
+                while (itor.hasNext())
+                {
+                    strbuff.append((String)itor.next());
+                    if (itor.hasNext())
+                        strbuff.append(",");
+                }
+                String excludes = strbuff.toString();
+
+                try
+                {
+                    List files = FileUtils.getFiles(scanTargetPatterns[i].getDirectory(), includes, excludes);
+                    itor = files.iterator();
+                    while (itor.hasNext())
+                        getLog().info("Adding extra scan target from pattern: "+itor.next());
+                    setExtraScanTargets(files);
+                }
+                catch (IOException e)
+                {
+                    throw new MojoExecutionException(e.getMessage());
+                }
+            }
+            
+           
         }
     }
 
