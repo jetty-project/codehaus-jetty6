@@ -47,9 +47,9 @@ public class SocketEndPoint extends StreamEndPoint
     /* (non-Javadoc)
      * @see org.mortbay.io.BufferIO#isClosed()
      */
-    public boolean isClosed()
+    public boolean isOpen()
     {
-        return _socket==null || _socket.isClosed() || _socket.isInputShutdown() || _socket.isOutputShutdown();
+        return super.isOpen() && _socket!=null && !_socket.isClosed() && !_socket.isInputShutdown() && !_socket.isOutputShutdown();
     }
 
     /* (non-Javadoc)
