@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + Work around IBM JVM socket close issue 
+ + JETTY-346 add wildcard support to extra scan targets for maven plugin
 
 jetty-6.1.4rc0
  + Reorganized import of contrib modules
