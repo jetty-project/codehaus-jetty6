@@ -50,7 +50,7 @@ import org.mortbay.util.IO;
  *  be the Eclipse java compiler.
  *  </p>
  *  
- *  <p>See <a href="howto.html">Usage</a> for instructions on using this plugin.
+ *  <p>See <a href="http://docs.codehaus.org/display/JETTY/Maven+Jetty+Jspc+Plugin">Usage Guide</a> for instructions on using this plugin.
  *  </p>
  * @author janb
  * 
