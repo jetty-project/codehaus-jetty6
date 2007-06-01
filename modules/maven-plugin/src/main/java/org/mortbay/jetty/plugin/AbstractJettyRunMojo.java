@@ -105,7 +105,9 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     
     
     /**
-     * 
+     * List of directories with ant-style &lt;include&gt; and &lt;exclude&gt; patterns
+     * for extra targets to periodically scan for changes. Can be used instead of,
+     * or in conjunction with &lt;scanTargets&gt;.Optional.
      * @parameter
      */
     private ScanTargetPattern[] scanTargetPatterns;
