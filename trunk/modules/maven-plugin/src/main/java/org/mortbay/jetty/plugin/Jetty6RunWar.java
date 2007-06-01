@@ -37,8 +37,8 @@ import org.mortbay.util.Scanner;
  *  This can be used, for example, to deploy a static webapp that is not part of your maven build. 
  *  </p>
  *  <p>
- *  There is a <a href="run-mojo.html">reference guide</a> to the configuration parameters for this plugin, and more detailed information
- *  with examples in the <a href="howto.html">Configuration How-To</a>.
+ *  There is a <a href="run-war-mojo.html">reference guide</a> to the configuration parameters for this plugin, and more detailed information
+ *  with examples in the <a href="http://docs.codehaus.org/display/JETTY/Maven+Jetty+Plugin/">Configuration Guide</a>.
  *  </p>
  * 
  * @goal run-war
