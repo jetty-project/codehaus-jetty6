@@ -176,7 +176,8 @@ public class ByteArrayBuffer extends AbstractBuffer
             if (in.available()<=0)
                 break;
         }
-
+        if (len<0 && total==0)
+            return -1;
         return total;
     }
 }
