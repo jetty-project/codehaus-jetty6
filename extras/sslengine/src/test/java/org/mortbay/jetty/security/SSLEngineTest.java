@@ -86,11 +86,10 @@ public class SSLEngineTest extends TestCase
         Server server=new Server();
         SslSelectChannelConnector connector=new SslSelectChannelConnector();
 
-        
-        String keystoreDir = System.getProperty("user.dir")+File.separator+"src"+File.separator+"etc"+File.separator+"keystore";
+        String keystore = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+"keystore";
         
         connector.setPort(0);
-        connector.setKeystore(keystoreDir);
+        connector.setKeystore(keystore);
         connector.setPassword("storepwd");
         connector.setKeyPassword("keypwd");
 
@@ -99,7 +98,7 @@ public class SSLEngineTest extends TestCase
         server.setHandler(new HelloWorldHandler());
         server.start();
 
-        final int numConns=500;
+        final int numConns=200;
         Socket[] client=new Socket[numConns];
 
         SSLContext ctx=SSLContext.getInstance("SSLv3");
@@ -111,28 +110,30 @@ public class SSLEngineTest extends TestCase
         {
             for (int i=0; i<numConns; ++i)
             {
-                System.err.println("write:"+i);
+                // System.err.println("write:"+i);
                 client[i]=ctx.getSocketFactory().createSocket("localhost",port);
                 OutputStream os=client[i].getOutputStream();
 
                 os.write(REQUEST0.getBytes());
-                os.write(REQUEST1.getBytes());
-            }
-
-            for (int i=0; i<numConns; ++i)
-            {
-                System.err.println("flush:"+i);
-                OutputStream os=client[i].getOutputStream();
+                os.write(REQUEST0.getBytes());
                 os.flush();
             }
 
             for (int i=0; i<numConns; ++i)
             {
-                System.err.println("read:"+i);
+                // System.err.println("flush:"+i);
+                OutputStream os=client[i].getOutputStream();
+                os.write(REQUEST1.getBytes());
+                os.flush();
+            }
+
+            for (int i=0; i<numConns; ++i)
+            {
+                // System.err.println("read:"+i);
                 // Read the response.
                 String responses=readResponse(client[i]);
                 // Check the response
-                assertEquals(String.format("responses %d",i),RESPONSE0+RESPONSE1,responses);
+                assertEquals(String.format("responses %d",i),RESPONSE0+RESPONSE0+RESPONSE1,responses);
             }
         }
         finally

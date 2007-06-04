@@ -68,7 +68,10 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             loop: while (isOpen() && !_engine.isOutboundDone() )
             {
                 if (_outNIOBuffer.length()>0)
+                {
                     flush();
+                    Thread.sleep(100); // TODO yuck
+                }
                 
                 switch(_engine.getHandshakeStatus())
                 {
@@ -78,7 +81,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         
                     case NEED_UNWRAP:
                         if(!fill(__EMPTY))
-                            break loop; // TODO may need to reschedule?
+                            Thread.sleep(100); // TODO yuck
                         break;
                         
                     case NEED_TASK:
@@ -119,6 +122,10 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             
         }
         catch(IOException e)
+        {
+            Log.ignore(e);
+        }
+        catch (InterruptedException e)
         {
             Log.ignore(e);
         }
