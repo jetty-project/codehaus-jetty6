@@ -358,9 +358,11 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             int len=super.fill(_inNIOBuffer);
             if (len<=0)
             {
+                if (len<0)
+                    _engine.closeInbound();
                 if (len==0 || in_len>0)
                     break;
-                throw new IOException("EOF");
+                return false;
             }
             in_len+=len;
         }
