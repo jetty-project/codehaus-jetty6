@@ -52,6 +52,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         _engine.setUseClientMode(false);
         _session=engine.getSession();
 
+        // TODO pool buffers and use only when needed.
+        
         _outNIOBuffer=new NIOBuffer(_session.getPacketBufferSize(),true);
         _outBuffer=_outNIOBuffer.getByteBuffer();
         _inNIOBuffer=new NIOBuffer(_session.getPacketBufferSize(),true);
