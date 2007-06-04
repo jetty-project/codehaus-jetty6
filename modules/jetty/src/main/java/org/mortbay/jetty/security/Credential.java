@@ -103,6 +103,7 @@ public abstract class Credential
     public static class MD5 extends Credential
     {
         public static final String __TYPE="MD5:";
+        public static final Object __md5Lock = new Object();
         private static MessageDigest __md;
         
         private byte[] _digest;
@@ -132,7 +133,7 @@ public abstract class Credential
                 if (credentials instanceof Password ||
                     credentials instanceof String)
                 {
-                    synchronized(__TYPE)
+                    synchronized(__md5Lock)
                     {
                         if (__md==null)
                             __md = MessageDigest.getInstance("MD5");
@@ -182,7 +183,7 @@ public abstract class Credential
             try
             {
                 byte[] digest;
-                synchronized(__TYPE)
+                synchronized(__md5Lock)
                 {
                     if (__md==null)
                     {
