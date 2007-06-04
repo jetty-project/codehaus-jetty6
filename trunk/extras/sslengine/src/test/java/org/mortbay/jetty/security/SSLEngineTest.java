@@ -98,7 +98,7 @@ public class SSLEngineTest extends TestCase
         server.setHandler(new HelloWorldHandler());
         server.start();
 
-        final int numConns=200;
+        final int numConns=500;
         Socket[] client=new Socket[numConns];
 
         SSLContext ctx=SSLContext.getInstance("SSLv3");
@@ -110,6 +110,7 @@ public class SSLEngineTest extends TestCase
         {
             for (int i=0; i<numConns; ++i)
             {
+                System.err.println("write:"+i);
                 client[i]=ctx.getSocketFactory().createSocket("localhost",port);
                 OutputStream os=client[i].getOutputStream();
 
@@ -119,17 +120,18 @@ public class SSLEngineTest extends TestCase
 
             for (int i=0; i<numConns; ++i)
             {
+                System.err.println("flush:"+i);
                 OutputStream os=client[i].getOutputStream();
                 os.flush();
             }
 
             for (int i=0; i<numConns; ++i)
             {
+                System.err.println("read:"+i);
                 // Read the response.
                 String responses=readResponse(client[i]);
                 // Check the response
                 assertEquals(String.format("responses %d",i),RESPONSE0+RESPONSE1,responses);
-                System.err.println(responses);
             }
         }
         finally
