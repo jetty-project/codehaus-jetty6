@@ -53,7 +53,12 @@ import org.mortbay.util.MultiException;
 public class Server extends HandlerWrapper implements Attributes
 {
     private static ShutdownHookThread hookThread = new ShutdownHookThread();
-    
+    private static String _version = (Server.class.getPackage()!=null && Server.class.getPackage().getImplementationVersion()!=null)
+        ?Server.class.getPackage().getImplementationVersion()
+        :"6.1.x";
+
+
+
     private ThreadPool _threadPool;
     private Connector[] _connectors;
     private UserRealm[] _realms;
@@ -62,7 +67,6 @@ public class Server extends HandlerWrapper implements Attributes
     private boolean _sendServerVersion = true; //send Server: header
     private boolean _sendDateHeader = false; //send Date: header 
     private AttributesMap _attributes = new AttributesMap();
-    private String _version = "6.1.x";
     private List _dependentLifeCycles=new ArrayList();
     
     /* ------------------------------------------------------------ */
@@ -84,6 +88,13 @@ public class Server extends HandlerWrapper implements Attributes
         setConnectors(new Connector[]{connector});
     }
 
+
+    /* ------------------------------------------------------------ */
+    public static String getVersion()
+    {
+        return _version;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the container.
@@ -173,8 +184,6 @@ public class Server extends HandlerWrapper implements Attributes
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
-        if (this.getClass().getPackage()!=null && this.getClass().getPackage().getImplementationVersion()!=null)
-            _version=this.getClass().getPackage().getImplementationVersion();
         Log.info("jetty-"+_version);
         HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
@@ -356,12 +365,6 @@ public class Server extends HandlerWrapper implements Attributes
         return _sendServerVersion;
     }
 
-    /* ------------------------------------------------------------ */
-    public String getVersion()
-    {
-        return _version;
-    }
-    
     /* ------------------------------------------------------------ */
     /**
      * @param sendDateHeader
