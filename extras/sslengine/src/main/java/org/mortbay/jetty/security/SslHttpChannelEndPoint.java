@@ -26,9 +26,8 @@ import org.mortbay.log.Log;
  */
 public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndPoint implements Runnable
 {
-    private static ByteBuffer[] __NO_BUFFERS={};
-    private static ByteBuffer __EMPTY=ByteBuffer.allocate(0);
-    private static SSLEngineResult _result;
+    private static final ByteBuffer[] __NO_BUFFERS={};
+    private static final ByteBuffer __EMPTY=ByteBuffer.allocate(0);
     
     private SSLEngine _engine;
     private ByteBuffer _inBuffer;
@@ -66,8 +65,11 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         
         try
         {   
-            loop: while (_inBuffer.remaining()>0)
+            loop: while (isOpen() && !_engine.isOutboundDone() )
             {
+                if (_outNIOBuffer.length()>0)
+                    flush();
+                
                 switch(_engine.getHandshakeStatus())
                 {
                     case FINISHED:
@@ -91,19 +93,21 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         
                     case NEED_WRAP:
                     {
-                        flush();
+                        if (_outNIOBuffer.length()>0)
+                            flush();
                         
                         SSLEngineResult result=null;
                         try
                         {
-                            _outBuffer.position(_outNIOBuffer.putIndex());
+                            _outNIOBuffer.compact();
+                            int put=_outNIOBuffer.putIndex();
+                            _outBuffer.position(put);
                             result=_engine.wrap(__NO_BUFFERS,_outBuffer);
+                            _outNIOBuffer.setPutIndex(put+result.bytesProduced());
                         }
                         finally
                         {
                             _outBuffer.position(0);
-                            _outNIOBuffer.setGetIndex(0);
-                            _outNIOBuffer.setPutIndex(result.bytesProduced());
                         }
                         
                         flush();
@@ -131,68 +135,72 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
      */
     public int fill(Buffer buffer) throws IOException
     {
-        ByteBuffer bbuf=extractInputBuffer(buffer);
-        int size=buffer.length();
-		 
-        try
+        synchronized(buffer)
         {
-            fill(bbuf);
-            
-            loop: while (_inBuffer.remaining()>0)
+            ByteBuffer bbuf=extractInputBuffer(buffer);
+            int size=buffer.length();
+
+            try
             {
-                switch(_engine.getHandshakeStatus())
+                fill(bbuf);
+
+                loop: while (_inBuffer.remaining()>0)
                 {
-                    case FINISHED:
-                    case NOT_HANDSHAKING:
-                        break loop;
-                        
-                    case NEED_UNWRAP:
-                        if(!fill(bbuf))
-                            break loop;
-                        break;
-                        
-                    case NEED_TASK:
-                    {
-                        Runnable task;
-                        while ((task=_engine.getDelegatedTask())!=null)
-                        {
-                            task.run();
-                        }
-                        break;
-                    }
-                        
-                    case NEED_WRAP:
-                    {
+                    if (_outNIOBuffer.length()>0)
                         flush();
-                        
-                        SSLEngineResult result=null;
-                        try
-                        {
-                            _outBuffer.position(_outNIOBuffer.putIndex());
-                            result=_engine.wrap(__NO_BUFFERS,_outBuffer);
-                        }
-                        finally
-                        {
-                            _outBuffer.position(0);
-                            _outNIOBuffer.setGetIndex(0);
-                            _outNIOBuffer.setPutIndex(result.bytesProduced());
-                        }
                     
-                        flush();
-                        
-                        break;
+                    switch(_engine.getHandshakeStatus())
+                    {
+                        case FINISHED:
+                        case NOT_HANDSHAKING:
+                            break loop;
+
+                        case NEED_UNWRAP:
+                            if(!fill(bbuf))
+                                break loop;
+                            break;
+
+                        case NEED_TASK:
+                        {
+                            Runnable task;
+                            while ((task=_engine.getDelegatedTask())!=null)
+                            {
+                                task.run();
+                            }
+                            break;
+                        }
+
+                        case NEED_WRAP:
+                        {
+                            SSLEngineResult result=null;
+                            try
+                            {
+                                _outNIOBuffer.compact();
+                                int put=_outNIOBuffer.putIndex();
+                                _outBuffer.position();
+                                result=_engine.wrap(__NO_BUFFERS,_outBuffer);
+                                _outNIOBuffer.setPutIndex(put+result.bytesProduced());
+                            }
+                            finally
+                            {
+                                _outBuffer.position(0);
+                            }
+
+                            flush();
+
+                            break;
+                        }
                     }
                 }
             }
-            
+            finally
+            {
+                buffer.setPutIndex(bbuf.position());
+                bbuf.position(0);
+            }
+
+            return buffer.length()-size; 
         }
-        finally
-        {
-            buffer.setPutIndex(bbuf.position());
-            bbuf.position(0);
-        }
-        
-        return buffer.length()-size; 
     }
 
     /* ------------------------------------------------------------ */
@@ -217,21 +225,23 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         _outBuffers[0]=extractOutputBuffer(header);
         _outBuffers[1]=extractOutputBuffer(buffer);
         _outBuffers[2]=extractOutputBuffer(trailer);
-        
+
+        SSLEngineResult result;
+        int consumed=0;
         try
         {
             _outNIOBuffer.clear();
             _outBuffer.position(0);
             _outBuffer.limit(_outBuffer.capacity());
-            _result=_engine.wrap(_outBuffers,_outBuffer);
+            result=_engine.wrap(_outBuffers,_outBuffer);
+            _outNIOBuffer.setGetIndex(0);
+            _outNIOBuffer.setPutIndex(result.bytesProduced());
+            consumed=result.bytesConsumed();
         }
         finally
         {
             _outBuffer.position(0);
-            _outNIOBuffer.setGetIndex(0);
-            _outNIOBuffer.setPutIndex(_result.bytesProduced());
             
-            int consumed=_result.bytesConsumed();
             if (consumed>0 && header!=null)
             {
                 int len=consumed<header.length()?consumed:header.length();
@@ -261,7 +271,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     
         flush();
         
-        return _result.bytesConsumed();
+        return result.bytesConsumed();
     }
 
     
@@ -328,35 +338,35 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     private boolean fill(ByteBuffer buffer) throws IOException
     {
         int in_len=0;
-        
-        if (!_inNIOBuffer.hasContent() || (_result != null && _result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW))
+
+        if (_inNIOBuffer.hasContent())
+            _inNIOBuffer.compact();
+        else 
+            _inNIOBuffer.clear();
+
+        while (_inNIOBuffer.space()>0)
         {
-            if (_inNIOBuffer.hasContent())
-                _inNIOBuffer.compact();
-            else 
-                _inNIOBuffer.clear();
-            
-            while (_inNIOBuffer.space()>0)
+            int len=super.fill(_inNIOBuffer);
+            if (len<=0)
             {
-                int len=super.fill(_inNIOBuffer);
-                if (len<=0)
-                {
-                    if (len==0 || in_len>0)
-                        break;
-                    throw new IOException("EOF");
-                }
-                in_len+=len;
+                if (len==0 || in_len>0)
+                    break;
+                throw new IOException("EOF");
             }
+            in_len+=len;
         }
+        
 
         if (_inNIOBuffer.length()==0)
             return false;
-        
+
+        SSLEngineResult result;
         try
         {
             _inBuffer.position(_inNIOBuffer.getIndex());
             _inBuffer.limit(_inNIOBuffer.putIndex());
-            _result=_engine.unwrap(_inBuffer,buffer);
+            result=_engine.unwrap(_inBuffer,buffer);
+            _inNIOBuffer.skip(result.bytesConsumed());
         }
         finally
         {
@@ -364,31 +374,30 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             _inBuffer.limit(_inBuffer.capacity());
         }
 
-        if (_result != null)
+        if (result != null)
         {
-            switch(_result.getStatus())
+            switch(result.getStatus())
             {
                 case OK:
-                    _inNIOBuffer.skip(_result.bytesConsumed());
                     break;
                 case CLOSED:
                     throw new IOException("sslEngine closed");
                     
                 case BUFFER_OVERFLOW:
-                    Log.debug("unwrap {}",_result);
+                    Log.debug("unwrap {}",result);
                     break;
                     
                 case BUFFER_UNDERFLOW:
-                    Log.debug("unwrap {}",_result);
+                    Log.debug("unwrap {}",result);
                     break;
                     
                 default:
-                    Log.warn("unwrap "+_result);
-                throw new IOException(_result.toString());
+                    Log.warn("unwrap "+result);
+                throw new IOException(result.toString());
             }
         }
         
-        return (_result.bytesProduced()+_result.bytesConsumed())>0;
+        return (result.bytesProduced()+result.bytesConsumed())>0;
     }
 
     /* ------------------------------------------------------------ */
