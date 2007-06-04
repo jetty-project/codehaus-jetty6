@@ -88,12 +88,18 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
     
     public boolean isPending()
     {
-        return _pending;
+        synchronized (_mutex)
+        {
+            return _pending;
+        }
     }
     
     public boolean isResumed()
     {
-        return _resumed;
+        synchronized (_mutex)
+        {
+            return _resumed;
+        }
     }
 
     public Object getObject()
@@ -118,4 +124,14 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
         _mutex = mutex==null ? this : mutex; 
     }
 
+    public String toString()
+    {
+        synchronized (this)
+        {
+            return "WaitingContinuation@"+hashCode()+
+            (_new?",new":"")+
+            (_pending?",pending":"")+
+            (_resumed?",resumed":"");
+        }
+    }
 }

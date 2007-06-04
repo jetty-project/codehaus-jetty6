@@ -540,7 +540,7 @@ public class HttpConnection implements Connection
                 
                 if (!retrying)
                 {
-                    if (_request.getContinuation()!=null && _request.getContinuation().isPending())
+                    if (_request.getContinuation()!=null)
                     {
                         Log.debug("continuation still pending {}");
                         _request.getContinuation().reset();
