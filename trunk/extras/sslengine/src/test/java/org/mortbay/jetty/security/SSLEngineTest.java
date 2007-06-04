@@ -86,8 +86,9 @@ public class SSLEngineTest extends TestCase
         Server server=new Server();
         SslSelectChannelConnector connector=new SslSelectChannelConnector();
 
-        String keystoreDir=System.getProperty("user.dir")+File.separator+".."+File.separator+".."+File.separator+"etc"+File.separator+"keystore";
-
+        
+        String keystoreDir = System.getProperty("user.dir")+File.separator+"src"+File.separator+"etc"+File.separator+"keystore";
+        
         connector.setPort(0);
         connector.setKeystore(keystoreDir);
         connector.setPassword("storepwd");
