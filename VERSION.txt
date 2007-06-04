@@ -4,10 +4,12 @@ jetty-6.1.3z - 18 May 2007
  + Delay ssl handshake until after dispatch in sslSocketConnector
  + Set so_timeout during ssl handshake as an option on SslSocketConnector
  + Optional send Date header. Server.setSendDateHeader(boolean)
+ + fixed waiting continuation reset
  + JETTY-309 fix applied to sslEngine
  + JETTY-335 SslEngine overflow fix
  + fixed JSP close handling
  + fixed lost content with blocked NIO.
+ + JETTY-357 SSL select channel fixed
 
 jetty-6.1.3 - 4 May 2007
  + Handle CRLF for content in header optimization
