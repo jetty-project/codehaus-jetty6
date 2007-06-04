@@ -307,13 +307,17 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             // different set of connectors,
             // use the default
             Object[] configuredConnectors = getConfiguredConnectors();
-            if (configuredConnectors == null|| configuredConnectors.length == 0)
+            
+            plugin.setConnectors(configuredConnectors);
+            Object[] connectors = plugin.getConnectors();
+            
+            if (connectors == null|| connectors.length == 0)
             {
                 //if a SystemProperty -Djetty.port=<portnum> has been supplied, use that as the default port
                 configuredConnectors = new Object[] { plugin.createDefaultConnector(System.getProperty(PORT_SYSPROPERTY, null)) };
+                plugin.setConnectors(configuredConnectors);
             }
-            
-            plugin.setConnectors(configuredConnectors);
+       
             
             //set up a RequestLog if one is provided
             if (getConfiguredRequestLog() != null)
