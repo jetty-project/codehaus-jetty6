@@ -15,6 +15,7 @@
 
 package org.mortbay.jetty.plugin;
 
+
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.RequestLog;
@@ -41,8 +42,6 @@ public class Jetty6PluginServer implements JettyPluginServer
     public static int DEFAULT_PORT = 8080;
     public static int DEFAULT_MAX_IDLE_TIME = 30000;
     private Server server;
-    private Connector[] connectors;
-    private UserRealm[] realms;
     private ContextHandlerCollection contexts; //the list of ContextHandlers
     HandlerCollection handlers; //the list of lists of Handlers
     private RequestLogHandler requestLogHandler; //the request log handler
@@ -67,15 +66,19 @@ public class Jetty6PluginServer implements JettyPluginServer
      */
     public void setConnectors(Object[] connectors)
     {
-        this.connectors = new Connector[connectors.length];
+        if (connectors==null || connectors.length==0)
+            return;
+        
         for (int i=0; i<connectors.length;i++)
         {
-            this.connectors[i] = (Connector)connectors[i];
-            PluginLog.getLog().debug("Setting Connector: "+this.connectors[i].getClass().getName()+" on port "+this.connectors[i].getPort());
+            Connector connector = (Connector)connectors[i];
+            PluginLog.getLog().debug("Setting Connector: "+connector.getClass().getName()+" on port "+connector.getPort());
+            this.server.addConnector(connector);
         }
-        this.server.setConnectors(this.connectors);
     }
 
+    
+  
     /**
      *
      * 
@@ -83,7 +86,7 @@ public class Jetty6PluginServer implements JettyPluginServer
      */
     public Object[] getConnectors()
     {
-        return this.connectors;
+        return this.server.getConnectors();
     }
 
     /**
@@ -94,15 +97,10 @@ public class Jetty6PluginServer implements JettyPluginServer
     public void setUserRealms(Object[] realms) throws Exception
     {
         if (realms == null)
-            this.realms = null;
-        else
-        {
-            this.realms = new UserRealm[realms.length];
-            for (int i=0; i<realms.length;i++)
-                this.realms[i] = (UserRealm)realms[i];
-        }
-        
-        this.server.setUserRealms(this.realms);
+            return;
+ 
+         for (int i=0; i<realms.length;i++)
+             this.server.addUserRealm((UserRealm)realms[i]);
     }
 
     /**
@@ -111,7 +109,7 @@ public class Jetty6PluginServer implements JettyPluginServer
      */
     public Object[] getUserRealms()
     {
-        return this.realms;
+        return this.server.getUserRealms();
     }
 
     
