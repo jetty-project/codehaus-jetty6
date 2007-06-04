@@ -4,6 +4,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-346 add wildcard support to extra scan targets for maven plugin
  + JETTY-355 extensible SslSelectChannelConnector
  + JETTY-357 cleaned up ssl buffering
+ + JETTY-360 allow connectors, userRealms to be added from a <jettyConfig> for maven plugin
  + JETTY-362 More object locks
 
 jetty-6.1.4rc0

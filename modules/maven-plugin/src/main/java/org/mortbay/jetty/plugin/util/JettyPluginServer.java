@@ -31,7 +31,7 @@ public interface JettyPluginServer extends Proxy
   
     public void setConnectors (Object[] connectors) throws Exception;
     public Object[] getConnectors();
-    
+   
     public  void setUserRealms (Object[] realms) throws Exception;
     public Object[] getUserRealms();
     
