@@ -40,6 +40,14 @@ detected.
   </Set>
   -->
 
+  <!-- disable cookies 
+  <Get name="sessionHandler">
+     <Get name="sessionManager">
+        <Set name="usingCookies" type="boolean">false</Set>
+     </Get>
+  </Get>
+  -->
+
   <Get name="securityHandler">
     <Set name="userRealm">
       <New class="org.mortbay.jetty.security.HashUserRealm">
