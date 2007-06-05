@@ -12,8 +12,6 @@ package org.mortbay.jetty.security;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URL;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,13 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.log.Log;
 import org.mortbay.log.Logger;
 import org.mortbay.resource.Resource;
@@ -60,6 +55,32 @@ public class HTAccessHandler extends SecurityHandler
     String _accessFile=".htaccess";
 
     transient HashMap _htCache=new HashMap();
+    
+    /**
+     * DummyPrincipal
+     *
+     * For use when there is no user realm configured.
+     */
+    class DummyPrincipal implements Principal
+    {
+        private String _userName;
+
+        public DummyPrincipal(String name) 
+        {
+            _userName=name;
+        }
+
+        public String getName()
+        {
+            return _userName;
+        }
+
+        public String toString()
+        {
+            return getName();
+        }        
+    }
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -204,7 +225,7 @@ public class HTAccessHandler extends SecurityHandler
                 if (user!=null)
                 {
                     base_request.setAuthType(Constraint.__BASIC_AUTH);
-                    base_request.setUserPrincipal(getUserRealm().getPrincipal(user));
+                    base_request.setUserPrincipal(getPrincipal(user, getUserRealm()));
                 }
             }
             
@@ -224,7 +245,22 @@ public class HTAccessHandler extends SecurityHandler
             }
         }
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /** Get a Principal matching the user.
+     * If there is no user realm, and therefore we are using a
+     * htpassword file instead, then just return a dummy Principal.
+     * @param user
+     * @param realm
+     * @return
+     */
+    public Principal getPrincipal (String user, UserRealm realm)
+    {
+        if (realm==null)
+            return new DummyPrincipal(user);
+        
+        return realm.getPrincipal(user);
+    }
     /* ------------------------------------------------------------ */
     /**
      * set functions for the following .xml administration statements.
