@@ -451,7 +451,7 @@ public abstract class Resource implements Serializable
         for (int i=0 ; i< ls.length ; i++)
         {
             String encoded=URIUtil.encodePath(ls[i]);
-            Resource item = addPath(encoded);
+            Resource item = addPath(ls[i]);
             
             buf.append("<TR><TD><A HREF=\"");
             String path=URIUtil.addPaths(base,encoded);
