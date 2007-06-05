@@ -429,7 +429,8 @@ public abstract class Resource implements Serializable
             return null;
         Arrays.sort(ls);
         
-        String title = "Directory: "+base;
+        String decodedBase = URIUtil.decodePath(base);
+        String title = "Directory: "+decodedBase;
 
         StringBuffer buf=new StringBuffer(4096);
         buf.append("<HTML><HEAD><TITLE>");
@@ -441,7 +442,7 @@ public abstract class Resource implements Serializable
         if (parent)
         {
             buf.append("<TR><TD><A HREF=");
-            buf.append(URIUtil.encodePath(URIUtil.addPaths(base,"../")));
+            buf.append(URIUtil.addPaths(base,"../"));
             buf.append(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
         }
         
