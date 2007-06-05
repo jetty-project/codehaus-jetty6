@@ -93,14 +93,13 @@ public abstract class SelectorManager extends AbstractLifeCycle
      * @param att Attached Object
      * @throws IOException
      */
-    public SelectionKey register(SocketChannel channel, Object att) throws IOException
+    public void register(SocketChannel channel, Object att) throws IOException
     {
         int s=_set++; 
         s=s%_selectSets;
         SelectSet set=_selectSet[s];
-        SelectionKey key=channel.register(set.getSelector(),channel.isConnected()?SelectionKey.OP_READ:SelectionKey.OP_CONNECT,att);
+        set.addChange(channel,att);
         set.wakeup();
-        return key;
     }
     
     /* ------------------------------------------------------------ */
@@ -115,6 +114,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         s=s%_selectSets;
         SelectSet set=_selectSet[s];
         set.addChange(acceptChannel);
+        set.wakeup();
     }
 
     /* ------------------------------------------------------------ */
@@ -305,6 +305,18 @@ public abstract class SelectorManager extends AbstractLifeCycle
             synchronized (_changes)
             {
                 _changes[_change].add(point);
+                if (point instanceof SocketChannel)
+                    _changes[_change].add(null);
+            }
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void addChange(SocketChannel channel, Object att)
+        {   
+            synchronized (_changes)
+            {
+                _changes[_change].add(channel);
+                _changes[_change].add(att);
             }
         }
         
@@ -343,7 +355,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         Object o = changes.get(i);
                         if (o instanceof EndPoint)
                         {
-                            // Update the operatios for a key.
+                            // Update the operations for a key.
                             SelectChannelEndPoint endpoint = (SelectChannelEndPoint)o;
                             endpoint.doUpdateKey();
                         }
@@ -355,20 +367,21 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         {
                             // finish accepting/connecting this connection
                             SocketChannel channel=(SocketChannel)o;
+                            Object att = changes.get(++i);
                             
                             if (channel.isRegistered()) // TODO remove this if when all tested and working
                                 throw new IllegalStateException();
 
                             if (channel.isConnected())
                             {
-                                SelectionKey key = channel.register(_selector,SelectionKey.OP_READ,null);
+                                SelectionKey key = channel.register(_selector,SelectionKey.OP_READ,att);
                                 SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                 key.attach(endpoint);
                                 doDispatch(endpoint);
                             }
                             else
                             {
-                                channel.register(_selector,SelectionKey.OP_CONNECT,null);
+                                channel.register(_selector,SelectionKey.OP_CONNECT,att);
                             }
 
                         }
