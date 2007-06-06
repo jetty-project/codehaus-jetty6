@@ -462,7 +462,15 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         doGet(request,response);
     }
     
-    
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see javax.servlet.http.HttpServlet#doTrace(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    {
+        resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * Finds a matching welcome file for the supplied {@link Resource}. This will be the first entry in the list of 
