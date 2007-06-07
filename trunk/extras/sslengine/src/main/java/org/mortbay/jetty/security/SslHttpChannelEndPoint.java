@@ -35,8 +35,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     private ByteBuffer _outBuffer;
     private NIOBuffer _outNIOBuffer;
 
-    private ByteBuffer _reuseBuffer;    
-    private ByteBuffer[] _outBuffers=new ByteBuffer[3];
+    private ByteBuffer[] _reuseBuffer=new ByteBuffer[2];    
+    private ByteBuffer[] _outBuffers=new ByteBuffer[2];
 
     // ssl
     protected SSLSession _session;
@@ -230,56 +230,98 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
             if (_outNIOBuffer.length()>0)
                 return 0;
         }
-        
-        _outBuffers[0]=extractOutputBuffer(header);
-        _outBuffers[1]=extractOutputBuffer(buffer);
-        _outBuffers[2]=extractOutputBuffer(trailer);
 
-        SSLEngineResult result;
-        int consumed=0;
-        try
+        SSLEngineResult result=null;
+
+        if (header!=null && buffer!=null)
         {
-            _outNIOBuffer.clear();
-            _outBuffer.position(0);
-            _outBuffer.limit(_outBuffer.capacity());
-            result=_engine.wrap(_outBuffers,_outBuffer);
-            _outNIOBuffer.setGetIndex(0);
-            _outNIOBuffer.setPutIndex(result.bytesProduced());
-            consumed=result.bytesConsumed();
+            _outBuffers[0]=extractOutputBuffer(header,0);
+            synchronized(_outBuffers[0])
+            {
+                _outBuffers[0].position(header.getIndex());
+                _outBuffers[0].limit(header.putIndex());
+
+                _outBuffers[1]=extractOutputBuffer(buffer,1);
+
+                synchronized(_outBuffers[1])
+                {
+                    _outBuffers[1].position(buffer.getIndex());
+                    _outBuffers[1].limit(buffer.putIndex());
+
+                    int consumed=0;
+                    try
+                    {
+                        _outNIOBuffer.clear();
+                        _outBuffer.position(0);
+                        _outBuffer.limit(_outBuffer.capacity());
+                        result=_engine.wrap(_outBuffers,_outBuffer);
+                        _outNIOBuffer.setGetIndex(0);
+                        _outNIOBuffer.setPutIndex(result.bytesProduced());
+                        consumed=result.bytesConsumed();
+                    }
+                    finally
+                    {
+                        _outBuffer.position(0);
+
+                        if (consumed>0 && header!=null)
+                        {
+                            int len=consumed<header.length()?consumed:header.length();
+                            header.skip(len);
+                            consumed-=len;
+                            _outBuffers[0].position(0);
+                            _outBuffers[0].limit(_outBuffers[0].capacity());
+                        }
+                        if (consumed>0 && buffer!=null)
+                        {
+                            int len=consumed<buffer.length()?consumed:buffer.length();
+                            buffer.skip(len);
+                            consumed-=len;
+                            _outBuffers[1].position(0);
+                            _outBuffers[1].limit(_outBuffers[1].capacity());
+                        }
+                        assert consumed==0;
+                    }
+                }
+            }
         }
-        finally
+        else
         {
-            _outBuffer.position(0);
-            
-            if (consumed>0 && header!=null)
+            _outBuffers[0]=extractOutputBuffer(header,0);
+            synchronized(_outBuffers[0])
             {
-                int len=consumed<header.length()?consumed:header.length();
-                header.skip(len);
-                consumed-=len;
-                _outBuffers[0].position(0);
-                _outBuffers[0].limit(_outBuffers[0].capacity());
+                _outBuffers[0].position(header.getIndex());
+                _outBuffers[0].limit(header.putIndex());
+
+                int consumed=0;
+                try
+                {
+                    _outNIOBuffer.clear();
+                    _outBuffer.position(0);
+                    _outBuffer.limit(_outBuffer.capacity());
+                    result=_engine.wrap(_outBuffers[0],_outBuffer);
+                    _outNIOBuffer.setGetIndex(0);
+                    _outNIOBuffer.setPutIndex(result.bytesProduced());
+                    consumed=result.bytesConsumed();
+                }
+                finally
+                {
+                    _outBuffer.position(0);
+
+                    if (consumed>0 && header!=null)
+                    {
+                        int len=consumed<header.length()?consumed:header.length();
+                        header.skip(len);
+                        consumed-=len;
+                        _outBuffers[0].position(0);
+                        _outBuffers[0].limit(_outBuffers[0].capacity());
+                    }
+                    assert consumed==0;
+                }
             }
-            if (consumed>0 && buffer!=null)
-            {
-                int len=consumed<buffer.length()?consumed:buffer.length();
-                buffer.skip(len);
-                consumed-=len;
-                _outBuffers[1].position(0);
-                _outBuffers[1].limit(_outBuffers[1].capacity());
-            }
-            if (consumed>0 && trailer!=null)
-            {
-                int len=consumed<trailer.length()?consumed:trailer.length();
-                trailer.skip(len);
-                consumed-=len;
-                _outBuffers[1].position(0);
-                _outBuffers[1].limit(_outBuffers[1].capacity());
-            }
-            assert consumed==0;
         }
-    
+
         flush();
-        
+
         return result.bytesConsumed();
     }
 
@@ -311,11 +353,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     }
     
     /* ------------------------------------------------------------ */
-    private ByteBuffer extractOutputBuffer(Buffer buffer)
+    private ByteBuffer extractOutputBuffer(Buffer buffer,int n)
     {
-        if(buffer==null)
-            return __EMPTY;
-        
         ByteBuffer src=null;
         NIOBuffer nBuf=null;
 
@@ -326,20 +365,13 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         }
         else
         {
-            if (_reuseBuffer == null)
-            {
-                _reuseBuffer = ByteBuffer.allocateDirect(_session.getPacketBufferSize());
-            }
-            _reuseBuffer.put(buffer.asArray());
-            src = _reuseBuffer;
+            src = _reuseBuffer[n];
+            if (src == null)
+                src = _reuseBuffer[n] = ByteBuffer.allocateDirect(_session.getApplicationBufferSize());
+            
+            src.clear();
+            src.put(buffer.asArray());
         }
-
-        if (src!=null)
-        {
-            src.position(buffer.getIndex());
-            src.limit(buffer.putIndex());
-        }
-
         return src;
     }
 
