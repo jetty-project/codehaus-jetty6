@@ -233,9 +233,19 @@ public class Response implements HttpServletResponse
     		return;
     	
         if (isCommitted())
+        {
             Log.warn("Committed before "+code+" "+message);
+            return;
+        }
 
         resetBuffer();
+        _characterEncoding=null;
+        setHeader(HttpHeaders.EXPIRES,null);
+        setHeader(HttpHeaders.LAST_MODIFIED,null);
+        setHeader(HttpHeaders.CACHE_CONTROL,null);
+        setHeader(HttpHeaders.CONTENT_TYPE,null);
+        setHeader(HttpHeaders.CONTENT_LENGTH,null);
+     
         _outputState=NONE;
         setStatus(code,message);
         
@@ -429,7 +439,12 @@ public class Response implements HttpServletResponse
         {
             _connection.getResponseFields().put(name, value);
             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
-                _connection._generator.setContentLength(Long.parseLong(value));
+            {
+                if (value==null)
+                    _connection._generator.setContentLength(-1);
+                else
+                    _connection._generator.setContentLength(Long.parseLong(value));
+            }
         }
     }
     
@@ -683,20 +698,23 @@ public class Response implements HttpServletResponse
         if (isCommitted() || _connection.isIncluding())
             return;
         _connection._generator.setContentLength(len);
-        _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
-        if (_connection._generator.isContentWritten())
+        if (len>=0)
         {
-            if (_outputState==WRITER)
-                _writer.close();
-            else if (_outputState==STREAM)
+            _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
+            if (_connection._generator.isContentWritten())
             {
-                try
+                if (_outputState==WRITER)
+                    _writer.close();
+                else if (_outputState==STREAM)
                 {
-                    getOutputStream().close();
-                }
-                catch(IOException e)
-                {
-                    throw new RuntimeException(e);
+                    try
+                    {
+                        getOutputStream().close();
+                    }
+                    catch(IOException e)
+                    {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }

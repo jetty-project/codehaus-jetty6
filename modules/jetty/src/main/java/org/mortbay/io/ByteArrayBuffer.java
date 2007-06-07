@@ -162,17 +162,23 @@ public class ByteArrayBuffer extends AbstractBuffer
     /* ------------------------------------------------------------ */
     public int readFrom(InputStream in,int max) throws IOException
     {
-        if (max>space())
+        if (max<0||max>space())
             max=space();
         int p = putIndex();
         
         int len=0, total=0, available=max;
-        while (total<max && (len=in.read(_bytes,p,available)) > 0) 
+        while (total<max) 
         {
-            p += len;
-            total += len;
-            available -= len;
-            setPutIndex(p);
+            len=in.read(_bytes,p,available);
+            if (len<0)
+                break;
+            else if (len>0)
+            {
+                p += len;
+                total += len;
+                available -= len;
+                setPutIndex(p);
+            }
             if (in.available()<=0)
                 break;
         }

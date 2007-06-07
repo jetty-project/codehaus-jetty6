@@ -277,7 +277,10 @@ public abstract class AbstractGenerator implements Generator
     /* ------------------------------------------------------------ */
     public void setContentLength(long value)
     {
-        _contentLength=value;
+        if (value<0)
+            _contentLength=HttpTokens.UNKNOWN_CONTENT;
+        else
+            _contentLength=value;
     }
     
     /* ------------------------------------------------------------ */

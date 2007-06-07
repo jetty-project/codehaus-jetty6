@@ -198,15 +198,6 @@ public class HttpGenerator extends AbstractGenerator
         return _buffer.space()<=(_contentLength == HttpTokens.CHUNKED_CONTENT?CHUNK_SPACE:0);
     }
 
-
-    /* ------------------------------------------------------------ */
-    public void setContentLength(long value)
-    {
-        if (value<_contentWritten)
-            throw new IllegalArgumentException();
-        super.setContentLength(value);
-    }
-
     /* ------------------------------------------------------------ */
     /** Prepare buffer for unchecked writes.
      * Prepare the generator buffer to receive unchecked writes
