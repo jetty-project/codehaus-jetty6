@@ -173,7 +173,7 @@ public class HttpConnectionTest extends TestCase
         }
         catch(Exception e)
         {
-                e.printStackTrace();
+            e.printStackTrace();
             assertTrue(false);
             if (response!=null)
                 System.err.println(response);

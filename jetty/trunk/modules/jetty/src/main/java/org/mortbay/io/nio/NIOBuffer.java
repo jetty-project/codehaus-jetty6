@@ -41,7 +41,9 @@ public class NIOBuffer extends AbstractBuffer
   	
     protected ByteBuffer _buf;
     private ReadableByteChannel _in;
+    private InputStream _inStream;
     private WritableByteChannel _out;
+    private OutputStream _outStream;
 
     public NIOBuffer(int size, boolean direct)
     {
@@ -187,50 +189,110 @@ public class NIOBuffer extends AbstractBuffer
         this._buf = buf;
     }
 
-    
+
+    /* ------------------------------------------------------------ */
     public int readFrom(InputStream in, int max) throws IOException
     {
-        if (_in==null || !_in.isOpen())
+        if (_in==null || !_in.isOpen() || in!=_inStream)
+        {
             _in=Channels.newChannel(in);
+            _inStream=in;
+        }
 
-        if (max>space())
+        if (max<0 || max>space())
             max=space();
         int p = putIndex();
         
         try
         {
-            _buf.position(p);
-            _buf.limit(p+max);
-            int len=_in.read(_buf);
-            if (len>0)
-                setPutIndex(p+len);
-            else
-                _in=null;
-            return len;
+            int len=0, total=0, available=max;
+            while (total<max) 
+            {
+                _buf.position(p);
+                _buf.limit(p+available);
+                len=_in.read(_buf);
+                if (len<0)
+                {
+                    _in=null;
+                    _inStream=in;
+                    break;
+                }
+                else if (len>0)
+                {
+                    p += len;
+                    total += len;
+                    available -= len;
+                    setPutIndex(p);
+                }
+                if (in.available()<=0)
+                    break;
+            }
+            if (len<0 && total==0)
+                return -1;
+            return total;
+            
+        }
+        catch(IOException e)
+        {
+            _in=null;
+            _inStream=in;
+            throw e;
         }
         finally
         {
+            if (_in!=null && !_in.isOpen())
+            {
+                _in=null;
+                _inStream=in;
+            }
             _buf.position(0);
             _buf.limit(_buf.capacity());
         }
     }
 
+    /* ------------------------------------------------------------ */
     public void writeTo(OutputStream out) throws IOException
     {
-        if (_out==null || !_out.isOpen())
+        if (_out==null || !_out.isOpen() || _out!=_outStream)
+        {
             _out=Channels.newChannel(out);
+            _outStream=out;
+        }
 
         try
         {
-            _buf.position(getIndex());
-            _buf.limit(putIndex());
-            _out.write(_buf);
+            int loop=0;
+            while(hasContent() && _out.isOpen())
+            {
+                _buf.position(getIndex());
+                _buf.limit(putIndex());
+                int len=_out.write(_buf);
+                if (len<0)
+                    break;
+                else if (len>0)
+                {
+                    skip(len);
+                    loop=0;
+                }
+                else if (loop++>1)
+                    break;
+            }
+        }
+        catch(IOException e)
+        {
+            _out=null;
+            _outStream=null;
+            throw e;
         }
         finally
         {
+            if (_out!=null && !_out.isOpen())
+            {
+                _out=null;
+                _outStream=null;
+            }
             _buf.position(0);
             _buf.limit(_buf.capacity());
-            clear();
         }
         
     }

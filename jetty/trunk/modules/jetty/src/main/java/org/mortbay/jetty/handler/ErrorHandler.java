@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpGenerator;
+import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.StringUtil;

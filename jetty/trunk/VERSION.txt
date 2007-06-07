@@ -2,6 +2,7 @@ jetty-6.1-SNAPSHOT
  + Work around IBM JVM socket close issue 
  + moved documentation for jetty and jspc maven plugins to wiki
  + async client improvements
+ + fixed handling of large streamed files
  + JETTY-310 better exception when no filter file for cometd servlet
  + JETTY-323 handle htaccess without a user realm
  + JETTY-346 add wildcard support to extra scan targets for maven plugin
