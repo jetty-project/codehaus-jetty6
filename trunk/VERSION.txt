@@ -10,6 +10,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-360 allow connectors, userRealms to be added from a <jettyConfig> for maven plugin
  + JETTY-361 prevent url encoding of dir listings for non-link text
  + JETTY-362 More object locks
+ + JETTY-365 make needClientAuth work on SslSelectChannelConnector
 
 jetty-6.1.4rc0
  + Reorganized import of contrib modules
