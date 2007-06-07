@@ -206,6 +206,7 @@ public class NIOBuffer extends AbstractBuffer
         try
         {
             int len=0, total=0, available=max;
+            int loop=0;
             while (total<max) 
             {
                 _buf.position(p);
@@ -223,7 +224,10 @@ public class NIOBuffer extends AbstractBuffer
                     total += len;
                     available -= len;
                     setPutIndex(p);
+                    loop=0;
                 }
+                else if (loop++>1)
+                    break;
                 if (in.available()<=0)
                     break;
             }
