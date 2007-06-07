@@ -102,7 +102,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
     private String _truststore;
     private String _truststoreType="JKS"; // type of the key store
-    private SSLContext context;
+    private SSLContext _context;
 
     /**
      * Return the chain of X509 certificates used to negotiate the SSL Session.
@@ -184,11 +184,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
         try
         {
-            if (_wantClientAuth)
-                sslEngine.setWantClientAuth(_wantClientAuth);
-            if (_needClientAuth)
-                sslEngine.setNeedClientAuth(_needClientAuth);
-
+          
             SSLSession sslSession=sslEngine.getSession();
             String cipherSuite=sslSession.getCipherSuite();
             Integer keySize;
@@ -477,8 +473,13 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         SSLEngine engine=null;
         try
         {
-            engine=context.createSSLEngine();
-
+            engine=_context.createSSLEngine();
+            
+            if (_wantClientAuth)
+                engine.setWantClientAuth(_wantClientAuth);
+            if (_needClientAuth)
+                engine.setNeedClientAuth(_needClientAuth);
+            
             if (_excludeCipherSuites!=null&&_excludeCipherSuites.length>0)
             {
                 List<String> excludedCSList=Arrays.asList(_excludeCipherSuites);
@@ -507,11 +508,10 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         return engine;
     }
 
-    @Override
+   
     protected void doStart() throws Exception
     {
-        context=createSSLContext();
-
+        _context=createSSLContext();
         super.doStart();
     }
 
