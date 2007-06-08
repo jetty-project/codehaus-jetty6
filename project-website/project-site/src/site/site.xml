@@ -27,8 +27,8 @@
       <item name="Source XRef" href="xref/index.html"/>
     </menu>
     <menu name="Maven Plugins">
-      <item name="maven-jetty-plugin" href="maven-plugin/index.html"/>
-      <item name="maven-jetty-jspc-plugin" href="jspc-maven-plugin/index.html"/>
+      <item name="maven-jetty-plugin" href="http://docs.codehaus.org/display/JETTY/Maven+Jetty+Plugin"/>
+      <item name="maven-jetty-jspc-plugin" href="http://docs.codehaus.org/display/JETTY/Maven+Jetty+Jspc+Plugin"/>
     </menu>
     <menu name="Commercial Services">
       <item name="Support" href="http://www.webtide.com/support.jsp"/>
