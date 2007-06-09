@@ -475,7 +475,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         if (dot>0)
             name=name.substring(dot+1);
         
-        return name+" @ "+(getHost()==null?"0.0.0.0":getHost())+":"+(getLocalPort()<=0?getPort():getLocalPort());
+        return name+"@"+hashCode()+"/"+(getHost()==null?"0.0.0.0":getHost())+":"+(getLocalPort()<=0?getPort():getLocalPort());
     }
     
     

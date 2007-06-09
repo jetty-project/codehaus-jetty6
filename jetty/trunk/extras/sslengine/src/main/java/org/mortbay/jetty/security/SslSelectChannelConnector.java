@@ -3,6 +3,7 @@ package org.mortbay.jetty.security;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.security.KeyStore;
@@ -12,6 +13,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -24,9 +26,11 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.HttpConnection;
@@ -90,6 +94,62 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     private String _truststore;
     private String _truststoreType="JKS"; // type of the key store
     private SSLContext _context;
+
+    private int _packetBufferSize;
+    private int _applicationBufferSize;
+    private ConcurrentLinkedQueue<Buffer> _packetBuffers = new ConcurrentLinkedQueue<Buffer>();
+    private ConcurrentLinkedQueue<Buffer> _applicationBuffers = new ConcurrentLinkedQueue<Buffer>();
+    
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see org.mortbay.jetty.AbstractBuffers#getBuffer(int)
+     */
+    public Buffer getBuffer(int size)
+    {
+        Buffer buffer;
+        if (size==_applicationBufferSize)
+        {   
+            buffer = _applicationBuffers.poll();
+            if (buffer==null)
+                buffer=new NIOBuffer(size,false); 
+        }
+        else if (size==_packetBufferSize)
+        {   
+            buffer = _packetBuffers.poll();
+            if (buffer==null)
+                buffer=new NIOBuffer(size,getUseDirectBuffers()); 
+        }
+        else 
+            buffer=super.getBuffer(size);
+        
+        return buffer;
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see org.mortbay.jetty.AbstractBuffers#returnBuffer(org.mortbay.io.Buffer)
+     */
+    public void returnBuffer(Buffer buffer)
+    {
+        if (_loss++>BUFFER_LOSS_RATE)
+        {
+            _loss=0;
+            return;
+        }
+        buffer.clear();
+        int size=buffer.capacity();
+        ByteBuffer bbuf = ((NIOBuffer)buffer).getByteBuffer();
+        bbuf.position(0);
+        bbuf.limit(size);
+        
+        if (size==_applicationBufferSize)
+            _applicationBuffers.add(buffer);
+        else if (size==_packetBufferSize)
+            _packetBuffers.add(buffer);
+    }
+    
+    
 
     /**
      * Return the chain of X509 certificates used to negotiate the SSL Session.
@@ -165,13 +225,12 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     {
         super.customize(endpoint,request);
         request.setScheme(HttpSchemes.HTTPS);
-
+        
         SslHttpChannelEndPoint sslHttpChannelEndpoint=(SslHttpChannelEndPoint)endpoint;
         SSLEngine sslEngine=sslHttpChannelEndpoint.getSSLEngine();
 
         try
         {
-          
             SSLSession sslSession=sslEngine.getSession();
             String cipherSuite=sslSession.getCipherSuite();
             Integer keySize;
@@ -210,9 +269,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         // size should be 16k, but appears to need 16k+1 byte? Giving it 16k+2k
         // just
         // to be safe. TODO investigate
-        setHeaderBufferSize(18*1024);
-        setRequestBufferSize(18*1024);
-        setResponseBufferSize(18*1024);
+        
     }
 
     /**
@@ -443,7 +500,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     /* ------------------------------------------------------------------------------- */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SslHttpChannelEndPoint(channel,selectSet,key,createSSLEngine());
+        return new SslHttpChannelEndPoint(this,channel,selectSet,key,createSSLEngine());
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -499,6 +556,14 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     protected void doStart() throws Exception
     {
         _context=createSSLContext();
+        
+        SSLEngine engine=createSSLEngine();
+        SSLSession ssl_session=engine.getSession();
+        
+        setHeaderBufferSize(ssl_session.getApplicationBufferSize());
+        setRequestBufferSize(ssl_session.getApplicationBufferSize());
+        setResponseBufferSize(ssl_session.getApplicationBufferSize());
+        
         super.doStart();
     }
 

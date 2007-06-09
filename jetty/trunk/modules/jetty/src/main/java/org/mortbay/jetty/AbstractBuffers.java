@@ -14,7 +14,7 @@ import org.mortbay.io.Buffers;
  */
 public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffers
 {
-    private static int BUFFER_LOSS_RATE=256; // Leak buffers to shrink pools
+    protected static int BUFFER_LOSS_RATE=256; // Leak buffers to shrink pools
     
     private int _headerBufferSize=4*1024;
     private int _requestBufferSize=8*1024;
@@ -22,7 +22,7 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
 
     // Use and array of buffers to avoid contention
     private transient ArrayList _headerBuffers=new ArrayList();
-    private transient int _loss;
+    protected transient int _loss;
     private transient ArrayList _requestBuffers;
     private transient ArrayList _responseBuffers;
 

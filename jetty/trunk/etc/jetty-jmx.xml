@@ -30,7 +30,7 @@
         <Arg>
           <New class="org.mortbay.management.MBeanContainer">
             <Arg><Ref id="MBeanServer"/></Arg>
-            <Set name="managementPort">8082</Set>
+            <!-- Set name="managementPort">8082</Set -->
             <Call name="start" />
           </New>
         </Arg>

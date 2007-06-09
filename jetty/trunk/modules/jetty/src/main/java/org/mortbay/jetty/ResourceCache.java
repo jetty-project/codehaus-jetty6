@@ -140,8 +140,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     public Content lookup(String pathInContext, ResourceFactory factory)
         throws IOException
     {
-        if (Log.isDebugEnabled()) Log.debug("lookup {}",pathInContext);
-        
         Content content=null;
         
         // Look up cache operations
@@ -152,7 +150,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         
             if (content!=null && content.isValid())
             {
-                if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",pathInContext);
                 return content;
             }    
         }
@@ -163,8 +160,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             long len = resource.length();
             if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
             {
-                if (Log.isDebugEnabled()) Log.debug("CACHE MISS: {}",pathInContext);
-
                 content = new Content(resource);
                 fill(content);
 
@@ -174,12 +169,9 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                     Content content2 =(Content)_cache.get(pathInContext);
                     if (content2!=null)
                     {
-                        if (Log.isDebugEnabled()) Log.debug("FALSE HIT: {}",pathInContext);
                         content.release();
                         return content2;
                     }
-                    
-                    if (Log.isDebugEnabled()) Log.debug("CACHE FILL: {}",pathInContext);
 
                     int must_be_smaller_than=_maxCacheSize-(int)len;
                     while(_cachedSize>must_be_smaller_than || (_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles))
@@ -191,7 +183,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             }
         }
 
-        if (Log.isDebugEnabled()) Log.debug("CACHE MISS: {}",pathInContext);
         return null; 
     }
 
