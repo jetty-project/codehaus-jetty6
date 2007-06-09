@@ -14,6 +14,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-361 prevent url encoding of dir listings for non-link text
  + JETTY-362 More object locks
  + JETTY-365 make needClientAuth work on SslSelectChannelConnector
+ + JETTY-366 JETTY-368 Improved bayeux disconnect
 
 jetty-6.1.4rc0
  + Reorganized import of contrib modules
