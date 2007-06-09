@@ -12,6 +12,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.Buffers;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.nio.SelectChannelConnector;
@@ -28,6 +29,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
 {
     private static final ByteBuffer[] __NO_BUFFERS={};
     private static final ByteBuffer __EMPTY=ByteBuffer.allocate(0);
+
+    private Buffers _buffers;
     
     private SSLEngine _engine;
     private ByteBuffer _inBuffer;
@@ -35,29 +38,30 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     private ByteBuffer _outBuffer;
     private NIOBuffer _outNIOBuffer;
 
-    private ByteBuffer[] _reuseBuffer=new ByteBuffer[2];    
-    private ByteBuffer[] _outBuffers=new ByteBuffer[2];
+    private NIOBuffer[] _reuseBuffer=new NIOBuffer[2];    
+    private ByteBuffer[] _gather=new ByteBuffer[2];
 
     // ssl
     protected SSLSession _session;
     
     /* ------------------------------------------------------------ */
-    public SslHttpChannelEndPoint(SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
+    public SslHttpChannelEndPoint(Buffers buffers,SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
             throws SSLException, IOException
     {
         super(channel,selectSet,key);
-
+        _buffers=buffers;
+        
         // ssl
         _engine=engine;
         _engine.setUseClientMode(false);
         _session=engine.getSession();
 
         // TODO pool buffers and use only when needed.
-        
-        _outNIOBuffer=new NIOBuffer(_session.getPacketBufferSize(),true);
+        _outNIOBuffer=(NIOBuffer)buffers.getBuffer(_session.getPacketBufferSize());
         _outBuffer=_outNIOBuffer.getByteBuffer();
-        _inNIOBuffer=new NIOBuffer(_session.getPacketBufferSize(),true);
+        _inNIOBuffer=(NIOBuffer)buffers.getBuffer(_session.getPacketBufferSize());
         _inBuffer=_inNIOBuffer.getByteBuffer();
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -134,6 +138,15 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         finally
         {
             super.close();
+            
+            if (_inNIOBuffer!=null)
+                _buffers.returnBuffer(_inNIOBuffer);
+            if (_outNIOBuffer!=null)
+                _buffers.returnBuffer(_outNIOBuffer);
+            if (_reuseBuffer[0]!=null)
+                _buffers.returnBuffer(_reuseBuffer[0]);
+            if (_reuseBuffer[1]!=null)
+                _buffers.returnBuffer(_reuseBuffer[1]);
         }
         
         
@@ -235,18 +248,18 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
 
         if (header!=null && buffer!=null)
         {
-            _outBuffers[0]=extractOutputBuffer(header,0);
-            synchronized(_outBuffers[0])
+            _gather[0]=extractOutputBuffer(header,0);
+            synchronized(_gather[0])
             {
-                _outBuffers[0].position(header.getIndex());
-                _outBuffers[0].limit(header.putIndex());
+                _gather[0].position(header.getIndex());
+                _gather[0].limit(header.putIndex());
 
-                _outBuffers[1]=extractOutputBuffer(buffer,1);
+                _gather[1]=extractOutputBuffer(buffer,1);
 
-                synchronized(_outBuffers[1])
+                synchronized(_gather[1])
                 {
-                    _outBuffers[1].position(buffer.getIndex());
-                    _outBuffers[1].limit(buffer.putIndex());
+                    _gather[1].position(buffer.getIndex());
+                    _gather[1].limit(buffer.putIndex());
 
                     int consumed=0;
                     try
@@ -254,7 +267,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         _outNIOBuffer.clear();
                         _outBuffer.position(0);
                         _outBuffer.limit(_outBuffer.capacity());
-                        result=_engine.wrap(_outBuffers,_outBuffer);
+                        result=_engine.wrap(_gather,_outBuffer);
                         _outNIOBuffer.setGetIndex(0);
                         _outNIOBuffer.setPutIndex(result.bytesProduced());
                         consumed=result.bytesConsumed();
@@ -268,16 +281,16 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             int len=consumed<header.length()?consumed:header.length();
                             header.skip(len);
                             consumed-=len;
-                            _outBuffers[0].position(0);
-                            _outBuffers[0].limit(_outBuffers[0].capacity());
+                            _gather[0].position(0);
+                            _gather[0].limit(_gather[0].capacity());
                         }
                         if (consumed>0 && buffer!=null)
                         {
                             int len=consumed<buffer.length()?consumed:buffer.length();
                             buffer.skip(len);
                             consumed-=len;
-                            _outBuffers[1].position(0);
-                            _outBuffers[1].limit(_outBuffers[1].capacity());
+                            _gather[1].position(0);
+                            _gather[1].limit(_gather[1].capacity());
                         }
                         assert consumed==0;
                     }
@@ -286,11 +299,11 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         }
         else
         {
-            _outBuffers[0]=extractOutputBuffer(header,0);
-            synchronized(_outBuffers[0])
+            _gather[0]=extractOutputBuffer(header,0);
+            synchronized(_gather[0])
             {
-                _outBuffers[0].position(header.getIndex());
-                _outBuffers[0].limit(header.putIndex());
+                _gather[0].position(header.getIndex());
+                _gather[0].limit(header.putIndex());
 
                 int consumed=0;
                 try
@@ -298,7 +311,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     _outNIOBuffer.clear();
                     _outBuffer.position(0);
                     _outBuffer.limit(_outBuffer.capacity());
-                    result=_engine.wrap(_outBuffers[0],_outBuffer);
+                    result=_engine.wrap(_gather[0],_outBuffer);
                     _outNIOBuffer.setGetIndex(0);
                     _outNIOBuffer.setPutIndex(result.bytesProduced());
                     consumed=result.bytesConsumed();
@@ -312,8 +325,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         int len=consumed<header.length()?consumed:header.length();
                         header.skip(len);
                         consumed-=len;
-                        _outBuffers[0].position(0);
-                        _outBuffers[0].limit(_outBuffers[0].capacity());
+                        _gather[0].position(0);
+                        _gather[0].limit(_gather[0].capacity());
                     }
                     assert consumed==0;
                 }
@@ -361,18 +374,17 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         if (buffer.buffer() instanceof NIOBuffer)
         {
             nBuf=(NIOBuffer)buffer.buffer();
-            src=nBuf.getByteBuffer();
+            return nBuf.getByteBuffer();
         }
         else
         {
-            src = _reuseBuffer[n];
-            if (src == null)
-                src = _reuseBuffer[n] = ByteBuffer.allocateDirect(_session.getApplicationBufferSize());
-            
-            src.clear();
-            src.put(buffer.asArray());
+            if (_reuseBuffer[n]==null)
+                _reuseBuffer[n] = (NIOBuffer)_buffers.getBuffer(_session.getApplicationBufferSize());
+            NIOBuffer buf = _reuseBuffer[n];
+            buf.clear();
+            buf.put(buffer);
+            return buf.getByteBuffer();
         }
-        return src;
     }
 
     /* ------------------------------------------------------------ */

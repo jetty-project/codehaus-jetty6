@@ -411,7 +411,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "HEP@" + hashCode() + "[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
+        return "SCEP@" + hashCode() + "[d=" + _dispatched + ",io=" + _interestOps + ",w=" + _writable + ",b=" + _readBlocked + "|" + _writeBlocked + "]";
     }
 
     /* ------------------------------------------------------------ */

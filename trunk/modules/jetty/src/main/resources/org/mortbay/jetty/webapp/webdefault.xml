@@ -100,6 +100,11 @@
   <!--                                                                      -->
   <!--  maxCachedFiles    Maximum number of files in the cache              -->
   <!--                                                                      -->
+  <!--  cacheType         "nio", "bio" or "both" to determine the type(s)   -->
+  <!--                    of resource cache. A bio cached buffer may be used-->
+  <!--                    by nio but is not as efficient as a nio buffer.   -->
+  <!--                    An nio cached buffer may not be used by bio.      -->
+  <!--                                                                      -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
     <servlet-name>default</servlet-name>
@@ -127,6 +132,10 @@
     <init-param>
       <param-name>maxCachedFiles</param-name>
       <param-value>1000</param-value>
+    </init-param>
+    <init-param>
+      <param-name>cacheType</param-name>
+      <param-value>both</param-value>
     </init-param>
     <init-param>
       <param-name>gzip</param-name>

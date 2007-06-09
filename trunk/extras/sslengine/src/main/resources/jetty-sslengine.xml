@@ -11,8 +11,10 @@
   <Call name="addConnector">
     <Arg>
       <New class="org.mortbay.jetty.security.SslSelectChannelConnector">
-	<Set name="Port">8443</Set>
+	<Set name="Port">8444</Set>
 	<Set name="maxIdleTime">30000</Set>
+        <Set name="Acceptors">2</Set>
+        <Set name="AcceptQueueSize">100</Set>
 	<Set name="Keystore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
 	<Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
 	<Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
@@ -20,20 +22,4 @@
     </Arg>
   </Call>
         
-  <!-- Use this version if neo NIO is available
-  <Call name="addConnector">
-    <Arg>
-      <New class="org.mortbay.jetty.security.SslSocketConnector">
-        <Set name="Port">8443</Set>
-        <Set name="maxIdleTime">30000</Set>
-        <Set name="keystore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
-        <Set name="password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
-        <Set name="keyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
-        <Set name="truststore"><SystemProperty name="jetty.home" default="." />/etc/keystore</Set>
-        <Set name="trustPassword">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
-      </New>
-    </Arg>
-  </Call>
-  -->
-
 </Configure>
