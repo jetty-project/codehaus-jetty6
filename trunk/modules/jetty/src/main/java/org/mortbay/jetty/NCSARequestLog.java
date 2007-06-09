@@ -35,7 +35,7 @@ import org.mortbay.util.TypeUtil;
  * This {@link RequestLog} implementation outputs logs in the pseudo-standard NCSA common log format.
  * Configuration options allow a choice between the standard Common Log Format (as used in the 3 log format)
  * and the Combined Log Format (single log format).
- * This log format can be output by most web servers, and almost all web log analysing software can understand
+ * This log format can be output by most web servers, and almost all web log analysis software can understand
  *  these formats.
  * @author Greg Wilkins
  * @author Nigel Canonizado
@@ -72,6 +72,10 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         _retainDays = 31;
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param filename The filename for the request log. This may be in the format expected by {@link RolloverFileOutputStream}
+     */
     public NCSARequestLog(String filename)
     {
         _extended = true;
@@ -80,6 +84,10 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         setFilename(filename);
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param filename The filename for the request log. This may be in the format expected by {@link RolloverFileOutputStream}
+     */
     public void setFilename(String filename)
     {
         if (filename != null) 

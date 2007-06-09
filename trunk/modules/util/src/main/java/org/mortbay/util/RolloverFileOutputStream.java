@@ -33,6 +33,13 @@ import java.util.TimerTask;
 
 /** 
  * RolloverFileOutputStream
+ * 
+ * This output stream puts content in a file that is rolled over every 24 hours.
+ * The filename must include the string "yyyy_mm_dd", which is replaced with the 
+ * actual date when creating and rolling over the file.
+ * 
+ * Old files are retained for a number of days before being deleted.
+ * 
  * @author Greg Wilkins 
  */
 public class RolloverFileOutputStream extends FilterOutputStream
@@ -53,6 +60,11 @@ public class RolloverFileOutputStream extends FilterOutputStream
     private int _retainDays;
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param filename The filename must include the string "yyyy_mm_dd", 
+     * which is replaced with the actual date when creating and rolling over the file.
+     * @throws IOException
+     */
     public RolloverFileOutputStream(String filename)
         throws IOException
     {
@@ -60,6 +72,12 @@ public class RolloverFileOutputStream extends FilterOutputStream
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param filename The filename must include the string "yyyy_mm_dd", 
+     * which is replaced with the actual date when creating and rolling over the file.
+     * @param append If true, existing files will be appended to.
+     * @throws IOException
+     */
     public RolloverFileOutputStream(String filename, boolean append)
         throws IOException
     {
@@ -67,6 +85,13 @@ public class RolloverFileOutputStream extends FilterOutputStream
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @param filename The filename must include the string "yyyy_mm_dd", 
+     * which is replaced with the actual date when creating and rolling over the file.
+     * @param append If true, existing files will be appended to.
+     * @param retainDays The number of days to retain files before deleting them.  0 to retain forever.
+     * @throws IOException
+     */
     public RolloverFileOutputStream(String filename,
                                     boolean append,
                                     int retainDays)
@@ -76,6 +101,13 @@ public class RolloverFileOutputStream extends FilterOutputStream
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param filename The filename must include the string "yyyy_mm_dd", 
+     * which is replaced with the actual date when creating and rolling over the file.
+     * @param append If true, existing files will be appended to.
+     * @param retainDays The number of days to retain files before deleting them. 0 to retain forever.
+     * @throws IOException
+     */
     public RolloverFileOutputStream(String filename,
                                     boolean append,
                                     int retainDays,
