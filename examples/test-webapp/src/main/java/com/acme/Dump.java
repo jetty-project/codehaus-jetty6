@@ -71,7 +71,7 @@ public class Dump extends HttpServlet
             response.flushBuffer();
             return;
         }
-
+        
         if (request.getParameter("sleep")!=null)
         {
             try
@@ -262,6 +262,8 @@ public class Dump extends HttpServlet
             throw new RuntimeException("test");
         }
 
+        if ("true".equals(request.getParameter("close")))
+            response.setHeader("Connection","close");
 
         String buffered= request.getParameter("buffered");
         

@@ -89,6 +89,9 @@ import org.mortbay.util.URIUtil;
  *  maxCacheSize      The maximum total size of the cache or 0 for no cache.
  *  maxCachedFileSize The maximum size of a file to cache
  *  maxCachedFiles    The maximum number of files to cache
+ *  cacheType         Set to "bio", "nio" or "both" to determine the type resource cache. 
+ *                    A bio cached buffer may be used by nio but is not as efficient as an
+ *                    nio buffer.  An nio cached buffer may not be used by bio.    
  *  
  *  useFileMappedBuffer 
  *                    If set to true, it will use mapped file buffer to serve static content
@@ -98,6 +101,7 @@ import org.mortbay.util.URIUtil;
  *                    
  *  cacheControl      If set, all static content will have this value set as the cache-control
  *                    header.
+ *                    
  * 
  * </PRE>
  *                                                                    
@@ -117,7 +121,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private boolean _gzip=true;
     
     private Resource _resourceBase;
-    private ResourceCache _cache;
+    private NIOResourceCache _nioCache;
+    private ResourceCache _bioCache;
     
     private MimeTypes _mimeTypes;
     private String[] _welcomes;
@@ -183,31 +188,41 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             if (_resourceBase==null)
                 _resourceBase=Resource.newResource(_context.getResource(URIUtil.SLASH));
 
+            String cache_type =getInitParameter("cacheType");
             int max_cache_size=getInitInt("maxCacheSize", -2);
-            if (max_cache_size==-2 || max_cache_size>0)
+            int max_cached_file_size=getInitInt("maxCachedFileSize", -2);
+            int max_cached_files=getInitInt("maxCachedFiles", -2);
+
+            if (cache_type==null || "nio".equals(cache_type)|| "both".equals(cache_type))
             {
-                if (_cache==null)
-                    _cache=new NIOResourceCache(_mimeTypes);
-                
-                if (max_cache_size>0)
-		    _cache.setMaxCacheSize(max_cache_size);    
+                if (max_cache_size==-2 || max_cache_size>0)
+                {
+                    _nioCache=new NIOResourceCache(_mimeTypes);
+                    if (max_cache_size>0)
+                        _nioCache.setMaxCacheSize(max_cache_size);    
+                    if (max_cached_file_size>=-1)
+                        _nioCache.setMaxCachedFileSize(max_cached_file_size);    
+                    if (max_cached_files>=-1)
+                        _nioCache.setMaxCachedFiles(max_cached_files);
+                    _nioCache.start();
+                }
             }
-            else
-                _cache=null;
-            
-            if (_cache!=null)
+            if ("bio".equals(cache_type)|| "both".equals(cache_type))
             {
-                int max_cached_file_size=getInitInt("maxCachedFileSize", -2);
-                if (max_cached_file_size>=-1)
-                    _cache.setMaxCachedFileSize(max_cached_file_size);    
-                
-                int max_cached_files=getInitInt("maxCachedFiles", -2);
-                if (max_cached_files>=-1)
-                    _cache.setMaxCachedFiles(max_cached_files);
-                
-                _cache.start();
+                if (max_cache_size==-2 || max_cache_size>0)
+                {
+                    _bioCache=new ResourceCache(_mimeTypes);
+                    if (max_cache_size>0)
+                        _bioCache.setMaxCacheSize(max_cache_size);    
+                    if (max_cached_file_size>=-1)
+                        _bioCache.setMaxCachedFileSize(max_cached_file_size);    
+                    if (max_cached_files>=-1)
+                        _bioCache.setMaxCachedFiles(max_cached_files);
+                    _bioCache.start();
+                }
             }
-            
+            if (_nioCache==null)
+                _bioCache=null;
            
         }
         catch (Exception e) 
@@ -318,17 +333,20 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         // Find the resource and content
         Resource resource=null;
         HttpContent content=null;
+        
+        Connector connector = HttpConnection.getCurrentConnection().getConnector();
+        ResourceCache cache=(connector instanceof NIOConnector) ?_nioCache:_bioCache;
         try
         {   
             // Try gzipped content first
             if (gzip)
             {
                 pathInContextGz=pathInContext+".gz";  
-                if (_cache==null)
+                if (cache==null)
                     resource=getResource(pathInContextGz);
                 else
                 {
-                    content=_cache.lookup(pathInContextGz,this);
+                    content=cache.lookup(pathInContextGz,this);
                     if (content!=null)
                         resource=content.getResource();
                     else
@@ -345,11 +363,11 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             // find resource
             if (!gzip)
             {
-                if (_cache==null)
+                if (cache==null)
                     resource=getResource(pathInContext);
                 else
                 {
-                    content=_cache.lookup(pathInContext,this);
+                    content=cache.lookup(pathInContext,this);
 
                     if (content!=null)
                         resource=content.getResource();
@@ -784,8 +802,10 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     {
         try
         {
-            if (_cache!=null)
-                _cache.stop();
+            if (_nioCache!=null)
+                _nioCache.stop();
+            if (_bioCache!=null)
+                _bioCache.stop();
         }
         catch(Exception e)
         {
@@ -867,42 +887,34 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         /* ------------------------------------------------------------ */
         protected void fill(Content content) throws IOException
         {
-            Connector connector = HttpConnection.getCurrentConnection().getConnector();
-            if (connector instanceof NIOConnector) 
-            {
-                Buffer buffer=null;
-                Resource resource=content.getResource();
-                long length=resource.length();
-                
-                if (_useFileMappedBuffer && resource.getFile()!=null) 
-                {    
-                    File file = resource.getFile();
-                    if (file != null) 
-                        buffer = new NIOBuffer(file);
-                } 
-                else 
-                {
-                    InputStream is = resource.getInputStream();
-                    try
-                    {
-                        buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
-                    }
-                    catch(OutOfMemoryError e)
-                    {
-                        Log.warn(e.toString());
-                        Log.debug(e);
-                        buffer = new NIOBuffer((int) length, NIOBuffer.INDIRECT);
-                    }
-                    buffer.readFrom(is,(int)length);
-                    is.close();
-                }
-                content.setBuffer(buffer);
+            Buffer buffer=null;
+            Resource resource=content.getResource();
+            long length=resource.length();
+
+            if (_useFileMappedBuffer && resource.getFile()!=null) 
+            {    
+                File file = resource.getFile();
+                if (file != null) 
+                    buffer = new NIOBuffer(file);
             } 
             else 
             {
-                super.fill(content);
-            }   
-            
+                InputStream is = resource.getInputStream();
+                try
+                {
+                    Connector connector = HttpConnection.getCurrentConnection().getConnector();
+                    buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
+                }
+                catch(OutOfMemoryError e)
+                {
+                    Log.warn(e.toString());
+                    Log.debug(e);
+                    buffer = new NIOBuffer((int) length, NIOBuffer.INDIRECT);
+                }
+                buffer.readFrom(is,(int)length);
+                is.close();
+            }
+            content.setBuffer(buffer);
         }
     }
 }
