@@ -589,10 +589,10 @@ Index: examples/test-jndi-webapp/pom.xml
      <relativePath>../../pom.xml</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-Index: extras/client/pom.xml
+Index: contrib/client/pom.xml
 ===================================================================
---- extras/client/pom.xml	(revision 142)
-+++ extras/client/pom.xml	(working copy)
+--- contrib/client/pom.xml	(revision 142)
++++ contrib/client/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
      <artifactId>project</artifactId>
@@ -602,10 +602,10 @@ Index: extras/client/pom.xml
    </parent>
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.mortbay.jetty</groupId>
-Index: extras/cometd/pom.xml
+Index: contrib/cometd/pom.xml
 ===================================================================
---- extras/cometd/pom.xml	(revision 142)
-+++ extras/cometd/pom.xml	(working copy)
+--- contrib/cometd/pom.xml	(revision 142)
++++ contrib/cometd/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
      <artifactId>project</artifactId>
@@ -615,10 +615,10 @@ Index: extras/cometd/pom.xml
    </parent>
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.mortbay.jetty</groupId>
-Index: extras/wadi/pom.xml
+Index: contrib/wadi/pom.xml
 ===================================================================
---- extras/wadi/pom.xml	(revision 143)
-+++ extras/wadi/pom.xml	(working copy)
+--- contrib/wadi/pom.xml	(revision 143)
++++ contrib/wadi/pom.xml	(working copy)
 @@ -2,13 +2,13 @@
    <!--parent>
      <artifactId>project</artifactId>
@@ -635,10 +635,10 @@ Index: extras/wadi/pom.xml
    <name>Wadi - Jetty Session Cache</name>
    <url>http://jetty.mortbay.org</url>
    <licenses>
-Index: extras/ant/pom.xml
+Index: contrib/jetty-ant/pom.xml
 ===================================================================
---- extras/ant/pom.xml	(revision 144)
-+++ extras/ant/pom.xml	(working copy)
+--- contrib/jetty-ant/pom.xml	(revision 144)
++++ contrib/jetty-ant/pom.xml	(working copy)
 @@ -3,7 +3,7 @@
    <parent>
      <artifactId>project</artifactId>
@@ -648,10 +648,10 @@ Index: extras/ant/pom.xml
    </parent>
  	<modelVersion>4.0.0</modelVersion>
    <groupId>org.mortbay.jetty</groupId>
-Index: extras/terracotta/pom.xml
+Index: contrib/terracotta/pom.xml
 ===================================================================
---- extras/terracotta/pom.xml	(revision 142)
-+++ extras/terracotta/pom.xml	(working copy)
+--- contrib/terracotta/pom.xml	(revision 142)
++++ contrib/terracotta/pom.xml	(working copy)
 @@ -4,7 +4,7 @@
    <artifactId>terracotta-sessions</artifactId>
    <packaging>jar</packaging>
@@ -670,10 +670,10 @@ Index: extras/terracotta/pom.xml
      </dependency>
      <dependency>
       <groupId>org.terracotta</groupId>
-Index: examples/cometd-demo/bin/runTerracottaNode.sh
+Index: contrib/cometd-demo/bin/runTerracottaNode.sh
 ===================================================================
---- examples/cometd-demo/bin/runTerracottaNode.sh	(revision 142)
-+++ examples/cometd-demo/bin/runTerracottaNode.sh	(working copy)
+--- contrib/cometd-demo/bin/runTerracottaNode.sh	(revision 142)
++++ contrib/cometd-demo/bin/runTerracottaNode.sh	(working copy)
 @@ -8,7 +8,7 @@
  cd $(dirname $0)/..
  DEMO_HOME=$(pwd)
@@ -683,10 +683,10 @@ Index: examples/cometd-demo/bin/runTerracottaNode.sh
  
  TC=/java/terracotta-2.2.0-dso
  # TC_JAVA_HOME=$(dirname $(dirname $(which java)))
-Index: examples/cometd-demo/pom.xml
+Index: contrib/cometd-demo/pom.xml
 ===================================================================
---- examples/cometd-demo/pom.xml	(revision 142)
-+++ examples/cometd-demo/pom.xml	(working copy)
+--- contrib/cometd-demo/pom.xml	(revision 142)
++++ contrib/cometd-demo/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
      <artifactId>project</artifactId>

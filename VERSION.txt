@@ -1,4 +1,6 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.4rc1 - 10 Jun 2007
  + Work around IBM JVM socket close issue 
  + moved documentation for jetty and jspc maven plugins to wiki
  + async client improvements
@@ -16,7 +18,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-365 make needClientAuth work on SslSelectChannelConnector
  + JETTY-366 JETTY-368 Improved bayeux disconnect
 
-jetty-6.1.4rc0
+jetty-6.1.4rc0 - 1 Jun 2007
  + Reorganized import of contrib modules
  + Unified JMX configuration
  + Updated slf4j version to 1.3.1
