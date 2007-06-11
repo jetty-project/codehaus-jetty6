@@ -212,9 +212,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
                 // Set to non blocking mode
                 _acceptChannel.configureBlocking(false);
-                
-                // Register accepts on the server socket with the selector.
-                _manager.register(_acceptChannel);
             }
         }
     }
@@ -309,6 +306,8 @@ public class SelectChannelConnector extends AbstractNIOConnector
         _manager.setLowResourcesConnections(getLowResourcesConnections());
         _manager.setLowResourcesMaxIdleTime(getLowResourcesMaxIdleTime());
         _manager.start();
+        open();
+        _manager.register(_acceptChannel);
         super.doStart();
     }
 
