@@ -53,6 +53,7 @@
             <Set name="confidentialPort">8443</Set>
 	    <Set name="lowResourcesConnections">1000</Set>
 	    <Set name="lowResourcesMaxIdleTime">500</Set>
+	    <Call name="open"/>
           </New>
       </Arg>
     </Call>

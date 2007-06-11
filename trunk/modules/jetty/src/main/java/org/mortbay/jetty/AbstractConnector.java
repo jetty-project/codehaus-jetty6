@@ -475,7 +475,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         if (dot>0)
             name=name.substring(dot+1);
         
-        return name+"@"+hashCode()+"/"+(getHost()==null?"0.0.0.0":getHost())+":"+(getLocalPort()<=0?getPort():getLocalPort());
+        return name+"@"+(getHost()==null?"0.0.0.0":getHost())+":"+(getLocalPort()<=0?getPort():getLocalPort());
     }
     
     
@@ -692,7 +692,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     {
         if (on && _statsStartedAt!=-1)
             return;
-        Log.info("Statistics on = "+on+" for "+this);
+        Log.debug("Statistics on = "+on+" for "+this);
         statsReset();
         _statsStartedAt=on?System.currentTimeMillis():-1;
     }
