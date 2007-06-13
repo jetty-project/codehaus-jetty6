@@ -636,6 +636,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
         {
             synchronized (this)
             {
+                if (_idleTimeout.getDuration() <= 0)
+                    return;
+                
                 task.schedule(_idleTimeout);
             }
         }
