@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + fixed early open() call in NIO connectors
+ + JETTY-370 ensure maxIdleTime<=0 means connections never expire
 
 jetty-6.1.4rc1 - 10 Jun 2007
  + Work around IBM JVM socket close issue 
