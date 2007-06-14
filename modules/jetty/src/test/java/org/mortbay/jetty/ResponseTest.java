@@ -16,16 +16,32 @@
 package org.mortbay.jetty;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.Socket;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpSessionContext;
 
+import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.HashSessionManager;
+import org.mortbay.util.IO;
+
 import java.util.Locale;
 
 import junit.framework.TestCase;
@@ -341,6 +357,50 @@ public class ResponseTest extends TestCase
         catch (Exception e)
         {
             assertTrue(e instanceof IllegalStateException);
+        }
+    }
+    
+    public void testHead() throws Exception
+    {
+        Server server = new Server();
+        try
+        {
+            SocketConnector socketConnector = new SocketConnector();
+            socketConnector.setPort(0);
+            server.addConnector(socketConnector);
+            server.addHandler(new AbstractHandler() {
+                public void handle(String string, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException {
+                    response.setStatus(200);
+                    response.setContentType("text/plain");
+                    PrintWriter w = response.getWriter();
+                    w.flush();
+                    w.println("Geht");
+                    w.flush();
+                    w.println("Doch");
+                    ((Request) request).setHandled(true);
+                }
+            });
+            server.start();
+
+            Socket socket = new Socket("localhost",socketConnector.getLocalPort());
+            socket.getOutputStream().write("HEAD / HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes());
+            socket.getOutputStream().write("GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n".getBytes());
+            socket.getOutputStream().flush();
+            
+            LineNumberReader reader = new LineNumberReader(new InputStreamReader(socket.getInputStream()));
+            String line = reader.readLine();
+            while (line!=null && line.length()>0)
+                line = reader.readLine();
+
+            while (line!=null && line.length()==0)
+                line = reader.readLine();
+
+            assertTrue(line.startsWith("HTTP/1.1 200 OK"));
+            
+        }
+        finally
+        {
+            server.stop();
         }
     }
     

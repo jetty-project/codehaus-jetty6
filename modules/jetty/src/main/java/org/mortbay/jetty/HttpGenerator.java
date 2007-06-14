@@ -658,10 +658,12 @@ public class HttpGenerator extends AbstractGenerator
             
             if (_endp == null)
             {
-                if (_needCRLF && _buffer != null) 
+                if (_needCRLF && _buffer!=null) 
                     _buffer.put(HttpTokens.CRLF);
-                if (_needEOC && _buffer != null) 
+                if (_needEOC && _buffer!=null && !_head) 
                     _buffer.put(LAST_CHUNK);
+                _needCRLF=false;
+                _needEOC=false;
                 return 0;
             }
             
@@ -839,13 +841,15 @@ public class HttpGenerator extends AbstractGenerator
                     {
                         if (_buffer == null && _header.space() >= LAST_CHUNK.length)
                         {
-                            _header.put(LAST_CHUNK);
+                            if (!_head)
+                                _header.put(LAST_CHUNK);
                             _bufferChunked=true;
                             _needEOC = false;
                         }
                         else if (_buffer!=null && _buffer.space() >= LAST_CHUNK.length)
                         {
-                            _buffer.put(LAST_CHUNK);
+                            if (!_head)
+                                _buffer.put(LAST_CHUNK);
                             _bufferChunked=true;
                             _needEOC = false;
                         }
