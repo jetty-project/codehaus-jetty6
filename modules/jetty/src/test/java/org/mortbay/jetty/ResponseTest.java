@@ -368,8 +368,10 @@ public class ResponseTest extends TestCase
             SocketConnector socketConnector = new SocketConnector();
             socketConnector.setPort(0);
             server.addConnector(socketConnector);
-            server.addHandler(new AbstractHandler() {
-                public void handle(String string, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException {
+            server.addHandler(new AbstractHandler() 
+            {
+                public void handle(String string, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException 
+                {
                     response.setStatus(200);
                     response.setContentType("text/plain");
                     PrintWriter w = response.getWriter();
