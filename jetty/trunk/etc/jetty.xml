@@ -21,6 +21,7 @@
       <New class="org.mortbay.thread.BoundedThreadPool">
         <Set name="minThreads">10</Set>
         <Set name="maxThreads">250</Set>
+        <Set name="lowThreads">25</Set>
       </New>
 
       <!-- Optional Java 5 bounded threadpool with job queue 
@@ -50,7 +51,7 @@
             <Set name="Acceptors">2</Set>
             <Set name="statsOn">false</Set>
             <Set name="confidentialPort">8443</Set>
-	    <Set name="lowResourcesConnections">1000</Set>
+	    <Set name="lowResourcesConnections">5000</Set>
 	    <Set name="lowResourcesMaxIdleTime">5000</Set>
 	    <Call name="open"/>
           </New>
