@@ -355,7 +355,7 @@ public class Request implements HttpServletRequest
                     }
                     last++;
                 }
-                if (_lastCookies != null)
+                if (_lastCookies != null && _lastCookies.length==last)
                 {
                     _cookiesExtracted = true;
                     return _cookies;
