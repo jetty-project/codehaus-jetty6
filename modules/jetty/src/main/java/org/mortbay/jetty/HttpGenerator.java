@@ -842,15 +842,19 @@ public class HttpGenerator extends AbstractGenerator
                         if (_buffer == null && _header.space() >= LAST_CHUNK.length)
                         {
                             if (!_head)
+                            {
                                 _header.put(LAST_CHUNK);
-                            _bufferChunked=true;
+                                _bufferChunked=true;
+                            }
                             _needEOC = false;
                         }
                         else if (_buffer!=null && _buffer.space() >= LAST_CHUNK.length)
                         {
                             if (!_head)
+                            {
                                 _buffer.put(LAST_CHUNK);
-                            _bufferChunked=true;
+                                _bufferChunked=true;
+                            }
                             _needEOC = false;
                         }
                     }
