@@ -203,7 +203,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         throws InterruptedException
     {
         flushCache();
-        _cache=null;
     }
 
     /* ------------------------------------------------------------ */
