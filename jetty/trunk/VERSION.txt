@@ -1,4 +1,6 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.4 - 15 Jun 2007
  + fixed early open() call in NIO connectors
  + JETTY-370 ensure maxIdleTime<=0 means connections never expire
  + JETTY-371 Fixed chunked HEAD response
