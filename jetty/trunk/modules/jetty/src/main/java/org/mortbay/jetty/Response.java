@@ -233,10 +233,7 @@ public class Response implements HttpServletResponse
     		return;
     	
         if (isCommitted())
-        {
             Log.warn("Committed before "+code+" "+message);
-            return;
-        }
 
         resetBuffer();
         _characterEncoding=null;
