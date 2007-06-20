@@ -93,7 +93,7 @@ public class ResponseTest extends TestCase
     	throws Exception
     {
 
-        HttpConnection connection = new HttpConnection(connector,connector.endp,connector.server);
+        HttpConnection connection = new HttpConnection(connector,connector._endp,connector._server);
         Response response = connection.getResponse();
         
         assertEquals(null,response.getContentType());
@@ -131,7 +131,7 @@ public class ResponseTest extends TestCase
         throws Exception
     {
 
-        HttpConnection connection = new HttpConnection(connector,connector.endp,connector.server);
+        HttpConnection connection = new HttpConnection(connector,connector._endp,connector._server);
         Request request = connection.getRequest();
         Response response = connection.getResponse();
         ContextHandler context = new ContextHandler();
@@ -155,7 +155,7 @@ public class ResponseTest extends TestCase
     public void testContentTypeCharacterEncoding()
         throws Exception
     {
-        HttpConnection connection = new HttpConnection(connector,connector.endp,connector.server);
+        HttpConnection connection = new HttpConnection(connector,connector._endp,connector._server);
         
         Request request = connection.getRequest();
         Response response = connection.getResponse();
@@ -188,7 +188,7 @@ public class ResponseTest extends TestCase
     public void testCharacterEncodingContentType()
     throws Exception
     {
-        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+        Response response = new Response(new HttpConnection(connector,connector._endp,connector._server));
         
         response.setCharacterEncoding("utf-8");
         response.setContentType("foo/bar");
@@ -217,7 +217,7 @@ public class ResponseTest extends TestCase
     public void testContentTypeWithCharacterEncoding()
         throws Exception
     {
-        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+        Response response = new Response(new HttpConnection(connector,connector._endp,connector._server));
         
         response.setCharacterEncoding("utf16");
         response.setContentType("foo/bar; charset=utf-8");
@@ -246,7 +246,7 @@ public class ResponseTest extends TestCase
     public void testContentTypeWithOther()
     throws Exception
     {
-        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+        Response response = new Response(new HttpConnection(connector,connector._endp,connector._server));
         
         response.setContentType("foo/bar; other=xyz");
         assertEquals("foo/bar; other=xyz",response.getContentType());
@@ -270,7 +270,7 @@ public class ResponseTest extends TestCase
     public void testContentTypeWithCharacterEncodingAndOther()
         throws Exception
     {
-        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+        Response response = new Response(new HttpConnection(connector,connector._endp,connector._server));
 
         response.setCharacterEncoding("utf16");
         response.setContentType("foo/bar; charset=utf-8 other=xyz");
@@ -326,7 +326,7 @@ public class ResponseTest extends TestCase
     public void testEncodeRedirect()
         throws Exception
     {
-        HttpConnection connection=new HttpConnection(connector,connector.endp,connector.server);
+        HttpConnection connection=new HttpConnection(connector,connector._endp,connector._server);
         Response response = new Response(connection);
         Request request = connection.getRequest();
         
@@ -346,7 +346,7 @@ public class ResponseTest extends TestCase
     public void testSetBufferSize ()
     throws Exception
     {
-        Response response = new Response(new HttpConnection(connector,connector.endp,connector.server));
+        Response response = new Response(new HttpConnection(connector,connector._endp,connector._server));
         response.setBufferSize(20*1024);
         response.getWriter().print("hello");
         try
@@ -408,7 +408,7 @@ public class ResponseTest extends TestCase
     
     private Response newResponse()
     {
-        HttpConnection connection=new HttpConnection(connector,connector.endp,connector.server);
+        HttpConnection connection=new HttpConnection(connector,connector._endp,connector._server);
         connection.getGenerator().reset(false);
         HttpConnection.setCurrentConnection(connection);
         Response response = connection.getResponse();

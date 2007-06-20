@@ -22,12 +22,12 @@ import org.mortbay.io.ByteArrayEndPoint;
 
 public class LocalConnector extends AbstractConnector
 {
-    ByteArrayEndPoint endp;
-    ByteArrayBuffer in;
-    ByteArrayBuffer out;
+    ByteArrayEndPoint _endp;
+    ByteArrayBuffer _in;
+    ByteArrayBuffer _out;
     
-    Server server;
-    boolean accepting;
+    Server _server;
+    boolean _accepting;
     boolean _keepOpen;
     
     public LocalConnector()
@@ -38,7 +38,7 @@ public class LocalConnector extends AbstractConnector
     /* ------------------------------------------------------------ */
     public Object getConnection()
     {
-        return endp;
+        return _endp;
     }
     
 
@@ -46,25 +46,26 @@ public class LocalConnector extends AbstractConnector
     public void setServer(Server server)
     {
         super.setServer(server);
-        this.server=server;
+        this._server=server;
     }
 
     /* ------------------------------------------------------------ */
     public void clear()
     {
-        in.clear();
-        out.clear();
+        _in.clear();
+        _out.clear();
     }
 
     /* ------------------------------------------------------------ */
     public void reopen()
     {
-        in.clear();
-        out.clear();
-        endp = new ByteArrayEndPoint();
-        endp.setIn(in);
-        endp.setOut(out);
-        accepting=false;
+        _in.clear();
+        _out.clear();
+        _endp = new ByteArrayEndPoint();
+        _endp.setIn(_in);
+        _endp.setOut(_out);
+        _endp.setGrowOutput(true);
+        _accepting=false;
     }
 
     /* ------------------------------------------------------------ */
@@ -73,12 +74,13 @@ public class LocalConnector extends AbstractConnector
     {
         super.doStart();
         
-        in=new ByteArrayBuffer(8192);
-        out=new ByteArrayBuffer(8192);
-        endp = new ByteArrayEndPoint();
-        endp.setIn(in);
-        endp.setOut(out);
-        accepting=false;
+        _in=new ByteArrayBuffer(8192);
+        _out=new ByteArrayBuffer(8192);
+        _endp = new ByteArrayEndPoint();
+        _endp.setIn(_in);
+        _endp.setOut(_out);
+        _endp.setGrowOutput(true);
+        _accepting=false;
     }
 
     /* ------------------------------------------------------------ */
@@ -94,21 +96,29 @@ public class LocalConnector extends AbstractConnector
     {
         // System.out.println("\nREQUESTS :\n"+requests);
         // System.out.flush();
-        
-        in.put(new ByteArrayBuffer(requests));
+        ByteArrayBuffer buf=new ByteArrayBuffer(requests);
+        if (_in.space()<buf.length())
+        {
+            ByteArrayBuffer n = new ByteArrayBuffer(_in.length()+buf.length());
+            n.put(_in);
+            _in=n;
+            _endp.setIn(_in);
+        }
+        _in.put(buf);
         
         synchronized (this)
         {
             _keepOpen=keepOpen;
-            accepting=true;
+            _accepting=true;
             this.notify();
             
-            while(accepting)
+            while(_accepting)
                 this.wait();
         }
         
         // System.err.println("\nRESPONSES:\n"+out);
-        return out.toString();
+        _out=_endp.getOut();
+        return _out.toString();
     }
 
     /* ------------------------------------------------------------ */
@@ -128,7 +138,7 @@ public class LocalConnector extends AbstractConnector
             {
                 try
                 {
-                    while(!accepting)
+                    while(!_accepting)
                         this.wait();
                 }
                 catch(InterruptedException e)
@@ -141,10 +151,10 @@ public class LocalConnector extends AbstractConnector
             {
                 if (connection==null)
                 {
-                    connection=new HttpConnection(this,endp,getServer());
+                    connection=new HttpConnection(this,_endp,getServer());
                     connectionOpened(connection);
                 }
-                while (in.length()>0)
+                while (_in.length()>0)
                     connection.handle();
             }
             finally
@@ -157,7 +167,7 @@ public class LocalConnector extends AbstractConnector
                 }
                 synchronized (this)
                 {
-                    accepting=false;
+                    _accepting=false;
                     this.notify();
                 }
             }
