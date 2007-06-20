@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JETTY-374 - HttpTesters handles large requests/responses
  + JETTY-375 - IllegalStateException when committed.
+ + update terracotta session clustering to terracotta 2.4
 
 jetty-6.1.4 - 15 Jun 2007
  + fixed early open() call in NIO connectors
