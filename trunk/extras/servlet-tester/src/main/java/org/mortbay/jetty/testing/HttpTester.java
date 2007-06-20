@@ -87,8 +87,8 @@ public class HttpTester
     /* ------------------------------------------------------------ */
     public String generate() throws IOException
     {
-        Buffer bb=new ByteArrayBuffer(32*1024);
-        Buffer sb=new ByteArrayBuffer(8*1024);
+        Buffer bb=new ByteArrayBuffer(32*1024 + (_genContent!=null?_genContent.length:0));
+        Buffer sb=new ByteArrayBuffer(4*1024);
         StringEndPoint endp = new StringEndPoint();
         HttpGenerator generator = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
         

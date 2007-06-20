@@ -31,6 +31,7 @@ public class ByteArrayEndPoint implements EndPoint
     ByteArrayBuffer _out;
     boolean _closed;
     boolean _nonBlocking;
+    boolean _growOutput;
 
     /* ------------------------------------------------------------ */
     /**
@@ -165,6 +166,23 @@ public class ByteArrayEndPoint implements EndPoint
     {
         if (_closed)
             throw new IOException("CLOSED");
+        if (_growOutput && buffer.length()>_out.space())
+        {
+            _out.compact();
+
+            if (buffer.length()>_out.space())
+            {
+                ByteArrayBuffer n = new ByteArrayBuffer(_out.putIndex()+buffer.length());
+
+                n.put(_out.peek(0,_out.putIndex()));
+                if (_out.getIndex()>0)
+                {
+                    n.mark();
+                    n.setGetIndex(_out.getIndex());
+                }
+                _out=n;
+            }
+        }
         int len = _out.put(buffer);
         buffer.skip(len);
         return len;
@@ -178,30 +196,22 @@ public class ByteArrayEndPoint implements EndPoint
     {
         if (_closed)
             throw new IOException("CLOSED");
+        
         int flushed=0;
+        
         if (header!=null && header.length()>0)
-        {
-            int len=_out.put(header);
-            header.skip(len);
-            flushed+=len;
-        }
+            flushed=flush(header);
         
         if (header==null || header.length()==0)
         {
             if (buffer!=null && buffer.length()>0)
-            {
-                int len=_out.put(buffer);
-                buffer.skip(len);
-                flushed+=len;
-            }
+                flushed+=flush(buffer);
             
             if (buffer==null || buffer.length()==0)
             {
                 if (trailer!=null && trailer.length()>0)
                 {
-                    int len=_out.put(trailer);
-                    trailer.skip(len);
-                    flushed+=len;
+                    flushed+=flush(trailer);
                 }
             }
         }
@@ -306,6 +316,24 @@ public class ByteArrayEndPoint implements EndPoint
     public boolean isBufferred()
     {
         return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the growOutput
+     */
+    public boolean isGrowOutput()
+    {
+        return _growOutput;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param growOutput the growOutput to set
+     */
+    public void setGrowOutput(boolean growOutput)
+    {
+        _growOutput=growOutput;
     }
 
 

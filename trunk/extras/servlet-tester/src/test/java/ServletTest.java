@@ -123,6 +123,43 @@ public class ServletTest extends TestCase
 
 
     /* ------------------------------------------------------------ */
+    public void testBigPost() throws Exception
+    {
+        // generated and parsed test
+        HttpTester request = new HttpTester();
+        HttpTester response = new HttpTester();
+        
+        String content = "0123456789abcdef";
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+=content;
+        content+="!";
+        
+        request.setMethod("POST");
+        request.setVersion("HTTP/1.1");
+        request.setURI("/context/hello/info");
+        request.setHeader("Host","tester");
+        request.setHeader("Content-Type","text/plain");
+        request.setContent(content);
+        String r=request.generate();
+        r = tester.getResponses(r);
+        response.parse(r);
+        assertTrue(response.getMethod()==null);
+        assertEquals(200,response.getStatus());
+        assertEquals("<h1>Hello Servlet</h1>"+content,response.getContent());
+        
+        
+    }
+    /* ------------------------------------------------------------ */
     public static class HelloServlet extends HttpServlet
     {
         private static final long serialVersionUID=2779906630657190712L;
