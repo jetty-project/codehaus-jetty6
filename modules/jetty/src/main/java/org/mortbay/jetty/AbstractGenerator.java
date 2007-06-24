@@ -360,9 +360,7 @@ public abstract class AbstractGenerator implements Generator
             for (int i=0;i<len;i++)
             {
                 char ch = reason.charAt(i);
-                if (Character.isWhitespace(ch))
-                    _reason.put((byte)'_');
-                else if (Character.isJavaIdentifierPart(ch))
+                if (ch==' ' || Character.isJavaIdentifierPart(ch))
                     _reason.put((byte)ch);
             }
         }
