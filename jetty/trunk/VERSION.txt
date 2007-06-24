@@ -1,7 +1,8 @@
 jetty-6.1-SNAPSHOT
+ + update terracotta session clustering to terracotta 2.4
  + JETTY-374 - HttpTesters handles large requests/responses
  + JETTY-375 - IllegalStateException when committed.
- + update terracotta session clustering to terracotta 2.4
+ + JETTY-376 - allow spaces in reason string
 
 jetty-6.1.4 - 15 Jun 2007
  + fixed early open() call in NIO connectors
