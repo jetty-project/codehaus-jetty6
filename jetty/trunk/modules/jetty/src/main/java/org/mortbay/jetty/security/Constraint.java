@@ -150,7 +150,7 @@ public class Constraint implements Cloneable, Serializable
 
     /* ------------------------------------------------------------ */
     /** 
-     * @param c 
+     * @param c Data constrain indicator: 0=DC+NONE, 1=DC_INTEGRAL & 2=DC_CONFIDENTIAL
      */
     public void setDataConstraint(int c)
     {
