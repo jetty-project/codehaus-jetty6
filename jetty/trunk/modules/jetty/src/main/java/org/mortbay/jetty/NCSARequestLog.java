@@ -51,6 +51,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     private boolean _closeOut;
     private boolean _preferProxiedForAddress;
     private String _logDateFormat = "dd/MM/yyyy:HH:mm:ss ZZZ";
+    private String _filenameDateFormat = null;
     private Locale _logLocale = Locale.getDefault();
     private String _logTimeZone = TimeZone.getDefault().getID();
     private String[] _ignorePaths;
@@ -219,79 +220,78 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             
             if (_fileOut == null)
                 return;
-            
+
             StringBuffer buf = new StringBuffer(160);
-
-            if (_logServer)
+            String log =null;
+            synchronized(buf) // for efficiency until we can use StringBuilder
             {
-                buf.append(request.getServerName());
-                buf.append(' ');
-            }
-            
-            String addr = null;
-            if (_preferProxiedForAddress) 
-            {
-                addr = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
-            }
-            
-            if (addr == null) 
-                addr = request.getRemoteAddr();
-            
-            buf.append(addr);
-            buf.append(" - ");
-            String user = request.getRemoteUser();
-            buf.append((user == null)? " - " : user);
-            buf.append(" [");
-            buf.append(_logDateCache.format(request.getTimeStamp()));
-            buf.append("] \"");
-            buf.append(request.getMethod());
-            buf.append(' ');
-            buf.append(request.getUri());
-            buf.append(' ');
-            buf.append(request.getProtocol());
-            buf.append("\" ");
-            int status = response.getStatus();
-            if (status<=0)
-                status=404;
-            buf.append((char)('0'+((status/100)%10)));
-            buf.append((char)('0'+((status/10)%10)));
-            buf.append((char)('0'+(status%10)));
-            
-            
-            long responseLength=response.getContentCount();
-            if (responseLength >=0)
-            {
-                buf.append(' ');
-                if (responseLength > 99999)
-                    buf.append(Long.toString(responseLength));
-                else 
+                if (_logServer)
                 {
-                    if (responseLength > 9999)
-                        buf.append((char)('0' + ((responseLength / 10000)%10)));
-                    if (responseLength > 999)
-                        buf.append((char)('0' + ((responseLength /1000)%10)));
-                    if (responseLength > 99)
-                        buf.append((char)('0' + ((responseLength / 100)%10)));
-                    if (responseLength > 9)
-                        buf.append((char)('0' + ((responseLength / 10)%10)));
-                    buf.append((char)('0' + (responseLength)%10));
+                    buf.append(request.getServerName());
+                    buf.append(' ');
                 }
-                buf.append(' ');
-            }
-            else 
-                buf.append(" - ");
 
-            String log = buf.toString();
+                String addr = null;
+                if (_preferProxiedForAddress) 
+                {
+                    addr = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
+                }
+
+                if (addr == null) 
+                    addr = request.getRemoteAddr();
+
+                buf.append(addr);
+                buf.append(" - ");
+                String user = request.getRemoteUser();
+                buf.append((user == null)? " - " : user);
+                buf.append(" [");
+                buf.append(_logDateCache.format(request.getTimeStamp()));
+                buf.append("] \"");
+                buf.append(request.getMethod());
+                buf.append(' ');
+                buf.append(request.getUri());
+                buf.append(' ');
+                buf.append(request.getProtocol());
+                buf.append("\" ");
+                int status = response.getStatus();
+                if (status<=0)
+                    status=404;
+                buf.append((char)('0'+((status/100)%10)));
+                buf.append((char)('0'+((status/10)%10)));
+                buf.append((char)('0'+(status%10)));
+
+
+                long responseLength=response.getContentCount();
+                if (responseLength >=0)
+                {
+                    buf.append(' ');
+                    if (responseLength > 99999)
+                        buf.append(Long.toString(responseLength));
+                    else 
+                    {
+                        if (responseLength > 9999)
+                            buf.append((char)('0' + ((responseLength / 10000)%10)));
+                        if (responseLength > 999)
+                            buf.append((char)('0' + ((responseLength /1000)%10)));
+                        if (responseLength > 99)
+                            buf.append((char)('0' + ((responseLength / 100)%10)));
+                        if (responseLength > 9)
+                            buf.append((char)('0' + ((responseLength / 10)%10)));
+                        buf.append((char)('0' + (responseLength)%10));
+                    }
+                    buf.append(' ');
+                }
+                else 
+                    buf.append(" - ");
+
+                log = buf.toString();
+            }
+            
             synchronized(_writer)
             {
                 _writer.write(log);
                 if (_extended)
-                {
                     logExtended(request, response, _writer);
-                    if (!_logCookies)
-                        _writer.write(" -");
-                }
-
                 
                 if (_logCookies)
                 {
@@ -353,8 +353,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
             writer.write('"');
             writer.write(agent);
             writer.write('"');
-        }    
-        
+        }          
     }
 
     protected void doStart() throws Exception
@@ -364,8 +363,9 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         
         if (_filename != null) 
         {
-            _fileOut = new RolloverFileOutputStream(_filename,_append,_retainDays,TimeZone.getTimeZone(_logTimeZone));
+            _fileOut = new RolloverFileOutputStream(_filename,_append,_retainDays,TimeZone.getTimeZone(_logTimeZone),_filenameDateFormat,null);
             _closeOut = true;
+            Log.info("Opened "+getDatedFilename());
         }
         else 
             _fileOut = System.err;
@@ -397,6 +397,25 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         _closeOut = false;
         _logDateCache = null;
         _writer = null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the log File Date Format
+     */
+    public String getFilenameDateFormat()
+    {
+        return _filenameDateFormat;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the log file date format.
+     * @see {@link RolloverFileOutputStream#RolloverFileOutputStream(String, boolean, int, TimeZone, String, String)}
+     * @param logFileDateFormat the logFileDateFormat to pass to {@link RolloverFileOutputStream}
+     */
+    public void setFilenameDateFormat(String logFileDateFormat)
+    {
+        _filenameDateFormat=logFileDateFormat;
     }
 
 }
