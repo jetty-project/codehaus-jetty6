@@ -68,7 +68,11 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             {
                 if (!_resumed && timeout>=0)
                 {
-                    _mutex.wait(timeout);
+                    if (timeout==0)
+                        _mutex.wait();
+                    else if (timeout>0)
+                        _mutex.wait(timeout);
+                        
                 }
             }
             catch (InterruptedException e)
