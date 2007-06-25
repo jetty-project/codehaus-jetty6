@@ -195,17 +195,20 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                         case NEED_WRAP:
                         {
                             SSLEngineResult result=null;
-                            try
+                            synchronized(_outBuffer)
                             {
-                                _outNIOBuffer.compact();
-                                int put=_outNIOBuffer.putIndex();
-                                _outBuffer.position();
-                                result=_engine.wrap(__NO_BUFFERS,_outBuffer);
-                                _outNIOBuffer.setPutIndex(put+result.bytesProduced());
-                            }
-                            finally
-                            {
-                                _outBuffer.position(0);
+                                try
+                                {
+                                    _outNIOBuffer.compact();
+                                    int put=_outNIOBuffer.putIndex();
+                                    _outBuffer.position();
+                                    result=_engine.wrap(__NO_BUFFERS,_outBuffer);
+                                    _outNIOBuffer.setPutIndex(put+result.bytesProduced());
+                                }
+                                finally
+                                {
+                                    _outBuffer.position(0);
+                                }
                             }
 
                             flush();
@@ -261,13 +264,62 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     _gather[1].position(buffer.getIndex());
                     _gather[1].limit(buffer.putIndex());
 
-                    int consumed=0;
+                    synchronized(_outBuffer)
+                    {
+                        int consumed=0;
+                        try
+                        {
+                            _outNIOBuffer.clear();
+                            _outBuffer.position(0);
+                            _outBuffer.limit(_outBuffer.capacity());
+                            result=_engine.wrap(_gather,_outBuffer);
+                            _outNIOBuffer.setGetIndex(0);
+                            _outNIOBuffer.setPutIndex(result.bytesProduced());
+                            consumed=result.bytesConsumed();
+                        }
+                        finally
+                        {
+                            _outBuffer.position(0);
+
+                            if (consumed>0 && header!=null)
+                            {
+                                int len=consumed<header.length()?consumed:header.length();
+                                header.skip(len);
+                                consumed-=len;
+                                _gather[0].position(0);
+                                _gather[0].limit(_gather[0].capacity());
+                            }
+                            if (consumed>0 && buffer!=null)
+                            {
+                                int len=consumed<buffer.length()?consumed:buffer.length();
+                                buffer.skip(len);
+                                consumed-=len;
+                                _gather[1].position(0);
+                                _gather[1].limit(_gather[1].capacity());
+                            }
+                            assert consumed==0;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            _gather[0]=extractOutputBuffer(header,0);
+            synchronized(_gather[0])
+            {
+                _gather[0].position(header.getIndex());
+                _gather[0].limit(header.putIndex());
+
+                int consumed=0;
+                synchronized(_outBuffer)
+                {
                     try
                     {
                         _outNIOBuffer.clear();
                         _outBuffer.position(0);
                         _outBuffer.limit(_outBuffer.capacity());
-                        result=_engine.wrap(_gather,_outBuffer);
+                        result=_engine.wrap(_gather[0],_outBuffer);
                         _outNIOBuffer.setGetIndex(0);
                         _outNIOBuffer.setPutIndex(result.bytesProduced());
                         consumed=result.bytesConsumed();
@@ -284,51 +336,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             _gather[0].position(0);
                             _gather[0].limit(_gather[0].capacity());
                         }
-                        if (consumed>0 && buffer!=null)
-                        {
-                            int len=consumed<buffer.length()?consumed:buffer.length();
-                            buffer.skip(len);
-                            consumed-=len;
-                            _gather[1].position(0);
-                            _gather[1].limit(_gather[1].capacity());
-                        }
                         assert consumed==0;
                     }
-                }
-            }
-        }
-        else
-        {
-            _gather[0]=extractOutputBuffer(header,0);
-            synchronized(_gather[0])
-            {
-                _gather[0].position(header.getIndex());
-                _gather[0].limit(header.putIndex());
-
-                int consumed=0;
-                try
-                {
-                    _outNIOBuffer.clear();
-                    _outBuffer.position(0);
-                    _outBuffer.limit(_outBuffer.capacity());
-                    result=_engine.wrap(_gather[0],_outBuffer);
-                    _outNIOBuffer.setGetIndex(0);
-                    _outNIOBuffer.setPutIndex(result.bytesProduced());
-                    consumed=result.bytesConsumed();
-                }
-                finally
-                {
-                    _outBuffer.position(0);
-
-                    if (consumed>0 && header!=null)
-                    {
-                        int len=consumed<header.length()?consumed:header.length();
-                        header.skip(len);
-                        consumed-=len;
-                        _gather[0].position(0);
-                        _gather[0].limit(_gather[0].capacity());
-                    }
-                    assert consumed==0;
                 }
             }
         }
