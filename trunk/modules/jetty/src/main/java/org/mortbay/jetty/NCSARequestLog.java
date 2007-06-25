@@ -50,7 +50,7 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     private int _retainDays;
     private boolean _closeOut;
     private boolean _preferProxiedForAddress;
-    private String _logDateFormat = "dd/MM/yyyy:HH:mm:ss ZZZ";
+    private String _logDateFormat;
     private String _filenameDateFormat = null;
     private Locale _logLocale = Locale.getDefault();
     private String _logTimeZone = TimeZone.getDefault().getID();
@@ -112,6 +112,11 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
         return null;
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param format Format for the timestamps in the log file.  If not set,
+     * the pre-formated request timestamp is used.
+     */
     public void setLogDateFormat(String format)
     {
         _logDateFormat = format;
@@ -245,7 +250,11 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
                 String user = request.getRemoteUser();
                 buf.append((user == null)? " - " : user);
                 buf.append(" [");
-                buf.append(_logDateCache.format(request.getTimeStamp()));
+                if (_logDateCache!=null)
+                    buf.append(_logDateCache.format(request.getTimeStamp()));
+                else
+                    buf.append(request.getTimeStampBuffer().toString());
+                    
                 buf.append("] \"");
                 buf.append(request.getMethod());
                 buf.append(' ');
@@ -358,8 +367,11 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
 
     protected void doStart() throws Exception
     {
-        _logDateCache = new DateCache(_logDateFormat, _logLocale);
-        _logDateCache.setTimeZoneID(_logTimeZone);
+        if (_logDateFormat!=null)
+        {       
+            _logDateCache = new DateCache(_logDateFormat, _logLocale);
+            _logDateCache.setTimeZoneID(_logTimeZone);
+        }
         
         if (_filename != null) 
         {
