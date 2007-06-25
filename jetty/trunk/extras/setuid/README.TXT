@@ -2,8 +2,8 @@ Need to automate the build of this....
 
 but for now do the following:
 
-Build
------
+Build and Install
+-----------------
 
 In this directory do: 
   mvn install
@@ -13,14 +13,6 @@ In this directory do:
 Where $JDK_HOME is same as $JAVA_HOME and where linux should be replaced by the name of your operating system.
 
 NOTE: if you are compiling on Solaris, you may need to leave out the -shared argument.
-
-Install
--------
-
-From this directory do: 
-
-  cp target/jetty-setuid-6.1-SNAPSHOT.jar ../../lib/ext/
-  cp etc/jetty-setuid.xml ../../etc
 
 
 Configuration
