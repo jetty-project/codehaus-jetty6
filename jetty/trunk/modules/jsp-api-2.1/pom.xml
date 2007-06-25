@@ -75,18 +75,39 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>0.9.0-incubator-SNAPSHOT</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+            <configuration>
+              <instructions>
+                <Mode>stable</Mode>
+                <Url>${pom.url}</Url>
+	        <Implementation-Vendor>JCP</Implementation-Vendor>
+	        <Implementation-Version>${pom.version}</Implementation-Version>
+	        <Specification-Version>2.1</Specification-Version>
+	        <Package>javax.servlet.jsp</Package>
+                <Bundle-Version>2.1</Bundle-Version>
+                <Bundle-Description>Bundle for JSP-2.1.</Bundle-Description>
+                <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
+                <Implementation-Version>${project.version}</Implementation-Version>
+              </instructions>
+            </configuration>
+           </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <manifestEntries>
-              <mode>stable</mode>
-              <url>${pom.url}</url>
-	      <implementation-vendor>JCP</implementation-vendor>
-	      <implementation-version>${pom.version}</implementation-version>
-	      <specification-version>2.1</specification-version>
-	      <package>javax.servlet.jsp</package>
-            </manifestEntries>
+              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
           </archive>
         </configuration>
       </plugin>

@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-374 - HttpTesters handles large requests/responses
  + JETTY-375 - IllegalStateException when committed.
  + JETTY-376 - allow spaces in reason string
+ + make OSGi manifests for jetty jars
 
 jetty-6.1.4 - 15 Jun 2007
  + fixed early open() call in NIO connectors
