@@ -1,6 +1,8 @@
 jetty-6.1-SNAPSHOT
  + update terracotta session clustering to terracotta 2.4
  + SetUID option to only open connectors before setUID.
+ + Protect SslSelectChannelConnector from exceptions during close
+ + Improved Request log configuration options
  + JETTY-374 - HttpTesters handles large requests/responses
  + JETTY-375 - IllegalStateException when committed.
  + JETTY-376 - allow spaces in reason string

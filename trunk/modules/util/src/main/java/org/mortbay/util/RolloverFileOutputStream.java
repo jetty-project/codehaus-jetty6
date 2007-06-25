@@ -49,10 +49,8 @@ public class RolloverFileOutputStream extends FilterOutputStream
     final static String YYYY_MM_DD="yyyy_mm_dd";
 
     private RollTask _rollTask;
-    private SimpleDateFormat _fileBackupFormat =
-        new SimpleDateFormat(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS"));
-    private SimpleDateFormat _fileDateFormat = 
-        new SimpleDateFormat(System.getProperty("ROLLOVERFILE_DATE_FORMAT","yyyy_MM_dd"));
+    private SimpleDateFormat _fileBackupFormat;
+    private SimpleDateFormat _fileDateFormat;
 
     private String _filename;
     private File _file;
@@ -99,7 +97,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
     {
         this(filename,append,retainDays,TimeZone.getDefault());
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param filename The filename must include the string "yyyy_mm_dd", 
@@ -114,7 +112,39 @@ public class RolloverFileOutputStream extends FilterOutputStream
                                     TimeZone zone)
         throws IOException
     {
+
+         this(filename,append,retainDays,TimeZone.getDefault(),null,null);
+    }
+     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param filename The filename must include the string "yyyy_mm_dd", 
+     * which is replaced with the actual date when creating and rolling over the file.
+     * @param append If true, existing files will be appended to.
+     * @param retainDays The number of days to retain files before deleting them. 0 to retain forever.
+     * @param dateFormat The format for the date file substitution. If null the system property ROLLOVERFILE_DATE_FORMAT is 
+     * used and if that is null, then default is "yyyy_MM_dd". 
+     * @param backupFormat The format for the file extension of backup files. If null the system property
+     * ROLLOVERFILE_BACKUP_FORMAT is used and if that is null, then default is "HHmmssSSS". 
+     * @throws IOException
+     */
+    public RolloverFileOutputStream(String filename,
+                                    boolean append,
+                                    int retainDays,
+                                    TimeZone zone,
+                                    String dateFormat,
+                                    String backupFormat)
+        throws IOException
+    {
         super(null);
+
+        if (dateFormat==null)
+            dateFormat=System.getProperty("ROLLOVERFILE_DATE_FORMAT","yyyy_MM_dd");
+        _fileDateFormat = new SimpleDateFormat(dateFormat);
+        
+        if (backupFormat==null)
+            backupFormat=System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS");
+        _fileBackupFormat = new SimpleDateFormat(backupFormat);
         
         _fileBackupFormat.setTimeZone(zone);
         _fileDateFormat.setTimeZone(zone);
