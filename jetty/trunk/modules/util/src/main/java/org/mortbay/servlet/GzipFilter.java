@@ -1,0 +1,479 @@
+//========================================================================
+//Copyright 2007 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+package org.mortbay.servlet;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.zip.GZIPOutputStream;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+
+import org.mortbay.util.ByteArrayOutputStream2;
+import org.mortbay.util.StringUtil;
+
+/* ------------------------------------------------------------ */
+/** GZIP Filter
+ * This filter will gzip the content of a response iff: <ul>
+ * <li>The filter is mapped to a matching path</li>
+ * <li>The response status code is >=200 and <300
+ * <li>The content length is unknown or more than the minGzipSize initParameter (default 2048)</li>
+ * <li>The content-type is in the coma separated list of mimeTypes set in the mimeTypes initParameter or
+ * if no mimeTypes are defined the content-type is not "application/gzip"</li>
+ * <li>No content-encoding is specified by the resource</li>
+ * </ul>
+ * 
+ * <p>
+ * Compressing the content can greatly improve the network bandwidth usage, but at a cost of memory and
+ * CPU cycles.   If this filter is mapped for static content, then use of efficient direct NIO may be 
+ * prevented, thus use of the gzip mechanism of the {@link org.mortbay.jetty.servlet.DefaultServlet} is 
+ * advised instead.
+ * </p>
+ * 
+ *  
+ * @author gregw
+ *
+ */
+public class GzipFilter implements Filter
+{
+    protected Set _mimeTypes;
+    protected int _bufferSize=8192;
+    protected int _minGzipSize=2048;
+    
+    public void init(FilterConfig filterConfig) throws ServletException
+    {
+        String tmp=filterConfig.getInitParameter("bufferSize");
+        if (tmp!=null)
+            _bufferSize=Integer.parseInt(tmp);
+
+        tmp=filterConfig.getInitParameter("minGzipSize");
+        if (tmp!=null)
+            _minGzipSize=Integer.parseInt(tmp);
+        
+        tmp=filterConfig.getInitParameter("mimeTypes");
+        if (tmp!=null)
+        {
+            _mimeTypes=new HashSet();
+            StringTokenizer tok = new StringTokenizer(tmp,", ",false);
+            while (tok.hasMoreTokens())
+                _mimeTypes.add(tok.nextToken());
+        }
+    }
+
+    public void destroy()
+    {
+    }
+
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) 
+        throws IOException, ServletException
+    {
+        HttpServletRequest request=(HttpServletRequest)req;
+        HttpServletResponse response=(HttpServletResponse)res;
+
+        String ae = request.getHeader("accept-encoding");
+        if (ae != null && ae.indexOf("gzip")>=0)
+        {
+            GZIPResponseWrapper wrappedResponse=new GZIPResponseWrapper(response);
+            
+            boolean exceptional=true;
+            try
+            {
+                chain.doFilter(req,wrappedResponse);
+                exceptional=false;
+            }
+            finally
+            {
+                if (exceptional && !response.isCommitted())
+                {
+                    wrappedResponse.resetBuffer();
+                    wrappedResponse.noGzip();
+                }
+                else
+                    wrappedResponse.finish();
+            }
+        }
+        else
+        {
+            chain.doFilter(req,res);
+        }
+    }
+
+    public class GZIPResponseWrapper extends HttpServletResponseWrapper
+    {
+        boolean _noGzip;
+        PrintWriter _writer;
+        GzipStream _gzStream;
+        long _contentLength=-1;
+
+        public GZIPResponseWrapper(HttpServletResponse httpServletResponse)
+        {
+            super(httpServletResponse);
+        }
+
+        public void setContentType(String ct)
+        {
+            super.setContentType(ct);
+            int colon=ct.indexOf(";");
+            if (colon>0)
+                ct=ct.substring(0,colon);
+
+            if (_mimeTypes==null && "application/gzip".equalsIgnoreCase(ct) ||
+                    _mimeTypes!=null && !_mimeTypes.contains(StringUtil.asciiToLowerCase(ct)))
+            {
+                System.err.println("noGzip (mime)");
+                noGzip();
+            }
+        }
+
+        
+        public void setStatus(int sc, String sm)
+        {
+            super.setStatus(sc,sm);
+            if (sc<200||sc>=300)
+                noGzip();
+        }
+
+        public void setStatus(int sc)
+        {
+            super.setStatus(sc);
+            if (sc<200||sc>=300)
+                noGzip();
+        }
+
+        public void setContentLength(int length)
+        {
+            _contentLength=length;
+            if (_gzStream!=null)
+                _gzStream.setContentLength(length);
+        }
+        
+        public void setHeader(String name, String value)
+        {
+            if ("content-length".equalsIgnoreCase(name))
+            {
+                _contentLength=Long.parseLong(value);
+                if (_gzStream!=null)
+                    _gzStream.setContentLength(_contentLength);
+            }
+            else if ("content-type".equalsIgnoreCase(name))
+            {   
+                setContentType(value);
+            }
+            else if ("content-encoding".equalsIgnoreCase(name))
+            {   
+                super.setHeader(name,value);
+                if (!isCommitted())
+                {
+                    System.err.println("noGzip (ce)");
+                    noGzip();
+                }
+            }
+            else
+                super.setHeader(name,value);
+        }
+
+        public void setIntHeader(String name, int value)
+        {
+            if ("content-length".equalsIgnoreCase(name))
+            {
+                _contentLength=value;
+                if (_gzStream!=null)
+                    _gzStream.setContentLength(_contentLength);
+            }
+            else
+                super.setIntHeader(name,value);
+        }
+
+        public void flushBuffer() throws IOException
+        {
+            if (_writer!=null)
+                _writer.flush();
+            if (_gzStream!=null)
+                _gzStream.finish();
+            else
+                getResponse().flushBuffer();
+        }
+
+        public void reset()
+        {
+            super.reset();
+            if (_gzStream!=null)
+                _gzStream.resetBuffer();
+            _writer=null;
+            _gzStream=null;
+            _noGzip=false;
+            _contentLength=-1;
+        }
+        
+        public void resetBuffer()
+        {
+            super.resetBuffer();
+            if (_gzStream!=null)
+                _gzStream.resetBuffer();
+            _writer=null;
+            _gzStream=null;
+        }
+        
+        public void sendError(int sc, String msg) throws IOException
+        {
+            resetBuffer();
+            super.sendError(sc,msg);
+        }
+        
+        public void sendError(int sc) throws IOException
+        {
+            resetBuffer();
+            super.sendError(sc);
+        }
+        
+        public void sendRedirect(String location) throws IOException
+        {
+            resetBuffer();
+            super.sendRedirect(location);
+        }
+
+        public ServletOutputStream getOutputStream() throws IOException
+        {
+            if (_gzStream==null)
+            {
+                if (getResponse().isCommitted() || _noGzip)
+                    return getResponse().getOutputStream();
+                
+                _gzStream=new GzipStream((HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
+            }
+            else if (_writer!=null)
+                throw new IllegalStateException("getWriter() called");
+            
+            return _gzStream;   
+        }
+
+        public PrintWriter getWriter() throws IOException
+        {
+            if (_writer==null)
+            { 
+                if (_gzStream!=null)
+                    throw new IllegalStateException("getOutputStream() called");
+                
+                if (getResponse().isCommitted() || _noGzip)
+                    return getResponse().getWriter();
+                
+                _gzStream=new GzipStream((HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
+                _writer=new PrintWriter(_gzStream);
+            }
+            return _writer;   
+        }
+
+        void noGzip()
+        {
+            _noGzip=true;
+            if (_gzStream!=null)
+            {
+                try
+                {
+                    _gzStream.doNotGzip();
+                }
+                catch (IOException e)
+                {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
+        
+        void finish() throws IOException
+        {
+            if (_writer!=null)
+                _writer.flush();
+            if (_gzStream!=null)
+                _gzStream.finish();
+        }
+        
+    }
+
+    
+    public static class GzipStream extends ServletOutputStream
+    {
+        protected OutputStream _out;
+        protected ByteArrayOutputStream2 _bOut;
+        protected GZIPOutputStream _gzOut;
+        protected HttpServletResponse _response;
+        protected boolean _closed;
+        protected int _bufferSize;
+        protected int _minGzipSize;
+        protected long _contentLength;
+
+        public GzipStream(HttpServletResponse response,long contentLength,int bufferSize, int minGzipSize) throws IOException
+        {
+            super();
+            _response=response;
+            _contentLength=contentLength;
+            _bufferSize=bufferSize;
+            _minGzipSize=minGzipSize;
+        }
+
+        public void resetBuffer()
+        {
+            _closed=false;
+            _out=null;
+            _bOut=null;
+            if (_gzOut!=null)
+                _response.setHeader("Content-Encoding",null);
+            _gzOut=null;
+        }
+
+        public void setContentLength(long length)
+        {
+            _contentLength=length;
+        }
+        
+        public void flush() throws IOException
+        {
+            if (_out==null || _bOut!=null)
+            {
+                if (_contentLength>0 && _contentLength<_minGzipSize)
+                    doNotGzip();
+                else
+                    doGzip();
+            }
+            
+            _out.flush();
+        }
+
+        public void close() throws IOException
+        {
+            if (_bOut!=null)
+            {
+                if (_contentLength<0)
+                    _contentLength=_bOut.getCount();
+                if (_contentLength<_minGzipSize)
+                    doNotGzip();
+                else
+                    doGzip();
+            }
+            else if (_out==null)
+            {
+                doNotGzip();
+            }
+            
+            if (_gzOut!=null)
+                _gzOut.finish();
+            _out.close();
+            _closed=true;
+        }  
+
+        public void finish() throws IOException
+        {
+            if (!_closed)
+            {
+                flush();
+                if (_gzOut!=null)
+                    _gzOut.finish();
+            }
+        }  
+
+        public void write(int b) throws IOException
+        {    
+            checkOut(1);
+            _out.write(b);
+        }
+
+        public void write(byte b[]) throws IOException
+        {
+            checkOut(b.length);
+            _out.write(b);
+        }
+
+        public void write(byte b[], int off, int len) throws IOException
+        {
+            checkOut(len);
+            _out.write(b,off,len);
+        }
+        
+        public void doGzip() throws IOException
+        {
+            if (_gzOut==null) 
+            {
+                if (_response.isCommitted())
+                    throw new IllegalStateException();
+                
+                _response.addHeader("Content-Encoding", "gzip");
+                _out=_gzOut=new GZIPOutputStream(_response.getOutputStream(),_bufferSize);
+                
+                if (_bOut!=null)
+                {
+                    _out.write(_bOut.getBuf(),0,_bOut.getCount());
+                    _bOut=null;
+                }
+            }
+        }
+        
+        public void doNotGzip() throws IOException
+        {
+            if (_gzOut!=null) 
+                throw new IllegalStateException();
+            if (_out==null || _bOut!=null )
+            {
+                _out=_response.getOutputStream();
+                if (_contentLength>=0)
+                {
+                    if(_contentLength<Integer.MAX_VALUE)
+                        _response.setContentLength((int)_contentLength);
+                    else
+                        _response.setHeader("Content-Length",Long.toString(_contentLength));
+                }
+
+                if (_bOut!=null)
+                    _out.write(_bOut.getBuf(),0,_bOut.getCount());
+                _bOut=null;
+            }   
+        }
+        
+        private void checkOut(int length) throws IOException 
+        {
+            if (_closed) 
+            {
+                new Throwable().printStackTrace();
+                throw new IOException("CLOSED");
+            }
+            
+            if (_out==null)
+            {
+                if (_response.isCommitted() || (_contentLength>=0 && _contentLength<_minGzipSize))
+                    doNotGzip();
+                else if (length>_minGzipSize)
+                    doGzip();
+                else
+                    _out=_bOut=new ByteArrayOutputStream2(_bufferSize);
+            }
+            else if (_bOut!=null)
+            {
+                if (_response.isCommitted() || (_contentLength>=0 && _contentLength<_minGzipSize))
+                    doNotGzip();
+                else if (length>=(_bOut.size()-_bOut.getCount()))
+                    doGzip();
+            }
+        }
+    }
+}
