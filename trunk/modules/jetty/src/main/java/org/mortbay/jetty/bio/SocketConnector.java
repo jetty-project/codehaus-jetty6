@@ -69,6 +69,7 @@ public class SocketConnector extends AbstractConnector
     public void open() throws IOException
     {
         // Create a new server socket and set to non blocking mode
+        if (_serverSocket==null || _serverSocket.isClosed())
         _serverSocket= newServerSocket(getHost(),getPort(),getAcceptQueueSize());
     }
 
