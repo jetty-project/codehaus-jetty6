@@ -185,9 +185,8 @@
     <Ref id="RequestLog">
       <Set name="requestLog">
         <New id="RequestLogImpl" class="org.mortbay.jetty.NCSARequestLog">
-          <!--Set name="filename"><SystemProperty name="jetty.logs" default="./logs"/>/access_log.yyyy_mm_dd</Set-->
           <Set name="filename"><SystemProperty name="jetty.logs" default="./logs"/>/yyyy_mm_dd.request.log</Set>
-          <Set name="filenameDateFormat">yyyy-MM-dd</Set>
+          <Set name="filenameDateFormat">yyyy_MM_dd</Set>
           <Set name="retainDays">90</Set>
           <Set name="append">true</Set>
           <Set name="extended">true</Set>
