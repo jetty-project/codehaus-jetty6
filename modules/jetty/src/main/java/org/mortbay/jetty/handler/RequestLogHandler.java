@@ -112,9 +112,9 @@ public class RequestLogHandler extends HandlerWrapper
      */
     protected void doStart() throws Exception
     {
+        super.doStart();
         if (_requestLog!=null)
             _requestLog.start();
-        super.doStart();
     }
 
     /* ------------------------------------------------------------ */
