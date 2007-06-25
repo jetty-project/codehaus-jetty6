@@ -195,7 +195,14 @@ public class Dump extends HttpServlet
         {
             response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
             response.sendRedirect(redirect);
-            response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
+            try
+            {
+                response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
+            }
+            catch(IOException e)
+            {
+                // ignored as stream is closed.
+            }
             return;
         }
 
@@ -205,7 +212,14 @@ public class Dump extends HttpServlet
         {
             response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
             response.sendError(Integer.parseInt(error));
-            response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
+            try
+            {
+                response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
+            }
+            catch(IOException e)
+            {
+                // ignored as stream is closed.
+            }
             return;
         }
 
@@ -257,8 +271,8 @@ public class Dump extends HttpServlet
                 throw new IOException("test ex1");
             else if ("/ex2".equals(pi))
                 throw new UnavailableException("test ex2");
-            else if (pi.startsWith("/ex2/"))
-                throw new UnavailableException("test ex2",Integer.parseInt(pi.substring(5)));
+            else if (pi.startsWith("/ex3/"))
+                throw new UnavailableException("test ex3",Integer.parseInt(pi.substring(5)));
             throw new RuntimeException("test");
         }
 
