@@ -532,7 +532,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 _endPoint.scheduleIdle();
                 _endPoint.getSelectSet().addChange(this);
             }
-            else
+            else if (_timeout>0)
                 _endPoint.getSelectSet().scheduleTimeout(this,_timeout);
             
             _endPoint.getSelectSet().wakeup();
