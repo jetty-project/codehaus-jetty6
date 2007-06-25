@@ -8,6 +8,12 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jsp-2.1</artifactId>
   <name>Glassfish Jasper</name>
+  <licenses>
+    <license>
+      <name>CDDL 1.0</name>
+      <url>https://glassfish.dev.java.net/public/CDDLv1.0.html</url>
+    </license>
+  </licenses>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
@@ -105,6 +111,37 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>0.9.0-incubator-SNAPSHOT</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+            <configuration>
+              <instructions>
+                <Bundle-Version>2.1</Bundle-Version>
+                <Bundle-Description>Bundle for JSP-2.1 Implementation from Jetty.</Bundle-Description>
+                <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
+                <Implementation-Version>${project.version}</Implementation-Version>
+              </instructions>
+            </configuration>
+           </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.1</version>
+        <configuration>
+          <archive>
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
       </plugin>
     </plugins>
   </build>
