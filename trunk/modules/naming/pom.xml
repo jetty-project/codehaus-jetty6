@@ -9,6 +9,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-naming</artifactId>
   <name>Jetty Naming</name>
+  <description>JNDI spi impl for java namespace</description>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -69,13 +70,6 @@
             <goals>
               <goal>manifest</goal>
             </goals>
-            <configuration>
-              <instructions>
-                <Bundle-Version>${project.version}</Bundle-Version>
-                <Bundle-Description>Bundle for java JNDI for use with Jetty Plus.</Bundle-Description>
-                <Implementation-Version>${project.version}</Implementation-Version>
-              </instructions>
-            </configuration>
            </execution>
         </executions>
       </plugin>

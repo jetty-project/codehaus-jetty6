@@ -10,6 +10,7 @@
   <artifactId>jetty-util</artifactId>
   <name>Jetty Utilities</name>
   <url>http://jetty.mortbay.org</url>
+  <description>Utility classes for Jetty</description>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
@@ -74,13 +75,6 @@
             <goals>
               <goal>manifest</goal>
             </goals>
-            <configuration>
-              <instructions>
-                <Bundle-Version>${project.version}</Bundle-Version>
-                <Bundle-Description>Bundle for jetty-util.</Bundle-Description>
-                <Implementation-Version>${project.version}</Implementation-Version>
-              </instructions>
-            </configuration>
            </execution>
         </executions>
       </plugin>
