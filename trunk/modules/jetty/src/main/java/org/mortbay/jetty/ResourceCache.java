@@ -153,8 +153,33 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 return content;
             }    
         }
-        
         Resource resource=factory.getResource(pathInContext);
+        return load(pathInContext,resource);
+    }
+    
+    public Content lookup(String pathInContext, Resource resource)
+        throws IOException
+    {
+        Content content=null;
+        
+        // Look up cache operations
+        synchronized(_cache)
+        {
+            // Look for it in the cache
+            content = (Content)_cache.get(pathInContext);
+        
+            if (content!=null && content.isValid())
+            {
+                return content;
+            }    
+        }
+        return load(pathInContext,resource);
+    }
+
+    private Content load(String pathInContext, Resource resource)
+        throws IOException
+    {
+        Content content=null;
         if (resource!=null && resource.exists() && !resource.isDirectory())
         {
             long len = resource.length();
