@@ -9,6 +9,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-management</artifactId>
   <name>Jetty Management</name>
+  <description>Jetty JMX</description>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -91,13 +92,6 @@
             <goals>
               <goal>manifest</goal>
             </goals>
-            <configuration>
-              <instructions>
-                <Bundle-Version>${project.version}</Bundle-Version>
-                <Bundle-Description>Bundle for JMX impl for Jetty.</Bundle-Description>
-                <Implementation-Version>${project.version}</Implementation-Version>
-              </instructions>
-            </configuration>
            </execution>
         </executions>
       </plugin>

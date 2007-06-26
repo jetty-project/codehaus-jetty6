@@ -9,6 +9,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-plus</artifactId>
   <name>Jetty Plus</name>
+  <description>Jetty JavaEE style services</description>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -70,13 +71,6 @@
             <goals>
               <goal>manifest</goal>
             </goals>
-            <configuration>
-              <instructions>
-                <Bundle-Version>${project.version}</Bundle-Version>
-                <Bundle-Description>Bundle for Jetty Plus features.</Bundle-Description>
-                <Implementation-Version>${project.version}</Implementation-Version>
-              </instructions>
-            </configuration>
            </execution>
         </executions>
       </plugin>

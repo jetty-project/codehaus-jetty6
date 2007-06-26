@@ -10,6 +10,7 @@
   <artifactId>jetty</artifactId>
   <name>Jetty Server</name>
   <url>http://jetty.mortbay.org</url>
+  <description>Jetty server core</description>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
@@ -69,10 +70,7 @@
             </goals>
             <configuration>
               <instructions>
-                <Bundle-Version>${project.version}</Bundle-Version>
-                <Bundle-Description>Bundle for core Jetty.</Bundle-Description>
                 <Bundle-RequiredExcutionEnvironment>J2SE-1.5</Bundle-RequiredExcutionEnvironment>
-                <Implementation-Version>${project.version}</Implementation-Version>
               </instructions>
             </configuration>
            </execution>

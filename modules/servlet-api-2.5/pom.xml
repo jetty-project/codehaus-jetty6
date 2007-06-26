@@ -9,6 +9,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>servlet-api-2.5</artifactId>
   <name>Servlet Specification 2.5 API</name>
+  <description>Servlet Specification 2.5 API</description>
   <packaging>jar</packaging>
   <url>http://jetty.mortbay.org</url>
   <licenses>
@@ -78,14 +79,9 @@
             <configuration>
               <instructions>
               <Bundle-Version>2.5</Bundle-Version>
-              <Bundle-Description>javax.servlet 2.5 bundle from jetty</Bundle-Description>
               <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-              <Mode>stable</Mode>
-              <Url>${pom.url}</Url>
               <Implementation-Vendor>JCP</Implementation-Vendor>
-              <Implementation-Version>${pom.version}</Implementation-Version>
               <Specification-Version>2.5</Specification-Version>
-              <Package>javax.servlet</Package>
               </instructions>
             </configuration>
            </execution>
