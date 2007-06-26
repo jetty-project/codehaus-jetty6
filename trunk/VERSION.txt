@@ -4,6 +4,7 @@ jetty-6.1-SNAPSHOT
  + Protect SslSelectChannelConnector from exceptions during close
  + Improved Request log configuration options
  + Added GzipFilter
+ + JETTY-373 - Stop all dependent lifecycles
  + JETTY-374 - HttpTesters handles large requests/responses
  + JETTY-375 - IllegalStateException when committed.
  + JETTY-376 - allow spaces in reason string

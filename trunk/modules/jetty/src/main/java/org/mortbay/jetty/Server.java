@@ -263,7 +263,7 @@ public class Server extends HandlerWrapper implements Attributes
         
         if (!_dependentLifeCycles.isEmpty())
         {
-            ListIterator itor = _dependentLifeCycles.listIterator(_dependentLifeCycles.size()-1);
+            ListIterator itor = _dependentLifeCycles.listIterator(_dependentLifeCycles.size());
             while (itor.hasPrevious())
             {
                 try
