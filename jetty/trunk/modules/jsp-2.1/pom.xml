@@ -8,6 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jsp-2.1</artifactId>
   <name>Glassfish Jasper</name>
+  <description>JSP2.1 Jasper implementation from Glassfish</description>
   <licenses>
     <license>
       <name>CDDL 1.0</name>
@@ -125,9 +126,7 @@
             <configuration>
               <instructions>
                 <Bundle-Version>2.1</Bundle-Version>
-                <Bundle-Description>Bundle for JSP-2.1 Implementation from Jetty.</Bundle-Description>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-                <Implementation-Version>${project.version}</Implementation-Version>
               </instructions>
             </configuration>
            </execution>

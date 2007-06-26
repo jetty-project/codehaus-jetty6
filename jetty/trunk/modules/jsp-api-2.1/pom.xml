@@ -8,6 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jsp-api-2.1</artifactId>
   <name>Glassfish Jasper API</name>
+  <description>JSP2.1 API</description>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
@@ -86,16 +87,10 @@
             </goals>
             <configuration>
               <instructions>
-                <Mode>stable</Mode>
-                <Url>${pom.url}</Url>
 	        <Implementation-Vendor>JCP</Implementation-Vendor>
-	        <Implementation-Version>${pom.version}</Implementation-Version>
 	        <Specification-Version>2.1</Specification-Version>
-	        <Package>javax.servlet.jsp</Package>
                 <Bundle-Version>2.1</Bundle-Version>
-                <Bundle-Description>Bundle for JSP-2.1.</Bundle-Description>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-                <Implementation-Version>${project.version}</Implementation-Version>
               </instructions>
             </configuration>
            </execution>
