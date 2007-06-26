@@ -342,15 +342,18 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             if (gzip)
             {
                 pathInContextGz=pathInContext+".gz";  
-                if (cache==null)
-                    resource=getResource(pathInContextGz);
-                else
+                resource=getResource(pathInContextGz);
+
+                if (resource==null || !resource.exists()|| resource.isDirectory())
                 {
-                    content=cache.lookup(pathInContextGz,this);
+                    gzip=false;
+                    pathInContextGz=null;
+                }
+                else if (cache!=null)
+                {
+                    content=cache.lookup(pathInContextGz,resource);
                     if (content!=null)
                         resource=content.getResource();
-                    else
-                        resource=getResource(pathInContextGz);
                 }
 
                 if (resource==null || !resource.exists()|| resource.isDirectory())
