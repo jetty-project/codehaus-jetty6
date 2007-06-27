@@ -79,7 +79,7 @@
             <configuration>
               <instructions>
               <Bundle-Version>2.5</Bundle-Version>
-              <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
+              <Bundle-RequiredExecutionEnvironment>J2SE-1.4</Bundle-RequiredExecutionEnvironment>
               <Implementation-Vendor>JCP</Implementation-Vendor>
               <Specification-Version>2.5</Specification-Version>
               </instructions>
