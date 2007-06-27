@@ -264,7 +264,6 @@
     <!--module>contrib/wadi</module-->
     <!--module>contrib/client</module-->
     <!--module>contrib/terracotta</module-->
-    <module>contrib/cometd-demo</module>
   </modules>
 
   <reporting>
