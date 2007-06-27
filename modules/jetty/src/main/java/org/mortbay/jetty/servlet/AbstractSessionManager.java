@@ -65,6 +65,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public final static int __distantFuture=60*60*24*7*52*20;
 
     private static final HttpSessionContext __nullSessionContext=new NullSessionContext();
+    private static final String SESSION_ATTR="org.mortbay.jetty.servlet.Session";
 
     private boolean _usingCookies=true;
     
@@ -103,7 +104,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         long now=System.currentTimeMillis();
 
-        Session s =(Session)session;
+        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
         s.access(now);
         
         // Do we need to refresh the cookie?
@@ -141,7 +142,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public void complete(HttpSession session)
     {
-        Session s =(Session)session;
+        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
         s.complete();
     }
 
@@ -150,8 +151,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         _context=ContextHandler.getCurrentContext();
         _loader=Thread.currentThread().getContextClassLoader();
-
-        
 
         if (_sessionIdManager==null)
         {
@@ -388,19 +387,22 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public boolean isValid(HttpSession session)
     {
-        return ((Session)session).isValid();
+        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        return s.isValid();
     }
     
     /* ------------------------------------------------------------ */
     public String getClusterId(HttpSession session)
     {
-        return ((Session)session).getClusterId();
+        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        return s.getClusterId();
     }
     
     /* ------------------------------------------------------------ */
     public String getNodeId(HttpSession session)
     {
-        return ((Session)session).getNodeId();
+        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        return s.getNodeId();
     }
 
     /* ------------------------------------------------------------ */
@@ -609,6 +611,17 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _nodeIdInSessionId=nodeIdInSessionId;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Remove session from manager 
+     * @param session The session to remove
+     * @param invalidate True if {@link HttpSessionListener#sessionDestroyed(HttpSessionEvent)} and
+     * {@link SessionIdManager#invalidateAll(String)} should be called.
+     */
+    public void removeSession(HttpSession session, boolean invalidate)
+    {
+        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        removeSession(s,invalidate);
+    }
 
     /* ------------------------------------------------------------ */
     /** Remove session from manager 
@@ -747,8 +760,13 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         {
             if (_invalid)
                 throw new IllegalStateException();
+
+            if (SESSION_ATTR==name)
+                return this;
+            
             if (null == _values)
                 return null;
+            
             return _values.get(name);
         }
 

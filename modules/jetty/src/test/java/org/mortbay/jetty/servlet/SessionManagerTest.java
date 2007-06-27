@@ -84,7 +84,7 @@ public class SessionManagerTest extends TestCase
         TestListener listener = new TestListener();
         session.setAttribute("key", listener);
         
-        sessionManager.removeSession((Session) session, false);
+        sessionManager.removeSession(session, false);
 
         assertNull(listener.activateEvent);
         assertNotNull(listener.passivateEvent);
@@ -97,7 +97,7 @@ public class SessionManagerTest extends TestCase
         TestListener listener = new TestListener();
         session.setAttribute("key", listener);
 
-        sessionManager.removeSession((Session) session, false);
+        sessionManager.removeSession(session, false);
         listener.passivateEvent = null;
         
         sessionManager.addSession((Session) session, false);
