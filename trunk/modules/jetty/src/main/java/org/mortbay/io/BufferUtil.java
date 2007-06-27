@@ -14,6 +14,10 @@
 
 package org.mortbay.io;
 
+import java.io.UnsupportedEncodingException;
+
+import org.mortbay.util.StringUtil;
+
 /* ------------------------------------------------------------------------------- */
 /** Buffer utility methods.
  * 
@@ -111,7 +115,15 @@ public class BufferUtil
 
             if (n == Integer.MIN_VALUE)
             {
-                buffer.put("80000000".getBytes(),0,8);
+                buffer.put((byte)(0x7f&'8'));
+                buffer.put((byte)(0x7f&'0'));
+                buffer.put((byte)(0x7f&'0'));
+                buffer.put((byte)(0x7f&'0'));
+                buffer.put((byte)(0x7f&'0'));
+                buffer.put((byte)(0x7f&'0'));
+                buffer.put((byte)(0x7f&'0'));
+                buffer.put((byte)(0x7f&'0'));
+                
                 return;
             }
             n= -n;
@@ -292,4 +304,26 @@ public class BufferUtil
         return true;
     }
 
+    public static String to8859_1_String(Buffer buffer)
+    {
+        if (buffer.isImmutable())
+            return buffer.toString();
+        
+        try
+        {
+            byte[] bytes=buffer.array();
+            if (bytes!=null)
+                return new String(bytes,buffer.getIndex(),buffer.length(),StringUtil.__ISO_8859_1);
+            
+            StringBuffer b = new StringBuffer(buffer.length());
+            for (int i=buffer.getIndex(),c=0;c<buffer.length();i++,c++)
+                b.append((char)(0x7f&buffer.peek(i)));
+            return b.toString();
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+            return buffer.toString();
+        }
+    }
 }

@@ -79,7 +79,7 @@ public class BufferUtilTest extends TestCase
         {
             buffer.clear();
             BufferUtil.putDecInt(buffer,val[i]);
-            assertEquals("t"+i,str[i],buffer.toString());
+            assertEquals("t"+i,str[i],BufferUtil.to8859_1_String(buffer));
         }       
     }
 
@@ -102,7 +102,7 @@ public class BufferUtilTest extends TestCase
         {
             buffer.clear();
             BufferUtil.putHexInt(buffer,val[i]);
-            assertEquals("t"+i,str[i],buffer.toString());
+            assertEquals("t"+i,str[i],BufferUtil.to8859_1_String(buffer));
         }       
     }
 }

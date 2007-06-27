@@ -885,14 +885,14 @@ public class Request implements HttpServletRequest
             {
                 if (hostPort.peek(hostPort.getIndex()+i)==':')
                 {
-                    _serverName=hostPort.peek(hostPort.getIndex(), i).toString();
+                    _serverName=BufferUtil.to8859_1_String(hostPort.peek(hostPort.getIndex(), i));
                     _port=BufferUtil.toInt(hostPort.peek(hostPort.getIndex()+i+1, hostPort.length()-i-1));
                     return _serverName;
                 }
             }
             if (_serverName==null || _port<0)
             {
-                _serverName = hostPort.toString();
+                _serverName=BufferUtil.to8859_1_String(hostPort);
                 _port = 0;
             }
             
