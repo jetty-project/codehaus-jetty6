@@ -24,7 +24,6 @@ import java.io.OutputStream;
  */
 public abstract class AbstractBuffer implements Buffer
 {
-
     protected final static String 
     __IMMUTABLE = "IMMUTABLE", 
     __READONLY = "READONLY",
