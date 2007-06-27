@@ -243,7 +243,7 @@ public class HttpFields
             {
                 if (field != null || hasMoreElements())
                 {
-                    String n = field._name.toString();
+                    String n = BufferUtil.to8859_1_String(field._name);
                     field = null;
                     return n;
                 }
@@ -346,7 +346,8 @@ public class HttpFields
     {
         // TODO - really reuse strings from previous requests!
         Field field = getField(name);
-        if (field != null && field._revision == _revision) return field._value.toString();
+        if (field != null && field._revision == _revision) 
+            return BufferUtil.to8859_1_String(field._value);
         return null;
     }
 
@@ -359,7 +360,8 @@ public class HttpFields
     public Buffer get(Buffer name)
     {
         Field field = getField(name);
-        if (field != null && field._revision == _revision) return field._value;
+        if (field != null && field._revision == _revision) 
+            return field._value;
         return null;
     }
 
@@ -745,7 +747,7 @@ public class HttpFields
 
         if (field._numValue != -1) return field._numValue;
 
-        String val = valueParameters(field._value.toString(), null);
+        String val = valueParameters(BufferUtil.to8859_1_String(field._value), null);
         if (val == null) return -1;
 
         
@@ -1054,7 +1056,7 @@ public class HttpFields
         {
             ByteArrayBuffer buffer = new ByteArrayBuffer(4096);
             put(buffer);
-            return buffer.toString();
+            return BufferUtil.to8859_1_String(buffer);
         }
         catch (Exception e)
         {
@@ -1366,9 +1368,9 @@ public class HttpFields
         /* ------------------------------------------------------------ */
         public void write(Writer writer) throws IOException
         {
-            writer.write(_name.toString());
+            writer.write(BufferUtil.to8859_1_String(_name));
             writer.write(":");
-            writer.write(_value.toString());
+            writer.write(BufferUtil.to8859_1_String(_value));
             writer.write(StringUtil.CRLF);
         }
 
@@ -1385,7 +1387,7 @@ public class HttpFields
         /* ------------------------------------------------------------ */
         public String getName()
         {
-            return _name.toString();
+            return BufferUtil.to8859_1_String(_name);
         }
 
         /* ------------------------------------------------------------ */
@@ -1404,7 +1406,7 @@ public class HttpFields
         public String getValue()
         {
             if (_stringValue==null)
-                _stringValue=_value.toString();
+                _stringValue=BufferUtil.to8859_1_String(_value);
             return _stringValue;
         }
 
