@@ -32,6 +32,18 @@
             </configuration>
           </execution>
           <execution>
+            <id>tstamp</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                 <tstamp/>
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
             <phase>install</phase>
             <goals>
               <goal>run</goal>
@@ -74,7 +86,7 @@
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
               <name>Test Realm</name>
-              <config>../../etc/realm.properties</config>
+              <config>../../etc/realm.properties-${TSTAMP}</config>
             </userRealm>
           </userRealms>
         </configuration>
@@ -135,4 +147,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <properties>
+   <TSTAMP>124</TSTAMP>
+  </properties>
 </project>
