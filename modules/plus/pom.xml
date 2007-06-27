@@ -71,6 +71,11 @@
             <goals>
               <goal>manifest</goal>
             </goals>
+            <configuration>
+              <instructions>
+                <Bundle-RequiredExcutionEnvironment>J2SE-1.4</Bundle-RequiredExcutionEnvironment>
+              </instructions>
+            </configuration>
            </execution>
         </executions>
       </plugin>

@@ -75,6 +75,13 @@
             <goals>
               <goal>manifest</goal>
             </goals>
+            <configuration>
+              <instructions>
+                <Bundle-RequiredExcutionEnvironment>J2SE-1.4</Bundle-RequiredExcutionEnvironment>
+                <Import-Package>!org.mortbay.*,*</Import-Package>
+                <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
+              </instructions>
+            </configuration>
            </execution>
         </executions>
       </plugin>
