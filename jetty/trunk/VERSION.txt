@@ -11,6 +11,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-377 - allow sessions to be wrapped.
  + JETTY-378 - handle JVMs with non ISO/UTF default encodings
  + make OSGi manifests for jetty jars
+ + update terracotta configs for tc 2.4 stable1
 
 jetty-6.1.4 - 15 Jun 2007
  + fixed early open() call in NIO connectors
