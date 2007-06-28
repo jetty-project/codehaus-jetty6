@@ -179,6 +179,11 @@
     <error-code>404</error-code>
     <location>/jspsnoop/ERROR/404</location>
   </error-page>
+  
+  <error-page>
+    <exception-type>java.io.IOException</exception-type>
+    <location>/jspsnoop/IOException</location>
+  </error-page>
 
   <security-constraint>
     <web-resource-collection>
