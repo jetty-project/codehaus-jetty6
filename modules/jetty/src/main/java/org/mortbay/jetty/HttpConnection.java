@@ -446,6 +446,7 @@ public class HttpConnection implements Connection
                     }
                     
                     reset(!more_in_buffer);
+                    no_progress=0;
                 }
                 
                 Continuation continuation = _request.getContinuation();
