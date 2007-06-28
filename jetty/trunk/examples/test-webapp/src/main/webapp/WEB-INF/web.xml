@@ -54,7 +54,7 @@
     </init-param>
     <init-param>
       <param-name>userAgent</param-name>
-      <param-value>(?:Mozilla[^\(]*\(compatible;\s*+([^;]*);.*)|(?:([^\s]*)\s.*)</param-value>
+      <param-value>(?:Mozilla[^\(]*\(compatible;\s*+([^;]*);.*)|(?:.*?([^\s]+/[^\s]+).*)</param-value>
     </init-param>
     <init-param>
       <param-name>cacheSize</param-name>

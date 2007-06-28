@@ -116,7 +116,7 @@ public class GzipFilter extends UserAgentFilter
                 String ua=getUserAgent(request);
                 if (_excluded.contains(ua))
                 {
-                    chain.doFilter(req,res);
+                    super.doFilter(request,response,chain);
                     return;
                 }
             }
@@ -126,7 +126,7 @@ public class GzipFilter extends UserAgentFilter
             boolean exceptional=true;
             try
             {
-                chain.doFilter(req,wrappedResponse);
+                super.doFilter(request,response,chain);
                 exceptional=false;
             }
             finally
@@ -142,7 +142,7 @@ public class GzipFilter extends UserAgentFilter
         }
         else
         {
-            chain.doFilter(req,res);
+            super.doFilter(request,response,chain);
         }
     }
 
@@ -168,7 +168,6 @@ public class GzipFilter extends UserAgentFilter
             if (_mimeTypes==null && "application/gzip".equalsIgnoreCase(ct) ||
                     _mimeTypes!=null && !_mimeTypes.contains(StringUtil.asciiToLowerCase(ct)))
             {
-                System.err.println("noGzip (mime)");
                 noGzip();
             }
         }
@@ -212,7 +211,6 @@ public class GzipFilter extends UserAgentFilter
                 super.setHeader(name,value);
                 if (!isCommitted())
                 {
-                    System.err.println("noGzip (ce)");
                     noGzip();
                 }
             }
