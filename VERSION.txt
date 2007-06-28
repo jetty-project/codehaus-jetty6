@@ -3,7 +3,7 @@ jetty-6.1-SNAPSHOT
  + SetUID option to only open connectors before setUID.
  + Protect SslSelectChannelConnector from exceptions during close
  + Improved Request log configuration options
- + Added GzipFilter
+ + Added GzipFilter and UserAgentFilter
  + JETTY-373 - Stop all dependent lifecycles
  + JETTY-374 - HttpTesters handles large requests/responses
  + JETTY-375 - IllegalStateException when committed.

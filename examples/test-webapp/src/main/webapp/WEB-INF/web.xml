@@ -52,6 +52,18 @@
       <param-name>minGzipSize</param-name>
       <param-value>1024</param-value>
     </init-param>
+    <init-param>
+      <param-name>userAgent</param-name>
+      <param-value>(?:Mozilla[^\(]*\(compatible;\s*+([^;]*);.*)|(?:([^\s]*)\s.*)</param-value>
+    </init-param>
+    <init-param>
+      <param-name>cacheSize</param-name>
+      <param-value>1024</param-value>
+    </init-param>
+    <init-param>
+      <param-name>excludedAgents</param-name>
+      <param-value>MSIE 6.0</param-value>
+    </init-param>
   </filter>
   <filter-mapping>
     <filter-name>GzipFilter</filter-name>
