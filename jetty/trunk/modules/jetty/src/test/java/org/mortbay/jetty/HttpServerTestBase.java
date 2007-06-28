@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -454,6 +455,69 @@ public class HttpServerTestBase extends TestCase
 
     }
     
+
+    /**
+     * After several iterations, I generated some known bad fragment points.
+     * 
+     * @throws Exception
+     */
+    public void testPipeline() throws Exception
+    {
+        Server server=startServer(new HelloWorldHandler());
+
+        try
+        {   
+            for (int pipeline=1;pipeline<32;pipeline++)
+            {   
+                Socket client=new Socket(HOST,port);
+                client.setSoTimeout(5000);
+                OutputStream os=client.getOutputStream();
+
+                String request="";
+
+                for (int i=1;i<pipeline;i++)
+                    request+=
+                        "GET /data?writes=1&block=16&id="+i+" HTTP/1.1\r\n"+
+                        "host: "+HOST+":"+port+"\r\n"+
+                        "user-agent: testharness/1.0 (blah foo/bar)\r\n"+
+                        "accept-encoding: nothing\r\n"+
+                        "cookie: aaa=1234567890\r\n"+
+                        "\r\n";
+                
+                request+=
+                    "GET /data?writes=1&block=16 HTTP/1.1\r\n"+
+                    "host: "+HOST+":"+port+"\r\n"+
+                    "user-agent: testharness/1.0 (blah foo/bar)\r\n"+
+                    "accept-encoding: nothing\r\n"+
+                    "cookie: aaa=bbbbbb\r\n"+
+                    "Connection: close\r\n"+
+                    "\r\n";
+
+                os.write(request.getBytes());
+                os.flush();
+
+                LineNumberReader in = new LineNumberReader(new InputStreamReader(client.getInputStream()));
+
+                String line = in.readLine();
+                int count=0;
+                while (line!=null)
+                {
+                    if ("HTTP/1.1 200 OK".equals(line))
+                        count++;
+                    line = in.readLine();
+                }
+                assertEquals(pipeline,count);
+            }
+        }
+        finally
+        {
+            // Shut down
+            server.stop();
+            Thread.yield();
+        }
+
+    }
+
     public void testStoppable() throws Exception
     {
         Server server=startServer(null);
@@ -592,7 +656,7 @@ public class HttpServerTestBase extends TestCase
             Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             base_request.setHandled(true);
             response.setStatus(200);
-            response.getOutputStream().print("Hello world");
+            response.getOutputStream().print("Hello world\r\n");
         }
     }
 
