@@ -40,8 +40,8 @@ import org.mortbay.util.StringUtil;
  * This filter will gzip the content of a response iff: <ul>
  * <li>The filter is mapped to a matching path</li>
  * <li>The response status code is >=200 and <300
- * <li>The content length is unknown or more than the minGzipSize initParameter (default 2048)</li>
- * <li>The content-type is in the coma separated list of mimeTypes set in the mimeTypes initParameter or
+ * <li>The content length is unknown or more than the <code>minGzipSize</code> initParameter (default 2048)</li>
+ * <li>The content-type is in the coma separated list of mimeTypes set in the <code>mimeTypes</code> initParameter or
  * if no mimeTypes are defined the content-type is not "application/gzip"</li>
  * <li>No content-encoding is specified by the resource</li>
  * </ul>
@@ -52,19 +52,25 @@ import org.mortbay.util.StringUtil;
  * prevented, thus use of the gzip mechanism of the {@link org.mortbay.jetty.servlet.DefaultServlet} is 
  * advised instead.
  * </p>
- * 
+ * <p>
+ * This filter extends {@link UserAgentFilter} and if the the initParameter <code>excludedAgents</code> 
+ * is set to a comma separated list of user agents, then these agents will be excluded from gzip content.
+ * </p>
  *  
  * @author gregw
  *
  */
-public class GzipFilter implements Filter
+public class GzipFilter extends UserAgentFilter
 {
     protected Set _mimeTypes;
     protected int _bufferSize=8192;
     protected int _minGzipSize=2048;
+    protected Set _excluded;
     
     public void init(FilterConfig filterConfig) throws ServletException
     {
+        super.init(filterConfig);
+        
         String tmp=filterConfig.getInitParameter("bufferSize");
         if (tmp!=null)
             _bufferSize=Integer.parseInt(tmp);
@@ -77,9 +83,18 @@ public class GzipFilter implements Filter
         if (tmp!=null)
         {
             _mimeTypes=new HashSet();
-            StringTokenizer tok = new StringTokenizer(tmp,", ",false);
+            StringTokenizer tok = new StringTokenizer(tmp,",",false);
             while (tok.hasMoreTokens())
                 _mimeTypes.add(tok.nextToken());
+        }
+        
+        tmp=filterConfig.getInitParameter("excludedAgents");
+        if (tmp!=null)
+        {
+            _excluded=new HashSet();
+            StringTokenizer tok = new StringTokenizer(tmp,",",false);
+            while (tok.hasMoreTokens())
+                _excluded.add(tok.nextToken());
         }
     }
 
@@ -96,6 +111,16 @@ public class GzipFilter implements Filter
         String ae = request.getHeader("accept-encoding");
         if (ae != null && ae.indexOf("gzip")>=0)
         {
+            if (_excluded!=null)
+            {
+                String ua=getUserAgent(request);
+                if (_excluded.contains(ua))
+                {
+                    chain.doFilter(req,res);
+                    return;
+                }
+            }
+            
             GZIPResponseWrapper wrappedResponse=new GZIPResponseWrapper(response);
             
             boolean exceptional=true;
