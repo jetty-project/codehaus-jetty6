@@ -252,12 +252,8 @@ public class RolloverFileOutputStream extends FilterOutputStream
     {
         if (_retainDays>0)
         {
-            Calendar retainDate = Calendar.getInstance();
-            retainDate.add(Calendar.DATE,-_retainDays);
-            int borderYear = retainDate.get(java.util.Calendar.YEAR);
-            int borderMonth = retainDate.get(java.util.Calendar.MONTH) + 1;
-            int borderDay = retainDate.get(java.util.Calendar.DAY_OF_MONTH);
-
+            long now = System.currentTimeMillis();
+            
             File file= new File(_filename);
             File dir = new File(file.getParent());
             String fn=file.getName();
@@ -273,28 +269,10 @@ public class RolloverFileOutputStream extends FilterOutputStream
                 fn = logList[i];
                 if(fn.startsWith(prefix)&&fn.indexOf(suffix,prefix.length())>=0)
                 {        
-                    try
-                    {
-                        StringTokenizer st = new StringTokenizer (fn.substring(prefix.length(), prefix.length()+YYYY_MM_DD.length()), "_.");
-                        int nYear = Integer.parseInt(st.nextToken());
-                        int nMonth = Integer.parseInt(st.nextToken());
-                        int nDay = Integer.parseInt(st.nextToken());
-                        
-                        if (nYear<borderYear ||
-                            (nYear==borderYear && nMonth<borderMonth) ||
-                            (nYear==borderYear &&
-                             nMonth==borderMonth &&
-                             nDay<=borderDay))
-                        {
-                            //log.info("Log age "+fn);
-                            new File(dir,fn).delete();
-                        }
-                    }
-                    catch(Exception e)
-                    {
-                        //if (log.isDebugEnabled())
-                            e.printStackTrace();
-                    }
+                    File f = new File(dir,fn);
+                    long date = f.lastModified();
+                    if ( ((now-date)/(1000*60*60*24))>_retainDays)
+                        f.delete();   
                 }
             }
         }
