@@ -14,6 +14,7 @@ jetty-6.1-SNAPSHOT
  + make OSGi manifests for jetty jars
  + update terracotta configs for tc 2.4 stable1
  + remove call to open connectors in jetty.xml
+ + update links on website
 
 jetty-6.1.4 - 15 Jun 2007
  + fixed early open() call in NIO connectors
