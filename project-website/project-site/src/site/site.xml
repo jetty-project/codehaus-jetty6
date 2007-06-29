@@ -17,7 +17,7 @@
     <menu name="About Jetty">
       <item name="Home" href="index.html"/>
       <item name="License" href="LICENSE.txt"/>
-      <item name="Jetty Powered" href="http://www.mortbay.com/mortbay/powered.html"/>
+      <item name="Jetty Powered" href="http://docs.codehaus.org/display/JETTY/Jetty+Powered"/>
     </menu>
     <menu name="Resources">
       <item name="Downloads" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#download"/>
@@ -37,7 +37,7 @@
     </menu>
   </body>
   <poweredBy>
-    <logo name="jetty" href="http://jetty.mortbay.org" img="./images/powered_by_jetty.gif"/>
+    <logo name="jetty" href="http://docs.codehaus.org/display/JETTY/Jetty+Powered" img="./images/small_powered_by.gif"/>
     <logo name="webtide" href="http://www.webtide.com" img="./images/webtide_logo.jpg"/>
     <logo name="Maven" href="http://maven.apache.org" img="./images/logos/maven-feather.png"/>
     <logo name="Codehaus" href="http://www.codehaus.org" img="./images/codehaus-small.png"/>
