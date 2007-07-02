@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 
 import org.mortbay.component.Container;
 import org.mortbay.component.LifeCycle;
-import org.mortbay.component.Container.Relationship;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
@@ -37,7 +36,6 @@ import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
-import org.mortbay.util.DateCache;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 
@@ -57,8 +55,6 @@ public class Server extends HandlerWrapper implements Attributes
         ?Server.class.getPackage().getImplementationVersion()
         :"6.1.x";
 
-
-
     private ThreadPool _threadPool;
     private Connector[] _connectors;
     private UserRealm[] _realms;
@@ -68,6 +64,7 @@ public class Server extends HandlerWrapper implements Attributes
     private boolean _sendDateHeader = false; //send Date: header 
     private AttributesMap _attributes = new AttributesMap();
     private List _dependentLifeCycles=new ArrayList();
+    private int _graceful=0;
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -242,6 +239,27 @@ public class Server extends HandlerWrapper implements Attributes
     protected void doStop() throws Exception
     {
         MultiException mex=new MultiException();
+        
+        if (_graceful>0)
+        {
+            if (_connectors!=null)
+            {
+                for (int i=_connectors.length;i-->0;)
+                {
+                    Log.info("Graceful shutdown {}",_connectors[i]);
+                    try{_connectors[i].close();}catch(Throwable e){mex.add(e);}
+                }
+            }
+            
+            Handler[] contexts = getChildHandlersByClass(Graceful.class);
+            for (int c=0;c<contexts.length;c++)
+            {
+                Graceful context=(Graceful)contexts[c];
+                Log.info("Graceful shutdown {}",context);
+                context.setShutdown(true);
+            }
+            Thread.sleep(_graceful);
+        }
         
         if (_connectors!=null)
         {
@@ -650,4 +668,36 @@ public class Server extends HandlerWrapper implements Attributes
         _attributes.setAttribute(name, attribute);
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the graceful
+     */
+    public int getGracefulShutdown()
+    {
+        return _graceful;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set graceful shutdown timeout.  If set, the {@link #doStop()} method will not immediately stop the 
+     * server. Instead, all {@link Connector}s will be closed so that new connections will not be accepted
+     * and all handlers that implement {@link Graceful} will be put into the shutdown mode so that no new requests
+     * will be accepted, but existing requests can complete.  The server will then wait the configured timeout 
+     * before stopping.
+     * @param graceful the milliseconds to wait for existing request to complete before stopping the server.
+     * 
+     */
+    public void setGracefulShutdown(int graceful)
+    {
+        _graceful=graceful;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* A component that can be gracefully shutdown.
+     * Called by doStop if a {@link #setGracefulShutdown} period is set.
+     */
+    public interface Graceful
+    {
+        public void setShutdown(boolean shutdown);
+    }
 }
