@@ -95,7 +95,6 @@ public class ServletHandler extends AbstractHandler
     private transient PathMap _servletPathMap;
     
     protected transient HashMap _chainCache[];
-    protected transient HashMap _namedChainCache[];
 
 
     /* ------------------------------------------------------------ */
@@ -140,10 +139,7 @@ public class ServletHandler extends AbstractHandler
         updateMappings();
         
         if(_filterChainsCached)
-        {
             _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
-            _namedChainCache=new HashMap[]{null,null,new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
-        }
 
         super.doStart();
         
@@ -180,7 +176,6 @@ public class ServletHandler extends AbstractHandler
         
         _servletPathMap=null;
         _chainCache=null;
-        _namedChainCache=null;
     }
 
     
@@ -526,10 +521,10 @@ public class ServletHandler extends AbstractHandler
         FilterChain chain = null;
         if (_filterChainsCached)
         {
+            if (LazyList.size(filters) > 0)
+                chain= new CachedChain(filters, servletHolder);
             synchronized(this)
             {
-                if (LazyList.size(filters) > 0)
-                    chain= new CachedChain(filters, servletHolder);
                 if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
                     _chainCache[requestType].clear();
                 _chainCache[requestType].put(key,chain);

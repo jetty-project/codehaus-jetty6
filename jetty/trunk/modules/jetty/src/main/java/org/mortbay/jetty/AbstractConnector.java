@@ -733,11 +733,11 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     {   
         if (_statsStartedAt>=0)
         {
+            long duration=System.currentTimeMillis()-connection.getTimeStamp();
+            int requests=connection.getRequests();
             synchronized(_statsLock)
             {
-                int requests=connection.getRequests();
                 _requests+=requests;
-                long duration=System.currentTimeMillis()-connection.getTimeStamp();
                 _connections++;
                 _connectionsOpen--;
                 _connectionsDurationTotal+=duration;
