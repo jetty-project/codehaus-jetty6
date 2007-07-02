@@ -1,6 +1,225 @@
+Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
+===================================================================
+--- modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(revision 1979)
++++ modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(working copy)
+@@ -226,7 +226,7 @@
+             {
+ 
+                 int[] points=new int[pointCount];
+-                StringBuffer message=new StringBuffer();
++                StringBuilder message=new StringBuilder();
+ 
+                 message.append("iteration #"+(i+1));
+ 
+@@ -271,7 +271,7 @@
+             for (int i=0; i<bytes.length; i+=3)
+             {
+                 int[] points=new int[] { i };
+-                StringBuffer message=new StringBuffer();
++                StringBuilder message=new StringBuilder();
+ 
+                 message.append("iteration #"+(i+1));
+ 
+@@ -323,7 +323,7 @@
+             {
+                 Socket client=new Socket(HOST,port);
+                 OutputStream os=client.getOutputStream();
+-                StringBuffer message=new StringBuffer();
++                StringBuilder message=new StringBuilder();
+ 
+                 message.append("iteration #"+(i+1));
+                 writeFragments(bytes,badPoints[i],message,os);
+@@ -546,7 +546,7 @@
+         {
+             br=new BufferedReader(new InputStreamReader(client.getInputStream()));
+ 
+-            StringBuffer sb=new StringBuffer();
++            StringBuilder sb=new StringBuilder();
+             String line;
+ 
+             while ((line=br.readLine())!=null)
+@@ -593,7 +593,7 @@
+         return server;
+     }
+ 
+-    private void writeFragments(byte[] bytes, int[] points, StringBuffer message, OutputStream os) throws IOException, InterruptedException
++    private void writeFragments(byte[] bytes, int[] points, StringBuilder message, OutputStream os) throws IOException, InterruptedException
+     {
+         int last=0;
+ 
+Index: modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(working copy)
+@@ -226,76 +226,74 @@
+             if (_fileOut == null)
+                 return;
+ 
+-            StringBuffer buf = new StringBuffer(160);
++            StringBuilder buf = new StringBuilder(160);
+             String log =null;
+-            synchronized(buf) // for efficiency until we can use StringBuilder
++            if (_logServer)
+             {
+-                if (_logServer)
+-                {
+-                    buf.append(request.getServerName());
+-                    buf.append(' ');
+-                }
++                buf.append(request.getServerName());
++                buf.append(' ');
++            }
+ 
+-                String addr = null;
+-                if (_preferProxiedForAddress) 
+-                {
+-                    addr = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
+-                }
++            String addr = null;
++            if (_preferProxiedForAddress) 
++            {
++                addr = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
++            }
+ 
+-                if (addr == null) 
+-                    addr = request.getRemoteAddr();
++            if (addr == null) 
++                addr = request.getRemoteAddr();
+ 
+-                buf.append(addr);
+-                buf.append(" - ");
+-                String user = request.getRemoteUser();
+-                buf.append((user == null)? " - " : user);
+-                buf.append(" [");
+-                if (_logDateCache!=null)
+-                    buf.append(_logDateCache.format(request.getTimeStamp()));
+-                else
+-                    buf.append(request.getTimeStampBuffer().toString());
+-                    
+-                buf.append("] \"");
+-                buf.append(request.getMethod());
+-                buf.append(' ');
+-                buf.append(request.getUri());
+-                buf.append(' ');
+-                buf.append(request.getProtocol());
+-                buf.append("\" ");
+-                int status = response.getStatus();
+-                if (status<=0)
+-                    status=404;
+-                buf.append((char)('0'+((status/100)%10)));
+-                buf.append((char)('0'+((status/10)%10)));
+-                buf.append((char)('0'+(status%10)));
++            buf.append(addr);
++            buf.append(" - ");
++            String user = request.getRemoteUser();
++            buf.append((user == null)? " - " : user);
++            buf.append(" [");
++            if (_logDateCache!=null)
++                buf.append(_logDateCache.format(request.getTimeStamp()));
++            else
++                buf.append(request.getTimeStampBuffer().toString());
+ 
++            buf.append("] \"");
++            buf.append(request.getMethod());
++            buf.append(' ');
++            buf.append(request.getUri());
++            buf.append(' ');
++            buf.append(request.getProtocol());
++            buf.append("\" ");
++            int status = response.getStatus();
++            if (status<=0)
++                status=404;
++            buf.append((char)('0'+((status/100)%10)));
++            buf.append((char)('0'+((status/10)%10)));
++            buf.append((char)('0'+(status%10)));
+ 
+-                long responseLength=response.getContentCount();
+-                if (responseLength >=0)
++
++            long responseLength=response.getContentCount();
++            if (responseLength >=0)
++            {
++                buf.append(' ');
++                if (responseLength > 99999)
++                    buf.append(Long.toString(responseLength));
++                else 
+                 {
+-                    buf.append(' ');
+-                    if (responseLength > 99999)
+-                        buf.append(Long.toString(responseLength));
+-                    else 
+-                    {
+-                        if (responseLength > 9999)
+-                            buf.append((char)('0' + ((responseLength / 10000)%10)));
+-                        if (responseLength > 999)
+-                            buf.append((char)('0' + ((responseLength /1000)%10)));
+-                        if (responseLength > 99)
+-                            buf.append((char)('0' + ((responseLength / 100)%10)));
+-                        if (responseLength > 9)
+-                            buf.append((char)('0' + ((responseLength / 10)%10)));
+-                        buf.append((char)('0' + (responseLength)%10));
+-                    }
+-                    buf.append(' ');
++                    if (responseLength > 9999)
++                        buf.append((char)('0' + ((responseLength / 10000)%10)));
++                    if (responseLength > 999)
++                        buf.append((char)('0' + ((responseLength /1000)%10)));
++                    if (responseLength > 99)
++                        buf.append((char)('0' + ((responseLength / 100)%10)));
++                    if (responseLength > 9)
++                        buf.append((char)('0' + ((responseLength / 10)%10)));
++                    buf.append((char)('0' + (responseLength)%10));
+                 }
+-                else 
+-                    buf.append(" - ");
+-
+-                log = buf.toString();
++                buf.append(' ');
+             }
+-            
++            else 
++                buf.append(" - ");
++
++            log = buf.toString();
++
++
+             synchronized(_writer)
+             {
+                 _writer.write(log);
+Index: modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(working copy)
+@@ -175,7 +175,7 @@
+     /* ------------------------------------------------------------ */
+     public String toHeaderRangeString(long size)
+     {
+-        StringBuffer sb = new StringBuffer(40);
++        StringBuilder sb = new StringBuilder(40);
+         sb.append("bytes ");
+         sb.append(getFirst(size));
+         sb.append('-');
+@@ -188,7 +188,7 @@
+     /* ------------------------------------------------------------ */
+     public static String to416HeaderRangeString(long size)
+     {
+-        StringBuffer sb = new StringBuffer(40);
++        StringBuilder sb = new StringBuilder(40);
+         sb.append("bytes */");
+         sb.append(size);
+         return sb.toString();
+@@ -198,7 +198,7 @@
+     /* ------------------------------------------------------------ */
+     public String toString()
+     {
+-        StringBuffer sb = new StringBuffer(60);
++        StringBuilder sb = new StringBuilder(60);
+         sb.append(Long.toString(first));
+         sb.append(":");
+         sb.append(Long.toString(last));
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 1720)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 1979)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(working copy)
 @@ -25,7 +25,7 @@
  import org.mortbay.jetty.SessionIdManager;
@@ -90,9 +309,100 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManage
 -}
 \ No newline at end of file
 +}
+Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(working copy)
+@@ -21,6 +21,7 @@
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
++import java.util.concurrent.ConcurrentHashMap;
+ 
+ import javax.servlet.Filter;
+ import javax.servlet.FilterChain;
+@@ -94,8 +95,7 @@
+     private transient Map _servletNameMap=new HashMap();
+     private transient PathMap _servletPathMap;
+     
+-    protected transient HashMap _chainCache[];
+-    protected transient HashMap _namedChainCache[];
++    protected transient ConcurrentHashMap _chainCache[];
+ 
+ 
+     /* ------------------------------------------------------------ */
+@@ -141,8 +141,7 @@
+         
+         if(_filterChainsCached)
+         {
+-            _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
+-            _namedChainCache=new HashMap[]{null,null,new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
++            _chainCache=     new ConcurrentHashMap[]{null,new ConcurrentHashMap(),new ConcurrentHashMap(),null,new ConcurrentHashMap(),null,null,null,new ConcurrentHashMap()};
+         }
+ 
+         super.doStart();
+@@ -180,7 +179,6 @@
+         
+         _servletPathMap=null;
+         _chainCache=null;
+-        _namedChainCache=null;
+     }
+ 
+     
+@@ -473,17 +471,13 @@
+         
+         if (_filterChainsCached && _chainCache!=null)
+         {
+-            synchronized(this)
+-            {
+-                if(_chainCache[requestType].containsKey(key))
+-                    return (FilterChain)_chainCache[requestType].get(key);
+-            }
++            FilterChain chain = (FilterChain)_chainCache[requestType].get(key);
++            if (chain!=null)
++                return chain;
+         }
+         
+-        
+         // Build list of filters
+         Object filters= null;
+-    
+         
+         // Path filters
+         if (pathInContext!=null && _filterPathMappings!=null)
+@@ -526,14 +520,12 @@
+         FilterChain chain = null;
+         if (_filterChainsCached)
+         {
+-            synchronized(this)
+-            {
+-                if (LazyList.size(filters) > 0)
+-                    chain= new CachedChain(filters, servletHolder);
+-                if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
+-                    _chainCache[requestType].clear();
+-                _chainCache[requestType].put(key,chain);
+-            }
++            if (LazyList.size(filters) > 0)
++                chain= new CachedChain(filters, servletHolder);
++         
++            if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
++                _chainCache[requestType].clear();
++            _chainCache[requestType].put(key,chain);
+         }
+         else if (LazyList.size(filters) > 0)
+             chain = new Chain(filters, servletHolder);
+@@ -1155,7 +1147,7 @@
+         /* ------------------------------------------------------------ */
+         public String toString()
+         {
+-            StringBuffer b = new StringBuffer();
++            StringBuilder b = new StringBuilder();
+             for (int i=0; i<LazyList.size(_chain);i++)
+             {
+                 b.append(LazyList.get(_chain, i).toString());
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 1720)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 1979)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(working copy)
 @@ -22,6 +22,8 @@
  import java.util.Timer;
@@ -112,11 +422,528 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.
          super.doStart();
  
          _timer=new Timer();
+Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(working copy)
+@@ -410,19 +410,22 @@
+                 if (!endsWithSlash || (pathInContext.length()==1 && request.getAttribute("org.mortbay.jetty.nullPathInfo")!=null))
+                 {
+                     StringBuffer buf=request.getRequestURL();
+-                    int param=buf.lastIndexOf(";");
+-                    if (param<0)
+-                        buf.append('/');
+-                    else
+-                        buf.insert(param,'/');
+-                    String q=request.getQueryString();
+-                    if (q!=null&&q.length()!=0)
++                    synchronized(buf)
+                     {
+-                        buf.append('?');
+-                        buf.append(q);
++                        int param=buf.lastIndexOf(";");
++                        if (param<0)
++                            buf.append('/');
++                        else
++                            buf.insert(param,'/');
++                        String q=request.getQueryString();
++                        if (q!=null&&q.length()!=0)
++                        {
++                            buf.append('?');
++                            buf.append(q);
++                        }
++                        response.setContentLength(0);
++                        response.sendRedirect(response.encodeRedirectURL(buf.toString()));
+                     }
+-                    response.setContentLength(0);
+-                    response.sendRedirect(response.encodeRedirectURL(buf.toString()));
+                 }
+                 // else look for a welcome file
+                 else if (null!=(welcome=getWelcomeFile(resource)))
+Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(working copy)
+@@ -77,7 +77,7 @@
+      */
+     public static String formatDate(long date, boolean cookie)
+     {
+-        StringBuffer buf = new StringBuffer(32);
++        StringBuilder buf = new StringBuilder(32);
+         GregorianCalendar gc = new GregorianCalendar(__GMT);
+         gc.setTimeInMillis(date);
+         formatDate(buf, gc, cookie);
+@@ -91,7 +91,7 @@
+      */
+     public static String formatDate(Calendar calendar, boolean cookie)
+     {
+-        StringBuffer buf = new StringBuffer(32);
++        StringBuilder buf = new StringBuilder(32);
+         formatDate(buf, calendar, cookie);
+         return buf.toString();
+     }
+@@ -101,7 +101,7 @@
+      * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
+      * cookies
+      */
+-    public static String formatDate(StringBuffer buf, long date, boolean cookie)
++    public static String formatDate(StringBuilder buf, long date, boolean cookie)
+     {
+         GregorianCalendar gc = new GregorianCalendar(__GMT);
+         gc.setTimeInMillis(date);
+@@ -114,7 +114,7 @@
+      * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
+      * cookies
+      */
+-    public static void formatDate(StringBuffer buf, Calendar calendar, boolean cookie)
++    public static void formatDate(StringBuilder buf, Calendar calendar, boolean cookie)
+     {
+         // "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
+         // "EEE, dd-MMM-yy HH:mm:ss 'GMT'", cookie
+@@ -201,7 +201,7 @@
+     protected int _revision;
+     protected HashMap _bufferMap = new HashMap(32);
+     protected SimpleDateFormat _dateReceive[] = new SimpleDateFormat[__dateReceive.length];
+-    private StringBuffer _dateBuffer;
++    private StringBuilder _dateBuffer;
+     private Calendar _calendar;
+ 
+     /* ------------------------------------------------------------ */
+@@ -892,7 +892,7 @@
+     {
+         if (_dateBuffer == null)
+         {
+-            _dateBuffer = new StringBuffer(32);
++            _dateBuffer = new StringBuilder(32);
+             _calendar = new GregorianCalendar(__GMT);
+         }
+         _dateBuffer.setLength(0);
+@@ -926,7 +926,7 @@
+     {
+         if (_dateBuffer == null)
+         {
+-            _dateBuffer = new StringBuffer(32);
++            _dateBuffer = new StringBuilder(32);
+             _calendar = new GregorianCalendar(__GMT);
+         }
+         _dateBuffer.setLength(0);
+@@ -954,72 +954,70 @@
+         if (name == null || name.length() == 0) throw new IllegalArgumentException("Bad cookie name");
+ 
+         // Format value and params
+-        StringBuffer buf = new StringBuffer(128);
++        StringBuilder buf = new StringBuilder(128);
+         String name_value_params = null;
+-        synchronized (buf)
++        buf.append(name);
++        buf.append('=');
++        if (value != null && value.length() > 0)
+         {
+-            buf.append(name);
+-            buf.append('=');
+-            if (value != null && value.length() > 0)
+-            {
+-                URIUtil.encodePath(buf,value);
+-            }
++            URIUtil.encodePath(buf,value);
++        }
+ 
+-            if (version > 0)
++        if (version > 0)
++        {
++            buf.append(";Version=");
++            buf.append(version);
++            String comment = cookie.getComment();
++            if (comment != null && comment.length() > 0)
+             {
+-                buf.append(";Version=");
+-                buf.append(version);
+-                String comment = cookie.getComment();
+-                if (comment != null && comment.length() > 0)
+-                {
+-                    buf.append(";Comment=");
+-                    QuotedStringTokenizer.quoteIfNeeded(buf, comment);
+-                }
++                buf.append(";Comment=");
++                QuotedStringTokenizer.quoteIfNeeded(buf, comment);
+             }
+-            String path = cookie.getPath();
+-            if (path != null && path.length() > 0)
+-            {
+-                buf.append(";Path=");
+-                buf.append(URIUtil.encodePath(path));
+-            }
+-            String domain = cookie.getDomain();
+-            if (domain != null && domain.length() > 0)
+-            {
+-                buf.append(";Domain=");
+-                buf.append(domain.toLowerCase());// lowercase for IE
+-            }
++        }
++        String path = cookie.getPath();
++        if (path != null && path.length() > 0)
++        {
++            buf.append(";Path=");
++            buf.append(URIUtil.encodePath(path));
++        }
++        String domain = cookie.getDomain();
++        if (domain != null && domain.length() > 0)
++        {
++            buf.append(";Domain=");
++            buf.append(domain.toLowerCase());// lowercase for IE
++        }
+ 
+-            long maxAge = cookie.getMaxAge();
+-            if (maxAge >= 0)
++        long maxAge = cookie.getMaxAge();
++        if (maxAge >= 0)
++        {
++            if (version == 0)
+             {
+-                if (version == 0)
+-                {
+-                    buf.append(";Expires=");
+-                    if (maxAge == 0)
+-                        buf.append(__01Jan1970);
+-                    else
+-                        formatDate(buf, System.currentTimeMillis() + 1000L * maxAge, true);
+-                }
++                buf.append(";Expires=");
++                if (maxAge == 0)
++                    buf.append(__01Jan1970);
+                 else
+-                {
+-                    buf.append(";Max-Age=");
+-                    buf.append(maxAge);
+-                }
++                    formatDate(buf, System.currentTimeMillis() + 1000L * maxAge, true);
+             }
+-            else if (version > 0)
++            else
+             {
+-                buf.append(";Discard");
++                buf.append(";Max-Age=");
++                buf.append(maxAge);
+             }
++        }
++        else if (version > 0)
++        {
++            buf.append(";Discard");
++        }
+ 
+-            if (cookie.getSecure())
+-            {
+-                buf.append(";Secure");
+-            }
+-            if (cookie instanceof HttpOnlyCookie) buf.append(";HttpOnly");
+-
+-            // TODO - straight to Buffer?
+-            name_value_params = buf.toString();
++        if (cookie.getSecure())
++        {
++            buf.append(";Secure");
+         }
++        if (cookie instanceof HttpOnlyCookie) buf.append(";HttpOnly");
++
++        // TODO - straight to Buffer?
++        name_value_params = buf.toString();
++
+         put(HttpHeaders.EXPIRES_BUFFER, __01Jan1970_BUFFER);
+         add(HttpHeaders.SET_COOKIE_BUFFER, new ByteArrayBuffer(name_value_params));
+     }
+Index: modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java	(working copy)
+@@ -733,11 +733,11 @@
+     {   
+         if (_statsStartedAt>=0)
+         {
++            int requests=connection.getRequests();
++            long duration=System.currentTimeMillis()-connection.getTimeStamp();
+             synchronized(_statsLock)
+             {
+-                int requests=connection.getRequests();
+                 _requests+=requests;
+-                long duration=System.currentTimeMillis()-connection.getTimeStamp();
+                 _connections++;
+                 _connectionsOpen--;
+                 _connectionsDurationTotal+=duration;
+Index: modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(working copy)
+@@ -337,7 +337,7 @@
+             return null;
+         URLClassLoader loader = (URLClassLoader)_classLoader;
+         URL[] urls =loader.getURLs();
+-        StringBuffer classpath=new StringBuffer();
++        StringBuilder classpath=new StringBuilder();
+         for (int i=0;i<urls.length;i++)
+         {
+             try
+Index: modules/jetty/src/main/java/org/mortbay/jetty/Response.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(working copy)
+@@ -383,7 +383,7 @@
+ 
+         if (!URIUtil.hasScheme(location))
+         {
+-            StringBuffer buf = _connection.getRequest().getRootURL();
++            StringBuilder buf = _connection.getRequest().getRootURL();
+             if (location.startsWith("/"))
+                 buf.append(URIUtil.canonicalPath(location));
+             else
+Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(working copy)
+@@ -368,7 +368,7 @@
+         HttpFields.Field transfer_encoding = null;
+         boolean keep_alive = false;
+         boolean close=false;
+-        StringBuffer connection = null;
++        StringBuilder connection = null;
+ 
+         if (fields != null)
+         {
+@@ -439,7 +439,7 @@
+                                             
+                                             default:
+                                                 if (connection==null)
+-                                                    connection=new StringBuffer();
++                                                    connection=new StringBuilder();
+                                                 else
+                                                     connection.append(',');
+                                                 connection.append(values[i]);
+@@ -448,7 +448,7 @@
+                                     else
+                                     {
+                                         if (connection==null)
+-                                            connection=new StringBuffer();
++                                            connection=new StringBuilder();
+                                         else
+                                             connection.append(',');
+                                         connection.append(values[i]);
+@@ -479,7 +479,7 @@
+                             default:
+                             {
+                                 if (connection==null)
+-                                    connection=new StringBuffer();
++                                    connection=new StringBuilder();
+                                 else
+                                     connection.append(',');
+                                 connection.append(field.getValue());
+Index: modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(working copy)
+@@ -122,31 +122,29 @@
+     /* ------------------------------------------------------------ */
+     public static String obfuscate(String s)
+     {
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         byte[] b = s.getBytes();
+-        
+-        synchronized(buf)
++
++        buf.append(__OBFUSCATE);
++        for (int i=0;i<b.length;i++)
+         {
+-            buf.append(__OBFUSCATE);
+-            for (int i=0;i<b.length;i++)
+-            {
+-                byte b1 = b[i];
+-                byte b2 = b[s.length()-(i+1)];
+-                int i1= 127+b1+b2;
+-                int i2= 127+b1-b2;
+-                int i0=i1*256+i2;
+-                String x=Integer.toString(i0,36);
++            byte b1 = b[i];
++            byte b2 = b[s.length()-(i+1)];
++            int i1= 127+b1+b2;
++            int i2= 127+b1-b2;
++            int i0=i1*256+i2;
++            String x=Integer.toString(i0,36);
+ 
+-                switch(x.length())
+-                {
+-                  case 1:buf.append('0');
+-                  case 2:buf.append('0');
+-                  case 3:buf.append('0');
+-                  default:buf.append(x);
+-                }
++            switch(x.length())
++            {
++                case 1:buf.append('0');
++                case 2:buf.append('0');
++                case 3:buf.append('0');
++                default:buf.append(x);
+             }
+-            return buf.toString();
+         }
++        return buf.toString();
++
+     }
+     
+     /* ------------------------------------------------------------ */
+Index: modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(working copy)
+@@ -668,7 +668,7 @@
+         /* ------------------------------------------------------------ */
+         public String toString()
+         {
+-            StringBuffer buf=new StringBuffer();
++            StringBuilder buf=new StringBuilder();
+ 
+             buf.append("AuthUserFile=");
+             buf.append(_userFile);
+Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
+@@ -1545,25 +1545,22 @@
+      * 
+      * @return "scheme://host:port"
+      */
+-    public StringBuffer getRootURL()
++    public StringBuilder getRootURL()
+     {
+-        StringBuffer url = new StringBuffer(48);
+-        synchronized (url)
+-        {
+-            String scheme = getScheme();
+-            int port = getServerPort();
++        StringBuilder url = new StringBuilder(48);
++        String scheme = getScheme();
++        int port = getServerPort();
+ 
+-            url.append(scheme);
+-            url.append("://");
+-            url.append(getServerName());
+-            
+-            if (port > 0 && ((scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)))
+-            {
+-                url.append(':');
+-                url.append(port);
+-            }
+-            return url;
++        url.append(scheme);
++        url.append("://");
++        url.append(getServerName());
++
++        if (port > 0 && ((scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)))
++        {
++            url.append(':');
++            url.append(port);
+         }
++        return url;
+     }
+ 
+     /* ------------------------------------------------------------ */
+Index: modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(working copy)
+@@ -829,16 +829,13 @@
+             else
+             {
+                 // Get the multiple items as a single string
+-                StringBuffer buf = new StringBuffer();
+-                synchronized (buf)
++                StringBuilder buf = new StringBuilder();
++                for (int i = first; i <= last; i++)
+                 {
+-                    for (int i = first; i <= last; i++)
+-                    {
+-                        Object item = node.get(i);
+-                        buf.append(itemValue(obj, item));
+-                    }
+-                    value = buf.toString();
++                    Object item = node.get(i);
++                    buf.append(itemValue(obj, item));
+                 }
++                value = buf.toString();
+             }
+         }
+ 
+Index: modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(working copy)
+@@ -669,12 +669,9 @@
+          */
+         public synchronized String toString(boolean tag)
+         {
+-            StringBuffer buf = new StringBuffer();
+-            synchronized (buf)
+-            {
+-                toString(buf, tag);
+-                return buf.toString();
+-            }
++            StringBuilder buf = new StringBuilder();
++            toString(buf, tag);
++            return buf.toString();
+         }
+ 
+         /* ------------------------------------------------------------ */
+@@ -692,7 +689,7 @@
+         }
+ 
+         /* ------------------------------------------------------------ */
+-        private synchronized void toString(StringBuffer buf, boolean tag)
++        private synchronized void toString(StringBuilder buf, boolean tag)
+         {
+             if (tag)
+             {
+Index: modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(working copy)
+@@ -315,7 +315,7 @@
+             if (bytes!=null)
+                 return new String(bytes,buffer.getIndex(),buffer.length(),StringUtil.__ISO_8859_1);
+             
+-            StringBuffer b = new StringBuffer(buffer.length());
++            StringBuilder b = new StringBuilder(buffer.length());
+             for (int i=buffer.getIndex(),c=0;c<buffer.length();i++,c++)
+                 b.append((char)(0x7f&buffer.peek(i)));
+             return b.toString();
+Index: modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(working copy)
+@@ -495,7 +495,7 @@
+ 
+     public String toDetailString()
+     {
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         buf.append("[");
+         buf.append(super.hashCode());
+         buf.append(",");
+Index: modules/jetty/src/main/java/org/mortbay/resource/Resource.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(revision 1979)
++++ modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(working copy)
+@@ -432,7 +432,7 @@
+         String decodedBase = URIUtil.decodePath(base);
+         String title = "Directory: "+decodedBase;
+ 
+-        StringBuffer buf=new StringBuffer(4096);
++        StringBuilder buf=new StringBuilder(4096);
+         buf.append("<HTML><HEAD><TITLE>");
+         buf.append(title);
+         buf.append("</TITLE></HEAD><BODY>\n<H1>");
 Index: modules/jetty/pom.xml
 ===================================================================
---- modules/jetty/pom.xml	(revision 1720)
+--- modules/jetty/pom.xml	(revision 1979)
 +++ modules/jetty/pom.xml	(working copy)
-@@ -24,6 +24,13 @@
+@@ -25,6 +25,13 @@
      </testResources>
      <plugins>
        <plugin>
@@ -130,325 +957,1083 @@ Index: modules/jetty/pom.xml
          <artifactId>maven-antrun-plugin</artifactId>
          <executions>
            <execution>
-Index: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
+Index: modules/util/src/test/java/org/mortbay/util/URITest.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java	(revision 0)
-+++ modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java	(revision 0)
-@@ -0,0 +1,303 @@
-+// ========================================================================
-+// Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
-+// ------------------------------------------------------------------------
-+// Licensed under the Apache License, Version 2.0 (the "License");
-+// you may not use this file except in compliance with the License.
-+// You may obtain a copy of the License at 
-+// http://www.apache.org/licenses/LICENSE-2.0
-+// Unless required by applicable law or agreed to in writing, software
-+// distributed under the License is distributed on an "AS IS" BASIS,
-+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-+// See the License for the specific language governing permissions and
-+// limitations under the License.
-+// ========================================================================
-+
-+package org.mortbay.util;
-+
-+import java.util.Arrays;
+--- modules/util/src/test/java/org/mortbay/util/URITest.java	(revision 1979)
++++ modules/util/src/test/java/org/mortbay/util/URITest.java	(working copy)
+@@ -45,7 +45,7 @@
+     public void testEncodePath()
+     {
+         // test basic encode/decode
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         
+         
+         buf.setLength(0);
+Index: modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java
+===================================================================
+--- modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(revision 1979)
++++ modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(working copy)
+@@ -94,7 +94,7 @@
+     
+     public void testQuote()
+     {
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         
+         buf.setLength(0);
+         QuotedStringTokenizer.quote(buf,"abc \n efg");
+Index: modules/util/src/test/java/org/mortbay/util/StringMapTest.java
+===================================================================
+--- modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(revision 1979)
++++ modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(working copy)
+@@ -133,7 +133,7 @@
+         m5.put("aBc", "x");
+         m5i.put("AbC", "x");
+ 
+-        StringBuffer buffer=new StringBuffer();
++        StringBuilder buffer=new StringBuilder();
+         buffer.append("aBc");
+         assertEquals("2",m5.get("abc"));
+         assertEquals("x",m5.get(buffer));
+Index: modules/util/src/test/java/org/mortbay/util/StringUtilTest.java
+===================================================================
+--- modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(revision 1979)
++++ modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(working copy)
+@@ -137,7 +137,7 @@
+ 
+     public void testAppend()
+     {
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         buf.append('a');
+         StringUtil.append(buf, "abc", 1, 1);
+         StringUtil.append(buf, (byte)12, 16);
+Index: modules/util/src/main/java/org/mortbay/servlet/CGI.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/servlet/CGI.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/servlet/CGI.java	(working copy)
+@@ -361,7 +361,7 @@
+      * @throws IOException
+      */
+     private String getTextLineFromStream( InputStream is ) throws IOException {
+-        StringBuffer buffer = new StringBuffer();
++        StringBuilder buffer = new StringBuilder();
+         int b;
+ 
+        	while( (b = is.read()) != -1 && b != (int) '\n' ) {
+Index: modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(working copy)
+@@ -20,6 +20,7 @@
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
 +import java.util.concurrent.ConcurrentHashMap;
-+import java.util.HashMap;
-+import java.util.Iterator;
-+import java.util.List;
-+import java.util.Map;
-+
-+/* ------------------------------------------------------------ */
-+/** A multi valued Map.
-+ * This Map specializes HashMap and provides methods
-+ * that operate on multi valued items. 
-+ * <P>
-+ * Implemented as a map of LazyList values
-+ *
-+ * @see LazyList
-+ * @author Greg Wilkins (gregw)
-+ */
-+public class ConcurrentMultiMap extends ConcurrentHashMap
-+    implements Cloneable
-+{
-+    /* ------------------------------------------------------------ */
-+    /** Constructor. 
-+     */
-+    public ConcurrentMultiMap()
-+    {}
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Constructor. 
-+     * @param size Capacity of the map
-+     */
-+    public ConcurrentMultiMap(int size)
-+    {
-+        super(size);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Constructor. 
-+     * @param map 
-+     */
-+    public ConcurrentMultiMap(Map map)
-+    {
-+        super((map.size()*3)/2);
-+        putAll(map);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Get multiple values.
-+     * Single valued entries are converted to singleton lists.
-+     * @param name The entry key. 
-+     * @return Unmodifieable List of values.
-+     */
-+    public List getValues(Object name)
-+    {
-+        return LazyList.getList(super.get(name),true);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Get a value from a multiple value.
-+     * If the value is not a multivalue, then index 0 retrieves the
-+     * value or null.
-+     * @param name The entry key.
-+     * @param i Index of element to get.
-+     * @return Unmodifieable List of values.
-+     */
-+    public Object getValue(Object name,int i)
-+    {
-+        Object l=super.get(name);
-+        if (i==0 && LazyList.size(l)==0)
-+            return null;
-+        return LazyList.get(l,i);
-+    }
-+    
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Get value as String.
-+     * Single valued items are converted to a String with the toString()
-+     * Object method. Multi valued entries are converted to a comma separated
-+     * List.  No quoting of commas within values is performed.
-+     * @param name The entry key. 
-+     * @return String value.
-+     */
-+    public String getString(Object name)
-+    {
-+        Object l=super.get(name);
-+        switch(LazyList.size(l))
-+        {
-+          case 0:
-+              return null;
-+          case 1:
-+              Object o=LazyList.get(l,0);
-+              return o==null?null:o.toString();
-+          default:
-+              StringBuffer values=new StringBuffer(128);
-+              synchronized(values)
-+              {
-+                  for (int i=0; i<LazyList.size(l); i++)              
-+                  {
-+                      Object e=LazyList.get(l,i);
-+                      if (e!=null)
-+                      {
-+                          if (values.length()>0)
-+                              values.append(',');
-+                          values.append(e.toString());
-+                      }
-+                  }   
-+                  return values.toString();
-+              }
-+        }
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    public Object get(Object name) 
-+    {
-+        Object l=super.get(name);
-+        switch(LazyList.size(l))
-+        {
-+          case 0:
-+              return null;
-+          case 1:
-+              Object o=LazyList.get(l,0);
-+              return o;
-+          default:
-+              return LazyList.getList(l,true);
-+        }
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Put and entry into the map.
-+     * @param name The entry key. 
-+     * @param value The entry value.
-+     * @return The previous value or null.
-+     */
-+    public Object put(Object name, Object value) 
-+    {
-+        return super.put(name,LazyList.add(null,value));
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /** Put multi valued entry.
-+     * @param name The entry key. 
-+     * @param values The List of multiple values.
-+     * @return The previous value or null.
-+     */
-+    public Object putValues(Object name, List values) 
-+    {
-+        return super.put(name,values);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Put multi valued entry.
-+     * @param name The entry key. 
-+     * @param values The String array of multiple values.
-+     * @return The previous value or null.
-+     */
-+    public Object putValues(Object name, String[] values) 
-+    {
-+        Object list=null;
-+        for (int i=0;i<values.length;i++)
-+            list=LazyList.add(list,values[i]);
-+        return put(name,list);
-+    }
-+    
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Add value to multi valued entry.
-+     * If the entry is single valued, it is converted to the first
-+     * value of a multi valued entry.
-+     * @param name The entry key. 
-+     * @param value The entry value.
-+     */
-+    public void add(Object name, Object value) 
-+    {
-+        Object lo = super.get(name);
-+        Object ln = LazyList.add(lo,value);
-+        if (lo!=ln)
-+            super.put(name,ln);
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /** Add values to multi valued entry.
-+     * If the entry is single valued, it is converted to the first
-+     * value of a multi valued entry.
-+     * @param name The entry key. 
-+     * @param values The List of multiple values.
-+     */
-+    public void addValues(Object name, List values) 
-+    {
-+        Object lo = super.get(name);
-+        Object ln = LazyList.addCollection(lo,values);
-+        if (lo!=ln)
-+            super.put(name,ln);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Add values to multi valued entry.
-+     * If the entry is single valued, it is converted to the first
-+     * value of a multi valued entry.
-+     * @param name The entry key. 
-+     * @param values The String array of multiple values.
-+     */
-+    public void addValues(Object name, String[] values) 
-+    {
-+        Object lo = super.get(name);
-+        Object ln = LazyList.addCollection(lo,Arrays.asList(values));
-+        if (lo!=ln)
-+            super.put(name,ln);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Remove value.
-+     * @param name The entry key. 
-+     * @param value The entry value. 
-+     * @return true if it was removed.
-+     */
-+    public boolean removeValue(Object name,Object value)
-+    {
-+        Object lo = super.get(name);
-+        Object ln=lo;
-+        int s=LazyList.size(lo);
-+        if (s>0)
-+        {
-+            ln=LazyList.remove(lo,value);
-+            if (ln==null)
-+                super.remove(name);
-+            else
-+                super.put(name, ln);
-+        }
-+        return LazyList.size(ln)!=s;
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Put all contents of map.
-+     * @param m Map
-+     */
-+    public void putAll(Map m)
-+    {
-+        Iterator i = m.entrySet().iterator();
-+        boolean multi=m instanceof MultiMap;
-+        while(i.hasNext())
-+        {
-+            Map.Entry entry =
-+                (Map.Entry)i.next();
-+            if (multi)
-+                super.put(entry.getKey(),LazyList.clone(entry.getValue()));
-+            else
-+                put(entry.getKey(),entry.getValue());
-+        }
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /** 
-+     * @return Map of String arrays
-+     */
-+    public Map toStringArrayMap()
-+    {
-+        HashMap map = new HashMap(size()*3/2);
+ import java.util.regex.Matcher;
+ import java.util.regex.Pattern;
+ 
+@@ -55,7 +56,7 @@
+ public class UserAgentFilter implements Filter
+ {
+     private Pattern _pattern;
+-    private Map _agentCache = new HashMap();
++    private Map _agentCache = new ConcurrentHashMap();
+     private int _agentCacheSize=1024;
+     private String _attribute;
+ 
+@@ -117,11 +118,8 @@
+         if (ua==null)
+             return null;
+         
+-        String tag;
+-        synchronized(_agentCache)
+-        {
+-            tag = (String)_agentCache.get(ua);
+-        }
++        String tag = (String)_agentCache.get(ua);
 +        
-+        Iterator i = super.entrySet().iterator();
-+        while(i.hasNext())
-+        {
-+            Map.Entry entry = (Map.Entry)i.next();
-+            Object l = entry.getValue();
-+            String[] a = LazyList.toStringArray(l);
-+            // for (int j=a.length;j-->0;)
-+            //    if (a[j]==null)
-+            //         a[j]="";
-+            map.put(entry.getKey(),a);
-+        }
-+        return map;
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    public Object clone()
-+        throws CloneNotSupportedException
-+    {
-+        ConcurrentMultiMap mm = (ConcurrentMultiMap) super.clone();
+ 
+         if (tag==null)
+         {
+@@ -143,12 +141,9 @@
+             else
+                 tag=ua;
+ 
+-            synchronized(_agentCache)
+-            {
+-                if (_agentCache.size()>=_agentCacheSize)
++            if (_agentCache.size()>=_agentCacheSize)
+                     _agentCache.clear();
+                 _agentCache.put(ua,tag);
+-            }
+ 
+         }
+         return tag;
+Index: modules/util/src/main/java/org/mortbay/thread/Timeout.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/thread/Timeout.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/thread/Timeout.java	(working copy)
+@@ -175,7 +175,7 @@
+     /* ------------------------------------------------------------ */
+     public String toString()
+     {
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         buf.append(super.toString());
+         
+         Task task = _head._next;
+Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/DateCache.java	(working copy)
+@@ -155,7 +155,7 @@
+             String ss2 = _formatString.substring( zIndex+3 );
+             int tzOffset = tz.getRawOffset();
+             
+-            StringBuffer sb = new StringBuffer(_formatString.length()+10);
++            StringBuilder sb = new StringBuilder(_formatString.length()+10);
+             sb.append(ss1);
+             sb.append("'");
+             if( tzOffset >= 0 )
+@@ -254,17 +254,15 @@
+ 
+         // Always format if we get here
+         _lastSeconds = seconds;
+-        StringBuffer sb=new StringBuffer(_secFormatString.length());
+-        synchronized(sb)
+-        {
+-            sb.append(_secFormatString0);
+-            int s=(int)(seconds%60);
+-            if (s<10)
+-                sb.append('0');
+-            sb.append(s);
+-            sb.append(_secFormatString1);
+-            _lastResult=sb.toString();
+-        }
++        StringBuilder sb=new StringBuilder(_secFormatString.length());
++        sb.append(_secFormatString0);
++        int s=(int)(seconds%60);
++        if (s<10)
++            sb.append('0');
++        sb.append(s);
++        sb.append(_secFormatString1);
++        _lastResult=sb.toString();
++
+                 
+         return _lastResult;
+     }
+@@ -272,9 +270,9 @@
+     /* ------------------------------------------------------------ */
+     /** Format to string buffer. 
+      * @param inDate Date the format
+-     * @param buffer StringBuffer
++     * @param buffer StringBuilder
+      */
+-    public void format(long inDate, StringBuffer buffer)
++    public void format(long inDate, StringBuilder buffer)
+     {
+         buffer.append(format(inDate));
+     }
+Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(working copy)
+@@ -53,7 +53,7 @@
+  * </pre>
+  * </p><p>
+  * The interface {@link JSON.Generator} may be implemented by classes that know how to render themselves as JSON and
+- * the {@link #toString(Object)} method will use {@link JSON.Generator#addJSON(StringBuffer)} to generate the JSON.
++ * the {@link #toString(Object)} method will use {@link JSON.Generator#addJSON(StringBuilder)} to generate the JSON.
+  * The class {@link JSON.Literal} may be used to hold pre-gnerated JSON object. 
+  * </p>
+  * @author gregw
+@@ -65,21 +65,21 @@
+     
+     public static String toString(Object object)
+     {
+-        StringBuffer buffer = new StringBuffer();
++        StringBuilder buffer = new StringBuilder();
+         append(buffer,object);
+         return buffer.toString();
+     }
+     
+     public static String toString(Map object)
+     {
+-        StringBuffer buffer = new StringBuffer();
++        StringBuilder buffer = new StringBuilder();
+         appendMap(buffer,object);
+         return buffer.toString();
+     }
+     
+     public static String toString(Object[] array)
+     {
+-        StringBuffer buffer = new StringBuffer();
++        StringBuilder buffer = new StringBuilder();
+         appendArray(buffer,array);
+         return buffer.toString();
+     }
+@@ -129,7 +129,7 @@
+      * @param buffer
+      * @param object
+      */
+-    public static void append(StringBuffer buffer, Object object)
++    public static void append(StringBuilder buffer, Object object)
+     {
+         if (object==null)
+             buffer.append("null");
+@@ -152,17 +152,17 @@
+             appendString(buffer,object.toString());
+     }
+ 
+-    private static void appendNull(StringBuffer buffer)
++    private static void appendNull(StringBuilder buffer)
+     {
+         buffer.append("null");
+     }
+ 
+-    private static void appendJSON(StringBuffer buffer, Generator generator)
++    private static void appendJSON(StringBuilder buffer, Generator generator)
+     {
+         generator.addJSON(buffer);
+     }
+     
+-    private static void appendMap(StringBuffer buffer, Map object)
++    private static void appendMap(StringBuilder buffer, Map object)
+     {
+         if (object==null)
+         {
+@@ -185,7 +185,7 @@
+         buffer.append('}');
+     }
+     
+-    private static void appendArray(StringBuffer buffer, Object array)
++    private static void appendArray(StringBuilder buffer, Object array)
+     {
+         if (array==null)
+         {
+@@ -206,7 +206,7 @@
+         buffer.append(']');
+     }
+ 
+-    private static void appendBoolean(StringBuffer buffer, Boolean b)
++    private static void appendBoolean(StringBuilder buffer, Boolean b)
+     {
+         if (b==null)
+         {
+@@ -216,7 +216,7 @@
+         buffer.append(b.booleanValue()?"true":"false");
+     }
+     
+-    private static void appendNumber(StringBuffer buffer, Number number)
++    private static void appendNumber(StringBuilder buffer, Number number)
+     {
+         if (number==null)
+         {
+@@ -226,7 +226,7 @@
+         buffer.append(number);
+     }
+     
+-    private static void appendString(StringBuffer buffer, String string)
++    private static void appendString(StringBuilder buffer, String string)
+     {
+         if (string==null)
+         {
+@@ -426,7 +426,7 @@
+             throw new IllegalStateException();
+         
+         boolean escape=false;
+-        StringBuffer b = new StringBuffer();
++        StringBuilder b = new StringBuilder();
+         while(source.hasNext())
+         {
+             char c=source.next();
+@@ -612,7 +612,7 @@
+     
+     public interface Generator
+     {
+-        public void addJSON(StringBuffer buffer);
++        public void addJSON(StringBuilder buffer);
+     }
+     
+     /* ------------------------------------------------------------ */
+@@ -637,7 +637,7 @@
+             return _json;
+         }
+         
+-        public void addJSON(StringBuffer buffer)
++        public void addJSON(StringBuilder buffer)
+         {
+             buffer.append(_json);
+         }
+Index: modules/util/src/main/java/org/mortbay/util/StringUtil.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/StringUtil.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/StringUtil.java	(working copy)
+@@ -190,22 +190,20 @@
+         if (i == -1)
+             return s;
+     
+-        StringBuffer buf = new StringBuffer(s.length()+with.length());
++        StringBuilder buf = new StringBuilder(s.length()+with.length());
+ 
+-        synchronized(buf)
++        do
+         {
+-            do
+-            {
+-                buf.append(s.substring(c,i));
+-                buf.append(with);
+-                c=i+sub.length();
+-            } while ((i=s.indexOf(sub,c))!=-1);
+-            
+-            if (c<s.length())
+-                buf.append(s.substring(c,s.length()));
+-            
+-            return buf.toString();
+-        }
++            buf.append(s.substring(c,i));
++            buf.append(with);
++            c=i+sub.length();
++        } while ((i=s.indexOf(sub,c))!=-1);
++
++        if (c<s.length())
++            buf.append(s.substring(c,s.length()));
++
++        return buf.toString();
 +        
-+        Iterator iter = mm.entrySet().iterator();
-+        while (iter.hasNext())
+     }
+ 
+ 
+@@ -219,13 +217,13 @@
+ 
+ 
+     /* ------------------------------------------------------------ */
+-    /** Append substring to StringBuffer 
+-     * @param buf StringBuffer to append to
++    /** Append substring to StringBuilder 
++     * @param buf StringBuilder to append to
+      * @param s String to append from
+      * @param offset The offset of the substring
+      * @param length The length of the substring
+      */
+-    public static void append(StringBuffer buf,
++    public static void append(StringBuilder buf,
+                               String s,
+                               int offset,
+                               int length)
+@@ -248,7 +246,7 @@
+      * append hex digit
+      * 
+      */
+-    public static void append(StringBuffer buf,byte b,int base)
++    public static void append(StringBuilder buf,byte b,int base)
+     {
+         int bi=0xff&b;
+         int c='0'+(bi/base)%base;
+@@ -263,7 +261,7 @@
+ 
+     
+     /* ------------------------------------------------------------ */
+-    public static void append2digits(StringBuffer buf,int i)
++    public static void append2digits(StringBuilder buf,int i)
+     {
+         if (i<100)
+         {
+@@ -346,7 +344,7 @@
+     {
+         if (name==null)
+             return null;
+-        StringBuffer buf = new StringBuffer(name.length());
++        StringBuilder buf = new StringBuilder(name.length());
+         for (int i=0;i<name.length();i++)
+         {
+             char c=name.charAt(i);
+Index: modules/util/src/main/java/org/mortbay/util/StringMap.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/StringMap.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/StringMap.java	(working copy)
+@@ -613,15 +613,12 @@
+         public Object setValue(Object o){Object old=_value;_value=o;return old;}
+         public String toString()
+         {
+-            StringBuffer buf=new StringBuffer();
+-            synchronized(buf)
+-            {
+-                toString(buf);
+-            }
++            StringBuilder buf=new StringBuilder();
++            toString(buf);
+             return buf.toString();
+         }
+ 
+-        private void toString(StringBuffer buf)
++        private void toString(StringBuilder buf)
+         {
+             buf.append("{[");
+             if (_char==null)
+Index: modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(working copy)
+@@ -26,6 +26,7 @@
+  * The UTF-8 decoding is done by this class and no additional buffers or Readers are used.
+  * The UTF-8 code was inspired by http://javolution.org
+  * 
++ * This class is not synchronized and should probably be called Utf8StringBuilder
+  */
+ public class Utf8StringBuffer 
+ {
+Index: modules/util/src/main/java/org/mortbay/util/TypeUtil.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(working copy)
+@@ -375,7 +375,7 @@
+     /* ------------------------------------------------------------ */
+     public static String toString(byte[] bytes, int base)
+     {
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         for (int i=0;i<bytes.length;i++)
+         {
+             int bi=0xff&bytes[i];
+@@ -407,7 +407,7 @@
+     /* ------------------------------------------------------------ */
+     public static String toHexString(byte[] b)
+     {   
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         for (int i=0;i<b.length;i++)
+         {
+             int bi=0xff&b[i];
+@@ -426,7 +426,7 @@
+     /* ------------------------------------------------------------ */
+     public static String toHexString(byte[] b,int offset,int length)
+     {   
+-        StringBuffer buf = new StringBuffer();
++        StringBuilder buf = new StringBuilder();
+         for (int i=offset;i<offset+length;i++)
+         {
+             int bi=0xff&b[i];
+Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(working copy)
+@@ -37,7 +37,7 @@
+     private String _delim = __delim;
+     private boolean _returnQuotes=false;
+     private boolean _returnDelimiters=false;
+-    private StringBuffer _token;
++    private StringBuilder _token;
+     private boolean _hasToken=false;
+     private int _i=0;
+     private int _lastStart=0;
+@@ -61,7 +61,7 @@
+             _delim.indexOf('"')>=0)
+             throw new Error("Can't use quotes as delimiters: "+_delim);
+         
+-        _token=new StringBuffer(_string.length()>1024?512:_string.length()/2);
++        _token=new StringBuilder(_string.length()>1024?512:_string.length()/2);
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -274,7 +274,7 @@
+             char c = s.charAt(i);
+             if (c=='\\' || c=='"' || c=='\'' || Character.isWhitespace(c) || delim.indexOf(c)>=0)
+             {
+-                StringBuffer b=new StringBuffer(s.length()+8);
++                StringBuilder b=new StringBuilder(s.length()+8);
+                 quote(b,s);
+                 return b.toString();
+             }
+@@ -298,139 +298,135 @@
+         if (s.length()==0)
+             return "\"\"";
+         
+-        StringBuffer b=new StringBuffer(s.length()+8);
++        StringBuilder b=new StringBuilder(s.length()+8);
+         quote(b,s);
+         return b.toString();
+    
+     }
+ 
+-    
++
+     /* ------------------------------------------------------------ */
+-    /** Quote a string into a StringBuffer.
++    /** Quote a string into a StringBuilder.
+      * The characters ", \, \n, \r, \t, \f and \b are escaped
+-     * @param buf The StringBuffer
++     * @param buf The StringBuilder
+      * @param s The String to quote.
+      */
+-    public static void quote(StringBuffer buf, String s)
++    public static void quote(StringBuilder buf, String s)
+     {
+-        synchronized(buf)
++        buf.append('"');
++        for (int i=0;i<s.length();i++)
+         {
+-            buf.append('"');
+-            for (int i=0;i<s.length();i++)
++            char c = s.charAt(i);
++            switch(c)
+             {
+-                char c = s.charAt(i);
+-                switch(c)
+-                {
+-                    case '"':
+-                        buf.append("\\\"");
+-                        continue;
+-                    case '\\':
+-                        buf.append("\\\\");
+-                        continue;
+-                    case '\n':
+-                        buf.append("\\n");
+-                        continue;
+-                    case '\r':
+-                        buf.append("\\r");
+-                        continue;
+-                    case '\t':
+-                        buf.append("\\t");
+-                        continue;
+-                    case '\f':
+-                        buf.append("\\f");
+-                        continue;
+-                    case '\b':
+-                        buf.append("\\b");
+-                        continue;
+-                        
+-                    default:
+-                        buf.append(c);
+-                        continue;
+-                }
++                case '"':
++                    buf.append("\\\"");
++                    continue;
++                case '\\':
++                    buf.append("\\\\");
++                    continue;
++                case '\n':
++                    buf.append("\\n");
++                    continue;
++                case '\r':
++                    buf.append("\\r");
++                    continue;
++                case '\t':
++                    buf.append("\\t");
++                    continue;
++                case '\f':
++                    buf.append("\\f");
++                    continue;
++                case '\b':
++                    buf.append("\\b");
++                    continue;
++
++                default:
++                    buf.append(c);
++                continue;
+             }
+-            buf.append('"');
+-        } 
+-    }
++        }
++        buf.append('"');
++    } 
+ 
+-    
++
++
+     /* ------------------------------------------------------------ */
+-    /** Quote a string into a StringBuffer.
++    /** Quote a string into a StringBuilder.
+      * The characters ", \, \n, \r, \t, \f and \b are escaped
+-     * @param buf The StringBuffer
++     * @param buf The StringBuilder
+      * @param s The String to quote.
+      */
+-    public static void quoteIfNeeded(StringBuffer buf, String s)
++    public static void quoteIfNeeded(StringBuilder buf, String s)
+     {
+-        synchronized(buf)
++        int e=-1;
++
++        search: for (int i=0;i<s.length();i++)
+         {
+-            int e=-1;
+-            
+-            search: for (int i=0;i<s.length();i++)
++            char c = s.charAt(i);
++            switch(c)
+             {
+-                char c = s.charAt(i);
+-                switch(c)
+-                {
+-                    case '"':
+-                    case '\\':
+-                    case '\n':
+-                    case '\r':
+-                    case '\t':
+-                    case '\f':
+-                    case '\b':
+-                    case ' ':
+-                        e=i;
+-                        buf.append('"');
+-                        // TODO when 1.4 support is dropped: buf.append(s,0,e);
+-                        for (int j=0;j<e;j++)
+-                            buf.append(s.charAt(j));
+-                        break search;
+-                        
+-                    default:
+-                        continue;
+-                }
++                case '"':
++                case '\\':
++                case '\n':
++                case '\r':
++                case '\t':
++                case '\f':
++                case '\b':
++                case ' ':
++                    e=i;
++                    buf.append('"');
++                    // TODO when 1.4 support is dropped: buf.append(s,0,e);
++                    for (int j=0;j<e;j++)
++                        buf.append(s.charAt(j));
++                    break search;
++
++                default:
++                    continue;
+             }
+-            
+-            if (e<0)
++        }
++
++        if (e<0)
 +        {
++            buf.append(s);
++            return;
++        }
++
++        for (int i=e;i<s.length();i++)
++        {
++            char c = s.charAt(i);
++            switch(c)
+             {
+-                buf.append(s);
+-                return;
++                case '"':
++                    buf.append("\\\"");
++                    continue;
++                case '\\':
++                    buf.append("\\\\");
++                    continue;
++                case '\n':
++                    buf.append("\\n");
++                    continue;
++                case '\r':
++                    buf.append("\\r");
++                    continue;
++                case '\t':
++                    buf.append("\\t");
++                    continue;
++                case '\f':
++                    buf.append("\\f");
++                    continue;
++                case '\b':
++                    buf.append("\\b");
++                    continue;
++
++                default:
++                    buf.append(c);
++                continue;
+             }
+-            
+-            for (int i=e;i<s.length();i++)
+-            {
+-                char c = s.charAt(i);
+-                switch(c)
+-                {
+-                    case '"':
+-                        buf.append("\\\"");
+-                        continue;
+-                    case '\\':
+-                        buf.append("\\\\");
+-                        continue;
+-                    case '\n':
+-                        buf.append("\\n");
+-                        continue;
+-                    case '\r':
+-                        buf.append("\\r");
+-                        continue;
+-                    case '\t':
+-                        buf.append("\\t");
+-                        continue;
+-                    case '\f':
+-                        buf.append("\\f");
+-                        continue;
+-                    case '\b':
+-                        buf.append("\\b");
+-                        continue;
+-                        
+-                    default:
+-                        buf.append(c);
+-                        continue;
+-                }
+-            }
+-            buf.append('"');
+         }
++        buf.append('"');
+     }
++
+     
+     /* ------------------------------------------------------------ */
+     /** Unquote a string.
+@@ -448,59 +444,58 @@
+         char last=s.charAt(s.length()-1);
+         if (first!=last || (first!='"' && first!='\''))
+             return s;
+-        
+-        StringBuffer b=new StringBuffer(s.length()-2);
+-        synchronized(b)
++
++        StringBuilder b=new StringBuilder(s.length()-2);
++
++        boolean escape=false;
++        for (int i=1;i<s.length()-1;i++)
+         {
+-            boolean escape=false;
+-            for (int i=1;i<s.length()-1;i++)
+-            {
+-                char c = s.charAt(i);
++            char c = s.charAt(i);
+ 
+-                if (escape)
++            if (escape)
++            {
++                escape=false;
++                switch (c)
+                 {
+-                    escape=false;
+-                    switch (c)
+-                    {
+-                        case 'n':
+-                            b.append('\n');
+-                            break;
+-                        case 'r':
+-                            b.append('\r');
+-                            break;
+-                        case 't':
+-                            b.append('\t');
+-                            break;
+-                        case 'f':
+-                            b.append('\f');
+-                            break;
+-                        case 'b':
+-                            b.append('\b');
+-                            break;
+-                        case 'u':
+-                            b.append((char)(
+-                                    (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<24)+
+-                                    (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<16)+
+-                                    (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<8)+
+-                                    (TypeUtil.convertHexDigit((byte)s.charAt(i++)))
+-                                    ) 
+-                            );
+-                            break;
+-                        default:
+-                            b.append(c);
+-                    }
++                    case 'n':
++                        b.append('\n');
++                        break;
++                    case 'r':
++                        b.append('\r');
++                        break;
++                    case 't':
++                        b.append('\t');
++                        break;
++                    case 'f':
++                        b.append('\f');
++                        break;
++                    case 'b':
++                        b.append('\b');
++                        break;
++                    case 'u':
++                        b.append((char)(
++                                (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<24)+
++                                (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<16)+
++                                (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<8)+
++                                (TypeUtil.convertHexDigit((byte)s.charAt(i++)))
++                        ) 
++                        );
++                        break;
++                    default:
++                        b.append(c);
+                 }
+-                else if (c=='\\')
+-                {
+-                    escape=true;
+-                    continue;
+-                }
+-                else
+-                    b.append(c);
+             }
+-            
+-            return b.toString();
++            else if (c=='\\')
++            {
++                escape=true;
++                continue;
++            }
++            else
++                b.append(c);
+         }
++
++        return b.toString();
++
+     }
+ 
+     /* ------------------------------------------------------------ */
+Index: modules/util/src/main/java/org/mortbay/util/UrlEncoded.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(working copy)
+@@ -114,57 +114,56 @@
+     {
+         if (charset==null)
+             charset=StringUtil.__UTF8;
+-        
+-        StringBuffer result = new StringBuffer(128);
+-        synchronized(result)
++
++        StringBuilder result = new StringBuilder(128);
++
++        Iterator iter = map.entrySet().iterator();
++        while(iter.hasNext())
+         {
+-            Iterator iter = map.entrySet().iterator();
+-            while(iter.hasNext())
 +            Map.Entry entry = (Map.Entry)iter.next();
-+            entry.setValue(LazyList.clone(entry.getValue()));
-+        }
-+        
-+        return mm;
-+    }
-+}
-
-Property changes on: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
-___________________________________________________________________
-Name: svn:eol-style
-   + native
-
++
++            String key = entry.getKey().toString();
++            Object list = entry.getValue();
++            int s=LazyList.size(list);
++
++            if (s==0)
+             {
+-                Map.Entry entry = (Map.Entry)iter.next();
+-                
+-                String key = entry.getKey().toString();
+-                Object list = entry.getValue();
+-                int s=LazyList.size(list);
+-                
+-                if (s==0)
++                result.append(encodeString(key,charset));
++                if(equalsForNullValue)
++                    result.append('=');
++            }
++            else
++            {
++                for (int i=0;i<s;i++)
+                 {
++                    if (i>0)
++                        result.append('&');
++                    Object val=LazyList.get(list,i);
+                     result.append(encodeString(key,charset));
+-                    if(equalsForNullValue)
+-                        result.append('=');
+-                }
+-                else
+-                {
+-                    for (int i=0;i<s;i++)
+-                    {
+-                        if (i>0)
+-                            result.append('&');
+-                        Object val=LazyList.get(list,i);
+-                        result.append(encodeString(key,charset));
+ 
+-                        if (val!=null)
++                    if (val!=null)
++                    {
++                        String str=val.toString();
++                        if (str.length()>0)
+                         {
+-                            String str=val.toString();
+-                            if (str.length()>0)
+-                            {
+-                                result.append('=');
+-                                result.append(encodeString(str,charset));
+-                            }
+-                            else if (equalsForNullValue)
+-                                result.append('=');
++                            result.append('=');
++                            result.append(encodeString(str,charset));
+                         }
+                         else if (equalsForNullValue)
+                             result.append('=');
+                     }
++                    else if (equalsForNullValue)
++                        result.append('=');
+                 }
+-                if (iter.hasNext())
+-                    result.append('&');
+             }
+-            return result.toString();
++            if (iter.hasNext())
++                result.append('&');
+         }
++        return result.toString();
+     }
+ 
+ 
++
+     /* -------------------------------------------------------------- */
+     /** Decoded parameters to Map.
+      * @param content the string containing the encoded parameters
+Index: modules/util/src/main/java/org/mortbay/util/MultiMap.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/MultiMap.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/MultiMap.java	(working copy)
+@@ -105,21 +105,20 @@
+               Object o=LazyList.get(l,0);
+               return o==null?null:o.toString();
+           default:
+-              StringBuffer values=new StringBuffer(128);
+-              synchronized(values)
++          {
++              StringBuilder values=new StringBuilder(128);
++              for (int i=0; i<LazyList.size(l); i++)              
+               {
+-                  for (int i=0; i<LazyList.size(l); i++)              
++                  Object e=LazyList.get(l,i);
++                  if (e!=null)
+                   {
+-                      Object e=LazyList.get(l,i);
+-                      if (e!=null)
+-                      {
+-                          if (values.length()>0)
+-                              values.append(',');
+-                          values.append(e.toString());
+-                      }
+-                  }   
+-                  return values.toString();
+-              }
++                      if (values.length()>0)
++                          values.append(',');
++                      values.append(e.toString());
++                  }
++              }   
++              return values.toString();
++          }
+         }
+     }
+     
+Index: modules/util/src/main/java/org/mortbay/util/URIUtil.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/URIUtil.java	(revision 1979)
++++ modules/util/src/main/java/org/mortbay/util/URIUtil.java	(working copy)
+@@ -56,17 +56,17 @@
+         if (path==null || path.length()==0)
+             return path;
+         
+-        StringBuffer buf = encodePath(null,path);
++        StringBuilder buf = encodePath(null,path);
+         return buf==null?path:buf.toString();
+     }
+         
+     /* ------------------------------------------------------------ */
+     /** Encode a URI path.
+      * @param path The path the encode
+-     * @param buf StringBuffer to encode path into (or null)
+-     * @return The StringBuffer or null if no substitutions required.
++     * @param buf StringBuilder to encode path into (or null)
++     * @return The StringBuilder or null if no substitutions required.
+      */
+-    public static StringBuffer encodePath(StringBuffer buf, String path)
++    public static StringBuilder encodePath(StringBuilder buf, String path)
+     {
+         if (buf==null)
+         {
+@@ -81,7 +81,7 @@
+                   case ';':
+                   case '#':
+                   case ' ':
+-                      buf=new StringBuffer(path.length()<<1);
++                      buf=new StringBuilder(path.length()<<1);
+                       break loop;
+                 }
+             }
+@@ -124,13 +124,13 @@
+     /* ------------------------------------------------------------ */
+     /** Encode a URI path.
+      * @param path The path the encode
+-     * @param buf StringBuffer to encode path into (or null)
++     * @param buf StringBuilder to encode path into (or null)
+      * @param encode String of characters to encode. % is always encoded.
+-     * @return The StringBuffer or null if no substitutions required.
++     * @return The StringBuilder or null if no substitutions required.
+      */
+-    public static StringBuffer encodeString(StringBuffer buf,
+-                                            String path,
+-                                            String encode)
++    public static StringBuilder encodeString(StringBuilder buf,
++                                             String path,
++                                             String encode)
+     {
+         if (buf==null)
+         {
+@@ -140,7 +140,7 @@
+                 char c=path.charAt(i);
+                 if (c=='%' || encode.indexOf(c)>=0)
+                 {    
+-                    buf=new StringBuffer(path.length()<<1);
++                    buf=new StringBuilder(path.length()<<1);
+                     break loop;
+                 }
+             }
+@@ -169,7 +169,7 @@
+     /* ------------------------------------------------------------ */
+     /* Decode a URI path.
+      * @param path The path the encode
+-     * @param buf StringBuffer to encode path into
++     * @param buf StringBuilder to encode path into
+      */
+     public static String decodePath(String path)
+     {
+@@ -247,7 +247,7 @@
+     /* ------------------------------------------------------------ */
+     /* Decode a URI path.
+      * @param path The path the encode
+-     * @param buf StringBuffer to encode path into
++     * @param buf StringBuilder to encode path into
+      */
+     public static String decodePath(byte[] buf, int offset, int length)
+     {
+@@ -321,7 +321,7 @@
+         if (split<0)
+             split=p1.length();
+ 
+-        StringBuffer buf = new StringBuffer(p1.length()+p2.length()+2);
++        StringBuilder buf = new StringBuilder(p1.length()+p2.length()+2);
+         buf.append(p1);
+         
+         if (buf.charAt(split-1)=='/')
+@@ -415,7 +415,7 @@
+         if (start>=end)
+             return path;
+         
+-        StringBuffer buf = new StringBuffer(path);
++        StringBuilder buf = new StringBuilder(path);
+         int delStart=-1;
+         int delEnd=-1;
+         int skip=0;
 Index: modules/util/pom.xml
 ===================================================================
---- modules/util/pom.xml	(revision 1720)
+--- modules/util/pom.xml	(revision 1979)
 +++ modules/util/pom.xml	(working copy)
-@@ -36,6 +36,13 @@
+@@ -37,6 +37,13 @@
      </testResources>
      <plugins>
        <plugin>
