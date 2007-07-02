@@ -124,7 +124,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
       */
      public static String formatDate(long date, boolean cookie)
      {
--        StringBuffer buf = new StringBuffer(32);
+-        StringBuilder buf = new StringBuilder(32);
 -        GregorianCalendar gc = new GregorianCalendar(__GMT);
 -        gc.setTimeInMillis(date);
 -        formatDate(buf, gc, cookie);
@@ -138,9 +138,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
       * cookies
       */
 -    public static String formatDate(Calendar calendar, boolean cookie)
-+    public static void formatDate(StringBuffer buf, long date, boolean cookie)
++    public static void formatDate(StringBuilder buf, long date, boolean cookie)
      {
--        StringBuffer buf = new StringBuffer(32);
+-        StringBuilder buf = new StringBuilder(32);
 -        formatDate(buf, calendar, cookie);
 -        return buf.toString();
 +        (cookie?__cookieDateFormat:__httpDateFormat).printTo(buf,date);
@@ -151,7 +151,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 -     * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
 -     * cookies
 -     */
--    public static String formatDate(StringBuffer buf, long date, boolean cookie)
+-    public static String formatDate(StringBuilder buf, long date, boolean cookie)
 -    {
 -        GregorianCalendar gc = new GregorianCalendar(__GMT);
 -        gc.setTimeInMillis(date);
@@ -164,7 +164,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 -     * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
 -     * cookies
 -     */
--    public static void formatDate(StringBuffer buf, Calendar calendar, boolean cookie)
+-    public static void formatDate(StringBuilder buf, Calendar calendar, boolean cookie)
 -    {
 -        // "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
 -        // "EEE, dd-MMM-yy HH:mm:ss 'GMT'", cookie
@@ -247,7 +247,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      protected int _revision;
      protected HashMap _bufferMap = new HashMap(32);
 -    protected SimpleDateFormat _dateReceive[] = new SimpleDateFormat[__dateReceive.length];
--    private StringBuffer _dateBuffer;
+-    private StringBuilder _dateBuffer;
 -    private Calendar _calendar;
  
      /* ------------------------------------------------------------ */
@@ -342,7 +342,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      {
 -        if (_dateBuffer == null)
 -        {
--            _dateBuffer = new StringBuffer(32);
+-            _dateBuffer = new StringBuilder(32);
 -            _calendar = new GregorianCalendar(__GMT);
 -        }
 -        _dateBuffer.setLength(0);
@@ -360,7 +360,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      {
 -        if (_dateBuffer == null)
 -        {
--            _dateBuffer = new StringBuffer(32);
+-            _dateBuffer = new StringBuilder(32);
 -            _calendar = new GregorianCalendar(__GMT);
 -        }
 -        _dateBuffer.setLength(0);
@@ -373,7 +373,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          add(n, v, date);
      }
  
-@@ -1099,9 +957,6 @@
+@@ -1097,9 +957,6 @@
              }
          }
          _fields = null;
@@ -566,7 +566,7 @@ Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
 -            int tzOffset = tz.getRawOffset();
 +            int tzOffset = tz.getOffset(0);
              
-             StringBuffer sb = new StringBuffer(_formatString.length()+10);
+             StringBuilder sb = new StringBuilder(_formatString.length()+10);
              sb.append(ss1);
 @@ -220,6 +210,8 @@
       */
@@ -604,7 +604,7 @@ Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
  
              int i=_secFormatString.indexOf("ss");
              int l=2;
-@@ -282,7 +271,7 @@
+@@ -280,7 +271,7 @@
      /* ------------------------------------------------------------ */
      /** Get the format.
       */
@@ -741,7 +741,7 @@ Index: modules/util/pom.xml
 ===================================================================
 --- modules/util/pom.xml	(revision 1979)
 +++ modules/util/pom.xml	(working copy)
-@@ -95,6 +95,29 @@
+@@ -102,6 +95,29 @@
            </archive>
          </configuration>
        </plugin>
@@ -771,7 +771,7 @@ Index: modules/util/pom.xml
      </plugins>
    </build>
    <dependencies>
-@@ -109,5 +132,9 @@
+@@ -116,5 +132,9 @@
        <version>${project.version}</version>
        <scope>provided</scope>
      </dependency>
