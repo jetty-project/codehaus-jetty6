@@ -684,12 +684,12 @@ public class Server extends HandlerWrapper implements Attributes
      * and all handlers that implement {@link Graceful} will be put into the shutdown mode so that no new requests
      * will be accepted, but existing requests can complete.  The server will then wait the configured timeout 
      * before stopping.
-     * @param graceful the milliseconds to wait for existing request to complete before stopping the server.
+     * @param timeoutMS the milliseconds to wait for existing request to complete before stopping the server.
      * 
      */
-    public void setGracefulShutdown(int graceful)
+    public void setGracefulShutdown(int timeoutMS)
     {
-        _graceful=graceful;
+        _graceful=timeoutMS;
     }
 
     /* ------------------------------------------------------------ */
