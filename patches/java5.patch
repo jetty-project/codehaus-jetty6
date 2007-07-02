@@ -311,7 +311,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManage
 +}
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 1979)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 1983)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(working copy)
 @@ -21,6 +21,7 @@
  import java.util.HashMap;
@@ -321,35 +321,25 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
  
  import javax.servlet.Filter;
  import javax.servlet.FilterChain;
-@@ -94,8 +95,7 @@
+@@ -94,7 +95,7 @@
      private transient Map _servletNameMap=new HashMap();
      private transient PathMap _servletPathMap;
      
 -    protected transient HashMap _chainCache[];
--    protected transient HashMap _namedChainCache[];
 +    protected transient ConcurrentHashMap _chainCache[];
  
  
      /* ------------------------------------------------------------ */
-@@ -141,8 +141,7 @@
+@@ -139,7 +140,7 @@
+         updateMappings();
          
          if(_filterChainsCached)
-         {
 -            _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
--            _namedChainCache=new HashMap[]{null,null,new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
 +            _chainCache=     new ConcurrentHashMap[]{null,new ConcurrentHashMap(),new ConcurrentHashMap(),null,new ConcurrentHashMap(),null,null,null,new ConcurrentHashMap()};
-         }
  
          super.doStart();
-@@ -180,7 +179,6 @@
          
-         _servletPathMap=null;
-         _chainCache=null;
--        _namedChainCache=null;
-     }
- 
-     
-@@ -473,17 +471,13 @@
+@@ -468,17 +469,13 @@
          
          if (_filterChainsCached && _chainCache!=null)
          {
@@ -370,28 +360,23 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
          
          // Path filters
          if (pathInContext!=null && _filterPathMappings!=null)
-@@ -526,14 +520,12 @@
-         FilterChain chain = null;
-         if (_filterChainsCached)
+@@ -523,12 +520,9 @@
          {
+             if (LazyList.size(filters) > 0)
+                 chain= new CachedChain(filters, servletHolder);
 -            synchronized(this)
 -            {
--                if (LazyList.size(filters) > 0)
--                    chain= new CachedChain(filters, servletHolder);
 -                if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
 -                    _chainCache[requestType].clear();
 -                _chainCache[requestType].put(key,chain);
 -            }
-+            if (LazyList.size(filters) > 0)
-+                chain= new CachedChain(filters, servletHolder);
-+         
-+            if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
-+                _chainCache[requestType].clear();
-+            _chainCache[requestType].put(key,chain);
++	    if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
++		_chainCache[requestType].clear();
++	    _chainCache[requestType].put(key,chain);
          }
          else if (LazyList.size(filters) > 0)
              chain = new Chain(filters, servletHolder);
-@@ -1155,7 +1147,7 @@
+@@ -1150,7 +1144,7 @@
          /* ------------------------------------------------------------ */
          public String toString()
          {
@@ -651,24 +636,6 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          put(HttpHeaders.EXPIRES_BUFFER, __01Jan1970_BUFFER);
          add(HttpHeaders.SET_COOKIE_BUFFER, new ByteArrayBuffer(name_value_params));
      }
-Index: modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java
-===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java	(revision 1979)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java	(working copy)
-@@ -733,11 +733,11 @@
-     {   
-         if (_statsStartedAt>=0)
-         {
-+            int requests=connection.getRequests();
-+            long duration=System.currentTimeMillis()-connection.getTimeStamp();
-             synchronized(_statsLock)
-             {
--                int requests=connection.getRequests();
-                 _requests+=requests;
--                long duration=System.currentTimeMillis()-connection.getTimeStamp();
-                 _connections++;
-                 _connectionsOpen--;
-                 _connectionsDurationTotal+=duration;
 Index: modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
 ===================================================================
 --- modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 1979)
