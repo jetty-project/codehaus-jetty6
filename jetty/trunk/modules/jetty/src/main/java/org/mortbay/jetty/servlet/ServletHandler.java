@@ -354,7 +354,7 @@ public class ServletHandler extends AbstractHandler
             if (Log.isDebugEnabled()) 
             {
                 Log.debug("chain="+chain);
-                Log.debug("servelet holder="+servlet_holder);
+                Log.debug("servlet holder="+servlet_holder);
             }
 
             // Do the filter/handling thang
