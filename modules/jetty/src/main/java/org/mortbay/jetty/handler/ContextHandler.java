@@ -80,7 +80,7 @@ import org.mortbay.util.URIUtil;
  * @author gregw
  *
  */
-public class ContextHandler extends HandlerWrapper implements Attributes
+public class ContextHandler extends HandlerWrapper implements Attributes, Server.Graceful
 {
     private static ThreadLocal __context=new ThreadLocal();
     
