@@ -28,6 +28,10 @@
                 <delete failonerror="false" includeemptydirs="true">
                   <fileset dir="../../webapps/test/" includes="**" />
                 </delete>
+                <delete failonerror="false" includeemptydirs="true">
+                  <fileset dir="../../contexts/test.d/" includes="**" />
+                </delete>
+                <delete failonerror="false" file="../../contexts/test.xml"/>
               </tasks>
             </configuration>
           </execution>
@@ -42,6 +46,9 @@
                 <copy failonerror="false" todir="../../webapps/test" >
                   <fileset dir="target/${project.artifactId}-${project.version}" includes="**" />
 		</copy>
+                <copy failonerror="false" todir="../../contexts">
+                  <fileset dir="src/main/configuration" includes="**" />
+                </copy>
 		<chmod dir="../../webapps/test/cgi-bin" perm="ugo+rx" includes="**/*.sh" />
 		<touch file="../../contexts/test.xml" mkdirs="true"/>
               </tasks>

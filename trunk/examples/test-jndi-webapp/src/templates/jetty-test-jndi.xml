@@ -1,14 +1,29 @@
 <?xml version="1.0"?>
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
 
-
 <!-- =============================================================== -->
 <!-- Configure the test-jndi webapp                                  -->
 <!-- =============================================================== -->
-<Configure id="Server" class="org.mortbay.jetty.Server">
+<Configure class="org.mortbay.jetty.webapp.WebAppContext">
 
-<!-- Define a couple of system properties (do it regardless of which jars
-     are being used as they do no harm) -->
+<!-- Ensure Jetty Plus features are enabled for this webapp                      -->
+  <Set name="configurationClasses">
+    <Array type="java.lang.String">
+      <Item>org.mortbay.jetty.webapp.WebInfConfiguration</Item>
+      <Item>org.mortbay.jetty.plus.webapp.EnvConfiguration</Item>
+      <Item>org.mortbay.jetty.plus.webapp.Configuration</Item>
+      <Item>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</Item>
+      <Item>org.mortbay.jetty.webapp.TagLibConfiguration</Item>
+    </Array>
+  </Set>
+
+  <Set name="contextPath">/test-jndi</Set>
+  <Set name="war"><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d</Set>
+  <Set name="extractWAR">false</Set>
+  <Set name="copyWebDir">false</Set>
+
+
+<!-- Define a couple of system properties. These are jdbc and jta impl specific.  -->
   <Call class="java.lang.System" name="setProperty">
     <Arg>derby.system.home</Arg>
     <Arg><SystemProperty name="java.io.tmpdir"/></Arg>
@@ -16,10 +31,10 @@
 
   <Call class="java.lang.System" name="setProperty">
     <Arg>com.atomikos.icatch.file</Arg>
-    <Arg>webapps-plus/test-jndi/WEB-INF/classes/jta.properties</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d/WEB-INF/classes/jta.properties</Arg>
   </Call>
 
-  <!-- JNDI java:comp/env                                          -->
+  <!-- Define some env entries for java:comp/env                                  -->
   <New id="woggle"  class="org.mortbay.jetty.plus.naming.EnvEntry">
     <Arg>woggle</Arg>
     <Arg type="java.lang.Integer">4000</Arg>

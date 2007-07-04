@@ -16,6 +16,7 @@ jetty-6.1-SNAPSHOT
  + update terracotta configs for tc 2.4 stable1
  + remove call to open connectors in jetty.xml
  + update links on website
+ + make jetty plus example webapps use ContextDeployer
 
 jetty-6.1.4 - 15 Jun 2007
  + fixed early open() call in NIO connectors
