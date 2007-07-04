@@ -4,10 +4,10 @@ After you have built the example, you will need to edit a couple
 of files to uncomment the appropriate  configuration for the
 transaction manager you are using.
 
-+ edit etc/jetty-test-jndi.xml and uncomment one of the transaction
++ edit contexts/test-jndi.xml and uncomment one of the transaction
   manager setups.
 
-+ edit webapps-plus/test-jndi/WEB-INF/jetty-env.xml and uncomment
++ edit contexts/test-jndi.d/WEB-INF/jetty-env.xml and uncomment
   one of the transaction manager setups.
 
 
@@ -22,7 +22,7 @@ http://docs.codehaus.org/display/JETTY/Jetty+User+Guides
 
 You run the demo like so:
    
-   java -jar start.jar etc/jetty.xml etc/jetty-plus.xml etc/jetty-test-jndi.xml
+   java -jar start.jar 
 
 
 Adding Support for a Different Transaction Manager
