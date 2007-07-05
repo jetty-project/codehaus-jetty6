@@ -295,7 +295,8 @@ public class HttpConnection implements Connection
      */
     public ServletOutputStream getOutputStream()
     {
-        if (_out == null) _out = new Output();
+        if (_out == null) 
+            _out = new Output();
         return _out;
     }
 
