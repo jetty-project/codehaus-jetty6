@@ -2,14 +2,11 @@ package org.mortbay.io.nio;
 
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -220,27 +217,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
         _selectSet[i].stop();
     }
 
-    /* ------------------------------------------------------------------------------- */
-    private void doDispatch(SelectChannelEndPoint endpoint) throws IOException
-    {
-        boolean dispatch_done = true;
-        try
-        {
-            if (endpoint.dispatch(_delaySelectKeyUpdate))
-            {
-                dispatch_done= false;
-                dispatch_done = dispatch((Runnable)endpoint);
-            }
-        }
-        finally
-        {
-            if (!dispatch_done)
-            {
-                Log.warn("dispatch failed!");
-                endpoint.undispatch();
-            }
-        }
-    }
     /* ------------------------------------------------------------ */
     /**
      * @param endpoint
@@ -377,7 +353,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 SelectionKey key = channel.register(_selector,SelectionKey.OP_READ,att);
                                 SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                 key.attach(endpoint);
-                                doDispatch(endpoint);
+                                endpoint.dispatch();
                             }
                             else
                             {
@@ -446,7 +422,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             {
                                 SelectionKey key = (SelectionKey) iter.next();
                                 if (key.isValid()&&key.interestOps()==0)
+                                {
                                     key.cancel();
+                                }
                             }
                             try
                             {
@@ -492,7 +470,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         if (att instanceof SelectChannelEndPoint)
                         {
                             SelectChannelEndPoint endpoint = (SelectChannelEndPoint)att;
-                            doDispatch(endpoint);
+                            endpoint.dispatch();
                         }
                         else if (key.isAcceptable())
                         {
@@ -513,7 +491,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
                                 cKey.attach(endpoint);
                                 if (endpoint != null)
-                                    doDispatch(endpoint);
+                                    endpoint.dispatch();
                             }
                             else
                             {
@@ -542,10 +520,12 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                     key.interestOps(SelectionKey.OP_READ);
                                     SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                     key.attach(endpoint);
-                                    doDispatch(endpoint);
+                                    endpoint.dispatch();
                                 }
                                 else
+                                {
                                     key.cancel();
+                                }
                             }
                         }
                         else
@@ -555,7 +535,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                             key.attach(endpoint);
                             if (key.isReadable())
-                                doDispatch(endpoint);                           
+                                endpoint.dispatch();                           
                         }
                         key = null;
                     }
