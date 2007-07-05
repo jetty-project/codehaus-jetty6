@@ -54,7 +54,7 @@ public abstract class AbstractGenerator implements Generator
     public final static int STATE_END = 4;
     
     private static byte[] NO_BYTES = {};
-    private static int MAX_OUTPUT_CHARS = 2048; 
+    private static int MAX_OUTPUT_CHARS = 512; 
 
     private static Buffer[] __reasons = new Buffer[505];
     static
@@ -723,7 +723,9 @@ public abstract class AbstractGenerator implements Generator
             }
 
             if (_out._chars==null)
+            {
                 _out._chars = new char[MAX_OUTPUT_CHARS]; 
+            }
             char[] chars = _out._chars;
             s.getChars(offset, offset + length, chars, 0);
             write(chars, 0, length);
