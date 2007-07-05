@@ -14,7 +14,6 @@ import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpException;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
-import org.omg.CORBA.SystemException;
 
 /* ------------------------------------------------------------ */
 /**
@@ -56,6 +55,28 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         
         _key = key;
     }
+
+    /* ------------------------------------------------------------ */
+    void dispatch() throws IOException
+    {
+        boolean dispatch_done = true;
+        try
+        {
+            if (dispatch(_manager.isDelaySelectKeyUpdate()))
+            {
+                dispatch_done= false;
+                dispatch_done = _manager.dispatch((Runnable)this);
+            }
+        }
+        finally
+        {
+            if (!dispatch_done)
+            {
+                Log.warn("dispatch failed!");
+                undispatch();
+            }
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -71,7 +92,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         // If threads are blocked on this
         synchronized (this)
         {
-            if (_key == null)
+            if (_key == null )
             {
                 _readBlocked=false;
                 _writeBlocked=false;
@@ -116,7 +137,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
 
             _dispatched = true;
         }
-
         return true;
     }
 
@@ -269,6 +289,13 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
     
     /* ------------------------------------------------------------ */
+    public void scheduleWrite()
+    {
+        _writable=false;
+        updateKey();
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * Updates selection key. Adds operations types to the selection key as needed. No operations
      * are removed as this is only done during dispatch. This method records the new key and
@@ -286,7 +313,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                     ((!_dispatched || _readBlocked)  ? SelectionKey.OP_READ  : 0) 
                 |   ((!_writable   || _writeBlocked) ? SelectionKey.OP_WRITE : 0);
             }
-            
             if(_interestOps == ops && getChannel().isOpen())
                 return;
             
@@ -332,7 +358,9 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                         }
                     }
                     else
+                    {
                         _key.interestOps(_interestOps);
+                    }
                 }
                 else
                 {
