@@ -71,9 +71,7 @@ public class LocalConnector extends AbstractConnector
     /* ------------------------------------------------------------ */
     public void doStart()
         throws Exception
-    {
-        super.doStart();
-        
+    {   
         _in=new ByteArrayBuffer(8192);
         _out=new ByteArrayBuffer(8192);
         _endp = new ByteArrayEndPoint();
@@ -81,6 +79,8 @@ public class LocalConnector extends AbstractConnector
         _endp.setOut(_out);
         _endp.setGrowOutput(true);
         _accepting=false;
+        
+        super.doStart();
     }
 
     /* ------------------------------------------------------------ */
