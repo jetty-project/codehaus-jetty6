@@ -49,10 +49,14 @@ public interface Connector extends LifeCycle, Buffers
      * @throws IOException
      */
     void open() throws IOException;
-    
+
+    /* ------------------------------------------------------------ */
     void close() throws IOException;
 
+    /* ------------------------------------------------------------ */
     void setServer(Server server);
+    
+    /* ------------------------------------------------------------ */
     Server getServer();
 
     /* ------------------------------------------------------------ */
