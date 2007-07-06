@@ -259,10 +259,10 @@
 
     <module>extras/tests</module>
 
+    <module>contrib/client</module>
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
     <!--module>contrib/wadi</module-->
-    <!--module>contrib/client</module-->
     <!--module>contrib/terracotta</module-->
   </modules>
 

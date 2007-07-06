@@ -92,7 +92,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         // If threads are blocked on this
         synchronized (this)
         {
-            if (_key == null )
+            if (_key == null || !_key.isValid())
             {
                 _readBlocked=false;
                 _writeBlocked=false;
