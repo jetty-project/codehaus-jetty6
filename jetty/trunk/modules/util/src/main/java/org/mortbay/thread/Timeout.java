@@ -215,6 +215,19 @@ public class Timeout
             _next=_prev=this;
         }
 
+        public long getTimestamp()
+        {
+            return _timestamp;
+        }
+        
+        public long getAge()
+        {
+            Timeout t = _timeout;
+            if (t!=null && t._now!=0 && _timestamp!=0)
+                return t._now-_timestamp;
+            return 0;
+        }
+        
         public void unlink()
         {
             _next._prev=_prev;
