@@ -81,7 +81,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             return channel;
         }
 
-        protected boolean dispatch(Runnable task) throws IOException
+        public boolean dispatch(Runnable task) throws IOException
         {
             return getThreadPool().dispatch(task);
         }
