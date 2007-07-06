@@ -89,9 +89,6 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     }
 
     /* ------------------------------------------------------------------------------- */
-    public abstract void open() throws IOException;
-
-    /* ------------------------------------------------------------------------------- */
     /*
      */
     public Server getServer()
@@ -286,6 +283,8 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         else if (_threadPool instanceof LifeCycle)
             ((LifeCycle)_threadPool).stop();
         
+        super.doStop();
+        
         Thread[] acceptors=null;
         synchronized(this)
         {
@@ -302,7 +301,6 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
             }
         }
 
-        super.doStop();
     }
     
     /* ------------------------------------------------------------ */
@@ -509,7 +507,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
             try
             {
                 current.setPriority(old_priority-_acceptorPriorityOffset);
-                while (isRunning())
+                while (isRunning() && getConnection()!=null)
                 {
                     try
                     {
