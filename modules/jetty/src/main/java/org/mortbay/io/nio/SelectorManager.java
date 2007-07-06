@@ -186,7 +186,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
     protected abstract SocketChannel acceptChannel(SelectionKey key) throws IOException;
 
     /* ------------------------------------------------------------------------------- */
-    protected abstract boolean dispatch(Runnable task) throws IOException;
+    public abstract boolean dispatch(Runnable task) throws IOException;
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
@@ -242,7 +242,11 @@ public abstract class SelectorManager extends AbstractLifeCycle
      */
     protected abstract SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey sKey) throws IOException;
 
-    
+    /* ------------------------------------------------------------------------------- */
+    protected void connectionFailed(SocketChannel channel,Throwable ex,Object attachment)
+    {
+        Log.warn(ex);
+    }
     
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
@@ -511,7 +515,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             }
                             catch(Exception e)
                             {
-                                Log.ignore(e);
+                                connectionFailed(channel,e,att);
                             }
                             finally
                             {
