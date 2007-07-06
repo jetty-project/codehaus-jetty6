@@ -21,6 +21,8 @@
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d</Set>
   <Set name="extractWAR">false</Set>
   <Set name="copyWebDir">false</Set>
+  <Set name="descriptor"><SystemProperty name="jetty.home" default="."/>/contexts/test-jndi.d/WEB-INF/instruction-web.xml</Set>
+
 
 
 <!-- Define a couple of system properties. These are jdbc and jta impl specific.  -->
