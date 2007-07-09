@@ -42,12 +42,12 @@ public class StdErrLog implements Logger
         
     }
     
-    StdErrLog()
+    public StdErrLog()
     {
         this(null);
     }
     
-    StdErrLog(String name)
+    public StdErrLog(String name)
     {    
         this.name=name==null?"":name;
     }

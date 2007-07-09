@@ -17,7 +17,7 @@ package org.mortbay.log;
 
 import java.lang.reflect.Method;
 
-class Slf4jLog implements Logger
+public class Slf4jLog implements Logger
 {
     private static final String LOGGER="org.slf4j.Logger";
     private static final String LOGGERFACTORY="org.slf4j.LoggerFactory";
@@ -32,12 +32,12 @@ class Slf4jLog implements Logger
     private Object logger;
     
 
-    Slf4jLog() throws Exception
+    public Slf4jLog() throws Exception
     {
         this("org.mortbay.log");
     }
     
-    Slf4jLog(String name) throws Exception
+    public Slf4jLog(String name) throws Exception
     {
         Class slf4j = null;
         Class slf4jf = null;
