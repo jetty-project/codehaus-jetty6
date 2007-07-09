@@ -65,14 +65,47 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
     }
 
     /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see org.mortbay.io.nio.SelectChannelEndPoint#idleExpired()
+     */
+    protected void idleExpired()
+    {
+        try
+        {
+            _selectSet.getManager().dispatch(new Runnable()
+            {
+                public void run() 
+                { 
+                    try 
+                    {
+                        close(); 
+                    }
+                    catch(Exception e)
+                    {
+                        Log.ignore(e);
+                    }
+                }
+            });
+        }
+        catch(Exception e)
+        {
+            Log.ignore(e);
+        }
+    }
+
+
+
+    /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
         _engine.closeOutbound();
         
         try
         {   
-            loop: while (isOpen() && !_engine.isOutboundDone() )
+            int tries=0;
+            loop: while (isOpen() && !_engine.isOutboundDone() && tries++<100)
             {
+               
                 if (_outNIOBuffer.length()>0)
                 {
                     flush();
