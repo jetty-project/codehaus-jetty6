@@ -73,6 +73,9 @@
             <configuration>
               <instructions>
                 <Bundle-RequiredExcutionEnvironment>J2SE-1.4</Bundle-RequiredExcutionEnvironment>
+                <Import-Package>!org.mortbay.naming.*,*</Import-Package>
+                <Bundle-SymbolicName>org.mortbay.naming</Bundle-SymbolicName>
+                <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
               </instructions>
             </configuration>
            </execution>

@@ -125,7 +125,6 @@
             </goals>
             <configuration>
               <instructions>
-                <Bundle-Version>2.1</Bundle-Version>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
               </instructions>
             </configuration>
