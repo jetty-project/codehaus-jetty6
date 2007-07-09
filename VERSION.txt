@@ -4,6 +4,12 @@ jetty-6.1-SNAPSHOT
  + Protect SslSelectChannelConnector from exceptions during close
  + Improved Request log configuration options
  + Added GzipFilter and UserAgentFilter
+ + make OSGi manifests for jetty jars
+ + update terracotta configs for tc 2.4 stable1
+ + remove call to open connectors in jetty.xml
+ + update links on website
+ + make jetty plus example webapps use ContextDeployer
+ + Dispatch SslEngine expiry (non atomic)
  + JETTY-253 - Improved graceful shutdown
  + JETTY-373 - Stop all dependent lifecycles
  + JETTY-374 - HttpTesters handles large requests/responses
@@ -12,11 +18,6 @@ jetty-6.1-SNAPSHOT
  + JETTY-377 - allow sessions to be wrapped.
  + JETTY-378 - handle JVMs with non ISO/UTF default encodings
  + JETTY-380 - handle pipelines of more than 4 requests!
- + make OSGi manifests for jetty jars
- + update terracotta configs for tc 2.4 stable1
- + remove call to open connectors in jetty.xml
- + update links on website
- + make jetty plus example webapps use ContextDeployer
 
 jetty-6.1.4 - 15 Jun 2007
  + fixed early open() call in NIO connectors
