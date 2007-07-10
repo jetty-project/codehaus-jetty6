@@ -61,7 +61,9 @@ import org.mortbay.util.URIUtil;
 /** The default servlet.                                                 
  * This servlet, normally mapped to /, provides the handling for static 
  * content, OPTION and TRACE methods for the context.                   
- * The following initParameters are supported:                          
+ * The following initParameters are supported, these can be set either
+ * on the servlet itself or as ServletContext initParameters with a prefix
+ * of org.mortbay.jetty.servlet.Default. :                          
  * <PRE>                                                                      
  *   acceptRanges     If true, range requests and responses are         
  *                    supported                                         
@@ -233,6 +235,15 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         
         if (Log.isDebugEnabled()) Log.debug("resource base = "+_resourceBase);
     }
+
+    /* ------------------------------------------------------------ */
+    public String getInitParameter(String name)
+    {
+        String value=getServletContext().getInitParameter("org.mortbay.jetty.servlet.Default."+name);
+	if (value==null)
+	    value=super.getInitParameter(name);
+	return value;
+    }
     
     /* ------------------------------------------------------------ */
     private boolean getInitBoolean(String name, boolean dft)
@@ -251,6 +262,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private int getInitInt(String name, int dft)
     {
         String value=getInitParameter(name);
+	if (value==null)
+            value=getInitParameter(name);
         if (value!=null && value.length()>0)
             return Integer.parseInt(value);
         return dft;
