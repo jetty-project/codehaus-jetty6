@@ -65,7 +65,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public final static int __distantFuture=60*60*24*7*52*20;
 
     private static final HttpSessionContext __nullSessionContext=new NullSessionContext();
-    private static final String SESSION_ATTR="org.mortbay.jetty.servlet.Session";
 
     private boolean _usingCookies=true;
     
@@ -104,7 +103,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         long now=System.currentTimeMillis();
 
-        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        Session s = ((SessionIf)session).getSession();
         s.access(now);
         
         // Do we need to refresh the cookie?
@@ -142,7 +141,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public void complete(HttpSession session)
     {
-        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        Session s = ((SessionIf)session).getSession();
         s.complete();
     }
 
@@ -387,21 +386,21 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public boolean isValid(HttpSession session)
     {
-        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        Session s = ((SessionIf)session).getSession();
         return s.isValid();
     }
     
     /* ------------------------------------------------------------ */
     public String getClusterId(HttpSession session)
     {
-        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        Session s = ((SessionIf)session).getSession();
         return s.getClusterId();
     }
     
     /* ------------------------------------------------------------ */
     public String getNodeId(HttpSession session)
     {
-        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        Session s = ((SessionIf)session).getSession();
         return s.getNodeId();
     }
 
@@ -619,7 +618,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      */
     public void removeSession(HttpSession session, boolean invalidate)
     {
-        Session s = (Session)((session instanceof Session)?session:session.getAttribute(SESSION_ATTR));
+        Session s = ((SessionIf)session).getSession();
         removeSession(s,invalidate);
     }
 
@@ -706,6 +705,19 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /**
+     * Interface that any session wrapper should implement so that
+     * SessionManager may access the Jetty session implementation.
+     *
+     */
+    public interface SessionIf extends HttpSession
+    {
+        public Session getSession();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /**
      * 
      * <p>
      * Implements {@link javax.servlet.HttpSession} from the {@link javax.servlet} package.   
@@ -713,7 +725,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      * @author gregw
      *
      */
-    public abstract class Session implements HttpSession, Serializable
+    public abstract class Session implements SessionIf, Serializable
     {
         protected final String _clusterId;
         protected final String _nodeId;
@@ -750,6 +762,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
+        public Session getSession()
+        {
+            return this;
+        }
+        
+        /* ------------------------------------------------------------- */
         protected void initValues() 
         {
             _values=newAttributeMap();
@@ -761,9 +779,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             if (_invalid)
                 throw new IllegalStateException();
 
-            if (SESSION_ATTR==name)
-                return this;
-            
             if (null == _values)
                 return null;
             
