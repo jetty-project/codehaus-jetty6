@@ -192,8 +192,12 @@ public class SessionHandler extends HandlerWrapper
             HttpSession session=request.getSession(false);
             if (session!=null&& session!=old_session)
                 getSessionManager().complete(session);
-            base_request.setSessionManager(old_session_manager);
-            base_request.setSession(old_session);
+
+            if (old_session_manager != _sessionManager)
+            {
+                base_request.setSessionManager(old_session_manager);
+                base_request.setSession(old_session);
+            }
         }
     }
     

@@ -19,6 +19,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-377 - allow sessions to be wrapped with AbstractSesssionManager.SessionIf
  + JETTY-378 - handle JVMs with non ISO/UTF default encodings
  + JETTY-380 - handle pipelines of more than 4 requests!
+ + JETTY-385 - EncodeURL for new sessions from dispatch
 
 
 jetty-6.1.4 - 15 Jun 2007
