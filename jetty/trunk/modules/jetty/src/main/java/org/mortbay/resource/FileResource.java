@@ -165,7 +165,7 @@ public class FileResource extends URLResource
         {
             if (!(r instanceof BadResource))
             {
-                ((FileResource)r)._alias=r._url;
+                ((FileResource)r)._alias=new URL(URIUtil.addPaths(_urlString,URIUtil.encodePath(path)));
                 ((FileResource)r)._aliasChecked=true;
             }
         }                             
