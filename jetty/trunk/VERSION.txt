@@ -16,7 +16,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-374 - HttpTesters handles large requests/responses
  + JETTY-375 - IllegalStateException when committed.
  + JETTY-376 - allow spaces in reason string
- + JETTY-377 - allow sessions to be wrapped.
+ + JETTY-377 - allow sessions to be wrapped with AbstractSesssionManager.SessionIf
  + JETTY-378 - handle JVMs with non ISO/UTF default encodings
  + JETTY-380 - handle pipelines of more than 4 requests!
 
