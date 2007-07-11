@@ -285,7 +285,8 @@ public class HttpConnection implements Connection
      */
     public ServletInputStream getInputStream()
     {
-        if (_in == null) _in = new HttpParser.Input(((HttpParser)_parser),_connector.getMaxIdleTime());
+        if (_in == null) 
+            _in = new HttpParser.Input(((HttpParser)_parser),_connector.getMaxIdleTime());
         return _in;
     }
 
