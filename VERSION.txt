@@ -11,6 +11,7 @@ jetty-6.1-SNAPSHOT
  + make jetty plus example webapps use ContextDeployer
  + Dispatch SslEngine expiry (non atomic)
  + Make SLF4JLog impl public, add mbean descriptors
+ + SPR-3682 - dont hide forward attr in include.
  + JETTY-253 - Improved graceful shutdown
  + JETTY-373 - Stop all dependent lifecycles
  + JETTY-374 - HttpTesters handles large requests/responses
