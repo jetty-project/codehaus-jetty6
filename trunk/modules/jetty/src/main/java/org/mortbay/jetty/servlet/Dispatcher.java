@@ -322,9 +322,6 @@ public class Dispatcher implements RequestDispatcher
                 if (key.equals(__FORWARD_QUERY_STRING)) return _query;
             }
 
-            if (key.startsWith(__INCLUDE_PREFIX)) 
-                return null;
-
             if (key.equals(__FORWARD_JETTY)) 
                 return Boolean.TRUE;
             
@@ -402,7 +399,8 @@ public class Dispatcher implements RequestDispatcher
             setAttribute(name,null);
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
     private class IncludeAttributes implements Attributes
     {
         Attributes _attr;
@@ -419,6 +417,8 @@ public class Dispatcher implements RequestDispatcher
         }
         
         /* ------------------------------------------------------------ */
+        /* ------------------------------------------------------------ */
+        /* ------------------------------------------------------------ */
         public Object getAttribute(String key)
         {
             if (Dispatcher.this._named==null)
@@ -429,14 +429,8 @@ public class Dispatcher implements RequestDispatcher
                 if (key.equals(__INCLUDE_QUERY_STRING)) return _query;
                 if (key.equals(__INCLUDE_REQUEST_URI))  return _requestURI;
             }
-            else
-            {
-                if (key.startsWith(__INCLUDE_PREFIX)) 
+            else if (key.startsWith(__INCLUDE_PREFIX)) 
                     return null;
-            }
-
-            if (key.startsWith(__FORWARD_PREFIX)) 
-                return null;
             
             if (key.equals(__INCLUDE_JETTY)) 
                 return Boolean.TRUE;
