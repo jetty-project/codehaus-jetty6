@@ -27,6 +27,7 @@ import java.net.URLConnection;
 import java.security.Permission;
 
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
 
@@ -138,14 +139,17 @@ public class FileResource extends URLResource
         throws IOException,MalformedURLException
     {
         URLResource r=null;
+        String url=null;
 
+        path = org.mortbay.util.URIUtil.canonicalPath(path);
+        
         if (!isDirectory())
         {
             r=(FileResource)super.addPath(path);
+            url=r._urlString;
         }
         else
         {
-            path = org.mortbay.util.URIUtil.canonicalPath(path);
             if (path==null)
                 throw new MalformedURLException();   
             
@@ -154,7 +158,8 @@ public class FileResource extends URLResource
             if (path.startsWith("/"))
                 rel = path.substring(1);
             
-            r=(URLResource)Resource.newResource(URIUtil.addPaths(_urlString,URIUtil.encodePath(rel)));
+            url=URIUtil.addPaths(_urlString,URIUtil.encodePath(rel));
+            r=(URLResource)Resource.newResource(url);
         }
         
         String encoded=URIUtil.encodePath(path);
@@ -163,9 +168,17 @@ public class FileResource extends URLResource
         
         if (expected!=index && ((expected-1)!=index || path.endsWith("/") || !r.isDirectory()))
         {
+            String no_doubles_slash= StringUtil.replace(path,"//","/");
+            if (!path.equals(no_doubles_slash))
+            {
+                Resource try_again = addPath(no_doubles_slash);
+                if (try_again.getAlias()==null)
+                    return try_again;
+            }
+            
             if (!(r instanceof BadResource))
             {
-                ((FileResource)r)._alias=new URL(URIUtil.addPaths(_urlString,URIUtil.encodePath(path)));
+                ((FileResource)r)._alias=new URL(url);
                 ((FileResource)r)._aliasChecked=true;
             }
         }                             
