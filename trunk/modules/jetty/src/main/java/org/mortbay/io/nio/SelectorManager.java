@@ -9,6 +9,8 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.io.Connection;
@@ -317,6 +319,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
          */
         public void doSelect() throws IOException
         {
+            SelectionKey key=null;
+            
             try
             {
                 List changes;
@@ -354,7 +358,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
                             if (channel.isConnected())
                             {
-                                SelectionKey key = channel.register(_selector,SelectionKey.OP_READ,att);
+                                key = channel.register(_selector,SelectionKey.OP_READ,att);
                                 SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                 key.attach(endpoint);
                                 endpoint.dispatch();
@@ -424,7 +428,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             Iterator iter = _selector.keys().iterator();
                             while(iter.hasNext())
                             {
-                                SelectionKey key = (SelectionKey) iter.next();
+                                key = (SelectionKey) iter.next();
                                 if (key.isValid()&&key.interestOps()==0)
                                 {
                                     key.cancel();
@@ -457,7 +461,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 Iterator iter = _selector.selectedKeys().iterator();
                 while (iter.hasNext())
                 {
-                    SelectionKey key = (SelectionKey) iter.next();
+                    key = (SelectionKey) iter.next();
                                         
                     try
                     {
@@ -557,6 +561,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         if (key != null && !(key.channel() instanceof ServerSocketChannel) && key.isValid())
                         {
                             key.interestOps(0);
+
                             key.cancel();
                         } 
                     }

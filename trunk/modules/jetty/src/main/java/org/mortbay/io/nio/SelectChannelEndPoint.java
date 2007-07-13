@@ -350,7 +350,9 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                             {
                                 Log.ignore(e);
                                 if (_key!=null && _key.isValid())
+                                {
                                     _key.cancel();
+                                }
                                 cancelIdle();
                                 _manager.endPointClosed(this);
                                 _key = null;
@@ -364,14 +366,19 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 }
                 else
                 {
-                    _key.interestOps(0);
-                    //_key.cancel();
+                    if (_key.isValid())
+                        _key.interestOps(0);
+                    else
+                        _key=null;
                 }
             }
             else    
             {
                 if (_key!=null && _key.isValid())
-                    _key.cancel();
+                {
+                    _key.interestOps(0);
+                    _key.cancel(); 
+                }
                 cancelIdle();
                 _manager.endPointClosed(this);
                 _key = null;

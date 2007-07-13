@@ -34,7 +34,7 @@ public class Timeout
 {
     
     private long _duration;
-    private long _now;
+    private long _now=System.currentTimeMillis();
     private Task _head=new Task();
     
     public Timeout()
