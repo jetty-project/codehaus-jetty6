@@ -126,6 +126,8 @@ public class ChannelEndPoint implements EndPoint
                 {
                     bbuf.position(buffer.putIndex());
                     len=_channel.read(bbuf);
+                    if (len<0)
+                        _channel.close();
                 }
                 finally
                 {

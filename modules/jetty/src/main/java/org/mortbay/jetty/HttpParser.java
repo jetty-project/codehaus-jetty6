@@ -70,6 +70,7 @@ public class HttpParser implements Parser
     private String _multiLineValue;
     private int _responseStatus; // If >0 then we are parsing a response
     private boolean _forceContentBuffer;
+    private Input _input;
     
     /* ------------------------------------------------------------------------------- */
     protected int _state=STATE_START;
@@ -214,6 +215,8 @@ public class HttpParser implements Parser
         return total;
     }
 
+
+    
     /* ------------------------------------------------------------------------------- */
     /**
      * Parse until next Event.
@@ -596,6 +599,8 @@ public class HttpParser implements Parser
         
         // Handle _content
         length=_buffer.length();
+        if (_input!=null)
+            _input._contentView=_contentView;
         Buffer chunk; 
         while (_state > STATE_END && length > 0)
         {
@@ -730,10 +735,83 @@ public class HttpParser implements Parser
     }
 
     /* ------------------------------------------------------------------------------- */
+    /** fill the buffers from the endpoint
+     * 
+     */
+    public long fill() throws IOException
+    {
+        if (_body!=null && _buffer!=_body)
+            _buffer=_body;
+        if (_buffer == _body) 
+            _buffer.compact();
+        
+        int space=_buffer.space();
+        
+        // Fill buffer if we can
+        if (space == 0) 
+            throw new IOException("FULL "+(_buffer==_body?"body":"head"));
+        else
+        {
+            int filled=-1;
+            
+            if (_endp != null )
+            {
+                try
+                {
+                    filled=_endp.fill(_buffer);
+                }
+                catch(IOException e)
+                {
+                    Log.debug(e);
+                    reset(true);
+                    throw (e instanceof EofException) ? e:new EofException(e);
+                }
+            }
+            
+            return filled;
+        }
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    /** Skip any CRLFs in buffers
+     * 
+     */
+    public void skipCRLF()
+    {
+
+        while (_header!=null && _header.length()>0)
+        {
+            byte ch = _header.peek();
+            if (ch==HttpTokens.CARRIAGE_RETURN || ch==HttpTokens.LINE_FEED)
+            {
+                _eol=ch;
+                _header.skip(1);
+            }
+            else
+                break;
+        }
+
+        while (_body!=null && _body.length()>0)
+        {
+            byte ch = _body.peek();
+            if (ch==HttpTokens.CARRIAGE_RETURN || ch==HttpTokens.LINE_FEED)
+            {
+                _eol=ch;
+                _body.skip(1);
+            }
+            else
+                break;
+        }
+        
+    }
+    /* ------------------------------------------------------------------------------- */
     public void reset(boolean returnBuffers)
     {   
-        synchronized (this) // prevent dual reset.
+        synchronized (this) 
         {
+            if (_input!=null && _contentView.length()>0)
+                _input._contentView=_contentView.duplicate(Buffer.READWRITE);
+            
             _state=STATE_START;
             _contentLength=HttpTokens.UNKNOWN_CONTENT;
             _contentPosition=0;
@@ -816,6 +894,12 @@ public class HttpParser implements Parser
         }
         return _header;
     }
+    
+    /* ------------------------------------------------------------ */
+    public Buffer getBodyBuffer()
+    {
+        return _body;
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -868,11 +952,10 @@ public class HttpParser implements Parser
     /* ------------------------------------------------------------ */
     public static class Input extends ServletInputStream
     {
-
         protected HttpParser _parser;
         protected EndPoint _endp;
         protected long _maxIdleTime;
-        protected View _content;
+        protected Buffer _contentView;
         
         /* ------------------------------------------------------------ */
         public Input(HttpParser parser, long maxIdleTime)
@@ -880,7 +963,8 @@ public class HttpParser implements Parser
             _parser=parser;
             _endp=parser._endp;
             _maxIdleTime=maxIdleTime;
-            _content=_parser._contentView;
+            _contentView=_parser._contentView;
+            _parser._input=this;
         }
         
         /* ------------------------------------------------------------ */
@@ -891,7 +975,7 @@ public class HttpParser implements Parser
         {
             int c=-1;
             if (blockForContent())
-                c= 0xff & _content.get();
+                c= 0xff & _contentView.get();
             return c;
         }
         
@@ -903,16 +987,16 @@ public class HttpParser implements Parser
         {
             int l=-1;
             if (blockForContent())
-                l= _content.get(b, off, len);
+                l= _contentView.get(b, off, len);
             return l;
         }
         
         /* ------------------------------------------------------------ */
         private boolean blockForContent() throws IOException
         {
-            if (_content.length()>0)
+            if (_contentView.length()>0)
                 return true;
-            if (_parser.isState(HttpParser.STATE_END)) 
+            if (_parser.getState() <= HttpParser.STATE_END) 
                 return false;
             
             // Handle simple end points.
@@ -927,7 +1011,7 @@ public class HttpParser implements Parser
                     _parser.parseNext();
 
                     // parse until some progress is made (or IOException thrown for timeout)
-                    while(_content.length() == 0 && !_parser.isState(HttpParser.STATE_END))
+                    while(_contentView.length() == 0 && !_parser.isState(HttpParser.STATE_END))
                     {
                         // Try to get more _parser._content
                         _parser.parseNext();
@@ -944,7 +1028,7 @@ public class HttpParser implements Parser
                 _parser.parseNext();
                 
                 // parse until some progress is made (or IOException thrown for timeout)
-                while(_content.length() == 0 && !_parser.isState(HttpParser.STATE_END))
+                while(_contentView.length() == 0 && !_parser.isState(HttpParser.STATE_END))
                 {
                     if (!_endp.blockReadable(_maxIdleTime))
                     {
@@ -957,7 +1041,7 @@ public class HttpParser implements Parser
                 }
             }
             
-            return _content.length()>0; 
+            return _contentView.length()>0; 
         }   
 
         /* ------------------------------------------------------------ */
@@ -966,12 +1050,12 @@ public class HttpParser implements Parser
          */
         public int available() throws IOException
         {
-            if (_content!=null && _content.length()>0)
-                return _content.length();
+            if (_contentView!=null && _contentView.length()>0)
+                return _contentView.length();
             if (!_endp.isBlocking())
                 _parser.parseNext();
             
-            return _content==null?0:_content.length();
+            return _contentView==null?0:_contentView.length();
         }
     }
 
