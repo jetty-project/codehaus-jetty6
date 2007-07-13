@@ -203,6 +203,8 @@ public class URITest extends junit.framework.TestCase
             {"./aaa/../bbb","bbb"},
             {"aaa/bbb/..","aaa/"},
             {"aaa/bbb/../","aaa/"},
+            {"/aaa//../bbb","/aaa/bbb"},
+            {"/aaa/./../bbb","/bbb"},
             {"./",""},
             {".",""},
             {"",""},
