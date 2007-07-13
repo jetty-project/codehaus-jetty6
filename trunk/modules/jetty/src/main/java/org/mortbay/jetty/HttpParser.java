@@ -740,6 +740,12 @@ public class HttpParser implements Parser
      */
     public long fill() throws IOException
     {
+        if (_buffer==null)
+        {
+            _buffer=_header=getHeaderBuffer();
+            _tok0=new View(_buffer);
+            _tok1=new View(_buffer);
+        }
         if (_body!=null && _buffer!=_body)
             _buffer=_body;
         if (_buffer == _body) 
