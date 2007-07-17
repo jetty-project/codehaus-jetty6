@@ -90,7 +90,8 @@ public class UserAgentFilter implements Filter
         _attribute=filterConfig.getInitParameter("attribute");
         
         String p=filterConfig.getInitParameter("userAgent");
-        _pattern=Pattern.compile(p);
+        if (p!=null)
+            _pattern=Pattern.compile(p);
         
         String size=filterConfig.getInitParameter("cacheSize");
         if (size!=null)
