@@ -18,6 +18,8 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.NCSARequestLog;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.deployer.ContextDeployer;
+import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -34,6 +36,9 @@ public class LikeJettyXml
         throws Exception
     {
         Server server = new Server();
+        String jetty_home = System.getProperty("jetty.home");
+        if (jetty_home==null)
+            jetty_home=".";
         
         BoundedThreadPool threadPool = new BoundedThreadPool();
         threadPool.setMaxThreads(100);
@@ -41,6 +46,7 @@ public class LikeJettyXml
              
         Connector connector=new SelectChannelConnector();
         connector.setPort(8080);
+        connector.setMaxIdleTime(30000);
         server.setConnectors(new Connector[]{connector});
         
         HandlerCollection handlers = new HandlerCollection();
@@ -49,16 +55,27 @@ public class LikeJettyXml
         handlers.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
         server.setHandler(handlers);
         
-        // TODO add javadoc context to contexts
+        ContextDeployer deployer0 = new ContextDeployer();
+        deployer0.setContexts(contexts);
+        deployer0.setConfigurationDir(jetty_home+"/contexts");
+        deployer0.setScanInterval(1);
+        server.addLifeCycle(deployer0);   
         
-        WebAppContext.addWebApplications(server, "./webapps", "org/mortbay/jetty/webapp/webdefault.xml", true, false);
-        
+        WebAppDeployer deployer1 = new WebAppDeployer();
+        deployer1.setContexts(contexts);
+        deployer1.setWebAppDir(jetty_home+"/webapps");
+        deployer1.setParentLoaderPriority(false);
+        deployer1.setExtract(true);
+        deployer1.setAllowDuplicates(false);
+        deployer1.setDefaultsDescriptor(jetty_home+"/etc/webdefault.xml");
+        server.addLifeCycle(deployer1);
+          
         HashUserRealm userRealm = new HashUserRealm();
         userRealm.setName("Test Realm");
-        userRealm.setConfig("./etc/realm.properties");
+        userRealm.setConfig(jetty_home+"/etc/realm.properties");
         server.setUserRealms(new UserRealm[]{userRealm});
         
-        NCSARequestLog requestLog = new NCSARequestLog("./logs/jetty-yyyy-mm-dd.log");
+        NCSARequestLog requestLog = new NCSARequestLog(jetty_home+"/logs/jetty-yyyy-mm-dd.log");
         requestLog.setExtended(false);
         requestLogHandler.setRequestLog(requestLog);
         
