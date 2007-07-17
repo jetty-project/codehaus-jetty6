@@ -141,6 +141,14 @@ public class WebAppTest extends TestCase
 
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?continue=1000");
         assertTrue(IO.toString(url.openStream()).startsWith("<html>"));
+        
+        
+        url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/info?lines=100");
+        
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.addRequestProperty("accept-encoding","gzip");
+        connection.connect();
+        assertEquals("gzip",connection.getHeaderField("Content-Encoding"));
 
     }
     
@@ -191,7 +199,7 @@ public class WebAppTest extends TestCase
         url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test/dump/ex3/2");
         try{IO.toString(url.openStream());} catch(IOException e){}
         assertFalse(context.getServletHandler().isAvailable());
-        Thread.sleep(4000);
+        Thread.sleep(5000);
         assertTrue(context.getServletHandler().isAvailable());
     }
     

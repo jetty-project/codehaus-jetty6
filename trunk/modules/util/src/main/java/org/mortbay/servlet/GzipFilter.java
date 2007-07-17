@@ -120,13 +120,13 @@ public class GzipFilter extends UserAgentFilter
                     return;
                 }
             }
-            
+
             GZIPResponseWrapper wrappedResponse=new GZIPResponseWrapper(response);
             
             boolean exceptional=true;
             try
             {
-                super.doFilter(request,response,chain);
+                super.doFilter(request,wrappedResponse,chain);
                 exceptional=false;
             }
             finally
