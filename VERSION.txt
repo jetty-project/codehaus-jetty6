@@ -1,4 +1,4 @@
-jetty-6.1-SNAPSHOT
+jetty-6.1.5 - 19 Jul 2007
  + Upgrade to Jasper 2.1 tag SJSAS-9_1-B50G-BETA3-27_June_2007
  + Fixed GzipFilter for dispatchers
  + JETTY-392 - updated LikeJettyXml example
@@ -17,6 +17,7 @@ jetty-6.1.5rc0 - 15 Jul 200
  + Dispatch SslEngine expiry (non atomic)
  + Make SLF4JLog impl public, add mbean descriptors
  + SPR-3682 - dont hide forward attr in include.
+ + Upgrade to Jasper 2.1 tag SJSAS-9_1-B50G-BETA3-27_June_2007
  + JETTY-253 - Improved graceful shutdown
  + JETTY-373 - Stop all dependent lifecycles
  + JETTY-374 - HttpTesters handles large requests/responses
