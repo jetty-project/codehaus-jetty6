@@ -43,7 +43,7 @@
   
   <filter>
     <filter-name>GzipFilter</filter-name>
-    <filter-class>org.mortbay.servlet.GzipFilter</filter-class>
+    <filter-class>org.mortbay.servlet.jetty.IncludableGzipFilter</filter-class>
     <init-param>
       <param-name>bufferSize</param-name>
       <param-value>8192</param-value>
@@ -78,6 +78,8 @@
   <filter-mapping>
     <filter-name>Chat</filter-name>
     <url-pattern>/chat/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
   
   <filter>
