@@ -35,12 +35,14 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.StringUtil;
 
+import sun.nio.cs.ext.ISCII91;
+
 /* ------------------------------------------------------------ */
 /** GZIP Filter
  * This filter will gzip the content of a response iff: <ul>
  * <li>The filter is mapped to a matching path</li>
  * <li>The response status code is >=200 and <300
- * <li>The content length is unknown or more than the <code>minGzipSize</code> initParameter (default 2048)</li>
+ * <li>The content length is unknown or more than the <code>minGzipSize</code> initParameter or the minGzipSize is 0(default)</li>
  * <li>The content-type is in the coma separated list of mimeTypes set in the <code>mimeTypes</code> initParameter or
  * if no mimeTypes are defined the content-type is not "application/gzip"</li>
  * <li>No content-encoding is specified by the resource</li>
@@ -64,7 +66,7 @@ public class GzipFilter extends UserAgentFilter
 {
     protected Set _mimeTypes;
     protected int _bufferSize=8192;
-    protected int _minGzipSize=2048;
+    protected int _minGzipSize=0;
     protected Set _excluded;
     
     public void init(FilterConfig filterConfig) throws ServletException
@@ -121,7 +123,7 @@ public class GzipFilter extends UserAgentFilter
                 }
             }
 
-            GZIPResponseWrapper wrappedResponse=new GZIPResponseWrapper(response);
+            GZIPResponseWrapper wrappedResponse=newGZIPResponseWrapper(request,response);
             
             boolean exceptional=true;
             try
@@ -145,17 +147,25 @@ public class GzipFilter extends UserAgentFilter
             super.doFilter(request,response,chain);
         }
     }
+    
+    protected GZIPResponseWrapper newGZIPResponseWrapper(HttpServletRequest request, HttpServletResponse response)
+    {
+        return new GZIPResponseWrapper(request,response);
+    }
+
 
     public class GZIPResponseWrapper extends HttpServletResponseWrapper
     {
+        HttpServletRequest _request;
         boolean _noGzip;
         PrintWriter _writer;
         GzipStream _gzStream;
         long _contentLength=-1;
 
-        public GZIPResponseWrapper(HttpServletResponse httpServletResponse)
+        public GZIPResponseWrapper(HttpServletRequest request, HttpServletResponse response)
         {
-            super(httpServletResponse);
+            super(response);
+            _request=request;
         }
 
         public void setContentType(String ct)
@@ -165,8 +175,9 @@ public class GzipFilter extends UserAgentFilter
             if (colon>0)
                 ct=ct.substring(0,colon);
 
-            if (_mimeTypes==null && "application/gzip".equalsIgnoreCase(ct) ||
-                    _mimeTypes!=null && !_mimeTypes.contains(StringUtil.asciiToLowerCase(ct)))
+            if ((_gzStream==null || _gzStream._out==null) && 
+                (_mimeTypes==null && "application/gzip".equalsIgnoreCase(ct) ||
+                 _mimeTypes!=null && !_mimeTypes.contains(StringUtil.asciiToLowerCase(ct))))
             {
                 noGzip();
             }
@@ -285,7 +296,7 @@ public class GzipFilter extends UserAgentFilter
                 if (getResponse().isCommitted() || _noGzip)
                     return getResponse().getOutputStream();
                 
-                _gzStream=new GzipStream((HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
+                _gzStream=newGzipStream(_request,(HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
             }
             else if (_writer!=null)
                 throw new IllegalStateException("getWriter() called");
@@ -303,7 +314,7 @@ public class GzipFilter extends UserAgentFilter
                 if (getResponse().isCommitted() || _noGzip)
                     return getResponse().getWriter();
                 
-                _gzStream=new GzipStream((HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
+                _gzStream=newGzipStream(_request,(HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
                 _writer=new PrintWriter(_gzStream);
             }
             return _writer;   
@@ -332,28 +343,35 @@ public class GzipFilter extends UserAgentFilter
             if (_gzStream!=null)
                 _gzStream.finish();
         }
-        
+     
+        protected GzipStream newGzipStream(HttpServletRequest request,HttpServletResponse response,long contentLength,int bufferSize, int minGzipSize) throws IOException
+        {
+            return new GzipStream(request,response,contentLength,bufferSize,minGzipSize);
+        }
     }
 
     
     public static class GzipStream extends ServletOutputStream
     {
+        protected HttpServletRequest _request;
+        protected HttpServletResponse _response;
         protected OutputStream _out;
         protected ByteArrayOutputStream2 _bOut;
         protected GZIPOutputStream _gzOut;
-        protected HttpServletResponse _response;
         protected boolean _closed;
         protected int _bufferSize;
         protected int _minGzipSize;
         protected long _contentLength;
 
-        public GzipStream(HttpServletResponse response,long contentLength,int bufferSize, int minGzipSize) throws IOException
+        public GzipStream(HttpServletRequest request,HttpServletResponse response,long contentLength,int bufferSize, int minGzipSize) throws IOException
         {
-            super();
+            _request=request;
             _response=response;
             _contentLength=contentLength;
             _bufferSize=bufferSize;
             _minGzipSize=minGzipSize;
+            if (minGzipSize==0)
+                doGzip();
         }
 
         public void resetBuffer()
@@ -361,7 +379,7 @@ public class GzipFilter extends UserAgentFilter
             _closed=false;
             _out=null;
             _bOut=null;
-            if (_gzOut!=null)
+            if (_gzOut!=null && !_response.isCommitted())
                 _response.setHeader("Content-Encoding",null);
             _gzOut=null;
         }
@@ -386,24 +404,29 @@ public class GzipFilter extends UserAgentFilter
 
         public void close() throws IOException
         {
-            if (_bOut!=null)
+            if (_request.getAttribute("javax.servlet.include.request_uri")!=null)            
+                flush();
+            else
             {
-                if (_contentLength<0)
-                    _contentLength=_bOut.getCount();
-                if (_contentLength<_minGzipSize)
+                if (_bOut!=null)
+                {
+                    if (_contentLength<0)
+                        _contentLength=_bOut.getCount();
+                    if (_contentLength<_minGzipSize)
+                        doNotGzip();
+                    else
+                        doGzip();
+                }
+                else if (_out==null)
+                {
                     doNotGzip();
-                else
-                    doGzip();
+                }
+
+                if (_gzOut!=null)
+                    _gzOut.finish();
+                _out.close();
+                _closed=true;
             }
-            else if (_out==null)
-            {
-                doNotGzip();
-            }
-            
-            if (_gzOut!=null)
-                _gzOut.finish();
-            _out.close();
-            _closed=true;
         }  
 
         public void finish() throws IOException
@@ -434,6 +457,12 @@ public class GzipFilter extends UserAgentFilter
             _out.write(b,off,len);
         }
         
+        protected boolean setContentEncodingGzip()
+        {
+            _response.setHeader("Content-Encoding", "gzip");
+            return _response.containsHeader("Content-Encoding");
+        }
+        
         public void doGzip() throws IOException
         {
             if (_gzOut==null) 
@@ -441,14 +470,18 @@ public class GzipFilter extends UserAgentFilter
                 if (_response.isCommitted())
                     throw new IllegalStateException();
                 
-                _response.addHeader("Content-Encoding", "gzip");
-                _out=_gzOut=new GZIPOutputStream(_response.getOutputStream(),_bufferSize);
-                
-                if (_bOut!=null)
+                if (setContentEncodingGzip())
                 {
-                    _out.write(_bOut.getBuf(),0,_bOut.getCount());
-                    _bOut=null;
+                    _out=_gzOut=new GZIPOutputStream(_response.getOutputStream(),_bufferSize);
+
+                    if (_bOut!=null)
+                    {
+                        _out.write(_bOut.getBuf(),0,_bOut.getCount());
+                        _bOut=null;
+                    }
                 }
+                else 
+                    doNotGzip();
             }
         }
         
