@@ -336,7 +336,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         // Can we gzip this request?
         String pathInContextGz=null;
         boolean gzip=false;
-        if (_gzip && reqRanges==null && !endsWithSlash )
+        if (!included.booleanValue() && _gzip && reqRanges==null && !endsWithSlash )
         {
             String accept=request.getHeader(HttpHeaders.ACCEPT_ENCODING);
             if (accept!=null && accept.indexOf("gzip")>=0)
