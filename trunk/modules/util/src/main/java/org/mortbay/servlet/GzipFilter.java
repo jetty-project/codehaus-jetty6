@@ -433,7 +433,14 @@ public class GzipFilter extends UserAgentFilter
         {
             if (!_closed)
             {
-                flush();
+                if (_out==null || _bOut!=null)
+                {
+                    if (_contentLength>0 && _contentLength<_minGzipSize)
+                        doNotGzip();
+                    else
+                        doGzip();
+                }
+                
                 if (_gzOut!=null)
                     _gzOut.finish();
             }
