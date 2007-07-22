@@ -140,6 +140,7 @@ public abstract class AbstractGenerator implements Generator
         _state = STATE_HEADER;
         _status = 0;
         _version = HttpVersions.HTTP_1_1_ORDINAL;
+        _reason = null;
         _last = false;
         _head = false;
         _noContent=false;
