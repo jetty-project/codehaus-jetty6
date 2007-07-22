@@ -58,7 +58,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     private int _acceptorPriorityOffset=0;
     private boolean _useDNS;
     
-    protected int _maxIdleTime=30000; 
+    protected int _maxIdleTime=200000; 
     protected int _lowResourceMaxIdleTime=-1; 
     protected int _soLingerTime=-1; 
     
