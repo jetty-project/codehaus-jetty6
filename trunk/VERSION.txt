@@ -1,6 +1,9 @@
+jetty-SNAPSHOT
+
 jetty-6.1.5 - 19 Jul 2007
  + Upgrade to Jasper 2.1 tag SJSAS-9_1-B50G-BETA3-27_June_2007
  + Fixed GzipFilter for dispatchers
+ + Fixed reset of reason
  + JETTY-392 - updated LikeJettyXml example
 
 jetty-6.1.5rc0 - 15 Jul 200

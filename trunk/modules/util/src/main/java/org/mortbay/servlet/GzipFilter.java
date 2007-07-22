@@ -15,6 +15,7 @@ package org.mortbay.servlet;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
@@ -111,7 +112,7 @@ public class GzipFilter extends UserAgentFilter
         HttpServletResponse response=(HttpServletResponse)res;
 
         String ae = request.getHeader("accept-encoding");
-        if (ae != null && ae.indexOf("gzip")>=0)
+        if (ae != null && ae.indexOf("gzip")>=0 && !response.containsHeader("Content-Encoding"))
         {
             if (_excluded!=null)
             {
@@ -315,7 +316,8 @@ public class GzipFilter extends UserAgentFilter
                     return getResponse().getWriter();
                 
                 _gzStream=newGzipStream(_request,(HttpServletResponse)getResponse(),_contentLength,_bufferSize,_minGzipSize);
-                _writer=new PrintWriter(_gzStream);
+                String encoding = getCharacterEncoding();
+                _writer=encoding==null?new PrintWriter(_gzStream):new PrintWriter(new OutputStreamWriter(_gzStream,encoding));
             }
             return _writer;   
         }
