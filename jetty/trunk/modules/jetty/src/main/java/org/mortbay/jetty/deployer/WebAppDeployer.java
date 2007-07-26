@@ -191,14 +191,19 @@ public class WebAppDeployer extends AbstractLifeCycle
                 for (int i=0; i<installed.length; i++)
                 {
                     ContextHandler c=(ContextHandler)installed[i];
-                    
+        
                     if (context.equals(c.getContextPath()))
                         continue files;
                     
-                    if (c.getBaseResource()!=null && c.getBaseResource().getFile().getAbsolutePath().equals(app.getFile().getAbsolutePath()))
+                   String path;
+                   if (c instanceof WebAppContext)
+                       path = ((WebAppContext)c).getWar();
+                   else
+                       path = (c.getBaseResource()==null?"":c.getBaseResource().getFile().getAbsolutePath());
+
+                    if (path.equals(app.getFile().getAbsolutePath()))
                         continue files;
-                    
-                            
+   
                 }
             }
 
@@ -230,7 +235,6 @@ public class WebAppDeployer extends AbstractLifeCycle
             wah.setExtractWAR(_extract);
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(_parentLoaderPriority);
-            
             // add it
             _contexts.addHandler(wah);
             _deployed.add(wah);
