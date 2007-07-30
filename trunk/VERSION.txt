@@ -1,5 +1,6 @@
 jetty-SNAPSHOT
  + JETTY-400 consume CGI stderr
+ + JETTY-403 Allow long content length for range requests
  + JETTY-404 WebAppDeployer sometimes deploys duplicate webapp
 
 jetty-6.1.5 - 19 Jul 2007

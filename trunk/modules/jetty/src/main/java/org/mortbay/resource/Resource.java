@@ -490,7 +490,7 @@ public abstract class Resource implements Serializable
             if (count<0)
                 IO.copy(in,out);
             else
-                IO.copy(in,out,(int)count);
+                IO.copy(in,out,count);
         }
         finally
         {
