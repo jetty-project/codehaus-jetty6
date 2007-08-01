@@ -71,10 +71,13 @@ public class SetUIDServer extends Server
         if (_startServerAsPrivileged)
         {
             super.doStart();
-            if (_uid!=0)
+            if (_gid!=0)
             {
                 Log.info("Setting GID="+_gid);
                 SetUID.setgid(_gid);
+            }
+            if (_uid!=0)
+            {
                 Log.info("Setting UID="+_uid);
                 SetUID.setuid(_uid);
             }
@@ -84,10 +87,13 @@ public class SetUIDServer extends Server
             Connector[] connectors = getConnectors();
             for (int i=0;connectors!=null && i<connectors.length;i++)
                 connectors[i].open();
-            if (_uid!=0)
+            if (_gid!=0)
             {
                 Log.info("Setting GID="+_gid);
                 SetUID.setgid(_gid);
+            }
+            if (_uid!=0)
+            {
                 Log.info("Setting UID="+_uid);
                 SetUID.setuid(_uid);
             }
