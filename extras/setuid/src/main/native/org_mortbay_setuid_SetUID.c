@@ -15,3 +15,9 @@ Java_org_mortbay_setuid_SetUID_setumask (JNIEnv * jnienv, jclass j, jint mask)
 {
     return((jint)umask((mode_t)mask));
 }
+  
+JNIEXPORT jint JNICALL 
+Java_org_mortbay_setuid_SetUID_setgid (JNIEnv * jnienv, jclass j, jint gid)
+{
+    return((jint)setgid((gid_t)gid));
+}
