@@ -14,9 +14,12 @@
 
 package org.mortbay.jetty.security;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,6 +32,8 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.Scanner;
+import org.mortbay.util.Scanner.BulkListener;
 
 /* ------------------------------------------------------------ */
 /** HashMapped User Realm.
@@ -65,10 +70,12 @@ public class HashUserRealm implements UserRealm, SSORealm
     /* ------------------------------------------------------------ */
     private String _realmName;
     private String _config;
+    private Resource _configResource;
     protected HashMap _users=new HashMap();
     protected HashMap _roles=new HashMap(7);
     private SSORealm _ssoRealm;
-    
+    private Scanner _scanner=new Scanner();
+    private int _refreshInterval=0;//default is not to reload
     
 
     /* ------------------------------------------------------------ */
@@ -115,38 +122,97 @@ public class HashUserRealm implements UserRealm, SSORealm
         throws IOException
     {
         _config=config;
-        _users.clear();
-        _roles.clear();
-        
-        if(Log.isDebugEnabled())Log.debug("Load "+this+" from "+config);
-        Properties properties = new Properties();
-        Resource resource=Resource.newResource(config);
-        properties.load(resource.getInputStream());
-
-        Iterator iter = properties.entrySet().iterator();
-        while(iter.hasNext())
-        {
-            Map.Entry entry = (Map.Entry)iter.next();
-
-            String username=entry.getKey().toString().trim();
-            String credentials=entry.getValue().toString().trim();
-            String roles=null;
-            int c=credentials.indexOf(',');
-            if (c>0)
+        _configResource=Resource.newResource(_config);
+       loadConfig();
+        _scanner.stop(); 
+        List dirList = new ArrayList(1);
+        dirList.add(_configResource.getFile());
+        _scanner.setScanDirs(dirList);
+        _scanner.setFilenameFilter(new FilenameFilter ()
             {
-                roles=credentials.substring(c+1).trim();
-                credentials=credentials.substring(0,c).trim();
-            }
-
-            if (username!=null && username.length()>0 &&
-                credentials!=null && credentials.length()>0)
-            {
-                put(username,credentials);
-                if(roles!=null && roles.length()>0)
+                public boolean accept(File dir, String name)
                 {
-                    StringTokenizer tok = new StringTokenizer(roles,", ");
-                    while (tok.hasMoreTokens())
-                        addUserToRole(username,tok.nextToken());
+                    File f = new File(dir,name);
+                    try
+                    {
+                        if (f.compareTo(_configResource.getFile())==0)
+                            return true;
+                    }
+                    catch (IOException e)
+                    {
+                        return false;
+                    }
+
+                    return false;
+                }
+            
+            });
+        _scanner.addListener(new BulkListener()
+            {
+                public void filesChanged(List filenames) throws Exception
+                {
+                    if (filenames==null)
+                        return;
+                    if (filenames.isEmpty())
+                        return;
+                    if (filenames.size()==1 && filenames.get(0).equals(_config))
+                        loadConfig();
+                }
+
+           });
+        _scanner.setReportExistingFilesOnStartup(false);
+        _scanner.start();
+    }
+    
+
+    public void setRefreshInterval (int msec)
+    {
+        _refreshInterval=msec;
+        _scanner.setScanInterval(getRefreshInterval());
+    }
+    
+    public int getRefreshInterval()
+    {
+        return _refreshInterval;
+    }
+    
+    public void loadConfig () 
+    throws IOException
+    {
+        synchronized (this)
+        {
+            _users.clear();
+            _roles.clear();
+            
+            if(Log.isDebugEnabled())Log.debug("Load "+this+" from "+_config);
+            Properties properties = new Properties();
+            properties.load(_configResource.getInputStream());
+
+            Iterator iter = properties.entrySet().iterator();
+            while(iter.hasNext())
+            {
+                Map.Entry entry = (Map.Entry)iter.next();
+
+                String username=entry.getKey().toString().trim();
+                String credentials=entry.getValue().toString().trim();
+                String roles=null;
+                int c=credentials.indexOf(',');
+                if (c>0)
+                {
+                    roles=credentials.substring(c+1).trim();
+                    credentials=credentials.substring(0,c).trim();
+                }
+
+                if (username!=null && username.length()>0 &&
+                        credentials!=null && credentials.length()>0)
+                {
+                    put(username,credentials);
+                    if(roles!=null && roles.length()>0)
+                    {
+                        StringTokenizer tok = new StringTokenizer(roles,", ");
+                        while (tok.hasMoreTokens())
+                            addUserToRole(username,tok.nextToken());
+                    }
                 }
             }
         }
@@ -186,7 +252,7 @@ public class HashUserRealm implements UserRealm, SSORealm
         }
         if (user==null)
             return null;
-
+        
         if (user.authenticate(credentials))
             return user;
         
