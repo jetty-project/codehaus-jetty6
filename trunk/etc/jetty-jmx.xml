@@ -12,24 +12,24 @@
 <Configure id="Server" class="org.mortbay.jetty.Server">
 
     <!-- =========================================================== -->
-    <!-- Initialize platform mbean server                            -->
+    <!-- Initialize an mbean server                                  -->
     <!-- =========================================================== -->
-    <!-- Create an MBeanServer or use the jdk 1.5 platformMBeanServer -->
+    <!-- Use the jdk 1.5 platformMBeanServer -->
     <Call id="MBeanServer" class="java.lang.management.ManagementFactory" name="getPlatformMBeanServer"/>
-    
-    <!-- =========================================================== -->
-    <!-- Initialize mx4j mbean server                                -->
-    <!-- =========================================================== -->
-    <!-- replace platform config with
+
+    <!-- Use an mx4j mbean server - use this if running with jdk<1.5 -->
     <Call id="MBeanServer" class="javax.management.MBeanServerFactory" name="createMBeanServer"/>
     -->
     
-    <!-- initialize the Jetty MBean container -->
+    <!-- =========================================================== -->
+    <!-- Initialize the Jetty MBean container                        -->
+    <!-- =========================================================== -->
     <Get id="Container" name="container">
       <Call name="addEventListener">
         <Arg>
           <New class="org.mortbay.management.MBeanContainer">
             <Arg><Ref id="MBeanServer"/></Arg>
+            <!-- If using < jdk1.5 uncomment to start http adaptor -->
             <!-- Set name="managementPort">8082</Set -->
             <Call name="start" />
           </New>
