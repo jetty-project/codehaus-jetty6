@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -138,7 +139,9 @@ public class JSON
         else if (object instanceof Map)
             appendMap(buffer, (Map)object);
         else if (object instanceof List)
-            appendArray(buffer,LazyList.toArray(object,Object.class));
+            appendArray(buffer,((List) object).toArray ());
+        else if (object instanceof Collection)
+            appendArray(buffer,((Collection)object).toArray());
         else if (object.getClass().isArray())
             appendArray(buffer,object);
         else if (object instanceof Number)
@@ -338,7 +341,6 @@ public class JSON
                             return parseNumber(source);
                         else if (Character.isWhitespace(c))
                             break;
-
                         throw new IllegalStateException("unknown char "+c);
                 }
             }
