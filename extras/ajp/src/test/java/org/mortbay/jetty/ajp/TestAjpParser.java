@@ -178,19 +178,19 @@ public class TestAjpParser extends TestCase
         
         endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("1234007e007c7468656e616d653d746865253230717569636b25323062726f776e253230666f782532306a756d70732532306f766572253230746f2532307468652532306c617a79253230646f67253230544845253230515549434b25323042524f574e253230464f582532304a554d50532532304f564552253230544f25323054")));
 
-        parser.parseNext();
+        while (parser.parseNext()>0);
         assertEquals(1,parser.getState());
         assertEquals(2,count[0]);
         
         endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("12340042004048452532304c415a59253230444f472532302676616c75656f66323d6162636465666768696a6b6c6d6e6f707172737475767778797a31323334353637383930")));
 
-        parser.parseNext();
+        while (parser.parseNext()>0);
         assertEquals(1,parser.getState());
         assertEquals(3,count[0]);
         
         endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("123400020000")));
 
-        parser.parseNext();
+        while (parser.getState()!=0 && parser.parseNext()>0);
         assertEquals(0,parser.getState());
         assertEquals(3,count[0]);
         
