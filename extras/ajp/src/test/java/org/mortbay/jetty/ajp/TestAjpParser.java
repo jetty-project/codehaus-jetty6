@@ -153,7 +153,7 @@ public class TestAjpParser extends TestCase
     
     public void testPacketWithChunkedBody() throws Exception
     {
-        String packet=getTestHeader();
+        String packet="123400ff02040008485454502f312e3100000f2f746573742f64756d702f696e666f0000093132372e302e302e3100ffff00096c6f63616c686f7374000050000007a00e000d4a6176612f312e352e305f313100a00b00096c6f63616c686f737400a0010034746578742f68746d6c2c20696d6167652f6769662c20696d6167652f6a7065672c202a3b20713d2e322c202a2f2a3b20713d2e3200a006000a6b6565702d616c69766500a00700216170706c69636174696f6e2f782d7777772d666f726d2d75726c656e636f6465640000115472616e736665722d456e636f64696e670000076368756e6b656400000c4d61782d466f727761726473000002313000ff";
         byte[] src=TypeUtil.fromHexString(packet);
         ByteArrayBuffer buffer=new ByteArrayBuffer(Ajp13Packet.MAX_PACKET_SIZE);
         SimpleBuffers buffers=new SimpleBuffers(new Buffer[]
@@ -174,20 +174,25 @@ public class TestAjpParser extends TestCase
         
         parser.parseNext();
         assertEquals(1,parser.getState());
-        assertEquals(0,count[0]);
+        assertEquals(1,count[0]);
         
-        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString(getTestShortBody())));
+        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("1234007e007c7468656e616d653d746865253230717569636b25323062726f776e253230666f782532306a756d70732532306f766572253230746f2532307468652532306c617a79253230646f67253230544845253230515549434b25323042524f574e253230464f582532304a554d50532532304f564552253230544f25323054")));
 
         parser.parseNext();
         assertEquals(1,parser.getState());
-        assertEquals(1,count[0]);
+        assertEquals(2,count[0]);
         
-        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString(getTestTinyBody())));
+        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("12340042004048452532304c415a59253230444f472532302676616c75656f66323d6162636465666768696a6b6c6d6e6f707172737475767778797a31323334353637383930")));
 
         parser.parseNext();
+        assertEquals(1,parser.getState());
+        assertEquals(3,count[0]);
+        
+        endp.setIn(new ByteArrayBuffer(TypeUtil.fromHexString("123400020000")));
+
         parser.parseNext();
         assertEquals(0,parser.getState());
-        assertEquals(1,count[0]);
+        assertEquals(3,count[0]);
         
         assertTrue(true);
     }
