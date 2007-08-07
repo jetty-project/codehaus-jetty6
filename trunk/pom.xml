@@ -249,6 +249,7 @@
     <module>extras/win32service</module>
     <!--module>extras/gwt</module-->
     <module>extras/threadpool</module>
+    <module>extras/client</module>
 
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
@@ -258,7 +259,6 @@
 
     <module>extras/tests</module>
 
-    <module>contrib/client</module>
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
     <!--module>contrib/grizzly</module-->
