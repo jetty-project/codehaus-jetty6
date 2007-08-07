@@ -1,10 +1,32 @@
 
-
 This is the Jetty 6 HTTP server and servlet container.
 
 For more information about Jetty, please see the Jetty wiki: 
 
    http://docs.codehaus.org/display/JETTY/
+
+DIRECTORY LAYOUT
+================
+bin                   utility scripts and executables
+contexts              Deployment directory for context descriptors
+contrib               Source modules for optional jetty packages in the jetty-contrib repository, which has a larger more open group of committers
+etc                   Configuration files
+examples              Example projects
+extras                Source modules for optional jetty packages in the main jetty repository.
+javadoc               Generated javadoc
+lib                   Generated libraries
+LICENSES              License
+logs                  Request log and server log files
+modules               Source modules for core jetty packages
+patches               Optional patches for source modules
+pom.xml               Build configuration for maven
+project-website       Project Website
+README.txt            This file
+resources             Directory for resources to include on classpath
+start.jar             Start jar for jetty
+VERSION.txt           Version history
+webapps               Deployment directory for standard webapps
+webapps-plus          Deployment directory for plus webapps
 
 
 RUNNING JETTY

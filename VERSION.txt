@@ -3,6 +3,7 @@ jetty-SNAPSHOT
  + Fix cached header optimization for extra characters
  + SetUID option to support setgid
  + Make mx4j used only if runtime uses jdk<1.5
+ + Moved Grizzly to contrib
  + Give deployment file Scanner threads a unique name
  + Fix Host header for async client
  + JETTY-400 consume CGI stderr
