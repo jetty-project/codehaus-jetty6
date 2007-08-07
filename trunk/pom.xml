@@ -243,7 +243,6 @@
     <module>extras/servlet-tester</module>
     <module>extras/xbean</module>
     <module>extras/spring</module>
-    <!--module>extras/grizzly</module-->
     <module>extras/sslengine</module>
     <module>extras/ajp</module>
     <module>extras/setuid</module>
@@ -262,6 +261,7 @@
     <module>contrib/client</module>
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
+    <!--module>contrib/grizzly</module-->
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
   </modules>
