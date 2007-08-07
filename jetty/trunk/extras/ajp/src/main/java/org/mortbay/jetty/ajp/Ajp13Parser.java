@@ -170,8 +170,12 @@ public class Ajp13Parser implements Parser
             }
 
             _buffer = _body;
-            filled = _buffer.length();
-            return filled;
+            
+            if (_buffer.length()>0)
+            {            
+                filled = _buffer.length();
+                return filled;
+            }
         }
 
         if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
@@ -342,7 +346,7 @@ public class Ajp13Parser implements Parser
                 if (bufHeaderName != null && bufHeaderName.toString().equals(Ajp13RequestHeaders.CONTENT_LENGTH))
                 {
                     _contentLength = BufferUtil.toLong(bufHeaderValue);
-                    if (_contentLength <= 0)
+                    if (_contentLength == 0)
                         _contentLength = HttpTokens.NO_CONTENT;
                 }
 
@@ -464,13 +468,26 @@ public class Ajp13Parser implements Parser
             _contentPosition = 0;
             switch ((int) _contentLength)
             {
-                case HttpTokens.UNKNOWN_CONTENT:
+
                 case HttpTokens.NO_CONTENT:
                     _state = STATE_END;
                     _handler.headerComplete();
                     _handler.messageComplete(_contentPosition);
 
                     break;
+
+                case HttpTokens.UNKNOWN_CONTENT:
+
+                    _generator.getBodyChunk();
+                    if (_buffers != null && _body == null && _buffer == _header && _header.length() <= 0)
+                    {
+                        _body = _buffers.getBuffer(Ajp13Packet.MAX_PACKET_SIZE);
+                        _body.clear();
+                    }
+                    _state = STATE_AJP13CHUNK_START;
+                    _handler.headerComplete(); // May recurse here!
+
+                    return total_filled;
 
                 default:
 
@@ -514,6 +531,7 @@ public class Ajp13Parser implements Parser
                     if (_chunkLength==0)
                     {
                         _state=STATE_END;
+                         _generator.gotBody();
                         _handler.messageComplete(_contentPosition);
                         return total_filled;
                     }
@@ -561,7 +579,7 @@ public class Ajp13Parser implements Parser
                     if (remaining==0)
                     {
                         _state=STATE_AJP13CHUNK_START;
-                        if (_contentPosition<_contentLength)
+                        if (_contentPosition<_contentLength || _contentLength == HttpTokens.UNKNOWN_CONTENT)
                         {
                             _generator.getBodyChunk();
                         }
