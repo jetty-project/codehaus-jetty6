@@ -3,6 +3,7 @@ jetty-SNAPSHOT
  + Fix cached header optimization for extra characters
  + SetUID option to support setgid
  + Make mx4j used only if runtime uses jdk<1.5
+ + Give deployment file Scanner threads a unique name
  + JETTY-400 consume CGI stderr
  + JETTY-402 keep HashUserRealm in sync with file
  + JETTY-403 Allow long content length for range requests
