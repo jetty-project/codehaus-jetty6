@@ -44,9 +44,8 @@ import org.mortbay.log.Log;
  */
 public class Scanner
 {
+    private static int __scannerId=0;
     private int _scanInterval;
-
-    
     private List _listeners = Collections.synchronizedList(new ArrayList());
     private Map _prevScan = Collections.EMPTY_MAP;
     private FilenameFilter _filter;
@@ -219,7 +218,7 @@ public class Scanner
             _prevScan = scanFiles();
         }
 
-        _timer = new Timer();
+        _timer = new Timer("Scanner-"+__scannerId++, true);
         _task = new TimerTask()
         {
             public void run() { scan(); }
