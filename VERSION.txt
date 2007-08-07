@@ -1,4 +1,5 @@
 jetty-SNAPSHOT
+ + AJP13 Fix on chunked post
  + Fix cached header optimization for extra characters
  + SetUID option to support setgid
  + Make mx4j used only if runtime uses jdk<1.5
@@ -7,6 +8,7 @@ jetty-SNAPSHOT
  + JETTY-403 Allow long content length for range requests
  + JETTY-404 WebAppDeployer sometimes deploys duplicate webapp
  + JETTY-405 Default date formate for reqest log
+ + JETTY-407 AJP handles unknown content length
 
 jetty-6.1.5 - 19 Jul 2007
  + Upgrade to Jasper 2.1 tag SJSAS-9_1-B50G-BETA3-27_June_2007
