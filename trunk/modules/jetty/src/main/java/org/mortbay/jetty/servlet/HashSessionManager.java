@@ -219,6 +219,8 @@ public class HashSessionManager extends AbstractSessionManager
     /* ------------------------------------------------------------ */
     public AbstractSessionManager.Session getSession(String idInCluster)
     {
+        if (_sessions==null)
+            return null;
         return (Session)_sessions.get(idInCluster);
     }
 
