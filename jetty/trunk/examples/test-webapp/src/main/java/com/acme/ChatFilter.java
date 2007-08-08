@@ -193,15 +193,35 @@ public class ChatFilter extends AjaxFilter
                 member = new Member(session,null);
                 room.put(session.getId(),member);
             }
+
+            Continuation continuation = ContinuationSupport.getContinuation(request, room);
             
-            // Get an existing Continuation or create a new one if there are no events.
             if (!member.hasMessages())
-            {
-                Continuation continuation = ContinuationSupport.getContinuation(request, room);
-                member.setContinuation(continuation);
-                continuation.suspend(timeoutMS);
+            {   
+                if (member.getContinuation()!=null && member.getContinuation()!=continuation)
+                {
+                    // duplicate frames!
+                    Message duplicate = new Message("System","Multiple frames/tabs/windows from same browser!",true);
+                    Message action = new Message("System","Please use only one frame/tab/window",true);
+                    member.addMessage(duplicate);
+                    member.addMessage(action);
+                    try
+                    {
+                        Thread.sleep(5000);
+                    }
+                    catch(Exception e)
+                    {}
+                }
+                else
+                {
+                    member.setContinuation(continuation);
+                    continuation.suspend(timeoutMS);
+                }
             }
-            member.setContinuation(null);
+            
+            if (member.getContinuation()==continuation)
+                member.setContinuation(null);
+
             
             if (member.sendMessages(response))
                 sendMembers(room,response);
@@ -334,6 +354,15 @@ public class ChatFilter extends AjaxFilter
         }
 
 
+        /* ------------------------------------------------------------ */
+        /**
+         * @param continuation The continuation to set.
+         */
+        public Continuation getContinuation()
+        {
+            return _continuation;
+        }
+        
         /* ------------------------------------------------------------ */
         /**
          * @param continuation The continuation to set.
