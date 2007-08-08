@@ -54,6 +54,7 @@ var room =
      var from=message.getAttribute('from');
      var special=message.getAttribute('alert');
      var text=message.childNodes[0].data;
+     
      if ( special!='true' && from == room._last )
          from="...";
      else
@@ -108,70 +109,11 @@ var room =
     	window.status="ERROR: members "+e.name + ": " + e.message;
         // alert("_members " + e);
     }
-  },
-/*      
-  _joined: function(message)
-  {    
-     alert("room._joined is called");
-     var from=message.getAttribute('from');
-     var divChat=$('chat');
-
-     var span = document.createElement("span");
-     span.className="alert";
-     divChat.appendChild(span);
-     var spanFrom = document.createElement("span");
-     spanFrom.className="from";
-     spanFrom.innerHTML=from+"&nbsp;";
-     var spanText = document.createElement("span");
-     spanText.className="text";
-     spanText.innerHTML="has joined the room!";
-     var lineBreak = document.createElement("br");
-     span.appendChild(spanFrom);
-     span.appendChild(spanText);
-     divChat.appendChild(lineBreak);
-     divChat.scrollTop = divChat.scrollHeight - divChat.clientHeight;
-  },
-*/
-  
-/*
-  _left: function(message)
-  {    
-     var from=message.getAttribute('from');
-     var divChat=$('chat');
-
-     var span = document.createElement("span");
-     span.className="alert";
-     divChat.appendChild(span);
-     var spanFrom = document.createElement("span");
-     spanFrom.className="from";
-     spanFrom.innerHTML=from+"&nbsp;";
-     var spanText = document.createElement("span");
-     spanText.className="text";
-     spanText.innerHTML="has left the room!";
-     var lineBreak = document.createElement("br");
-     span.appendChild(spanFrom);
-     span.appendChild(spanText);
-     divChat.appendChild(lineBreak);
-     divChat.scrollTop = divChat.scrollHeight - divChat.clientHeight;
-  },
-*/
-  
-  _poll: function(first)
-  {
-     if (first ||  $('join').className=='hidden' && $('joined').className=='hidden')
-     {
-       ajax.addListener('chat',room._chat);
-      // ajax.addListener('joined',room._joined);
-      // ajax.addListener('left',room._left);
-       ajax.addListener('members',room._members);
-       $('join').className='';
-       $('joined').className='hidden';
-       $('username').focus();
-      Behaviour.apply();
-     }
   }
 };
 
+ajax.addListener('chat',room._chat);
+ajax.addListener('members',room._members);
 ajax.addPollHandler(room._poll);
 
 var chatBehaviours = 

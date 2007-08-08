@@ -15,14 +15,18 @@
 
 package com.acme;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -56,12 +60,22 @@ public class ChatFilter extends AjaxFilter
         chatrooms=null;
     }
 
+
+    /* ------------------------------------------------------------ */
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
+    {
+        HttpSession session = ((HttpServletRequest)request).getSession(true);
+        super.doFilter(request,response,chain);
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.ajax.AjaxFilter#handle(java.lang.String, javax.servlet.http.HttpServletRequest, org.mortbay.ajax.AjaxFilter.AjaxResponse)
      */
     public void handle(String method, String message, HttpServletRequest request, AjaxResponse response)
     {
+        HttpSession session = request.getSession(true);
+        
         String roomName=request.getParameter("room");
         if (roomName==null)
             roomName="0";
@@ -167,6 +181,8 @@ public class ChatFilter extends AjaxFilter
         long timeoutMS = 10000L; 
         if (request.getParameter("timeout")!=null)
             timeoutMS=Long.parseLong(request.getParameter("timeout"));
+        if (session.isNew())
+            timeoutMS=1;
         
         Member member=null;
         synchronized (room)
