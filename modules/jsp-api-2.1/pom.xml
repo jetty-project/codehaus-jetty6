@@ -91,6 +91,7 @@
 	        <Specification-Version>2.1</Specification-Version>
                 <Bundle-Version>2.1</Bundle-Version>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
+                <Import-Package>!javax.el.*,!javax.servlet.jsp.*,!org.apache.taglibs.*,*</Import-Package>
               </instructions>
             </configuration>
            </execution>
