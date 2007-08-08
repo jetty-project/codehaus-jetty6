@@ -413,7 +413,7 @@ public class HttpExchange
     {
     }
 
-    protected void onResponsetHeader(Buffer name, Buffer value) throws IOException
+    protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
     }
     
@@ -484,7 +484,7 @@ public class HttpExchange
         }
 
         /* ------------------------------------------------------------ */
-        protected void onResponsetHeader(Buffer name, Buffer value) throws IOException
+        protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
             if (_responseFields!=null)
                 _responseFields.add(name, value);
@@ -517,7 +517,7 @@ public class HttpExchange
         }
         
         /* ------------------------------------------------------------ */
-        protected void onResponsetHeader(Buffer name, Buffer value) throws IOException
+        protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
             int header = HttpHeaders.CACHE.getOrdinal(value);
             switch(header)

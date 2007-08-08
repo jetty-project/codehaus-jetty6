@@ -6,6 +6,7 @@ jetty-SNAPSHOT
  + Moved Grizzly to contrib
  + Give deployment file Scanner threads a unique name
  + Fix Host header for async client
+ + Fix typo in async client onResponsetHeader method name
  + JETTY-400 consume CGI stderr
  + JETTY-402 keep HashUserRealm in sync with file
  + JETTY-403 Allow long content length for range requests

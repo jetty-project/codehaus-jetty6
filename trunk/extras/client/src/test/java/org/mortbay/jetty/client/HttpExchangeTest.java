@@ -107,7 +107,7 @@ public class HttpExchangeTest extends TestCase
                     // System.err.println("Response Status: " + version+" "+status+" "+reason);
                 }
 
-                protected void onResponsetHeader(Buffer name, Buffer value)
+                protected void onResponseHeader(Buffer name, Buffer value)
                 {
                     // System.err.println("Response header: " + name + " = " + value);
                 }
