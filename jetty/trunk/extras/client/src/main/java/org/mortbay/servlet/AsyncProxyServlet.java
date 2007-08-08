@@ -184,7 +184,7 @@ public class AsyncProxyServlet implements Servlet
                             
                     }
 
-                    protected void onResponsetHeader(Buffer name, Buffer value) throws IOException
+                    protected void onResponseHeader(Buffer name, Buffer value) throws IOException
                     {
                         System.err.println("onResponseHeader("+name+","+value+")");
                         String s = name.toString().toLowerCase();
