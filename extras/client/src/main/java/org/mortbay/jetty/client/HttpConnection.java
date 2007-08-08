@@ -401,7 +401,7 @@ class HttpConnection implements Connection
             {
                 _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
             }
-            _exchange.onResponsetHeader(name, value);
+            _exchange.onResponseHeader(name, value);
         }
 
         @Override
