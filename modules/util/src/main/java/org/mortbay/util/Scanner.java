@@ -101,13 +101,18 @@ public class Scanner
      */
     public synchronized void setScanInterval(int scanInterval)
     {
-        if (_running)
-            _task.cancel();
-        
         this._scanInterval = scanInterval;
         
-        if (_running && _scanInterval >0)
-            _timer.scheduleAtFixedRate(_task,1000L*getScanInterval(),1000L*getScanInterval());
+        if (_running)
+        {
+            stop();
+
+            _timer = newTimer();
+            _task = newTimerTask();
+
+            schedule(_timer, _task);
+            _running = true;
+        }
     }
 
     /**
@@ -218,18 +223,36 @@ public class Scanner
             _prevScan = scanFiles();
         }
 
-        _timer = new Timer("Scanner-"+__scannerId++, true);
-        _task = new TimerTask()
-        {
-            public void run() { scan(); }
-        };
+        _timer = newTimer();
+        _task = newTimerTask();
 
-        if (getScanInterval()>0)
-            _timer.scheduleAtFixedRate(_task,1000L*getScanInterval(),1000L*getScanInterval());
+        schedule(_timer, _task);
         
     }
 
+    public TimerTask newTimerTask ()
+    {
+        return new TimerTask()
+        {
+            public void run() { scan(); }
+        };
+    }
 
+    public Timer newTimer ()
+    {
+        return new Timer("Scanner-"+__scannerId++, true);
+    }
+    
+    public void schedule (Timer timer, TimerTask task)
+    {
+        if (timer==null)
+            throw new IllegalArgumentException("Timer is null");
+        if (task==null)
+            throw new IllegalArgumentException("TimerTask is null");
+        
+        if (getScanInterval() > 0)
+            timer.scheduleAtFixedRate(task, 1000L*getScanInterval(),1000L*getScanInterval());
+    }
     /**
      * Stop the scanning.
      */
