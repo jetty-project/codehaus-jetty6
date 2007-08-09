@@ -11,6 +11,7 @@ jetty-SNAPSHOT
  + Allow scan interval to be set after Scanner started
  + Add jetty.host system property
  + UTF-8 for bayeux client
+ + JETTY-311 avoid json keywords
  + JETTY-400 consume CGI stderr
  + JETTY-402 keep HashUserRealm in sync with file
  + JETTY-403 Allow long content length for range requests
