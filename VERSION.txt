@@ -9,6 +9,7 @@ jetty-SNAPSHOT
  + Fix typo in async client onResponsetHeader method name
  + Tweak OSGi manifests to remove unneeded imports
  + Allow scan interval to be set after Scanner started
+ + Add jetty.host system property
  + UTF-8 for bayeux client
  + JETTY-400 consume CGI stderr
  + JETTY-402 keep HashUserRealm in sync with file
