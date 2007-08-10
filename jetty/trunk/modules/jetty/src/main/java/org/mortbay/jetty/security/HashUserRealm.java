@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.log.Log;
@@ -60,7 +61,7 @@ import org.mortbay.util.Scanner.BulkListener;
  * @see Password
  * @author Greg Wilkins (gregw)
  */
-public class HashUserRealm implements UserRealm, SSORealm
+public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORealm
 {
 
     /** HttpContext Attribute to set to activate SSO.
@@ -74,7 +75,7 @@ public class HashUserRealm implements UserRealm, SSORealm
     protected HashMap _users=new HashMap();
     protected HashMap _roles=new HashMap(7);
     private SSORealm _ssoRealm;
-    private Scanner _scanner=new Scanner();
+    private Scanner _scanner;
     private int _refreshInterval=0;//default is not to reload
     
 
@@ -124,51 +125,13 @@ public class HashUserRealm implements UserRealm, SSORealm
         _config=config;
         _configResource=Resource.newResource(_config);
        loadConfig();
-        _scanner.stop(); 
-        List dirList = new ArrayList(1);
-        dirList.add(_configResource.getFile());
-        _scanner.setScanDirs(dirList);
-        _scanner.setFilenameFilter(new FilenameFilter ()
-            {
-                public boolean accept(File dir, String name)
-                {
-                    File f = new File(dir,name);
-                    try
-                    {
-                        if (f.compareTo(_configResource.getFile())==0)
-                            return true;
-                    }
-                    catch (IOException e)
-                    {
-                        return false;
-                    }
-
-                    return false;
-                }
-            
-            });
-        _scanner.addListener(new BulkListener()
-            {
-                public void filesChanged(List filenames) throws Exception
-                {
-                    if (filenames==null)
-                        return;
-                    if (filenames.isEmpty())
-                        return;
-                    if (filenames.size()==1 && filenames.get(0).equals(_config))
-                        loadConfig();
-                }
-
-           });
-        _scanner.setReportExistingFilesOnStartup(false);
-        _scanner.start();
+ 
     }
     
 
     public void setRefreshInterval (int msec)
     {
         _refreshInterval=msec;
-        _scanner.setScanInterval(getRefreshInterval());
     }
     
     public int getRefreshInterval()
@@ -398,6 +361,76 @@ public class HashUserRealm implements UserRealm, SSORealm
             _ssoRealm.clearSingleSignOn(username);
     }
     
+  
+    
+    
+    
+    /** 
+     * @see org.mortbay.component.AbstractLifeCycle#doStart()
+     */
+    protected void doStart() throws Exception
+    {
+        super.doStart();
+        if (_scanner!=null)
+            _scanner.stop(); 
+
+        if (getRefreshInterval() > 0)
+        {
+            _scanner = new Scanner();
+            _scanner.setScanInterval(getRefreshInterval());
+            List dirList = new ArrayList(1);
+            dirList.add(_configResource.getFile());
+            _scanner.setScanDirs(dirList);
+            _scanner.setFilenameFilter(new FilenameFilter ()
+            {
+                public boolean accept(File dir, String name)
+                {
+                    File f = new File(dir,name);
+                    try
+                    {
+                        if (f.compareTo(_configResource.getFile())==0)
+                            return true;
+                    }
+                    catch (IOException e)
+                    {
+                        return false;
+                    }
+
+                    return false;
+                }
+
+            });
+            _scanner.addListener(new BulkListener()
+            {
+                public void filesChanged(List filenames) throws Exception
+                {
+                    if (filenames==null)
+                        return;
+                    if (filenames.isEmpty())
+                        return;
+                    if (filenames.size()==1 && filenames.get(0).equals(_config))
+                        loadConfig();
+                }
+
+            });
+            _scanner.setReportExistingFilesOnStartup(false);
+            _scanner.start();
+        }
+    }
+
+    /** 
+     * @see org.mortbay.component.AbstractLifeCycle#doStop()
+     */
+    protected void doStop() throws Exception
+    {
+        super.doStop();
+        if (_scanner!=null)
+            _scanner.stop();
+        _scanner=null;
+    }
+
+
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

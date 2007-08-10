@@ -261,6 +261,7 @@ public class Scanner
         if (_running)
         {
             _running = false; 
+            _timer.cancel();
             _task.cancel();
             _task=null;
             _timer=null;
