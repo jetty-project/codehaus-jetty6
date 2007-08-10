@@ -10,6 +10,7 @@ jetty-SNAPSHOT
  + Tweak OSGi manifests to remove unneeded imports
  + Allow scan interval to be set after Scanner started
  + Add jetty.host system property
+ + Allow properties files on the XmlConfiguration command line.
  + Prevent infinite loop on stopping with temp dir
  + UTF-8 for bayeux client
  + JETTY-311 avoid json keywords
