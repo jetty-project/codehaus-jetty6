@@ -499,7 +499,7 @@ public class WebAppContext extends Context
             }
             
             // delete temp directory if we had to create it or if it isn't called work
-            if (!_isExistingTmpDir && !isTempWorkDirectory()) //_tmpDir!=null && !"work".equals(_tmpDir.getName()))
+            if (_tmpDir!=null && !_isExistingTmpDir && !isTempWorkDirectory()) //_tmpDir!=null && !"work".equals(_tmpDir.getName()))
             {
                 IO.delete(_tmpDir);
                 _tmpDir=null;
@@ -752,15 +752,14 @@ public class WebAppContext extends Context
      */
     public boolean isTempWorkDirectory ()
     {
-        File tmpDir = getTempDirectory();
-        if (tmpDir == null)
+        if (_tmpDir == null)
             return false;
-        if (tmpDir.getName().equalsIgnoreCase("work"))
+        if (_tmpDir.getName().equalsIgnoreCase("work"))
             return true;
-        tmpDir = tmpDir.getParentFile();
-        if (tmpDir == null)
+        File t = _tmpDir.getParentFile();
+        if (t == null)
             return false;
-        return (tmpDir.getName().equalsIgnoreCase("work"));
+        return (t.getName().equalsIgnoreCase("work"));
     }
     
     /* ------------------------------------------------------------ */
