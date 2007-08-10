@@ -22,9 +22,14 @@ import java.net.Socket;
 /*-------------------------------------------*/
 /** Monitor thread.
  * This thread listens on the port specified by the STOP.PORT system parameter
- * (defaults to 0 or not listening) for request authenticated with the key given by the STOP.KEY
- * system parameter (defaults to "mortbay") for admin requests. Commands "stop" and
- * "status" are currently supported.
+ * (defaults to -1 for not listening) for request authenticated with the key given by the STOP.KEY
+ * system parameter (defaults to "mortbay") for admin requests. 
+ * <p>
+ * If the stop port is set to zero, then a random port is assigned and the port number
+ * is printed to stdout.
+ * <p>
+ * Commands "stop" and * "status" are currently supported.
+ *
  */
 public class Monitor extends Thread
 {
