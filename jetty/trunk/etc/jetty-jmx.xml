@@ -17,7 +17,7 @@
     <!-- Use the jdk 1.5 platformMBeanServer -->
     <Call id="MBeanServer" class="java.lang.management.ManagementFactory" name="getPlatformMBeanServer"/>
 
-    <!-- Use an mx4j mbean server - use this if running with jdk<1.5 -->
+    <!-- Use an mx4j mbean server - use this if running with jdk<1.5 
     <Call id="MBeanServer" class="javax.management.MBeanServerFactory" name="createMBeanServer"/>
     -->
     
