@@ -756,8 +756,6 @@ public class XmlConfiguration
         }
         else if (defval != null)
             prop=defval;
-        else
-            throw new Exception ("Unresolved property name="+name);
 
         if (id != null) 
             _idMap.put(id, prop);
