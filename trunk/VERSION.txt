@@ -14,6 +14,7 @@ jetty-SNAPSHOT
  + Prevent infinite loop on stopping with temp dir
  + Ensure session is completed only when leaving context.
  + Update terracotta to 2.4.1 and exclude ssl classes
+ + Update jasper2.1 to tag SJSAS-9_1-B58C-FCS-22_Aug_2007
  + UTF-8 for bayeux client
  + JETTY-311 avoid json keywords
  + JETTY-400 consume CGI stderr
