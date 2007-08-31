@@ -64,16 +64,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <version>${project.version}</version>
-        <configuration>
-          <scanIntervalSeconds>10</scanIntervalSeconds>
-        </configuration>
-   <dependencies>
-  </dependencies>
-      </plugin>
     </plugins>
   </build>
   <dependencies>
