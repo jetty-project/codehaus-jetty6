@@ -15,6 +15,7 @@ jetty-SNAPSHOT
  + Ensure session is completed only when leaving context.
  + Update terracotta to 2.4.1 and exclude ssl classes
  + Update jasper2.1 to tag SJSAS-9_1-B58C-FCS-22_Aug_2007
+ + Removal of unneeded dependencies from management, maven-plugin, naming &  plus poms
  + UTF-8 for bayeux client
  + JETTY-311 avoid json keywords
  + JETTY-398 Allow same WADI Dispatcher to be used across multiple web-app contexts
