@@ -18,6 +18,7 @@ jetty-SNAPSHOT
  + Removal of unneeded dependencies from management, maven-plugin, naming &  plus poms
  + Adding setUsername,setGroupname to setuid and mavenizing native build
  + UTF-8 for bayeux client
+ + Make default time format for RequestLog match NCSA default
  + JETTY-311 avoid json keywords
  + JETTY-398 Allow same WADI Dispatcher to be used across multiple web-app contexts
  + JETTY-400 consume CGI stderr
