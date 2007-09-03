@@ -24,10 +24,34 @@ import org.mortbay.log.Log;
  */
 public class SetUIDServer extends Server
 {
-    int _uid=0;
-    int _gid=0;
-    int _umask=0;
-    boolean _startServerAsPrivileged;
+    private int _uid=0;
+    private int _gid=0;
+    private int _umask=0;
+    private boolean _startServerAsPrivileged;
+    
+    public void setUsername(String username)
+    {
+        Passwd passwd = SetUID.getpwnam(username);
+        _uid = passwd.getPwUid();
+    }
+    
+    public String getUsername()
+    {
+        Passwd passwd = SetUID.getpwuid(_uid);
+        return passwd.getPwName();
+    }
+    
+    public void setGroupname(String groupname)
+    {
+        Group group = SetUID.getgrnam(groupname);
+        _gid = group.getGrGid();
+    }
+    
+    public String getGroupname()
+    {
+        Group group = SetUID.getgrgid(_gid);
+        return group.getGrName();
+    }
 
 
     public int getUmask ()
