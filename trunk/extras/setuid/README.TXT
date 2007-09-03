@@ -1,18 +1,13 @@
-Need to automate the build of this....
 
-but for now do the following:
 
 Build and Install
 -----------------
 
-In this directory do: 
+In this directory do (this can only be built on linux or unix with gcc compiler): 
+
   mvn install
 
-  gcc -I$JDK_HOME/include/ -I$JDK_HOME/include/linux/ -shared src/main/native/org_mortbay_setuid_SetUID.c -o ../../lib/ext/libsetuid.so
 
-Where $JDK_HOME is same as $JAVA_HOME and where linux should be replaced by the name of your operating system.
-
-NOTE: if you are compiling on Solaris, you may need to leave out the -shared argument.
 
 
 Configuration
@@ -24,6 +19,19 @@ Change etc/jetty-setuid.xml to use the userid you want.
 Running
 -------
 In the top level jetty directory do:
+  
+- if your libsetuid.so is located at <jetty-root>/lib/ext which is by default located at that folder
+  sudo java -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
 
-  sudo java -Djava.library.path=lib/ext -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
+
+  
+- you could alternately set jetty.libsetuid.path property to /directory/path/to/your/jetty/lib/libsetuid.so  
+    * using -Djetty.libsetuid.path=/directory/path/to/your/jetty/lib/libsetuid.so option
+        sudo java -Djetty.libsetuid.path=/directory/path/to/your/jetty/lib/libsetuid.so -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
+
+    * or you can set it as a System Property on your jetty configuration and execute the command below
+        sudo java -jar start.jar etc/jetty-setuid.xml etc/jetty.xml   
+
+- one last option, is setting java.library.path to the directory where your libsetuid.so is found
+  sudo java -Djava.library.path=/directory/path/to/your/jetty/lib -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
 
