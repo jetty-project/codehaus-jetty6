@@ -39,6 +39,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpContent;
 import org.mortbay.jetty.HttpFields;
+import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.InclusiveByteRange;
@@ -112,9 +113,7 @@ import org.mortbay.util.URIUtil;
  * @author Nigel Canonizado
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory
-{
-    private static ByteArrayBuffer BYTE_RANGES=new ByteArrayBuffer("bytes");
-    
+{   
     private ContextHandler.SContext _context;
     
     private boolean _acceptRanges=true;
@@ -769,7 +768,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             HttpFields fields = r.getHttpFields();
 
             if (content.getLastModified()!=null)  
-                fields.put(HttpHeaders.LAST_MODIFIED_BUFFER,content.getLastModified());
+                fields.put(HttpHeaders.LAST_MODIFIED_BUFFER,content.getLastModified(),content.getResource().lastModified());
             else if (content.getResource()!=null)
             {
                 long lml=content.getResource().lastModified();
@@ -781,7 +780,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 r.setLongContentLength(count);
 
             if (_acceptRanges)
-                fields.put(HttpHeaders.ACCEPT_RANGES_BUFFER,BYTE_RANGES);
+                fields.put(HttpHeaders.ACCEPT_RANGES_BUFFER,HttpHeaderValues.BYTES_BUFFER);
 
             if (_cacheControl!=null)
                 fields.put(HttpHeaders.CACHE_CONTROL_BUFFER,_cacheControl);
@@ -789,10 +788,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         else
         {
-            if (content.getLastModified()!=null)	
-                response.setHeader(HttpHeaders.LAST_MODIFIED,content.getLastModified().toString());
-            else
-                response.setDateHeader(HttpHeaders.LAST_MODIFIED,content.getResource().lastModified());
+            long lml=content.getResource().lastModified();
+            if (lml>=0)
+                response.setDateHeader(HttpHeaders.LAST_MODIFIED,lml);
 
             if (count != -1)
             {
