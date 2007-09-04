@@ -90,6 +90,22 @@ public class HttpHeaderTest extends TestCase
         assertEquals(false, e.hasMoreElements());
     }
     
+    public void testCRLF()
+    throws Exception
+    {
+        HttpFields header = new HttpFields();
+
+        header.put("name0", "value\r\n0");
+        header.put("name\r\n1", "value1");
+        header.put("name:2", "value:\r\n2");
+        
+        ByteArrayBuffer buffer = new ByteArrayBuffer(1024);
+        header.put(buffer);
+        assertTrue(buffer.toString().contains("name0: value0"));
+        assertTrue(buffer.toString().contains("name1: value1"));
+        assertTrue(buffer.toString().contains("name2: value:2"));       
+    }
+    
     public void testCachedPut()
         throws Exception
     {

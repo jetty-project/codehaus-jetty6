@@ -245,6 +245,9 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
+        if (_server==null)
+            throw new IllegalStateException("No server");
+        
         // open listener port
         open();
         
