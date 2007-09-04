@@ -42,6 +42,7 @@ import org.mortbay.io.BufferDateCache;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
+import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.QuotedStringTokenizer;
@@ -524,8 +525,9 @@ public class HttpFields
      * 
      * @param name the name of the field
      * @param value the value of the field. If null the field is cleared.
+     * @param numValue the numeric value of the field (must match value) or -1
      */
-    private void put(Buffer name, Buffer value, long numValue)
+    public void put(Buffer name, Buffer value, long numValue)
     {
         if (value == null)
         {
@@ -1025,20 +1027,6 @@ public class HttpFields
     }
 
     /* -------------------------------------------------------------- */
-    public void write(Writer writer) throws IOException
-    {
-        synchronized (writer)
-        {
-            for (int i = 0; i < _fields.size(); i++)
-            {
-                Field field = (Field) _fields.get(i);
-                if (field != null && field._revision == _revision) field.write(writer);
-            }
-            writer.write(StringUtil.CRLF);
-        }
-    }
-
-    /* -------------------------------------------------------------- */
     public void put(Buffer buffer) throws IOException
     {
         for (int i = 0; i < _fields.size(); i++)
@@ -1364,23 +1352,58 @@ public class HttpFields
                 }
             }
         }
-
-        /* ------------------------------------------------------------ */
-        public void write(Writer writer) throws IOException
-        {
-            writer.write(BufferUtil.to8859_1_String(_name));
-            writer.write(":");
-            writer.write(BufferUtil.to8859_1_String(_value));
-            writer.write(StringUtil.CRLF);
-        }
+        
+        
 
         /* ------------------------------------------------------------ */
         public void put(Buffer buffer) throws IOException
         {
-            buffer.put(_name);
+            int o=(_name instanceof CachedBuffer)?((CachedBuffer)_name).getOrdinal():-1;
+            if (o>=0)
+                buffer.put(_name);
+            else
+            {
+                int s=_name.getIndex();
+                int e=_name.putIndex();
+                while (s<e)
+                {
+                    byte b=_name.peek(s++);
+                    switch(b)
+                    {
+                        case '\r':
+                        case '\n':
+                        case ':' :
+                            continue;
+                        default:
+                            buffer.put(b);
+                    }
+                }
+            }
+            
             buffer.put((byte) ':');
             buffer.put((byte) ' ');
-            buffer.put(_value);
+            
+            o=(_value instanceof CachedBuffer)?((CachedBuffer)_value).getOrdinal():-1;
+            if (o>=0 || _numValue>=0)
+                buffer.put(_value);
+            else
+            {
+                int s=_value.getIndex();
+                int e=_value.putIndex();
+                while (s<e)
+                {
+                    byte b=_value.peek(s++);
+                    switch(b)
+                    {
+                        case '\r':
+                        case '\n':
+                            continue;
+                        default:
+                            buffer.put(b);
+                    }
+                }
+            }
+
             BufferUtil.putCRLF(buffer);
         }
 
