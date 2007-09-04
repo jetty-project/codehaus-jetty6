@@ -361,8 +361,11 @@ public abstract class AbstractGenerator implements Generator
             for (int i=0;i<len;i++)
             {
                 char ch = reason.charAt(i);
-                if (ch==' ' || Character.isJavaIdentifierPart(ch))
+                if (ch!='\r'&&ch!='\n')
                     _reason.put((byte)ch);
+                else
+
+                    _reason.put((byte)' ');
             }
         }
     }
