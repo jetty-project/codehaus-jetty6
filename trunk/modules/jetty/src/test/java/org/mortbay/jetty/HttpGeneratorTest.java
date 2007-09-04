@@ -78,7 +78,7 @@ public class HttpGeneratorTest extends TestCase
                         endp.reset();
                         fields.clear();
                         
-                        tr[r].build(v,hb,null,connect[c],null,chunks, fields);
+                        tr[r].build(v,hb,"OK\r\nTest",connect[c],null,chunks, fields);
                         String response=endp.getOut().toString();
                         // System.out.println("RESPONSE: "+t+"\n"+response+(hb.isPersistent()?"...\n":"---\n"));
                         
@@ -108,6 +108,9 @@ public class HttpGeneratorTest extends TestCase
                             assertTrue(t,hb.isPersistent() || tr[r].values[1]==null || c==2 || c==0);
                         else
                             assertTrue(t,hb.isPersistent() ||  c==2 || c==3);
+                        
+                        if (v>9)
+                            assertEquals("OK  Test",f2);
                         
                         assertTrue(t,tr[r].values[1]==null || content.length()==Integer.parseInt(tr[r].values[1]));
                     }
@@ -199,7 +202,6 @@ public class HttpGeneratorTest extends TestCase
       /* 7 */  new TR(200,"text/html",""+CONTENT.length(),CONTENT),
     };
     
-
     String content;
     String f0;
     String f1;
