@@ -33,6 +33,7 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.util.Attributes;
+import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.UrlEncoded;
@@ -254,11 +255,28 @@ public class Dispatcher implements RequestDispatcher
                 
                 ForwardAttributes attr = new ForwardAttributes(old_attr); 
                 
-                attr._requestURI=old_uri;
-                attr._contextPath=old_context_path;
-                attr._servletPath=old_servlet_path;
-                attr._pathInfo=old_path_info;
-                attr._query=old_query;
+                //If we have already been forwarded previously, then keep using the established 
+                //original value. Otherwise, this is the first forward and we need to establish the values.
+                //Note: the established value on the original request for pathInfo and
+                //for queryString is allowed to be null, but cannot be null for the other values.
+                if ((String)old_attr.getAttribute(__FORWARD_REQUEST_URI) != null)
+                {
+                    attr._pathInfo=(String)old_attr.getAttribute(__FORWARD_PATH_INFO);
+                    attr._query=(String)old_attr.getAttribute(__FORWARD_QUERY_STRING);
+                    attr._requestURI=(String)old_attr.getAttribute(__FORWARD_REQUEST_URI);
+                    attr._contextPath=(String)old_attr.getAttribute(__FORWARD_CONTEXT_PATH);
+                    attr._servletPath=(String)old_attr.getAttribute(__FORWARD_SERVLET_PATH);
+                }
+                else
+                {
+                    attr._pathInfo=old_path_info;
+                    attr._query=old_query;
+                    attr._requestURI=old_uri;
+                    attr._contextPath=old_context_path;
+                    attr._servletPath=old_servlet_path;
+                }                
+   
+              
                 
                 base_request.setRequestURI(_uri);
                 base_request.setContextPath(_contextHandler.getContextPath());
