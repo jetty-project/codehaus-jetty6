@@ -1,6 +1,6 @@
 Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(revision 2088)
+--- modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(revision 2089)
 +++ modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(working copy)
 @@ -226,7 +226,7 @@
              {
@@ -49,7 +49,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
  
 Index: modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(working copy)
 @@ -226,76 +226,74 @@
              if (_fileOut == null)
@@ -188,7 +188,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java
                  _writer.write(log);
 Index: modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(working copy)
 @@ -175,7 +175,7 @@
      /* ------------------------------------------------------------ */
@@ -219,7 +219,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java
          sb.append(Long.toString(last));
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(working copy)
 @@ -25,7 +25,7 @@
  import org.mortbay.jetty.SessionIdManager;
@@ -311,7 +311,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManage
 +}
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(working copy)
 @@ -21,6 +21,7 @@
  import java.util.HashMap;
@@ -387,7 +387,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
                  b.append(LazyList.get(_chain, i).toString());
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(working copy)
 @@ -22,6 +22,8 @@
  import java.util.Timer;
@@ -409,7 +409,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.
          _timer=new Timer();
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(working copy)
 @@ -422,19 +422,22 @@
                  if (!endsWithSlash || (pathInContext.length()==1 && request.getAttribute("org.mortbay.jetty.nullPathInfo")!=null))
@@ -447,7 +447,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java
                  else if (null!=(welcome=getWelcomeFile(resource)))
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(working copy)
 @@ -78,7 +78,7 @@
       */
@@ -638,7 +638,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      }
 Index: modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(working copy)
 @@ -337,7 +337,7 @@
              return null;
@@ -651,7 +651,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
              try
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Response.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(working copy)
 @@ -383,7 +383,7 @@
  
@@ -664,7 +664,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Response.java
              else
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(working copy)
 @@ -368,7 +368,7 @@
          HttpFields.Field transfer_encoding = null;
@@ -704,7 +704,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java
                                  connection.append(field.getValue());
 Index: modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(working copy)
 @@ -122,31 +122,29 @@
      /* ------------------------------------------------------------ */
@@ -758,7 +758,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java
      /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(working copy)
 @@ -668,7 +668,7 @@
          /* ------------------------------------------------------------ */
@@ -771,7 +771,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.ja
              buf.append(_userFile);
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
 @@ -1545,25 +1545,22 @@
       * 
@@ -814,7 +814,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
      /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(working copy)
 @@ -830,16 +830,13 @@
              else
@@ -840,7 +840,7 @@ Index: modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java
  
 Index: modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(working copy)
 @@ -669,12 +669,9 @@
           */
@@ -869,7 +869,7 @@ Index: modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java
              {
 Index: modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(working copy)
 @@ -315,7 +315,7 @@
              if (bytes!=null)
@@ -882,7 +882,7 @@ Index: modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java
              return b.toString();
 Index: modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(working copy)
 @@ -495,7 +495,7 @@
  
@@ -895,7 +895,7 @@ Index: modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java
          buf.append(",");
 Index: modules/jetty/src/main/java/org/mortbay/resource/Resource.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(revision 2088)
+--- modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(revision 2089)
 +++ modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(working copy)
 @@ -432,7 +432,7 @@
          String decodedBase = URIUtil.decodePath(base);
@@ -908,7 +908,7 @@ Index: modules/jetty/src/main/java/org/mortbay/resource/Resource.java
          buf.append("</TITLE></HEAD><BODY>\n<H1>");
 Index: modules/jetty/pom.xml
 ===================================================================
---- modules/jetty/pom.xml	(revision 2088)
+--- modules/jetty/pom.xml	(revision 2089)
 +++ modules/jetty/pom.xml	(working copy)
 @@ -25,6 +25,13 @@
      </testResources>
@@ -926,7 +926,7 @@ Index: modules/jetty/pom.xml
            <execution>
 Index: modules/util/src/test/java/org/mortbay/util/URITest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/URITest.java	(revision 2088)
+--- modules/util/src/test/java/org/mortbay/util/URITest.java	(revision 2089)
 +++ modules/util/src/test/java/org/mortbay/util/URITest.java	(working copy)
 @@ -45,7 +45,7 @@
      public void testEncodePath()
@@ -939,7 +939,7 @@ Index: modules/util/src/test/java/org/mortbay/util/URITest.java
          buf.setLength(0);
 Index: modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(revision 2088)
+--- modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(revision 2089)
 +++ modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(working copy)
 @@ -94,7 +94,7 @@
      
@@ -952,7 +952,7 @@ Index: modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.jav
          QuotedStringTokenizer.quote(buf,"abc \n efg");
 Index: modules/util/src/test/java/org/mortbay/util/StringMapTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(revision 2088)
+--- modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(revision 2089)
 +++ modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(working copy)
 @@ -133,7 +133,7 @@
          m5.put("aBc", "x");
@@ -965,7 +965,7 @@ Index: modules/util/src/test/java/org/mortbay/util/StringMapTest.java
          assertEquals("x",m5.get(buffer));
 Index: modules/util/src/test/java/org/mortbay/util/StringUtilTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(revision 2088)
+--- modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(revision 2089)
 +++ modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(working copy)
 @@ -137,7 +137,7 @@
  
@@ -978,7 +978,7 @@ Index: modules/util/src/test/java/org/mortbay/util/StringUtilTest.java
          StringUtil.append(buf, (byte)12, 16);
 Index: modules/util/src/main/java/org/mortbay/servlet/CGI.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/servlet/CGI.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/servlet/CGI.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/servlet/CGI.java	(working copy)
 @@ -363,7 +363,7 @@
       * @throws IOException
@@ -991,7 +991,7 @@ Index: modules/util/src/main/java/org/mortbay/servlet/CGI.java
         	while( (b = is.read()) != -1 && b != (int) '\n' ) {
 Index: modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(working copy)
 @@ -20,6 +20,7 @@
  import java.util.HashMap;
@@ -1040,7 +1040,7 @@ Index: modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java
          return tag;
 Index: modules/util/src/main/java/org/mortbay/thread/Timeout.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/thread/Timeout.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/thread/Timeout.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/thread/Timeout.java	(working copy)
 @@ -175,7 +175,7 @@
      /* ------------------------------------------------------------ */
@@ -1053,7 +1053,7 @@ Index: modules/util/src/main/java/org/mortbay/thread/Timeout.java
          Task task = _head._next;
 Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/DateCache.java	(working copy)
 @@ -155,7 +155,7 @@
              String ss2 = _formatString.substring( zIndex+3 );
@@ -1105,7 +1105,7 @@ Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
      }
 Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(working copy)
 @@ -54,7 +54,7 @@
   * </pre>
@@ -1236,7 +1236,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
          }
 Index: modules/util/src/main/java/org/mortbay/util/StringUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/StringUtil.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/StringUtil.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/StringUtil.java	(working copy)
 @@ -190,22 +190,20 @@
          if (i == -1)
@@ -1319,7 +1319,7 @@ Index: modules/util/src/main/java/org/mortbay/util/StringUtil.java
              char c=name.charAt(i);
 Index: modules/util/src/main/java/org/mortbay/util/StringMap.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/StringMap.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/StringMap.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/StringMap.java	(working copy)
 @@ -613,15 +613,12 @@
          public Object setValue(Object o){Object old=_value;_value=o;return old;}
@@ -1342,7 +1342,7 @@ Index: modules/util/src/main/java/org/mortbay/util/StringMap.java
              if (_char==null)
 Index: modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(working copy)
 @@ -26,6 +26,7 @@
   * The UTF-8 decoding is done by this class and no additional buffers or Readers are used.
@@ -1354,7 +1354,7 @@ Index: modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java
  {
 Index: modules/util/src/main/java/org/mortbay/util/TypeUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(working copy)
 @@ -375,7 +375,7 @@
      /* ------------------------------------------------------------ */
@@ -1385,7 +1385,7 @@ Index: modules/util/src/main/java/org/mortbay/util/TypeUtil.java
              int bi=0xff&b[i];
 Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(working copy)
 @@ -37,7 +37,7 @@
      private String _delim = __delim;
@@ -1765,7 +1765,7 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
      /* ------------------------------------------------------------ */
 Index: modules/util/src/main/java/org/mortbay/util/UrlEncoded.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(working copy)
 @@ -114,57 +114,56 @@
      {
@@ -1861,7 +1861,7 @@ Index: modules/util/src/main/java/org/mortbay/util/UrlEncoded.java
       * @param content the string containing the encoded parameters
 Index: modules/util/src/main/java/org/mortbay/util/MultiMap.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/MultiMap.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/MultiMap.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/MultiMap.java	(working copy)
 @@ -105,21 +105,20 @@
                Object o=LazyList.get(l,0);
@@ -1897,323 +1897,9 @@ Index: modules/util/src/main/java/org/mortbay/util/MultiMap.java
          }
      }
      
-Index: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
-===================================================================
---- modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java	(revision 0)
-+++ modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java	(revision 0)
-@@ -0,0 +1,303 @@
-+// ========================================================================
-+// Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
-+// ------------------------------------------------------------------------
-+// Licensed under the Apache License, Version 2.0 (the "License");
-+// you may not use this file except in compliance with the License.
-+// You may obtain a copy of the License at 
-+// http://www.apache.org/licenses/LICENSE-2.0
-+// Unless required by applicable law or agreed to in writing, software
-+// distributed under the License is distributed on an "AS IS" BASIS,
-+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-+// See the License for the specific language governing permissions and
-+// limitations under the License.
-+// ========================================================================
-+
-+package org.mortbay.util;
-+
-+import java.util.Arrays;
-+import java.util.concurrent.ConcurrentHashMap;
-+import java.util.HashMap;
-+import java.util.Iterator;
-+import java.util.List;
-+import java.util.Map;
-+
-+/* ------------------------------------------------------------ */
-+/** A multi valued Map.
-+ * This Map specializes HashMap and provides methods
-+ * that operate on multi valued items. 
-+ * <P>
-+ * Implemented as a map of LazyList values
-+ *
-+ * @see LazyList
-+ * @author Greg Wilkins (gregw)
-+ */
-+public class ConcurrentMultiMap extends ConcurrentHashMap
-+    implements Cloneable
-+{
-+    /* ------------------------------------------------------------ */
-+    /** Constructor. 
-+     */
-+    public ConcurrentMultiMap()
-+    {}
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Constructor. 
-+     * @param size Capacity of the map
-+     */
-+    public ConcurrentMultiMap(int size)
-+    {
-+        super(size);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Constructor. 
-+     * @param map 
-+     */
-+    public ConcurrentMultiMap(Map map)
-+    {
-+        super((map.size()*3)/2);
-+        putAll(map);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Get multiple values.
-+     * Single valued entries are converted to singleton lists.
-+     * @param name The entry key. 
-+     * @return Unmodifieable List of values.
-+     */
-+    public List getValues(Object name)
-+    {
-+        return LazyList.getList(super.get(name),true);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Get a value from a multiple value.
-+     * If the value is not a multivalue, then index 0 retrieves the
-+     * value or null.
-+     * @param name The entry key.
-+     * @param i Index of element to get.
-+     * @return Unmodifieable List of values.
-+     */
-+    public Object getValue(Object name,int i)
-+    {
-+        Object l=super.get(name);
-+        if (i==0 && LazyList.size(l)==0)
-+            return null;
-+        return LazyList.get(l,i);
-+    }
-+    
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Get value as String.
-+     * Single valued items are converted to a String with the toString()
-+     * Object method. Multi valued entries are converted to a comma separated
-+     * List.  No quoting of commas within values is performed.
-+     * @param name The entry key. 
-+     * @return String value.
-+     */
-+    public String getString(Object name)
-+    {
-+        Object l=super.get(name);
-+        switch(LazyList.size(l))
-+        {
-+          case 0:
-+              return null;
-+          case 1:
-+              Object o=LazyList.get(l,0);
-+              return o==null?null:o.toString();
-+          default:
-+              StringBuffer values=new StringBuffer(128);
-+              synchronized(values)
-+              {
-+                  for (int i=0; i<LazyList.size(l); i++)              
-+                  {
-+                      Object e=LazyList.get(l,i);
-+                      if (e!=null)
-+                      {
-+                          if (values.length()>0)
-+                              values.append(',');
-+                          values.append(e.toString());
-+                      }
-+                  }   
-+                  return values.toString();
-+              }
-+        }
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    public Object get(Object name) 
-+    {
-+        Object l=super.get(name);
-+        switch(LazyList.size(l))
-+        {
-+          case 0:
-+              return null;
-+          case 1:
-+              Object o=LazyList.get(l,0);
-+              return o;
-+          default:
-+              return LazyList.getList(l,true);
-+        }
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Put and entry into the map.
-+     * @param name The entry key. 
-+     * @param value The entry value.
-+     * @return The previous value or null.
-+     */
-+    public Object put(Object name, Object value) 
-+    {
-+        return super.put(name,LazyList.add(null,value));
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /** Put multi valued entry.
-+     * @param name The entry key. 
-+     * @param values The List of multiple values.
-+     * @return The previous value or null.
-+     */
-+    public Object putValues(Object name, List values) 
-+    {
-+        return super.put(name,values);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Put multi valued entry.
-+     * @param name The entry key. 
-+     * @param values The String array of multiple values.
-+     * @return The previous value or null.
-+     */
-+    public Object putValues(Object name, String[] values) 
-+    {
-+        Object list=null;
-+        for (int i=0;i<values.length;i++)
-+            list=LazyList.add(list,values[i]);
-+        return put(name,list);
-+    }
-+    
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Add value to multi valued entry.
-+     * If the entry is single valued, it is converted to the first
-+     * value of a multi valued entry.
-+     * @param name The entry key. 
-+     * @param value The entry value.
-+     */
-+    public void add(Object name, Object value) 
-+    {
-+        Object lo = super.get(name);
-+        Object ln = LazyList.add(lo,value);
-+        if (lo!=ln)
-+            super.put(name,ln);
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /** Add values to multi valued entry.
-+     * If the entry is single valued, it is converted to the first
-+     * value of a multi valued entry.
-+     * @param name The entry key. 
-+     * @param values The List of multiple values.
-+     */
-+    public void addValues(Object name, List values) 
-+    {
-+        Object lo = super.get(name);
-+        Object ln = LazyList.addCollection(lo,values);
-+        if (lo!=ln)
-+            super.put(name,ln);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Add values to multi valued entry.
-+     * If the entry is single valued, it is converted to the first
-+     * value of a multi valued entry.
-+     * @param name The entry key. 
-+     * @param values The String array of multiple values.
-+     */
-+    public void addValues(Object name, String[] values) 
-+    {
-+        Object lo = super.get(name);
-+        Object ln = LazyList.addCollection(lo,Arrays.asList(values));
-+        if (lo!=ln)
-+            super.put(name,ln);
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Remove value.
-+     * @param name The entry key. 
-+     * @param value The entry value. 
-+     * @return true if it was removed.
-+     */
-+    public boolean removeValue(Object name,Object value)
-+    {
-+        Object lo = super.get(name);
-+        Object ln=lo;
-+        int s=LazyList.size(lo);
-+        if (s>0)
-+        {
-+            ln=LazyList.remove(lo,value);
-+            if (ln==null)
-+                super.remove(name);
-+            else
-+                super.put(name, ln);
-+        }
-+        return LazyList.size(ln)!=s;
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    /** Put all contents of map.
-+     * @param m Map
-+     */
-+    public void putAll(Map m)
-+    {
-+        Iterator i = m.entrySet().iterator();
-+        boolean multi=m instanceof MultiMap;
-+        while(i.hasNext())
-+        {
-+            Map.Entry entry =
-+                (Map.Entry)i.next();
-+            if (multi)
-+                super.put(entry.getKey(),LazyList.clone(entry.getValue()));
-+            else
-+                put(entry.getKey(),entry.getValue());
-+        }
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /** 
-+     * @return Map of String arrays
-+     */
-+    public Map toStringArrayMap()
-+    {
-+        HashMap map = new HashMap(size()*3/2);
-+        
-+        Iterator i = super.entrySet().iterator();
-+        while(i.hasNext())
-+        {
-+            Map.Entry entry = (Map.Entry)i.next();
-+            Object l = entry.getValue();
-+            String[] a = LazyList.toStringArray(l);
-+            // for (int j=a.length;j-->0;)
-+            //    if (a[j]==null)
-+            //         a[j]="";
-+            map.put(entry.getKey(),a);
-+        }
-+        return map;
-+    }
-+    
-+    /* ------------------------------------------------------------ */
-+    public Object clone()
-+        throws CloneNotSupportedException
-+    {
-+        ConcurrentMultiMap mm = (ConcurrentMultiMap) super.clone();
-+        
-+        Iterator iter = mm.entrySet().iterator();
-+        while (iter.hasNext())
-+        {
-+            Map.Entry entry = (Map.Entry)iter.next();
-+            entry.setValue(LazyList.clone(entry.getValue()));
-+        }
-+        
-+        return mm;
-+    }
-+}
-
-Property changes on: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
-___________________________________________________________________
-Name: svn:eol-style
-   + native
-
 Index: modules/util/src/main/java/org/mortbay/util/URIUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/URIUtil.java	(revision 2088)
+--- modules/util/src/main/java/org/mortbay/util/URIUtil.java	(revision 2089)
 +++ modules/util/src/main/java/org/mortbay/util/URIUtil.java	(working copy)
 @@ -56,17 +56,17 @@
          if (path==null || path.length()==0)
@@ -2312,7 +1998,7 @@ Index: modules/util/src/main/java/org/mortbay/util/URIUtil.java
          int skip=0;
 Index: modules/util/pom.xml
 ===================================================================
---- modules/util/pom.xml	(revision 2088)
+--- modules/util/pom.xml	(revision 2089)
 +++ modules/util/pom.xml	(working copy)
 @@ -37,6 +37,13 @@
      </testResources>
@@ -2328,3 +2014,16 @@ Index: modules/util/pom.xml
          <artifactId>maven-antrun-plugin</artifactId>
          <executions>
            <execution>
+Index: contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java
+===================================================================
+--- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java	(revision 433)
++++ contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java	(working copy)
+@@ -118,7 +118,7 @@
+ 
+     protected Object filterJSON(Client from, Channel to, JSON.Generator json)
+     {
+-        StringBuffer buffer = new StringBuffer();
++        StringBuilder buffer = new StringBuilder();
+         json.addJSON (buffer);
+         Object data = JSON.parse (buffer.toString ());
+         return filter(from,to,data);
