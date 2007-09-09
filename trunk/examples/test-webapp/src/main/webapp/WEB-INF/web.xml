@@ -177,6 +177,22 @@
     <url-pattern>/cgi-bin/*</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+    <servlet-name>Concat</servlet-name>
+    <servlet-class>org.mortbay.servlet.ConcatServlet</servlet-class>
+    <init-param>
+      <param-name>development</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>Concat</servlet-name>
+    <url-pattern>/concat</url-pattern>
+  </servlet-mapping>
+  
   <error-page>
     <error-code>404</error-code>
     <location>/jspsnoop/ERROR/404</location>

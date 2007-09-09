@@ -23,6 +23,7 @@ jetty-SNAPSHOT
  + Make default time format for RequestLog match NCSA default
  + Use terracotta repo for build; make jetty a terracotta module
  + Fix patch for java5 to include cometd module
+ + Added ConcatServlet to combine javascript and css
  + JETTY-311 avoid json keywords
  + JETTY-376 allow anything but CRLF in reason string
  + JETTY-398 Allow same WADI Dispatcher to be used across multiple web-app contexts
