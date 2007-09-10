@@ -100,7 +100,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
                 {
                     getLog().info("Restarting webapp");
                     getLog().debug("Stopping webapp ...");
-                    getWebApplication().stop();
+                    webAppConfig.stop();
                     getLog().debug("Reconfiguring webapp ...");
 
                     checkPomConfiguration();
@@ -128,7 +128,7 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
                     }
 
                     getLog().debug("Restarting webapp ...");
-                    getWebApplication().start();
+                    webAppConfig.start();
                     getLog().info("Restart completed.");
                 }
                 catch (Exception e)
@@ -154,8 +154,8 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
     public void configureWebApplication () throws Exception
     {
         super.configureWebApplication();        
-        getWebApplication().setWebAppSrcDir(webApp);
-        getWebApplication().configure();
+        webAppConfig.setWar(webApp.getCanonicalPath());
+        webAppConfig.configure();
     }
     
     public void execute () throws MojoExecutionException, MojoFailureException
