@@ -64,7 +64,7 @@
             <id>env-SunOs</id>
             <activation>
                 <os>
-                    <family>SunOS</family>
+                    <name>SunOS</name>
                 </os>
             </activation>
             <modules>
@@ -95,6 +95,38 @@
             </properties>
         </profile>
 
+        <profile>
+            <id>env-dos</id>
+            <activation>
+              <os>
+                 <family>dos</family>
+              </os>
+            </activation>
+            <modules>
+            </modules>
+         </profile>
+
+        <profile>
+            <id>env-windows</id>
+            <activation>
+              <os>
+                 <family>windows</family>
+              </os>
+            </activation>
+            <modules>
+            </modules>
+         </profile>
+
+        <profile>
+            <id>env-windows</id>
+            <activation>
+              <os>
+                 <family>win9x</family>
+              </os>
+            </activation>
+            <modules>
+            </modules>
+         </profile>
 
     </profiles>
 </project>
