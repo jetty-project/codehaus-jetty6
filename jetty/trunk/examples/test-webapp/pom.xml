@@ -77,7 +77,16 @@
         <version>${project.version}</version>
         <configuration>
           <scanIntervalSeconds>1</scanIntervalSeconds>
-          <contextPath>/test</contextPath>
+          <!-- contextPath>/test</contextPath -->
+          <webAppConfig>
+            <contextPath>/test</contextPath>
+            <tempDirectory>${project.build.directory}/work</tempDirectory>
+            <!-- sessionHandler implementation="org.mortbay.jetty.servlet.SessionHandler">
+              <sessionManager implementation="org.mortbay.jetty.servlet.HashSessionManager">
+                <storeDirectory>${basedir}/target/sessions</storeDirectory>
+              </sessionManager>
+            </sessionHandler -->
+          </webAppConfig>
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
               <name>Test Realm</name>
