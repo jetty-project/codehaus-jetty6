@@ -70,7 +70,6 @@ public class HashSessionManager extends AbstractSessionManager
         
         setScavengePeriod(getScavengePeriod());
 
-
         if (_storeDir!=null)
         {
             if (!_storeDir.exists())
@@ -245,6 +244,7 @@ public class HashSessionManager extends AbstractSessionManager
     {
         if (_sessions==null)
             return null;
+
         return (Session)_sessions.get(idInCluster);
     }
 
@@ -386,7 +386,7 @@ public class HashSessionManager extends AbstractSessionManager
                 String key = in.readUTF();
                 keys.add(key);
             }
-            ObjectInputStream ois = new ObjectInputStream(in);
+            ClassLoadingObjectInputStream ois = new ClassLoadingObjectInputStream(in);
             for (int i=0;i<size;i++)
             {
                 Object value = ois.readObject();
@@ -480,6 +480,34 @@ public class HashSessionManager extends AbstractSessionManager
         
     }
     
+    protected class ClassLoadingObjectInputStream extends ObjectInputStream
+    {
+        public ClassLoadingObjectInputStream(java.io.InputStream in)
+        throws IOException
+        {
+            super(in);
+        }
+        
+        public ClassLoadingObjectInputStream ()
+        throws IOException
+        {
+            super();
+        }
+        
+        public Class resolveClass (java.io.ObjectStreamClass cl)
+        throws IOException, ClassNotFoundException
+        {
+            Class clazz;
+            try
+            {
+                return Thread.currentThread().getContextClassLoader().loadClass(cl.getName());
+            }
+            catch (ClassNotFoundException e)
+            {
+                return super.resolveClass(cl);
+            }
+        }
+    }
 
     
 }
