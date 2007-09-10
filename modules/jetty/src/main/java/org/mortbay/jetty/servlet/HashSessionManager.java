@@ -14,8 +14,18 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,6 +49,7 @@ public class HashSessionManager extends AbstractSessionManager
     private TimerTask _task;
     private int _scavengePeriodMs=30000;
     protected Map _sessions;
+    private File _storeDir;
     
     /* ------------------------------------------------------------ */
     public HashSessionManager()
@@ -59,6 +70,14 @@ public class HashSessionManager extends AbstractSessionManager
         
         setScavengePeriod(getScavengePeriod());
 
+
+        if (_storeDir!=null)
+        {
+            if (!_storeDir.exists())
+                _storeDir.mkdir();
+            restoreSessions();
+        }
+      
     }
 
     /* ------------------------------------------------------------ */
@@ -67,7 +86,12 @@ public class HashSessionManager extends AbstractSessionManager
      */
     public void doStop() throws Exception
     {
+        
+        if (_storeDir != null)
+            saveSessions();
+        
         super.doStop();
+ 
         _sessions.clear();
         _sessions=null;
 
@@ -251,6 +275,131 @@ public class HashSessionManager extends AbstractSessionManager
     }
     
     
+    public void setStoreDirectory (File dir)
+    {
+        _storeDir=dir;
+    }
+    
+    public File getStoreDirectory ()
+    {
+        return _storeDir;
+    }
+
+    public void restoreSessions () throws Exception
+    {
+        if (_storeDir==null || !_storeDir.exists())
+        {
+            return;
+        }
+
+        if (!_storeDir.canRead())
+        {
+            Log.warn ("Unable to restore Sessions: Cannot read from Session storage directory "+_storeDir.getAbsolutePath());
+            return;
+        }
+
+        File[] files = _storeDir.listFiles();
+        for (int i=0;files!=null&&i<files.length;i++)
+        {
+            try
+            {
+                FileInputStream in = new FileInputStream(files[i]);           
+                Session session = restoreSession(in);
+                in.close();          
+                addSession(session, false);
+                files[i].delete();
+            }
+            catch (Exception e)
+            {
+                Log.warn("Problem restoring session "+files[i].getName(), e);
+            }
+        }
+    }
+    
+    public void saveSessions () throws Exception
+    {
+        if (_storeDir==null || !_storeDir.exists())
+        {
+            return;
+        }
+        
+        if (!_storeDir.canWrite())
+        {
+            Log.warn ("Unable to save Sessions: Session persistence storage directory "+_storeDir.getAbsolutePath()+ " is not writeable");
+            return;
+        }
+ 
+        Iterator itor = _sessions.entrySet().iterator();
+        while (itor.hasNext())
+        {
+            Map.Entry entry = (Map.Entry)itor.next();
+            String id = (String)entry.getKey();
+            Session session = (Session)entry.getValue();
+            try
+            {
+                File file = new File (_storeDir, id);
+                file.createNewFile();
+                FileOutputStream fos = new FileOutputStream (file);
+                session.save(fos);
+                fos.close();
+            }
+            catch (Exception e)
+            {
+                Log.warn("Problem persisting session "+id, e);
+            }
+        }
+    }
+        
+    public Session restoreSession (FileInputStream fis) 
+    throws Exception
+    {
+
+        /*
+         * Take care of this class's fields first by calling 
+         * defaultReadObject
+         */
+        
+        DataInputStream in = new DataInputStream(fis);
+        String clusterId = in.readUTF();
+        String nodeId = in.readUTF();
+        boolean idChanged = in.readBoolean();
+        long created = in.readLong();
+        long cookieSet = in.readLong();
+        long accessed = in.readLong();
+        long lastAccessed = in.readLong();
+        //boolean invalid = in.readBoolean();
+        //boolean invalidate = in.readBoolean();
+        //long maxIdle = in.readLong();
+        //boolean isNew = in.readBoolean();
+        int requests = in.readInt();
+        
+        Session session = new Session (created, clusterId);
+        session._cookieSet = cookieSet;
+        session._lastAccessed = lastAccessed;
+        
+        int size = in.readInt();
+        if (size > 0)
+        {
+            ArrayList keys = new ArrayList();
+            for (int i=0; i<size; i++)
+            {
+                String key = in.readUTF();
+                keys.add(key);
+            }
+            ObjectInputStream ois = new ObjectInputStream(in);
+            for (int i=0;i<size;i++)
+            {
+                Object value = ois.readObject();
+                session.setAttribute((String)keys.get(i),value);
+            }
+            ois.close();
+        }
+        else
+            session.initValues();
+        in.close();
+        return session;
+    }
+
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -259,6 +408,8 @@ public class HashSessionManager extends AbstractSessionManager
     {
         /* ------------------------------------------------------------ */
         private static final long serialVersionUID=-2134521374206116367L;
+        
+   
 
         /* ------------------------------------------------------------- */
         protected Session(HttpServletRequest request)
@@ -266,6 +417,10 @@ public class HashSessionManager extends AbstractSessionManager
             super(request);
         }
         
+        protected Session(long created, String clusterId)
+        {
+            super(created, clusterId);
+        }
         /* ------------------------------------------------------------- */
         public void setMaxInactiveInterval(int secs)
         {
@@ -279,6 +434,50 @@ public class HashSessionManager extends AbstractSessionManager
         {
             return new HashMap(3);
         }
+        
+ 
+        
+        public void save(FileOutputStream fos)  throws IOException 
+        {
+            DataOutputStream out = new DataOutputStream(fos);
+            out.writeUTF(_clusterId);
+            out.writeUTF(_nodeId);
+            out.writeBoolean(_idChanged);
+            out.writeLong( _created);
+            out.writeLong(_cookieSet);
+            out.writeLong(_accessed);
+            out.writeLong(_lastAccessed);
+            /* Don't write these out, as they don't make sense to store because they
+             * either they cannot be true or their value will be restored in the 
+             * Session constructor.
+             */
+            //out.writeBoolean(_invalid);
+            //out.writeBoolean(_doInvalidate);
+            //out.writeLong(_maxIdleMs);
+            //out.writeBoolean( _newSession);
+            out.writeInt(_requests);
+            if (_values != null)
+            {
+                out.writeInt(_values.size());
+                Iterator itor = _values.keySet().iterator();
+                while (itor.hasNext())
+                {
+                    String key = (String)itor.next();
+                    out.writeUTF(key);
+                }
+                itor = _values.values().iterator();
+                ObjectOutputStream oos = new ObjectOutputStream(out);
+                while (itor.hasNext())
+                {
+                    oos.writeObject(itor.next());
+                }
+                oos.close();
+            }
+            else
+                out.writeInt(0);
+            out.close();
+        }
+        
     }
     
 

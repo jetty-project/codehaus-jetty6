@@ -15,6 +15,8 @@
 
 package org.mortbay.jetty.plugin.util;
 
+import org.mortbay.jetty.webapp.WebAppContext;
+
 /**
  * JettyPluginServer
  * 
@@ -37,13 +39,11 @@ public interface JettyPluginServer extends Proxy
     
     public void configureHandlers () throws Exception;
     
-    public  void addWebApplication (JettyPluginWebApplication webapp) throws Exception;
+    public  void addWebApplication (WebAppContext webapp) throws Exception;
     
     public  void start() throws Exception;
     
     public Object createDefaultConnector (String port) throws Exception;
-    
-    public JettyPluginWebApplication createWebApplication () throws Exception;
     
     public void join () throws Exception;
 
