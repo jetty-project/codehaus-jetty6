@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.Policy;
@@ -537,6 +538,10 @@ public class Main
             out.write((_key+"\r\nstop\r\n").getBytes());
             out.flush();
             s.close();
+        }
+        catch (ConnectException e)
+        {
+            System.err.println("ERROR: Not running!");
         }
         catch (Exception e)
         {
