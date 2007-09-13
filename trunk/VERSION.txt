@@ -1,4 +1,5 @@
 jetty-SNAPSHOT
+ + Added jetty.lib system property to start.config
  + AJP13 Fix on chunked post
  + Fix cached header optimization for extra characters
  + SetUID option to support setgid
