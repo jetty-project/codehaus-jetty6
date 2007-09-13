@@ -35,12 +35,17 @@ public class Jetty6PluginWebAppContext extends WebAppContext
     private List classpathFiles;
     private File jettyEnvXmlFile;
     private File webXmlFile;
+    private WebInfConfiguration webInfConfig = new WebInfConfiguration();
+    private EnvConfiguration envConfig =  new EnvConfiguration();
+    private Jetty6MavenConfiguration mvnConfig = new Jetty6MavenConfiguration();
+    private JettyWebXmlConfiguration jettyWebConfig = new JettyWebXmlConfiguration();
+    private TagLibConfiguration tagConfig = new TagLibConfiguration();
+    private Configuration[] configs = new Configuration[]{webInfConfig,envConfig, mvnConfig, jettyWebConfig, tagConfig};
     
     public Jetty6PluginWebAppContext ()
     {
         super();
-        setConfigurations(new Configuration[]{new WebInfConfiguration(), new EnvConfiguration(), new Jetty6MavenConfiguration(), new JettyWebXmlConfiguration(), new TagLibConfiguration()});
-        
+        setConfigurations(configs);
     }
     
     public void setClassPathFiles(List classpathFiles)
@@ -61,6 +66,19 @@ public class Jetty6PluginWebAppContext extends WebAppContext
     
     public void configure ()
     {        
+        setConfigurations(configs);
+        mvnConfig.setClassPathConfiguration (classpathFiles);
+        mvnConfig.setWebXml (webXmlFile);  
+        try
+        {
+            if (this.jettyEnvXmlFile != null)
+                envConfig.setJettyEnvXml(this.jettyEnvXmlFile.toURL());
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+        /*
         Configuration[] configurations = getConfigurations();
         for (int i=0;i<configurations.length; i++)
         {
@@ -82,6 +100,7 @@ public class Jetty6PluginWebAppContext extends WebAppContext
                 }
             }
         }
+        */
     }
 
 
