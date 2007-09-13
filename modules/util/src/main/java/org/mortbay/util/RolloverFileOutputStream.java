@@ -113,7 +113,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
         throws IOException
     {
 
-         this(filename,append,retainDays,TimeZone.getDefault(),null,null);
+         this(filename,append,retainDays,zone,null,null);
     }
      
     /* ------------------------------------------------------------ */
