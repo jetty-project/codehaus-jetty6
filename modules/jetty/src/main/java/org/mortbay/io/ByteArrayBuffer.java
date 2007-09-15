@@ -17,7 +17,6 @@ package org.mortbay.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -65,16 +64,6 @@ public class ByteArrayBuffer extends AbstractBuffer
     {
         super(READWRITE,NON_VOLATILE);
         _bytes = Portable.getBytes(value);
-        setGetIndex(0);
-        setPutIndex(_bytes.length);
-        _access=IMMUTABLE;
-        _string = value;
-    }
-
-    public ByteArrayBuffer(String value,String encoding) throws UnsupportedEncodingException
-    {
-        super(READWRITE,NON_VOLATILE);
-        _bytes = value.getBytes(encoding);
         setGetIndex(0);
         setPutIndex(_bytes.length);
         _access=IMMUTABLE;

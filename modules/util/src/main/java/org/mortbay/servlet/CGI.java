@@ -262,8 +262,6 @@ public class CGI extends HttpServlet
         final OutputStream outToCgi=p.getOutputStream();
         final int inLength=len;
 
-        IO.copyThread(p.getErrorStream(),System.err);
-        
         new Thread(new Runnable()
         {
             public void run()

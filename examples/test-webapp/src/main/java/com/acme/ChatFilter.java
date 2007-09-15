@@ -15,18 +15,14 @@
 
 package com.acme;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -60,22 +56,12 @@ public class ChatFilter extends AjaxFilter
         chatrooms=null;
     }
 
-
-    /* ------------------------------------------------------------ */
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
-    {
-        HttpSession session = ((HttpServletRequest)request).getSession(true);
-        super.doFilter(request,response,chain);
-    }
-    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.ajax.AjaxFilter#handle(java.lang.String, javax.servlet.http.HttpServletRequest, org.mortbay.ajax.AjaxFilter.AjaxResponse)
      */
     public void handle(String method, String message, HttpServletRequest request, AjaxResponse response)
     {
-        HttpSession session = request.getSession(true);
-        
         String roomName=request.getParameter("room");
         if (roomName==null)
             roomName="0";
@@ -181,8 +167,6 @@ public class ChatFilter extends AjaxFilter
         long timeoutMS = 10000L; 
         if (request.getParameter("timeout")!=null)
             timeoutMS=Long.parseLong(request.getParameter("timeout"));
-        if (session.isNew())
-            timeoutMS=1;
         
         Member member=null;
         synchronized (room)
@@ -193,35 +177,15 @@ public class ChatFilter extends AjaxFilter
                 member = new Member(session,null);
                 room.put(session.getId(),member);
             }
-
-            Continuation continuation = ContinuationSupport.getContinuation(request, room);
             
+            // Get an existing Continuation or create a new one if there are no events.
             if (!member.hasMessages())
-            {   
-                if (member.getContinuation()!=null && member.getContinuation()!=continuation)
-                {
-                    // duplicate frames!
-                    Message duplicate = new Message("System","Multiple frames/tabs/windows from same browser!",true);
-                    Message action = new Message("System","Please use only one frame/tab/window",true);
-                    member.addMessage(duplicate);
-                    member.addMessage(action);
-                    try
-                    {
-                        Thread.sleep(5000);
-                    }
-                    catch(Exception e)
-                    {}
-                }
-                else
-                {
-                    member.setContinuation(continuation);
-                    continuation.suspend(timeoutMS);
-                }
+            {
+                Continuation continuation = ContinuationSupport.getContinuation(request, room);
+                member.setContinuation(continuation);
+                continuation.suspend(timeoutMS);
             }
-            
-            if (member.getContinuation()==continuation)
-                member.setContinuation(null);
-
+            member.setContinuation(null);
             
             if (member.sendMessages(response))
                 sendMembers(room,response);
@@ -354,15 +318,6 @@ public class ChatFilter extends AjaxFilter
         }
 
 
-        /* ------------------------------------------------------------ */
-        /**
-         * @param continuation The continuation to set.
-         */
-        public Continuation getContinuation()
-        {
-            return _continuation;
-        }
-        
         /* ------------------------------------------------------------ */
         /**
          * @param continuation The continuation to set.

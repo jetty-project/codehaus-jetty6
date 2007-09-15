@@ -361,11 +361,8 @@ public abstract class AbstractGenerator implements Generator
             for (int i=0;i<len;i++)
             {
                 char ch = reason.charAt(i);
-                if (ch!='\r'&&ch!='\n')
+                if (ch==' ' || Character.isJavaIdentifierPart(ch))
                     _reason.put((byte)ch);
-                else
-
-                    _reason.put((byte)' ');
             }
         }
     }
@@ -594,16 +591,12 @@ public abstract class AbstractGenerator implements Generator
          */
         public void write(int b) throws IOException
         {
-            if (_closed || !_generator._endp.isOpen())
+            if (_closed)
                 throw new IOException("Closed");
             
             // Block until we can add _content.
-            while (_generator.isBufferFull())
-            {
+            while (_generator.isBufferFull() && _generator._endp.isOpen())
                 blockForOutput();
-                if (_closed || !_generator._endp.isOpen())
-                    throw new IOException("Closed");
-            }
 
             // Add the _content
             if (_generator.addContent((byte)b))
@@ -620,16 +613,12 @@ public abstract class AbstractGenerator implements Generator
         /* ------------------------------------------------------------ */
         private void write(Buffer buffer) throws IOException
         {
-            if (_closed || !_generator._endp.isOpen())
+            if (_closed)
                 throw new IOException("Closed");
             
             // Block until we can add _content.
-            while (_generator.isBufferFull())
-            {
+            while (_generator.isBufferFull() && _generator._endp.isOpen())
                 blockForOutput();
-                if (_closed || !_generator._endp.isOpen())
-                    throw new IOException("Closed");
-            }
 
             // Add the _content
             _generator.addContent(buffer, Generator.MORE);

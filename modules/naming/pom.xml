@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.1.5</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -91,29 +91,6 @@
           </archive>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>dependency-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-deps</id>
-            <phase>install</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>javax.mail</groupId>
-                  <artifactId>mail</artifactId>
-                  <version>${mail-version}</version>
-                </artifactItem>
-              </artifactItems>
-              <outputDirectory>../../lib/naming</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>	  
     </plugins>
   </build>
   <dependencies>
@@ -131,55 +108,12 @@
     <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
-      <version>${mail-version}</version>
-	  <exclusions>
-	    <exclusion>
-		  <groupId>javax.activation</groupId>
-		  <artifactId>activation</artifactId>
-		</exclusion>
-	  </exclusions>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+      <optional>true</optional>
     </dependency>
   </dependencies>
-  <profiles>
-    <profile>
-      <id>below-jdk1.6</id>
-      <activation>
-        <jdk>!1.6</jdk>
-      </activation>
-	  <build>
-	    <plugins>
-		  <plugin>
-		    <groupId>org.codehaus.mojo</groupId>
-			<artifactId>dependency-maven-plugin</artifactId>
-			<executions>
-			  <execution>
-			    <id>copy-deps-below1.6</id>
-				<phase>install</phase>
-				<goals>
-				  <goal>copy</goal>
-				</goals>
-				<configuration>
-				  <artifactItems>
-					<artifactItem>
-					  <groupId>javax.activation</groupId>
-					  <artifactId>activation</artifactId>
-					  <version>${activation-version}</version>
-					</artifactItem>
-				  </artifactItems>
-				  <outputDirectory>../../lib/naming</outputDirectory>
-				</configuration>				
-			  </execution>
-			</executions>
-		  </plugin>
-		</plugins>
-	  </build>
-      <dependencies>
-		<dependency>
-		  <groupId>javax.activation</groupId>
-		  <artifactId>activation</artifactId>
-		  <version>${activation-version}</version>
-		</dependency>	  
-      </dependencies>
-    </profile>
-  </profiles>  
 </project>

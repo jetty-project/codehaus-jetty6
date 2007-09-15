@@ -113,7 +113,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
         throws IOException
     {
 
-         this(filename,append,retainDays,zone,null,null);
+         this(filename,append,retainDays,TimeZone.getDefault(),null,null);
     }
      
     /* ------------------------------------------------------------ */
@@ -166,7 +166,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
         synchronized(RolloverFileOutputStream.class)
         {
             if (__rollover==null)
-                __rollover=new Timer(RolloverFileOutputStream.class.getName(),true);
+                __rollover=new Timer();
             
             _rollTask=new RollTask();
 

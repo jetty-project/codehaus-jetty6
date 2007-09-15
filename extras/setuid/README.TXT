@@ -1,43 +1,29 @@
+Need to automate the build of this....
+
+but for now do the following:
 
 Build and Install
 -----------------
 
-On Linux or Unix with gcc installed, do:
-
+In this directory do: 
   mvn install
 
+  gcc -I$JDK_HOME/include/ -I$JDK_HOME/include/linux/ -shared src/main/native/org_mortbay_setuid_SetUID.c -o ../../lib/ext/libsetuid.so
 
-On other systems, you may need to manually generate the lib. Here are
-some guidelines to get you started, but you may need to vary the arguments
-to the gcc command depending on your environment: 
+Where $JDK_HOME is same as $JAVA_HOME and where linux should be replaced by the name of your operating system.
 
-+  run mvn install at the top level of this project
-+  mkdir -p modules/native/target/generated
-+  cp modules/native/src/main/native/org_mortbay_setuid_SetUID.c modules/native/target/generated  
-+  javah -d modules/native/target/generated -classpath modules/java/target/jetty-setuid-java-6.1-SNAPSHOT.jar org.mortbay.setuid.SetUID
-+  gcc -I$JAVA_HOME/include/ -I$JAVA_HOME/include/linux/  \
-       -shared modules/native/target/generated/org_mortbay_setuid_SetUID.c -o \
-       ../../lib/ext/libsetuid.so
-
+NOTE: if you are compiling on Solaris, you may need to leave out the -shared argument.
 
 
 Configuration
 -------------
 
-Change etc/jetty-setuid.xml to use the userid or username, and/or group id or group name you want.
+Change etc/jetty-setuid.xml to use the userid you want.
 
 
 Running
 -------
 In the top level jetty directory do:
-  
-+  if your libsetuid.so is located at <jetty-root>/lib/ext (the default location):
-       sudo java -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
 
-+  or set the System property java.library.path to the directory where your libsetuid.so is located:
-       sudo java -Djava.library.path=/directory/path/to/your/jetty/lib -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
-
-+ alternatively, set the System property jetty.libsetuid.path to the location of your
-  libsetuid.so file:
-       sudo java -Djetty.libsetuid.path=/directory/path/to/your/jetty/lib/libsetuid.so -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
+  sudo java -Djava.library.path=lib/ext -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
 

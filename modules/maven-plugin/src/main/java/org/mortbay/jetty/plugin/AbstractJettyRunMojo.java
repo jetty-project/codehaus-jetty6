@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.util.Scanner;
 import org.mortbay.jetty.plugin.util.ScanTargetPattern;
 import org.codehaus.plexus.util.FileUtils;
@@ -287,6 +288,16 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
             throw new MojoExecutionException("Location of classesDirectory does not exist");
         }
         
+        // check the tmp directory
+        if (getTmpDirectory() != null)
+        {
+            if (!getTmpDirectory().exists())
+            {
+                if (!getTmpDirectory().mkdirs())
+                    throw new MojoExecutionException("Unable to create tmp directory at " + getTmpDirectory());
+            }
+            
+        }
         
         
         if (scanTargets == null)
@@ -352,14 +363,16 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     public void configureWebApplication() throws Exception
     {
        super.configureWebApplication();
+        
+        JettyPluginWebApplication webapp = getWebApplication();
         setClassPathFiles(setUpClassPath());
-        webAppConfig.setWebXmlFile(getWebXmlFile());
-        webAppConfig.setJettyEnvXmlFile(getJettyEnvXmlFile());
-        webAppConfig.setClassPathFiles(getClassPathFiles());
-        webAppConfig.setWar(getWebAppSourceDirectory().getCanonicalPath());
+        webapp.setWebXmlFile(getWebXmlFile());
+        webapp.setJettyEnvXmlFile(getJettyEnvXmlFile());
+        webapp.setClassPathFiles(getClassPathFiles());
+        webapp.setWebAppSrcDir(getWebAppSourceDirectory());
         getLog().info("Webapp directory = " + getWebAppSourceDirectory().getCanonicalPath());
 
-        webAppConfig.configure();
+        webapp.configure();
     }
     
     public void configureScanner ()
@@ -383,9 +396,9 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
             {
                 try
                 {
-                    getLog().info("restarting "+webAppConfig);
+                    getLog().info("restarting "+getWebApplication());
                     getLog().debug("Stopping webapp ...");
-                    webAppConfig.stop();
+                    getWebApplication().stop();
                     getLog().debug("Reconfiguring webapp ...");
 
                     checkPomConfiguration();
@@ -407,7 +420,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                     }
 
                     getLog().debug("Restarting webapp ...");
-                    webAppConfig.start();
+                    getWebApplication().start();
                     getLog().info("Restart completed at "+new Date().toString());
                 }
                 catch (Exception e)

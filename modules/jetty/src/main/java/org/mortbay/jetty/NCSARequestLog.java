@@ -50,10 +50,10 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
     private int _retainDays;
     private boolean _closeOut;
     private boolean _preferProxiedForAddress;
-    private String _logDateFormat="dd/MMM/yyyy:HH:mm:ss Z";
+    private String _logDateFormat;
     private String _filenameDateFormat = null;
     private Locale _logLocale = Locale.getDefault();
-    private String _logTimeZone = "GMT";
+    private String _logTimeZone = TimeZone.getDefault().getID();
     private String[] _ignorePaths;
     private boolean _logLatency = false;
     private boolean _logCookies = false;

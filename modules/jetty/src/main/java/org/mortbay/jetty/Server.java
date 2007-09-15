@@ -185,11 +185,6 @@ public class Server extends HandlerWrapper implements Attributes
         HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
       
-        for (int i=0;_realms !=null && i<_realms.length; i++)
-        {
-            if (_realms[i] instanceof LifeCycle)
-                ((LifeCycle)_realms[i]).start();
-        }
 
         Iterator itor = _dependentLifeCycles.iterator();
         while (itor.hasNext())
@@ -244,12 +239,6 @@ public class Server extends HandlerWrapper implements Attributes
     protected void doStop() throws Exception
     {
         MultiException mex=new MultiException();
-        
-        for (int i=0;_realms !=null && i<_realms.length; i++)
-        {
-            if (_realms[i] instanceof LifeCycle)
-                ((LifeCycle)_realms[i]).stop();
-        }
         
         if (_graceful>0)
         {

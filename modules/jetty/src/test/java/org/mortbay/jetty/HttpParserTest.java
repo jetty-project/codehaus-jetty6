@@ -163,7 +163,6 @@ public class HttpParserTest extends TestCase
                 + "Header3: \015\012"
                 + "Header4 \015\012"
                 + "  value4\015\012"
-                + "Server5: notServer\015\012"
                 + "\015\012");
         ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
         SimpleBuffers buffers=new SimpleBuffers(new Buffer[]{buffer});
@@ -182,9 +181,7 @@ public class HttpParserTest extends TestCase
         assertEquals("", val[2]);
         assertEquals("Header4", hdr[3]);
         assertEquals("value4", val[3]);
-        assertEquals("Server5", hdr[4]);
-        assertEquals("notServer", val[4]);
-        assertEquals(4, h);
+        assertEquals(3, h);
     }
 
     public void testChunkParse()

@@ -44,8 +44,9 @@ import org.mortbay.log.Log;
  */
 public class Scanner
 {
-    private static int __scannerId=0;
     private int _scanInterval;
+
+    
     private List _listeners = Collections.synchronizedList(new ArrayList());
     private Map _prevScan = Collections.EMPTY_MAP;
     private FilenameFilter _filter;
@@ -101,18 +102,13 @@ public class Scanner
      */
     public synchronized void setScanInterval(int scanInterval)
     {
+        if (_running)
+            _task.cancel();
+        
         this._scanInterval = scanInterval;
         
-        if (_running)
-        {
-            stop();
-
-            _timer = newTimer();
-            _task = newTimerTask();
-
-            schedule(_timer, _task);
-            _running = true;
-        }
+        if (_running && _scanInterval >0)
+            _timer.scheduleAtFixedRate(_task,1000L*getScanInterval(),1000L*getScanInterval());
     }
 
     /**
@@ -223,36 +219,18 @@ public class Scanner
             _prevScan = scanFiles();
         }
 
-        _timer = newTimer();
-        _task = newTimerTask();
-
-        schedule(_timer, _task);
-        
-    }
-
-    public TimerTask newTimerTask ()
-    {
-        return new TimerTask()
+        _timer = new Timer();
+        _task = new TimerTask()
         {
             public void run() { scan(); }
         };
+
+        if (getScanInterval()>0)
+            _timer.scheduleAtFixedRate(_task,1000L*getScanInterval(),1000L*getScanInterval());
+        
     }
 
-    public Timer newTimer ()
-    {
-        return new Timer("Scanner-"+__scannerId++, true);
-    }
-    
-    public void schedule (Timer timer, TimerTask task)
-    {
-        if (timer==null)
-            throw new IllegalArgumentException("Timer is null");
-        if (task==null)
-            throw new IllegalArgumentException("TimerTask is null");
-        
-        if (getScanInterval() > 0)
-            timer.scheduleAtFixedRate(task, 1000L*getScanInterval(),1000L*getScanInterval());
-    }
+
     /**
      * Stop the scanning.
      */
@@ -261,7 +239,6 @@ public class Scanner
         if (_running)
         {
             _running = false; 
-            _timer.cancel();
             _task.cancel();
             _task=null;
             _timer=null;

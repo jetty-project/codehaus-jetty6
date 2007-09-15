@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Server Project</name>
-  <version>6.1-SNAPSHOT</version>
+  <version>6.1.5</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -243,25 +243,25 @@
     <module>extras/servlet-tester</module>
     <module>extras/xbean</module>
     <module>extras/spring</module>
+    <!--module>extras/grizzly</module-->
     <module>extras/sslengine</module>
     <module>extras/ajp</module>
     <module>extras/setuid</module>
     <module>extras/win32service</module>
     <!--module>extras/gwt</module-->
     <module>extras/threadpool</module>
-    <module>extras/client</module>
 
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
     <module>examples/test-jndi-webapp</module>
     <module>examples/embedded</module>
     <!-- <module>examples/spring-ebj3-demo</module> -->
-    <module>examples/tests</module>
 
+    <module>extras/tests</module>
 
+    <module>contrib/client</module>
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
-    <!--module>contrib/grizzly</module-->
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
   </modules>

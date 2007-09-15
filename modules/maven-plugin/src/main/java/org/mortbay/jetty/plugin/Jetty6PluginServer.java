@@ -26,9 +26,9 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
+import org.mortbay.jetty.plugin.util.JettyPluginWebApplication;
 import org.mortbay.jetty.plugin.util.PluginLog;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
 
 /**
@@ -143,9 +143,9 @@ public class Jetty6PluginServer implements JettyPluginServer
     /**
      * @see org.mortbay.jetty.plugin.util.JettyPluginServer#addWebApplication(java.lang.Object)
      */
-    public void addWebApplication(WebAppContext webapp) throws Exception
+    public void addWebApplication(JettyPluginWebApplication webapp) throws Exception
     {  
-        contexts.addHandler (webapp);
+        contexts.addHandler ((Handler)webapp.getProxiedObject());
     }
 
     
@@ -199,6 +199,15 @@ public class Jetty6PluginServer implements JettyPluginServer
     }
     
  
+
+    /**
+     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#createWebApplication()
+     */
+    public JettyPluginWebApplication createWebApplication() throws Exception
+    {
+        return new Jetty6PluginWebApplication();
+    }
+
 
 
     public void join () throws Exception

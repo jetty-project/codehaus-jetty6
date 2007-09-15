@@ -64,11 +64,10 @@ var ajax =
         var response = request.responseXML.getElementsByTagName("ajax-response");
         if (response != null && response.length == 1)
         {
-          var responses = response[0].getElementsByTagName("response");
-	  
-          for ( var i = 0 ; i < responses.length ; i++ ) 
+          for ( var i = 0 ; i < response[0].childNodes.length ; i++ ) 
           {
-            var responseElement = responses[i];
+            var responseElement = response[0].childNodes[i];
+	    
 	    
             // only process nodes of type element.....
             if ( responseElement.nodeType != 1 )
@@ -77,8 +76,7 @@ var ajax =
             var id   = responseElement.getAttribute('id');
             
             var handler = ajax._handlers[id];
-	    
-	    if (handler!=null)
+            if (handler!=null)
             {
               for (var j = 0; j < responseElement.childNodes.length; j++) 
               {
@@ -134,7 +132,7 @@ var ajax =
     if (ajax._messages==0)
     {
       if (ajax.poll)
-        ajax._xhr('POST','.?ajax=poll&message=poll',null,ajax._pollHandler);
+        ajax._xhr('GET','.?ajax=poll&message=poll',null,ajax._pollHandler);
     }
     else
     {
@@ -186,7 +184,7 @@ var ajax =
   _startPolling : function()
   {
     if (ajax.poll)
-      ajax._xhr('POST','.?ajax=poll&message=poll&timeout=0',null,ajax._pollHandler);
+      ajax._xhr('GET','.?ajax=poll&message=poll&timeout=0',null,ajax._pollHandler);
   },
   
   getContentAsString: function( parentNode ) {

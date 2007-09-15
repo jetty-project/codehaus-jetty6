@@ -783,7 +783,8 @@ public class HttpConnection implements Connection
                     _generator.setHead(_head);
                     
                     if (_server.getSendDateHeader())
-                        _responseFields.put(HttpHeaders.DATE_BUFFER, _request.getTimeStampBuffer(),_request.getTimeStamp());
+                        _responseFields.put(HttpHeaders.DATE_BUFFER, _request.getTimeStampBuffer());
+                   
                     
                     if (!_host)
                     {
@@ -936,11 +937,11 @@ public class HttpConnection implements Connection
                 if (c.getContentLength() > 0) 
                     _responseFields.putLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
                 Buffer lm = c.getLastModified();
-                long lml=c.getResource().lastModified();
                 if (lm != null) 
-                    _responseFields.put(HttpHeaders.LAST_MODIFIED_BUFFER, lm,lml);
+                    _responseFields.put(HttpHeaders.LAST_MODIFIED_BUFFER, lm);
                 else if (c.getResource()!=null)
                 {
+                    long lml=c.getResource().lastModified();
                     if (lml!=-1)
                         _responseFields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER, lml);
                 }
@@ -952,9 +953,10 @@ public class HttpConnection implements Connection
             else if (content instanceof Resource)
             {
                 resource=(Resource)content;
-                _responseFields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER, resource.lastModified());
+                _responseFields.putLongField(HttpHeaders.LAST_MODIFIED_BUFFER, resource.lastModified());
                 content=resource.getInputStream();
             }
+            
             
             
             if (content instanceof Buffer)

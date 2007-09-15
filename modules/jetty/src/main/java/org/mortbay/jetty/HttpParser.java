@@ -534,15 +534,12 @@ public class HttpParser implements Parser
                             
                             // try cached name!
                             if (array!=null)
-                            {
                                 _cached=HttpHeaders.CACHE.getBest(array, _buffer.markIndex(), length+1);
-
-                                if (_cached!=null)
-                                {
-                                    _length=_cached.length();
-                                    _buffer.setGetIndex(_buffer.markIndex()+_length);
-                                    length=_buffer.length();
-                                }
+                            if (_cached!=null)
+                            {
+                                _length=_cached.length();
+                                _buffer.setGetIndex(_buffer.markIndex()+_length);
+                                length=_buffer.length();
                             }
                         }
                     }
@@ -566,7 +563,6 @@ public class HttpParser implements Parser
                     else if (ch != HttpTokens.SPACE && ch != HttpTokens.TAB)
                     {
                         // Drag the mark
-                        _cached=null;
                         if (_length == -1) _buffer.mark();
                         _length=_buffer.getIndex() - _buffer.markIndex();
                     }
