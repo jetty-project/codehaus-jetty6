@@ -591,12 +591,16 @@ public abstract class AbstractGenerator implements Generator
          */
         public void write(int b) throws IOException
         {
-            if (_closed)
+            if (_closed || !_generator._endp.isOpen())
                 throw new IOException("Closed");
             
             // Block until we can add _content.
-            while (_generator.isBufferFull() && _generator._endp.isOpen())
+            while (_generator.isBufferFull())
+            {
                 blockForOutput();
+                if (_closed || !_generator._endp.isOpen())
+                    throw new IOException("Closed");
+            }
 
             // Add the _content
             if (_generator.addContent((byte)b))
@@ -613,12 +617,16 @@ public abstract class AbstractGenerator implements Generator
         /* ------------------------------------------------------------ */
         private void write(Buffer buffer) throws IOException
         {
-            if (_closed)
+            if (_closed || !_generator._endp.isOpen())
                 throw new IOException("Closed");
             
             // Block until we can add _content.
-            while (_generator.isBufferFull() && _generator._endp.isOpen())
+            while (_generator.isBufferFull())
+            {
                 blockForOutput();
+                if (_closed || !_generator._endp.isOpen())
+                    throw new IOException("Closed");
+            }
 
             // Add the _content
             _generator.addContent(buffer, Generator.MORE);
