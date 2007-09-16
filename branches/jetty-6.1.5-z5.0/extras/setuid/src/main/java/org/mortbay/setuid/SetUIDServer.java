@@ -25,6 +25,7 @@ import org.mortbay.log.Log;
 public class SetUIDServer extends Server
 {
     int _uid=0;
+    int _gid=0;
     int _umask=0;
     boolean _startServerAsPrivileged;
 
@@ -49,6 +50,15 @@ public class SetUIDServer extends Server
         _uid=uid;
     }
     
+    public void setGid(int gid)
+    {
+        _gid=gid;
+    }
+    
+    public int getGid()
+    {
+        return _gid;
+    }
 
     protected void doStart() throws Exception
     {
@@ -61,6 +71,11 @@ public class SetUIDServer extends Server
         if (_startServerAsPrivileged)
         {
             super.doStart();
+            if (_gid!=0)
+            {
+                Log.info("Setting GID="+_gid);
+                SetUID.setgid(_gid);
+            }
             if (_uid!=0)
             {
                 Log.info("Setting UID="+_uid);
@@ -72,6 +87,11 @@ public class SetUIDServer extends Server
             Connector[] connectors = getConnectors();
             for (int i=0;connectors!=null && i<connectors.length;i++)
                 connectors[i].open();
+            if (_gid!=0)
+            {
+                Log.info("Setting GID="+_gid);
+                SetUID.setgid(_gid);
+            }
             if (_uid!=0)
             {
                 Log.info("Setting UID="+_uid);
