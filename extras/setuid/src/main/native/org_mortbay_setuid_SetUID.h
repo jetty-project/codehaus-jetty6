@@ -18,6 +18,9 @@ JNIEXPORT jint JNICALL Java_org_mortbay_setuid_SetUID_setuid
 JNIEXPORT jint JNICALL Java_org_mortbay_setuid_SetUID_setumask
   (JNIEnv *, jclass, jint);
 
+JNIEXPORT jint JNICALL Java_org_mortbay_setuid_SetUID_setgid
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif

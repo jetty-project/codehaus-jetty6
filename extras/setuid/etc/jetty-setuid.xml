@@ -12,5 +12,6 @@
   <Set name="startServerAsPrivileged">false</Set>
   <Set name="umask">2</Set>
   <Set name="uid">2001</Set>
+  <Set name="gid">2001</Set>
 </Configure>
 

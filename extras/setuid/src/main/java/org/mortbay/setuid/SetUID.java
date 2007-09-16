@@ -8,6 +8,7 @@ public class SetUID
 
     public static native int setumask(int mask);
     public static native int setuid(int uid);
+    public static native int setgid(int gid);
 
     static 
     {
