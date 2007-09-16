@@ -29,6 +29,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import org.mortbay.component.LifeCycle;
 import org.mortbay.log.Log;
@@ -151,12 +152,14 @@ public class XmlConfiguration
     {
         _idMap=map;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void setProperties (Map map)
     {
         _propertyMap = map;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public Map getProperties ()
     {
         return _propertyMap;
@@ -923,19 +926,48 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** 
+     * Run the XML configurations as a main application.
+     * The command line is used to obtain properties files (must be named '*.properties') and XmlConfiguration
+     * files.
+     * <p>
+     * Any property file on the command line is added to a combined Property instance that is passed to
+     * each configuration file via {@link XmlConfiguration#setProperties(Map)}.
+     * <p>
+     * Each configuration file on the command line is used to create a new XmlConfiguration instance and the
+     * {@link XmlConfiguration#configure()} method is used to create the configured object.  If the resulting 
+     * object is an instance of {@link LifeCycle}, then it is started.
+     * <p>
+     * Any IDs created in a configuration are passed to the next configuration file on the command line using
+     * {@link #getIdMap()} and {@link #setIdMap(Map)}. This allows objects with IDs created in one config file to
+     * be referenced in subsequent config files on the command line.
+     * 
+     * @param args array of property and xml configuration filenames or {@link Resource}s.
+     */
     public static void main(String[] args)
     {
         try
         {
+            Properties properties=new Properties();
             XmlConfiguration last=null;
             Object[] obj = new Object[args.length];
             for (int i = 0; i < args.length; i++)
             {
-                XmlConfiguration configuration = new XmlConfiguration(Resource.newResource(args[i]).getURL());
-                if (last!=null)
-                    configuration.getIdMap().putAll(last.getIdMap());
-                obj[i] = configuration.configure();
-                last=configuration;
+                if (args[i].toLowerCase().endsWith(".properties"))
+                {
+                    properties.load(Resource.newResource(args[i]).getInputStream());
+                }
+                else
+                {
+                    XmlConfiguration configuration = new XmlConfiguration(Resource.newResource(args[i]).getURL());
+                    if (last!=null)
+                        configuration.getIdMap().putAll(last.getIdMap());
+                    if (properties.size()>0)
+                        configuration.setProperties(properties);
+                    obj[i] = configuration.configure();
+                    last=configuration;
+                }
             }
 
             for (int i = 0; i < args.length; i++)
