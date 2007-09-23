@@ -125,12 +125,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
     }
     
     /* ------------------------------------------------------------ */
-    public void stopAccept(int acceptorID) throws Exception
-    {
-        _manager.doStop(acceptorID);
-    }
-    
-    /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
         synchronized(this)
@@ -139,7 +133,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 _acceptChannel.close();
             _acceptChannel = null;
         }
-
     }
     
     /* ------------------------------------------------------------------------------- */
