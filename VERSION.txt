@@ -39,6 +39,7 @@ jetty-SNAPSHOT
  + JETTY-413 Make rolloveroutputstream timer daemon
  + JETTY-422 Allow <Property> values to be null in config files
  + JETTY-423 Ensure javax.servlet.forward parameters are latched on first forward
+ + JETTY-430 improved cometd logging
 
 jetty-6.1.5 - 19 Jul 2007
  + Upgrade to Jasper 2.1 tag SJSAS-9_1-B50G-BETA3-27_June_2007
