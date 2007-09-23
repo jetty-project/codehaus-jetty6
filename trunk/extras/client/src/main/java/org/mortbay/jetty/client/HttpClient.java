@@ -81,6 +81,7 @@ public class HttpClient extends AbstractBuffers
     Connector _connector;
     private long _idleTimeout=20000;
     private long _exchangeTimeout=200000;
+    private int _soTimeout = 10000;
     private Timeout _timeout = new Timeout();
     
     
@@ -351,6 +352,7 @@ public class HttpClient extends AbstractBuffers
             SocketChannel channel=SocketChannel.open();
             channel.configureBlocking(false);
             channel.connect(destination.getAddress());
+            channel.socket().setSoTimeout(_soTimeout);
             _selectorManager.register(channel,destination);
         }
 
@@ -437,6 +439,14 @@ public class HttpClient extends AbstractBuffers
     public void setIdleTimeout(long idleTimeout)
     {
         _idleTimeout=idleTimeout;
+    }
+
+    public int get_soTimeout() {
+        return _soTimeout;
+    }
+
+    public void set_soTimeout(int timeout) {
+        _soTimeout = timeout;
     }
 
 }
