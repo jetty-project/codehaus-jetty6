@@ -163,10 +163,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
      */
     public void doSelect(int acceptorID) throws IOException
     {
-        
-        if (_selectSet!=null && _selectSet.length>acceptorID && _selectSet[acceptorID]!=null)
-            _selectSet[acceptorID].doSelect();
-        
+        SelectSet[] sets= _selectSet;
+        if (sets!=null && sets.length>acceptorID && sets[acceptorID]!=null)
+            sets[acceptorID].doSelect();
     }
 
 
@@ -207,16 +206,12 @@ public abstract class SelectorManager extends AbstractLifeCycle
     /* ------------------------------------------------------------------------------- */
     protected void doStop() throws Exception
     {
-        for (int i=0;i<_selectSet.length;i++)
-            _selectSet[i].stop();
-        super.doStop();
+        SelectSet[] sets= _selectSet;
         _selectSet=null;
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public void doStop(int i) throws Exception
-    {
-        _selectSet[i].stop();
+        if (sets!=null)
+            for (int i=0;i<sets.length;i++)
+                sets[i].stop();
+        super.doStop();
     }
 
     /* ------------------------------------------------------------ */
