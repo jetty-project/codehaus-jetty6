@@ -27,6 +27,7 @@ jetty-SNAPSHOT
  + Added ConcatServlet to combine javascript and css
  + Add ability to persist sessions with HashSessionManager
  + Avoid FULL exception in window between blockForOutput and remote close
+ + JETTY-259 SystemRoot set for windows CGI
  + JETTY-311 avoid json keywords
  + JETTY-376 allow anything but CRLF in reason string
  + JETTY-398 Allow same WADI Dispatcher to be used across multiple web-app contexts
