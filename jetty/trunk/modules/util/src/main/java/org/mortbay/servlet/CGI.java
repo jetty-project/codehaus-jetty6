@@ -126,6 +126,9 @@ public class CGI extends HttpServlet
             if (n!=null&&n.startsWith("ENV_"))
                 _env.set(n.substring(4),getInitParameter(n));
         }
+	String os = System.getenv("OS");
+	if (os!=null && os.toLowerCase().indexOf("windows")!=-1)
+	    _env.set("SystemRoot", "C:\\WINDOWS");    
         _ok=true;
     }
 
