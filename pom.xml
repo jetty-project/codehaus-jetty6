@@ -104,21 +104,7 @@
     <url>http://snapshots.repository.codehaus.org</url>
     <snapshots><enabled>true</enabled></snapshots>
    </repository>
-    <!-- for the felix osgi bundle plugin -->
-    <repository>
-      <id>apache.m2.incubator</id>
-      <name>Apache M2 Incubator Repository</name>
-      <url>http://people.apache.org/repo/m2-snapshot-repository/</url>
-    </repository>
   </repositories>
-  <!-- for the felix osgi bundle plugin -->
-  <pluginRepositories>
-    <pluginRepository>
-      <id>apache.m2.incubator</id>
-      <name>Apache M2 Incubator Repository</name>
-      <url>http://people.apache.org/repo/m2-snapshot-repository/</url>
-    </pluginRepository>
-  </pluginRepositories>
   <scm>
     <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</connection>
     <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/trunk</developerConnection>
@@ -134,18 +120,7 @@
     <testSourceDirectory>src/test/java</testSourceDirectory>
     <outputDirectory>target/classes</outputDirectory>
     <testOutputDirectory>target/test-classes</testOutputDirectory>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh-external</artifactId>
-        <version>1.0-alpha-6</version>
-      </extension>
-      <extension>
-	<groupId>org.apache.maven.wagon</groupId>
-	<artifactId>wagon-webdav</artifactId>
-	<version>1.0-beta-1</version>
-      </extension>
-    </extensions>
+   
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
@@ -167,12 +142,7 @@
           <target>1.4</target>
         </configuration>
       </plugin>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <tagBase>https://svn.codehaus.org/jetty/jetty/tags</tagBase>
-        </configuration>
-      </plugin>
+     
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -183,43 +153,13 @@
             <manifestEntries>
               <mode>development</mode>
               <url>${pom.url}</url>
-	      <implementation-version>${pom.version}</implementation-version>
+         
 	      <package>org.mortbay</package>
             </manifestEntries>
           </archive>
         </configuration>
       </plugin>
 
-      <plugin>
-	<inherited>true</inherited>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-source-plugin</artifactId>
-	<executions>
-	  <execution>
-	    <id>attach-sources</id>
-	    <goals>
-	      <goal>jar</goal>
-	    </goals>
-	  </execution>
-	</executions>
-      </plugin>
-
-      <!-- plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clover-plugin</artifactId>
-        <configuration>
-	  <jdk>1.5</jdk>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>instrument</goal>
-              <goal>aggregate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin -->
 
     </plugins>
   </build>
@@ -229,41 +169,22 @@
     <module>modules/jetty</module>
     <module>modules/jsp-api-2.1</module>
     <module>modules/jsp-2.1</module>
-    <module>modules/jsp-api-2.0</module>
-    <module>modules/jsp-2.0</module>
-    <module>modules/management</module>
     <module>modules/start</module>
-    <module>modules/maven-plugin</module>
-    <module>modules/jspc-maven-plugin</module>
-    <module>modules/naming</module>
-    <module>modules/plus</module>
+
     <module>modules/html</module>
-    <module>modules/annotations</module>
+    <!--module>modules/management</module-->
+    <!--module>modules/naming</module-->
+    <!--module>modules/plus</module-->
+    <!--module>modules/annotations</module-->
 
-    <module>extras/servlet-tester</module>
-    <module>extras/xbean</module>
-    <module>extras/spring</module>
-    <!--module>extras/grizzly</module-->
-    <module>extras/sslengine</module>
+    <!--module>examples/test-webapp</module-->
+
     <module>extras/ajp</module>
-    <module>extras/setuid</module>
-    <module>extras/win32service</module>
-    <!--module>extras/gwt</module-->
-    <module>extras/threadpool</module>
+    <!--module>extras/client</module-->
+    <!--module>extras/sslengine</module-->
 
-    <module>examples/test-webapp</module>
-    <module>examples/test-jaas-webapp</module>
-    <module>examples/test-jndi-webapp</module>
-    <module>examples/embedded</module>
-    <!-- <module>examples/spring-ebj3-demo</module> -->
+    <!--module>contrib/cometd</module-->
 
-    <module>extras/tests</module>
-
-    <module>contrib/client</module>
-    <module>contrib/cometd</module>
-    <module>contrib/jetty-ant</module>
-    <!--module>contrib/wadi</module-->
-    <!--module>contrib/terracotta</module-->
   </modules>
 
   <reporting>
