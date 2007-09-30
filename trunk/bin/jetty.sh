@@ -131,7 +131,7 @@ fi
 ##################################################
 # Jetty's hallmark
 ##################################################
-JETTY_INSTALL_TRACE_FILE="start.jar"
+JETTY_INSTALL_TRACE_FILE="etc/jetty.xml"
 
 
 ##################################################
@@ -153,23 +153,27 @@ fi
 ##################################################
 if [ "$JETTY_HOME" = "" ] ; then
   STANDARD_LOCATIONS="           \
+        /usr/share               \
+        /usr/share/java          \
         $HOME                    \
         $HOME/src                \
         ${HOME}/opt/             \
         /opt                     \
         /java                    \
-        /usr/share               \
-        /usr/share/java          \
         /usr/local               \
         /usr/local/share         \
         /usr/local/share/java    \
         /home                    \
         "
   JETTY_DIR_NAMES="              \
-        Jetty                    \
+        jetty-6                  \
+        jetty6                   \
+        jetty-6.*                \
         jetty                    \
-        Jetty-*                  \
-        jetty-*                  \
+        Jetty-6                  \
+        Jetty6                   \
+        Jetty-6.*                \
+        Jetty                    \
         "
         
   JETTY_HOME=
@@ -187,6 +191,7 @@ if [ "$JETTY_HOME" = "" ] ; then
   done
 fi
 
+
 ##################################################
 # No JETTY_HOME yet? We're out of luck!
 ##################################################
@@ -194,6 +199,7 @@ if [ -z "$JETTY_HOME" ] ; then
     echo "** ERROR: JETTY_HOME not set, you need to set it or install in a standard location" 
     exit 1
 fi
+cd $JETTY_HOME
 
 #####################################################
 # Check that jetty is where we think it is
@@ -349,6 +355,7 @@ then
 
     # Java search path
     JAVA_LOCATIONS="\
+        /usr/java \
         /usr/bin \
         /usr/local/bin \
         /usr/local/java \
@@ -358,7 +365,7 @@ then
         /opt/jdk \
         /opt/jre \
     " 
-    JAVA_NAMES="java jre kaffe"
+    JAVA_NAMES="java jdk jre"
     for N in $JAVA_NAMES ; do
         for L in $JAVA_LOCATIONS ; do
             [ -d $L ] || continue 
@@ -366,7 +373,7 @@ then
                 [ -x $J ] || continue
                 VERSION=`eval $J -version 2>&1`       
                 [ $? = 0 ] || continue
-                VERSION=`expr "$VERSION" : '.*"\(1.[0-9\.]*\)"'`
+                VERSION=`expr "$VERSION" : '.*"\(1.[0-9\.]*\)["_]'`
                 [ "$VERSION" = "" ] && continue
                 expr $VERSION \< 1.2 >/dev/null && continue
                 echo $VERSION:$J
@@ -432,10 +439,14 @@ esac
 #####################################################
 JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.home=$JETTY_HOME "
 
+[ -f $JETTY_HOME/etc/start.config ] && JAVA_OPTIONS="-DSTART=$JETTY_HOME/etc/start.config $JAVA_OPTIONS"
+
 #####################################################
 # This is how the Jetty server will be started
 #####################################################
-RUN_CMD="$JAVA $JAVA_OPTIONS -jar $JETTY_HOME/start.jar $JETTY_ARGS $CONFIGS"
+JETTY_START=$JETTY_HOME/start.jar
+[ ! -f $JETTY_START ] && JETTY_START=$JETTY_HOME/lib/start.jar
+RUN_CMD="$JAVA $JAVA_OPTIONS -jar $JETTY_START $JETTY_ARGS $CONFIGS"
 
 #####################################################
 # Comment these out after you're happy with what 
