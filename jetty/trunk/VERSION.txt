@@ -28,6 +28,7 @@ jetty-SNAPSHOT
  + Add ability to persist sessions with HashSessionManager
  + Avoid FULL exception in window between blockForOutput and remote close
  + Added JPackage RPM support
+ + Added JSON.Convertable
  + JETTY-259 SystemRoot set for windows CGI
  + JETTY-311 avoid json keywords
  + JETTY-376 allow anything but CRLF in reason string
