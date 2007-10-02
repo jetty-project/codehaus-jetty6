@@ -14,8 +14,10 @@
 
 package org.mortbay.util.ajax;
 
+import java.io.Externalizable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,8 +26,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.mortbay.log.Log;
 import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.Loader;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.TypeUtil;
 
@@ -53,6 +57,10 @@ import org.mortbay.util.TypeUtil;
  *   Object --> string (dubious!)
  * </pre>
  * </p><p>
+ * The interface {@link JSON.Convertable} may be implemented by classes that wish to externalize and 
+ * initialize specific fields to and from JSON objects.  Only directed acyclic graphs of objects are supported.
+ * </p>
+ * <p>
  * The interface {@link JSON.Generator} may be implemented by classes that know how to render themselves as JSON and
  * the {@link #toString(Object)} method will use {@link JSON.Generator#addJSON(StringBuffer)} to generate the JSON.
  * The class {@link JSON.Literal} may be used to hold pre-gnerated JSON object. 
@@ -134,6 +142,8 @@ public class JSON
     {
         if (object==null)
             buffer.append("null");
+        else if (object instanceof Convertable)
+            appendJSON(buffer, (Convertable)object);
         else if (object instanceof Generator)
             appendJSON(buffer, (Generator)object);
         else if (object instanceof Map)
@@ -158,6 +168,62 @@ public class JSON
     private static void appendNull(StringBuffer buffer)
     {
         buffer.append("null");
+    }
+
+    private static void appendJSON(final StringBuffer buffer, Convertable converter)
+    {
+        buffer.append('{');
+        converter.toJSON(new Output(){
+            char c=0;
+            public void addClass(Class type)
+            {
+                if (c>0)
+                    buffer.append(c);
+                buffer.append("\"class\":");
+                append(buffer,type.getName());
+                c=',';
+            }
+            public void add(String name, Object value)
+            {
+                if (c>0)
+                    buffer.append(c);
+                QuotedStringTokenizer.quote(buffer,name);
+                buffer.append(':');
+                append(buffer,value);
+                c=',';
+            }
+
+            public void add(String name, double value)
+            {
+                if (c>0)
+                    buffer.append(c);
+                QuotedStringTokenizer.quote(buffer,name);
+                buffer.append(':');
+                appendNumber(buffer,new Double(value));
+                c=',';
+            }
+
+            public void add(String name, long value)
+            {
+                if (c>0)
+                    buffer.append(c);
+                QuotedStringTokenizer.quote(buffer,name);
+                buffer.append(':');
+                appendNumber(buffer,new Long(value));
+                c=',';
+            }
+
+            public void add(String name, boolean value)
+            {
+                if (c>0)
+                    buffer.append(c);
+                QuotedStringTokenizer.quote(buffer,name);
+                buffer.append(':');
+                appendBoolean(buffer,value?Boolean.TRUE:Boolean.FALSE);
+                c=',';
+            }
+        });
+        buffer.append('}');
     }
 
     private static void appendJSON(StringBuffer buffer, Generator generator)
@@ -350,7 +416,7 @@ public class JSON
         return null;
     }
     
-    private static Map parseObject(Source source)
+    private static Object parseObject(Source source)
     {
         if (source.next()!='{')
             throw new IllegalStateException();
@@ -381,6 +447,31 @@ public class JSON
                 next = seekTo("\"}",source);
         }
      
+        String classname = (String)map.get("class");
+        if (classname!=null)
+        {
+            try
+            {
+                Class c = Loader.loadClass(JSON.class,classname);
+                if (c!=null && Convertable.class.isAssignableFrom(c));
+                {
+                    try
+                    {
+                        Convertable conv = (Convertable)c.newInstance();
+                        conv.fromJSON(map);
+                        return conv; 
+                    }
+                    catch(Exception e)
+                    {
+                        throw new IllegalArgumentException(e);
+                    }
+                }
+            }
+            catch(ClassNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        }
         return map;
     }
     
@@ -611,7 +702,42 @@ public class JSON
             return string.substring(mark,end);
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * JSON Output class for use by {@link Convertable}.
+     */
+    public interface Output
+    {
+        public void addClass(Class c);
+        public void add(String name,Object value);
+        public void add(String name,double value);
+        public void add(String name,long value);
+        public void add(String name,boolean value);
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** JSON Convertable object.
+     * Object can implement this interface in a similar way to the 
+     * {@link Externalizable} interface is used to allow classes to
+     * provide their own serialization mechanism.
+     * <p>
+     * A JSON.Convertable object may be written to a JSONObject 
+     * or initialized from a Map of field names to values.
+     * <p>
+     * If the JSON is to be convertable back to an Object, then
+     * the method {@link Output#addClass(Class)} must be called from within toJSON()
+     * @author gregw
+     *
+     */
+    public interface Convertable
+    {
+        public void toJSON(Output out) ;
+        public void fromJSON(Map object);
+    }
+
+    /* ------------------------------------------------------------ */
     public interface Generator
     {
         public void addJSON(StringBuffer buffer);
