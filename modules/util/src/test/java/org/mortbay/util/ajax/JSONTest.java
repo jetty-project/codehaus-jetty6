@@ -105,7 +105,7 @@ public class JSONTest extends TestCase
     }
     
     
-    public static class Woggle implements JSON.Convertable
+    public static class Woggle implements JSON.Convertible
     {
         String name;
         Woggle nested;
