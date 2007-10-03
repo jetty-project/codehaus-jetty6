@@ -1,4 +1,6 @@
 jetty-SNAPSHOT
+
+jetty-6.1.6rc0 - 3 October 2007
  + Added jetty.lib system property to start.config
  + AJP13 Fix on chunked post
  + Fix cached header optimization for extra characters
