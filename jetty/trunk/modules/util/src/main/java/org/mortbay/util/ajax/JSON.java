@@ -57,7 +57,7 @@ import org.mortbay.util.TypeUtil;
  *   Object --> string (dubious!)
  * </pre>
  * </p><p>
- * The interface {@link JSON.Convertable} may be implemented by classes that wish to externalize and 
+ * The interface {@link JSON.Convertible} may be implemented by classes that wish to externalize and 
  * initialize specific fields to and from JSON objects.  Only directed acyclic graphs of objects are supported.
  * </p>
  * <p>
@@ -142,8 +142,8 @@ public class JSON
     {
         if (object==null)
             buffer.append("null");
-        else if (object instanceof Convertable)
-            appendJSON(buffer, (Convertable)object);
+        else if (object instanceof Convertible)
+            appendJSON(buffer, (Convertible)object);
         else if (object instanceof Generator)
             appendJSON(buffer, (Generator)object);
         else if (object instanceof Map)
@@ -170,7 +170,7 @@ public class JSON
         buffer.append("null");
     }
 
-    private static void appendJSON(final StringBuffer buffer, Convertable converter)
+    private static void appendJSON(final StringBuffer buffer, Convertible converter)
     {
         buffer.append('{');
         converter.toJSON(new Output(){
@@ -453,11 +453,11 @@ public class JSON
             try
             {
                 Class c = Loader.loadClass(JSON.class,classname);
-                if (c!=null && Convertable.class.isAssignableFrom(c));
+                if (c!=null && Convertible.class.isAssignableFrom(c));
                 {
                     try
                     {
-                        Convertable conv = (Convertable)c.newInstance();
+                        Convertible conv = (Convertible)c.newInstance();
                         conv.fromJSON(map);
                         return conv; 
                     }
@@ -705,7 +705,7 @@ public class JSON
 
     /* ------------------------------------------------------------ */
     /** 
-     * JSON Output class for use by {@link Convertable}.
+     * JSON Output class for use by {@link Convertible}.
      */
     public interface Output
     {
@@ -718,20 +718,20 @@ public class JSON
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    /** JSON Convertable object.
+    /** JSON Convertible object.
      * Object can implement this interface in a similar way to the 
      * {@link Externalizable} interface is used to allow classes to
      * provide their own serialization mechanism.
      * <p>
-     * A JSON.Convertable object may be written to a JSONObject 
+     * A JSON.Convertible object may be written to a JSONObject 
      * or initialized from a Map of field names to values.
      * <p>
-     * If the JSON is to be convertable back to an Object, then
+     * If the JSON is to be convertible back to an Object, then
      * the method {@link Output#addClass(Class)} must be called from within toJSON()
      * @author gregw
      *
      */
-    public interface Convertable
+    public interface Convertible
     {
         public void toJSON(Output out) ;
         public void fromJSON(Map object);
