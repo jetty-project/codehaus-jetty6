@@ -26,7 +26,6 @@ resources             Directory for resources to include on classpath
 start.jar             Start jar for jetty
 VERSION.txt           Version history
 webapps               Deployment directory for standard webapps
-webapps-plus          Deployment directory for plus webapps
 
 
 RUNNING JETTY
@@ -93,7 +92,7 @@ The server can be run with JMX management with the command:
 
    java -jar start.jar etc/jetty-jmx.xml etc/jetty.xml
    
-This commands adds the jmx configuration file before the server
+This command adds the jmx configuration file before the server
 configuration.
 
 RUNNING WITH JETTY PLUS
@@ -104,26 +103,15 @@ command:
 
    java -jar start.jar etc/jetty.xml etc/jetty-plus.xml
    
-This commands adds the plus configuration file after
-the server configuration file
+This command adds the plus configuration file after the server configuration file,
+although you will first need to follow the instructions inside the etc/jetty-plus.xml
+file.
 
 RUNNING WITH OTHER CONTAINERS
 =============================
 If you wish to use Continuations in other containers, the jetty-util.jar
 can be included in WEB-INF/lib and will provide waiting continuations
 
-ASSEMBLIES
-==========
-The assemblies directory contains alternate bundlings of the jetty classes:
-
-Currently this is not built due to maven plugin issues.
-
-jetty-standalone.jar can be run from the command line without additional 
-dependencies:
-
-  java -jar assemblies/jetty-standalone.jar
-  java -jar assemblies/jetty-standalone.jar 8080 -webapp mywebapp.war
-     
 
 BUILDING JETTY
 ==============

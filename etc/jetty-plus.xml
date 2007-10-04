@@ -51,6 +51,10 @@
   <!-- =========================================================== -->
   <!-- Deploy all webapps in webapps-plus                          -->
   <!-- =========================================================== -->
+  <!-- Uncomment the following to set up a WebAppDeployer that will -->
+  <!-- deploy webapps from a directory called webapps-plus. Note    -->
+  <!-- that you will need to create this directory first!           -->
+  <!--
     <Call name="addLifeCycle">
       <Arg>
         <New class="org.mortbay.jetty.deployer.WebAppDeployer">
@@ -64,6 +68,7 @@
         </New>
       </Arg>
     </Call>
+   -->
 
 </Configure>
 
