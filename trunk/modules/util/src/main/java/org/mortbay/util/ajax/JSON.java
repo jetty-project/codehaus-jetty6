@@ -17,6 +17,7 @@ package org.mortbay.util.ajax;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class JSON
      */
     public static Object parse(String s,boolean stripOuterComment)
     {
-        return parse(new Source(s),stripOuterComment);
+        return parse(new StringSource(s),stripOuterComment);
     }
 
     /**
@@ -108,10 +109,9 @@ public class JSON
      * @param stripOuterComment If true, an outer comment around the JSON is ignored.
      * @return A Map, Object array or primitive array parsed from the JSON.
      */
-    public static Object parse(InputStream in,boolean stripOuterComment) throws IOException
+    public static Object parse(Reader in,boolean stripOuterComment) throws IOException
     {
-        String s=IO.toString(in);
-        return parse(new Source(s),stripOuterComment);
+        return parse(new ReaderSource(in),stripOuterComment);
     }
     
     /**
@@ -120,17 +120,16 @@ public class JSON
      */
     public static Object parse(String s)
     {
-        return parse(new Source(s),false);
+        return parse(new StringSource(s),false);
     }
 
     /**
-     * @param s Stream containing JSON object or array.
+     * @param in Reader containing JSON object or array.
      * @return A Map, Object array or primitive array parsed from the JSON.
      */
-    public static Object parse(InputStream in) throws IOException
+    public static Object parse(Reader in) throws IOException
     {
-        String s=IO.toString(in);
-        return parse(new Source(s),false);
+        return parse(new ReaderSource(in),false);
     }
     
     /**
@@ -407,7 +406,7 @@ public class JSON
                             return parseNumber(source);
                         else if (Character.isWhitespace(c))
                             break;
-                        throw new IllegalStateException("unknown char "+c);
+                        throw new IllegalStateException("unknown char "+(int)c);
                 }
             }
             source.next();
@@ -573,10 +572,57 @@ public class JSON
     
     private static Number parseNumber(Source source)
     {
-        int start=source.index();
-        int end=-1;
-        boolean is_double=false;
-        while(source.hasNext()&&end<0)
+        boolean minus=false;
+        long number=0;
+        StringBuilder buffer=null;
+
+        
+        longLoop:
+        while(source.hasNext())
+        {
+            char c=source.peek();
+            switch(c)
+            {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    number=number*10+(c-'0');
+                    source.next();
+                    break;
+
+                case '-':
+                    if (number!=0)
+                        throw new IllegalStateException("bad number");
+                    minus=true;
+                    source.next();
+                    break;
+                    
+                case '.':
+                case 'e':
+                case 'E':
+                    buffer=new StringBuilder(16);
+                    buffer.append(minus?-1*number:number);
+                    buffer.append(c);
+                    source.next();
+                    break longLoop;
+                    
+                default:
+                    break longLoop;
+            }
+        }
+        
+        if (buffer==null)
+            return new Long(number);
+    
+        doubleLoop:
+        while(source.hasNext())
         {
             char c=source.peek();
             switch(c)
@@ -592,25 +638,18 @@ public class JSON
                 case '8':
                 case '9':
                 case '-':
-                    source.next();
-                    break;
-                    
                 case '.':
                 case 'e':
                 case 'E':
-                    is_double=true;
+                    buffer.append(c);
                     source.next();
                     break;
                     
                 default:
-                    end=source.index();
+                    break doubleLoop;
             }
         }
-        String s = end>=0?source.from(start,end):source.from(start);
-        if (is_double)
-            return new Double(s);
-        else
-            return new Long(s);
+        return new Double(buffer.toString());
     }
     
     private static void seekTo(char seek, Source source)
@@ -661,45 +700,83 @@ public class JSON
             throw new IllegalStateException("Expected \""+seek+"\"");
     }
     
+
+    private interface Source
+    {
+        boolean hasNext();
+        char next();
+        char peek();
+    }
     
-    private static class Source
+    private static class StringSource implements Source
     {
         private final String string;
         private int index;
         
-        Source(String s)
+        StringSource(String s)
         {
             string=s;
         }
         
-        boolean hasNext()
+        public boolean hasNext()
         {
             return (index<string.length());
         }
         
-        char next()
+        public char next()
         {
             return string.charAt(index++);
         }
         
-        char peek()
+        public char peek()
         {
             return string.charAt(index);
         }
+    }
+    
+    private static class ReaderSource implements Source
+    {
+        private Reader _reader;
+        private int _next=-1;
         
-        int index()
+        ReaderSource(Reader r)
         {
-            return index;
+            _reader=r;
         }
         
-        String from(int mark)
+        public boolean hasNext()
         {
-            return string.substring(mark,index);
+            getNext();
+            return _next>=0;
         }
         
-        String from(int mark,int end)
+        public char next()
         {
-            return string.substring(mark,end);
+            getNext();
+            char c= (char)_next;
+            _next=-1;
+            return c;
+        }
+        
+        public char peek()
+        { 
+            getNext();
+            return (char)_next;
+        }
+        
+        private void getNext()
+        {
+            if (_next<0)
+            {
+                try 
+                {
+                    _next=_reader.read();
+                }
+                catch(IOException e)
+                {
+                    throw new IllegalStateException(e);
+                }
+            }
         }
     }
 
