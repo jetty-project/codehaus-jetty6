@@ -1,4 +1,5 @@
 package org.mortbay.util.ajax;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +10,20 @@ import junit.framework.TestCase;
 
 public class JSONTest extends TestCase
 {
-
+    String test="\n\n\n\t\t    "+
+    "// ignore this ,a [ \" \n"+
+    "/* and this \n" +
+    "/* and * // this \n" +
+    "*/" +
+    "{ "+
+    "\"onehundred\" : 100  ,"+
+    "\"name\" : \"fred\"  ," +
+    "\"empty\" : {}  ," +
+    "\"map\" : {\"a\":-1.0e2}  ," +
+    "\"array\" : [\"a\",-1.0e2,[],null,true,false]  ," +
+    "\"w0\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle0\",\"nested\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle1\",\"nested\":null,\"number\":101},\"number\":100}" +
+    "}";
+    
     public void testToString()
     {
         HashMap map = new HashMap();
@@ -25,7 +39,6 @@ public class JSONTest extends TestCase
         w1.name="woggle1";
         w1.nested=null;
         w1.number=101;
-       
         
         map.put("n1",null);
         map.put("n2",new Integer(2));
@@ -41,7 +54,6 @@ public class JSONTest extends TestCase
         obj7.put("x","value");
         
         String s = JSON.toString(map);
-        System.err.println(s);
         assertTrue(s.indexOf("\"n1\":null")>=0);
         assertTrue(s.indexOf("\"n2\":2")>=0);
         assertTrue(s.indexOf("\"n3\":-3.0E-11")>=0);
@@ -56,22 +68,7 @@ public class JSONTest extends TestCase
     
     public void testParse()
     {
-        String test="\n\n\n\t\t    "+
-        "// ignore this ,a [ \" \n"+
-        "/* and this \n" +
-        "/* and * // this \n" +
-        "*/" +
-        "{ "+
-        "\"onehundred\" : 100  ,"+
-        "\"name\" : \"fred\"  ," +
-        "\"empty\" : {}  ," +
-        "\"map\" : {\"a\":-1.0e2}  ," +
-        "\"array\" : [\"a\",-1.0e2,[],null,true,false]  ," +
-        "\"w0\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle0\",\"nested\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle1\",\"nested\":null,\"number\":101},\"number\":100}" +
-        "}";
-        
         Map map = (Map)JSON.parse(test);
-        System.err.println(map);
         assertEquals(new Long(100),map.get("onehundred"));
         assertEquals("fred",map.get("name"));
         assertTrue(map.get("array").getClass().isArray());
@@ -81,7 +78,20 @@ public class JSONTest extends TestCase
         test="{\"data\":{\"source\":\"15831407eqdaawf7\",\"widgetId\":\"Magnet_8\"},\"channel\":\"/magnets/moveStart\",\"connectionId\":null,\"clientId\":\"15831407eqdaawf7\"}";
         map = (Map)JSON.parse(test);
     }
-    
+
+    public void testParseReader() throws Exception
+    {
+        Map map = (Map)JSON.parse(new StringReader(test));
+   
+        assertEquals(new Long(100),map.get("onehundred"));
+        assertEquals("fred",map.get("name"));
+        assertTrue(map.get("array").getClass().isArray());
+        assertTrue(map.get("w0") instanceof Woggle);
+        assertTrue(((Woggle)map.get("w0")).nested instanceof Woggle);
+        
+        test="{\"data\":{\"source\":\"15831407eqdaawf7\",\"widgetId\":\"Magnet_8\"},\"channel\":\"/magnets/moveStart\",\"connectionId\":null,\"clientId\":\"15831407eqdaawf7\"}";
+        map = (Map)JSON.parse(test);
+    }
     
     public void testStripComment()
     {
