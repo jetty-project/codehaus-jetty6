@@ -237,7 +237,7 @@ public class JSON
             appendNull(buffer);
             return;
         }
-        
+
         buffer.append('{');
         Iterator iter = object.entrySet().iterator();
         while(iter.hasNext())
@@ -829,11 +829,13 @@ public class JSON
         private String _json;
         /* ------------------------------------------------------------ */
         /** Construct a literal JSON instance for use by {@link JSON#toString(Object)}.
-         * @param json A literal JSON string that will be parsed to check validity.
+         * If {@link Log#isDebugEnabled()} is true, the JSON will be parsed to check validity
+         * @param json A literal JSON string. 
          */
         public Literal(String json)
         {
-            parse(json);
+            if (Log.isDebugEnabled())
+                parse(json);
             _json=json;
         }
         
