@@ -167,11 +167,13 @@ public interface Connector extends LifeCycle, Buffers
      */
     void persist(EndPoint endpoint) throws IOException;
     
-    
-    
+    /* ------------------------------------------------------------ */
     Continuation newContinuation();
-    
+
+    /* ------------------------------------------------------------ */
     String getHost();
+    
+    /* ------------------------------------------------------------ */
     void setHost(String hostname);
 
     /* ------------------------------------------------------------ */
