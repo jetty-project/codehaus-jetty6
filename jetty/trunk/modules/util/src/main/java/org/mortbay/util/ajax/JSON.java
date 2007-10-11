@@ -93,6 +93,15 @@ public class JSON
         appendArray(buffer,array);
         return buffer.toString();
     }
+    
+    /**
+     * @param s String containing JSON object or array.
+     * @return A Map, Object array or primitive array parsed from the JSON.
+     */
+    public static Object parse(String s)
+    {
+        return parse(new StringSource(s),false);
+    }
 
     /**
      * @param s String containing JSON object or array.
@@ -105,6 +114,15 @@ public class JSON
     }
 
     /**
+     * @param in Reader containing JSON object or array.
+     * @return A Map, Object array or primitive array parsed from the JSON.
+     */
+    public static Object parse(Reader in) throws IOException
+    {
+        return parse(new ReaderSource(in),false);
+    }
+    
+    /**
      * @param s Stream containing JSON object or array.
      * @param stripOuterComment If true, an outer comment around the JSON is ignored.
      * @return A Map, Object array or primitive array parsed from the JSON.
@@ -113,23 +131,26 @@ public class JSON
     {
         return parse(new ReaderSource(in),stripOuterComment);
     }
-    
-    /**
-     * @param s String containing JSON object or array.
-     * @return A Map, Object array or primitive array parsed from the JSON.
-     */
-    public static Object parse(String s)
-    {
-        return parse(new StringSource(s),false);
-    }
 
     /**
+     * @deprecated use {@link #parse(Reader)}
      * @param in Reader containing JSON object or array.
      * @return A Map, Object array or primitive array parsed from the JSON.
      */
-    public static Object parse(Reader in) throws IOException
+    public static Object parse(InputStream in) throws IOException
     {
-        return parse(new ReaderSource(in),false);
+        return parse(new StringSource(IO.toString(in)),false);
+    }
+    
+    /**
+     * @deprecated use {@link #parse(Reader, boolean)}
+     * @param s Stream containing JSON object or array.
+     * @param stripOuterComment If true, an outer comment around the JSON is ignored.
+     * @return A Map, Object array or primitive array parsed from the JSON.
+     */
+    public static Object parse(InputStream in,boolean stripOuterComment) throws IOException
+    {
+        return parse(new StringSource(IO.toString(in)),stripOuterComment);
     }
     
     /**
