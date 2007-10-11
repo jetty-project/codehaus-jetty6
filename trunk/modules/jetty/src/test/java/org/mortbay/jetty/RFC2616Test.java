@@ -340,29 +340,29 @@ public class RFC2616Test extends TestCase
     {
         try
         {
-
             String response;
             int offset=0;
             connector.reopen();
+            // No Expect 100
+            offset=0;
+            connector.reopen();
+            response=connector.getResponses("GET /R1 HTTP/1.1\n"+
+                                            "Host: localhost\n"+
+                                            "Content-Type: text/plain\n"+
+                                            "Content-Length: 8\n"+
+                                            "\n",true);
 
+            assertTrue("8.2.3 no expect 100",response==null || response.length()==0);
+            response=connector.getResponses("AbCdEf\015\012");
+            offset=checkContains(response,offset,"HTTP/1.1 200","8.2.3 no expect 100")+1;
+            offset=checkContains(response,offset,"AbCdEf","8.2.3 no expect 100")+1;
+            
             // Expect Failure
             offset=0;
             connector.reopen();
             response=connector.getResponses("GET /R1 HTTP/1.1\n"+"Host: localhost\n"+"Expect: unknown\n"+"Content-Type: text/plain\n"+"Content-Length: 8\n"
                     +"\n");
             offset=checkContains(response,offset,"HTTP/1.1 417","8.2.3 expect failure")+1;
-
-            // TODO
-            /*
-             * // No Expect offset=0; connector.reopen();
-             * response=connector.getResponses("GET /R1 HTTP/1.1\n"+ "Host:
-             * localhost\n"+ "Content-Type: text/plain\n"+ "Content-Length:
-             * 8\n"+ "\n"); assertEquals("8.2.3 no expect no
-             * 100",-1,response.indexOf("HTTP/1.1 100"));
-             * offset=checkContains(response,offset, "HTTP/1.1 200","8.2.3 no
-             * expect no 100")+1;
-             * 
-             */
 
             // Expect with body
             offset=0;
@@ -383,8 +383,9 @@ public class RFC2616Test extends TestCase
                                             "\n",true);
             offset=checkContains(response,offset,"HTTP/1.1 100 ","8.2.3 expect 100")+1;
             checkNotContained(response,offset,"HTTP/1.1 200","8.2.3 expect 100");
-            response=connector.getResponses("123456\015\012");
+            response=connector.getResponses("654321\015\012");
             offset=checkContains(response,offset,"HTTP/1.1 200","8.2.3 expect 100")+1;
+            offset=checkContains(response,offset,"654321","8.2.3 expect 100")+1;
 
         }
         catch (Exception e)
