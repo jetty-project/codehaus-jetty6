@@ -72,6 +72,8 @@
        <property name="CVSROOT" value=":pserver:guest@cvs.dev.java.net:/cvs"/>
        <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/com" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-webtier/src/java/org/apache/jasper" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-jstl/conf/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-jstl/src/org" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="export -r ${glassfish.tag}" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="export -r ${glassfish.tag}" package="glassfish/pwc-commons/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <property name="export.done" value="true"/>
@@ -85,6 +87,8 @@
        <property name="CVSROOT" value=":pserver:guest@cvs.dev.java.net:/cvs"/>
        <cvs command="co" package="glassfish/appserv-webtier/src/java/com" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="co" package="glassfish/appserv-webtier/src/java/org/apache/jasper" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="co" package="glassfish/appserv-jstl/conf/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="co" package="glassfish/appserv-jstl/src/org" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="co" package="glassfish/common-util/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <cvs command="co" package="glassfish/pwc-commons/src/java/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <property name="checkout.done" value="true"/>
@@ -126,11 +130,40 @@
         <exclude name="**/CVS/*"/>
       </fileset>
     </copy>
+
     <copy todir="${generated.java}/com/sun/enterprise/web/io">
       <fileset dir="target/glassfish/pwc-commons/src/java/com/sun/enterprise/web/io">
         <exclude name="**/CVS/*"/>
       </fileset>
     </copy>
+
+    <copy todir="${generated.java}/org/apache/taglibs">
+      <fileset dir="target/glassfish/appserv-jstl/src/org/apache/taglibs">
+        <exclude name="**/*.properties"/>
+        <exclude name="**/CVS/*"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${generated.resources}/org/apache/taglibs/standard/lang/jstl">
+      <fileset dir="target/glassfish/appserv-jstl/src/org/apache/taglibs/standard/lang/jstl">
+        <include name="**/*.properties"/>
+        <exclude name="**/CVS/*"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${generated.resources}/org/apache/taglibs/standard/resources/">
+      <fileset dir="target/glassfish/appserv-jstl/src/org/apache/taglibs/standard/resources/">
+        <include name="**/*.properties"/>
+        <exclude name="**/CVS/*"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${generated.resources}/META-INF">
+      <fileset dir="target/glassfish/appserv-jstl/conf">
+        <include name="**/*.tld"/>
+      </fileset>
+    </copy>
+
     <copy todir="${generated.resources}/com/sun/el">
       <fileset dir="target/glassfish/appserv-webtier/src/java/com/sun/el">
         <include name="Messages.properties"/>
