@@ -74,8 +74,7 @@
        <fail unless="glassfish.tag"/>
        <property name="CVSROOT" value=":pserver:guest@cvs.dev.java.net:/cvs"/>
        <cvs command="export -r ${glassfish.tag}" package="glassfish/servlet-api/src/jsr245/src/share/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
-       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-jstl/conf/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
-       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-jstl/src/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="export -r ${glassfish.tag}" package="glassfish/appserv-jstl/src/javax" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
    </target>
 
     <!-- ============================================================== -->
@@ -86,8 +85,7 @@
        <property name="CVSROOT" value=":pserver:guest@cvs.dev.java.net:/cvs"/>
        <cvs command="co" package="glassfish/servlet-api/src/jsr245/src/share/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
        <!-- get the jstl stuff too -->
-       <cvs command="co" package="glassfish/appserv-jstl/conf/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
-       <cvs command="co" package="glassfish/appserv-jstl/src/" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
+       <cvs command="co" package="glassfish/appserv-jstl/src/javax" dest="target" cvsRoot="${CVSROOT}" failonerror="true" />
    </target>
 
 
@@ -114,34 +112,9 @@
       </fileset>
     </copy>
 
-    <copy todir="${generated.java}/org/apache/taglibs">
-      <fileset dir="target/glassfish/appserv-jstl/src/org/apache/taglibs">
-        <exclude name="**/*.properties"/>
-        <exclude name="**/CVS/*"/>
-      </fileset>
-    </copy>
-
     <copy todir="${generated.java}/javax/servlet/jsp/jstl">
       <fileset dir="target/glassfish/appserv-jstl/src/javax/servlet/jsp/jstl">
         <exclude name="**/CVS/*"/>
-      </fileset>
-    </copy>
-    <copy todir="${generated.resources}/org/apache/taglibs/standard/lang/jstl">
-      <fileset dir="target/glassfish/appserv-jstl/src/org/apache/taglibs/standard/lang/jstl">
-        <include name="**/*.properties"/>
-        <exclude name="**/CVS/*"/>
-      </fileset>
-    </copy>
-    <copy todir="${generated.resources}/org/apache/taglibs/standard/resources/">
-      <fileset dir="target/glassfish/appserv-jstl/src/org/apache/taglibs/standard/resources/">
-        <include name="**/*.properties"/>
-        <exclude name="**/CVS/*"/>
-      </fileset>
-    </copy>
-
-    <copy todir="${generated.resources}/META-INF">
-      <fileset dir="target/glassfish/appserv-jstl/conf">
-        <include name="**/*.tld"/>
       </fileset>
     </copy>
 
