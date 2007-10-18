@@ -2,6 +2,7 @@ jetty-SNAPSHOT
  + Improved JSON parsing from Readers
  + Moved some impl classes from jsp-api-2.1 to jsp-2.1
  + Added configuration file for capturing stderr and stdout
+ + Jetty Eclipse Plugin 1.0.1: force copy of context file on redeploy
 
 jetty-6.1.6rc0 - 3 October 2007
  + Added jetty.lib system property to start.config
