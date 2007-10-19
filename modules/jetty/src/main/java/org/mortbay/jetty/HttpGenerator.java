@@ -730,7 +730,7 @@ public class HttpGenerator extends AbstractGenerator
                         {
                             if (_state == STATE_FLUSHING)
                                 _state = STATE_END;
-                            if (_state==STATE_END && _close) 
+                            if (_state==STATE_END && _close && _status!=100) 
                                 _endp.close();
                             
                             break Flushing;
