@@ -1,4 +1,4 @@
-#!/bin/sh  
+#!/bin/bash  
 #
 # Startup script for jetty under *nix systems (it works under NT/cygwin too).
 #
@@ -48,11 +48,6 @@
 #   set to this value for use by configure.xml files, f.e.:
 #
 #    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jetty.war</Arg>
-#
-# JETTY_CONSOLE
-#   Where Jetty console output should go. Defaults to first writeable of
-#      /dev/console
-#      /dev/tty
 #
 # JETTY_PORT
 #   Override the default port for Jetty servers. If not set then the
@@ -310,7 +305,7 @@ fi
 #####################################################
 if [ -z "$CONFIGS" ] 
 then
-    CONFIGS="${JETTY_HOME}/etc/jetty.xml"
+    CONFIGS="${JETTY_HOME}/etc/jetty-logging.xml ${JETTY_HOME}/etc/jetty.xml"
 fi
 
 
@@ -328,19 +323,6 @@ fi
 if [  -z "$JETTY_PID" ] 
 then
   JETTY_PID="$JETTY_RUN/jetty.pid"
-fi
-
-#####################################################
-# Find a location for the jetty console
-#####################################################
-if [  -z "$JETTY_CONSOLE" ] 
-then
-  if [ -w /dev/console ]
-  then
-    JETTY_CONSOLE=/dev/console
-  else
-    JETTY_CONSOLE=/dev/tty
-  fi
 fi
 
 
@@ -456,7 +438,6 @@ RUN_CMD="$JAVA $JAVA_OPTIONS -jar $JETTY_START $JETTY_ARGS $CONFIGS"
 #echo "JETTY_CONF     =  $JETTY_CONF"
 #echo "JETTY_RUN      =  $JETTY_RUN"
 #echo "JETTY_PID      =  $JETTY_PID"
-#echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"
 #echo "JETTY_ARGS     =  $JETTY_ARGS"
 #echo "CONFIGS        =  $CONFIGS"
 #echo "JAVA_OPTIONS   =  $JAVA_OPTIONS"
@@ -476,21 +457,22 @@ case "$ACTION" in
             exit 1
         fi
 
-        echo "STARTED Jetty `date`" >> $JETTY_CONSOLE
+        echo "STARTED Jetty `date`" 
 
-        nohup sh -c "exec $RUN_CMD >>$JETTY_CONSOLE 2>&1" >/dev/null &
-        echo $! > $JETTY_PID
-        echo "Jetty running pid="`cat $JETTY_PID`
+        $RUN_CMD &
+	PID=$!
+	disown $PID
+        echo $PID > $JETTY_PID
         ;;
 
   stop)
         PID=`cat $JETTY_PID 2>/dev/null`
         echo "Shutting down Jetty: $PID"
         kill $PID 2>/dev/null
-        sleep 2
+        sleep 5
         kill -9 $PID 2>/dev/null
         rm -f $JETTY_PID
-        echo "STOPPED `date`" >>$JETTY_CONSOLE
+        echo "STOPPED `date`" 
         ;;
 
   restart)
@@ -525,7 +507,6 @@ case "$ACTION" in
         echo "JETTY_CONF     =  $JETTY_CONF"
         echo "JETTY_RUN      =  $JETTY_RUN"
         echo "JETTY_PID      =  $JETTY_PID"
-        echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"
         echo "JETTY_PORT     =  $JETTY_PORT"
         echo "CONFIGS        =  $CONFIGS"
         echo "JAVA_OPTIONS   =  $JAVA_OPTIONS"
