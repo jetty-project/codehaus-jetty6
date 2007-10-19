@@ -377,6 +377,7 @@ public class RFC2616Test extends TestCase
             connector.reopen();
             response=connector.getResponses("GET /R1 HTTP/1.1\n"+
                                             "Host: localhost\n"+
+                                            "Connection: close\n"+
                                             "Expect: 100-continue\n"+
                                             "Content-Type: text/plain\n"+
                                             "Content-Length: 8\n"+
