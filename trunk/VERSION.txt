@@ -4,6 +4,7 @@ jetty-SNAPSHOT
  + Added configuration file for capturing stderr and stdout
  + Jetty Eclipse Plugin 1.0.1: force copy of context file on redeploy
  + JETTY-439 Fixed 100 continues clash with Connection:close
+ + JETTY-445 removed test code
 
 jetty-6.1.6rc0 - 3 October 2007
  + Added jetty.lib system property to start.config
