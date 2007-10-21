@@ -347,9 +347,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             // finish accepting/connecting this connection
                             SocketChannel channel=(SocketChannel)o;
                             Object att = changes.get(++i);
-                            
-                            if (channel.isRegistered()) // TODO remove this if when all tested and working
-                                throw new IllegalStateException();
 
                             if (channel.isConnected())
                             {
