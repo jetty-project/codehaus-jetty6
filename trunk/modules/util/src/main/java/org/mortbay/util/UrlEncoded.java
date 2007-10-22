@@ -16,6 +16,8 @@ package org.mortbay.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
@@ -400,7 +402,6 @@ public class UrlEncoded extends MultiMap
         
         synchronized(map)
         {
-            ByteArrayOutputStream2 buf=new ByteArrayOutputStream2(256);
             String key = null;
             String value = null;
             
@@ -408,79 +409,77 @@ public class UrlEncoded extends MultiMap
             int digit=0;
             int digits=0;
             
-            // TODO cache of parameter names ???
-            byte[] bytes=new byte[256]; // TODO Configure ?? size??? tune??? // reuse???
             int l=-1;
             int totalLength = 0;
-            while ((l=in.read(bytes))>=0)
+            InputStreamReader input = new InputStreamReader(in,charset);
+            StringWriter output = new StringWriter(256);
+            int size=0;
+            
+            while ((c=input.read())>0)
             {
-                for (int i=0;i<l;i++)
+                switch ((char) c)
                 {
-                    c=bytes[i];
-                    switch ((char) c)
-                    {
-                        case '&':
-                            value = buf.size()==0?"":new String(buf.getBuf(), 0, buf.size(), charset);
-                            buf.reset();
-                            if (key != null)
-                            {
-                                map.add(key,value);
-                            }
-                            else if (value!=null&&value.length()>0)
-                            {
-                                map.add(value,"");
-                            }
-                            key = null;
-                            value=null;
-                            break;
-                        case '=':
-                            if (key!=null)
-                            {
-                                buf.write(c);
-                                break;
-                            }
-                            key = new String(buf.getBuf(), 0, buf.size(), charset);
-                            buf.reset();
-                            break;
-                        case '+':
-                            buf.write(' ');
-                            break;
-                        case '%':
-                            digits=2;
-                            break;
-                        default:
-                            if (digits==2)
-                            {
-                                digit=TypeUtil.convertHexDigit((byte)c);
-                                digits=1;
-                            }
-                            else if (digits==1)
-                            {
-                                buf.write((digit<<4) + TypeUtil.convertHexDigit((byte)c));
-                                digits=0;
-                            }
-                            else
-                                buf.write(c);
+                    case '&':
+                        size=output.getBuffer().length();
+                        value = size==0?"":output.getBuffer().toString();
+                        output.getBuffer().setLength(0);
+                        if (key != null)
+                        {
+                            map.add(key,value);
+                        }
+                        else if (value!=null&&value.length()>0)
+                        {
+                            map.add(value,"");
+                        }
+                        key = null;
+                        value=null;
                         break;
-                    }
+                    case '=':
+                        if (key!=null)
+                        {
+                            output.write(c);
+                            break;
+                        }
+                        size=output.getBuffer().length();
+                        key = size==0?"":output.getBuffer().toString();
+                        output.getBuffer().setLength(0);
+                        break;
+                    case '+':
+                        output.write(' ');
+                        break;
+                    case '%':
+                        digits=2;
+                        break;
+                    default:
+                        if (digits==2)
+                        {
+                            digit=TypeUtil.convertHexDigit((byte)c);
+                            digits=1;
+                        }
+                        else if (digits==1)
+                        {
+                            output.write((digit<<4) + TypeUtil.convertHexDigit((byte)c));
+                            digits=0;
+                        }
+                        else
+                            output.write(c);
+                    break;
                 }
                 
-                totalLength += l;
+                totalLength++;
                 if (maxLength>=0 && totalLength > maxLength)
                     throw new IllegalStateException("Form too large");
             }
-            
+
+            size=output.getBuffer().length();
             if (key != null)
             {
-                value = buf.size()==0?"":new String(buf.getBuf(), 0, buf.size(), charset);
-                buf.reset();
+                value = size==0?"":output.getBuffer().toString();
+                output.getBuffer().setLength(0);
                 map.add(key,value);
             }
-            else if (buf.size()>0)
-            {
-                map.add(new String(buf.getBuf(), 0, buf.size(), charset),"");
-            }
-
+            else if (size>0)
+                map.add(output.getBuffer().toString(),"");
         }
     }
     
