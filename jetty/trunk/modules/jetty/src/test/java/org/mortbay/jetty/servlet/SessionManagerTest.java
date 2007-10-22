@@ -26,9 +26,7 @@ import javax.servlet.http.HttpSessionEvent;
 
 import junit.framework.TestCase;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
 

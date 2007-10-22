@@ -17,11 +17,8 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.component.LifeCycle;
-import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.ThreadPool;

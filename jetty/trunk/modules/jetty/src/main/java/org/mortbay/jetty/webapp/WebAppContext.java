@@ -22,8 +22,6 @@ import java.security.PermissionCollection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +34,7 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;

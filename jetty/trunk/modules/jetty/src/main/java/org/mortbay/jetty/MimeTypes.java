@@ -25,7 +25,6 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
-import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 
 

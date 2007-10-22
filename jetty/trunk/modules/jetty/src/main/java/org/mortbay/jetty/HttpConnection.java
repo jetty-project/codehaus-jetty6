@@ -30,7 +30,6 @@ import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.DateCache;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
 

@@ -21,7 +21,6 @@ import java.nio.channels.ByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.jetty.EofException;
