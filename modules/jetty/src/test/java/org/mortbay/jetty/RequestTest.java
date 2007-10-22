@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionContext;
 
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
@@ -177,7 +178,7 @@ public class RequestTest extends TestCase
                 assertEquals(l,_handler._content.length());
         }
     }
-    
+
     public void testConnectionClose()
         throws Exception
     {

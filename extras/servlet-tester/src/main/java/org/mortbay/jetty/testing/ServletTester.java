@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.EventListener;
 
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
@@ -92,7 +93,21 @@ public class ServletTester
         //System.err.println("<<<<\n"+responses);
         return responses;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** Get raw HTTP responses from raw HTTP requests.
+     * Multiple requests and responses may be handled, but only if
+     * persistent connections conditions apply.
+     * @param rawRequests String of raw HTTP requests
+     * @return String of raw HTTP responses
+     * @throws Exception
+     */
+    public ByteArrayBuffer getResponses(ByteArrayBuffer rawRequests) throws Exception
+    {
+        _connector.reopen();
+        ByteArrayBuffer responses = _connector.getResponses(rawRequests,false);
+        return responses;
+    }
     
     /* ------------------------------------------------------------ */
     /** Create a Socket connector.

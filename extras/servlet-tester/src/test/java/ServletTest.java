@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.util.IO;
@@ -159,6 +160,69 @@ public class ServletTest extends TestCase
         
         
     }
+    
+
+    /* ------------------------------------------------------------ */
+    public void testCharset()
+        throws Exception
+    {
+        byte[] content_iso_8859_1="abcd=1234&AAA=xxx".getBytes("iso8859-1");
+        byte[] content_utf_8="abcd=1234&AAA=xxx".getBytes("utf-8");
+        byte[] content_utf_16="abcd=1234&AAA=xxx".getBytes("utf-16");
+
+        String request_iso_8859_1=
+            "POST /context/servlet/post HTTP/1.1\r\n"+
+            "Host: whatever\r\n"+
+            "Content-Type: application/x-www-form-urlencoded\r\n"+
+            "Content-Length: "+content_iso_8859_1.length+"\r\n"+
+            "\r\n";
+
+        String request_utf_8=
+            "POST /context/servlet/post HTTP/1.1\r\n"+
+            "Host: whatever\r\n"+
+            "Content-Type: application/x-www-form-urlencoded; charset=utf-8\r\n"+
+            "Content-Length: "+content_utf_8.length+"\r\n"+
+            "\r\n";
+
+        String request_utf_16=
+            "POST /context/servlet/post HTTP/1.1\r\n"+
+            "Host: whatever\r\n"+
+            "Content-Type: application/x-www-form-urlencoded; charset=utf-16\r\n"+
+            "Content-Length: "+content_utf_16.length+"\r\n"+
+            "Connection: close\r\n"+
+            "\r\n";
+        
+        ByteArrayBuffer out = new ByteArrayBuffer(4096);
+        out.put(request_iso_8859_1.getBytes("iso8859-1"));
+        out.put(content_iso_8859_1);
+        out.put(request_utf_8.getBytes("iso8859-1"));
+        out.put(content_utf_8);
+        out.put(request_utf_16.getBytes("iso8859-1"));
+        out.put(content_utf_16);
+
+        ByteArrayBuffer responses = tester.getResponses(out);
+        
+        String expected=
+            "HTTP/1.1 200 OK\r\n"+
+            "Content-Type: text/html; charset=iso-8859-1\r\n"+
+            "Content-Length: 21\r\n"+
+            "\r\n"+
+            "<h1>Test Servlet</h1>"+
+            "HTTP/1.1 200 OK\r\n"+
+            "Content-Type: text/html; charset=iso-8859-1\r\n"+
+            "Content-Length: 21\r\n"+
+            "\r\n"+
+            "<h1>Test Servlet</h1>"+
+            "HTTP/1.1 200 OK\r\n"+
+            "Content-Type: text/html; charset=iso-8859-1\r\n"+
+            "Connection: close\r\n"+
+            "\r\n"+
+            "<h1>Test Servlet</h1>";
+        
+        assertEquals(expected,responses.toString());
+    }
+
+    
     /* ------------------------------------------------------------ */
     public static class HelloServlet extends HttpServlet
     {
@@ -181,6 +245,20 @@ public class ServletTest extends TestCase
     {
         private static final long serialVersionUID=2779906630657190712L;
 
+        protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+        {
+            assertEquals("/context",request.getContextPath());
+            assertEquals("/servlet",request.getServletPath());
+            assertEquals("/post",request.getPathInfo());
+            assertEquals(2,request.getParameterMap().size());
+            assertEquals("1234",request.getParameter("abcd"));
+            assertEquals("xxx",request.getParameter("AAA"));
+            
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().print("<h1>Test Servlet</h1>");
+        }
+        
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
         {
             assertEquals("/context",request.getContextPath());
