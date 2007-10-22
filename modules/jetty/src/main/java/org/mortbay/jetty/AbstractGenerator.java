@@ -364,7 +364,6 @@ public abstract class AbstractGenerator implements Generator
                 if (ch!='\r'&&ch!='\n')
                     _reason.put((byte)ch);
                 else
-
                     _reason.put((byte)' ');
             }
         }

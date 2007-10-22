@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -20,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.util.IO;

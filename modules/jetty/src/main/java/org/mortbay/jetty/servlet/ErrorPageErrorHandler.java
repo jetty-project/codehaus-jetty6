@@ -23,7 +23,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpStatus;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.webapp.WebAppContext;

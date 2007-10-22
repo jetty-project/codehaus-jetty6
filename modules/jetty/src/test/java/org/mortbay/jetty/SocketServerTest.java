@@ -1,6 +1,5 @@
 package org.mortbay.jetty;
 import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.thread.BoundedThreadPool;
 
 /**
  * HttpServer Tester.

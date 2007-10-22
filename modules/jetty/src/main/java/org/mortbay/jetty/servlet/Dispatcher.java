@@ -33,7 +33,6 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.util.Attributes;
-import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.UrlEncoded;

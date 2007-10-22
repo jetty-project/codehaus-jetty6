@@ -4,7 +4,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
