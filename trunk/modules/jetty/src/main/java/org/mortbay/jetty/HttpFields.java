@@ -15,9 +15,6 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,7 +40,6 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
 import org.mortbay.io.BufferCache.CachedBuffer;
-import org.mortbay.util.DateCache;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringMap;

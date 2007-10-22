@@ -16,8 +16,6 @@
 package org.mortbay.jetty.webapp;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
@@ -28,7 +26,6 @@ import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;

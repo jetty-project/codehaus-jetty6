@@ -18,9 +18,7 @@ import java.util.Enumeration;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
-import javax.servlet.SingleThreadModel;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.log.Log;

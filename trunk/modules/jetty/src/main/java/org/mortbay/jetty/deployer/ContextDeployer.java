@@ -25,11 +25,10 @@ import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.mortbay.xml.XmlConfiguration;
 import org.mortbay.util.Scanner;
+import org.mortbay.xml.XmlConfiguration;
 
 /**
  * Context Deployer
