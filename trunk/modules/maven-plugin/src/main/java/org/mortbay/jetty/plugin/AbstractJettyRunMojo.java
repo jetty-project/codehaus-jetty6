@@ -53,7 +53,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      * The location of a jetty-env.xml file. Optional.
      * @parameter
      */
-    private String jettyEnvXml;
+    private File jettyEnvXml;
     
     /**
      * The location of the web.xml file. If not
@@ -61,7 +61,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      * 
      * @parameter expression="${maven.war.webxml}"
      */
-    private String webXml;
+    private File webXml;
     
     /**
      * The directory containing generated classes.
@@ -133,12 +133,12 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
      */
     private List extraScanTargets;
 
-    public String getWebXml()
+    public File getWebXml()
     {
         return this.webXml;
     }
     
-    public String getJettyEnvXml ()
+    public File getJettyEnvXml ()
     {
         return this.jettyEnvXml;
     }
@@ -230,10 +230,9 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
        
         // get the web.xml file if one has been provided, otherwise assume it is
         // in the webapp src directory
-        if (getWebXml() == null || (getWebXml().trim().equals("")))
-            setWebXmlFile(new File(new File(getWebAppSourceDirectory(),"WEB-INF"), "web.xml"));
-        else
-            setWebXmlFile(new File(getWebXml()));
+        if (getWebXml() == null )
+            webXml = new File(new File(getWebAppSourceDirectory(),"WEB-INF"), "web.xml");
+        setWebXmlFile(webXml);
         
         try
         {
@@ -252,7 +251,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         //check if a jetty-env.xml location has been provided, if so, it must exist
         if  (getJettyEnvXml() != null)
         {
-            setJettyEnvXmlFile(new File(getJettyEnvXml()));
+            setJettyEnvXmlFile(jettyEnvXml);
             
             try
             {

@@ -131,7 +131,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * will be applied before any plugin configuration. Optional.
      * @parameter
      */
-    protected String jettyConfig;
+    protected File jettyConfig;
   
     
     /**
@@ -228,7 +228,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         return this.systemProperties;
     }
 
-    public String getJettyXmlFileName ()
+    public File getJettyXmlFile ()
     {
         return this.jettyConfig;
     }
