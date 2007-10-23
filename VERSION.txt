@@ -4,6 +4,7 @@ jetty-SNAPSHOT
  + Added configuration file for capturing stderr and stdout
  + Jetty Eclipse Plugin 1.0.1: force copy of context file on redeploy
  + JETTY-388 Handle utf-16 and other multibyte non-utf-8 form content.
+ + JETTY-409 String params that denote files changed to File 
  + JETTY-439 Fixed 100 continues clash with Connection:close
  + JETTY-443 windows bug causes Acceptor thread to die
  + JETTY-445 removed test code
