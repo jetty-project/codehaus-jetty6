@@ -23,9 +23,11 @@ import org.mortbay.log.Log;
  * This class implements a timeout queue for timers that are at least as likely to be cancelled as they are to expire.
  * Unlike the util timeout class, the duration of the timouts is shared by all scheduled tasks and if the duration 
  * is changed, this affects all scheduled tasks.
- * 
+ * <p>
  * The nested class Task should be extended by users of this class to obtain call back notification of 
  * expiries. 
+ * <p>
+ * This class is not synchronized and the caller must protect against multiple thread access.
  * 
  * @author gregw
  *
