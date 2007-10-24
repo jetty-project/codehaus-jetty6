@@ -128,6 +128,7 @@ public class Request implements HttpServletRequest
     private boolean _paramsExtracted;
     private int _inputState=__NONE;
     private BufferedReader _reader;
+    private String _readerEncoding;
     private boolean _dns=false;
     private ContextHandler.SContext _context;
     private HttpSession _session;
@@ -186,13 +187,18 @@ public class Request implements HttpServletRequest
         _parameters=null;
         _paramsExtracted=false;
         _inputState=__NONE;
-        _reader=null; 
+        
         _cookiesExtracted=false;
         if (_savedNewSessions!=null)
             _savedNewSessions.clear();
         _savedNewSessions=null;
         if (_continuation!=null && _continuation.isPending())
             _continuation.reset();
+        
+        /*
+        _reader=null;
+        _readerEncoding=null;
+        */
     }
 
     /* ------------------------------------------------------------ */
@@ -714,13 +720,25 @@ public class Request implements HttpServletRequest
     {
         if (_inputState!=__NONE && _inputState!=__READER)
             throw new IllegalStateException("STREAMED");
-        if (_reader==null)
+
+        if (_inputState==__READER)
+            return _reader;
+        
+        String encoding=getCharacterEncoding();
+        if (encoding==null)
+            encoding=StringUtil.__ISO_8859_1;
+        
+        if (_reader==null || !encoding.equalsIgnoreCase(_readerEncoding))
         {
-            String encoding=getCharacterEncoding();
-            if (encoding==null)
-                encoding=StringUtil.__ISO_8859_1;
-            _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
-            
+            final ServletInputStream in = getInputStream();
+            _readerEncoding=encoding;
+            _reader=new BufferedReader(new InputStreamReader(in,encoding))
+            {
+                public void close() throws IOException
+                {
+                    in.close();
+                }   
+            };
         }
         _inputState=__READER;
         return _reader;
