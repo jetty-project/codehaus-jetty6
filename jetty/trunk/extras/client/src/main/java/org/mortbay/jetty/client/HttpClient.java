@@ -80,9 +80,9 @@ public class HttpClient extends AbstractBuffers
     ThreadPool _threadPool;
     Connector _connector;
     private long _idleTimeout=20000;
-    private long _exchangeTimeout=200000;
+    private long _timeout=320000;
     private int _soTimeout = 10000;
-    private Timeout _timeout = new Timeout();
+    private Timeout _timeoutQ = new Timeout();
     
     
     /* ------------------------------------------------------------------------------- */
@@ -133,16 +133,16 @@ public class HttpClient extends AbstractBuffers
     /* ------------------------------------------------------------ */
     public void schedule(Timeout.Task task)
     {
-        synchronized(_timeout)
+        synchronized(_timeoutQ)
         {
-           _timeout.schedule(task); 
+           _timeoutQ.schedule(task); 
         }
     }
 
     /* ------------------------------------------------------------ */
     public void cancel(Timeout.Task task)
     {
-        synchronized(_timeout)
+        synchronized(_timeoutQ)
         {
             task.cancel();
         }
@@ -226,8 +226,8 @@ public class HttpClient extends AbstractBuffers
     {
         super.doStart();
         
-        _timeout.setNow();
-        _timeout.setDuration(_exchangeTimeout);
+        _timeoutQ.setNow();
+        _timeoutQ.setDuration(_timeout);
         
         if(_threadPool==null)
         {
@@ -263,10 +263,10 @@ public class HttpClient extends AbstractBuffers
             {
                 while (isStarted())
                 {
-                    synchronized(_timeout)
+                    synchronized(_timeoutQ)
                     {
-                        _timeout.setNow();
-                        _timeout.tick();
+                        _timeoutQ.setNow();
+                        _timeoutQ.tick();
                     }
                     try
                     {
@@ -290,7 +290,7 @@ public class HttpClient extends AbstractBuffers
         {
             ((LifeCycle)_threadPool).stop();
         }
-        _timeout.cancelAll();
+        _timeoutQ.cancelAll();
         super.doStop();
     }
 
@@ -425,7 +425,7 @@ public class HttpClient extends AbstractBuffers
 
     /* ------------------------------------------------------------ */
     /**
-     * @return the idleTimeout
+     * @return the period in milliseconds a {@link HttpConnection} can be idle for before it is closed.
      */
     public long getIdleTimeout()
     {
@@ -434,19 +434,41 @@ public class HttpClient extends AbstractBuffers
 
     /* ------------------------------------------------------------ */
     /**
-     * @param idleTimeout the idleTimeout to set
+     * @param ms the period in milliseconds a {@link HttpConnection} can be idle for before it is closed.
      */
-    public void setIdleTimeout(long idleTimeout)
+    public void setIdleTimeout(long ms)
     {
-        _idleTimeout=idleTimeout;
+        _idleTimeout=ms;
     }
 
-    public int get_soTimeout() {
+    /* ------------------------------------------------------------ */
+    public int getSoTimeout() 
+    {
         return _soTimeout;
     }
 
-    public void set_soTimeout(int timeout) {
-        _soTimeout = timeout;
+    /* ------------------------------------------------------------ */
+    public void setSoTimeout(int so) 
+    {
+        _soTimeout = so;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the period in ms that an exchange will wait for a response from the server.
+     */
+    public long getTimeout()
+    {
+        return _timeout;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param ms the period in ms that an exchange will wait for a response from the server.
+     */
+    public void setTimeout(long ms)
+    {
+        _timeout=ms;
     }
 
 }
