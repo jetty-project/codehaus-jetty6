@@ -86,7 +86,6 @@ class HttpConnection implements Connection
                 
                 if(ex.getStatus()<HttpExchange.STATUS_COMPLETED)
                 {
-                    System.err.println("EXPIRE: "+ex);
                     ex.setStatus(HttpExchange.STATUS_EXPIRED);
                 }
             }
