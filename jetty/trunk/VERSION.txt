@@ -1,4 +1,7 @@
+
+
 jetty-SNAPSHOT
+ + CERT VU#38616 handle single quotes in cookie names.
  + Improved JSON parsing from Readers
  + Moved some impl classes from jsp-api-2.1 to jsp-2.1
  + Added configuration file for capturing stderr and stdout
@@ -384,7 +387,7 @@ jetty-6.1.0rc0 - 8 December 2006
 
 jetty-6.1.0pre3 - 22 November 2006
  + fixed NIO endpoint flush. Avoid duplicate sends
- + Upgraded session ID generation to use SecureRandom
+ + CVE-2006-6969 Upgraded session ID generation to use SecureRandom
  + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
  + Support TLS_DHE_RSA_WITH_AES_256_CBC_SHA 
  + JETTY-180 XBean support for context deploy
@@ -808,7 +811,7 @@ Jetty-6.0.0Beta5
 
 Jetty-6.0.0Beta4
  + System property support in plugin
- + Fixed JSP visibility security issue.
+ + CVE-2006-2758 Fixed JSP visibility security issue.
  + Improved jetty-web.xml access to org.mortbay classes.
  + Jasper 5.5.12
 
@@ -914,7 +917,7 @@ Jetty-5.1.7rc0 - 6 December 2005
  + use commons logging jar instead of api jar.
 
 Jetty-5.1.6 - 18 November 2005
- + Fixed JSP visibility security issue.
+ + CVE-2006-2758 Fixed JSP visibility security issue.
  + Improved jetty-web.xml access to org.mortbay classes.
 
 Jetty-5.1.5 - 10 November 2005

@@ -382,51 +382,75 @@ public class Request implements HttpServletRequest
                 lastCookies = LazyList.add(lastCookies, hdr);
 
                 // Parse the header
-                QuotedStringTokenizer tok = new QuotedStringTokenizer(hdr, ";,", false, false);
+                QuotedStringTokenizer tok = new QuotedStringTokenizer(hdr, "=;,", true, true);
                 tok.setSingle(false);
+                String name=null;
+                
                 while (tok.hasMoreElements())
                 {
-                    String c = (String) tok.nextElement();
-                    if (c == null) continue;
-                    c = c.trim();
+                    String token = (String) tok.nextElement();
+                    if (token == null) continue;
+                    token = token.trim();
+                    char c=token.charAt(0);
+                   
+                    boolean quoted=false;
+                    if (token.charAt(0)=='"')
+                    {
+                        token=QuotedStringTokenizer.unquote(token);
+                        quoted=true;
+                    }
+
+                    if (token.length()==1)
+                    {
+                        switch(c)
+                        {
+                            case ';':
+                            case ',':
+                                if (name!=null)
+                                {
+                                    token="";
+                                    break;
+                                }
+                                continue;
+                                
+                            case '=':
+                                continue;
+                        }
+                    }
+                    
+                    if (name==null)
+                    {
+                        name=token;
+                        continue;
+                    }
 
                     try
                     {
-                        String n;
-                        String v;
-                        int e = c.indexOf('=');
-                        if (e > 0)
-                        {
-                            n = c.substring(0, e);
-                            v = c.substring(e + 1);
-                        }
-                        else
-                        {
-                            n = c;
-                            v = "";
-                        }
-
                         // Ignore $ names
-                        if (n.startsWith("$"))
+                        if (name.startsWith("$"))
                         {
-                            if ("$version".equalsIgnoreCase(n))
-                                version = Integer.parseInt(StringUtil.unquote(v));
-                            else if ("$path".equalsIgnoreCase(n) && cookie != null)
-                                cookie.setPath(v);
-                            else if ("$domain".equalsIgnoreCase(n) && cookie != null)
-                                cookie.setDomain(v);
+                            if ("$version".equalsIgnoreCase(name))
+                                version = Integer.parseInt(token);
+                            else if ("$path".equalsIgnoreCase(name) && cookie != null)
+                                cookie.setPath(token);
+                            else if ("$domain".equalsIgnoreCase(name) && cookie != null)
+                                cookie.setDomain(token);
                             continue;
                         }
+                        else if (!quoted)
+                            token = URIUtil.decodePath(token); // TODO remove this old style jetty cookie support
 
-                        v = URIUtil.decodePath(v);
-                        
-                        cookie = new Cookie(n, v);
+                        cookie = new Cookie(name, token);
                         if (version > 0) cookie.setVersion(version);
                         cookies = LazyList.add(cookies, cookie);
                     }
                     catch (Exception ex)
                     {
                         Log.ignore(ex);
+                    }
+                    finally
+                    {
+                        name=null;
                     }
                 }
             }
