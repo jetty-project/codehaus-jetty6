@@ -145,6 +145,17 @@
   </servlet-mapping>
   
   <servlet>
+    <servlet-name>Cookie</servlet-name>
+    <servlet-class>com.acme.CookieDump</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>Cookie</servlet-name>
+    <url-pattern>/cookie/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
     <servlet-name>Dispatch</servlet-name>
     <servlet-class>com.acme.DispatchServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
