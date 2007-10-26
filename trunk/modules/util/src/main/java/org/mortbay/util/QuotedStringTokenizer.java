@@ -355,7 +355,10 @@ public class QuotedStringTokenizer
     
     /* ------------------------------------------------------------ */
     /** Quote a string into a StringBuffer.
-     * The characters ", \, \n, \r, \t, \f and \b are escaped
+     * The characters ", \, \n, \r, \t, \f, \b are escaped.
+     * Quotes are forced if any escaped characters are present or there
+     * is a ", ', space, + or % character.
+     * 
      * @param buf The StringBuffer
      * @param s The String to quote.
      */
@@ -377,6 +380,8 @@ public class QuotedStringTokenizer
                     case '\t':
                     case '\f':
                     case '\b':
+                    case '%':
+                    case '+':
                     case ' ':
                         e=i;
                         buf.append('"');

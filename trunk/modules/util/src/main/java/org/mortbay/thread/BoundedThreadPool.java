@@ -45,10 +45,10 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     private int _id;
     private List _idle;
 
+    private final Object _lock = new Object();
     private final Object _joinLock = new Object();
 
     private long _lastShrink;
-    private final Object _lock = new Object();
     private int _maxIdleTimeMs=60000;
     private int _maxThreads=255;
     private int _minThreads=1;
@@ -189,6 +189,14 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
         return _priority;
     }
 
+    /* ------------------------------------------------------------ */
+    public int getQueueSize()
+    {
+        synchronized(_lock)
+        {
+            return _queue.size();
+        }
+    }
 
     /* ------------------------------------------------------------ */
     /** 
@@ -202,7 +210,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     /* ------------------------------------------------------------ */
     public boolean isLowOnThreads()
     {
-        synchronized(this)
+        synchronized(_lock)
         {
             // maybe make this volatile?
             return _queue.size()>_lowThreads;

@@ -956,12 +956,10 @@ public class HttpFields
         String name_value_params = null;
         synchronized (buf)
         {
-            buf.append(name);
+            QuotedStringTokenizer.quoteIfNeeded(buf, name);
             buf.append('=');
             if (value != null && value.length() > 0)
-            {
-                URIUtil.encodePath(buf,value);
-            }
+                QuotedStringTokenizer.quoteIfNeeded(buf, value);
 
             if (version > 0)
             {
