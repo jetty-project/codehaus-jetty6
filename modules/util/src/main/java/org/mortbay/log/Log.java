@@ -206,7 +206,7 @@ public class Log
             {
                 Method get_target = th.getClass().getMethod(__nestedEx[i],__noArgs);
                 Throwable th2=(Throwable)get_target.invoke(th,(Object[])null);
-                if (th2!=null)
+                if (th2!=null && th2!=th)
                     warn("Nested in "+th+":",th2);
             }
             catch(Exception ignore){}
