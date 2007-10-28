@@ -11,6 +11,7 @@ jetty-SNAPSHOT
  + JETTY-439 Fixed 100 continues clash with Connection:close
  + JETTY-443 windows bug causes Acceptor thread to die
  + JETTY-445 removed test code
+ + JETTY-453 updated Wadi to 2.0-M7
 
 jetty-6.1.6rc0 - 3 October 2007
  + Added jetty.lib system property to start.config
