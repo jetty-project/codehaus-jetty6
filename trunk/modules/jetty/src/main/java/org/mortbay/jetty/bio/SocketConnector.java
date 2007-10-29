@@ -71,6 +71,7 @@ public class SocketConnector extends AbstractConnector
         // Create a new server socket and set to non blocking mode
         if (_serverSocket==null || _serverSocket.isClosed())
         _serverSocket= newServerSocket(getHost(),getPort(),getAcceptQueueSize());
+        _serverSocket.setReuseAddress(getReuseAddress());
     }
 
     /* ------------------------------------------------------------ */

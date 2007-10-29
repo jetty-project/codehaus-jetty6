@@ -54,6 +54,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     private int _acceptors=1;
     private int _acceptorPriorityOffset=0;
     private boolean _useDNS;
+    private boolean _reuseAddress;
     
     protected int _maxIdleTime=200000; 
     protected int _lowResourceMaxIdleTime=-1; 
@@ -781,6 +782,24 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     public void setAcceptorPriorityOffset(int offset)
     {
         _acceptorPriorityOffset=offset;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if the the server socket will be opened in SO_REUSEADDR mode.
+     */
+    public boolean getReuseAddress()
+    {
+        return _reuseAddress;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param reuseAddress True if the the server socket will be opened in SO_REUSEADDR mode.
+     */
+    public void setReuseAddress(boolean reuseAddress)
+    {
+        _reuseAddress=reuseAddress;
     }
 
 }
