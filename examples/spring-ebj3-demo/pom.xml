@@ -16,24 +16,6 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
-  <repositories>
-    <repository>
-      <snapshots><enabled>false</enabled></snapshots>
-      <id>jetty-repository</id>
-      <url>http://repository.codehaus.org/</url>
-    </repository>
-    <repository>
-      <snapshots><enabled>true</enabled></snapshots>
-      <id>jetty-snapshot-repository</id>
-      <url>http://snapshots.repository.codehaus.org/</url>
-    </repository>
-    <repository>
-      <snapshots><enabled>true</enabled></snapshots>
-      <id>apache-snapshot-repo</id>
-      <name>apache-snapshot-repo</name>
-      <url>http://people.apache.org/maven-snapshot-repository</url>
-    </repository>
-  </repositories>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
