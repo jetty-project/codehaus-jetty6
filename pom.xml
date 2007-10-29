@@ -126,12 +126,12 @@
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-external</artifactId>
-        <version>1.0-alpha-6</version>
+        <version>${maven-wagon-version}</version>
       </extension>
       <extension>
 	<groupId>org.apache.maven.wagon</groupId>
 	<artifactId>wagon-webdav</artifactId>
-	<version>1.0-beta-1</version>
+	<version>${maven-wagon-version}</version>
       </extension>
     </extensions>
     <defaultGoal>install</defaultGoal>
@@ -210,6 +210,15 @@
       </plugin -->
 
     </plugins>
+    <pluginManagement>
+      <plugins>
+       <plugin>
+        <groupId>org.apache.maven</groupId>
+	<artifactId>maven-surefire-plugin</artifactId>
+	<version>2.3</version>
+       </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
   <modules>
     <module>modules/servlet-api-2.5</module>
@@ -384,5 +393,6 @@
     <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
     <maven-bundle-plugin-version>1.0.0</maven-bundle-plugin-version>
     <maven-jar-plugin-version>2.1</maven-jar-plugin-version>
+    <maven-wagon-version>1.0-beta-2</maven-wagon-version>
   </properties>
 </project>
