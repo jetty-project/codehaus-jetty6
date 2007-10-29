@@ -1,8 +1,8 @@
 Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(revision 2127)
+--- modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(revision 2148)
 +++ modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(working copy)
-@@ -226,7 +226,7 @@
+@@ -236,7 +236,7 @@
              {
  
                  int[] points=new int[pointCount];
@@ -11,7 +11,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
  
                  message.append("iteration #"+(i+1));
  
-@@ -271,7 +271,7 @@
+@@ -281,7 +281,7 @@
              for (int i=0; i<bytes.length; i+=3)
              {
                  int[] points=new int[] { i };
@@ -20,7 +20,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
  
                  message.append("iteration #"+(i+1));
  
-@@ -323,7 +323,7 @@
+@@ -333,7 +333,7 @@
              {
                  Socket client=new Socket(HOST,port);
                  OutputStream os=client.getOutputStream();
@@ -29,7 +29,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
  
                  message.append("iteration #"+(i+1));
                  writeFragments(bytes,badPoints[i],message,os);
-@@ -546,7 +546,7 @@
+@@ -691,7 +691,7 @@
          {
              br=new BufferedReader(new InputStreamReader(client.getInputStream()));
  
@@ -38,7 +38,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
              String line;
  
              while ((line=br.readLine())!=null)
-@@ -593,7 +593,7 @@
+@@ -738,7 +738,7 @@
          return server;
      }
  
@@ -49,7 +49,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
  
 Index: modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(working copy)
 @@ -226,76 +226,74 @@
              if (_fileOut == null)
@@ -188,7 +188,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java
                  _writer.write(log);
 Index: modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(working copy)
 @@ -175,7 +175,7 @@
      /* ------------------------------------------------------------ */
@@ -219,7 +219,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java
          sb.append(Long.toString(last));
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(working copy)
 @@ -25,7 +25,7 @@
  import org.mortbay.jetty.SessionIdManager;
@@ -311,9 +311,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManage
 +}
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(working copy)
-@@ -32,6 +32,8 @@
+@@ -30,6 +30,8 @@
  import java.util.Timer;
  import java.util.TimerTask;
  
@@ -322,7 +322,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.
  import javax.servlet.http.HttpServletRequest;
  
  import org.mortbay.log.Log;
-@@ -63,7 +65,7 @@
+@@ -61,7 +63,7 @@
       */
      public void doStart() throws Exception
      {
@@ -333,7 +333,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.
          _timer=new Timer();
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(working copy)
 @@ -21,6 +21,7 @@
  import java.util.HashMap;
@@ -409,9 +409,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
                  b.append(LazyList.get(_chain, i).toString());
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(working copy)
-@@ -422,19 +422,22 @@
+@@ -421,19 +421,22 @@
                  if (!endsWithSlash || (pathInContext.length()==1 && request.getAttribute("org.mortbay.jetty.nullPathInfo")!=null))
                  {
                      StringBuffer buf=request.getRequestURL();
@@ -447,9 +447,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java
                  else if (null!=(welcome=getWelcomeFile(resource)))
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 2152)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(working copy)
-@@ -78,7 +78,7 @@
+@@ -74,7 +74,7 @@
       */
      public static String formatDate(long date, boolean cookie)
      {
@@ -458,7 +458,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          GregorianCalendar gc = new GregorianCalendar(__GMT);
          gc.setTimeInMillis(date);
          formatDate(buf, gc, cookie);
-@@ -92,7 +92,7 @@
+@@ -88,7 +88,7 @@
       */
      public static String formatDate(Calendar calendar, boolean cookie)
      {
@@ -467,7 +467,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
          formatDate(buf, calendar, cookie);
          return buf.toString();
      }
-@@ -102,7 +102,7 @@
+@@ -98,7 +98,7 @@
       * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
       * cookies
       */
@@ -476,7 +476,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      {
          GregorianCalendar gc = new GregorianCalendar(__GMT);
          gc.setTimeInMillis(date);
-@@ -115,7 +115,7 @@
+@@ -111,7 +111,7 @@
       * Format HTTP date "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for
       * cookies
       */
@@ -485,7 +485,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      {
          // "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
          // "EEE, dd-MMM-yy HH:mm:ss 'GMT'", cookie
-@@ -202,7 +202,7 @@
+@@ -198,7 +198,7 @@
      protected int _revision;
      protected HashMap _bufferMap = new HashMap(32);
      protected SimpleDateFormat _dateReceive[] = new SimpleDateFormat[__dateReceive.length];
@@ -494,7 +494,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      private Calendar _calendar;
  
      /* ------------------------------------------------------------ */
-@@ -894,7 +894,7 @@
+@@ -890,7 +890,7 @@
      {
          if (_dateBuffer == null)
          {
@@ -503,7 +503,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
              _calendar = new GregorianCalendar(__GMT);
          }
          _dateBuffer.setLength(0);
-@@ -928,7 +928,7 @@
+@@ -924,7 +924,7 @@
      {
          if (_dateBuffer == null)
          {
@@ -512,7 +512,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
              _calendar = new GregorianCalendar(__GMT);
          }
          _dateBuffer.setLength(0);
-@@ -956,72 +956,70 @@
+@@ -952,70 +952,69 @@
          if (name == null || name.length() == 0) throw new IllegalArgumentException("Bad cookie name");
  
          // Format value and params
@@ -520,27 +520,14 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 +        StringBuilder buf = new StringBuilder(128);
          String name_value_params = null;
 -        synchronized (buf)
-+        buf.append(name);
-+        buf.append('=');
-+        if (value != null && value.length() > 0)
-         {
--            buf.append(name);
+-        {
+-            QuotedStringTokenizer.quoteIfNeeded(buf, name);
 -            buf.append('=');
 -            if (value != null && value.length() > 0)
--            {
--                URIUtil.encodePath(buf,value);
--            }
-+            URIUtil.encodePath(buf,value);
-+        }
+-                QuotedStringTokenizer.quoteIfNeeded(buf, value);
  
 -            if (version > 0)
-+        if (version > 0)
-+        {
-+            buf.append(";Version=");
-+            buf.append(version);
-+            String comment = cookie.getComment();
-+            if (comment != null && comment.length() > 0)
-             {
+-            {
 -                buf.append(";Version=");
 -                buf.append(version);
 -                String comment = cookie.getComment();
@@ -549,9 +536,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 -                    buf.append(";Comment=");
 -                    QuotedStringTokenizer.quoteIfNeeded(buf, comment);
 -                }
-+                buf.append(";Comment=");
-+                QuotedStringTokenizer.quoteIfNeeded(buf, comment);
-             }
+-            }
 -            String path = cookie.getPath();
 -            if (path != null && path.length() > 0)
 -            {
@@ -564,27 +549,14 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 -                buf.append(";Domain=");
 -                buf.append(domain.toLowerCase());// lowercase for IE
 -            }
-+        }
-+        String path = cookie.getPath();
-+        if (path != null && path.length() > 0)
-+        {
-+            buf.append(";Path=");
-+            buf.append(URIUtil.encodePath(path));
-+        }
-+        String domain = cookie.getDomain();
-+        if (domain != null && domain.length() > 0)
-+        {
-+            buf.append(";Domain=");
-+            buf.append(domain.toLowerCase());// lowercase for IE
-+        }
++	QuotedStringTokenizer.quoteIfNeeded(buf, name);
++	buf.append('=');
++	if (value != null && value.length() > 0)
++	    QuotedStringTokenizer.quoteIfNeeded(buf, value);
  
 -            long maxAge = cookie.getMaxAge();
 -            if (maxAge >= 0)
-+        long maxAge = cookie.getMaxAge();
-+        if (maxAge >= 0)
-+        {
-+            if (version == 0)
-             {
+-            {
 -                if (version == 0)
 -                {
 -                    buf.append(";Expires=");
@@ -593,54 +565,87 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 -                    else
 -                        formatDate(buf, System.currentTimeMillis() + 1000L * maxAge, true);
 -                }
-+                buf.append(";Expires=");
-+                if (maxAge == 0)
-+                    buf.append(__01Jan1970);
-                 else
+-                else
 -                {
 -                    buf.append(";Max-Age=");
 -                    buf.append(maxAge);
 -                }
-+                    formatDate(buf, System.currentTimeMillis() + 1000L * maxAge, true);
-             }
+-            }
 -            else if (version > 0)
-+            else
-             {
+-            {
 -                buf.append(";Discard");
-+                buf.append(";Max-Age=");
-+                buf.append(maxAge);
-             }
-+        }
-+        else if (version > 0)
-+        {
-+            buf.append(";Discard");
-+        }
+-            }
++	if (version > 0)
++	{
++	    buf.append(";Version=");
++	    buf.append(version);
++	    String comment = cookie.getComment();
++	    if (comment != null && comment.length() > 0)
++	    {
++		buf.append(";Comment=");
++		QuotedStringTokenizer.quoteIfNeeded(buf, comment);
++	    }
++	}
++	String path = cookie.getPath();
++	if (path != null && path.length() > 0)
++	{
++	    buf.append(";Path=");
++	    buf.append(URIUtil.encodePath(path));
++	}
++	String domain = cookie.getDomain();
++	if (domain != null && domain.length() > 0)
++	{
++	    buf.append(";Domain=");
++	    buf.append(domain.toLowerCase());// lowercase for IE
++	}
  
 -            if (cookie.getSecure())
 -            {
 -                buf.append(";Secure");
 -            }
 -            if (cookie instanceof HttpOnlyCookie) buf.append(";HttpOnly");
--
++	long maxAge = cookie.getMaxAge();
++	if (maxAge >= 0)
++	{
++	    if (version == 0)
++	    {
++		buf.append(";Expires=");
++		if (maxAge == 0)
++		    buf.append(__01Jan1970);
++		else
++		    formatDate(buf, System.currentTimeMillis() + 1000L * maxAge, true);
++	    }
++	    else
++	    {
++		buf.append(";Max-Age=");
++		buf.append(maxAge);
++	    }
++	}
++	else if (version > 0)
++	{
++	    buf.append(";Discard");
++	}
+ 
 -            // TODO - straight to Buffer?
 -            name_value_params = buf.toString();
-+        if (cookie.getSecure())
-+        {
-+            buf.append(";Secure");
-         }
-+        if (cookie instanceof HttpOnlyCookie) buf.append(";HttpOnly");
+-        }
++	if (cookie.getSecure())
++	{
++	    buf.append(";Secure");
++	}
++	if (cookie instanceof HttpOnlyCookie) buf.append(";HttpOnly");
 +
-+        // TODO - straight to Buffer?
-+        name_value_params = buf.toString();
++	// TODO - straight to Buffer?
++	name_value_params = buf.toString();
 +
          put(HttpHeaders.EXPIRES_BUFFER, __01Jan1970_BUFFER);
          add(HttpHeaders.SET_COOKIE_BUFFER, new ByteArrayBuffer(name_value_params));
      }
 Index: modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 2161)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(working copy)
-@@ -337,7 +337,7 @@
+@@ -346,7 +346,7 @@
              return null;
          URLClassLoader loader = (URLClassLoader)_classLoader;
          URL[] urls =loader.getURLs();
@@ -651,7 +656,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
              try
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Response.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(working copy)
 @@ -383,7 +383,7 @@
  
@@ -664,7 +669,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Response.java
              else
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(working copy)
 @@ -368,7 +368,7 @@
          HttpFields.Field transfer_encoding = null;
@@ -704,7 +709,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java
                                  connection.append(field.getValue());
 Index: modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(working copy)
 @@ -122,31 +122,29 @@
      /* ------------------------------------------------------------ */
@@ -758,7 +763,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java
      /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(working copy)
 @@ -668,7 +668,7 @@
          /* ------------------------------------------------------------ */
@@ -771,9 +776,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.ja
              buf.append(_userFile);
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2152)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
-@@ -1545,25 +1545,22 @@
+@@ -1585,25 +1585,22 @@
       * 
       * @return "scheme://host:port"
       */
@@ -814,7 +819,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
      /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(working copy)
 @@ -830,16 +830,13 @@
              else
@@ -840,7 +845,7 @@ Index: modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java
  
 Index: modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(working copy)
 @@ -669,12 +669,9 @@
           */
@@ -869,7 +874,7 @@ Index: modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java
              {
 Index: modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(working copy)
 @@ -315,7 +315,7 @@
              if (bytes!=null)
@@ -882,7 +887,7 @@ Index: modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java
              return b.toString();
 Index: modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(working copy)
 @@ -495,7 +495,7 @@
  
@@ -895,7 +900,7 @@ Index: modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java
          buf.append(",");
 Index: modules/jetty/src/main/java/org/mortbay/resource/Resource.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(revision 2127)
+--- modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(revision 2147)
 +++ modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(working copy)
 @@ -432,7 +432,7 @@
          String decodedBase = URIUtil.decodePath(base);
@@ -908,7 +913,7 @@ Index: modules/jetty/src/main/java/org/mortbay/resource/Resource.java
          buf.append("</TITLE></HEAD><BODY>\n<H1>");
 Index: modules/jetty/pom.xml
 ===================================================================
---- modules/jetty/pom.xml	(revision 2127)
+--- modules/jetty/pom.xml	(revision 2147)
 +++ modules/jetty/pom.xml	(working copy)
 @@ -25,6 +25,13 @@
      </testResources>
@@ -926,7 +931,7 @@ Index: modules/jetty/pom.xml
            <execution>
 Index: modules/util/src/test/java/org/mortbay/util/URITest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/URITest.java	(revision 2127)
+--- modules/util/src/test/java/org/mortbay/util/URITest.java	(revision 2147)
 +++ modules/util/src/test/java/org/mortbay/util/URITest.java	(working copy)
 @@ -45,7 +45,7 @@
      public void testEncodePath()
@@ -939,7 +944,7 @@ Index: modules/util/src/test/java/org/mortbay/util/URITest.java
          buf.setLength(0);
 Index: modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(revision 2127)
+--- modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(revision 2147)
 +++ modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(working copy)
 @@ -94,7 +94,7 @@
      
@@ -952,7 +957,7 @@ Index: modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.jav
          QuotedStringTokenizer.quote(buf,"abc \n efg");
 Index: modules/util/src/test/java/org/mortbay/util/StringMapTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(revision 2127)
+--- modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(revision 2147)
 +++ modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(working copy)
 @@ -133,7 +133,7 @@
          m5.put("aBc", "x");
@@ -965,7 +970,7 @@ Index: modules/util/src/test/java/org/mortbay/util/StringMapTest.java
          assertEquals("x",m5.get(buffer));
 Index: modules/util/src/test/java/org/mortbay/util/StringUtilTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(revision 2127)
+--- modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(revision 2147)
 +++ modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(working copy)
 @@ -137,7 +137,7 @@
  
@@ -978,7 +983,7 @@ Index: modules/util/src/test/java/org/mortbay/util/StringUtilTest.java
          StringUtil.append(buf, (byte)12, 16);
 Index: modules/util/src/main/java/org/mortbay/servlet/CGI.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/servlet/CGI.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/servlet/CGI.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/servlet/CGI.java	(working copy)
 @@ -373,7 +373,7 @@
       * @throws IOException
@@ -991,7 +996,7 @@ Index: modules/util/src/main/java/org/mortbay/servlet/CGI.java
         	while( (b = is.read()) != -1 && b != (int) '\n' ) {
 Index: modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(working copy)
 @@ -20,6 +20,7 @@
  import java.util.HashMap;
@@ -1040,9 +1045,9 @@ Index: modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java
          return tag;
 Index: modules/util/src/main/java/org/mortbay/thread/Timeout.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/thread/Timeout.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/thread/Timeout.java	(revision 2149)
 +++ modules/util/src/main/java/org/mortbay/thread/Timeout.java	(working copy)
-@@ -175,7 +175,7 @@
+@@ -177,7 +177,7 @@
      /* ------------------------------------------------------------ */
      public String toString()
      {
@@ -1053,7 +1058,7 @@ Index: modules/util/src/main/java/org/mortbay/thread/Timeout.java
          Task task = _head._next;
 Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/DateCache.java	(working copy)
 @@ -155,7 +155,7 @@
              String ss2 = _formatString.substring( zIndex+3 );
@@ -1105,7 +1110,7 @@ Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
      }
 Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2130)
+--- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(working copy)
 @@ -63,7 +63,7 @@
   * </p>
@@ -1141,7 +1146,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
          appendArray(buffer,array);
          return buffer.toString();
      }
-@@ -137,7 +137,7 @@
+@@ -158,7 +158,7 @@
       * @param buffer
       * @param object
       */
@@ -1150,7 +1155,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
      {
          if (object==null)
              buffer.append("null");
-@@ -164,12 +164,12 @@
+@@ -185,12 +185,12 @@
              appendString(buffer,object.toString());
      }
  
@@ -1165,7 +1170,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
      {
          buffer.append('{');
          converter.toJSON(new Output(){
-@@ -225,12 +225,12 @@
+@@ -246,12 +246,12 @@
          buffer.append('}');
      }
  
@@ -1180,7 +1185,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
      {
          if (object==null)
          {
-@@ -253,7 +253,7 @@
+@@ -274,7 +274,7 @@
          buffer.append('}');
      }
      
@@ -1189,7 +1194,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
      {
          if (array==null)
          {
-@@ -274,7 +274,7 @@
+@@ -295,7 +295,7 @@
          buffer.append(']');
      }
  
@@ -1198,7 +1203,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
      {
          if (b==null)
          {
-@@ -284,7 +284,7 @@
+@@ -305,7 +305,7 @@
          buffer.append(b.booleanValue()?"true":"false");
      }
      
@@ -1207,7 +1212,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
      {
          if (number==null)
          {
-@@ -294,7 +294,7 @@
+@@ -315,7 +315,7 @@
          buffer.append(number);
      }
      
@@ -1216,7 +1221,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
      {
          if (string==null)
          {
-@@ -518,7 +518,7 @@
+@@ -539,7 +539,7 @@
              throw new IllegalStateException();
          
          boolean escape=false;
@@ -1225,7 +1230,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
          while(source.hasNext())
          {
              char c=source.next();
-@@ -817,7 +817,7 @@
+@@ -838,7 +838,7 @@
      /* ------------------------------------------------------------ */
      public interface Generator
      {
@@ -1234,7 +1239,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
      }
      
      /* ------------------------------------------------------------ */
-@@ -844,7 +844,7 @@
+@@ -865,7 +865,7 @@
              return _json;
          }
          
@@ -1245,7 +1250,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
          }
 Index: modules/util/src/main/java/org/mortbay/util/StringUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/StringUtil.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/StringUtil.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/StringUtil.java	(working copy)
 @@ -190,22 +190,20 @@
          if (i == -1)
@@ -1328,7 +1333,7 @@ Index: modules/util/src/main/java/org/mortbay/util/StringUtil.java
              char c=name.charAt(i);
 Index: modules/util/src/main/java/org/mortbay/util/StringMap.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/StringMap.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/StringMap.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/StringMap.java	(working copy)
 @@ -613,15 +613,12 @@
          public Object setValue(Object o){Object old=_value;_value=o;return old;}
@@ -1351,7 +1356,7 @@ Index: modules/util/src/main/java/org/mortbay/util/StringMap.java
              if (_char==null)
 Index: modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(working copy)
 @@ -26,6 +26,7 @@
   * The UTF-8 decoding is done by this class and no additional buffers or Readers are used.
@@ -1363,7 +1368,7 @@ Index: modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java
  {
 Index: modules/util/src/main/java/org/mortbay/util/TypeUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(working copy)
 @@ -375,7 +375,7 @@
      /* ------------------------------------------------------------ */
@@ -1394,7 +1399,7 @@ Index: modules/util/src/main/java/org/mortbay/util/TypeUtil.java
              int bi=0xff&b[i];
 Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(revision 2152)
 +++ modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(working copy)
 @@ -37,7 +37,7 @@
      private String _delim = __delim;
@@ -1423,7 +1428,7 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
                  quote(b,s);
                  return b.toString();
              }
-@@ -298,139 +298,135 @@
+@@ -298,7 +298,7 @@
          if (s.length()==0)
              return "\"\"";
          
@@ -1432,30 +1437,25 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
          quote(b,s);
          return b.toString();
     
-     }
+@@ -306,135 +306,129 @@
  
--    
-+
+     
      /* ------------------------------------------------------------ */
 -    /** Quote a string into a StringBuffer.
-+    /** Quote a string into a StringBuilder.
++    /** Quote a string into a StringBulder.
       * The characters ", \, \n, \r, \t, \f and \b are escaped
 -     * @param buf The StringBuffer
-+     * @param buf The StringBuilder
++     * @param buf The StringBulder
       * @param s The String to quote.
       */
 -    public static void quote(StringBuffer buf, String s)
 +    public static void quote(StringBuilder buf, String s)
      {
 -        synchronized(buf)
-+        buf.append('"');
-+        for (int i=0;i<s.length();i++)
-         {
+-        {
 -            buf.append('"');
 -            for (int i=0;i<s.length();i++)
-+            char c = s.charAt(i);
-+            switch(c)
-             {
+-            {
 -                char c = s.charAt(i);
 -                switch(c)
 -                {
@@ -1485,64 +1485,66 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
 -                        buf.append(c);
 -                        continue;
 -                }
-+                case '"':
-+                    buf.append("\\\"");
-+                    continue;
-+                case '\\':
-+                    buf.append("\\\\");
-+                    continue;
-+                case '\n':
-+                    buf.append("\\n");
-+                    continue;
-+                case '\r':
-+                    buf.append("\\r");
-+                    continue;
-+                case '\t':
-+                    buf.append("\\t");
-+                    continue;
-+                case '\f':
-+                    buf.append("\\f");
-+                    continue;
-+                case '\b':
-+                    buf.append("\\b");
-+                    continue;
-+
-+                default:
-+                    buf.append(c);
-+                continue;
-             }
+-            }
 -            buf.append('"');
 -        } 
--    }
-+        }
-+        buf.append('"');
-+    } 
++	buf.append('"');
++	for (int i=0;i<s.length();i++)
++	{
++	    char c = s.charAt(i);
++	    switch(c)
++	    {
++		case '"':
++		    buf.append("\\\"");
++		    continue;
++		case '\\':
++		    buf.append("\\\\");
++		    continue;
++		case '\n':
++		    buf.append("\\n");
++		    continue;
++		case '\r':
++		    buf.append("\\r");
++		    continue;
++		case '\t':
++		    buf.append("\\t");
++		    continue;
++		case '\f':
++		    buf.append("\\f");
++		    continue;
++		case '\b':
++		    buf.append("\\b");
++		    continue;
++		    
++		default:
++		    buf.append(c);
++		    continue;
++	    }
++	}
++	buf.append('"');
+     }
  
--    
-+
-+
+     
      /* ------------------------------------------------------------ */
 -    /** Quote a string into a StringBuffer.
-+    /** Quote a string into a StringBuilder.
-      * The characters ", \, \n, \r, \t, \f and \b are escaped
++    /** Quote a string into a StringBulder.
+      * The characters ", \, \n, \r, \t, \f, \b are escaped.
+      * Quotes are forced if any escaped characters are present or there
+      * is a ", ', space, + or % character.
+      * 
 -     * @param buf The StringBuffer
-+     * @param buf The StringBuilder
++     * @param buf The StringBulder
       * @param s The String to quote.
       */
 -    public static void quoteIfNeeded(StringBuffer buf, String s)
 +    public static void quoteIfNeeded(StringBuilder buf, String s)
      {
 -        synchronized(buf)
-+        int e=-1;
-+
-+        search: for (int i=0;i<s.length();i++)
-         {
+-        {
 -            int e=-1;
 -            
 -            search: for (int i=0;i<s.length();i++)
-+            char c = s.charAt(i);
-+            switch(c)
-             {
+-            {
 -                char c = s.charAt(i);
 -                switch(c)
 -                {
@@ -1553,6 +1555,8 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
 -                    case '\t':
 -                    case '\f':
 -                    case '\b':
+-                    case '%':
+-                    case '+':
 -                    case ' ':
 -                        e=i;
 -                        buf.append('"');
@@ -1564,67 +1568,13 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
 -                    default:
 -                        continue;
 -                }
-+                case '"':
-+                case '\\':
-+                case '\n':
-+                case '\r':
-+                case '\t':
-+                case '\f':
-+                case '\b':
-+                case ' ':
-+                    e=i;
-+                    buf.append('"');
-+                    // TODO when 1.4 support is dropped: buf.append(s,0,e);
-+                    for (int j=0;j<e;j++)
-+                        buf.append(s.charAt(j));
-+                    break search;
-+
-+                default:
-+                    continue;
-             }
+-            }
 -            
 -            if (e<0)
-+        }
-+
-+        if (e<0)
-+        {
-+            buf.append(s);
-+            return;
-+        }
-+
-+        for (int i=e;i<s.length();i++)
-+        {
-+            char c = s.charAt(i);
-+            switch(c)
-             {
+-            {
 -                buf.append(s);
 -                return;
-+                case '"':
-+                    buf.append("\\\"");
-+                    continue;
-+                case '\\':
-+                    buf.append("\\\\");
-+                    continue;
-+                case '\n':
-+                    buf.append("\\n");
-+                    continue;
-+                case '\r':
-+                    buf.append("\\r");
-+                    continue;
-+                case '\t':
-+                    buf.append("\\t");
-+                    continue;
-+                case '\f':
-+                    buf.append("\\f");
-+                    continue;
-+                case '\b':
-+                    buf.append("\\b");
-+                    continue;
-+
-+                default:
-+                    buf.append(c);
-+                continue;
-             }
+-            }
 -            
 -            for (int i=e;i<s.length();i++)
 -            {
@@ -1659,14 +1609,79 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
 -                }
 -            }
 -            buf.append('"');
-         }
-+        buf.append('"');
+-        }
++	int e=-1;
++	
++	search: for (int i=0;i<s.length();i++)
++	{
++	    char c = s.charAt(i);
++	    switch(c)
++	    {
++		case '"':
++		case '\\':
++		case '\n':
++		case '\r':
++		case '\t':
++		case '\f':
++		case '\b':
++		case '%':
++		case '+':
++		case ' ':
++		    e=i;
++		    buf.append('"');
++		    // TODO when 1.4 support is dropped: buf.append(s,0,e);
++		    for (int j=0;j<e;j++)
++			buf.append(s.charAt(j));
++		    break search;
++		    
++		default:
++		    continue;
++	    }
++	}
++	
++	if (e<0)
++	{
++	    buf.append(s);
++	    return;
++	}
++	
++	for (int i=e;i<s.length();i++)
++	{
++	    char c = s.charAt(i);
++	    switch(c)
++	    {
++		case '"':
++		    buf.append("\\\"");
++		    continue;
++		case '\\':
++		    buf.append("\\\\");
++		    continue;
++		case '\n':
++		    buf.append("\\n");
++		    continue;
++		case '\r':
++		    buf.append("\\r");
++		    continue;
++		case '\t':
++		    buf.append("\\t");
++		    continue;
++		case '\f':
++		    buf.append("\\f");
++		    continue;
++		case '\b':
++		    buf.append("\\b");
++		    continue;
++		    
++		default:
++		    buf.append(c);
++		    continue;
++	    }
++	}
++	buf.append('"');
      }
-+
      
      /* ------------------------------------------------------------ */
-     /** Unquote a string.
-@@ -448,59 +444,58 @@
+@@ -453,59 +447,58 @@
          char last=s.charAt(s.length()-1);
          if (first!=last || (first!='"' && first!='\''))
              return s;
@@ -1774,9 +1789,9 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
      /* ------------------------------------------------------------ */
 Index: modules/util/src/main/java/org/mortbay/util/UrlEncoded.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(working copy)
-@@ -114,57 +114,56 @@
+@@ -116,57 +116,56 @@
      {
          if (charset==null)
              charset=StringUtil.__UTF8;
@@ -1870,7 +1885,7 @@ Index: modules/util/src/main/java/org/mortbay/util/UrlEncoded.java
       * @param content the string containing the encoded parameters
 Index: modules/util/src/main/java/org/mortbay/util/MultiMap.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/MultiMap.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/MultiMap.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/MultiMap.java	(working copy)
 @@ -105,21 +105,20 @@
                Object o=LazyList.get(l,0);
@@ -2222,7 +2237,7 @@ Name: svn:eol-style
 
 Index: modules/util/src/main/java/org/mortbay/util/URIUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/URIUtil.java	(revision 2127)
+--- modules/util/src/main/java/org/mortbay/util/URIUtil.java	(revision 2147)
 +++ modules/util/src/main/java/org/mortbay/util/URIUtil.java	(working copy)
 @@ -56,17 +56,17 @@
          if (path==null || path.length()==0)
@@ -2321,7 +2336,7 @@ Index: modules/util/src/main/java/org/mortbay/util/URIUtil.java
          int skip=0;
 Index: modules/util/pom.xml
 ===================================================================
---- modules/util/pom.xml	(revision 2127)
+--- modules/util/pom.xml	(revision 2147)
 +++ modules/util/pom.xml	(working copy)
 @@ -37,6 +37,13 @@
      </testResources>
@@ -2339,7 +2354,7 @@ Index: modules/util/pom.xml
            <execution>
 Index: contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java
 ===================================================================
---- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java	(revision 518)
+--- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java	(revision 534)
 +++ contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java	(working copy)
 @@ -19,7 +19,7 @@
      String _json;
@@ -2352,7 +2367,7 @@ Index: contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java
      }
 Index: contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java
 ===================================================================
---- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java	(revision 521)
+--- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java	(revision 534)
 +++ contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java	(working copy)
 @@ -116,7 +116,7 @@
  
