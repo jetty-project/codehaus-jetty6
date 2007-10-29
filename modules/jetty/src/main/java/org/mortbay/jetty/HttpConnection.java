@@ -860,7 +860,7 @@ public class HttpConnection implements Connection
          */
         public void startResponse(Buffer version, int status, Buffer reason)
         {
-            throw new IllegalStateException("response");
+            Log.debug("Bad request!: "+version+" "+status+" "+reason);
         }
 
     }

@@ -11,6 +11,7 @@ jetty-SNAPSHOT
  + JETTY-439 Fixed 100 continues clash with Connection:close
  + JETTY-443 windows bug causes Acceptor thread to die
  + JETTY-445 removed test code
+ + JETTY-450 Bad request for response sent to server
  + JETTY-453 updated Wadi to 2.0-M7
  + JETTY-454 handle exceptions with themselves as root cause
 
