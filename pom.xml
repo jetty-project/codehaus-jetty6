@@ -252,7 +252,6 @@
     <module>extras/spring</module>
     <module>extras/sslengine</module>
     <module>extras/ajp</module>
-    <module>extras/setuid</module>
     <module>extras/win32service</module>
     <!--module>extras/gwt</module-->
     <module>extras/threadpool</module>
@@ -271,6 +270,8 @@
     <!--module>contrib/grizzly</module-->
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
+
+    <module>extras/setuid</module>
   </modules>
 
   <reporting>
