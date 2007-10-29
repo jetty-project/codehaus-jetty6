@@ -25,6 +25,15 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.mortbay.resource.Resource;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.LocalConnector;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.HttpConnection;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
 
 /**
  * @version $Revision$
@@ -71,4 +80,87 @@ public class ContextHandlerTest extends TestCase
 
         return root;
     }
+
+    public void testVirtualHostNormalization()
+        throws Exception
+    {
+        Server server = new Server();
+        LocalConnector connector = new LocalConnector();
+        server.setConnectors(new Connector[] {connector});
+
+        ContextHandler contextA = new ContextHandler("/");
+        contextA.setVirtualHosts(new String[] {"www.example.com"});
+        IsHandledHandler handlerA = new IsHandledHandler();
+        contextA.setHandler(handlerA);
+
+
+        ContextHandler contextB = new ContextHandler("/");
+        IsHandledHandler handlerB = new IsHandledHandler();
+        contextB.setHandler(handlerB);
+        contextB.setVirtualHosts(new String[] {"www.example2.com."});
+
+        ContextHandler contextC = new ContextHandler("/");
+        IsHandledHandler handlerC = new IsHandledHandler();
+        contextC.setHandler(handlerC);
+
+        HandlerCollection c = new HandlerCollection();
+
+        c.addHandler(contextA);
+        c.addHandler(contextB);
+        c.addHandler(contextC);
+
+
+        server.setHandler(c);
+
+        try
+        {
+            server.start();
+            connector.getResponses("GET / HTTP/1.1\n" +
+                "Host: www.example.com.\n\n");
+
+            assertTrue(handlerA.isHandled());
+            assertFalse(handlerB.isHandled());
+            assertFalse(handlerC.isHandled());
+
+            handlerA.reset();
+            handlerB.reset();
+            handlerC.reset();
+
+            connector.getResponses("GET / HTTP/1.1\n" +
+                "Host: www.example2.com\n\n");
+
+            assertFalse(handlerA.isHandled());
+            assertTrue(handlerB.isHandled());
+            assertFalse(handlerC.isHandled());
+
+
+        }
+        finally
+        {
+            server.stop();
+        }
+
+
+    }
+
+     public static final class IsHandledHandler extends AbstractHandler {
+        private boolean handled;
+
+        public boolean isHandled() {
+            return handled;
+        }
+
+        public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException,
+            ServletException
+        {
+            Request base_request = (request instanceof Request) ? (Request) request : HttpConnection.getCurrentConnection().getRequest();
+            base_request.setHandled(true);
+            this.handled = true;
+        }
+
+         public void reset()
+         {
+             handled = false;
+         }
+     }
 }

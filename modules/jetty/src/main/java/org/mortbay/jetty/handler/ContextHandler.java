@@ -222,9 +222,18 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      * null host name or null/empty array means any hostname is acceptable.
      * Host names may String representation of IP addresses.
      */
-    public void setVirtualHosts(String[] vhosts)
+    public void setVirtualHosts( String[] vhosts )
     {
-        _vhosts=vhosts;
+        if ( vhosts == null )
+        {
+            _vhosts = vhosts;
+        } 
+        else 
+        {
+            _vhosts = new String[vhosts.length];
+            for ( int i = 0; i < vhosts.length; i++ )
+                _vhosts[i] = normalizeHostname( vhosts[i]);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -610,7 +619,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             // Check the vhosts
             if (_vhosts!=null && _vhosts.length>0)
             {
-                String vhost=request.getServerName();
+                String vhost = normalizeHostname( request.getServerName());
+
                 boolean match=false;
                 
                 // TODO non-linear lookup
@@ -1442,15 +1452,23 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return _contextPath;
         }
 
-
         /* ------------------------------------------------------------ */
         public String toString()
         {
             return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?URIUtil.SLASH:getContextPath())+","+getBaseResource()+"}";
         }
-
     }
 
-
+    /* ------------------------------------------------------------ */
+    private String normalizeHostname( String host )
+    {
+        if ( host == null )
+            return null;
+        
+        if ( host.endsWith( "." ) )
+            return host.substring( 0, host.length() -1);
+      
+            return host;
+    }
 
 }
