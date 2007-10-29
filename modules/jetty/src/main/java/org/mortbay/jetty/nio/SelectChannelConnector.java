@@ -200,11 +200,13 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 _acceptChannel = ServerSocketChannel.open();
 
                 // Bind the server socket to the local host and port
+                _acceptChannel.socket().setReuseAddress(getReuseAddress());
                 InetSocketAddress addr = getHost()==null?new InetSocketAddress(getPort()):new InetSocketAddress(getHost(),getPort());
                 _acceptChannel.socket().bind(addr,getAcceptQueueSize());
 
                 // Set to non blocking mode
                 _acceptChannel.configureBlocking(false);
+                
             }
         }
     }
