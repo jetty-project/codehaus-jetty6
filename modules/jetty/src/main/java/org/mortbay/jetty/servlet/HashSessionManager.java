@@ -43,6 +43,7 @@ import org.mortbay.util.LazyList;
  */
 public class HashSessionManager extends AbstractSessionManager
 {
+    private static int __id;
     private Timer _timer;
     private TimerTask _task;
     private int _scavengePeriodMs=30000;
@@ -64,7 +65,7 @@ public class HashSessionManager extends AbstractSessionManager
         _sessions=new HashMap();
         super.doStart();
 
-        _timer=new Timer();
+        _timer=new Timer("HashSessionScavenger-"+__id++, true);
         
         setScavengePeriod(getScavengePeriod());
 
