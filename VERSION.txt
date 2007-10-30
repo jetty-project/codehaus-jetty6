@@ -11,6 +11,7 @@ jetty-SNAPSHOT
  + JETTY-409 String params that denote files changed to File 
  + JETTY-438 handle trailing . in vhosts
  + JETTY-439 Fixed 100 continues clash with Connection:close
+ + JETTY-451 Concurrent modification of session during invalidate
  + JETTY-443 windows bug causes Acceptor thread to die
  + JETTY-445 removed test code
  + JETTY-448 added setReuseAddress on AbstractConnector
