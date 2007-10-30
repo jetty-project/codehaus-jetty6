@@ -941,35 +941,28 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             try
             {
                 // Notify listeners and unbind values
-                if (_invalid)
-                    throw new IllegalStateException();
-
-                while (_values!=null && _values.size()>0)
+                synchronized (this)
                 {
-                    ArrayList keys;
-                    synchronized (this)
+                    if (_invalid)
+                        throw new IllegalStateException();
+
+                    if (_values!=null)
                     {
-                        keys=new ArrayList(_values.keySet());
-                    }
-
-                    Iterator iter=keys.iterator();
-                    while (iter.hasNext())
-                    {
-                        String key=(String)iter.next();
-
-                        Object value;
-                        synchronized (this)
+                        Iterator iter=_values.keySet().iterator();
+                        while (iter.hasNext())
                         {
-                            value=_values.remove(key);
-                        }
-                        unbindValue(key,value);
+                            String key=(String)iter.next();
+                            Object value=_values.get(key);
+                            iter.remove();
+                            unbindValue(key,value);
 
-                        if (_sessionAttributeListeners!=null)
-                        {
-                            HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,key,value);
+                            if (_sessionAttributeListeners!=null)
+                            {
+                                HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,key,value);
 
-                            for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
-                                ((HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i)).attributeRemoved(event);
+                                for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
+                                    ((HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i)).attributeRemoved(event);
+                            }
                         }
                     }
                 }
@@ -1126,7 +1119,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
-        protected synchronized void willPassivate() 
+        protected void willPassivate() 
         {
             HttpSessionEvent event = new HttpSessionEvent(this);
             for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
@@ -1141,7 +1134,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
-        protected synchronized void didActivate() 
+        protected void didActivate() 
         {
             HttpSessionEvent event = new HttpSessionEvent(this);
             for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
