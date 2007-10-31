@@ -89,7 +89,6 @@
     <dependency>
       <groupId>geronimo-spec</groupId>
       <artifactId>geronimo-spec-jta</artifactId>
-      <version>${jta-spec-version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
