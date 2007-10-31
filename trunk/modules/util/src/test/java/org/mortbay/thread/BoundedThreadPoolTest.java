@@ -28,7 +28,7 @@ public class BoundedThreadPoolTest extends TestCase
         assertEquals(15,pool.getThreads());
         assertEquals(0,pool.getIdleThreads());
         
-        Thread.sleep(700);
+        Thread.sleep(800);
 
         assertEquals(14,pool.getThreads());
         assertEquals(14,pool.getIdleThreads());
