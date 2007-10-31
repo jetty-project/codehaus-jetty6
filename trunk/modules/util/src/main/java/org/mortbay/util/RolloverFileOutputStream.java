@@ -166,7 +166,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
         synchronized(RolloverFileOutputStream.class)
         {
             if (__rollover==null)
-                __rollover=new Timer(RolloverFileOutputStream.class.getName(),true);
+                __rollover=new Timer(true);
             
             _rollTask=new RollTask();
 

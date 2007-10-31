@@ -8,7 +8,6 @@ jetty-SNAPSHOT
  + Moved some impl classes from jsp-api-2.1 to jsp-2.1
  + Added configuration file for capturing stderr and stdout
  + Updated for dojo 1.0 cometd
- + Give session scavenger timer threads names and make deamons
  + Give bayeux timer name
  + Give Terracotta session scavenger a name
  + Jetty Eclipse Plugin 1.0.1: force copy of context file on redeploy
