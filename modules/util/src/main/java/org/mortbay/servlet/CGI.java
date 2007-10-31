@@ -128,10 +128,10 @@ public class CGI extends HttpServlet
         }
         if(!_env.envMap.containsKey("SystemRoot"))
         {
-      	    String os = System.getenv("OS");
+      	    String os = System.getProperty("os.name");
             if (os!=null && os.toLowerCase().indexOf("windows")!=-1)
             {
-        	String windir = System.getenv("windir");
+        	String windir = System.getProperty("windir");
         	_env.set("SystemRoot", windir!=null ? windir : "C:\\WINDOWS"); 
             }
         }   
