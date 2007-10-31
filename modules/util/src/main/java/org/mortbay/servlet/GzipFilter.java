@@ -330,7 +330,7 @@ public class GzipFilter extends UserAgentFilter
                 }
                 catch (IOException e)
                 {
-                    throw new IllegalStateException(e);
+                    throw new IllegalStateException();
                 }
             }
         }

@@ -483,7 +483,8 @@ public class JSON
                     }
                     catch(Exception e)
                     {
-                        throw new IllegalArgumentException(e);
+                        e.printStackTrace();
+                        throw new IllegalArgumentException();
                     }
                 }
             }
@@ -595,7 +596,7 @@ public class JSON
     {
         boolean minus=false;
         long number=0;
-        StringBuilder buffer=null;
+        StringBuffer buffer=null;
 
         
         longLoop:
@@ -628,7 +629,7 @@ public class JSON
                 case '.':
                 case 'e':
                 case 'E':
-                    buffer=new StringBuilder(16);
+                    buffer=new StringBuffer(16);
                     buffer.append(minus?-1*number:number);
                     buffer.append(c);
                     source.next();
@@ -795,7 +796,8 @@ public class JSON
                 }
                 catch(IOException e)
                 {
-                    throw new IllegalStateException(e);
+                    e.printStackTrace();
+                    throw new IllegalStateException();
                 }
             }
         }
