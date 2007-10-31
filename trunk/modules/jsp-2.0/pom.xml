@@ -216,5 +216,7 @@
   </dependencies>
   <properties>
     <xerces-version>2.6.2</xerces-version>
+    <jasper-version>5.5.15</jasper-version>
+    <commons-el-version>1.0</commons-el-version>
   </properties>
 </project>

@@ -172,7 +172,8 @@
       <artifactId>ant</artifactId>
     </dependency>
   </dependencies>
-    <properties>
-     <glassfish.version.tag>SJSAS-9_1-B58C-FCS-22_Aug_2007</glassfish.version.tag>
+  <properties>
+     <glassfish.version.tag>SJSAS-9_1-B58G-FCS-08_Sept_2007</glassfish.version.tag>
+     <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
   </properties>
 </project>

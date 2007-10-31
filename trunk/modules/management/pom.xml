@@ -75,7 +75,7 @@
                 <artifactItem>
                   <groupId>mx4j</groupId>
                   <artifactId>mx4j-tools</artifactId>
-                  <version>${mx4j-tools-version}</version>
+                  <version>${mx4j-version}</version>
                   <outputDirectory>${basedir}/../../lib/management/mx4j</outputDirectory>
                 </artifactItem>
               </artifactItems>
@@ -129,4 +129,7 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
+  <properties>
+     <mx4j-version>3.0.1</mx4j-version>
+  </properties>
 </project>
