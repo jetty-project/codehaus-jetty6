@@ -1,6 +1,8 @@
 
 
 jetty-SNAPSHOT
+ + Upgrade jsp 2.1 to SJSAS-9_1-B58G-FCS-08_Sept_2007
+ + Housekeeping on poms
  + CERT VU#38616 handle single quotes in cookie names.
  + Improved JSON parsing from Readers
  + Moved some impl classes from jsp-api-2.1 to jsp-2.1

@@ -118,6 +118,6 @@
     </dependency>
   </dependencies>
     <properties>
-     <glassfish.version.tag>SJSAS-9_1-B58C-FCS-22_Aug_2007</glassfish.version.tag>
+     <glassfish.version.tag>SJSAS-9_1-B58G-FCS-08_Sept_2007</glassfish.version.tag>
   </properties>
 </project>
