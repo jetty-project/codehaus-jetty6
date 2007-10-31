@@ -1,6 +1,18 @@
+Index: VERSION.txt
+===================================================================
+--- VERSION.txt	(revision 2180)
++++ VERSION.txt	(working copy)
+@@ -8,6 +8,7 @@
+  + Moved some impl classes from jsp-api-2.1 to jsp-2.1
+  + Added configuration file for capturing stderr and stdout
+  + Updated for dojo 1.0 cometd
++ + Give session scavenger timer threads names and make deamons
+  + Give bayeux timer name
+  + Give Terracotta session scavenger a name
+  + Jetty Eclipse Plugin 1.0.1: force copy of context file on redeploy
 Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(revision 2148)
+--- modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(revision 2178)
 +++ modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java	(working copy)
 @@ -236,7 +236,7 @@
              {
@@ -49,7 +61,7 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/HttpServerTestBase.java
  
 Index: modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(working copy)
 @@ -226,76 +226,74 @@
              if (_fileOut == null)
@@ -188,7 +200,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/NCSARequestLog.java
                  _writer.write(log);
 Index: modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java	(working copy)
 @@ -175,7 +175,7 @@
      /* ------------------------------------------------------------ */
@@ -219,7 +231,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/InclusiveByteRange.java
          sb.append(Long.toString(last));
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManager.java	(working copy)
 @@ -25,7 +25,7 @@
  import org.mortbay.jetty.SessionIdManager;
@@ -309,31 +321,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionIdManage
 -}
 \ No newline at end of file
 +}
-Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java
-===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 2147)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(working copy)
-@@ -30,6 +30,8 @@
- import java.util.Timer;
- import java.util.TimerTask;
- 
-+import java.util.concurrent.ConcurrentHashMap;
-+
- import javax.servlet.http.HttpServletRequest;
- 
- import org.mortbay.log.Log;
-@@ -61,7 +63,7 @@
-      */
-     public void doStart() throws Exception
-     {
--        _sessions=new HashMap();
-+        _sessions=new ConcurrentHashMap(); // TODO: use syncronizedMap for JDK 1.4
-         super.doStart();
- 
-         _timer=new Timer();
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(working copy)
 @@ -21,6 +21,7 @@
  import java.util.HashMap;
@@ -407,9 +397,43 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
              for (int i=0; i<LazyList.size(_chain);i++)
              {
                  b.append(LazyList.get(_chain, i).toString());
+Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(revision 2180)
++++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/HashSessionManager.java	(working copy)
+@@ -30,6 +30,8 @@
+ import java.util.Timer;
+ import java.util.TimerTask;
+ 
++import java.util.concurrent.ConcurrentHashMap;
++
+ import javax.servlet.http.HttpServletRequest;
+ 
+ import org.mortbay.log.Log;
+@@ -43,6 +45,7 @@
+  */
+ public class HashSessionManager extends AbstractSessionManager
+ {
++    private static int __id;
+     private Timer _timer;
+     private TimerTask _task;
+     private int _scavengePeriodMs=30000;
+@@ -61,10 +64,10 @@
+      */
+     public void doStart() throws Exception
+     {
+-        _sessions=new HashMap();
++        _sessions=new ConcurrentHashMap(); // TODO: use syncronizedMap for JDK 1.4
+         super.doStart();
+ 
+-        _timer=new Timer(true);
++        _timer=new Timer("HashSessionScavenger-"+__id++, true);
+         
+         setScavengePeriod(getScavengePeriod());
+ 
 Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(working copy)
 @@ -421,19 +421,22 @@
                  if (!endsWithSlash || (pathInContext.length()==1 && request.getAttribute("org.mortbay.jetty.nullPathInfo")!=null))
@@ -447,7 +471,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java
                  else if (null!=(welcome=getWelcomeFile(resource)))
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 2152)
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java	(working copy)
 @@ -74,7 +74,7 @@
       */
@@ -643,7 +667,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpFields.java
      }
 Index: modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 2161)
+--- modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(working copy)
 @@ -346,7 +346,7 @@
              return null;
@@ -656,7 +680,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
              try
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Response.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/Response.java	(working copy)
 @@ -383,7 +383,7 @@
  
@@ -669,7 +693,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Response.java
              else
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java	(working copy)
 @@ -368,7 +368,7 @@
          HttpFields.Field transfer_encoding = null;
@@ -709,7 +733,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpGenerator.java
                                  connection.append(field.getValue());
 Index: modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java	(working copy)
 @@ -122,31 +122,29 @@
      /* ------------------------------------------------------------ */
@@ -763,7 +787,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/Password.java
      /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.java	(working copy)
 @@ -668,7 +668,7 @@
          /* ------------------------------------------------------------ */
@@ -776,7 +800,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/security/HTAccessHandler.ja
              buf.append(_userFile);
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2152)
+--- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
 @@ -1585,25 +1585,22 @@
       * 
@@ -819,7 +843,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
      /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java	(working copy)
 @@ -830,16 +830,13 @@
              else
@@ -845,7 +869,7 @@ Index: modules/jetty/src/main/java/org/mortbay/xml/XmlConfiguration.java
  
 Index: modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java	(working copy)
 @@ -669,12 +669,9 @@
           */
@@ -874,7 +898,7 @@ Index: modules/jetty/src/main/java/org/mortbay/xml/XmlParser.java
              {
 Index: modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java	(working copy)
 @@ -315,7 +315,7 @@
              if (bytes!=null)
@@ -887,7 +911,7 @@ Index: modules/jetty/src/main/java/org/mortbay/io/BufferUtil.java
              return b.toString();
 Index: modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java	(working copy)
 @@ -495,7 +495,7 @@
  
@@ -900,7 +924,7 @@ Index: modules/jetty/src/main/java/org/mortbay/io/AbstractBuffer.java
          buf.append(",");
 Index: modules/jetty/src/main/java/org/mortbay/resource/Resource.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(revision 2147)
+--- modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(revision 2178)
 +++ modules/jetty/src/main/java/org/mortbay/resource/Resource.java	(working copy)
 @@ -432,7 +432,7 @@
          String decodedBase = URIUtil.decodePath(base);
@@ -913,7 +937,7 @@ Index: modules/jetty/src/main/java/org/mortbay/resource/Resource.java
          buf.append("</TITLE></HEAD><BODY>\n<H1>");
 Index: modules/jetty/pom.xml
 ===================================================================
---- modules/jetty/pom.xml	(revision 2147)
+--- modules/jetty/pom.xml	(revision 2178)
 +++ modules/jetty/pom.xml	(working copy)
 @@ -25,6 +25,13 @@
      </testResources>
@@ -931,7 +955,7 @@ Index: modules/jetty/pom.xml
            <execution>
 Index: modules/util/src/test/java/org/mortbay/util/URITest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/URITest.java	(revision 2147)
+--- modules/util/src/test/java/org/mortbay/util/URITest.java	(revision 2178)
 +++ modules/util/src/test/java/org/mortbay/util/URITest.java	(working copy)
 @@ -45,7 +45,7 @@
      public void testEncodePath()
@@ -944,7 +968,7 @@ Index: modules/util/src/test/java/org/mortbay/util/URITest.java
          buf.setLength(0);
 Index: modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(revision 2147)
+--- modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(revision 2178)
 +++ modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.java	(working copy)
 @@ -94,7 +94,7 @@
      
@@ -957,7 +981,7 @@ Index: modules/util/src/test/java/org/mortbay/util/QuotedStringTokenizerTest.jav
          QuotedStringTokenizer.quote(buf,"abc \n efg");
 Index: modules/util/src/test/java/org/mortbay/util/StringMapTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(revision 2147)
+--- modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(revision 2178)
 +++ modules/util/src/test/java/org/mortbay/util/StringMapTest.java	(working copy)
 @@ -133,7 +133,7 @@
          m5.put("aBc", "x");
@@ -970,7 +994,7 @@ Index: modules/util/src/test/java/org/mortbay/util/StringMapTest.java
          assertEquals("x",m5.get(buffer));
 Index: modules/util/src/test/java/org/mortbay/util/StringUtilTest.java
 ===================================================================
---- modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(revision 2147)
+--- modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(revision 2178)
 +++ modules/util/src/test/java/org/mortbay/util/StringUtilTest.java	(working copy)
 @@ -137,7 +137,7 @@
  
@@ -983,7 +1007,7 @@ Index: modules/util/src/test/java/org/mortbay/util/StringUtilTest.java
          StringUtil.append(buf, (byte)12, 16);
 Index: modules/util/src/main/java/org/mortbay/servlet/GzipFilter.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/servlet/GzipFilter.java	(revision 2177)
+--- modules/util/src/main/java/org/mortbay/servlet/GzipFilter.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/servlet/GzipFilter.java	(working copy)
 @@ -330,7 +330,7 @@
                  }
@@ -996,7 +1020,7 @@ Index: modules/util/src/main/java/org/mortbay/servlet/GzipFilter.java
          }
 Index: modules/util/src/main/java/org/mortbay/servlet/CGI.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/servlet/CGI.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/servlet/CGI.java	(revision 2179)
 +++ modules/util/src/main/java/org/mortbay/servlet/CGI.java	(working copy)
 @@ -373,7 +373,7 @@
       * @throws IOException
@@ -1009,7 +1033,7 @@ Index: modules/util/src/main/java/org/mortbay/servlet/CGI.java
         	while( (b = is.read()) != -1 && b != (int) '\n' ) {
 Index: modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java	(working copy)
 @@ -20,6 +20,7 @@
  import java.util.HashMap;
@@ -1058,7 +1082,7 @@ Index: modules/util/src/main/java/org/mortbay/servlet/UserAgentFilter.java
          return tag;
 Index: modules/util/src/main/java/org/mortbay/thread/Timeout.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/thread/Timeout.java	(revision 2149)
+--- modules/util/src/main/java/org/mortbay/thread/Timeout.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/thread/Timeout.java	(working copy)
 @@ -177,7 +177,7 @@
      /* ------------------------------------------------------------ */
@@ -1069,9 +1093,22 @@ Index: modules/util/src/main/java/org/mortbay/thread/Timeout.java
          buf.append(super.toString());
          
          Task task = _head._next;
+Index: modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(revision 2180)
++++ modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java	(working copy)
+@@ -166,7 +166,7 @@
+         synchronized(RolloverFileOutputStream.class)
+         {
+             if (__rollover==null)
+-                __rollover=new Timer(true);
++                __rollover=new Timer(RolloverFileOutputStream.class.getName(),true);
+             
+             _rollTask=new RollTask();
+ 
 Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/util/DateCache.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/DateCache.java	(working copy)
 @@ -155,7 +155,7 @@
              String ss2 = _formatString.substring( zIndex+3 );
@@ -1123,7 +1160,7 @@ Index: modules/util/src/main/java/org/mortbay/util/DateCache.java
      }
 Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2177)
+--- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(working copy)
 @@ -63,7 +63,7 @@
   * </p>
@@ -1301,7 +1338,7 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
          }
 Index: modules/util/src/main/java/org/mortbay/util/StringMap.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/StringMap.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/util/StringMap.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/StringMap.java	(working copy)
 @@ -613,15 +613,12 @@
          public Object setValue(Object o){Object old=_value;_value=o;return old;}
@@ -1324,7 +1361,7 @@ Index: modules/util/src/main/java/org/mortbay/util/StringMap.java
              if (_char==null)
 Index: modules/util/src/main/java/org/mortbay/util/StringUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/StringUtil.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/util/StringUtil.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/StringUtil.java	(working copy)
 @@ -190,22 +190,20 @@
          if (i == -1)
@@ -1407,7 +1444,7 @@ Index: modules/util/src/main/java/org/mortbay/util/StringUtil.java
              char c=name.charAt(i);
 Index: modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java	(working copy)
 @@ -26,6 +26,7 @@
   * The UTF-8 decoding is done by this class and no additional buffers or Readers are used.
@@ -1419,7 +1456,7 @@ Index: modules/util/src/main/java/org/mortbay/util/Utf8StringBuffer.java
  {
 Index: modules/util/src/main/java/org/mortbay/util/TypeUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/TypeUtil.java	(working copy)
 @@ -375,7 +375,7 @@
      /* ------------------------------------------------------------ */
@@ -1450,7 +1487,7 @@ Index: modules/util/src/main/java/org/mortbay/util/TypeUtil.java
              int bi=0xff&b[i];
 Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(revision 2152)
+--- modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java	(working copy)
 @@ -37,7 +37,7 @@
      private String _delim = __delim;
@@ -1840,7 +1877,7 @@ Index: modules/util/src/main/java/org/mortbay/util/QuotedStringTokenizer.java
      /* ------------------------------------------------------------ */
 Index: modules/util/src/main/java/org/mortbay/util/UrlEncoded.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/UrlEncoded.java	(working copy)
 @@ -116,57 +116,56 @@
      {
@@ -1936,7 +1973,7 @@ Index: modules/util/src/main/java/org/mortbay/util/UrlEncoded.java
       * @param content the string containing the encoded parameters
 Index: modules/util/src/main/java/org/mortbay/util/MultiMap.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/MultiMap.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/util/MultiMap.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/MultiMap.java	(working copy)
 @@ -105,21 +105,20 @@
                Object o=LazyList.get(l,0);
@@ -1972,6 +2009,27 @@ Index: modules/util/src/main/java/org/mortbay/util/MultiMap.java
          }
      }
      
+Index: modules/util/src/main/java/org/mortbay/util/Scanner.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/Scanner.java	(revision 2180)
++++ modules/util/src/main/java/org/mortbay/util/Scanner.java	(working copy)
+@@ -44,6 +44,7 @@
+  */
+ public class Scanner
+ {
++    private static int __scannerId=0;
+     private int _scanInterval;
+     private List _listeners = Collections.synchronizedList(new ArrayList());
+     private Map _prevScan = Collections.EMPTY_MAP;
+@@ -239,7 +240,7 @@
+ 
+     public Timer newTimer ()
+     {
+-        return new Timer(true);
++        return new Timer("Scanner-"+__scannerId++, true);
+     }
+     
+     public void schedule (Timer timer, TimerTask task)
 Index: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
 ===================================================================
 --- modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java	(revision 0)
@@ -2283,12 +2341,16 @@ Index: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
 
 Property changes on: modules/util/src/main/java/org/mortbay/util/ConcurrentMultiMap.java
 ___________________________________________________________________
+Name: svn:mime-type
+   + text/plain
+Name: svn:keywords
+   + Date Author Id Revision HeadURL
 Name: svn:eol-style
    + native
 
 Index: modules/util/src/main/java/org/mortbay/util/URIUtil.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/URIUtil.java	(revision 2147)
+--- modules/util/src/main/java/org/mortbay/util/URIUtil.java	(revision 2178)
 +++ modules/util/src/main/java/org/mortbay/util/URIUtil.java	(working copy)
 @@ -56,17 +56,17 @@
          if (path==null || path.length()==0)
@@ -2387,7 +2449,7 @@ Index: modules/util/src/main/java/org/mortbay/util/URIUtil.java
          int skip=0;
 Index: modules/util/pom.xml
 ===================================================================
---- modules/util/pom.xml	(revision 2147)
+--- modules/util/pom.xml	(revision 2178)
 +++ modules/util/pom.xml	(working copy)
 @@ -37,6 +37,13 @@
      </testResources>
@@ -2459,7 +2521,7 @@ Index: contrib/cometd/demo/src/main/webapp/examples/dojo/dojo/dojo.js.uncompress
  		//		Each javascript source file must have (exactly) one dojo.provide()
 Index: contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java
 ===================================================================
---- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java	(revision 534)
+--- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java	(revision 542)
 +++ contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java	(working copy)
 @@ -19,7 +19,7 @@
      String _json;
@@ -2472,7 +2534,7 @@ Index: contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Message.java
      }
 Index: contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java
 ===================================================================
---- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java	(revision 534)
+--- contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java	(revision 542)
 +++ contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/filter/JSONDataFilter.java	(working copy)
 @@ -116,7 +116,7 @@
  
