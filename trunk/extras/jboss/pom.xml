@@ -99,58 +99,53 @@
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss</artifactId>
-      <version>4.0.5</version>
+      <version>${jboss.version}</version>
       <systemPath>${jboss.home}/server/all/lib/jboss.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-common</artifactId>
-      <version>4.0.5</version>
+      <version>${jboss.version}</version>
       <systemPath>${jboss.home}/lib/jboss-common.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-system</artifactId>
-      <version>4.0.5</version>
+      <version>${jboss.version}</version>
       <systemPath>${jboss.home}/lib/jboss-system.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-jmx</artifactId>
-      <version>4.0.5</version>
+      <version>${jboss.version}</version>
       <systemPath>${jboss.home}/lib/jboss-jmx.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jbosssx</artifactId>
-      <version>4.0.5</version>
+      <version>${jboss.version}</version>
       <systemPath>${jboss.home}/server/all/lib/jbosssx.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-jsr77</artifactId>
-      <version>4.0.5</version>
+      <version>${jboss.version}</version>
       <systemPath>${jboss.home}/server/all/lib/jboss-jsr77.jar</systemPath>
       <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-j2ee</artifactId>
-      <version>4.0.5</version>
+      <version>${jboss.version}</version>
       <systemPath>${jboss.home}/server/all/lib/jboss-j2ee.jar</systemPath>
       <scope>system</scope>
     </dependency>
   </dependencies>
-  <properties>
-    <!-- jboss.home must be provided on the command line -->
-    <jboss.version>4.0.5.GA</jboss.version>
-    <jboss.server>default</jboss.server>
-  </properties>
   <profiles>
     <profile>
       <id>jdk1.4</id>
