@@ -40,7 +40,7 @@
 </TR>
 <TR>
 	<TH align=right>Query string:</TH>
-	<TD><%= request.getQueryString() %></TD>
+	<TD><% if(request.getQueryString()!=null) out.write(request.getQueryString().replaceAll("<", "&lt;").replaceAll(">","&gt;")); %></TD>
 </TR>
 <TR>
 	<TH align=right>Content length:</TH>
@@ -122,13 +122,13 @@
 			String vals[] = request.getParameterValues(k);
 %>
 <TR valign=top>
-	<TD><%= k %></TD>
-	<TD><%= val %></TD>
+	<TD><%= k.replaceAll("<", "&lt;").replaceAll(">","&gt;") %></TD>
+	<TD><%= val.replaceAll("<", "&lt;").replaceAll(">","&gt;") %></TD>
 	<TD><%
 			for(int i = 0; i < vals.length; i++) {
 				if(i > 0)
 					out.print("<BR>");
-				out.print(vals[i]);
+				out.print(vals[i].replaceAll("<", "&lt;").replaceAll(">","&gt;"));
 			}
 		%></TD>
 </TR>
@@ -157,8 +157,8 @@
 			Object val = request.getAttribute(k);
 %>
 <TR valign=top>
-	<TD><%= k %></TD>
-	<TD><%= val %></TD>
+	<TD><%= k.replaceAll("<", "&lt;").replaceAll(">","&gt;") %></TD>
+	<TD><%= val.toString().replaceAll("<", "&lt;").replaceAll(">","&gt;") %></TD>
 </TR>
 <%
 		}
