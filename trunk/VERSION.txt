@@ -20,6 +20,7 @@ jetty-SNAPSHOT
  + JETTY-445 removed test code
  + JETTY-448 added setReuseAddress on AbstractConnector
  + JETTY-450 Bad request for response sent to server
+ + JETTY-452 CERT VU#237888 Dump Servlet - prevent cross site scripting
  + JETTY-453 updated Wadi to 2.0-M7
  + JETTY-454 handle exceptions with themselves as root cause
 

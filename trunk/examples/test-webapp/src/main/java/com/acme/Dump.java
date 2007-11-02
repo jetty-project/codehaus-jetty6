@@ -15,14 +15,12 @@
 package com.acme;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Locale;
 
@@ -37,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
@@ -63,6 +62,12 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+        if(request.getPathInfo().toLowerCase().indexOf("script")!=-1)
+        {
+            response.sendRedirect(getServletContext().getContextPath() + "/dump/info");
+            return;
+        }
+            
         request.setCharacterEncoding("UTF-8");
         
         if (request.getParameter("empty")!=null)
@@ -301,34 +306,34 @@ public class Dump extends HttpServlet
             pout.write("<table width=\"95%\">");
             pout.write("<tr>\n");
             pout.write("<th align=\"right\">getMethod:&nbsp;</th>");
-            pout.write("<td>" + request.getMethod()+"</td>");
+            pout.write("<td>" + notag(request.getMethod())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getContentLength:&nbsp;</th>");
             pout.write("<td>"+Integer.toString(request.getContentLength())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getContentType:&nbsp;</th>");
-            pout.write("<td>"+request.getContentType()+"</td>");
+            pout.write("<td>"+notag(request.getContentType())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getRequestURI:&nbsp;</th>");
-            pout.write("<td>"+request.getRequestURI()+"</td>");
+            pout.write("<td>"+notag(request.getRequestURI())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getRequestURL:&nbsp;</th>");
-            pout.write("<td>"+request.getRequestURL()+"</td>");
+            pout.write("<td>"+notag(request.getRequestURL().toString())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getContextPath:&nbsp;</th>");
             pout.write("<td>"+request.getContextPath()+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getServletPath:&nbsp;</th>");
-            pout.write("<td>"+request.getServletPath()+"</td>");
+            pout.write("<td>"+notag(request.getServletPath())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getPathInfo:&nbsp;</th>");
-            pout.write("<td>"+request.getPathInfo()+"</td>");
+            pout.write("<td>"+notag(request.getPathInfo())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getPathTranslated:&nbsp;</th>");
-            pout.write("<td>"+request.getPathTranslated()+"</td>");
+            pout.write("<td>"+notag(request.getPathTranslated())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getQueryString:&nbsp;</th>");
-            pout.write("<td>"+request.getQueryString()+"</td>");
+            pout.write("<td>"+notag(request.getQueryString())+"</td>");
 
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getProtocol:&nbsp;</th>");
@@ -338,7 +343,7 @@ public class Dump extends HttpServlet
             pout.write("<td>"+request.getScheme()+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getServerName:&nbsp;</th>");
-            pout.write("<td>"+request.getServerName()+"</td>");
+            pout.write("<td>"+notag(request.getServerName())+"</td>");
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getServerPort:&nbsp;</th>");
             pout.write("<td>"+Integer.toString(request.getServerPort())+"</td>");
@@ -399,8 +404,8 @@ public class Dump extends HttpServlet
                 {
                     String hv= (String)h2.nextElement();
                     pout.write("</tr><tr>\n");
-                    pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
-                    pout.write("<td>"+hv+"</td>");
+                    pout.write("<th align=\"right\">"+notag(name)+":&nbsp;</th>");
+                    pout.write("<td>"+notag(hv)+"</td>");
                 }
             }
 
@@ -411,13 +416,13 @@ public class Dump extends HttpServlet
             {
                 name= (String)h.nextElement();
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
-                pout.write("<td>"+request.getParameter(name)+"</td>");
+                pout.write("<th align=\"right\">"+notag(name)+":&nbsp;</th>");
+                pout.write("<td>"+notag(request.getParameter(name))+"</td>");
                 String[] values= request.getParameterValues(name);
                 if (values == null)
                 {
                     pout.write("</tr><tr>\n");
-                    pout.write("<th align=\"right\">"+name+" Values:&nbsp;</th>");
+                    pout.write("<th align=\"right\">"+notag(name)+" Values:&nbsp;</th>");
                     pout.write("<td>"+"NULL!"+"</td>");
                 }
                 else if (values.length > 1)
@@ -425,8 +430,8 @@ public class Dump extends HttpServlet
                     for (int i= 0; i < values.length; i++)
                     {
                         pout.write("</tr><tr>\n");
-                        pout.write("<th align=\"right\">"+name+"["+i+"]:&nbsp;</th>");
-                        pout.write("<td>"+values[i]+"</td>");
+                        pout.write("<th align=\"right\">"+notag(name)+"["+i+"]:&nbsp;</th>");
+                        pout.write("<td>"+notag(values[i])+"</td>");
                     }
                 }
             }
@@ -439,8 +444,8 @@ public class Dump extends HttpServlet
                 Cookie cookie = cookies[i];
 
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">"+cookie.getName()+":&nbsp;</th>");
-                pout.write("<td>"+cookie.getValue()+"</td>");
+                pout.write("<th align=\"right\">"+notag(cookie.getName())+":&nbsp;</th>");
+                pout.write("<td>"+notag(cookie.getValue())+"</td>");
             }
             
             String content_type=request.getContentType();
@@ -458,7 +463,7 @@ public class Dump extends HttpServlet
                     Reader in=request.getReader();
                     
                     while((len=in.read(content))>=0)
-                        pout.write(content,0,len);
+                        pout.write(notag(new String(content,0,len)));
                 }
                 catch(IOException e)
                 {
@@ -719,4 +724,13 @@ public class Dump extends HttpServlet
         }
     }
 
+    private String notag(String s)
+    {
+        if (s==null)
+            return "null";
+        s=StringUtil.replace(s,"&","&amp;");
+        s=StringUtil.replace(s,"<","&lt;");
+        s=StringUtil.replace(s,">","&gt;");
+        return s;
+    }
 }
