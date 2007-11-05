@@ -3,6 +3,7 @@ package org.mortbay.jetty.security;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -569,13 +570,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
     protected SSLContext createSSLContext() throws Exception
     {
-        if (_password==null)
-            _password=new Password("");
-        if (_keyPassword==null)
-            _keyPassword=_password;
-        if (_trustPassword==null)
-            _trustPassword=_password;
-
         if (_truststore==null)
         {
             _truststore=_keystore;
@@ -583,30 +577,27 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         }
 
         KeyManager[] keyManagers=null;
+        InputStream keystoreInputStream = null;
         if (_keystore!=null)
-        {
-            KeyStore keyStore=KeyStore.getInstance(_keystoreType);
-            if (_password==null)
-                throw new SSLException("_password is not set");
-            keyStore.load(Resource.newResource(_keystore).getInputStream(),_password.toString().toCharArray());
+            keystoreInputStream=Resource.newResource(_keystore).getInputStream();
+        KeyStore keyStore=KeyStore.getInstance(_keystoreType);
+        keyStore.load(keystoreInputStream,_password==null?null:_password.toString().toCharArray());
 
-            KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);
-            if (_keyPassword==null)
-                throw new SSLException("_keypassword is not set");
-            keyManagerFactory.init(keyStore,_keyPassword.toString().toCharArray());
-            keyManagers=keyManagerFactory.getKeyManagers();
-        }
+        KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);
+        keyManagerFactory.init(keyStore,_keyPassword==null?null:_keyPassword.toString().toCharArray());
+        keyManagers=keyManagerFactory.getKeyManagers();
+
 
         TrustManager[] trustManagers=null;
+        InputStream truststoreInputStream = null;
         if (_truststore!=null)
-        {
-            KeyStore trustStore=KeyStore.getInstance(_truststoreType);
-            trustStore.load(Resource.newResource(_truststore).getInputStream(),_trustPassword.toString().toCharArray());
+            truststoreInputStream = Resource.newResource(_truststore).getInputStream();
+        KeyStore trustStore=KeyStore.getInstance(_truststoreType);
+        trustStore.load(truststoreInputStream,_trustPassword==null?null:_trustPassword.toString().toCharArray());
 
-            TrustManagerFactory trustManagerFactory=TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
-            trustManagerFactory.init(trustStore);
-            trustManagers=trustManagerFactory.getTrustManagers();
-        }
+        TrustManagerFactory trustManagerFactory=TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
+        trustManagerFactory.init(trustStore);
+        trustManagers=trustManagerFactory.getTrustManagers();
 
         SecureRandom secureRandom=_secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
         SSLContext context=_provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol,_provider);
