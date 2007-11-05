@@ -25,6 +25,7 @@ jetty-6.1.6rc1 - 5 November 2007
  + JETTY-452 CERT VU#237888 Dump Servlet - prevent cross site scripting
  + JETTY-453 updated Wadi to 2.0-M7
  + JETTY-454 handle exceptions with themselves as root cause
+ + JETTY-456 allow null keystore for osX
 
 jetty-6.1.6rc0 - 3 October 2007
  + Added jetty.lib system property to start.config
