@@ -271,7 +271,7 @@
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
 
-    <module>extras/setuid</module>
+    <!--module>extras/setuid</module-->
   </modules>
 
   <reporting>
