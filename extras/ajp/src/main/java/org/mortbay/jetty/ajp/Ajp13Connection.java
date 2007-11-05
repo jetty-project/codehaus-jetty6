@@ -14,7 +14,14 @@
 
 package org.mortbay.jetty.ajp;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.servlet.ServletInputStream;
 
@@ -100,7 +107,27 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedSslCert(Buffer sslCert) throws IOException
         {
-            _request.setAttribute("javax.servlet.request.X509Certificate", sslCert.toString());
+            try 
+            {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                ByteArrayInputStream bis = new ByteArrayInputStream(sslCert.toString().getBytes());
+
+                Collection certCollection = cf.generateCertificates(bis);
+                X509Certificate[] certificates = new X509Certificate[certCollection.size()];
+
+                int i=0;
+                Iterator iter=certCollection.iterator();
+                while(iter.hasNext())
+                    certificates[i++] = (X509Certificate)iter.next();
+
+                _request.setAttribute("javax.servlet.request.X509Certificate", certificates);
+            } 
+            catch (Exception e) 
+            {
+                org.mortbay.log.Log.warn(e.toString());
+                org.mortbay.log.Log.ignore(e);
+                _request.setAttribute("javax.servlet.request.X509Certificate", sslCert);
+            }
         }
 
         public void parsedSslCipher(Buffer sslCipher) throws IOException
