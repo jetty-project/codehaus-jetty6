@@ -126,7 +126,8 @@ public class Ajp13Connection extends HttpConnection
             {
                 org.mortbay.log.Log.warn(e.toString());
                 org.mortbay.log.Log.ignore(e);
-                _request.setAttribute("javax.servlet.request.X509Certificate", sslCert);
+                if (sslCert!=null)
+                    _request.setAttribute("javax.servlet.request.X509Certificate", sslCert.toString());
             }
         }
 
