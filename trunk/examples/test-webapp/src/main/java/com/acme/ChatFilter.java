@@ -74,7 +74,7 @@ public class ChatFilter extends AjaxFilter
      */
     public void handle(String method, String message, HttpServletRequest request, AjaxResponse response)
     {
-        HttpSession session = request.getSession(true);
+        request.getSession(true);
         
         String roomName=request.getParameter("room");
         if (roomName==null)
@@ -178,7 +178,7 @@ public class ChatFilter extends AjaxFilter
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
-        long timeoutMS = 10000L; 
+        long timeoutMS = 60000L; 
         if (request.getParameter("timeout")!=null)
             timeoutMS=Long.parseLong(request.getParameter("timeout"));
         if (session.isNew())
