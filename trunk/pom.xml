@@ -282,7 +282,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
           <configuration>
             <aggregate>true</aggregate>
-            <debug>true</debug>
+            <debug>false</debug>
             <stylesheetfile>${basedir}/project-website/project-site/src/resources/javadoc.css</stylesheetfile>
             <links>
               <link>http://java.sun.com/javaee/5/docs/api</link>
@@ -296,23 +296,6 @@
         <configuration>
           <aggregate>true</aggregate>
        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>project-team</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clover-plugin</artifactId>
-        <configuration>
-        </configuration>
       </plugin>
     </plugins>
   </reporting>
