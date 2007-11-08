@@ -1,6 +1,7 @@
 
 
 jetty-SNAPSHOT
+ + rudimentary debian packaging
  + JETTY-455 Optional cometd id
  + JETTY-461 fixed cometd unknown channel
 
