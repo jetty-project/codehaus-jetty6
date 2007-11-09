@@ -123,7 +123,6 @@ shift
 ARGS="$*"
 CONFIGS=""
 NO_START=0
-VERBOSE=no
 TMP=/tmp
 
 ##################################################
@@ -201,7 +200,6 @@ if [ "$JETTY_HOME" = "" ] ; then
          if [ -d $L/$N ] && [ -f "$L/${N}/${JETTY_INSTALL_TRACE_FILE}" ] ; 
          then 
             JETTY_HOME="$L/$N"
-            echo "Defaulting JETTY_HOME to $JETTY_HOME"
          fi
      done
      [ ! -z "$JETTY_HOME" ] && break
@@ -475,12 +473,13 @@ RUN_CMD="$JAVA $RUN_ARGS"
 ##################################################
 case "$ACTION" in
   start)
-        if [ "$NO_START" != "0" -a "$1" != "stop" ]; then 
-	  [ "$VERBOSE" != "no" ] && echo "Not starting jetty - edit /etc/default/jetty and change NO_START to be 0 (or comment it out).";
+        echo -n "Starting Jetty: "
+
+        if [ "$NO_START" = "1" ]; then 
+	  echo "Not starting jetty - NO_START=1 in /etc/default/jetty6";
           exit 0;
 	fi
 
-        echo -n "Starting Jetty: "
 
 	if which start-stop-daemon > /dev/null 
 	then
