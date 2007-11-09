@@ -73,6 +73,9 @@
 # JETTY_ARGS
 #   The default arguments to pass to jetty.
 #
+# JETTY_USER
+#   if set, then used as a username to run the server as
+#
 
 usage()
 {
@@ -82,19 +85,9 @@ usage()
 
 [ $# -gt 0 ] || usage
 
-TMPJ=/tmp/j$$
 
 ##################################################
-# Get the action & configs
-##################################################
-
-ACTION=$1
-shift
-ARGS="$*"
-CONFIGS=""
-
-##################################################
-# Find directory function
+# Some utility functions
 ##################################################
 findDirectory()
 {
@@ -107,13 +100,41 @@ findDirectory()
     done 
 }
 
+running()
+{
+    [ -f $1 ] || return 1
+    PID=$(cat $1)
+    ps -p $PID >/dev/null 2>/dev/null || return 1
+    return 0
+}
+
+
+
+
+
+
+
+##################################################
+# Get the action & configs
+##################################################
+
+ACTION=$1
+shift
+ARGS="$*"
+CONFIGS=""
+NO_START=0
+VERBOSE=no
+TMP=/tmp
 
 ##################################################
 # See if there's a default configuration file
 ##################################################
-if [ -f /etc/default/jetty ] ; then 
+if [ -f /etc/default/jetty6 ] ; then 
+  . /etc/default/jetty6
+elif [ -f /etc/default/jetty ] ; then 
   . /etc/default/jetty
 fi
+
 
 ##################################################
 # See if there's a user-specific configuration file
@@ -127,6 +148,7 @@ fi
 # Jetty's hallmark
 ##################################################
 JETTY_INSTALL_TRACE_FILE="etc/jetty.xml"
+TMPJ=$TMP/j$$
 
 
 ##################################################
@@ -343,6 +365,7 @@ then
         /usr/local/java \
         /usr/local/jdk \
         /usr/local/jre \
+	/usr/lib/jvm \
         /opt/java \
         /opt/jdk \
         /opt/jre \
@@ -419,16 +442,19 @@ esac
 #####################################################
 # Add jetty properties to Java VM options.
 #####################################################
-JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.home=$JETTY_HOME "
+JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.home=$JETTY_HOME -Djava.io.tmpdir=$TMP"
 
 [ -f $JETTY_HOME/etc/start.config ] && JAVA_OPTIONS="-DSTART=$JETTY_HOME/etc/start.config $JAVA_OPTIONS"
 
 #####################################################
 # This is how the Jetty server will be started
 #####################################################
+
 JETTY_START=$JETTY_HOME/start.jar
 [ ! -f $JETTY_START ] && JETTY_START=$JETTY_HOME/lib/start.jar
-RUN_CMD="$JAVA $JAVA_OPTIONS -jar $JETTY_START $JETTY_ARGS $CONFIGS"
+
+RUN_ARGS="$JAVA_OPTIONS -jar $JETTY_START $JETTY_ARGS $CONFIGS"
+RUN_CMD="$JAVA $RUN_ARGS"
 
 #####################################################
 # Comment these out after you're happy with what 
@@ -449,30 +475,78 @@ RUN_CMD="$JAVA $JAVA_OPTIONS -jar $JETTY_START $JETTY_ARGS $CONFIGS"
 ##################################################
 case "$ACTION" in
   start)
-        echo "Starting Jetty: "
+        if [ "$NO_START" != "0" -a "$1" != "stop" ]; then 
+	  [ "$VERBOSE" != "no" ] && echo "Not starting jetty - edit /etc/default/jetty and change NO_START to be 0 (or comment it out).";
+          exit 0;
+	fi
 
-        if [ -f $JETTY_PID ]
-        then
+        echo -n "Starting Jetty: "
+
+	if which start-stop-daemon > /dev/null 
+	then
+          [ x$JETTY_USER = x ] && JETTY_USER=$(whoami)
+	  [ $UID = 0 ] && CH_USER="-c $JETTY_USER"
+	  if start-stop-daemon -S -p$JETTY_PID $CH_USER -d $JETTY_HOME -b -m -a $JAVA -- $RUN_ARGS 
+	  then
+	      sleep 1
+	      if running $JETTY_PID
+	      then
+                  echo OK
+              else
+                  echo FAILED
+              fi
+	  fi
+
+	else
+          if [ x$JETTY_USER != x ] 
+	  then
+            echo "Need start-stop-daemon to change user"
+            exit 1
+          fi
+
+          if [ -f $JETTY_PID ]
+          then
             echo "Already Running!!"
             exit 1
+          fi
+
+          $RUN_CMD &
+	  PID=$!
+	  disown $PID
+          echo $PID > $JETTY_PID
+          echo "STARTED Jetty `date`" 
         fi
 
-        echo "STARTED Jetty `date`" 
-
-        $RUN_CMD &
-	PID=$!
-	disown $PID
-        echo $PID > $JETTY_PID
         ;;
 
   stop)
-        PID=`cat $JETTY_PID 2>/dev/null`
-        echo "Shutting down Jetty: $PID"
-        kill $PID 2>/dev/null
-        sleep 5
-        kill -9 $PID 2>/dev/null
-        rm -f $JETTY_PID
-        echo "STOPPED `date`" 
+        echo -n "Stopping Jetty: "
+	if which start-stop-daemon > /dev/null ; then
+	  start-stop-daemon -K -p $JETTY_PID -d $JETTY_HOME -a $JAVA -s HUP 
+	  sleep 1
+	  if running $JETTY_PID
+	  then
+	      sleep 3
+	      if running $JETTY_PID
+	      then
+		  sleep 30
+	          if running $JETTY_PID
+	          then
+	             start-stop-daemon -K -p $JETTY_PID -d $JETTY_HOME -a $JAVA -s KILL
+		  fi
+              fi
+	  fi
+
+	  rm -f $JETTY_PID
+          echo OK
+	else
+	  PID=`cat $JETTY_PID 2>/dev/null`
+	  kill $PID 2>/dev/null
+	  sleep 5
+	  kill -9 $PID 2>/dev/null
+	  rm -f $JETTY_PID
+          echo OK
+	fi
         ;;
 
   restart)
