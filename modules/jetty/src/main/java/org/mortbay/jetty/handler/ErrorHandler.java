@@ -91,8 +91,8 @@ public class ErrorHandler extends AbstractHandler
         writer.write("<title>Error ");
         writer.write(Integer.toString(code));
         writer.write(' ');
-        if (message==null)
-        writer.write(message);
+        if (message!=null)
+            writer.write(message);
         writer.write("</title>\n");    
     }
 
@@ -111,10 +111,6 @@ public class ErrorHandler extends AbstractHandler
         writeErrorPageMessage(request,writer,code,message,uri);
         if (showStacks)
             writeErrorPageStacks(request,writer);
-            
-        {
-        }
-
         writer.write("<p><i><small><a href=\"http://jetty.mortbay.org/\">Powered by Jetty://</a></small></i></p>");
         for (int i= 0; i < 20; i++)
             writer.write("<br/>                                                \n");
