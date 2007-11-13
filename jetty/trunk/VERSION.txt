@@ -4,6 +4,7 @@ jetty-SNAPSHOT
  + rudimentary debian packaging
  + JETTY-455 Optional cometd id
  + JETTY-461 fixed cometd unknown channel
+ + JETTY-465 System.exit() in constructor exception for MultiPartOutputStream
 
 jetty-6.1.6rc1 - 5 November 2007
  + Upgrade jsp 2.1 to SJSAS-9_1-B58G-FCS-08_Sept_2007
