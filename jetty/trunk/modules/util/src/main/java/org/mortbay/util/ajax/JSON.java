@@ -76,22 +76,31 @@ public class JSON
     public static String toString(Object object)
     {
         StringBuffer buffer = new StringBuffer();
-        append(buffer,object);
-        return buffer.toString();
+        synchronized(buffer)
+        {
+            append(buffer,object);
+            return buffer.toString();
+        }
     }
     
     public static String toString(Map object)
     {
         StringBuffer buffer = new StringBuffer();
-        appendMap(buffer,object);
-        return buffer.toString();
+        synchronized(buffer)
+        {
+            appendMap(buffer,object);
+            return buffer.toString();
+        }
     }
     
     public static String toString(Object[] array)
     {
         StringBuffer buffer = new StringBuffer();
-        appendArray(buffer,array);
-        return buffer.toString();
+        synchronized(buffer)
+        {
+            appendArray(buffer,array);
+            return buffer.toString();
+        }
     }
     
     /**
@@ -541,55 +550,58 @@ public class JSON
         
         boolean escape=false;
         StringBuffer b = new StringBuffer();
-        while(source.hasNext())
+        synchronized(b)
         {
-            char c=source.next();
+            while(source.hasNext())
+            {
+                char c=source.next();
 
-            if (escape)
-            {
-                escape=false;
-                switch (c)
+                if (escape)
                 {
-                    case 'n':
-                        b.append('\n');
-                        break;
-                    case 'r':
-                        b.append('\r');
-                        break;
-                    case 't':
-                        b.append('\t');
-                        break;
-                    case 'f':
-                        b.append('\f');
-                        break;
-                    case 'b':
-                        b.append('\b');
-                        break;
-                    case 'u':
-                        b.append((char)(
-                                (TypeUtil.convertHexDigit((byte)source.next())<<24)+
-                                (TypeUtil.convertHexDigit((byte)source.next())<<16)+
-                                (TypeUtil.convertHexDigit((byte)source.next())<<8)+
-                                (TypeUtil.convertHexDigit((byte)source.next()))
-                                ) 
-                        );
-                        break;
-                    default:
-                        b.append(c);
+                    escape=false;
+                    switch (c)
+                    {
+                        case 'n':
+                            b.append('\n');
+                            break;
+                        case 'r':
+                            b.append('\r');
+                            break;
+                        case 't':
+                            b.append('\t');
+                            break;
+                        case 'f':
+                            b.append('\f');
+                            break;
+                        case 'b':
+                            b.append('\b');
+                            break;
+                        case 'u':
+                            b.append((char)(
+                                    (TypeUtil.convertHexDigit((byte)source.next())<<24)+
+                                    (TypeUtil.convertHexDigit((byte)source.next())<<16)+
+                                    (TypeUtil.convertHexDigit((byte)source.next())<<8)+
+                                    (TypeUtil.convertHexDigit((byte)source.next()))
+                            ) 
+                            );
+                            break;
+                        default:
+                            b.append(c);
+                    }
                 }
+                else if (c=='\\')
+                {
+                    escape=true;
+                    continue;
+                }
+                else if (c=='\"')
+                    break;
+                else
+                    b.append(c);
             }
-            else if (c=='\\')
-            {
-                escape=true;
-                continue;
-            }
-            else if (c=='\"')
-                break;
-            else
-                b.append(c);
+
+            return b.toString();
         }
-            
-        return b.toString();
     }
     
     private static Number parseNumber(Source source)
@@ -642,36 +654,39 @@ public class JSON
         
         if (buffer==null)
             return new Long(number);
-    
-        doubleLoop:
-        while(source.hasNext())
+
+        synchronized(buffer)
         {
-            char c=source.peek();
-            switch(c)
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                case '-':
-                case '.':
-                case 'e':
-                case 'E':
-                    buffer.append(c);
-                    source.next();
-                    break;
-                    
-                default:
-                    break doubleLoop;
-            }
-        }
+            doubleLoop:
+                while(source.hasNext())
+                {
+                    char c=source.peek();
+                    switch(c)
+                    {
+                        case '0':
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                        case '-':
+                        case '.':
+                        case 'e':
+                        case 'E':
+                            buffer.append(c);
+                            source.next();
+                            break;
+
+                        default:
+                            break doubleLoop;
+                    }
+                }
         return new Double(buffer.toString());
+        }
     }
     
     private static void seekTo(char seek, Source source)
