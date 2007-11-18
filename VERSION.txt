@@ -4,9 +4,11 @@ jetty-6.1.6 - 18 November 2007
  + rudimentary debian packaging
  + updated grizzly connector to 1.6.1
  + JETTY-455 Optional cometd id
+ + JETTY-459 Unable to deploy from Eclipse into the root context
  + JETTY-461 fixed cometd unknown channel
  + JETTY-464 typo in ErrorHandler
  + JETTY-465 System.exit() in constructor exception for MultiPartOutputStream
+ 
 
 jetty-6.1.6rc1 - 5 November 2007
  + Upgrade jsp 2.1 to SJSAS-9_1-B58G-FCS-08_Sept_2007
