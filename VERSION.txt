@@ -2,6 +2,7 @@
 
 jetty-6.1.6 - 18 November 2007
  + rudimentary debian packaging
+ + updated grizzly connector to 1.6.1
  + JETTY-455 Optional cometd id
  + JETTY-461 fixed cometd unknown channel
  + JETTY-464 typo in ErrorHandler
