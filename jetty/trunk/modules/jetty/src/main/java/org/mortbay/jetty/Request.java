@@ -194,11 +194,6 @@ public class Request implements HttpServletRequest
         _savedNewSessions=null;
         if (_continuation!=null && _continuation.isPending())
             _continuation.reset();
-        
-        /*
-        _reader=null;
-        _readerEncoding=null;
-        */
     }
 
     /* ------------------------------------------------------------ */
