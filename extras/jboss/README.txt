@@ -4,7 +4,7 @@ For full information to build jetty jboss, see http://docs.codehaus.org/display/
 in short:
 
 to build:
-mvn -Djboss.version=4.0.x -Djboss.home=/path/to/jboss-4.0.x clean install
+mvn -Djboss.version=4.x.y -Djboss.home=/path/to/jboss-4.x.y clean install
 
 to install:
    1. delete $JBOSS-HOME/server/default/deploy/jbossweb-tomcat55.sar (or from whichever deploy directory you
