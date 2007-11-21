@@ -1,4 +1,7 @@
 
+jetty-6.1-SNAPSHOT
+ + grizzly fixed for posts
+ + Delay 100 continues until getInputStream
 
 jetty-6.1.6 - 18 November 2007
  + rudimentary debian packaging

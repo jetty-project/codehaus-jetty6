@@ -384,9 +384,11 @@ public class RFC2616Test extends TestCase
                                             "\n",true);
             offset=checkContains(response,offset,"HTTP/1.1 100 ","8.2.3 expect 100")+1;
             checkNotContained(response,offset,"HTTP/1.1 200","8.2.3 expect 100");
+            /* can't test this with localconnector.
             response=connector.getResponses("654321\015\012");
             offset=checkContains(response,offset,"HTTP/1.1 200","8.2.3 expect 100")+1;
             offset=checkContains(response,offset,"654321","8.2.3 expect 100")+1;
+            */
 
         }
         catch (Exception e)

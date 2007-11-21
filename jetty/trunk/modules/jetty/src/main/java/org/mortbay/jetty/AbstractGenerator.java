@@ -316,7 +316,8 @@ public abstract class AbstractGenerator implements Generator
      */
     public void setVersion(int version)
     {
-        if (_state != STATE_HEADER) throw new IllegalStateException("STATE!=START");
+        if (_state != STATE_HEADER) 
+            throw new IllegalStateException("STATE!=START "+_state);
         _version = version;
         if (_version==HttpVersions.HTTP_0_9_ORDINAL && _method!=null)
             _noContent=true;
