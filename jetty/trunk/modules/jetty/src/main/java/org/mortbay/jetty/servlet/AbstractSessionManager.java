@@ -175,8 +175,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         tmp=_context.getInitParameter(SessionManager.__SessionURLProperty);
         if (tmp!=null)
         {
-            _sessionURL=tmp;
-            _sessionURLPrefix=";"+_sessionURL+"=";
+            _sessionURL=(tmp==null||"none".equals(tmp))?null:tmp;
+            _sessionURLPrefix=(tmp==null||"none".equals(tmp))?null:(";"+_sessionURL+"=");
         }
 
         // set up the max session cookie age if it isn't already
@@ -524,9 +524,13 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    public void setSessionURL(String url)
+    /** Set the session ID URL parameter name
+     * @param param The parameter name for session id URL rewriting (null or "none" for no rewriting).
+     */
+    public void setSessionURL(String param)
     {
-        _sessionURL=url;
+        _sessionURL=(param==null||"none".equals(param))?null:param;
+        _sessionURLPrefix=(param==null||"none".equals(param))?null:(";"+_sessionURL+"=");
     }
     /* ------------------------------------------------------------ */
     /**
