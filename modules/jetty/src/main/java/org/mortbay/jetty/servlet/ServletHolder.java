@@ -152,7 +152,7 @@ public class ServletHolder extends Holder
     /* ------------------------------------------------------------ */
     public int hashCode()
     {
-        return _name.hashCode();
+        return _name==null?System.identityHashCode(this):_name.hashCode();
     }
 
     /* ------------------------------------------------------------ */

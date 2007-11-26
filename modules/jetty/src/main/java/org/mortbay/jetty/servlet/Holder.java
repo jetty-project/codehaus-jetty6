@@ -53,7 +53,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
         if (held!=null)
         {
             _className=held.getName();
-            _name=held.getName();
+            _name=held.getName()+"-"+this.hashCode();
         }
     }
 
