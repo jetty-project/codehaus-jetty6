@@ -1,7 +1,9 @@
 
 jetty-6.1-SNAPSHOT
+ + Added BayeuxService
  + grizzly fixed for posts
  + Delay 100 continues until getInputStream
+ + JETTY-467 allow URL rewriting to be disabled.
 
 jetty-6.1.6 - 18 November 2007
  + rudimentary debian packaging
