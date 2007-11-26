@@ -652,7 +652,7 @@ public class ServletHandler extends AbstractHandler
     public ServletHolder addServletWithMapping (String className,String pathSpec)
     {
         ServletHolder holder = newServletHolder(null);
-        holder.setName(className);
+        holder.setName(className+"-"+holder.hashCode());
         holder.setClassName(className);
         
         addServletWithMapping(holder,pathSpec);
@@ -784,7 +784,7 @@ public class ServletHandler extends AbstractHandler
     public FilterHolder addFilterWithMapping (String className,String pathSpec,int dispatches)
     {
         FilterHolder holder = newFilterHolder(null);
-        holder.setName(className);
+        holder.setName(className+"-"+holder.hashCode());
         holder.setClassName(className);
         
         addFilterWithMapping(holder,pathSpec,dispatches);
