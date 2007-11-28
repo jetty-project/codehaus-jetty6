@@ -145,6 +145,11 @@
           <artifactId>jetty-annotations</artifactId>
           <version>${project.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>start</artifactId>
+          <version>${project.version}</version>
+        </dependency>        
       </dependencies>
     </profile>
   </profiles>
