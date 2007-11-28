@@ -148,7 +148,6 @@ public class HashSessionManager extends AbstractSessionManager
             period=0;
         _savePeriodMs=period;
         
-        System.err.println("Save Period="+_savePeriodMs);
         if (_timer!=null)
         {
             synchronized (this)
@@ -171,7 +170,6 @@ public class HashSessionManager extends AbstractSessionManager
                             }
                         }   
                     };
-                    System.err.println("Scheduling save task");
                     _timer.schedule(_saveTask,_savePeriodMs,_savePeriodMs);
                 }
             }
