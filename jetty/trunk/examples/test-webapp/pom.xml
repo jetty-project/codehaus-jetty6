@@ -81,11 +81,12 @@
           <webAppConfig>
             <contextPath>/test</contextPath>
             <tempDirectory>${project.build.directory}/work</tempDirectory>
-            <!-- sessionHandler implementation="org.mortbay.jetty.servlet.SessionHandler">
+            <sessionHandler implementation="org.mortbay.jetty.servlet.SessionHandler">
               <sessionManager implementation="org.mortbay.jetty.servlet.HashSessionManager">
                 <storeDirectory>${basedir}/target/sessions</storeDirectory>
+                <!-- savePeriod>5</savePeriod -->
               </sessionManager>
-            </sessionHandler -->
+            </sessionHandler>
           </webAppConfig>
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
