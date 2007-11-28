@@ -76,6 +76,8 @@
         <artifactId>maven-jetty-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
+          <stopPort>8087</stopPort>
+          <stopKey>foo</stopKey>
           <scanIntervalSeconds>1</scanIntervalSeconds>
           <!-- contextPath>/test</contextPath -->
           <webAppConfig>
