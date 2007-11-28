@@ -46,6 +46,8 @@ public class HashSessionManager extends AbstractSessionManager
     private Timer _timer;
     private TimerTask _task;
     private int _scavengePeriodMs=30000;
+    private int _savePeriodMs=0; //don't do period saves by default
+    private TimerTask _saveTask;
     protected Map _sessions;
     private File _storeDir;
     
@@ -74,7 +76,8 @@ public class HashSessionManager extends AbstractSessionManager
                 _storeDir.mkdir();
             restoreSessions();
         }
-      
+ 
+        setSavePeriod(getSavePeriod());
     }
 
     /* ------------------------------------------------------------ */
@@ -95,6 +98,8 @@ public class HashSessionManager extends AbstractSessionManager
         // stop the scavenger
         synchronized(this)
         {
+            if (_saveTask!=null)
+                _saveTask.cancel();
             if (_task!=null)
                 _task.cancel();
             if (_timer!=null)
@@ -135,6 +140,51 @@ public class HashSessionManager extends AbstractSessionManager
             setScavengePeriod((_dftMaxIdleSecs+9)/10);
     }
     
+    public void setSavePeriod (int seconds)
+    {
+        int oldSavePeriod = _savePeriodMs;
+        int period = (seconds * 1000);
+        if (period < 0)
+            period=0;
+        _savePeriodMs=period;
+        
+        System.err.println("Save Period="+_savePeriodMs);
+        if (_timer!=null)
+        {
+            synchronized (this)
+            {
+                if (_saveTask!=null)
+                    _saveTask.cancel();
+                if (_savePeriodMs > 0 && _storeDir!=null) //only save if we have a directory configured
+                {
+                    _saveTask = new TimerTask()
+                    {
+                        public void run()
+                        {
+                            try
+                            {
+                                saveSessions();
+                            }
+                            catch (Exception e)
+                            {
+                                Log.warn(e);
+                            }
+                        }   
+                    };
+                    System.err.println("Scheduling save task");
+                    _timer.schedule(_saveTask,_savePeriodMs,_savePeriodMs);
+                }
+            }
+        }
+    }
+    
+    public int getSavePeriod ()
+    {
+        if (_savePeriodMs<=0)
+            return 0;
+        
+        return _savePeriodMs/1000;
+    }
     /* ------------------------------------------------------------ */
     /**
      * @param seconds
@@ -327,23 +377,28 @@ public class HashSessionManager extends AbstractSessionManager
             return;
         }
  
-        Iterator itor = _sessions.entrySet().iterator();
-        while (itor.hasNext())
+        synchronized (this)
         {
-            Map.Entry entry = (Map.Entry)itor.next();
-            String id = (String)entry.getKey();
-            Session session = (Session)entry.getValue();
-            try
+            Iterator itor = _sessions.entrySet().iterator();
+            while (itor.hasNext())
             {
-                File file = new File (_storeDir, id);
-                file.createNewFile();
-                FileOutputStream fos = new FileOutputStream (file);
-                session.save(fos);
-                fos.close();
-            }
-            catch (Exception e)
-            {
-                Log.warn("Problem persisting session "+id, e);
+                Map.Entry entry = (Map.Entry)itor.next();
+                String id = (String)entry.getKey();
+                Session session = (Session)entry.getValue();
+                try
+                {
+                    File file = new File (_storeDir, id);
+                    if (file.exists())
+                        file.delete();
+                    file.createNewFile();
+                    FileOutputStream fos = new FileOutputStream (file);
+                    session.save(fos);
+                    fos.close();
+                }
+                catch (Exception e)
+                {
+                    Log.warn("Problem persisting session "+id, e);
+                }
             }
         }
     }
@@ -434,6 +489,31 @@ public class HashSessionManager extends AbstractSessionManager
         }
         
  
+        public void invalidate ()
+        throws IllegalStateException
+        {
+            super.invalidate();
+            remove(getId());
+        }
+        
+        public void remove (String id)
+        {
+            if (id==null)
+                return;
+            
+            //all sessions are invalidated when jetty is stopped, make sure we don't
+            //remove all the sessions in this case
+            if (isStopping() || isStopped())
+                return;
+            
+            if (_storeDir==null || !_storeDir.exists())
+            {
+                return;
+            }
+            
+            File f = new File(_storeDir, id);
+            f.delete();
+        }
         
         public void save(FileOutputStream fos)  throws IOException 
         {
