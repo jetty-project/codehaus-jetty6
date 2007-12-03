@@ -65,8 +65,8 @@ public class HttpParser implements Parser
     private int _contentBufferSize;
     private EventHandler _handler;
     private CachedBuffer _cached;
-    private View _tok0; // Saved token: header name, request method or response version
-    private View _tok1; // Saved token: header value, request URI or response code
+    private View.CaseInsensitive _tok0; // Saved token: header name, request method or response version
+    private View.CaseInsensitive _tok1; // Saved token: header value, request URI or response code
     private String _multiLineValue;
     private int _responseStatus; // If >0 then we are parsing a response
     private boolean _forceContentBuffer;
@@ -93,8 +93,8 @@ public class HttpParser implements Parser
 
         if (buffer != null)
         {
-            _tok0=new View(buffer);
-            _tok1=new View(buffer);
+            _tok0=new View.CaseInsensitive(buffer);
+            _tok1=new View.CaseInsensitive(buffer);
             _tok0.setPutIndex(_tok0.getIndex());
             _tok1.setPutIndex(_tok1.getIndex());
         }
@@ -236,8 +236,8 @@ public class HttpParser implements Parser
                 _header=_buffers.getBuffer(_headerBufferSize);
             }
             _buffer=_header;
-            _tok0=new View(_header);
-            _tok1=new View(_header);
+            _tok0=new View.CaseInsensitive(_header);
+            _tok1=new View.CaseInsensitive(_header);
             _tok0.setPutIndex(_tok0.getIndex());
             _tok1.setPutIndex(_tok1.getIndex());
         }
@@ -747,8 +747,8 @@ public class HttpParser implements Parser
         if (_buffer==null)
         {
             _buffer=_header=getHeaderBuffer();
-            _tok0=new View(_buffer);
-            _tok1=new View(_buffer);
+            _tok0=new View.CaseInsensitive(_buffer);
+            _tok1=new View.CaseInsensitive(_buffer);
         }
         if (_body!=null && _buffer!=_body)
             _buffer=_body;
