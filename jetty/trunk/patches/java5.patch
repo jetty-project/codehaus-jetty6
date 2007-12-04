@@ -936,37 +936,29 @@ Index: modules/util/src/main/java/org/mortbay/util/RolloverFileOutputStream.java
 +                __rollover=new Timer(RolloverFileOutputStream.class.getName(),true);
              
              _rollTask=new RollTask();
- 
+
 Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2207)
+--- modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(revision 2223)
 +++ modules/util/src/main/java/org/mortbay/util/ajax/JSON.java	(working copy)
-@@ -542,73 +542,71 @@
- 
-         throw new IllegalStateException("unexpected end of array");
-     }
--    
-+
-     private static String parseString(Source source)
-     {
-         if (source.next()!='"')
+@@ -642,61 +642,65 @@
              throw new IllegalStateException();
--        
-+
+ 
          boolean escape=false;
--        StringBuffer b = new StringBuffer();
--        synchronized(b)
+-        StringBuffer b=new StringBuffer();
+-        synchronized (b)
 +        StringBuilder b = new StringBuilder();
++
 +        while(source.hasNext())
          {
--            while(source.hasNext())
--            {
--                char c=source.next();
+-            while (source.hasNext())
 +            char c=source.next();
- 
--                if (escape)
++
 +            if (escape)
-+            {
+             {
+-                char c=source.next();
+-
+-                if (escape)
 +                escape=false;
 +                switch (c)
                  {
@@ -989,43 +981,38 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 -                            b.append('\b');
 -                            break;
 -                        case 'u':
--                            b.append((char)(
--                                    (TypeUtil.convertHexDigit((byte)source.next())<<24)+
--                                    (TypeUtil.convertHexDigit((byte)source.next())<<16)+
--                                    (TypeUtil.convertHexDigit((byte)source.next())<<8)+
--                                    (TypeUtil.convertHexDigit((byte)source.next()))
--                            ) 
--                            );
+-                            b.append((char)((TypeUtil.convertHexDigit((byte)source.next())<<24)+(TypeUtil.convertHexDigit((byte)source.next())<<16)
+-                                    +(TypeUtil.convertHexDigit((byte)source.next())<<8)+(TypeUtil.convertHexDigit((byte)source.next()))));
 -                            break;
 -                        default:
 -                            b.append(c);
 -                    }
 +                    case 'n':
-+                        b.append('\n');
++                         b.append('\n');
++                         break;
++                     case 'r':
++                         b.append('\r');
++                         break;
++                     case 't':
++                         b.append('\t');
++                         break;
++                     case 'f':
++                         b.append('\f');
 +                        break;
-+                    case 'r':
-+                        b.append('\r');
-+                        break;
-+                    case 't':
-+                        b.append('\t');
-+                        break;
-+                    case 'f':
-+                        b.append('\f');
-+                        break;
-+                    case 'b':
-+                        b.append('\b');
-+                        break;
-+                    case 'u':
-+                        b.append((char)(
-+                                (TypeUtil.convertHexDigit((byte)source.next())<<24)+
-+                                (TypeUtil.convertHexDigit((byte)source.next())<<16)+
-+                                (TypeUtil.convertHexDigit((byte)source.next())<<8)+
-+                                (TypeUtil.convertHexDigit((byte)source.next()))
-+                        ) 
-+                        );
-+                        break;
-+                    default:
-+                        b.append(c);
++                     case 'b':
++                         b.append('\b');
++                         break;
++                     case 'u':
++                         b.append((char)(
++                                 (TypeUtil.convertHexDigit((byte)source.next())<<24)+
++                                 (TypeUtil.convertHexDigit((byte)source.next())<<16)+
++                                 (TypeUtil.convertHexDigit((byte)source.next())<<8)+
++                                 (TypeUtil.convertHexDigit((byte)source.next()))
++                         )
++                         );
++                         break;
++                     default:
++                         b.append(c);
                  }
 -                else if (c=='\\')
 -                {
@@ -1037,8 +1024,6 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 -                else
 -                    b.append(c);
              }
--
--            return b.toString();
 +            else if (c=='\\')
 +            {
 +                escape=true;
@@ -1048,12 +1033,14 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 +                break;
 +            else
 +                b.append(c);
-         }
-+
++        }
+ 
+-            return b.toString();
+-        }
 +        return b.toString();
 +
      }
-     
+ 
      private static Number parseNumber(Source source)
      {
          boolean minus=false;
@@ -1061,9 +1048,9 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
 -        StringBuffer buffer=null;
 +        StringBuilder buffer=null;
  
-         
-         longLoop:
-@@ -641,7 +639,7 @@
+         longLoop: while (source.hasNext())
+         {
+@@ -727,7 +731,7 @@
                  case '.':
                  case 'e':
                  case 'E':
@@ -1072,75 +1059,24 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/JSON.java
                      buffer.append(minus?-1*number:number);
                      buffer.append(c);
                      source.next();
-@@ -651,42 +649,40 @@
-                     break longLoop;
-             }
-         }
--        
-+
+@@ -741,8 +745,7 @@
          if (buffer==null)
              return new Long(number);
  
--        synchronized(buffer)
+-        synchronized (buffer)
 -        {
--            doubleLoop:
--                while(source.hasNext())
-+        doubleLoop:
-+            while(source.hasNext())
-+            {
-+                char c=source.peek();
-+                switch(c)
-                 {
--                    char c=source.peek();
--                    switch(c)
--                    {
--                        case '0':
--                        case '1':
--                        case '2':
--                        case '3':
--                        case '4':
--                        case '5':
--                        case '6':
--                        case '7':
--                        case '8':
--                        case '9':
--                        case '-':
--                        case '.':
--                        case 'e':
--                        case 'E':
--                            buffer.append(c);
--                            source.next();
--                            break;
-+                    case '0':
-+                    case '1':
-+                    case '2':
-+                    case '3':
-+                    case '4':
-+                    case '5':
-+                    case '6':
-+                    case '7':
-+                    case '8':
-+                    case '9':
-+                    case '-':
-+                    case '.':
-+                    case 'e':
-+                    case 'E':
-+                        buffer.append(c);
-+                        source.next();
-+                        break;
- 
--                        default:
--                            break doubleLoop;
--                    }
-+                    default:
-+                        break doubleLoop;
++
+             doubleLoop: while (source.hasNext())
+             {
+                 char c=source.peek();
+@@ -771,7 +774,7 @@
                  }
-+            }
-         return new Double(buffer.toString());
+             }
+             return new Double(buffer.toString());
 -        }
 +
      }
-     
+ 
      private static void seekTo(char seek, Source source)
 Index: modules/util/src/main/java/org/mortbay/util/StringUtil.java
 ===================================================================
