@@ -6,6 +6,7 @@ jetty-6.1-SNAPSHOT
  + Delay 100 continues until getInputStream
  + Add "mvn jetty:stop" 
  + Added JSON.Convertor
+ + Update java5 patch
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
