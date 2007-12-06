@@ -88,6 +88,12 @@ public interface Continuation
      * @return True if the continuation is has been resumed.
      */
     public boolean isResumed();
+
+    /* ------------------------------------------------------------ */
+    /** Get the resumed status?
+     * @return True if the continuation is has been expired.
+     */
+    public boolean isExpired();
     
     /* ------------------------------------------------------------ */
     /** Arbitrary object associated with the continuation for context.
