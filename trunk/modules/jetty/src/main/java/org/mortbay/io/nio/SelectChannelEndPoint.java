@@ -32,7 +32,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     protected boolean _readBlocked;
     protected boolean _writeBlocked;
     protected Connection _connection;
-
+    private boolean _open;
     private Timeout.Task _timeoutTask = new IdleTask();
 
     /* ------------------------------------------------------------ */
@@ -50,13 +50,14 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         _selectSet = selectSet;
         _connection = _manager.newConnection(channel,this);
         
-        _manager.endPointOpened(this); // TODO not here!
+        _open=true;
+        _manager.endPointOpened(this);
         
         _key = key;
     }
 
     /* ------------------------------------------------------------ */
-    void dispatch() throws IOException
+    public void dispatch() throws IOException
     {
         boolean dispatch_done = true;
         try
@@ -353,7 +354,9 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                                     _key.cancel();
                                 }
                                 cancelIdle();
-                                _manager.endPointClosed(this);
+                                if (_open)
+                                    _manager.endPointClosed(this);
+                                _open=false;
                                 _key = null;
                             }
                         }
@@ -379,7 +382,9 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                     _key.cancel(); 
                 }
                 cancelIdle();
-                _manager.endPointClosed(this);
+                if (_open)
+                    _manager.endPointClosed(this);
+                _open=false;
                 _key = null;
             }
         }

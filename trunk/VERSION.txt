@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
  + Added JSON.Convertor
  + Improved Cometd timeout handling
  + Update java5 patch
+ + Added option to dispatch to suspended requests.
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields

@@ -66,6 +66,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     private transient ServerSocketChannel _acceptChannel;
     private long _lowResourcesConnections;
     private long _lowResourcesMaxIdleTime;
+    private boolean _dispatchToSuspended=true;
 
     private SelectorManager _manager = new SelectorManager()
     {
@@ -289,6 +290,25 @@ public class SelectChannelConnector extends AbstractNIOConnector
         _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
         super.setLowResourceMaxIdleTime(lowResourcesMaxIdleTime); 
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the dispatchToSuspended True if IO activity should cause a dispatch to a suspended request.
+     */
+    public boolean isDispatchToSuspended()
+    {
+        return _dispatchToSuspended;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param dispatchToSuspended True if IO activity should cause a dispatch to a suspended request.
+     */
+    public void setDispatchToSuspended(boolean dispatchToSuspended)
+    {
+        _dispatchToSuspended=dispatchToSuspended;
+    }
+
     
     /* ------------------------------------------------------------ */
     /*
@@ -371,9 +391,10 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public static class RetryContinuation extends Timeout.Task implements Continuation, Runnable
+    public static class RetryContinuation extends Timeout.Task implements Continuation
     {
         SelectChannelEndPoint _endPoint=(SelectChannelEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
+        boolean _dispatchToSuspended=((SelectChannelConnector)HttpConnection.getCurrentConnection().getConnector())._dispatchToSuspended;
         boolean _new = true;
         Object _object;
         boolean _pending = false;   // waiting for resume or timeout
@@ -478,9 +499,15 @@ public class SelectChannelConnector extends AbstractNIOConnector
                     this.cancel();   
                 }
 
-                _endPoint.scheduleIdle();  // TODO maybe not needed?
-                selectSet.addChange(this);
-                selectSet.wakeup();
+                _endPoint.scheduleIdle(); 
+                try
+                {
+                    _endPoint.dispatch();
+                }
+                catch(IOException e)
+                {
+                    Log.ignore(e);
+                }
             }
         }
         
@@ -495,15 +522,15 @@ public class SelectChannelConnector extends AbstractNIOConnector
             if (redispatch)
             {
                 _endPoint.scheduleIdle();  // TODO maybe not needed?
-                _endPoint.getSelectSet().addChange(this);
-                _endPoint.getSelectSet().wakeup();
+                try
+                {
+                    _endPoint.dispatch();
+                }
+                catch(IOException e)
+                {
+                    Log.ignore(e);
+                }
             }
-        }
-
-        
-        public void run()
-        {
-            _endPoint.run();
         }
         
         /* undispatch continuation.
@@ -525,13 +552,23 @@ public class SelectChannelConnector extends AbstractNIOConnector
             if (redispatch)
             {
                 _endPoint.scheduleIdle();
-                _endPoint.getSelectSet().addChange(this);
+                try
+                {
+                    _endPoint.dispatch();
+                }
+                catch(IOException e)
+                {
+                    Log.ignore(e);
+                }
+                return false;
             }
             else if (_timeout>0)
+            {
                 _endPoint.getSelectSet().scheduleTimeout(this,_timeout);
-            
-            _endPoint.getSelectSet().wakeup();
-            return false;
+                _endPoint.getSelectSet().wakeup();
+            }
+
+            return _dispatchToSuspended;
         }
 
         public void setObject(Object object)
@@ -553,5 +590,4 @@ public class SelectChannelConnector extends AbstractNIOConnector
         }
 
     }
-
 }
