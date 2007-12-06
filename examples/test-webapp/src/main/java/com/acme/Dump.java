@@ -62,7 +62,7 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        if(request.getPathInfo().toLowerCase().indexOf("script")!=-1)
+        if(request.getPathInfo()!=null && request.getPathInfo().toLowerCase().indexOf("script")!=-1)
         {
             response.sendRedirect(getServletContext().getContextPath() + "/dump/info");
             return;
