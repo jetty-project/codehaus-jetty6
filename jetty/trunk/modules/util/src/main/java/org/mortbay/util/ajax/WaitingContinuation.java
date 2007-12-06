@@ -15,6 +15,8 @@
 
 package org.mortbay.util.ajax;
 
+import org.mortbay.log.Log;
+
 public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
 {
     Object _mutex;
@@ -22,6 +24,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
     boolean _new=true;
     boolean _resumed=false;
     boolean _pending=false;
+    boolean _expired=false;
 
     public WaitingContinuation()
     {
@@ -48,6 +51,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
         {
             _resumed=false;
             _pending=false;
+            _expired=false;
             _mutex.notify();
         }
     }
@@ -77,7 +81,8 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                _expired=true;
+                Log.ignore(e);
             }
             finally
             {
@@ -103,6 +108,14 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
         synchronized (_mutex)
         {
             return _resumed;
+        }
+    }
+    
+    public boolean isExpired()
+    {
+        synchronized (_mutex)
+        {
+            return _expired;
         }
     }
 
@@ -135,7 +148,8 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             return "WaitingContinuation@"+hashCode()+
             (_new?",new":"")+
             (_pending?",pending":"")+
-            (_resumed?",resumed":"");
+            (_resumed?",resumed":"")+
+            (_expired?",expired":"");
         }
     }
 }
