@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,10 +58,11 @@ import org.mortbay.util.TypeUtil;
  */
 public class JSON
 {
-    private JSON()
+    private static JSON __default = new JSON();
+    
+    public JSON()
     {
     }
-    private static Map __convertors=new HashMap();
 
     /**
      * Register a {@link Convertor} for a class or interface.
@@ -69,34 +71,7 @@ public class JSON
      */
     public static void registerConvertor(Class forClass, Convertor convertor)
     {
-        __convertors.put(forClass,convertor);
-    }
-
-    /**
-     * Lookup a convertor for a class.
-     * <p>
-     * If no match is found for the class, then the interfaces for the class are tried. If still no
-     * match is found, then the super class and it's interfaces are tried recursively.
-     * @param forClass The class
-     * @return a {@link Convertor} or null if none were found.
-     */
-    public static Convertor getConvertor(Class forClass)
-    {
-        Class c=forClass;
-        Convertor convertor=(Convertor)__convertors.get(c);
-        while (convertor==null&&c!=null&&c!=Object.class)
-        {
-            Class[] ifs=c.getInterfaces();
-            int i=0;
-            while (convertor==null&&ifs!=null&&i<ifs.length)
-                convertor=(Convertor)__convertors.get(ifs[i++]);
-            if (convertor==null)
-            {
-                c=c.getSuperclass();
-                convertor=(Convertor)__convertors.get(c);
-            }
-        }
-        return convertor;
+        __default.addConvertor(forClass,convertor);
     }
 
     public static String toString(Object object)
@@ -135,7 +110,7 @@ public class JSON
      */
     public static Object parse(String s)
     {
-        return parse(new StringSource(s),false);
+        return __default.parse(new StringSource(s),false);
     }
 
     /**
@@ -145,7 +120,7 @@ public class JSON
      */
     public static Object parse(String s, boolean stripOuterComment)
     {
-        return parse(new StringSource(s),stripOuterComment);
+        return __default.parse(new StringSource(s),stripOuterComment);
     }
 
     /**
@@ -154,7 +129,7 @@ public class JSON
      */
     public static Object parse(Reader in) throws IOException
     {
-        return parse(new ReaderSource(in),false);
+        return __default.parse(new ReaderSource(in),false);
     }
 
     /**
@@ -164,7 +139,7 @@ public class JSON
      */
     public static Object parse(Reader in, boolean stripOuterComment) throws IOException
     {
-        return parse(new ReaderSource(in),stripOuterComment);
+        return __default.parse(new ReaderSource(in),stripOuterComment);
     }
 
     /**
@@ -174,7 +149,7 @@ public class JSON
      */
     public static Object parse(InputStream in) throws IOException
     {
-        return parse(new StringSource(IO.toString(in)),false);
+        return __default.parse(new StringSource(IO.toString(in)),false);
     }
 
     /**
@@ -185,7 +160,7 @@ public class JSON
      */
     public static Object parse(InputStream in, boolean stripOuterComment) throws IOException
     {
-        return parse(new StringSource(IO.toString(in)),stripOuterComment);
+        return __default.parse(new StringSource(IO.toString(in)),stripOuterComment);
     }
 
     /**
@@ -215,7 +190,7 @@ public class JSON
             appendString(buffer,(String)object);
         else
         {
-            Convertor convertor=getConvertor(object.getClass());
+            Convertor convertor=__default.getConvertor(object.getClass());
             if (convertor!=null)
                 appendJSON(buffer,convertor,object);
             else
@@ -421,11 +396,121 @@ public class JSON
         QuotedStringTokenizer.quote(buffer,string);
     }
 
-    private static Object parse(Source source, boolean stripOuterComment)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // Parsing utilities
+
+    private Map _convertors=new HashMap();
+    
+    protected String toString(char[] buffer,int offset,int length)
+    {
+        return new String(buffer,offset,length);
+    }
+    
+    protected Map newMap()
+    {
+        return new HashMap();
+    }
+    
+    protected Object[] newArray(int size)
+    {
+        return new Object[size];
+    }
+
+    protected JSON contextForArray()
+    {
+        return this;
+    }
+    
+    protected JSON contextFor(String field)
+    {
+        return this;
+    }
+    
+    protected Object convertTo(Class type,Map map)
+    {
+        if (type!=null&&Convertible.class.isAssignableFrom(type))
+        {
+            try
+            {
+                Convertible conv=(Convertible)type.newInstance();
+                conv.fromJSON(map);
+                return conv;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                throw new IllegalArgumentException();
+            }
+        }
+
+        Convertor convertor=getConvertor(type);
+        if (convertor!=null)
+        {
+            return convertor.fromJSON(map);
+        }
+        return map;
+    }
+
+
+    /**
+     * Register a {@link Convertor} for a class or interface.
+     * @param forClass The class or interface that the convertor applies to
+     * @param convertor the convertor
+     */
+    public void addConvertor(Class forClass, Convertor convertor)
+    {
+        _convertors.put(forClass,convertor);
+    }
+    
+    /**
+     * Lookup a convertor for a class.
+     * <p>
+     * If no match is found for the class, then the interfaces for the class are tried. If still no
+     * match is found, then the super class and it's interfaces are tried recursively.
+     * @param forClass The class
+     * @return a {@link Convertor} or null if none were found.
+     */
+    protected Convertor getConvertor(Class forClass)
+    {
+        Class c=forClass;
+        Convertor convertor=(Convertor)_convertors.get(c);
+        if (convertor==null && this!=__default)
+            convertor=__default.getConvertor(forClass);
+        
+        while (convertor==null&&c!=null&&c!=Object.class)
+        {
+            Class[] ifs=c.getInterfaces();
+            int i=0;
+            while (convertor==null&&ifs!=null&&i<ifs.length)
+                convertor=(Convertor)_convertors.get(ifs[i++]);
+            if (convertor==null)
+            {
+                c=c.getSuperclass();
+                convertor=(Convertor)_convertors.get(c);
+            }
+        }
+        return convertor;
+    }
+
+    
+
+    public Object parse(Source source, boolean stripOuterComment)
     {
         int comment_state=0; // 0=no comment, 1="/", 2="/*", 3="/* *" -1="//"
-        int strip_state=stripOuterComment?1:0; // 0=no strip, 1=wait for /*, 2= wait for */
+        if (!stripOuterComment)
+            return parse(source);
+        
+        int strip_state=1; // 0=no strip, 1=wait for /*, 2= wait for */
 
+        Object o=null;
         while (source.hasNext())
         {
             char c=source.peek();
@@ -445,6 +530,84 @@ public class JSON
                             comment_state=0;
                             strip_state=2;
                         }
+                }
+            }
+            // handle /* */ comment
+            else if (comment_state>1)
+            {
+                switch (c)
+                {
+                    case '*':
+                        comment_state=3;
+                        break;
+                    case '/':
+                        if (comment_state==3)
+                        {
+                            comment_state=0;
+                            if (strip_state==2)
+                                return o;
+                        }
+                        else
+                            comment_state=2;
+                        break;
+                    default:
+                        comment_state=2;
+                }
+            }
+            // handle // comment
+            else if (comment_state<0)
+            {
+                switch (c)
+                {
+                    case '\r':
+                    case '\n':
+                        comment_state=0;
+                    default:
+                        break;
+                }
+            }
+            // handle unknown
+            else
+            {
+                if (!Character.isWhitespace(c))
+                {
+                    if (c=='/')
+                        comment_state=1;
+                    else if (c=='*')
+                        comment_state=3;
+                    else if (o==null)
+                    {
+                        o=parse(source);
+                        continue;
+                    }
+                }
+            }
+            
+            source.next();
+        }
+
+        return o;
+    }
+
+    
+    public Object parse(Source source)
+    {
+        int comment_state=0; // 0=no comment, 1="/", 2="/*", 3="/* *" -1="//"
+
+        while (source.hasNext())
+        {
+            char c=source.peek();
+
+            // handle // or /* comment
+            if (comment_state==1)
+            {
+                switch (c)
+                {
+                    case '/':
+                        comment_state=-1;
+                        break;
+                    case '*':
+                        comment_state=2;
                 }
             }
             // handle /* */ comment
@@ -509,20 +672,12 @@ public class JSON
                         comment_state=1;
                         break;
 
-                    case '*':
-                        if (strip_state==2)
-                        {
-                            complete("*/",source);
-                            strip_state=0;
-                        }
-                        return null;
-
                     default:
                         if (Character.isDigit(c))
                             return parseNumber(source);
                         else if (Character.isWhitespace(c))
                             break;
-                        throw new IllegalStateException("unknown char "+(int)c);
+                        throw new IllegalStateException("unknown char '"+c+"'("+(int)c+") in "+source);
                 }
             }
             source.next();
@@ -531,11 +686,11 @@ public class JSON
         return null;
     }
 
-    private static Object parseObject(Source source)
+    protected Object parseObject(Source source)
     {
         if (source.next()!='{')
             throw new IllegalStateException();
-        Map map=new HashMap();
+        Map map=newMap();
 
         char next=seekTo("\"}",source);
 
@@ -551,7 +706,7 @@ public class JSON
             seekTo(':',source);
             source.next();
 
-            Object value=parse(source,false);
+            Object value=contextFor(name).parse(source);
             map.put(name,value);
 
             seekTo(",}",source);
@@ -568,27 +723,7 @@ public class JSON
             try
             {
                 Class c=Loader.loadClass(JSON.class,classname);
-                if (c!=null&&Convertible.class.isAssignableFrom(c))
-                {
-                    try
-                    {
-                        Convertible conv=(Convertible)c.newInstance();
-                        conv.fromJSON(map);
-                        return conv;
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                        throw new IllegalArgumentException();
-                    }
-                }
-
-                Convertor convertor=getConvertor(c);
-                if (convertor!=null)
-                {
-                    return convertor.fromJSON(map);
-                }
-
+                return convertTo(c,map);
             }
             catch (ClassNotFoundException e)
             {
@@ -597,13 +732,16 @@ public class JSON
         }
         return map;
     }
+    
 
-    private static Object parseArray(Source source)
+    private Object parseArray(Source source)
     {
         if (source.next()!='[')
             throw new IllegalStateException();
 
-        ArrayList list=new ArrayList();
+        int size=0;
+        ArrayList list=null;
+        Object item=null;
         boolean coma=true;
 
         while (source.hasNext())
@@ -613,13 +751,24 @@ public class JSON
             {
                 case ']':
                     source.next();
-                    return list.toArray(new Object[list.size()]);
+                    switch(size)
+                    {
+                        case 0:
+                            return newArray(0);
+                        case 1:
+                            Object array = newArray(1);
+                            Array.set(array,0,item);
+                            return array;
+                        default:
+                            return list.toArray(newArray(list.size()));
+                    }
 
                 case ',':
                     if (coma)
                         throw new IllegalStateException();
                     coma=true;
                     source.next();
+                    break;
 
                 default:
                     if (Character.isWhitespace(c))
@@ -627,7 +776,22 @@ public class JSON
                     else
                     {
                         coma=false;
-                        list.add(parse(source,false));
+                        if (size++==0)
+                            item=contextForArray().parse(source);
+                        else if (list==null)
+                        {
+                            list=new ArrayList();
+                            list.add(item);
+                            item=contextForArray().parse(source);
+                            list.add(item);
+                            item=null;
+                        }
+                        else
+                        {
+                            item=contextForArray().parse(source);
+                            list.add(item);
+                            item=null;
+                        }
                     }
             }
 
@@ -635,14 +799,85 @@ public class JSON
 
         throw new IllegalStateException("unexpected end of array");
     }
+    
 
-    private static String parseString(Source source)
+    private String parseString(Source source)
     {
         if (source.next()!='"')
             throw new IllegalStateException();
 
         boolean escape=false;
-        StringBuffer b=new StringBuffer();
+
+        StringBuffer b=null;
+        final char[] scratch=source.scratchBuffer();
+        
+        if (scratch!=null)
+        {
+            int i=0;
+            while (source.hasNext())
+            {
+                if(i>=scratch.length)
+                {
+                    // we have filled the scratch buffer, so we must
+                    // use the StringBuffer for a large string
+                    b=new StringBuffer(scratch.length*2);
+                    b.append(scratch,0,i);
+                    break;
+                }
+
+                char c=source.next();
+
+                if (escape)
+                {
+                    escape=false;
+                    switch (c)
+                    {
+                        case 'n':
+                            scratch[i++]='\n';
+                            break;
+                        case 'r':
+                            scratch[i++]='\r';
+                            break;
+                        case 't':
+                            scratch[i++]='\t';
+                            break;
+                        case 'f':
+                            scratch[i++]='\f';
+                            break;
+                        case 'b':
+                            scratch[i++]='\b';
+                            break;
+                        case 'u':
+                            scratch[i++]=((char)((TypeUtil.convertHexDigit((byte)source.next())<<24)+(TypeUtil.convertHexDigit((byte)source.next())<<16)
+                                    +(TypeUtil.convertHexDigit((byte)source.next())<<8)+(TypeUtil.convertHexDigit((byte)source.next()))));
+                            break;
+                        default:
+                            scratch[i++]=c;
+                    }
+                }
+                else if (c=='\\')
+                {
+                    escape=true;
+                    continue;
+                }
+                else if (c=='\"')
+                {
+                    // Return string that fits within scratch buffer
+                    return toString(scratch,0,i);
+                }
+                else
+                    scratch[i++]=c;
+            }
+            
+            // Missing end quote, but return string anyway ?
+            if (b==null)
+                return toString(scratch,0,i);
+        }
+        else
+            b=new StringBuffer();
+        
+        
+        // parse large string into string buffer
         synchronized (b)
         {
             while (source.hasNext())
@@ -692,7 +927,7 @@ public class JSON
         }
     }
 
-    private static Number parseNumber(Source source)
+    public Number parseNumber(Source source)
     {
         boolean minus=false;
         long number=0;
@@ -774,7 +1009,7 @@ public class JSON
         }
     }
 
-    private static void seekTo(char seek, Source source)
+    protected void seekTo(char seek, Source source)
     {
         while (source.hasNext())
         {
@@ -790,7 +1025,7 @@ public class JSON
         throw new IllegalStateException("Expected '"+seek+"'");
     }
 
-    private static char seekTo(String seek, Source source)
+    protected char seekTo(String seek, Source source)
     {
         while (source.hasNext())
         {
@@ -808,7 +1043,7 @@ public class JSON
         throw new IllegalStateException("Expected one of '"+seek+"'");
     }
 
-    private static void complete(String seek, Source source)
+    protected static void complete(String seek, Source source)
     {
         int i=0;
         while (source.hasNext()&&i<seek.length())
@@ -822,28 +1057,35 @@ public class JSON
             throw new IllegalStateException("Expected \""+seek+"\"");
     }
 
-    private interface Source
+    
+    public interface Source
     {
         boolean hasNext();
 
         char next();
 
         char peek();
+        
+        char[] scratchBuffer();
     }
 
-    private static class StringSource implements Source
+    public static class StringSource implements Source
     {
         private final String string;
         private int index;
+        private char[] scratch;
 
-        StringSource(String s)
+        public StringSource(String s)
         {
             string=s;
         }
 
         public boolean hasNext()
         {
-            return (index<string.length());
+            if (index<string.length())
+                return true;
+            scratch=null;
+            return false;
         }
 
         public char next()
@@ -855,14 +1097,27 @@ public class JSON
         {
             return string.charAt(index);
         }
+        
+        public String toString()
+        {
+            return string.substring(0,index)+"|||"+string.substring(index);
+        }
+
+        public char[] scratchBuffer()
+        {
+            if (scratch==null)
+                scratch=new char[string.length()];
+            return scratch;
+        }
     }
 
-    private static class ReaderSource implements Source
+    public static class ReaderSource implements Source
     {
         private Reader _reader;
         private int _next=-1;
+        private char[] scratch;
 
-        ReaderSource(Reader r)
+        public ReaderSource(Reader r)
         {
             _reader=r;
         }
@@ -870,7 +1125,12 @@ public class JSON
         public boolean hasNext()
         {
             getNext();
-            return _next>=0;
+            if (_next<0)
+            {
+                scratch=null;
+                return false;
+            }
+            return true;
         }
 
         public char next()
@@ -901,6 +1161,13 @@ public class JSON
                     throw new IllegalStateException();
                 }
             }
+        }
+
+        public char[] scratchBuffer()
+        {
+            if (scratch==null)
+                scratch=new char[1024];
+            return scratch;
         }
     }
 
