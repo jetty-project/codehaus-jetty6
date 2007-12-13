@@ -71,7 +71,7 @@ jetty-6.1.6rc0 - 3 October 2007
  + Removal of unneeded dependencies from management, maven-plugin, naming &  plus poms
  + Adding setUsername,setGroupname to setuid and mavenizing native build
  + UTF-8 for bayeux client
- + VU#38616 Added protection for response splitting with bad headers.
+ + CVE-2007-5615 Added protection for response splitting with bad headers.
  + Cached user agents strings in the /org/mortbay/jetty/useragents resource
  + Make default time format for RequestLog match NCSA default
  + Use terracotta repo for build; make jetty a terracotta module
@@ -485,6 +485,14 @@ jetty-6.0.2 - 22 November 2006
  + Upgraded session ID generation to use SecureRandom
  + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
  + Support TLS_DHE_RSA_WITH_AES_256_CBC_SHA 
+
+Jetty-5.1.14 - 9 Aug 2007
+ + patched with correct version
+ + JETTY-155 force close with content length.
+ + JETTY-369 failed state in Container
+
+Jetty-5.1.13
+ + Sourceforge 1648335: problem setting version for AJP13
 
 Jetty-5.1.12 - 22 November 2006
  + Added support for TLS_DHE_RSA_WITH_AES_256_CBC_SHA
