@@ -87,7 +87,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
      * @return True if the endpoint should be dispatched to a thread pool.
      * @throws IOException
      */
-    public boolean dispatch(boolean assumeShortDispatch) throws IOException
+    private boolean dispatch(boolean assumeShortDispatch) throws IOException
     {
         // If threads are blocked on this
         synchronized (this)
@@ -139,6 +139,30 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         }
         return true;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Called when a dispatched thread is no longer handling the endpoint. The selection key
+     * operations are updated.
+     */
+    public void undispatch()
+    {
+        synchronized (this)
+        {
+            try
+            {
+                _dispatched = false;
+                updateKey();
+            }
+            catch (Exception e)
+            {
+                // TODO investigate if this actually is a problem?
+                Log.ignore(e);
+                _interestOps = -1;
+                _selectSet.addChange(this);
+            }
+        }
+    }
 
     /* ------------------------------------------------------------ */
     public void scheduleIdle()
@@ -163,30 +187,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         catch (IOException e)
         {
             Log.ignore(e);
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Called when a dispatched thread is no longer handling the endpoint. The selection key
-     * operations are updated.
-     */
-    public void undispatch()
-    {
-        synchronized (this)
-        {
-            try
-            {
-                _dispatched = false;
-                updateKey();
-            }
-            catch (Exception e)
-            {
-                // TODO investigate if this actually is a problem?
-                Log.ignore(e);
-                _interestOps = -1;
-                _selectSet.addChange(this);
-            }
         }
     }
 
