@@ -523,6 +523,8 @@ public class Response implements HttpServletResponse
      */
     public void setStatus(int sc, String sm)
     {
+        if (sc<=0)
+            throw new IllegalArgumentException();
         if (!_connection.isIncluding())
         {
             _status=sc;
