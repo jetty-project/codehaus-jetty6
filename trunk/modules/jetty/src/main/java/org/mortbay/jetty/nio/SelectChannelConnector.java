@@ -380,19 +380,17 @@ public class SelectChannelConnector extends AbstractNIOConnector
         /* ------------------------------------------------------------ */
         public void undispatch()
         {
-            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+            HttpConnection connection = (HttpConnection)getConnection();
+            RetryContinuation continuation = (RetryContinuation) connection.getRequest().getContinuation();
 
+
+            super.undispatch();
             
-            if (continuation == null)
-                super.undispatch();
-            else
+            if (continuation != null)
             {
                 // We have a continuation
                 Log.debug("continuation {}", continuation);
-                super.undispatch();
-                boolean unsuspend = continuation.undispatch();
-                if (unsuspend)
-                    continuation.unsuspend();
+                continuation.undispatch();
             }
             
         }
@@ -412,7 +410,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
         // dsT scheduled     DsT RETRY
         // dSt SUSPENDED     DSt Suspending
         // dST unsuspending  DST unsuspending 
-        boolean _dispatched=true;
+        boolean _dispatched;
         boolean _suspended;
         boolean _triggered;
         
@@ -433,6 +431,9 @@ public class SelectChannelConnector extends AbstractNIOConnector
         RetryContinuation()
         {
             _mutex=this;
+            _dispatched=true;
+            _suspended=false;
+            _triggered=false;
                 
             HttpConnection connection = HttpConnection.getCurrentConnection();
             _endPoint=(SelectChannelEndPoint)connection.getEndPoint();
@@ -473,7 +474,10 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         public boolean isPending()
         {
-            return _suspended||_triggered;
+            synchronized(_mutex)
+            {
+                return _suspended||_triggered;
+            }
         }
 
         public boolean isResumed()
@@ -565,7 +569,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
         {
 
             boolean unsuspend=false;
-            synchronized (this)
+            synchronized (_mutex)
             {
                 // move to ?ST
                 if (_suspended)
@@ -613,7 +617,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
         }
         
         
-        public boolean undispatch()
+        public void undispatch()
         {
             boolean unsuspend=false;
         
@@ -629,19 +633,17 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 }
             }
             
-            return unsuspend;
+            if(unsuspend)
+                unsuspend();
         }
         
-        public void unsuspend()
+        private void unsuspend()
         {
-            SelectSet selectSet = _endPoint.getSelectSet();
-            
-            synchronized (selectSet)
+            synchronized (_endPoint.getSelectSet())
             {
                 _timeoutTask.cancel();   
             }
-
-            _endPoint.scheduleIdle(); 
+            
             try
             {
                 _endPoint.dispatch();
@@ -649,12 +651,9 @@ public class SelectChannelConnector extends AbstractNIOConnector
             catch(IOException e)
             {
                 Log.warn(e);
-                selectSet.addChange(_endPoint);
+                _endPoint.getSelectSet().addChange(_endPoint);
             }
         }
-        
-        
-        
 
         public void setObject(Object object)
         {
@@ -663,7 +662,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
         
         public String toString()
         {
-            synchronized (this)
+            synchronized (_mutex)
             {
                 return "RetryContinuation@"+hashCode()+
                 (_dispatched?",D":",d")+
