@@ -33,7 +33,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     protected boolean _writeBlocked;
     protected Connection _connection;
     private boolean _open;
-    private Timeout.Task _timeoutTask = new IdleTask();
+    private Timeout.Task _idleTask = new IdleTask();
 
     /* ------------------------------------------------------------ */
     public Connection getConnection()
@@ -167,13 +167,13 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /* ------------------------------------------------------------ */
     public void scheduleIdle()
     {
-        _selectSet.scheduleIdle(_timeoutTask);
+        _selectSet.scheduleIdle(_idleTask);
     }
 
     /* ------------------------------------------------------------ */
     public void cancelIdle()
     {
-        _selectSet.cancelIdle(_timeoutTask);
+        _selectSet.cancelIdle(_idleTask);
     }
 
 
@@ -456,7 +456,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /* ------------------------------------------------------------ */
     public Timeout.Task getTimeoutTask()
     {
-        return _timeoutTask;
+        return _idleTask;
     }
 
     /* ------------------------------------------------------------ */
