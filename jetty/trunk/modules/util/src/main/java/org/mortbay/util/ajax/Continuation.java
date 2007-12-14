@@ -77,8 +77,9 @@ public interface Continuation
     /** Get the pending status?
      * A continuation is pending while the handling of a call to suspend has not completed.
      * For blocking continuations, pending is true only during the call to {@link #suspend(long)}.
-     * For non-blocking continuations, pending is true until a second call to {@link #suspend(long)}, 
-     * thus this method can be used to determine if a request is being retried.
+     * For non-blocking continuations, pending is true until a second call to {@link #suspend(long)} or 
+     * a call to {@link #reset()}, thus this method can be used to determine if a request is being 
+     * retried.
      * @return True if the continuation is handling a call to suspend.
      */
     public boolean isPending();
@@ -106,5 +107,10 @@ public interface Continuation
      * @param o An arbitrary object to associate with the continuation
      */
     public void setObject(Object o);
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    public void setMutex(Object mutex);
     
 }

@@ -25,13 +25,13 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ContinuationSupport
 {
-    public static Continuation getContinuation(HttpServletRequest request, Object lock)
+    public static Continuation getContinuation(HttpServletRequest request, Object mutex)
     {
         Continuation continuation = (Continuation) request.getAttribute("org.mortbay.jetty.ajax.Continuation");
         if (continuation==null)
-            continuation=new WaitingContinuation(lock);
-        else if (continuation instanceof WaitingContinuation && continuation.isNew() && lock!=null)
-            ((WaitingContinuation)continuation).setMutex(lock);
+            continuation=new WaitingContinuation(mutex);
+        else if (mutex!=null)
+            continuation.setMutex(mutex);
         return continuation;
     }
 }
