@@ -15,6 +15,8 @@
 package org.mortbay.jetty;
 
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -301,6 +303,78 @@ public class HttpHeaderTest extends TestCase
         assertEquals(true, e.hasMoreElements());
         assertEquals(e.nextElement(), "value1");
         assertEquals(false, e.hasMoreElements());
+    }
+    
+    public void testCase()
+    throws Exception
+    {
+        HttpFields fields= new HttpFields();
+        Enumeration e;
+        Set s;
+        //         0123456789012345678901234567890
+        byte[] b ="Message-IDmessage-idvalueVALUE".getBytes();
+        ByteArrayBuffer buf= new ByteArrayBuffer(512);
+        buf.put(b);
+        
+        View headUC= new View.CaseInsensitive(buf);
+        View headLC= new View.CaseInsensitive(buf);
+        View valUC = new View(buf);
+        View valLC = new View(buf);
+        headUC.update(0,10);
+        headLC.update(10,20);
+        valUC.update(20,25);
+        valLC.update(25,30);
+
+        fields.add("header","value");
+        fields.add(headUC,valLC);
+        fields.add("other","data");
+        s=enum2set(fields.getFieldNames());
+        assertEquals(3,s.size());
+        assertTrue(s.contains("message-id"));
+        assertEquals("value",fields.getStringField("message-id").toLowerCase());
+        assertEquals("value",fields.getStringField("Message-ID").toLowerCase());
+
+        fields.clear();
+
+        fields.add("header","value");
+        fields.add(headLC,valLC);
+        fields.add("other","data");
+        s=enum2set(fields.getFieldNames());
+        assertEquals(3,s.size());
+        assertTrue(s.contains("message-id"));
+        assertEquals("value",fields.getStringField("Message-ID").toLowerCase());
+        assertEquals("value",fields.getStringField("message-id").toLowerCase());
+        
+        fields.clear();
+
+        fields.add("header","value");
+        fields.add(headUC,valUC);
+        fields.add("other","data");
+        s=enum2set(fields.getFieldNames());
+        assertEquals(3,s.size());
+        assertTrue(s.contains("message-id"));
+        assertEquals("value",fields.getStringField("message-id").toLowerCase());
+        assertEquals("value",fields.getStringField("Message-ID").toLowerCase());
+
+        fields.clear();
+
+        fields.add("header","value");
+        fields.add(headLC,valUC);
+        fields.add("other","data");
+        s=enum2set(fields.getFieldNames());
+        assertEquals(3,s.size());
+        assertTrue(s.contains("message-id"));
+        assertEquals("value",fields.getStringField("Message-ID").toLowerCase());
+        assertEquals("value",fields.getStringField("message-id").toLowerCase());
+        
+    }
+    
+    private Set enum2set(Enumeration e)
+    {
+        HashSet s=new HashSet();
+        while(e.hasMoreElements())
+            s.add(e.nextElement().toString().toLowerCase());
+        return s;
     }
     
     public void testDateFields()
