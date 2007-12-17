@@ -66,7 +66,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
     private transient ServerSocketChannel _acceptChannel;
     private long _lowResourcesConnections;
     private long _lowResourcesMaxIdleTime;
-    private boolean _dispatchToSuspended=true;
 
     private SelectorManager _manager = new SelectorManager()
     {
@@ -290,25 +289,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
         _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
         super.setLowResourceMaxIdleTime(lowResourcesMaxIdleTime); 
     }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the dispatchToSuspended True if IO activity should cause a dispatch to a suspended request.
-     */
-    public boolean isDispatchToSuspended()
-    {
-        return _dispatchToSuspended;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param dispatchToSuspended True if IO activity should cause a dispatch to a suspended request.
-     */
-    public void setDispatchToSuspended(boolean dispatchToSuspended)
-    {
-        _dispatchToSuspended=dispatchToSuspended;
-    }
-
     
     /* ------------------------------------------------------------ */
     /*
@@ -369,92 +349,38 @@ public class SelectChannelConnector extends AbstractNIOConnector
         }
 
         /* ------------------------------------------------------------ */
-        public void run()
-        {
-            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
-            if (continuation!=null)
-                continuation.dispatch();
-            super.run();
-        }
-        
-        /* ------------------------------------------------------------ */
         public void undispatch()
         {
-            HttpConnection connection = (HttpConnection)getConnection();
-            RetryContinuation continuation = (RetryContinuation) connection.getRequest().getContinuation();
+            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
 
-
-            super.undispatch();
-            
             if (continuation != null)
             {
                 // We have a continuation
                 Log.debug("continuation {}", continuation);
-                continuation.undispatch();
+                if (continuation.undispatch())
+                    super.undispatch();
             }
-            
+            else
+            {
+                super.undispatch();
+            }
+               
         }
     }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public static class RetryContinuation implements Continuation
+    public static class RetryContinuation extends Timeout.Task implements Continuation, Runnable
     {
-        // Configuration
-        final SelectChannelEndPoint _endPoint;
-        
-        
-        // Main states are D=Dispatched, S=suspended, T=triggered
-        // dst IDLE          Dst DISPATCHED
-        // dsT scheduled     DsT RETRY
-        // dSt SUSPENDED     DSt Suspending
-        // dST unsuspending  DST unsuspending 
-        boolean _dispatched;
-        boolean _suspended;
-        boolean _triggered;
-        
-        
-        // Secondary state
+        SelectChannelEndPoint _endPoint=(SelectChannelEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
         boolean _new = true;
-        boolean _resumed = false;   // resume called.
         Object _object;
-        
-        // other
+        boolean _pending = false;   // waiting for resume or timeout
+        boolean _resumed = false;   // resume called.
+        boolean _parked =false;     // end point dispatched, but undispatch called.
         RetryRequest _retry;
         long _timeout;
-        Object _mutex;
-        
-        final Timeout.Task _timeoutTask;
-        
-        
-        RetryContinuation()
-        {
-            _mutex=this;
-            _dispatched=true;
-            _suspended=false;
-            _triggered=false;
-                
-            HttpConnection connection = HttpConnection.getCurrentConnection();
-            _endPoint=(SelectChannelEndPoint)connection.getEndPoint();
-            
-            _timeoutTask= new Timeout.Task(_mutex)
-            {
-                public void expire()
-                {
-                    RetryContinuation.this.expire();
-                }
-            };
-        }
-        
-        public void setMutex(Object mutex)
-        {
-            synchronized(_mutex)
-            {
-                _mutex=mutex;
-                _timeoutTask.setMutex(mutex);
-            }
-        }
 
         
         public Object getObject()
@@ -474,185 +400,138 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         public boolean isPending()
         {
-            synchronized(_mutex)
-            {
-                return _suspended||_triggered;
-            }
+            return _pending;
         }
 
         public boolean isResumed()
         {
             return _resumed;
         }
-        
-        public boolean isExpired()
-        {
-            return _timeoutTask.isExpired();
-        }
 
         public void reset()
         {
-            synchronized (_mutex)
+            synchronized (this)
             {
-                // To ?-- state
-                _suspended=false;
-                _triggered=false;
-                
-                
                 _resumed = false;
+                _pending = false;
+                _parked = false;
             }
             
             synchronized (_endPoint.getSelectSet())
             {
-                _timeoutTask.cancel();   
+                this.cancel();   
             }
         } 
 
         public boolean suspend(long timeout)
         {
-            synchronized (_mutex)
+            boolean resumed=false;
+            synchronized (this)
             {
-                if (!_dispatched)
-                    throw new IllegalStateException("!Dispatched");
-                if (_suspended)
-                    throw new IllegalStateException("Suspended");
-                
-                
-                if (_triggered)
+                resumed=_resumed;
+                _resumed=false;
+                _new = false;
+                if (!_pending && !resumed && timeout >= 0)
                 {
-                    // suspending a retry == reset
-                    _suspended=false;
-                    _triggered=false;
-                    
-                    boolean resumed=_resumed;
-                    _resumed=false;
-                    return resumed;
-                }
-                else
-                {
-                    _suspended=true;
-
+                    _pending=true;
+                    _parked = false;
                     _timeout = timeout;
                     if (_retry==null)
-                        _retry = new RetryRequest();
+                     _retry = new RetryRequest();
+                    throw _retry;
                 }
+                
+                // here only if suspend called on pending continuation.
+                // acts like a reset
+                _resumed = false;
+                _pending = false;
+                _parked =false;
             }
 
-            _endPoint.getSelectSet().scheduleTimeout(_timeoutTask,_timeout);
-            throw _retry;      
+            synchronized (_endPoint.getSelectSet())
+            {
+                this.cancel();   
+            }
+
+            return resumed;
         }
-        
         
         public void resume()
         {
-            boolean unsuspend=false;
-            synchronized (_mutex)
+            boolean redispatch=false;
+            synchronized (this)
             {
-                if (_suspended)
+                if (_pending && !isExpired())
                 {
-                    _triggered=true;   
-                    _resumed=true;
-
-                    if (!_dispatched)
-                    {
-                        unsuspend=true;
-                        _suspended=false;
-                    }
+                    _resumed = true;
+                    redispatch=_parked;
+                    _parked=false;
                 }
             }
 
-            if (unsuspend)
-                unsuspend();
-        }
-
-        private void expire()
-        {
-
-            boolean unsuspend=false;
-            synchronized (_mutex)
-            {
-                // move to ?ST
-                if (_suspended)
-                {
-                    _triggered=true;
-                
-                    if (!_dispatched)
-                    {
-                        // -ST -> --T
-                        unsuspend=true;
-                        _suspended=false;
-                    }
-                }
-            }
-            
-            if (unsuspend)
-                unsuspend();
-        }
-        
-
-        
-        public void dispatch()
-        {
-            boolean suspended=false;
-            synchronized (_mutex)
-            {
-                _dispatched=true;
-                
-                if (_suspended)
-                {
-                    suspended=true;
-                    _suspended=false;
-                    _triggered=true;
-                }
-            }
-
-            if (suspended)
+            if (redispatch)
             {
                 SelectSet selectSet = _endPoint.getSelectSet();
+                
                 synchronized (selectSet)
                 {
-                    _timeoutTask.cancel();   
+                    this.cancel();   
                 }
+
+                _endPoint.scheduleIdle();  // TODO maybe not needed?
+                selectSet.addChange(this);
+                selectSet.wakeup();
             }
         }
         
-        
-        public void undispatch()
+        public void expire()
         {
-            boolean unsuspend=false;
-        
-            synchronized (_mutex)
+            boolean redispatch=false;
+            synchronized (this)
             {
-                _dispatched=false;
-                _new = false;
+                redispatch=_parked && _pending && !_resumed;
+                _parked=false;
+            }
+            if (redispatch)
+            {
+                _endPoint.scheduleIdle();  // TODO maybe not needed?
+                _endPoint.getSelectSet().addChange(this);
+                _endPoint.getSelectSet().wakeup();
+            }
+        }
+
+        
+        public void run()
+        {
+            _endPoint.run();
+        }
+        
+        /* undispatch continuation.
+         * Called when an endppoint is undispatched.  
+         * Either sets timeout or dispatches if already resumed or expired */
+        public boolean undispatch()
+        {
+            boolean redispatch=false;
+        
+            synchronized (this)
+            {
+                if (!_pending)
+                    return true;
                 
-                if (_suspended && _triggered)
-                {
-                    unsuspend=true;
-                    _suspended=false;
-                }
+                redispatch=isExpired() || _resumed;
+                _parked=!redispatch;
             }
             
-            if(unsuspend)
-                unsuspend();
-        }
-        
-        private void unsuspend()
-        {
-            synchronized (_endPoint.getSelectSet())
+            if (redispatch)
             {
-                _timeoutTask.cancel();   
+                _endPoint.scheduleIdle();
+                _endPoint.getSelectSet().addChange(this);
             }
+            else if (_timeout>0)
+                _endPoint.getSelectSet().scheduleTimeout(this,_timeout);
             
-            try
-            {
-                _endPoint.dispatch();
-            }
-            catch(IOException e)
-            {
-                Log.warn(e);
-                _endPoint.getSelectSet().addChange(_endPoint);
-            }
+            _endPoint.getSelectSet().wakeup();
+            return false;
         }
 
         public void setObject(Object object)
@@ -662,17 +541,17 @@ public class SelectChannelConnector extends AbstractNIOConnector
         
         public String toString()
         {
-            synchronized (_mutex)
+            synchronized (this)
             {
                 return "RetryContinuation@"+hashCode()+
-                (_dispatched?",D":",d")+
-                (_suspended?"S":"s")+
-                (_triggered?"T":"t")+
                 (_new?",new":"")+
+                (_pending?",pending":"")+
                 (_resumed?",resumed":"")+
-                (isExpired()?",expired":"");
+                (isExpired()?",expired":"")+
+                (_parked?",parked":"");
             }
         }
 
     }
+
 }

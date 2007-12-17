@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.1.6</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -76,19 +76,16 @@
         <artifactId>maven-jetty-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
-          <stopPort>8087</stopPort>
-          <stopKey>foo</stopKey>
           <scanIntervalSeconds>1</scanIntervalSeconds>
           <!-- contextPath>/test</contextPath -->
           <webAppConfig>
             <contextPath>/test</contextPath>
             <tempDirectory>${project.build.directory}/work</tempDirectory>
-            <sessionHandler implementation="org.mortbay.jetty.servlet.SessionHandler">
+            <!-- sessionHandler implementation="org.mortbay.jetty.servlet.SessionHandler">
               <sessionManager implementation="org.mortbay.jetty.servlet.HashSessionManager">
                 <storeDirectory>${basedir}/target/sessions</storeDirectory>
-                <!-- savePeriod>5</savePeriod -->
               </sessionManager>
-            </sessionHandler>
+            </sessionHandler -->
           </webAppConfig>
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">

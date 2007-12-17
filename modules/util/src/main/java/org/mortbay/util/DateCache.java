@@ -41,7 +41,6 @@ import java.util.TimeZone;
 
 public class DateCache  
 {
-    private static String DEFAULT_FORMAT="EEE MMM dd HH:mm:ss zzz yyyy";
     private static long __hitWindow=60*60;
     private static long __MaxMisses=10;
     
@@ -71,7 +70,7 @@ public class DateCache
      */
     public DateCache()
     {
-        this(DEFAULT_FORMAT);
+        this("EEE MMM dd HH:mm:ss zzz yyyy");
         getFormat().setTimeZone(TimeZone.getDefault());
     }
     

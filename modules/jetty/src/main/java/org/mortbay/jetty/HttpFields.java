@@ -216,7 +216,6 @@ public class HttpFields
      */
     public Enumeration getFieldNames()
     {
-        final int revision=_revision;
         return new Enumeration()
         {
             int i = 0;
@@ -228,7 +227,7 @@ public class HttpFields
                 while (i < _fields.size())
                 {
                     Field f = (Field) _fields.get(i++);
-                    if (f != null && f._prev == null && f._revision == revision)
+                    if (f != null && f._prev == null && f._revision == _revision)
                     {
                         field = f;
                         return true;
@@ -256,7 +255,6 @@ public class HttpFields
      */
     public Iterator getFields()
     {
-        final int revision=_revision;
         return new Iterator()
         {
             int i = 0;
@@ -268,7 +266,7 @@ public class HttpFields
                 while (i < _fields.size())
                 {
                     Field f = (Field) _fields.get(i++);
-                    if (f != null && f._revision == revision)
+                    if (f != null && f._revision == _revision)
                     {
                         field = f;
                         return true;
@@ -374,9 +372,7 @@ public class HttpFields
     public Enumeration getValues(String name)
     {
         final Field field = getField(name);
-        if (field == null) 
-            return null;
-        final int revision=_revision;
+        if (field == null) return null;
 
         return new Enumeration()
         {
@@ -384,7 +380,7 @@ public class HttpFields
 
             public boolean hasMoreElements()
             {
-                while (f != null && f._revision != revision)
+                while (f != null && f._revision != _revision)
                     f = f._next;
                 return f != null;
             }
@@ -395,7 +391,7 @@ public class HttpFields
                 Field n = f;
                 do
                     f = f._next;
-                while (f != null && f._revision != revision);
+                while (f != null && f._revision != _revision);
                 return n.getValue();
             }
         };
@@ -411,9 +407,8 @@ public class HttpFields
     public Enumeration getValues(Buffer name)
     {
         final Field field = getField(name);
-        if (field == null) 
-            return null;
-        final int revision=_revision;
+
+        if (field == null) return null;
 
         return new Enumeration()
         {
@@ -421,7 +416,7 @@ public class HttpFields
 
             public boolean hasMoreElements()
             {
-                while (f != null && f._revision != revision)
+                while (f != null && f._revision != _revision)
                     f = f._next;
                 return f != null;
             }
@@ -431,7 +426,7 @@ public class HttpFields
                 if (f == null) throw new NoSuchElementException();
                 Field n = f;
                 f = f._next;
-                while (f != null && f._revision != revision)
+                while (f != null && f._revision != _revision)
                     f = f._next;
                 return n.getValue();
             }
@@ -451,8 +446,7 @@ public class HttpFields
     public Enumeration getValues(String name, final String separators)
     {
         final Enumeration e = getValues(name);
-        if (e == null) 
-            return null;
+        if (e == null) return null;
         return new Enumeration()
         {
             QuotedStringTokenizer tok = null;

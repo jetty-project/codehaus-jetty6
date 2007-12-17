@@ -138,9 +138,7 @@ public class Response implements HttpServletResponse
         if (sessionManager==null)
             return url;
         String sessionURLPrefix = sessionManager.getSessionURLPrefix();
-        if (sessionURLPrefix==null)
-            return url;
-
+        
         // should not encode if cookies in evidence
         if (url==null || request==null || request.isRequestedSessionIdFromCookie())
         {
@@ -523,8 +521,6 @@ public class Response implements HttpServletResponse
      */
     public void setStatus(int sc, String sm)
     {
-        if (sc<=0)
-            throw new IllegalArgumentException();
         if (!_connection.isIncluding())
         {
             _status=sc;

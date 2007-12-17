@@ -69,9 +69,7 @@ public class BufferCache
         Buffer b= get(buffer);
         if (b == null)
         {
-            if (buffer instanceof Buffer.CaseInsensitve)
-                return buffer;
-            return new View.CaseInsensitive(buffer);
+            return buffer;
         }
 
         return b;

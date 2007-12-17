@@ -32,8 +32,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     protected boolean _readBlocked;
     protected boolean _writeBlocked;
     protected Connection _connection;
-    private boolean _open;
-    private Timeout.Task _idleTask = new IdleTask();
+
+    private Timeout.Task _timeoutTask = new IdleTask();
 
     /* ------------------------------------------------------------ */
     public Connection getConnection()
@@ -50,14 +50,13 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         _selectSet = selectSet;
         _connection = _manager.newConnection(channel,this);
         
-        _open=true;
-        _manager.endPointOpened(this);
+        _manager.endPointOpened(this); // TODO not here!
         
         _key = key;
     }
 
     /* ------------------------------------------------------------ */
-    public void dispatch() throws IOException
+    void dispatch() throws IOException
     {
         boolean dispatch_done = true;
         try
@@ -87,7 +86,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
      * @return True if the endpoint should be dispatched to a thread pool.
      * @throws IOException
      */
-    private boolean dispatch(boolean assumeShortDispatch) throws IOException
+    public boolean dispatch(boolean assumeShortDispatch) throws IOException
     {
         // If threads are blocked on this
         synchronized (this)
@@ -139,6 +138,32 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         }
         return true;
     }
+
+    /* ------------------------------------------------------------ */
+    public void scheduleIdle()
+    {
+        _selectSet.scheduleIdle(_timeoutTask);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void cancelIdle()
+    {
+        _selectSet.cancelIdle(_timeoutTask);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    protected void idleExpired()
+    {
+        try
+        {
+            close();
+        }
+        catch (IOException e)
+        {
+            Log.ignore(e);
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -161,32 +186,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 _interestOps = -1;
                 _selectSet.addChange(this);
             }
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public void scheduleIdle()
-    {
-        _selectSet.scheduleIdle(_idleTask);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void cancelIdle()
-    {
-        _selectSet.cancelIdle(_idleTask);
-    }
-
-
-    /* ------------------------------------------------------------ */
-    protected void idleExpired()
-    {
-        try
-        {
-            close();
-        }
-        catch (IOException e)
-        {
-            Log.ignore(e);
         }
     }
 
@@ -354,9 +353,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                                     _key.cancel();
                                 }
                                 cancelIdle();
-                                if (_open)
-                                    _manager.endPointClosed(this);
-                                _open=false;
+                                _manager.endPointClosed(this);
                                 _key = null;
                             }
                         }
@@ -382,9 +379,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                     _key.cancel(); 
                 }
                 cancelIdle();
-                if (_open)
-                    _manager.endPointClosed(this);
-                _open=false;
+                _manager.endPointClosed(this);
                 _key = null;
             }
         }
@@ -456,7 +451,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     /* ------------------------------------------------------------ */
     public Timeout.Task getTimeoutTask()
     {
-        return _idleTask;
+        return _timeoutTask;
     }
 
     /* ------------------------------------------------------------ */
