@@ -42,6 +42,7 @@ public class Log
     
     private static String logClass=System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4jLog");
     private static boolean verbose = System.getProperty("VERBOSE",null)!=null;
+    private static boolean ignored = System.getProperty("IGNORED",null)!=null;
     private static Logger log;
    
     static
@@ -112,9 +113,14 @@ public class Log
     {
         if (log==null)
             return;
+        if (ignored)
+        {
+            log.warn(IGNORED,th);
+            unwind(th);
+        }
         if (verbose)
         {
-            log.debug(IGNORED,th);
+            log.warn(IGNORED,th);
             unwind(th);
         }
     }

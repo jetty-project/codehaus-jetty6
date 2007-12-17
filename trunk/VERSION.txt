@@ -1,16 +1,32 @@
 
-jetty-6.1-SNAPSHOT
- + optimizations of Cometd and Continuations
- + Added BayeuxService
- + grizzly fixed for posts
- + allow sessions to be periodically persisted to disk
- + Delay 100 continues until getInputStream
- + Add "mvn jetty:stop" 
- + Added JSON.Convertor
- + Improved Cometd timeout handling
- + Update java5 patch
+jetty-6.2-SNAPSHOT
+ + Refactor of Continuation towards servlet 3.0 proposal
  + Added option to dispatch to suspended requests.
+ + Delay 100 continues until getInputStream
+ + Added BayeuxService
+ + Added JSON.Convertor
+ + Add "mvn jetty:stop" 
+ + allow sessions to be periodically persisted to disk
  + Cookie support in BayeuxClient
+ + grizzly fixed for posts
+ + Improved Cometd timeout handling
+ + optimizations and improvements of Cometd
+ + Update java5 patch
+ + JETTY-467 allow URL rewriting to be disabled.
+ + JETTY-468 unique holder names for addServletWithMapping
+ + JETTY-474 Fixed case sensitivity issue with HttpFields
+
+jetty-6.1-SNAPSHOT
+ + Added BayeuxService
+ + Added JSON.Convertor
+ + Add "mvn jetty:stop" 
+ + allow sessions to be periodically persisted to disk
+ + Cookie support in BayeuxClient
+ + Cookie support in BayeuxClient
+ + grizzly fixed for posts
+ + jetty-6.1 branch created from 6.1.6 and r593 of jetty-contrib trunk
+ + optimizations and improvements of Cometd
+ + Update java5 patch
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
@@ -23,7 +39,6 @@ jetty-6.1.6 - 18 November 2007
  + JETTY-461 fixed cometd unknown channel
  + JETTY-464 typo in ErrorHandler
  + JETTY-465 System.exit() in constructor exception for MultiPartOutputStream
- 
 
 jetty-6.1.6rc1 - 5 November 2007
  + Upgrade jsp 2.1 to SJSAS-9_1-B58G-FCS-08_Sept_2007

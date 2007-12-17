@@ -3,7 +3,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -11,7 +11,7 @@
   <artifactId>project-website</artifactId>
   <packaging>pom</packaging>
   <name>Jetty WebSite</name>
-  <version>6.1-SNAPSHOT</version>
+  <version>6.2-SNAPSHOT</version>
   <modules>
     <module>project-skin</module>
     <module>project-site</module>

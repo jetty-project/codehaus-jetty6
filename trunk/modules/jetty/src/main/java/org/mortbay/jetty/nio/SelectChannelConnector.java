@@ -17,6 +17,7 @@ package org.mortbay.jetty.nio;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -25,7 +26,9 @@ import org.mortbay.io.Connection;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.log.Log;
@@ -82,7 +85,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             return channel;
         }
 
-        public boolean dispatch(Runnable task) throws IOException
+        public boolean dispatch(Runnable task)
         {
             return getThreadPool().dispatch(task);
         }
@@ -139,7 +142,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
     {
-        ConnectorEndPoint cep = ((ConnectorEndPoint)endpoint);
+        SuspendableEndPoint cep = ((SuspendableEndPoint)endpoint);
         cep.cancelIdle();
         request.setTimeStamp(cep.getSelectSet().getNow());
         super.customize(endpoint, request);
@@ -148,7 +151,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void persist(org.mortbay.io.EndPoint endpoint) throws IOException
     {
-        ((ConnectorEndPoint)endpoint).scheduleIdle();
+        ((SuspendableEndPoint)endpoint).scheduleIdle();
         super.persist(endpoint);
     }
 
@@ -185,9 +188,9 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /*
      * @see org.mortbay.jetty.Connector#newContinuation()
      */
-    public Continuation newContinuation()
+    public Continuation newContinuation(Connection connection)
     {
-        return new RetryContinuation();
+        return (SuspendableEndPoint)((HttpConnection)connection).getEndPoint();
     }
 
     /* ------------------------------------------------------------ */
@@ -339,7 +342,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new ConnectorEndPoint(channel,selectSet,key);
+        return new SuspendableEndPoint(channel,selectSet,key);
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -351,111 +354,82 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public static class ConnectorEndPoint extends SelectChannelEndPoint
+    public static class SuspendableEndPoint extends SelectChannelEndPoint implements Continuation
     {
-        public ConnectorEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
-        {
-            super(channel,selectSet,key);
-            scheduleIdle();
-        }
-
-        public void close() throws IOException
-        {
-            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
-            if (continuation != null && continuation.isPending())
-                continuation.reset();
-
-            super.close();
-        }
-
-        /* ------------------------------------------------------------ */
-        public void run()
-        {
-            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
-            if (continuation!=null)
-                continuation.dispatch();
-            super.run();
-        }
-        
-        /* ------------------------------------------------------------ */
-        public void undispatch()
-        {
-            HttpConnection connection = (HttpConnection)getConnection();
-            RetryContinuation continuation = (RetryContinuation) connection.getRequest().getContinuation();
-
-
-            super.undispatch();
-            
-            if (continuation != null)
-            {
-                // We have a continuation
-                Log.debug("continuation {}", continuation);
-                continuation.undispatch();
-            }
-            
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static class RetryContinuation implements Continuation
-    {
-        // Configuration
-        final SelectChannelEndPoint _endPoint;
-        
-        
         // Main states are D=Dispatched, S=suspended, T=triggered
         // dst IDLE          Dst DISPATCHED
         // dsT scheduled     DsT RETRY
         // dSt SUSPENDED     DSt Suspending
         // dST unsuspending  DST unsuspending 
-        boolean _dispatched;
-        boolean _suspended;
-        boolean _triggered;
-        
+        protected boolean _suspended;
+        protected boolean _triggered;
         
         // Secondary state
-        boolean _new = true;
-        boolean _resumed = false;   // resume called.
-        Object _object;
+        protected boolean _new = true;
+        protected boolean _resumed = false;   // resume called.
+        protected Object _object;
         
         // other
-        RetryRequest _retry;
-        long _timeout;
-        Object _mutex;
+        protected RetryRequest _retry;
+        protected long _timeout;
+        protected Object _mutex;
         
-        final Timeout.Task _timeoutTask;
+        protected final Timeout.Task _timeoutTask;
         
         
-        RetryContinuation()
+        // TODO remove this debugging aid
+        /*
+        String[] last = {null,null,null,null,null,null};
+        void last(String l)
         {
+            last[5]=last[4];
+            last[4]=last[3];
+            last[3]=last[2];
+            last[2]=last[1];
+            last[1]=last[0];
+            last[0]=l;
+        }*/
+        
+        
+        
+        public SuspendableEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
+        {
+            super(channel,selectSet,key);
+
             _mutex=this;
-            _dispatched=true;
+            _dispatched=false;
             _suspended=false;
             _triggered=false;
                 
             HttpConnection connection = HttpConnection.getCurrentConnection();
-            _endPoint=(SelectChannelEndPoint)connection.getEndPoint();
             
             _timeoutTask= new Timeout.Task(_mutex)
             {
                 public void expire()
                 {
-                    RetryContinuation.this.expire();
+                    SuspendableEndPoint.this.expire();
                 }
             };
+            
+            scheduleIdle();
+        }
+
+        
+        public void close() throws IOException
+        {
+            reset();
+            super.close();
         }
         
         public void setMutex(Object mutex)
         {
             synchronized(_mutex)
             {
-                _mutex=mutex;
-                _timeoutTask.setMutex(mutex);
+                // TODO - is this a good idea?
+                // _mutex=mutex;
+                // _timeoutTask.setMutex(mutex);
             }
         }
-
         
         public Object getObject()
         {
@@ -469,7 +443,10 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         public boolean isNew()
         {
-            return _new;
+            synchronized(_mutex)
+            {
+                return _new;
+            }
         }
 
         public boolean isPending()
@@ -482,42 +459,48 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         public boolean isResumed()
         {
-            return _resumed;
+            synchronized(_mutex)
+            {
+                return _resumed;
+            }
         }
         
         public boolean isExpired()
         {
-            return _timeoutTask.isExpired();
+            synchronized(_mutex)
+            {
+                return _timeoutTask.isExpired();
+            }
         }
 
         public void reset()
         {
             synchronized (_mutex)
             {
-                // To ?-- state
+                // last("reset");
                 _suspended=false;
                 _triggered=false;
-                
-                
+  
                 _resumed = false;
             }
             
-            synchronized (_endPoint.getSelectSet())
+            synchronized (getSelectSet())
             {
                 _timeoutTask.cancel();   
             }
         } 
 
+        
         public boolean suspend(long timeout)
         {
             synchronized (_mutex)
             {
+                // last("suspend");
                 if (!_dispatched)
-                    throw new IllegalStateException("!Dispatched");
+                    throw new IllegalStateException("!Dispatched "+this);
                 if (_suspended)
-                    throw new IllegalStateException("Suspended");
-                
-                
+                    throw new IllegalStateException("Suspended "+this);
+                      
                 if (_triggered)
                 {
                     // suspending a retry == reset
@@ -538,16 +521,16 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 }
             }
 
-            _endPoint.getSelectSet().scheduleTimeout(_timeoutTask,_timeout);
+            getSelectSet().scheduleTimeout(_timeoutTask,_timeout);
             throw _retry;      
         }
         
-        
         public void resume()
         {
-            boolean unsuspend=false;
+            boolean dispatched=false;
             synchronized (_mutex)
             {
+                // last("resume");
                 if (_suspended)
                 {
                     _triggered=true;   
@@ -555,23 +538,23 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
                     if (!_dispatched)
                     {
-                        unsuspend=true;
+                        _new =false;
+                        dispatched=super.dispatch();
                         _suspended=false;
                     }
                 }
             }
 
-            if (unsuspend)
-                unsuspend();
+            if (dispatched)
+                getSelectSet().cancelIdle(_timeoutTask);
         }
 
         private void expire()
         {
-
-            boolean unsuspend=false;
+            boolean dispatched=false;
             synchronized (_mutex)
             {
-                // move to ?ST
+                // last("expire");
                 if (_suspended)
                 {
                     _triggered=true;
@@ -579,79 +562,58 @@ public class SelectChannelConnector extends AbstractNIOConnector
                     if (!_dispatched)
                     {
                         // -ST -> --T
-                        unsuspend=true;
+                        _new =false;
+                        dispatched=super.dispatch();
                         _suspended=false;
                     }
                 }
             }
             
-            if (unsuspend)
-                unsuspend();
+            if (dispatched)
+                getSelectSet().cancelIdle(_timeoutTask);
         }
-        
-
-        
-        public void dispatch()
+           
+        protected boolean dispatch()
         {
-            boolean suspended=false;
+            boolean dispatched=false;
+            boolean dispatchedFromSuspended=false;
             synchronized (_mutex)
             {
-                _dispatched=true;
+                // last("dispatch");
+                _new=false;
+                dispatched=super.dispatch();
                 
                 if (_suspended)
                 {
-                    suspended=true;
                     _suspended=false;
                     _triggered=true;
+                    dispatchedFromSuspended=true;
                 }
             }
 
-            if (suspended)
-            {
-                SelectSet selectSet = _endPoint.getSelectSet();
-                synchronized (selectSet)
-                {
-                    _timeoutTask.cancel();   
-                }
-            }
+            if (dispatchedFromSuspended)
+                getSelectSet().cancelTimeout(_timeoutTask);
+            
+            return dispatched;
         }
         
-        
-        public void undispatch()
+        public boolean undispatch()
         {
-            boolean unsuspend=false;
-        
             synchronized (_mutex)
             {
-                _dispatched=false;
-                _new = false;
+                if (!_dispatched)
+                    throw new IllegalStateException();
+                // last("undispatch");
                 
-                if (_suspended && _triggered)
+                if (_suspended&&_triggered)
                 {
-                    unsuspend=true;
+                    // short circuit
                     _suspended=false;
+                    // last("!undispatch");
+                    return false;
                 }
-            }
-            
-            if(unsuspend)
-                unsuspend();
-        }
-        
-        private void unsuspend()
-        {
-            synchronized (_endPoint.getSelectSet())
-            {
-                _timeoutTask.cancel();   
-            }
-            
-            try
-            {
-                _endPoint.dispatch();
-            }
-            catch(IOException e)
-            {
-                Log.warn(e);
-                _endPoint.getSelectSet().addChange(_endPoint);
+                
+                return super.undispatch();
             }
         }
 
@@ -671,6 +633,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 (_new?",new":"")+
                 (_resumed?",resumed":"")+
                 (isExpired()?",expired":"");
+                // ">"+last[5]+">"+last[4]+">"+last[3]+">"+last[2]+">"+last[1]+">"+last[0];
             }
         }
 
