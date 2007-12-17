@@ -64,8 +64,34 @@ public class JSONTest extends TestCase
         assertTrue(s.indexOf("\"n8\":[1,2,3,4]")>=0);
         assertTrue(s.indexOf("\"n9\":[{},  [],  {}]")>=0);
         assertTrue(s.indexOf("\"w0\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle0\",\"nested\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle1\",\"nested\":null,\"number\":101},\"number\":100}")>=0);
+
+        Gadget gadget = new Gadget();
+        gadget.setShields(42);
+        gadget.setWoggles(new Woggle[]{w0,w1});
+        
+        s = JSON.toString(new Gadget[]{gadget});
+        assertTrue(s.startsWith("["));
+        assertTrue(s.indexOf("\"modulated\":false")>=0);
+        assertTrue(s.indexOf("\"shields\":42")>=0);
+        assertTrue(s.indexOf("\"name\":\"woggle0\"")>=0);
+        assertTrue(s.indexOf("\"name\":\"woggle1\"")>=0);
+
     }
     
+    
+    
+    /* ------------------------------------------------------------ */
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#setUp()
+     */
+    protected void setUp() throws Exception
+    {
+        JSON.registerConvertor(Gadget.class,new JSONObjectConvertor(false));
+    }
+
+
+
+    /* ------------------------------------------------------------ */
     public void testParse()
     {
         Map map = (Map)JSON.parse(test);
@@ -77,8 +103,11 @@ public class JSONTest extends TestCase
         
         test="{\"data\":{\"source\":\"15831407eqdaawf7\",\"widgetId\":\"Magnet_8\"},\"channel\":\"/magnets/moveStart\",\"connectionId\":null,\"clientId\":\"15831407eqdaawf7\"}";
         map = (Map)JSON.parse(test);
+
+        
     }
 
+    /* ------------------------------------------------------------ */
     public void testParseReader() throws Exception
     {
         Map map = (Map)JSON.parse(new StringReader(test));
@@ -113,13 +142,69 @@ public class JSONTest extends TestCase
         assertEquals("fred",((Map)o).get("name"));
         
     }
-    
+
+    public static class Gadget 
+    {
+        private boolean modulated;
+        private long shields;
+        private Woggle[] woggles;
+        /* ------------------------------------------------------------ */
+        /**
+         * @return the modulated
+         */
+        public boolean isModulated()
+        {
+            return modulated;
+        }
+        /* ------------------------------------------------------------ */
+        /**
+         * @param modulated the modulated to set
+         */
+        public void setModulated(boolean modulated)
+        {
+            this.modulated=modulated;
+        }
+        /* ------------------------------------------------------------ */
+        /**
+         * @return the shields
+         */
+        public long getShields()
+        {
+            return shields;
+        }
+        /* ------------------------------------------------------------ */
+        /**
+         * @param shields the shields to set
+         */
+        public void setShields(long shields)
+        {
+            this.shields=shields;
+        }
+        /* ------------------------------------------------------------ */
+        /**
+         * @return the woggles
+         */
+        public Woggle[] getWoggles()
+        {
+            return woggles;
+        }
+        /* ------------------------------------------------------------ */
+        /**
+         * @param woggles the woggles to set
+         */
+        public void setWoggles(Woggle[] woggles)
+        {
+            this.woggles=woggles;
+        }
+        
+        
+    }
     
     public static class Woggle implements JSON.Convertible
     {
         String name;
         Woggle nested;
-        int number;
+        long number;
         
         public Woggle()
         {

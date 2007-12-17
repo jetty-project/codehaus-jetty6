@@ -132,6 +132,20 @@ public abstract class AbstractJettyMojo extends AbstractMojo
      * @parameter
      */
     protected File jettyConfig;
+    
+    /**
+     * Port to listen to stop jetty on executing -DSTOP.PORT=<stopPort> 
+     * -DSTOP.KEY=<stopKey> -jar start.jar --stop
+     * @parameter
+     */
+    protected int stopPort;
+    
+    /**
+     * Key to provide when stopping jetty on executing java -DSTOP.KEY=<stopKey> 
+     * -DSTOP.PORT=<stopPort> -jar start.jar --stop
+     * @parameter
+     */
+    protected String stopKey;
   
     
     /**
@@ -333,6 +347,12 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             //particular Jetty version
             finishConfigurationBeforeStart();   
             
+            if(stopPort>0 && stopKey!=null)
+            {
+                System.setProperty("STOP.PORT", String.valueOf(stopPort));
+                System.setProperty("STOP.KEY", stopKey);
+                org.mortbay.start.Monitor.monitor();
+            }
             // start Jetty
             server.start();
 
@@ -341,7 +361,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             // start the scanner thread (if necessary) on the main webapp
             configureScanner ();            
             startScanner();
-            
+
             // keep the thread going
             server.join();
         }

@@ -297,7 +297,12 @@ public class Timeout
             unlink();
         }
         
+        /* ------------------------------------------------------------ */
         public boolean isExpired() { return _expired; }
+
+        /* ------------------------------------------------------------ */
+	public boolean isScheduled() { return _next!=this; }
+
         
         /* ------------------------------------------------------------ */
         /** Expire task.
