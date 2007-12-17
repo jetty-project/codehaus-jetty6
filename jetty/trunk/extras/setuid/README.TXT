@@ -14,7 +14,7 @@ to the gcc command depending on your environment:
 +  run mvn install at the top level of this project
 +  mkdir -p modules/native/target/generated
 +  cp modules/native/src/main/native/org_mortbay_setuid_SetUID.c modules/native/target/generated  
-+  javah -d modules/native/target/generated -classpath modules/java/target/jetty-setuid-java-6.1-SNAPSHOT.jar org.mortbay.setuid.SetUID
++  javah -d modules/native/target/generated -classpath modules/java/target/jetty-setuid-java-6.2-SNAPSHOT.jar org.mortbay.setuid.SetUID
 +  gcc -I$JAVA_HOME/include/ -I$JAVA_HOME/include/linux/  \
        -shared modules/native/target/generated/org_mortbay_setuid_SetUID.c -o \
        ../../lib/ext/libsetuid.so
