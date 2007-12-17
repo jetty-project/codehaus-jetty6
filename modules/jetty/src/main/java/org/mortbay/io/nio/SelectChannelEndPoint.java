@@ -57,51 +57,27 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
 
     /* ------------------------------------------------------------ */
-    public void dispatch() throws IOException
-    {
-        boolean dispatch_done = true;
-        try
-        {
-            if (dispatch(_manager.isDelaySelectKeyUpdate()))
-            {
-                dispatch_done= false;
-                dispatch_done = _manager.dispatch((Runnable)this);
-            }
-        }
-        finally
-        {
-            if (!dispatch_done)
-            {
-                Log.warn("dispatch failed!");
-                undispatch();
-            }
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Put the endpoint into the dispatched state.
-     * A blocked thread may be woken up by this call, or the endpoint placed in a state ready
-     * for a dispatch to a threadpool.
-     * @param assumeShortDispatch If true, the interested ops are not modified.
-     * @return True if the endpoint should be dispatched to a thread pool.
-     * @throws IOException
+    /** Called by selectSet to schedule handling
+     * 
      */
-    private boolean dispatch(boolean assumeShortDispatch) throws IOException
+    public void schedule() throws IOException
     {
         // If threads are blocked on this
         synchronized (this)
         {
+            // If there is no key, then do nothing
             if (_key == null || !_key.isValid())
             {
                 _readBlocked=false;
                 _writeBlocked=false;
                 this.notifyAll();
-                return false;
+                return;
             }
             
+            // If there are threads dispatched reading and writing
             if (_readBlocked || _writeBlocked)
             {
+                assert _dispatched;
                 if (_readBlocked && _key.isReadable())
                     _readBlocked=false;
                 if (_writeBlocked && _key.isWritable())
@@ -112,18 +88,19 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 
                 // we are not interested in further selecting
                 _key.interestOps(0);
-                return false;
+                return;
             }
-
-            if (!assumeShortDispatch)
+            
+            if (!_manager.isDelaySelectKeyUpdate())
                 _key.interestOps(0);
 
+            
             // Otherwise if we are still dispatched
             if (_dispatched)
             {
                 // we are not interested in further selecting
                 _key.interestOps(0);
-                return false;
+                return;
             }
 
             // Remove writeable op
@@ -135,17 +112,33 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 _writable = true; // Once writable is in ops, only removed with dispatch.
             }
 
-            _dispatched = true;
+            if (!dispatch())
+                updateKey();
         }
-        return true;
     }
-    
+        
+    /* ------------------------------------------------------------ */
+    protected boolean dispatch() 
+    {
+        synchronized(this)
+        {
+            // Otherwise if we are still dispatched
+            if (_dispatched)
+                throw new IllegalStateException("ALREADY DISPATCHED!!!");
+
+            _dispatched = _manager.dispatch((Runnable)this);   
+            if(!_dispatched)
+                Log.warn("Dispatched Failed!");
+            return _dispatched;
+        }
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * Called when a dispatched thread is no longer handling the endpoint. The selection key
      * operations are updated.
      */
-    public void undispatch()
+    protected boolean undispatch()
     {
         synchronized (this)
         {
@@ -162,6 +155,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
                 _selectSet.addChange(this);
             }
         }
+        return true;
     }
 
     /* ------------------------------------------------------------ */
@@ -175,7 +169,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         _selectSet.cancelIdle(_idleTask);
     }
-
 
     /* ------------------------------------------------------------ */
     protected void idleExpired()
@@ -395,36 +388,42 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
      */
     public void run()
     {
-        try
+        
+        boolean dispatched=true;
+        do
         {
-            _connection.handle();
+            try
+            {
+                _connection.handle();
+            }
+            catch (ClosedChannelException e)
+            {
+                Log.ignore(e);
+            }
+            catch (EofException e)
+            {
+                Log.debug("EOF", e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
+            }
+            catch (HttpException e)
+            {
+                Log.debug("BAD", e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
+            }
+            catch (Throwable e)
+            {
+                Log.warn("handle failed", e);
+                try{close();}
+                catch(IOException e2){Log.ignore(e2);}
+            }
+            finally
+            {
+                dispatched=!undispatch();
+            }   
         }
-        catch (ClosedChannelException e)
-        {
-            Log.ignore(e);
-        }
-        catch (EofException e)
-        {
-            Log.debug("EOF", e);
-            try{close();}
-            catch(IOException e2){Log.ignore(e2);}
-        }
-        catch (HttpException e)
-        {
-            Log.debug("BAD", e);
-            try{close();}
-            catch(IOException e2){Log.ignore(e2);}
-        }
-        catch (Throwable e)
-        {
-            Log.warn("handle failed", e);
-            try{close();}
-            catch(IOException e2){Log.ignore(e2);}
-        }
-        finally
-        {
-            undispatch();
-        }
+        while(dispatched);
     }
 
     /* ------------------------------------------------------------ */

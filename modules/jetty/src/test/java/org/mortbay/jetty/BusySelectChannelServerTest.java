@@ -25,7 +25,7 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
              */
             protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
             {
-                return new ConnectorEndPoint(channel,selectSet,key)
+                return new SuspendableEndPoint(channel,selectSet,key)
                 {
                     int write;
                     int read;

@@ -519,7 +519,7 @@ public class HttpConnection implements Connection
             }
             catch (RetryRequest r)
             {
-                Log.ignore(r);
+                // Log.ignore(r);
                 retrying = true;
             }
             catch (EofException e)
@@ -561,12 +561,6 @@ public class HttpConnection implements Connection
                         _expect = UNKNOWN;
                         if (_parser instanceof HttpParser)
                             ((HttpParser)_parser).setState(HttpParser.STATE_END);
-                    }
-                    
-                    if (_request.getContinuation()!=null)
-                    {
-                        Log.debug("continuation still pending {}");
-                        _request.getContinuation().reset();
                     }
                     
                     if(_endp.isOpen())

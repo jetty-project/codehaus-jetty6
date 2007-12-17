@@ -1629,7 +1629,7 @@ public class Request implements HttpServletRequest
     public Continuation getContinuation(boolean create)
     {
         if (_continuation==null && create)
-            _continuation=getConnection().getConnector().newContinuation();
+            _continuation=getConnection().getConnector().newContinuation(getConnection());
         return _continuation;
     }
     
