@@ -1,6 +1,7 @@
 package org.mortbay.io.nio;
 
 import java.io.IOException;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -142,18 +143,9 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         synchronized (this)
         {
-            try
-            {
-                _dispatched = false;
-                updateKey();
-            }
-            catch (Exception e)
-            {
-                // TODO investigate if this actually is a problem?
-                Log.ignore(e);
-                _interestOps = -1;
-                _selectSet.addChange(this);
-            }
+            _dispatched = false;
+            updateKey();
+
         }
         return true;
     }
@@ -298,13 +290,22 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     {
         synchronized (this)
         {
+        
             int ops=-1;
             if (getChannel().isOpen())
             {
-                ops = ((_key!=null && _key.isValid())?_key.interestOps():-1);
                 _interestOps = 
                     ((!_dispatched || _readBlocked)  ? SelectionKey.OP_READ  : 0) 
                 |   ((!_writable   || _writeBlocked) ? SelectionKey.OP_WRITE : 0);
+                try
+                {
+                    ops = ((_key!=null && _key.isValid())?_key.interestOps():-1);
+                }
+                catch(Exception e)
+                {
+                    _key=null;
+                    Log.ignore(e);
+                }
             }
             if(_interestOps == ops && getChannel().isOpen())
                 return;
