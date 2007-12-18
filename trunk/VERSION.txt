@@ -1,5 +1,6 @@
 
 jetty-6.2-SNAPSHOT
+ + RetryRequest exception now extends ThreadDeath
  + Refactor of Continuation towards servlet 3.0 proposal
  + Added option to dispatch to suspended requests.
  + Delay 100 continues until getInputStream
