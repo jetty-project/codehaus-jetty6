@@ -53,6 +53,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /** Web Application Context Handler.
@@ -842,6 +843,8 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     protected boolean isProtectedTarget(String target)
     {
+        while (StringUtil.startsWithIgnoreCase(target,"//"))
+            target=target.substring(1);
         return StringUtil.startsWithIgnoreCase(target, "/web-inf") || StringUtil.startsWithIgnoreCase(target, "/meta-inf");
     }
     
