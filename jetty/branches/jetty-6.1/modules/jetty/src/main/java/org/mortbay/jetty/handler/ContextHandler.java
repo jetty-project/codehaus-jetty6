@@ -117,7 +117,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private Logger _logger;
     private boolean _shutdown;
     private boolean _allowNullPathInfo;
-    private int _maxFormContentSize=Integer.getInteger("org.mortbay.jetty.Request.maxFormContentSize",200000).intValue();;
+    private int _maxFormContentSize=Integer.getInteger("org.mortbay.jetty.Request.maxFormContentSize",200000).intValue();
+    private boolean _compactPath=false;
 
     private Object _contextListeners;
     private Object _contextAttributeListeners;
@@ -641,6 +642,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             // Nope - so check the target.
             if (dispatch==REQUEST)
             {
+                if (_compactPath)
+                    target=URIUtil.compactPath(target);
+                
                 if (target.equals(_contextPath))
                 {
                     if (!_allowNullPathInfo && !target.endsWith(URIUtil.SLASH))
@@ -992,6 +996,24 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         _maxFormContentSize=maxSize;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if URLs are compacted to replace multiple '/'s with a single '/'
+     */
+    public boolean isCompactPath()
+    {
+        return _compactPath;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param compactPath True if URLs are compacted to replace multiple '/'s with a single '/'
+     */
+    public void setCompactPath(boolean compactPath)
+    {
+        _compactPath=compactPath;
+    }
 
     /* ------------------------------------------------------------ */
     public String toString()

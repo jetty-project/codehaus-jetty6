@@ -157,6 +157,19 @@ public class URITest extends junit.framework.TestCase
         assertEquals("aaa;JS?A=1+/bbb", URIUtil.addPaths("aaa/;JS?A=1","/bbb"),"aaa/bbb;JS?A=1");
 
     }
+
+    /* ------------------------------------------------------------ */
+    public void testCompactPath()
+    {
+        assertEquals("/foo/bar", URIUtil.compactPath("/foo/bar"));
+        assertEquals("/foo/bar?a=b//c", URIUtil.compactPath("/foo/bar?a=b//c"));
+
+        assertEquals("/foo/bar", URIUtil.compactPath("//foo//bar"));
+        assertEquals("/foo/bar?a=b//c", URIUtil.compactPath("//foo//bar?a=b//c"));
+        
+        assertEquals("/foo/bar", URIUtil.compactPath("/foo///bar"));
+        assertEquals("/foo/bar?a=b//c", URIUtil.compactPath("/foo///bar?a=b//c"));
+    }
     
     /* ------------------------------------------------------------ */
     public void testParentPath()
