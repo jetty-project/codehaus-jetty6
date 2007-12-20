@@ -15,7 +15,7 @@ jetty-6.2-SNAPSHOT
  + optimizations and improvements of Cometd
  + Long cache for JSON
  + Update java5 patch
- + JETTY-368 Protect WEB-INF
+ + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields

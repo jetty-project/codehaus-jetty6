@@ -168,14 +168,6 @@ public class FileResource extends URLResource
         
         if (expected!=index && ((expected-1)!=index || path.endsWith("/") || !r.isDirectory()))
         {
-            String no_doubles_slash= StringUtil.replace(path,"//","/");
-            if (!path.equals(no_doubles_slash))
-            {
-                Resource try_again = addPath(no_doubles_slash);
-                if (try_again.getAlias()==null)
-                    return try_again;
-            }
-            
             if (!(r instanceof BadResource))
             {
                 ((FileResource)r)._alias=new URL(url);
