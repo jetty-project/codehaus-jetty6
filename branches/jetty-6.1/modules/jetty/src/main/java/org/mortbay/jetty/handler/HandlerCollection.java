@@ -113,7 +113,7 @@ public class HandlerCollection extends AbstractHandlerContainer
                 {
                     _handlers[i].handle(target,request, response, dispatch);
                 }
-                catch(EofException e)
+                catch(IOException e)
                 {
                     throw e;
                 }
@@ -129,7 +129,12 @@ public class HandlerCollection extends AbstractHandlerContainer
                 }
             }
             if (mex!=null)
-                throw new ServletException(mex);
+            {
+                if (mex.size()==1)
+                    throw new ServletException(mex.getThrowable(0));
+                else
+                    throw new ServletException(mex);
+            }
             
         }    
     }
