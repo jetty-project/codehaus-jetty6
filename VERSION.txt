@@ -10,7 +10,7 @@ jetty-6.1-SNAPSHOT
  + jetty-6.1 branch created from 6.1.6 and r593 of jetty-contrib trunk
  + optimizations and improvements of Cometd
  + Update java5 patch
- + JETTY-368 Protect WEB-INF
+ + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
