@@ -513,6 +513,69 @@ public class URIUtil
     }
 
     /* ------------------------------------------------------------ */
+    /** Convert a path to a compact form.
+     * All instances of "//" and "///" etc. are factored out to single "/" 
+     * @param path 
+     * @return path
+     */
+    public static String compactPath(String path)
+    {
+        if (path==null || path.length()==0)
+            return path;
+
+        int state=0;
+        int end=path.length();
+        int i=0;
+        
+        loop:
+        while (i<end)
+        {
+            char c=path.charAt(i);
+            switch(c)
+            {
+                case '?':
+                    return path;
+                case '/':
+                    state++;
+                    if (state==2)
+                        break loop;
+                    break;
+                default:
+                    state=0;
+            }
+            i++;
+        }
+        
+        if (state<2)
+            return path;
+        
+        StringBuffer buf = new StringBuffer(path.length());
+        buf.append(path,0,i);
+        
+        loop2:
+        while (i<end)
+        {
+            char c=path.charAt(i);
+            switch(c)
+            {
+                case '?':
+                    buf.append(path,i,end);
+                    break loop2;
+                case '/':
+                    if (state++==0)
+                        buf.append(c);
+                    break;
+                default:
+                    state=0;
+                    buf.append(c);
+            }
+            i++;
+        }
+        
+        return buf.toString();
+    }
+
+    /* ------------------------------------------------------------ */
     /** 
      * @param uri URI
      * @return True if the uri has a scheme
