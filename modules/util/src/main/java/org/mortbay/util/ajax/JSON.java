@@ -271,7 +271,7 @@ public class JSON
                 buffer.append(c);
                 QuotedStringTokenizer.quote(buffer,name);
                 buffer.append(':');
-                appendNumber(buffer,new Long(value));
+                appendNumber(buffer,TypeUtil.newLong(value));
                 c[0]=',';
             }
 
@@ -974,7 +974,7 @@ public class JSON
         }
 
         if (buffer==null)
-            return new Long(number);
+            return TypeUtil.newLong(number);
 
         synchronized (buffer)
         {
@@ -1121,6 +1121,12 @@ public class JSON
         {
             _reader=r;
         }
+        
+        public void setReader(Reader reader)
+        {
+            _reader=reader;
+            _next=-1;
+        }
 
         public boolean hasNext()
         {
@@ -1169,6 +1175,7 @@ public class JSON
                 scratch=new char[1024];
             return scratch;
         }
+
     }
 
     /* ------------------------------------------------------------ */
