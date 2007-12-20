@@ -152,6 +152,84 @@ public class WebAppTest extends TestCase
 
     }
     
+
+    public void testSecurity() throws Exception
+    {
+        URL url = null;
+        
+        String[] hidden = {
+           "/WEB-INF/web.xml",
+           "/WEB-INF/wEb.xml",
+           "/WEB-INF/web.xml%00",
+           "/WEB-INF/web.xml\00",
+           "/WEB-INF/web.xml\u0000",
+           "/WEB-INF//web.xml",
+           "//WEB-INF/web.xml",
+           "/WEB-INF//web.xml",
+           "//WEB-INF//web.xml",
+           "//auth/file.txt"
+        };
+        
+        String[] forbidden = {
+                "/auth/",
+                "/auth/file.txt",
+                "/auth//file.txt",
+             };
+        
+        String[] ok = 
+        {
+            "/auth/relax.txt",
+        };
+        
+        
+        for (int i=0;i<hidden.length;i++)
+        {
+            try 
+            {
+                url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test"+hidden[i]);
+                IO.toString(url.openStream());
+                assertTrue(false);
+            }
+            catch(FileNotFoundException e)
+            {
+                System.err.println(e);
+                assertTrue(true);
+            }
+        }
+
+        for (int i=0;i<forbidden.length;i++)
+        {
+            try 
+            {
+                url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test"+forbidden[i]);
+                IO.toString(url.openStream());
+                assertTrue(false);
+            }
+            catch(IOException e)
+            {
+                System.err.println(e);
+                assertTrue(e.toString().indexOf("403")>=0);
+            }
+        }
+
+        
+        for (int i=0;i<ok.length;i++)
+        {
+            try 
+            {
+                url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test"+ok[i]);
+                IO.toString(url.openStream());
+                assertTrue(true);
+            }
+            catch(FileNotFoundException e)
+            {
+                System.err.println(e);
+                assertTrue(false);
+            }
+        }
+        
+    }
+    
     public void testDoPost() throws Exception
     {
         URL url = null;
