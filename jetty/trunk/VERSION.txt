@@ -13,6 +13,7 @@ jetty-6.2-SNAPSHOT
  + grizzly fixed for posts
  + Improved Cometd timeout handling
  + optimizations and improvements of Cometd
+ + Long cache for JSON
  + Update java5 patch
  + JETTY-368 Protect WEB-INF
  + JETTY-467 allow URL rewriting to be disabled.
