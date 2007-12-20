@@ -841,8 +841,9 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     protected boolean isProtectedTarget(String target)
     {
-        while (StringUtil.startsWithIgnoreCase(target,"//"))
-            target=target.substring(1);
+        while (target.startsWith("//"))
+            target=URIUtil.compactPath(target);
+         
         return StringUtil.startsWithIgnoreCase(target, "/web-inf") || StringUtil.startsWithIgnoreCase(target, "/meta-inf");
     }
     
