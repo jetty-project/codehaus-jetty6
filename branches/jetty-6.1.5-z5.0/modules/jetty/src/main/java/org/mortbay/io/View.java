@@ -211,4 +211,22 @@ public class View extends AbstractBuffer
             return "INVALID";
         return super.toString();
     }
+    
+    public static class CaseInsensitive extends View implements Buffer.CaseInsensitve
+    {
+        public CaseInsensitive()
+        {
+            super();
+        }
+
+        public CaseInsensitive(Buffer buffer, int mark, int get, int put, int access)
+        {
+            super(buffer,mark,get,put,access);
+        }
+
+        public CaseInsensitive(Buffer buffer)
+        {
+            super(buffer);
+        }
+    }
 }

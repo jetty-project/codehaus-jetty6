@@ -1,30 +1,7 @@
 jetty-6.1.5z5.0 - 15 Sep 2007
  + Avoid FULL exception in window between blockForOutput and remote close
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
-
-jetty-6.1-SNAPSHOT
- + Added BayeuxService
- + Added JSON.Convertor
- + Add "mvn jetty:stop" 
- + allow sessions to be periodically persisted to disk
- + Cookie support in BayeuxClient
- + Cookie support in BayeuxClient
- + grizzly fixed for posts
- + jetty-6.1 branch created from 6.1.6 and r593 of jetty-contrib trunk
- + optimizations and improvements of Cometd
- + Update java5 patch
- + JETTY-467 allow URL rewriting to be disabled.
- + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
-
-jetty-6.1.6 - 18 November 2007
- + rudimentary debian packaging
- + updated grizzly connector to 1.6.1
- + JETTY-455 Optional cometd id
- + JETTY-459 Unable to deploy from Eclipse into the root context
- + JETTY-461 fixed cometd unknown channel
- + JETTY-464 typo in ErrorHandler
- + JETTY-465 System.exit() in constructor exception for MultiPartOutputStream
 
 jetty-6.1.6rc1 - 5 November 2007
  + Upgrade jsp 2.1 to SJSAS-9_1-B58G-FCS-08_Sept_2007
