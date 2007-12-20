@@ -12,7 +12,7 @@ jetty-6.2-SNAPSHOT
  + Cookie support in BayeuxClient
  + grizzly fixed for posts
  + Improved Cometd timeout handling
- + optimizations and improvements of Cometd
+ + Optimizations and improvements of Cometd, more pooled objects
  + Long cache for JSON
  + Update java5 patch
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
