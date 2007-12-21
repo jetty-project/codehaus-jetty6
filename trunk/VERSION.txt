@@ -19,6 +19,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
+ + JETTY-486 Improved jetty.sh script
  + JETTY-487 Handle empty chunked request
 
 jetty-6.1-SNAPSHOT
