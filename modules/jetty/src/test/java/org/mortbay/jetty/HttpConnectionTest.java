@@ -97,6 +97,21 @@ public class HttpConnectionTest extends TestCase
     }
 
     /* --------------------------------------------------------------- */
+    public void testEmpty() throws Exception
+    {        
+        String response=connector.getResponses("GET /R1 HTTP/1.1\n"+
+                "Host: localhost\n"+
+                "Transfer-Encoding: chunked\n"+
+                "Content-Type: text/plain\n"+
+                "\015\012"+
+        "0\015\012\015\012");
+
+        int offset=0;
+        offset = checkContains(response,offset,"HTTP/1.1 200");
+        offset = checkContains(response,offset,"/R1");
+    }
+
+    /* --------------------------------------------------------------- */
     public void testAutoFlush() throws Exception
     {        
         
