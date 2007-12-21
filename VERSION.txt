@@ -6,7 +6,7 @@ jetty-6.2-SNAPSHOT
  + Added option to dispatch to suspended requests.
  + Delay 100 continues until getInputStream
  + Added BayeuxService
- + Added JSON.Convertor
+ + Added JSON.Convertor and non static JSON instances
  + Add "mvn jetty:stop" 
  + allow sessions to be periodically persisted to disk
  + Cookie support in BayeuxClient

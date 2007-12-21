@@ -59,10 +59,37 @@ import org.mortbay.util.TypeUtil;
 public class JSON
 {
     private static JSON __default = new JSON();
+
+    private Map _convertors=new HashMap();
+    private int _stringBufferSize=256;
+    
     
     public JSON()
     {
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the initial stringBuffer size to use when creating JSON strings (default 256)
+     */
+    public int getStringBufferSize()
+    {
+        return _stringBufferSize;
+    }
+
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param stringBufferSize the initial stringBuffer size to use when creating JSON strings (default 256)
+     */
+    public void setStringBufferSize(int stringBufferSize)
+    {
+        _stringBufferSize=stringBufferSize;
+    }
+    
+
+
 
     /**
      * Register a {@link Convertor} for a class or interface.
@@ -74,32 +101,42 @@ public class JSON
         __default.addConvertor(forClass,convertor);
     }
 
+    public static JSON getDefault()
+    {
+        return __default;
+    }
+
+    public static void setDefault(JSON json)
+    {
+        __default=json;
+    }
+    
     public static String toString(Object object)
     {
-        StringBuffer buffer=new StringBuffer();
+        StringBuffer buffer=new StringBuffer(__default.getStringBufferSize());
         synchronized (buffer)
         {
-            append(buffer,object);
+            __default.append(buffer,object);
             return buffer.toString();
         }
     }
 
     public static String toString(Map object)
     {
-        StringBuffer buffer=new StringBuffer();
+        StringBuffer buffer=new StringBuffer(__default.getStringBufferSize());
         synchronized (buffer)
         {
-            appendMap(buffer,object);
+            __default.appendMap(buffer,object);
             return buffer.toString();
         }
     }
 
     public static String toString(Object[] array)
     {
-        StringBuffer buffer=new StringBuffer();
+        StringBuffer buffer=new StringBuffer(__default.getStringBufferSize());
         synchronized (buffer)
         {
-            appendArray(buffer,array);
+            __default.appendArray(buffer,array);
             return buffer.toString();
         }
     }
@@ -163,12 +200,38 @@ public class JSON
         return __default.parse(new StringSource(IO.toString(in)),stripOuterComment);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Convert Object to JSON
+     * @param object The object to convert
+     * @return The JSON String
+     */
+    public String toJSON(Object object)
+    {
+        StringBuffer buffer=new StringBuffer(getStringBufferSize());
+        synchronized (buffer)
+        {
+            append(buffer,object);
+            return buffer.toString();
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Convert JSON to Object
+     * @param json The json to convert
+     * @return The object
+     */
+    public Object fromJSON(String json)
+    {
+        Source source = new StringSource(json);
+        return parse(source);
+    }
+    
     /**
      * Append object as JSON to string buffer.
      * @param buffer
      * @param object
      */
-    public static void append(StringBuffer buffer, Object object)
+    public void append(StringBuffer buffer, Object object)
     {
         if (object==null)
             buffer.append("null");
@@ -190,7 +253,7 @@ public class JSON
             appendString(buffer,(String)object);
         else
         {
-            Convertor convertor=__default.getConvertor(object.getClass());
+            Convertor convertor=getConvertor(object.getClass());
             if (convertor!=null)
                 appendJSON(buffer,convertor,object);
             else
@@ -198,12 +261,12 @@ public class JSON
         }
     }
 
-    public static void appendNull(StringBuffer buffer)
+    public void appendNull(StringBuffer buffer)
     {
         buffer.append("null");
     }
 
-    public static void appendJSON(final StringBuffer buffer, final Convertor convertor, final Object object)
+    public void appendJSON(final StringBuffer buffer, final Convertor convertor, final Object object)
     {
         appendJSON(buffer,new Convertible()
         {
@@ -218,7 +281,7 @@ public class JSON
         });
     }
 
-    public static void appendJSON(final StringBuffer buffer, Convertible converter)
+    public void appendJSON(final StringBuffer buffer, Convertible converter)
     {
         final char[] c=
         { '{' };
@@ -293,12 +356,12 @@ public class JSON
             buffer.append("}");
     }
 
-    public static void appendJSON(StringBuffer buffer, Generator generator)
+    public void appendJSON(StringBuffer buffer, Generator generator)
     {
         generator.addJSON(buffer);
     }
 
-    public static void appendMap(StringBuffer buffer, Map object)
+    public void appendMap(StringBuffer buffer, Map object)
     {
         if (object==null)
         {
@@ -321,7 +384,7 @@ public class JSON
         buffer.append('}');
     }
 
-    public static void appendArray(StringBuffer buffer, Collection collection)
+    public void appendArray(StringBuffer buffer, Collection collection)
     {
         if (collection==null)
         {
@@ -344,7 +407,7 @@ public class JSON
         buffer.append(']');
     }
 
-    public static void appendArray(StringBuffer buffer, Object array)
+    public void appendArray(StringBuffer buffer, Object array)
     {
         if (array==null)
         {
@@ -365,7 +428,7 @@ public class JSON
         buffer.append(']');
     }
 
-    public static void appendBoolean(StringBuffer buffer, Boolean b)
+    public void appendBoolean(StringBuffer buffer, Boolean b)
     {
         if (b==null)
         {
@@ -375,7 +438,7 @@ public class JSON
         buffer.append(b.booleanValue()?"true":"false");
     }
 
-    public static void appendNumber(StringBuffer buffer, Number number)
+    public void appendNumber(StringBuffer buffer, Number number)
     {
         if (number==null)
         {
@@ -385,7 +448,7 @@ public class JSON
         buffer.append(number);
     }
 
-    public static void appendString(StringBuffer buffer, String string)
+    public void appendString(StringBuffer buffer, String string)
     {
         if (string==null)
         {
@@ -395,9 +458,6 @@ public class JSON
 
         QuotedStringTokenizer.quote(buffer,string);
     }
-
-    
-    
     
     
     
@@ -406,8 +466,6 @@ public class JSON
     
     
     // Parsing utilities
-
-    private Map _convertors=new HashMap();
     
     protected String toString(char[] buffer,int offset,int length)
     {
@@ -446,8 +504,7 @@ public class JSON
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                throw new IllegalArgumentException();
+                throw new RuntimeException(e);
             }
         }
 
@@ -874,7 +931,7 @@ public class JSON
                 return toString(scratch,0,i);
         }
         else
-            b=new StringBuffer();
+            b=new StringBuffer(getStringBufferSize());
         
         
         // parse large string into string buffer
@@ -1163,8 +1220,7 @@ public class JSON
                 }
                 catch (IOException e)
                 {
-                    e.printStackTrace();
-                    throw new IllegalStateException();
+                    throw new RuntimeException(e);
                 }
             }
         }

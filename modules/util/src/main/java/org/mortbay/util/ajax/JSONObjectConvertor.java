@@ -1,38 +1,53 @@
 package org.mortbay.util.ajax;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import org.mortbay.log.Log;
-import org.mortbay.util.Loader;
 import org.mortbay.util.ajax.JSON.Output;
 
+/* ------------------------------------------------------------ */
+/**
+ * Convert an Object to JSON using reflection on getters methods.
+ * 
+ * @author gregw
+ *
+ */
 public class JSONObjectConvertor implements JSON.Convertor
 {
     private boolean _fromJSON;
-    Method _isEnum;
-    {
-        try
-        {
-            _isEnum = Class.class.getMethod("isEnum", (Class[])null);
-        }
-        catch (Exception e)
-        {
-            Log.ignore(e);
-        }
-    }
+    private Set _excluded=null;
 
+    public JSONObjectConvertor()
+    {
+        _fromJSON=false;
+    }
+    
     public JSONObjectConvertor(boolean fromJSON)
     {
         _fromJSON=fromJSON;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param fromJSON
+     * @param excluded An array of field names to exclude from the conversion
+     */
+    public JSONObjectConvertor(boolean fromJSON,String[] excluded)
+    {
+        _fromJSON=fromJSON;
+        if (excluded!=null)
+            _excluded=new HashSet(Arrays.asList(excluded));
+    }
 
     public Object fromJSON(Map map)
     {
-        throw new UnsupportedOperationException();
+        if (_fromJSON)
+            throw new UnsupportedOperationException();
+        return map;
     }
 
     public void toJSON(Object obj, Output out)
@@ -40,23 +55,6 @@ public class JSONObjectConvertor implements JSON.Convertor
         try
         {
             Class c=obj.getClass();
-
-            try
-            {
-                if (_isEnum!=null)
-                {
-                    Boolean en=(Boolean)_isEnum.invoke(c, (Object[])null);
-                    if (en.booleanValue())
-                    {
-                        out.add(obj.toString());
-                        return;
-                    }
-                }
-            }
-            catch(Exception e)
-            {
-                Log.warn(e);
-            }
 
             if (_fromJSON)
                 out.addClass(obj.getClass());
@@ -79,8 +77,8 @@ public class JSONObjectConvertor implements JSON.Convertor
                     else
                         continue;
 
-                    out.add(name, m.invoke(obj,(Object[])null));
-
+                    if (includeField(name,obj,m))
+                        out.add(name, m.invoke(obj,(Object[])null));
                 }
             }
         } 
@@ -89,6 +87,11 @@ public class JSONObjectConvertor implements JSON.Convertor
             // e.printStackTrace();
             throw new IllegalArgumentException(e);
         }
+    }
+    
+    protected boolean includeField(String name, Object o, Method m)
+    {
+        return _excluded==null || !_excluded.contains(name);
     }
 
 }

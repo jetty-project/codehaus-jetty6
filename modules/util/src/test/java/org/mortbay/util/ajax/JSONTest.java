@@ -1,5 +1,6 @@
 package org.mortbay.util.ajax;
 import java.io.StringReader;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -122,6 +123,7 @@ public class JSONTest extends TestCase
         map = (Map)JSON.parse(test);
     }
     
+    /* ------------------------------------------------------------ */
     public void testStripComment()
     {
         String test="\n\n\n\t\t    "+
@@ -143,6 +145,7 @@ public class JSONTest extends TestCase
         
     }
 
+    /* ------------------------------------------------------------ */
     public static class Gadget 
     {
         private boolean modulated;
@@ -196,15 +199,87 @@ public class JSONTest extends TestCase
         {
             this.woggles=woggles;
         }
-        
-        
     }
-    
-    public static class Woggle implements JSON.Convertible
+
+    /* ------------------------------------------------------------ */
+    public void testConvertor()
+    {
+        JSON json = new JSON();
+        json.addConvertor(Date.class,new JSONDateConvertor());
+        json.addConvertor(Object.class,new JSONObjectConvertor());
+
+        Woggle w0 = new Woggle();
+        Gizmo g0 = new Gizmo();
+        
+        w0.name="woggle0";
+        w0.nested=g0;
+        w0.number=100;
+        g0.name="woggle1";
+        g0.nested=null;
+        g0.number=101;
+        g0.tested=true;
+        
+        HashMap map = new HashMap();
+        map.put("date",new Date(1));
+        map.put("w0",w0);
+
+        StringBuffer buf = new StringBuffer();
+        json.append(buf,map);
+        String js=buf.toString();
+        
+        System.err.println(js);
+        assertTrue(js.indexOf("\"date\":\"Thu Jan 01 00:00:00 GMT 1970\"")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Woggle")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Gizmo")<0);
+        assertTrue(js.indexOf("\"tested\":true")>=0);
+
+        json.addConvertor(Date.class,new JSONDateConvertor(true));
+        w0.nested=null;
+        buf = new StringBuffer();
+        json.append(buf,map);
+        js=buf.toString();
+        System.err.println(js);
+        assertTrue(js.indexOf("\"date\":\"Thu Jan 01 00:00:00 GMT 1970\"")<0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Woggle")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Gizmo")<0);
+        
+        map=(HashMap)json.parse(new JSON.StringSource(js));
+        
+        assertTrue(map.get("date") instanceof Date);
+        assertTrue(map.get("w0") instanceof Woggle);
+        
+           
+    }
+
+    /* ------------------------------------------------------------ */
+    public static class Gizmo
     {
         String name;
-        Woggle nested;
+        Gizmo nested;
         long number;
+        boolean tested;
+        
+        public String getName()
+        {
+            return name;
+        }
+        public Gizmo getNested()
+        {
+            return nested;
+        }
+        public long getNumber()
+        {
+            return number;
+        }
+        public boolean isTested()
+        {
+            return tested;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static class Woggle extends Gizmo implements JSON.Convertible
+    {
         
         public Woggle()
         {
@@ -213,7 +288,7 @@ public class JSONTest extends TestCase
         public void fromJSON(Map object)
         {
             name=(String)object.get("name");
-            nested=(Woggle)object.get("nested");
+            nested=(Gizmo)object.get("nested");
             number=((Number)object.get("number")).intValue();
         }
 
