@@ -166,6 +166,10 @@ public class TypeUtil
     private static Integer[] integerCache = new Integer[intCacheSize];
     private static String[] integerStrCache = new String[intCacheSize];
     private static Integer minusOne = new Integer(-1);
+    private static int longCacheSize=
+        Integer.getInteger("org.mortbay.util.TypeUtil.LongCacheSize",64).intValue();
+    private static Long[] longCache = new Long[longCacheSize];
+    private static Long minusOneL = new Long(-1);
     
     /* ------------------------------------------------------------ */
     /** Class from a canonical name for a type.
@@ -257,6 +261,22 @@ public class TypeUtil
         else if (i==-1)
             return minusOne;
         return new Integer(i);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Convert int to Integer using cache. 
+     */
+    public static Long newLong(long i)
+    {
+        if (i>=0 && i<longCacheSize)
+        {
+            if (longCache[(int)i]==null)
+                longCache[(int)i]=new Long(i);
+            return longCache[(int)i];
+        }
+        else if (i==-1)
+            return minusOneL;
+        return new Long(i);
     }
 
     
