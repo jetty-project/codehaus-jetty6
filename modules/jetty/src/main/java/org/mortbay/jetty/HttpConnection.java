@@ -857,6 +857,11 @@ public class HttpConnection implements Connection
          */
         public void messageComplete(long contextLength) throws IOException
         {
+            if (_delayedHandling)
+            {
+                _delayedHandling=false;
+                handleRequest();
+            }
         }
 
         /*
