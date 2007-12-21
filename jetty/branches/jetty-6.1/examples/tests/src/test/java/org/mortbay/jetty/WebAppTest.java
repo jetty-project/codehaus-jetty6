@@ -59,7 +59,6 @@ public class WebAppTest extends TestCase
             dir=dir.getParentFile();
         }
         
-        
         threadPool.setMaxThreads(100);
         server.setThreadPool(threadPool);
         
@@ -83,6 +82,7 @@ public class WebAppTest extends TestCase
         server.setSendServerVersion(true);
         
         server.start();
+        Thread.sleep(1000);
     }
     
     
