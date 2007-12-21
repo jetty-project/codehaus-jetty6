@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -169,7 +168,7 @@ public class DumpHandler extends AbstractHandler
                 writer.write(new String(content,0,len));
         }
         catch(IOException e)
-        {   
+        {
             writer.write(e.toString());
         }
         
@@ -179,24 +178,16 @@ public class DumpHandler extends AbstractHandler
         // commit now
         writer.flush();
         response.setContentLength(buf.size()+1000);
-
-        try
-        {
-            buf.writeTo(out);
-
-            buf.reset();
-            writer.flush();
-            for (int pad=998-buf.size();pad-->0;)
-                writer.write(" ");
-            writer.write("\015\012");
-            writer.flush();
-            buf.writeTo(out);
-
-            response.setHeader("IgnoreMe","ignored");
-        }
-        catch(Exception e)
-        {
-            Log.ignore(e);
-        }
+        buf.writeTo(out);
+        
+        buf.reset();
+        writer.flush();
+        for (int pad=998-buf.size();pad-->0;)
+            writer.write(" ");
+        writer.write("\015\012");
+        writer.flush();
+        buf.writeTo(out);
+        
+        response.setHeader("IgnoreMe","ignored");
     }
 }

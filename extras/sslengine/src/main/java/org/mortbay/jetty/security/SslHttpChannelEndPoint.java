@@ -25,7 +25,7 @@ import org.mortbay.log.Log;
  * @author Nik Gonzalez <ngonzalez@exist.com>
  * @author Greg Wilkins <gregw@mortbay.com>
  */
-public class SslHttpChannelEndPoint extends SelectChannelConnector.SuspendableEndPoint 
+public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndPoint implements Runnable
 {
     private static final ByteBuffer[] __NO_BUFFERS={};
     private static final ByteBuffer __EMPTY=ByteBuffer.allocate(0);

@@ -17,7 +17,6 @@ package org.mortbay.jetty.nio;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -26,9 +25,7 @@ import org.mortbay.io.Connection;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.log.Log;
@@ -69,7 +66,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
     private transient ServerSocketChannel _acceptChannel;
     private long _lowResourcesConnections;
     private long _lowResourcesMaxIdleTime;
-    private boolean _dispatchToSuspended=true;
 
     private SelectorManager _manager = new SelectorManager()
     {
@@ -85,7 +81,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             return channel;
         }
 
-        public boolean dispatch(Runnable task)
+        public boolean dispatch(Runnable task) throws IOException
         {
             return getThreadPool().dispatch(task);
         }
@@ -142,7 +138,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
     {
-        SuspendableEndPoint cep = ((SuspendableEndPoint)endpoint);
+        ConnectorEndPoint cep = ((ConnectorEndPoint)endpoint);
         cep.cancelIdle();
         request.setTimeStamp(cep.getSelectSet().getNow());
         super.customize(endpoint, request);
@@ -151,7 +147,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void persist(org.mortbay.io.EndPoint endpoint) throws IOException
     {
-        ((SuspendableEndPoint)endpoint).scheduleIdle();
+        ((ConnectorEndPoint)endpoint).scheduleIdle();
         super.persist(endpoint);
     }
 
@@ -188,9 +184,9 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /*
      * @see org.mortbay.jetty.Connector#newContinuation()
      */
-    public Continuation newContinuation(Connection connection)
+    public Continuation newContinuation()
     {
-        return (SuspendableEndPoint)((HttpConnection)connection).getEndPoint();
+        return new RetryContinuation();
     }
 
     /* ------------------------------------------------------------ */
@@ -293,25 +289,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
         _lowResourcesMaxIdleTime=lowResourcesMaxIdleTime;
         super.setLowResourceMaxIdleTime(lowResourcesMaxIdleTime); 
     }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the dispatchToSuspended True if IO activity should cause a dispatch to a suspended request.
-     */
-    public boolean isDispatchToSuspended()
-    {
-        return _dispatchToSuspended;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param dispatchToSuspended True if IO activity should cause a dispatch to a suspended request.
-     */
-    public void setDispatchToSuspended(boolean dispatchToSuspended)
-    {
-        _dispatchToSuspended=dispatchToSuspended;
-    }
-
     
     /* ------------------------------------------------------------ */
     /*
@@ -342,7 +319,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SuspendableEndPoint(channel,selectSet,key);
+        return new ConnectorEndPoint(channel,selectSet,key);
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -354,82 +331,57 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public static class SuspendableEndPoint extends SelectChannelEndPoint implements Continuation
+    public static class ConnectorEndPoint extends SelectChannelEndPoint
     {
-        // Main states are D=Dispatched, S=suspended, T=triggered
-        // dst IDLE          Dst DISPATCHED
-        // dsT scheduled     DsT RETRY
-        // dSt SUSPENDED     DSt Suspending
-        // dST unsuspending  DST unsuspending 
-        protected boolean _suspended;
-        protected boolean _triggered;
-        
-        // Secondary state
-        protected boolean _new = true;
-        protected boolean _resumed = false;   // resume called.
-        protected Object _object;
-        
-        // other
-        protected RetryRequest _retry;
-        protected long _timeout;
-        protected Object _mutex;
-        
-        protected final Timeout.Task _timeoutTask;
-        
-        
-        // TODO remove this debugging aid
-        /*
-        String[] last = {null,null,null,null,null,null};
-        void last(String l)
-        {
-            last[5]=last[4];
-            last[4]=last[3];
-            last[3]=last[2];
-            last[2]=last[1];
-            last[1]=last[0];
-            last[0]=l;
-        }*/
-        
-        
-        
-        public SuspendableEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
+        public ConnectorEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
         {
             super(channel,selectSet,key);
-
-            _mutex=this;
-            _dispatched=false;
-            _suspended=false;
-            _triggered=false;
-                
-            HttpConnection connection = HttpConnection.getCurrentConnection();
-            
-            _timeoutTask= new Timeout.Task(_mutex)
-            {
-                public void expire()
-                {
-                    SuspendableEndPoint.this.expire();
-                }
-            };
-            
             scheduleIdle();
         }
 
-        
         public void close() throws IOException
         {
-            reset();
+            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+            if (continuation != null && continuation.isPending())
+                continuation.reset();
+
             super.close();
         }
-        
-        public void setMutex(Object mutex)
+
+        /* ------------------------------------------------------------ */
+        public void undispatch()
         {
-            synchronized(_mutex)
+            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+
+            if (continuation != null)
             {
-                // TODO - is this a good idea?
-                // _mutex=mutex;
-                // _timeoutTask.setMutex(mutex);
+                // We have a continuation
+                Log.debug("continuation {}", continuation);
+                if (continuation.undispatch())
+                    super.undispatch();
             }
+            else
+            {
+                super.undispatch();
+            }
+               
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static class RetryContinuation extends Timeout.Task implements Continuation, Runnable
+    {
+        SelectChannelEndPoint _endPoint=(SelectChannelEndPoint)HttpConnection.getCurrentConnection().getEndPoint();
+        boolean _new = true;
+        Object _object;
+        boolean _pending = false;   // waiting for resume or timeout
+        boolean _resumed = false;   // resume called.
+        boolean _parked =false;     // end point dispatched, but undispatch called.
+        RetryRequest _retry;
+        long _timeout;
+
         
         public Object getObject()
         {
@@ -443,178 +395,143 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         public boolean isNew()
         {
-            synchronized(_mutex)
-            {
-                return _new;
-            }
+            return _new;
         }
 
         public boolean isPending()
         {
-            synchronized(_mutex)
-            {
-                return _suspended||_triggered;
-            }
+            return _pending;
         }
 
         public boolean isResumed()
         {
-            synchronized(_mutex)
-            {
-                return _resumed;
-            }
-        }
-        
-        public boolean isExpired()
-        {
-            synchronized(_mutex)
-            {
-                return _timeoutTask.isExpired();
-            }
+            return _resumed;
         }
 
         public void reset()
         {
-            synchronized (_mutex)
+            synchronized (this)
             {
-                // last("reset");
-                _suspended=false;
-                _triggered=false;
-  
                 _resumed = false;
+                _pending = false;
+                _parked = false;
             }
             
-            synchronized (getSelectSet())
+            synchronized (_endPoint.getSelectSet())
             {
-                _timeoutTask.cancel();   
+                this.cancel();   
             }
         } 
 
-        
         public boolean suspend(long timeout)
         {
-            synchronized (_mutex)
+            boolean resumed=false;
+            synchronized (this)
             {
-                // last("suspend");
-                if (!_dispatched)
-                    throw new IllegalStateException("!Dispatched "+this);
-                if (_suspended)
-                    throw new IllegalStateException("Suspended "+this);
-                      
-                if (_triggered)
+                resumed=_resumed;
+                _resumed=false;
+                _new = false;
+                if (!_pending && !resumed && timeout >= 0)
                 {
-                    // suspending a retry == reset
-                    _suspended=false;
-                    _triggered=false;
-                    
-                    boolean resumed=_resumed;
-                    _resumed=false;
-                    return resumed;
-                }
-                else
-                {
-                    _suspended=true;
-
+                    _pending=true;
+                    _parked = false;
                     _timeout = timeout;
                     if (_retry==null)
-                        _retry = new RetryRequest();
+                     _retry = new RetryRequest();
+                    throw _retry;
                 }
+                
+                // here only if suspend called on pending continuation.
+                // acts like a reset
+                _resumed = false;
+                _pending = false;
+                _parked =false;
             }
 
-            getSelectSet().scheduleTimeout(_timeoutTask,_timeout);
-            throw _retry;      
+            synchronized (_endPoint.getSelectSet())
+            {
+                this.cancel();   
+            }
+
+            return resumed;
         }
         
         public void resume()
         {
-            boolean dispatched=false;
-            synchronized (_mutex)
+            boolean redispatch=false;
+            synchronized (this)
             {
-                // last("resume");
-                if (_suspended)
+                if (_pending && !isExpired())
                 {
-                    _triggered=true;   
-                    _resumed=true;
-
-                    if (!_dispatched)
-                    {
-                        _new =false;
-                        dispatched=super.dispatch();
-                        _suspended=false;
-                    }
+                    _resumed = true;
+                    redispatch=_parked;
+                    _parked=false;
                 }
             }
 
-            if (dispatched)
-                getSelectSet().cancelIdle(_timeoutTask);
-        }
-
-        private void expire()
-        {
-            boolean dispatched=false;
-            synchronized (_mutex)
+            if (redispatch)
             {
-                // last("expire");
-                if (_suspended)
-                {
-                    _triggered=true;
+                SelectSet selectSet = _endPoint.getSelectSet();
                 
-                    if (!_dispatched)
-                    {
-                        // -ST -> --T
-                        _new =false;
-                        dispatched=super.dispatch();
-                        _suspended=false;
-                    }
-                }
-            }
-            
-            if (dispatched)
-                getSelectSet().cancelIdle(_timeoutTask);
-        }
-           
-        protected boolean dispatch()
-        {
-            boolean dispatched=false;
-            boolean dispatchedFromSuspended=false;
-            synchronized (_mutex)
-            {
-                // last("dispatch");
-                _new=false;
-                dispatched=super.dispatch();
-                
-                if (_suspended)
+                synchronized (selectSet)
                 {
-                    _suspended=false;
-                    _triggered=true;
-                    dispatchedFromSuspended=true;
+                    this.cancel();   
                 }
-            }
 
-            if (dispatchedFromSuspended)
-                getSelectSet().cancelTimeout(_timeoutTask);
-            
-            return dispatched;
+                _endPoint.scheduleIdle();  // TODO maybe not needed?
+                selectSet.addChange(this);
+                selectSet.wakeup();
+            }
         }
         
+        public void expire()
+        {
+            boolean redispatch=false;
+            synchronized (this)
+            {
+                redispatch=_parked && _pending && !_resumed;
+                _parked=false;
+            }
+            if (redispatch)
+            {
+                _endPoint.scheduleIdle();  // TODO maybe not needed?
+                _endPoint.getSelectSet().addChange(this);
+                _endPoint.getSelectSet().wakeup();
+            }
+        }
+
+        
+        public void run()
+        {
+            _endPoint.run();
+        }
+        
+        /* undispatch continuation.
+         * Called when an endppoint is undispatched.  
+         * Either sets timeout or dispatches if already resumed or expired */
         public boolean undispatch()
         {
-            synchronized (_mutex)
+            boolean redispatch=false;
+        
+            synchronized (this)
             {
-                if (!_dispatched)
-                    throw new IllegalStateException();
-                // last("undispatch");
+                if (!_pending)
+                    return true;
                 
-                if (_suspended&&_triggered)
-                {
-                    // short circuit
-                    _suspended=false;
-                    // last("!undispatch");
-                    return false;
-                }
-                
-                return super.undispatch();
+                redispatch=isExpired() || _resumed;
+                _parked=!redispatch;
             }
+            
+            if (redispatch)
+            {
+                _endPoint.scheduleIdle();
+                _endPoint.getSelectSet().addChange(this);
+            }
+            else if (_timeout>0)
+                _endPoint.getSelectSet().scheduleTimeout(this,_timeout);
+            
+            _endPoint.getSelectSet().wakeup();
+            return false;
         }
 
         public void setObject(Object object)
@@ -624,18 +541,17 @@ public class SelectChannelConnector extends AbstractNIOConnector
         
         public String toString()
         {
-            synchronized (_mutex)
+            synchronized (this)
             {
                 return "RetryContinuation@"+hashCode()+
-                (_dispatched?",D":",d")+
-                (_suspended?"S":"s")+
-                (_triggered?"T":"t")+
                 (_new?",new":"")+
+                (_pending?",pending":"")+
                 (_resumed?",resumed":"")+
-                (isExpired()?",expired":"");
-                // ">"+last[5]+">"+last[4]+">"+last[3]+">"+last[2]+">"+last[1]+">"+last[0];
+                (isExpired()?",expired":"")+
+                (_parked?",parked":"");
             }
         }
 
     }
+
 }

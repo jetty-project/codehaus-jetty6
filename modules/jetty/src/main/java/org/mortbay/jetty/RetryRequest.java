@@ -15,21 +15,7 @@
 
 package org.mortbay.jetty;
 
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.util.ajax.Continuation;
 
-
-/* ------------------------------------------------------------ */
-/** Retry Request
- * This is thrown by a non-blocking {@link Continuation} such as
- * {@link SelectChannelConnector.SuspendableEndPoint}.  While it
- * extends ThreadDeath, it does not actually stop the thread calling it.
- * It extends ThreadDeath so as to be an Error that will not be caught
- * by most frameworks.
- * 
- * @author gregw
- *
- */
-public class RetryRequest extends ThreadDeath
+public class RetryRequest extends RuntimeException
 {
 }

@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffers;
-import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.util.ajax.Continuation;
 
@@ -169,7 +168,7 @@ public interface Connector extends LifeCycle, Buffers
     void persist(EndPoint endpoint) throws IOException;
     
     /* ------------------------------------------------------------ */
-    Continuation newContinuation(Connection connection);
+    Continuation newContinuation();
 
     /* ------------------------------------------------------------ */
     String getHost();

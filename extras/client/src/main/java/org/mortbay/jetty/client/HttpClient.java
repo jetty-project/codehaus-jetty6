@@ -378,7 +378,7 @@ public class HttpClient extends AbstractBuffers
                 throw new IllegalStateException();
             }
 
-            public boolean dispatch(Runnable task)
+            public boolean dispatch(Runnable task) throws IOException
             {
                 return _threadPool.dispatch(task);
             }
