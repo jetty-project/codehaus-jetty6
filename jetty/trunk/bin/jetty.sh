@@ -481,7 +481,7 @@ case "$ACTION" in
 	fi
 
 
-	if which start-stop-daemon > /dev/null 
+	if which start-stop-daemon > /dev/null 2>&1 
 	then
           [ x$JETTY_USER = x ] && JETTY_USER=$(whoami)
 	  [ $UID = 0 ] && CH_USER="-c $JETTY_USER"
@@ -497,11 +497,6 @@ case "$ACTION" in
 	  fi
 
 	else
-          if [ x$JETTY_USER != x ] 
-	  then
-            echo "Need start-stop-daemon to change user"
-            exit 1
-          fi
 
           if [ -f $JETTY_PID ]
           then
@@ -509,10 +504,22 @@ case "$ACTION" in
             exit 1
           fi
 
-          $RUN_CMD &
-	  PID=$!
-	  disown $PID
-          echo $PID > $JETTY_PID
+          if [ x$JETTY_USER != x ] 
+          then
+              touch $JETTY_PID
+              chown $JETTY_USER $JETTY_PID
+              su - $JETTY_USER -c "
+                $RUN_CMD &
+                PID=\$!
+                disown \$PID
+                echo \$PID > $JETTY_PID"
+          else
+              $RUN_CMD &
+              PID=$!
+              disown $PID
+              echo $PID > $JETTY_PID
+          fi
+
           echo "STARTED Jetty `date`" 
         fi
 
@@ -520,7 +527,7 @@ case "$ACTION" in
 
   stop)
         echo -n "Stopping Jetty: "
-	if which start-stop-daemon > /dev/null ; then
+	if which start-stop-daemon > /dev/null 2>&1; then
 	  start-stop-daemon -K -p $JETTY_PID -d $JETTY_HOME -a $JAVA -s HUP 
 	  sleep 1
 	  if running $JETTY_PID
@@ -540,9 +547,16 @@ case "$ACTION" in
           echo OK
 	else
 	  PID=`cat $JETTY_PID 2>/dev/null`
-	  kill $PID 2>/dev/null
-	  sleep 5
-	  kill -9 $PID 2>/dev/null
+          TIMEOUT=30
+          while running $JETTY_PID && [ $TIMEOUT -gt 0 ]
+          do
+            kill $PID 2>/dev/null
+            sleep 1
+            let TIMEOUT=$TIMEOUT-1
+          done
+          
+          [ $TIMEOUT -gt 0 ] || kill -9 $PID 2>/dev/null
+
 	  rm -f $JETTY_PID
           echo OK
 	fi
