@@ -134,15 +134,15 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     protected File jettyConfig;
     
     /**
-     * Port to listen to stop jetty on executing -DSTOP.PORT=<stopPort> 
-     * -DSTOP.KEY=<stopKey> -jar start.jar --stop
+     * Port to listen to stop jetty on executing -DSTOP.PORT=&lt;stopPort&gt; 
+     * -DSTOP.KEY=&lt;stopKey&gt; -jar start.jar --stop
      * @parameter
      */
     protected int stopPort;
     
     /**
-     * Key to provide when stopping jetty on executing java -DSTOP.KEY=<stopKey> 
-     * -DSTOP.PORT=<stopPort> -jar start.jar --stop
+     * Key to provide when stopping jetty on executing java -DSTOP.KEY=&lt;stopKey&gt; 
+     * -DSTOP.PORT=&lt;stopPort&gt; -jar start.jar --stop
      * @parameter
      */
     protected String stopKey;
