@@ -316,40 +316,91 @@ public class QuotedStringTokenizer
         synchronized(buf)
         {
             buf.append('"');
-            for (int i=0;i<s.length();i++)
+            
+            int i=0;
+            loop:
+            for (;i<s.length();i++)
             {
                 char c = s.charAt(i);
                 switch(c)
                 {
                     case '"':
+                        buf.append(s,0,i);
                         buf.append("\\\"");
-                        continue;
+                        break loop;
                     case '\\':
+                        buf.append(s,0,i);
                         buf.append("\\\\");
-                        continue;
+                        break loop;
                     case '\n':
+                        buf.append(s,0,i);
                         buf.append("\\n");
-                        continue;
+                        break loop;
                     case '\r':
+                        buf.append(s,0,i);
                         buf.append("\\r");
-                        continue;
+                        break loop;
                     case '\t':
+                        buf.append(s,0,i);
                         buf.append("\\t");
-                        continue;
+                        break loop;
                     case '\f':
+                        buf.append(s,0,i);
                         buf.append("\\f");
-                        continue;
+                        break loop;
                     case '\b':
+                        buf.append(s,0,i);
                         buf.append("\\b");
-                        continue;
+                        break loop;
                         
                     default:
-                        buf.append(c);
                         continue;
                 }
             }
+            if (i==s.length())
+                buf.append(s);
+            else
+            {
+                i++;
+                for (;i<s.length();i++)
+                {
+                    char c = s.charAt(i);
+                    switch(c)
+                    {
+                        case '"':
+                            buf.append("\\\"");
+                            continue;
+                        case '\\':
+                            buf.append("\\\\");
+                            continue;
+                        case '\n':
+                            buf.append("\\n");
+                            continue;
+                        case '\r':
+                            buf.append("\\r");
+                            continue;
+                        case '\t':
+                            buf.append("\\t");
+                            continue;
+                        case '\f':
+                            buf.append("\\f");
+                            continue;
+                        case '\b':
+                            buf.append("\\b");
+                            continue;
+
+                        default:
+                            buf.append(c);
+                        continue;
+                    }
+                }
+            }
+            
             buf.append('"');
         } 
+        
+        
+        
     }
 
     
