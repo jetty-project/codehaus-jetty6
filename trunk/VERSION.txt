@@ -1,7 +1,8 @@
 
 jetty-6.2-SNAPSHOT
- + Added QueuedThreadPool
+ + Added QueuedThreadPool (as default)
  + Optimized QuotedStringTokenizer.quote()
+ + further Optimizations and improvements of Cometd
  + remote close throws EofException instead of IOException("Closed");
  + RetryRequest exception now extends ThreadDeath
  + Refactor of Continuation towards servlet 3.0 proposal
@@ -25,6 +26,9 @@ jetty-6.2-SNAPSHOT
  + JETTY-487 Handle empty chunked request
 
 jetty-6.1-SNAPSHOT
+ + Added QueuedThreadPool
+ + Optimized QuotedStringTokenizer.quote()
+ + further Optimizations and improvements of Cometd
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
