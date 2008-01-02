@@ -32,7 +32,7 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
-import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -203,8 +203,8 @@ public class Server extends HandlerWrapper implements Attributes
         
         if (_threadPool==null)
         {
-            BoundedThreadPool btp=new BoundedThreadPool();
-            setThreadPool(btp);
+            QueuedThreadPool tp=new QueuedThreadPool();
+            setThreadPool(tp);
         }
         
         if (_sessionIdManager!=null)
