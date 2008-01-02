@@ -1,5 +1,6 @@
 
 jetty-6.1-SNAPSHOT
+ + Optimized QuotedStringTokenizer.quote()
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
