@@ -37,6 +37,7 @@ import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
 
@@ -231,7 +232,7 @@ public class HttpClient extends AbstractBuffers
         
         if(_threadPool==null)
         {
-            BoundedThreadPool pool = new BoundedThreadPool();
+            QueuedThreadPool pool = new QueuedThreadPool();
             pool.setMaxThreads(16);
             pool.setDaemon(true);
             _threadPool=pool;
@@ -241,6 +242,10 @@ public class HttpClient extends AbstractBuffers
         if (_threadPool instanceof BoundedThreadPool)
         {
             ((BoundedThreadPool)_threadPool).setName("HttpClient");
+        }
+        if (_threadPool instanceof QueuedThreadPool)
+        {
+            ((QueuedThreadPool)_threadPool).setName("HttpClient");
         }
         if (_threadPool instanceof LifeCycle)
         {
