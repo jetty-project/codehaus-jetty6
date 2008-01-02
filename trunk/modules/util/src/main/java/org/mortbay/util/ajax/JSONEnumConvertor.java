@@ -48,7 +48,7 @@ public class JSONEnumConvertor implements JSON.Convertor
             throw new UnsupportedOperationException();
         try
         {
-            Class<?> c=Loader.loadClass(getClass(),(String)map.get("class"));
+            Class c=Loader.loadClass(getClass(),(String)map.get("class"));
             return _valueOf.invoke(null,new Object[]{c,map.get("value")});
         }
         catch(Exception e)
