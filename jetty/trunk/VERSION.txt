@@ -1,6 +1,7 @@
 
 jetty-6.2-SNAPSHOT
  + Added QueuedThreadPool
+ + Optimized QuotedStringTokenizer.quote()
  + remote close throws EofException instead of IOException("Closed");
  + RetryRequest exception now extends ThreadDeath
  + Refactor of Continuation towards servlet 3.0 proposal
