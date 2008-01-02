@@ -3,6 +3,7 @@ jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
+ + JETTY-490 Fixed JSONEnumConvertor
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
