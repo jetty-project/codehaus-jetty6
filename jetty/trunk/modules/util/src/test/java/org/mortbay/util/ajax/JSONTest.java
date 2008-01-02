@@ -10,7 +10,7 @@ import org.mortbay.util.ajax.JSON.Output;
 import junit.framework.TestCase;
 
 public class JSONTest extends TestCase
-{
+{   
     String test="\n\n\n\t\t    "+
     "// ignore this ,a [ \" \n"+
     "/* and this \n" +
@@ -250,6 +250,81 @@ public class JSONTest extends TestCase
         
            
     }
+    
+/* java 1.5 only 
+    enum Color { Red, Green, Blue };
+
+    public void testEnumConvertor()
+    {
+        JSON json = new JSON();
+        json.addConvertor(Date.class,new JSONDateConvertor());
+        json.addConvertor(Enum.class,new JSONEnumConvertor(false));
+        json.addConvertor(Object.class,new JSONObjectConvertor());
+
+        Woggle w0 = new Woggle();
+        Gizmo g0 = new Gizmo();
+        
+        w0.name="woggle0";
+        w0.nested=g0;
+        w0.number=100;
+        w0.other=Color.Blue;
+        g0.name="woggle1";
+        g0.nested=null;
+        g0.number=101;
+        g0.tested=true;
+        g0.other=Color.Green;
+        
+        HashMap map = new HashMap();
+        map.put("date",new Date(1));
+        map.put("w0",w0);
+        map.put("g0",g0);
+
+        StringBuffer buf = new StringBuffer();
+        json.append(buf,map);
+        String js=buf.toString();
+        
+        System.err.println(js);
+        assertTrue(js.indexOf("\"date\":\"Thu Jan 01 00:00:00 GMT 1970\"")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Woggle")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Gizmo")<0);
+        assertTrue(js.indexOf("\"tested\":true")>=0);
+        assertTrue(js.indexOf("\"Green\"")>=0);
+        assertTrue(js.indexOf("\"Blue\"")<0);
+
+        json.addConvertor(Date.class,new JSONDateConvertor(true));
+        w0.nested=null;
+        buf = new StringBuffer();
+        json.append(buf,map);
+        js=buf.toString();
+        System.err.println(js);
+        assertTrue(js.indexOf("\"date\":\"Thu Jan 01 00:00:00 GMT 1970\"")<0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Woggle")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Gizmo")<0);
+        
+        Map map2=(HashMap)json.parse(new JSON.StringSource(js));
+        
+        assertTrue(map2.get("date") instanceof Date);
+        assertTrue(map2.get("w0") instanceof Woggle);
+        assertEquals(null, ((Woggle)map2.get("w0")).getOther() );
+        assertEquals(Color.Green.toString(), ((Map)map2.get("g0")).get("other"));
+        
+        
+        
+        json.addConvertor(Enum.class,new JSONEnumConvertor(true));
+        buf = new StringBuffer();
+        json.append(buf,map);
+        js=buf.toString();
+        System.err.println(js);
+        map2=(HashMap)json.parse(new JSON.StringSource(js));
+        
+        assertTrue(map2.get("date") instanceof Date);
+        assertTrue(map2.get("w0") instanceof Woggle);
+        assertEquals(null, ((Woggle)map2.get("w0")).getOther() );
+        Object o=((Map)map2.get("g0")).get("other");
+        assertEquals(Color.Green, o);
+           
+    }
+*/
 
     /* ------------------------------------------------------------ */
     public static class Gizmo
@@ -258,6 +333,7 @@ public class JSONTest extends TestCase
         Gizmo nested;
         long number;
         boolean tested;
+        Object other;
         
         public String getName()
         {
@@ -274,6 +350,10 @@ public class JSONTest extends TestCase
         public boolean isTested()
         {
             return tested;
+        }
+        public Object getOther()
+        {
+            return other;
         }
     }
     

@@ -24,8 +24,7 @@ public class JSONEnumConvertor implements JSON.Convertor
         try
         {
             Class e = Loader.loadClass(getClass(),"java.lang.Enum");
-            _valueOf=e.getMethod("valueO",new Class[]{Class.class,String.class});
-            _valueOf=null;
+            _valueOf=e.getMethod("valueOf",new Class[]{Class.class,String.class});
         }
         catch(Exception e)
         {
@@ -49,8 +48,8 @@ public class JSONEnumConvertor implements JSON.Convertor
             throw new UnsupportedOperationException();
         try
         {
-            Class c=Loader.loadClass(getClass(),(String)map.get("class"));
-            _valueOf.invoke(null,new Object[]{c,map.get("value")});
+            Class<?> c=Loader.loadClass(getClass(),(String)map.get("class"));
+            return _valueOf.invoke(null,new Object[]{c,map.get("value")});
         }
         catch(Exception e)
         {

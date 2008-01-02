@@ -24,11 +24,13 @@ jetty-6.2-SNAPSHOT
  + JETTY-474 Fixed case sensitivity issue with HttpFields
  + JETTY-486 Improved jetty.sh script
  + JETTY-487 Handle empty chunked request
+ + JETTY-490 Fixed JSONEnumConvertor
 
 jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
+ + JETTY-490 Fixed JSONEnumConvertor
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
