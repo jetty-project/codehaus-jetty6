@@ -1,8 +1,8 @@
-
 jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
+ + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-490 Fixed JSONEnumConvertor
  + JETTY-491 opendocument mime types
  + JETTY-493 JSON handles BigDecimals
