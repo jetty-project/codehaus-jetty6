@@ -142,6 +142,7 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
     public void loadConfig () 
     throws IOException
     {
+        System.err.println("Loading hashuserrealm");
         synchronized (this)
         {
             _users.clear();
@@ -414,6 +415,7 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
 
             });
             _scanner.setReportExistingFilesOnStartup(false);
+            _scanner.setRecursive(false);
             _scanner.start();
         }
     }
