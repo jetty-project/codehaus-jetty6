@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-434 ContextDeployer scanning of sub-directories should be optional
  + JETTY-490 Fixed JSONEnumConvertor
  + JETTY-491 opendocument mime types
+ + JETTY-492 Null pointer in HashSSORealm
  + JETTY-493 JSON handles BigDecimals
 
 jetty-6.1.7 - 22 December 2007
