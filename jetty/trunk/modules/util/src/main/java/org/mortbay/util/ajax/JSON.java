@@ -1010,6 +1010,7 @@ public class JSON
                     break;
 
                 case '-':
+                case '+':
                     if (number!=0)
                         throw new IllegalStateException("bad number");
                     minus=true;
@@ -1052,6 +1053,7 @@ public class JSON
                     case '9':
                     case '-':
                     case '.':
+                    case '+':
                     case 'e':
                     case 'E':
                         buffer.append(c);

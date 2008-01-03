@@ -30,6 +30,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-490 Fixed JSONEnumConvertor
  + JETTY-491 opendocument mime types
  + JETTY-492 Null pointer in HashSSORealm
+ + JETTY-493 JSON handles BigDecimals
 
 jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
