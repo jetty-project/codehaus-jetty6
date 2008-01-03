@@ -44,7 +44,7 @@ public class HashSSORealm implements SSORealm
     {
         String ssoID = null;
         Cookie[] cookies = request.getCookies();
-        for (int i = 0; i < cookies.length; i++)
+        for (int i = 0; cookies!=null && i < cookies.length; i++)
         {
             if (cookies[i].getName().equals(SSO_COOKIE_NAME))
             {
