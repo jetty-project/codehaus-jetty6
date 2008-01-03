@@ -29,6 +29,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-487 Handle empty chunked request
  + JETTY-490 Fixed JSONEnumConvertor
  + JETTY-491 opendocument mime types
+ + JETTY-492 Null pointer in HashSSORealm
 
 jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
