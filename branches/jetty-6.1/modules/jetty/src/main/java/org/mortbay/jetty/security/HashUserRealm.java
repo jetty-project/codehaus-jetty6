@@ -414,6 +414,7 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
 
             });
             _scanner.setReportExistingFilesOnStartup(false);
+            _scanner.setRecursive(false);
             _scanner.start();
         }
     }

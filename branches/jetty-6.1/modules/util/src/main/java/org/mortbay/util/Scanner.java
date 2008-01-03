@@ -53,6 +53,7 @@ public class Scanner
     private boolean _reportExisting = true;
     private Timer _timer;
     private TimerTask _task;
+    private boolean _recursive=true;
 
     /**
      * Listener
@@ -145,6 +146,15 @@ public class Scanner
         return _scanDirs;
     }
     
+    public void setRecursive (boolean recursive)
+    {
+        _recursive=recursive;
+    }
+    
+    public boolean getRecursive ()
+    {
+        return _recursive;
+    }
     /**
      * Apply a filter to files found in the scan directory.
      * Only files matching the filter will be reported as added/changed/removed.
@@ -372,7 +382,7 @@ public class Scanner
                     scanInfoMap.put(name, new Long(lastModified));
                 }
             }
-            else if (f.isDirectory())
+            else if (f.isDirectory() && (_recursive || _scanDirs.contains(f)))
             {
                 File[] files = f.listFiles();
                 for (int i=0;i<files.length;i++)
