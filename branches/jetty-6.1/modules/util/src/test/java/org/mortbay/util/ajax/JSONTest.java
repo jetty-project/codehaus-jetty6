@@ -1,5 +1,7 @@
 package org.mortbay.util.ajax;
 import java.io.StringReader;
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -145,6 +147,17 @@ public class JSONTest extends TestCase
         
     }
 
+    /* ------------------------------------------------------------ */
+    public void testBigDecimal()
+    {
+        Object obj = JSON.parse("1.0E7");
+        assertTrue(obj instanceof Double);
+        BigDecimal bd = BigDecimal.valueOf(10000000d);
+        String string = JSON.toString(new Object[]{bd}); 
+        obj = Array.get(JSON.parse(string),0);
+        assertTrue(obj instanceof Double);
+    }
+    
     /* ------------------------------------------------------------ */
     public static class Gadget 
     {
