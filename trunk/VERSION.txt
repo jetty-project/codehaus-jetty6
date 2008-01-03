@@ -21,6 +21,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
+ + JETTY-434 ContextDeployer scanning of sub-directories should be optional
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
