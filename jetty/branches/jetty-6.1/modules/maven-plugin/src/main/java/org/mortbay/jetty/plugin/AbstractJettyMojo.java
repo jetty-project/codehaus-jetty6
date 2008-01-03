@@ -423,6 +423,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         scanner.setReportExistingFilesOnStartup(false);
         scanner.setScanInterval(getScanIntervalSeconds());
         scanner.setScanDirs(getScanList());
+        scanner.setRecursive(true);
         List listeners = getScannerListeners();
         Iterator itor = (listeners==null?null:listeners.iterator());
         while (itor!=null && itor.hasNext())

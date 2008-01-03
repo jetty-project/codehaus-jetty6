@@ -37,7 +37,8 @@ import org.mortbay.xml.XmlConfiguration;
  * {@link #setConfigurationDir(String)} for the appearance/disappearance or
  * changes to xml configuration files. The scan is performed at startup and at
  * an optional hot deployment frequency specified by
- * {@link #setScanInterval(int)}.
+ * {@link #setScanInterval(int)}. By default, the scanning is NOT recursive,
+ * but can be made so by {@link #setRecursive(boolean)}.
  * 
  * Each configuration file is in {@link XmlConfiguration} format and represents
  * the configuration of a instance of {@link ContextHandler} (or a subclass
@@ -73,6 +74,7 @@ public class ContextDeployer extends AbstractLifeCycle
     private Map _currentDeployments=new HashMap();
     private ContextHandlerCollection _contexts;
     private ConfigurationManager _configMgr;
+    private boolean _recursive = false;
 
     /* ------------------------------------------------------------ */
     protected class ScannerListener implements Scanner.DiscreteListener
@@ -243,6 +245,21 @@ public class ContextDeployer extends AbstractLifeCycle
         return _configMgr;
     }
 
+    
+    public void setRecursive (boolean recursive)
+    {
+        _recursive=recursive;
+    }
+    
+    public boolean getRecursive ()
+    {
+        return _recursive;
+    }
+    
+    public boolean isRecursive()
+    {
+        return _recursive;
+    }
     /* ------------------------------------------------------------ */
     private void deploy(String filename) throws Exception
     {
@@ -289,9 +306,8 @@ public class ContextDeployer extends AbstractLifeCycle
 
         _scanner.setScanDir(_configurationDir.getFile());
         _scanner.setScanInterval(getScanInterval());
-        // Accept changes only in files that could be the equivalent of
-        // jetty-web.xml files.
-        // That is, files that configure a single webapp.
+        _scanner.setRecursive(_recursive); //only look in the top level for deployment files?
+        // Accept changes only in files that could be a deployment descriptor
         _scanner.setFilenameFilter(new FilenameFilter()
         {
             public boolean accept(File dir, String name)
