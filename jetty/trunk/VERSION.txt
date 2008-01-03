@@ -37,6 +37,7 @@ jetty-6.1-SNAPSHOT
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
  + JETTY-490 Fixed JSONEnumConvertor
+ + JETTY-493 JSON handles BigDecimals
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
