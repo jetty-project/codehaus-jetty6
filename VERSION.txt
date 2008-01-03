@@ -27,6 +27,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-474 Fixed case sensitivity issue with HttpFields
  + JETTY-486 Improved jetty.sh script
  + JETTY-487 Handle empty chunked request
+ + JETTY-489 Improve doco on the jetty.port property for plugin
  + JETTY-490 Fixed JSONEnumConvertor
  + JETTY-491 opendocument mime types
  + JETTY-492 Null pointer in HashSSORealm
@@ -36,7 +37,13 @@ jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
+ + JETTY-350 log ssl errors on SslSocketConnector
+ + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
+ + JETTY-434 ContextDeployer scanning of sub-directories should be optional
+ + JETTY-489 Improve doco on the jetty.port property for plugin
  + JETTY-490 Fixed JSONEnumConvertor
+ + JETTY-491 opendocument mime types
+ + JETTY-492 Null pointer in HashSSORealm
  + JETTY-493 JSON handles BigDecimals
 
 jetty-6.1.7 - 22 December 2007
