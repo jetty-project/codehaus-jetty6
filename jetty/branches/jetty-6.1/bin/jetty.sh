@@ -427,6 +427,13 @@ then
   JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.port=$JETTY_PORT"
 fi
 
+#####################################################
+# See if JETTY_LOGS is defined
+#####################################################
+if [ "$JETTY_LOGS" != "" ]
+then
+  JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.logs=$JETTY_LOGS"
+fi
 
 #####################################################
 # Are we running on Windows? Could be, with Cygwin/NT.
@@ -595,6 +602,7 @@ case "$ACTION" in
         echo "JETTY_RUN      =  $JETTY_RUN"
         echo "JETTY_PID      =  $JETTY_PID"
         echo "JETTY_PORT     =  $JETTY_PORT"
+        echo "JETTY_LOGS     =  $JETTY_LOGS"
         echo "CONFIGS        =  $CONFIGS"
         echo "JAVA_OPTIONS   =  $JAVA_OPTIONS"
         echo "JAVA           =  $JAVA"
