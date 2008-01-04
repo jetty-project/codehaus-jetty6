@@ -26,9 +26,9 @@ import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.mortbay.util.Scanner;
-import org.mortbay.jetty.plugin.util.ScanTargetPattern;
 import org.codehaus.plexus.util.FileUtils;
+import org.mortbay.jetty.plugin.util.ScanTargetPattern;
+import org.mortbay.util.Scanner;
 
 /**
  * AbstractJettyRunMojo
@@ -227,7 +227,17 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
             throw new MojoExecutionException("Webapp source directory does not exist", e);
         }
         
-       
+        // check reload mechanic
+        if ( !"automatic".equalsIgnoreCase( reload ) && !"manual".equalsIgnoreCase( reload ) )
+        {
+            throw new MojoExecutionException( "invalid reload mechanic specified, must be 'automatic' or 'manual'" );
+        }
+        else
+        {
+            getLog().info("Reload Mechanic: " + reload );
+        }
+
+
         // get the web.xml file if one has been provided, otherwise assume it is
         // in the webapp src directory
         if (getWebXml() == null )
@@ -382,32 +392,8 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
             {
                 try
                 {
-                    getLog().info("restarting "+webAppConfig);
-                    getLog().debug("Stopping webapp ...");
-                    webAppConfig.stop();
-                    getLog().debug("Reconfiguring webapp ...");
-
-                    checkPomConfiguration();
-                    configureWebApplication();
-
-                    // check if we need to reconfigure the scanner,
-                    // which is if the pom changes
-                    if (changes.contains(getProject().getFile().getCanonicalPath()))
-                    {
-                        getLog().info("Reconfiguring scanner after change to pom.xml ...");
-                        scanList.clear();
-                        scanList.add(getWebXmlFile());
-                        if (getJettyEnvXmlFile() != null)
-                            scanList.add(getJettyEnvXmlFile());
-                        scanList.addAll(getExtraScanTargets());
-                        scanList.add(getProject().getFile());
-                        scanList.addAll(getClassPathFiles());
-                        getScanner().setScanDirs(scanList);
-                    }
-
-                    getLog().debug("Restarting webapp ...");
-                    webAppConfig.start();
-                    getLog().info("Restart completed at "+new Date().toString());
+                    boolean reconfigure = changes.contains(getProject().getFile().getCanonicalPath());
+                    restartWebApp(reconfigure);
                 }
                 catch (Exception e)
                 {
@@ -420,6 +406,35 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         setScannerListeners(listeners);
     }
 
+    public void restartWebApp(boolean reconfigureScanner) throws Exception 
+    {
+        getLog().info("restarting "+webAppConfig);
+        getLog().debug("Stopping webapp ...");
+        webAppConfig.stop();
+        getLog().debug("Reconfiguring webapp ...");
+
+        checkPomConfiguration();
+        configureWebApplication();
+
+        // check if we need to reconfigure the scanner,
+        // which is if the pom changes
+        if (reconfigureScanner)
+        {
+            getLog().info("Reconfiguring scanner after change to pom.xml ...");
+            scanList.clear();
+            scanList.add(getWebXmlFile());
+            if (getJettyEnvXmlFile() != null)
+                scanList.add(getJettyEnvXmlFile());
+            scanList.addAll(getExtraScanTargets());
+            scanList.add(getProject().getFile());
+            scanList.addAll(getClassPathFiles());
+            getScanner().setScanDirs(scanList);
+        }
+
+        getLog().debug("Restarting webapp ...");
+        webAppConfig.start();
+        getLog().info("Restart completed at "+new Date().toString());
+    }
     
     private List getDependencyFiles ()
     {
