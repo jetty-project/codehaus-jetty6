@@ -38,8 +38,6 @@ public class Jetty6MavenConfiguration extends Configuration
 {
     private List classPathFiles;
     private File webXmlFile;
-    
-    
    
     public Jetty6MavenConfiguration()
     {
@@ -75,7 +73,18 @@ public class Jetty6MavenConfiguration extends Configuration
                 Log.debug("Classpath = "+LazyList.array2List(((URLClassLoader)getWebAppContext().getClassLoader()).getURLs()));
         }
         else
+        {
             super.configureClassLoader();
+        }
+
+        // knock out environmental maven and plexus classes from webAppContext
+        String[] existingServerClasses = getWebAppContext().getServerClasses();
+        String[] newServerClasses = new String[2+(existingServerClasses==null?0:existingServerClasses.length)];
+        newServerClasses[0] = "-org.apache.maven.";
+        newServerClasses[1] = "-org.codehaus.plexus.";
+        System.arraycopy( existingServerClasses, 0, newServerClasses, 2, existingServerClasses.length );
+        
+        getWebAppContext().setServerClasses( newServerClasses );
     }
 
     
