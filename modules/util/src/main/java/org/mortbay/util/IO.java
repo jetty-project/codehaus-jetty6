@@ -27,13 +27,14 @@ import java.io.InputStreamReader;
 
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.QueuedThreadPool;
 
 /* ======================================================================== */
 /** IO Utilities.
  * Provides stream handling utilities in
  * singleton Threadpool implementation accessed by static members.
  */
-public class IO extends BoundedThreadPool
+public class IO 
 {
     /* ------------------------------------------------------------------- */
     public final static String
@@ -49,20 +50,14 @@ public class IO extends BoundedThreadPool
     /* ------------------------------------------------------------------- */
     // TODO get rid of this singleton!
     private static class Singleton {
-        static final IO __instance=new IO();
+        static final QueuedThreadPool __pool=new QueuedThreadPool();
         static
         {
-            try{__instance.start();}
+            try{__pool.start();}
             catch(Exception e){Log.warn(e); System.exit(1);}
         }
     }
 
-    /* ------------------------------------------------------------------- */
-    public static IO instance()
-    {
-        return Singleton.__instance;
-    }
-    
     /* ------------------------------------------------------------------- */
     static class Job implements Runnable
     {
@@ -123,7 +118,7 @@ public class IO extends BoundedThreadPool
     {
         try{
             Job job=new Job(in,out);
-            if (!instance().dispatch(job))
+            if (!Singleton.__pool.dispatch(job))
                 job.run();
         }
         catch(Exception e)
@@ -150,7 +145,7 @@ public class IO extends BoundedThreadPool
         try
         {
             Job job=new Job(in,out);
-            if (!instance().dispatch(job))
+            if (!Singleton.__pool.dispatch(job))
                 job.run();
         }
         catch(Exception e)
