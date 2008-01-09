@@ -139,6 +139,7 @@ public class SessionDump extends HttpServlet
 
                 out.println("<input type=\"submit\" name=\"Action\" value=\"Set\"/>");
                 out.println("<input type=\"submit\" name=\"Action\" value=\"Remove\"/>");
+                out.println("<input type=\"submit\" name=\"Action\" value=\"Refresh\"/>");
                 out.println("<input type=\"submit\" name=\"Action\" value=\"Invalidate\"/><br/>");
                 
                 out.println("</form><br/>");

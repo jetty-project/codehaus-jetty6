@@ -20,8 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -139,7 +141,8 @@ public class HashSessionManager extends AbstractSessionManager
         if (_dftMaxIdleSecs>0&&_scavengePeriodMs>_dftMaxIdleSecs*1000)
             setScavengePeriod((_dftMaxIdleSecs+9)/10);
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void setSavePeriod (int seconds)
     {
         int oldSavePeriod = _savePeriodMs;
@@ -175,7 +178,8 @@ public class HashSessionManager extends AbstractSessionManager
             }
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
     public int getSavePeriod ()
     {
         if (_savePeriodMs<=0)
@@ -183,6 +187,7 @@ public class HashSessionManager extends AbstractSessionManager
         
         return _savePeriodMs/1000;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param seconds
@@ -315,22 +320,31 @@ public class HashSessionManager extends AbstractSessionManager
     }
     
     /* ------------------------------------------------------------ */
+    protected AbstractSessionManager.Session newSession(long created, String clusterId)
+    {
+        return new Session(created,clusterId);
+    }
+    
+    /* ------------------------------------------------------------ */
     protected void removeSession(String clusterId)
     {
         _sessions.remove(clusterId);
     }
     
-    
+
+    /* ------------------------------------------------------------ */
     public void setStoreDirectory (File dir)
     {
         _storeDir=dir;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public File getStoreDirectory ()
     {
         return _storeDir;
     }
 
+    /* ------------------------------------------------------------ */
     public void restoreSessions () throws Exception
     {
         if (_storeDir==null || !_storeDir.exists())
@@ -361,7 +375,8 @@ public class HashSessionManager extends AbstractSessionManager
             }
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void saveSessions () throws Exception
     {
         if (_storeDir==null || !_storeDir.exists())
@@ -400,17 +415,15 @@ public class HashSessionManager extends AbstractSessionManager
             }
         }
     }
-        
-    public Session restoreSession (FileInputStream fis) 
-    throws Exception
-    {
 
+    /* ------------------------------------------------------------ */
+    public Session restoreSession (InputStream is) throws Exception
+    {
         /*
          * Take care of this class's fields first by calling 
          * defaultReadObject
          */
-        
-        DataInputStream in = new DataInputStream(fis);
+        DataInputStream in = new DataInputStream(is);
         String clusterId = in.readUTF();
         String nodeId = in.readUTF();
         boolean idChanged = in.readBoolean();
@@ -424,7 +437,7 @@ public class HashSessionManager extends AbstractSessionManager
         //boolean isNew = in.readBoolean();
         int requests = in.readInt();
         
-        Session session = new Session (created, clusterId);
+        Session session = (Session)newSession(created, clusterId);
         session._cookieSet = cookieSet;
         session._lastAccessed = lastAccessed;
         
@@ -460,18 +473,18 @@ public class HashSessionManager extends AbstractSessionManager
         /* ------------------------------------------------------------ */
         private static final long serialVersionUID=-2134521374206116367L;
         
-   
-
         /* ------------------------------------------------------------- */
         protected Session(HttpServletRequest request)
         {
             super(request);
         }
-        
+
+        /* ------------------------------------------------------------- */
         protected Session(long created, String clusterId)
         {
             super(created, clusterId);
         }
+        
         /* ------------------------------------------------------------- */
         public void setMaxInactiveInterval(int secs)
         {
@@ -486,16 +499,20 @@ public class HashSessionManager extends AbstractSessionManager
             return new HashMap(3);
         }
         
- 
+
+        /* ------------------------------------------------------------ */
         public void invalidate ()
         throws IllegalStateException
         {
             super.invalidate();
-            remove(getId());
+            
+            remove();
         }
-        
-        public void remove (String id)
+
+        /* ------------------------------------------------------------ */
+        public void remove()
         {
+            String id=getId();
             if (id==null)
                 return;
             
@@ -512,10 +529,11 @@ public class HashSessionManager extends AbstractSessionManager
             File f = new File(_storeDir, id);
             f.delete();
         }
-        
-        public void save(FileOutputStream fos)  throws IOException 
+
+        /* ------------------------------------------------------------ */
+        public void save(OutputStream os)  throws IOException 
         {
-            DataOutputStream out = new DataOutputStream(fos);
+            DataOutputStream out = new DataOutputStream(os);
             out.writeUTF(_clusterId);
             out.writeUTF(_nodeId);
             out.writeBoolean(_idChanged);
@@ -555,23 +573,25 @@ public class HashSessionManager extends AbstractSessionManager
         }
         
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     protected class ClassLoadingObjectInputStream extends ObjectInputStream
     {
-        public ClassLoadingObjectInputStream(java.io.InputStream in)
-        throws IOException
+        /* ------------------------------------------------------------ */
+        public ClassLoadingObjectInputStream(java.io.InputStream in) throws IOException
         {
             super(in);
         }
-        
-        public ClassLoadingObjectInputStream ()
-        throws IOException
+
+        /* ------------------------------------------------------------ */
+        public ClassLoadingObjectInputStream () throws IOException
         {
             super();
         }
-        
-        public Class resolveClass (java.io.ObjectStreamClass cl)
-        throws IOException, ClassNotFoundException
+
+        /* ------------------------------------------------------------ */
+        public Class resolveClass (java.io.ObjectStreamClass cl) throws IOException, ClassNotFoundException
         {
             Class clazz;
             try

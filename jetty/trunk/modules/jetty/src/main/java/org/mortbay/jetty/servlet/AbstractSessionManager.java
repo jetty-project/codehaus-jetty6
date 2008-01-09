@@ -731,8 +731,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      */
     public abstract class Session implements SessionIf, Serializable
     {
-        protected final String _clusterId;
-        protected final String _nodeId;
+        protected final String _clusterId; // ID unique within cluster
+        protected final String _nodeId;    // ID unique within node
         protected boolean _idChanged;
         protected final long _created;
         protected long _cookieSet;
