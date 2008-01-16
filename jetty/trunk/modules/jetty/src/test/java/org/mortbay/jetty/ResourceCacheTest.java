@@ -3,11 +3,11 @@ package org.mortbay.jetty;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import junit.framework.TestCase;
+
 import org.mortbay.jetty.ResourceCache.Content;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
-
-import junit.framework.TestCase;
 
 public class ResourceCacheTest extends TestCase
 {
