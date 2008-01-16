@@ -27,7 +27,6 @@ import java.net.URLConnection;
 import java.security.Permission;
 
 import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
 

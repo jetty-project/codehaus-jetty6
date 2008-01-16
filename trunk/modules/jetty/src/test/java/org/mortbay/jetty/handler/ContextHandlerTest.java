@@ -22,18 +22,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import junit.framework.TestCase;
-
-import org.mortbay.resource.Resource;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.LocalConnector;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.HttpConnection;
-
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
+
+import junit.framework.TestCase;
+
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.LocalConnector;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Server;
+import org.mortbay.resource.Resource;
 
 /**
  * @version $Revision$
