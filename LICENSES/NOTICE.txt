@@ -3,8 +3,9 @@
  Copyright 1995-2006 Mort Bay Consulting Pty Ltd
 ==============================================================
 
-This product includes some software developed at The Apache Software 
-Foundation (http://www.apache.org/).
+The Jetty Web Container is Copyright Mort Bay Consulting Pty Ltd
+unless otherwise noted. It is licensed under the apache 2.0
+license.
 
 The javax.servlet package used by Jetty is copyright 
 Sun Microsystems, Inc and Apache Software Foundation. It is 
