@@ -705,6 +705,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 }
                 
                 // Handle the REALLY SILLY request events!
+                // TODO, this really should be done AFTER security and session handlers
+                // Perhaps this can be moved to the servlet handler?
                 if (_requestListeners!=null)
                 {
                     event = new ServletRequestEvent(_scontext,request);
