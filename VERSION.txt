@@ -33,7 +33,8 @@ jetty-6.2-SNAPSHOT
  + JETTY-491 opendocument mime types
  + JETTY-492 Null pointer in HashSSORealm
  + JETTY-493 JSON handles BigDecimals
- + JETTY=494 Client side session replication
+ + JETTY-494 Client side session replication
+ + JETTY-498 Improved cookie parsing
 
 jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
