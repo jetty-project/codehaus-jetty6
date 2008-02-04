@@ -388,6 +388,21 @@ public class UrlEncoded extends MultiMap
     }
     
     /* -------------------------------------------------------------- */
+    public static void decodeUtf16To(InputStream in, MultiMap map, int maxLength) throws IOException
+    {
+        InputStreamReader input = new InputStreamReader(in,StringUtil.__UTF16);
+        StringBuffer buf = new StringBuffer();
+
+        int c;
+        int length=0;
+        if (maxLength<0)
+            maxLength=Integer.MAX_VALUE;
+        while ((c=input.read())>0 && length++<maxLength)
+            buf.append((char)c);
+        decodeTo(buf.toString(),map,StringUtil.__UTF8);
+    }
+    
+    /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
      * @param in the stream containing the encoded parameters
      */
@@ -397,6 +412,12 @@ public class UrlEncoded extends MultiMap
         if (charset==null || StringUtil.__UTF8.equalsIgnoreCase(charset) || StringUtil.__ISO_8859_1.equalsIgnoreCase(charset))
         {
             decodeUtf8To(in,map,maxLength);
+            return;
+        }
+        
+        if (StringUtil.__UTF16.equalsIgnoreCase(charset)) // Should be all 2 byte encodings
+        {
+            decodeUtf16To(in,map,maxLength);
             return;
         }
         
@@ -411,18 +432,18 @@ public class UrlEncoded extends MultiMap
             
             int l=-1;
             int totalLength = 0;
-            InputStreamReader input = new InputStreamReader(in,charset);
-            StringWriter output = new StringWriter(256);
+            ByteArrayOutputStream2 output = new ByteArrayOutputStream2();
+            
             int size=0;
             
-            while ((c=input.read())>0)
+            while ((c=in.read())>0)
             {
                 switch ((char) c)
                 {
                     case '&':
-                        size=output.getBuffer().length();
-                        value = size==0?"":output.getBuffer().toString();
-                        output.getBuffer().setLength(0);
+                        size=output.size();
+                        value = size==0?"":output.toString(charset);
+                        output.setCount(0);
                         if (key != null)
                         {
                             map.add(key,value);
@@ -440,9 +461,9 @@ public class UrlEncoded extends MultiMap
                             output.write(c);
                             break;
                         }
-                        size=output.getBuffer().length();
-                        key = size==0?"":output.getBuffer().toString();
-                        output.getBuffer().setLength(0);
+                        size=output.size();
+                        key = size==0?"":output.toString(charset);
+                        output.setCount(0);
                         break;
                     case '+':
                         output.write(' ');
@@ -471,15 +492,15 @@ public class UrlEncoded extends MultiMap
                     throw new IllegalStateException("Form too large");
             }
 
-            size=output.getBuffer().length();
+            size=output.size();
             if (key != null)
             {
-                value = size==0?"":output.getBuffer().toString();
-                output.getBuffer().setLength(0);
+                value = size==0?"":output.toString(charset);
+                output.setCount(0);
                 map.add(key,value);
             }
             else if (size>0)
-                map.add(output.getBuffer().toString(),"");
+                map.add(output.toString(charset),"");
         }
     }
     

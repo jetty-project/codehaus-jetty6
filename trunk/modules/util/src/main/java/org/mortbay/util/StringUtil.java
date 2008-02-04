@@ -52,6 +52,7 @@ public class StringUtil
     }
     
     public final static String __UTF8="UTF-8";
+    public final static String __UTF16="UTF-16";
     
     
     private static char[] lowercases = {
