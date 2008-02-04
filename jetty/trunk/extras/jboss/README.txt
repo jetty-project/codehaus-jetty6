@@ -13,5 +13,6 @@ to install:
    3. copy the $jetty.home/extras/jboss/target/jetty-JETTY-VERSION-jboss-JBOSS-VERSION.sar to your JBoss
       deploy directory (where JETTY-VERSION is the version of jetty you are using and JBOSS-VERSION is the
       version of JBoss).
-
+   4. edit $JBOSS-HOME/server/default/deploy/management/console-mgr.sar/web-console.war/WEB-INF/web.xml
+      and remove servlet and servlet-mapping for Status Servlet (tomcat specific)
 
