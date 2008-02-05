@@ -59,6 +59,11 @@
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-sslengine</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
       <version>${project.version}</version>
     </dependency>
