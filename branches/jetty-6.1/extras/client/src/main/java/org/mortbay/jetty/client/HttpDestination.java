@@ -65,7 +65,8 @@ public class HttpDestination
     {
         return _address;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public Buffer getHostHeader()
     {
         return _hostHeader;
@@ -75,6 +76,12 @@ public class HttpDestination
     public HttpClient getHttpClient()
     {
         return _client;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isSecure()
+    {
+        return _ssl;
     }
 
     /* ------------------------------------------------------------------------------- */
