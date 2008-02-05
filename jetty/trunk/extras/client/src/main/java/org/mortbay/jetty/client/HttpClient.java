@@ -23,6 +23,8 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.SSLSocket;
+
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
@@ -35,6 +37,7 @@ import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.QueuedThreadPool;
@@ -311,9 +314,20 @@ public class HttpClient extends AbstractBuffers
     {
         public void startConnection(final HttpDestination destination) throws IOException
         {
-            Socket socket=new Socket();
+            Socket socket=null;
+
+            if (destination.isSecure())
+            {
+                throw new UnsupportedOperationException("Not implemented");
+            }
+            else
+            {
+                socket= new Socket();
+            }
             socket.connect(destination.getAddress());
+            
             EndPoint endpoint=new SocketEndPoint(socket);
+            
             final HttpConnection connection=new HttpConnection(HttpClient.this,endpoint,getHeaderBufferSize(),getRequestBufferSize());
             connection.setDestination(destination);
             destination.onNewConnection(connection);
@@ -354,6 +368,10 @@ public class HttpClient extends AbstractBuffers
 
         public void startConnection(HttpDestination destination) throws IOException
         {
+            if (destination.isSecure())
+            {
+                throw new UnsupportedOperationException("Not implemented");
+            }
             SocketChannel channel=SocketChannel.open();
             channel.configureBlocking(false);
             channel.connect(destination.getAddress());
