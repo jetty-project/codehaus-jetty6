@@ -18,6 +18,7 @@ jetty-6.2-SNAPSHOT
  + Optimizations and improvements of Cometd, more pooled objects
  + Long cache for JSON
  + Update java5 patch
+ + Add removeHandler(Handler) method to HandlerContainer interface
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
