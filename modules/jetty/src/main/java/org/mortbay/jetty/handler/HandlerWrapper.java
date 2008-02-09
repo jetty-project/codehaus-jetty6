@@ -107,6 +107,19 @@ public class HandlerWrapper extends AbstractHandlerContainer
             ((HandlerContainer)handler).addHandler(old);
     }
     
+    
+    public void removeHandler (Handler handler)
+    {
+        Handler old = getHandler();
+        if (old!=null && (old instanceof HandlerContainer))
+            ((HandlerContainer)old).removeHandler(handler);
+        else if (old!=null && handler==old)
+            setHandler(null);
+        else
+            throw new IllegalStateException("Cannot remove");
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.thread.AbstractLifeCycle#doStart()
