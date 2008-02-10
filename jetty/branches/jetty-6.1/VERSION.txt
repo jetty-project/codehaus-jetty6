@@ -2,6 +2,7 @@ jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
+ + add removeHandler(Handler) method to HandlerContainer interface
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
  + JETTY-434 ContextDeployer scanning of sub-directories should be optional
