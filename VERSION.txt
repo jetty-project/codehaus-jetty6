@@ -19,6 +19,7 @@ jetty-6.2-SNAPSHOT
  + Long cache for JSON
  + Update java5 patch
  + Add removeHandler(Handler) method to HandlerContainer interface
+ + Improved Bayeux API
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
@@ -57,7 +58,6 @@ jetty-6.1.7 - 22 December 2007
  + Added JSON.Convertor and non static JSON instances
  + Add "mvn jetty:stop" 
  + allow sessions to be periodically persisted to disk
- + Cookie support in BayeuxClient
  + Cookie support in BayeuxClient
  + grizzly fixed for posts
  + jetty-6.1 branch created from 6.1.6 and r593 of jetty-contrib trunk
