@@ -143,7 +143,7 @@ public class HttpExchange
     
     /* ------------------------------------------------------------ */
     /**
-     * @param url
+     * @param url Including protocol, host and port
      */
     public void setURL(String url)
     {
@@ -450,6 +450,12 @@ public class HttpExchange
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    /**
+     * An exchange that caches response status and fields for later use.
+     * 
+     * @author gregw
+     *
+     */
     public static class CachedExchange extends HttpExchange
     {
         int _responseStatus;
@@ -495,6 +501,10 @@ public class HttpExchange
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    /**
+     * A CachedExchange that retains all content for later use.
+     *
+     */
     public static class ContentExchange extends CachedExchange
     {
         int _contentLength=1024;
