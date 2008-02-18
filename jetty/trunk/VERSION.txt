@@ -26,6 +26,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
  + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
+ + JETTY-433 ContextDeployer constructor fails unnecessarily when using a security manager if jetty.home not set
  + JETTY-434 ContextDeployer scanning of sub-directories should be optional
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
