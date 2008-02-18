@@ -35,6 +35,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-498 Improved cookie parsing
  + JETTY-507 Fixed encoding from JETTY-388
  + JETTY-508 Extensible cometd handlers
+ + JETTY-509 Fixed JSONP transport for changing callback names
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
