@@ -113,15 +113,17 @@ public class URLEncodedTest extends junit.framework.TestCase
         assertEquals("encoded encode","Name8=xx%2C++yy++%2Czz", url_encoded.encode());
         assertEquals("encoded get", url_encoded.getString("Name8"),"xx,  yy  ,zz");
 
-       /* Not every jvm supports this encoding, so don't run this test for now
+       /* Not every jvm supports this encoding */
         
-        url_encoded.clear();
-        url_encoded.decode("Name9=%83e%83X%83g", "SJIS"); // "Test" in Japanese Katakana
-        assertEquals("encoded param size",1, url_encoded.size());
-        assertEquals("encoded get", "\u30c6\u30b9\u30c8", url_encoded.getString("Name9"));   
-        
-       */
-        
+        if (java.nio.charset.Charset.isSupported("SJIS"))
+        {
+            url_encoded.clear();
+            url_encoded.decode("Name9=%83e%83X%83g", "SJIS"); // "Test" in Japanese Katakana
+            assertEquals("encoded param size",1, url_encoded.size());
+            assertEquals("encoded get", "\u30c6\u30b9\u30c8", url_encoded.getString("Name9"));   
+        }
+        else
+            assertTrue("Charset SJIS not supported by jvm", true);
     }
     
 
@@ -140,6 +142,15 @@ public class URLEncodedTest extends junit.framework.TestCase
         assertEquals("stream name2","",m.getString("name2"));
         assertEquals("stream name3","value 3",m.getString("name3"));
         
-        
+        if (java.nio.charset.Charset.isSupported("Shift_JIS"))
+        {
+            ByteArrayInputStream in2 = new ByteArrayInputStream ("name=%83e%83X%83g".getBytes());
+            MultiMap m2 = new MultiMap();
+            UrlEncoded.decodeTo(in2, m2, "Shift_JIS", -1);
+            assertEquals("stream length",1,m2.size());
+            assertEquals("stream name","\u30c6\u30b9\u30c8",m2.getString("name"));
+        }
+        else
+            assertTrue("Charset Shift_JIS not supported by jvm", true);
     }
 }
