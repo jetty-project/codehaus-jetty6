@@ -3,6 +3,24 @@ jetty-6.1-SNAPSHOT
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
  + add removeHandler(Handler) method to HandlerContainer interface
+ + remote close throws EofException instead of IOException("Closed");
+ + RetryRequest exception now extends ThreadDeath
+ + Refactor of Continuation towards servlet 3.0 proposal
+ + Added option to dispatch to suspended requests.
+ + Delay 100 continues until getInputStream
+ + Added BayeuxService
+ + Added JSON.Convertor and non static JSON instances
+ + Add "mvn jetty:stop" 
+ + allow sessions to be periodically persisted to disk
+ + Cookie support in BayeuxClient
+ + grizzly fixed for posts
+ + Improved Cometd timeout handling
+ + Optimizations and improvements of Cometd, more pooled objects
+ + Long cache for JSON
+ + Update java5 patch
+ + Add removeHandler(Handler) method to HandlerContainer interface
+ + Fixed JSON negative numbers
+ + Improved Bayeux API
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
