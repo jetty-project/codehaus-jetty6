@@ -117,13 +117,6 @@ public class ContextDeployer extends AbstractLifeCycle
      */
     public ContextDeployer() throws Exception
     {
-        // set up the default scan location to be $jetty.home/webapps
-        String home=System.getProperty("jetty.home");
-        if (home==null)
-            home=".";
-        Log.debug("jetty.home="+home);
-        setConfigurationDir(Resource.newResource(home).addPath("webapps"));
-        Log.debug("hot deploy dir="+_configurationDir.getFile().getCanonicalPath());
         _scanner=new Scanner();
     }
 
