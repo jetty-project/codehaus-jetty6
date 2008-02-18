@@ -19,6 +19,7 @@ jetty-6.2-SNAPSHOT
  + Long cache for JSON
  + Update java5 patch
  + Add removeHandler(Handler) method to HandlerContainer interface
+ + Fixed JSON negative numbers
  + Improved Bayeux API
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
  + JETTY-282 Support manually-triggered reloading by maven plugin
