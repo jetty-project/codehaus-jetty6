@@ -1032,7 +1032,7 @@ public class JSON
         }
 
         if (buffer==null)
-            return TypeUtil.newLong(number);
+            return TypeUtil.newLong(minus?-1*number:number);
 
         synchronized (buffer)
         {
