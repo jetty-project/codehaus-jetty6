@@ -20,6 +20,7 @@ jetty-6.2-SNAPSHOT
  + Update java5 patch
  + Add removeHandler(Handler) method to HandlerContainer interface
  + Improved Bayeux API
+ + Remove duplicate commons-logging jars and include sslengine in jboss sar
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
