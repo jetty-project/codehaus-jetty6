@@ -22,6 +22,7 @@ jetty-6.2-SNAPSHOT
  + Fixed JSON negative numbers
  + Improved Bayeux API
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
+ + Add test case for JETTY-507
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
