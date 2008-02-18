@@ -22,6 +22,7 @@ jetty-6.1-SNAPSHOT
  + Fixed JSON negative numbers
  + Improved Bayeux API
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
+ + Add test case for JETTY-507
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
  + JETTY-433 ContextDeployer constructor fails unnecessarily when using a security manager if jetty.home not set
