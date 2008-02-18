@@ -24,7 +24,7 @@ public class JSONTest extends TestCase
     "\"empty\" : {}  ," +
     "\"map\" : {\"a\":-1.0e2}  ," +
     "\"array\" : [\"a\",-1.0e2,[],null,true,false]  ," +
-    "\"w0\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle0\",\"nested\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle1\",\"nested\":null,\"number\":101},\"number\":100}" +
+    "\"w0\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle0\",\"nested\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle1\",\"nested\":null,\"number\":-101},\"number\":100}" +
     "}";
     
     public void testToString()
@@ -41,7 +41,7 @@ public class JSONTest extends TestCase
         w0.number=100;
         w1.name="woggle1";
         w1.nested=null;
-        w1.number=101;
+        w1.number=-101;
         
         map.put("n1",null);
         map.put("n2",new Integer(2));
@@ -66,7 +66,7 @@ public class JSONTest extends TestCase
         assertTrue(s.indexOf("\"n7\":{\"x\":\"value\"}")>=0);
         assertTrue(s.indexOf("\"n8\":[1,2,3,4]")>=0);
         assertTrue(s.indexOf("\"n9\":[{},  [],  {}]")>=0);
-        assertTrue(s.indexOf("\"w0\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle0\",\"nested\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle1\",\"nested\":null,\"number\":101},\"number\":100}")>=0);
+        assertTrue(s.indexOf("\"w0\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle0\",\"nested\":{\"class\":\"org.mortbay.util.ajax.JSONTest$Woggle\",\"name\":\"woggle1\",\"nested\":null,\"number\":-101},\"number\":100}")>=0);
 
         Gadget gadget = new Gadget();
         gadget.setShields(42);
@@ -103,6 +103,8 @@ public class JSONTest extends TestCase
         assertTrue(map.get("array").getClass().isArray());
         assertTrue(map.get("w0") instanceof Woggle);
         assertTrue(((Woggle)map.get("w0")).nested instanceof Woggle);
+        assertEquals(-101,((Woggle)((Woggle)map.get("w0")).nested).number);
+        
         
         test="{\"data\":{\"source\":\"15831407eqdaawf7\",\"widgetId\":\"Magnet_8\"},\"channel\":\"/magnets/moveStart\",\"connectionId\":null,\"clientId\":\"15831407eqdaawf7\"}";
         map = (Map)JSON.parse(test);
@@ -229,7 +231,7 @@ public class JSONTest extends TestCase
         w0.number=100;
         g0.name="woggle1";
         g0.nested=null;
-        g0.number=101;
+        g0.number=-101;
         g0.tested=true;
         
         HashMap map = new HashMap();
@@ -283,7 +285,7 @@ public class JSONTest extends TestCase
         w0.other=Color.Blue;
         g0.name="woggle1";
         g0.nested=null;
-        g0.number=101;
+        g0.number=-101;
         g0.tested=true;
         g0.other=Color.Green;
         
