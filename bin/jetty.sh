@@ -215,6 +215,7 @@ if [ -z "$JETTY_HOME" ] ; then
     exit 1
 fi
 cd $JETTY_HOME
+JETTY_HOME=`pwd`
 
 #####################################################
 # Check that jetty is where we think it is
