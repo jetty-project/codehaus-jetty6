@@ -21,8 +21,8 @@ jetty-6.2-SNAPSHOT
  + Add removeHandler(Handler) method to HandlerContainer interface
  + Fixed JSON negative numbers
  + Improved Bayeux API
+ + Allow Bayeux subscriptions to meta channels
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
- + Add test case for JETTY-507
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
@@ -42,7 +42,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-493 JSON handles BigDecimals
  + JETTY-494 Client side session replication
  + JETTY-498 Improved cookie parsing
- + JETTY-507 Fixed encoding from JETTY-388
+ + JETTY-507 Fixed encoding from JETTY-388 and test case
  + JETTY-508 Extensible cometd handlers
  + JETTY-509 Fixed JSONP transport for changing callback names
  + JETTY-511 jetty.sh mishandled JETTY_HOME when launched from a relative path 
