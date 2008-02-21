@@ -15,7 +15,9 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -40,6 +42,7 @@ public class ErrorPageErrorHandler extends ErrorHandler
 {
     protected ServletContext _servletContext;
     protected Map _errorPages; // code or exception to URL
+    protected List _errorPageList; // list of ErrorCode by range 
 
     /* ------------------------------------------------------------ */
     /**
@@ -80,9 +83,27 @@ public class ErrorPageErrorHandler extends ErrorHandler
             
             if (error_page == null)
             {
+                // look for an exact code match
                 Integer code=(Integer)request.getAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE);
                 if (code!=null)
+                {
                     error_page= (String)_errorPages.get(TypeUtil.toString(code.intValue()));
+
+                    // if still not found
+                    if ((error_page == null) && (_errorPageList != null))
+                    {
+                        // look for an error code range match.
+                        for (int i = 0; i < _errorPageList.size(); i++)
+                        {
+                            ErrorCodeRange errCode = (ErrorCodeRange) _errorPageList.get(i);
+                            if (errCode.isInRange(code.intValue()))
+                            {
+                                error_page = errCode.getUri();
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             
             if (error_page!=null)
@@ -134,9 +155,13 @@ public class ErrorPageErrorHandler extends ErrorHandler
     {
         _errorPages = errorPages;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /**
+    /** Add Error Page mapping for an exception class
+     * This method is called as a result of an exception-type element in a web.xml file
+     * or may be called directly
+     * @param code The class (or superclass) of the matching exceptions
+     * @param uri The URI of the error page.
      */
     public void addErrorPage(Class exception,String uri)
     {
@@ -146,13 +171,34 @@ public class ErrorPageErrorHandler extends ErrorHandler
     }
     
     /* ------------------------------------------------------------ */
-    /**
+    /** Add Error Page mapping for a status code.
+     * This method is called as a result of an error-code element in a web.xml file
+     * or may be called directly
+     * @param code The HTTP status code to match
+     * @param uri The URI of the error page.
      */
     public void addErrorPage(int code,String uri)
     {
         if (_errorPages==null)
             _errorPages=new HashMap();
         _errorPages.put(TypeUtil.toString(code),uri);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add Error Page mapping for a status code range.
+     * This method is not available from web.xml and must be called
+     * directly.
+     * @param from The lowest matching status code
+     * @param to The highest matching status code
+     * @param uri The URI of the error page.
+     */
+    public void addErrorPage(int from, int to, String uri)
+    {
+        if (_errorPageList == null)
+        {
+            _errorPageList = new ArrayList();
+        }
+        _errorPageList.add(new ErrorCodeRange(from, to, uri));
     }
 
     /* ------------------------------------------------------------ */
@@ -168,5 +214,44 @@ public class ErrorPageErrorHandler extends ErrorHandler
         // TODO Auto-generated method stub
         super.doStop();
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class ErrorCodeRange
+    {
+        private int _from;
+        private int _to;
+        private String _uri;
+        
+        ErrorCodeRange(int from, int to, String uri)
+            throws IllegalArgumentException
+        {
+            if (from > to)
+                throw new IllegalArgumentException("from>to");
+            
+            _from = from;
+            _to = to;
+            _uri = uri;
+        }
+        
+        boolean isInRange(int value)
+        {
+            if ((value >= _from) && (value <= _to))
+            {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        String getUri()
+        {
+            return _uri;
+        }
+        
+        public String toString()
+        {
+            return "from: " + _from + ",to: " + _to + ",uri: " + _uri;
+        }
+    }    
 }
