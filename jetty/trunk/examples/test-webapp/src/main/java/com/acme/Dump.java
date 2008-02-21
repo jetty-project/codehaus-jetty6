@@ -217,7 +217,7 @@ public class Dump extends HttpServlet
 
         // handle an error
         String error= request.getParameter("error");
-        if (error != null && error.length() > 0)
+        if (error != null && error.length() > 0 && request.getAttribute("javax.servlet.error.status_code")==null)
         {
             response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
             response.sendError(Integer.parseInt(error));
@@ -225,10 +225,15 @@ public class Dump extends HttpServlet
             {
                 response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
             }
-            catch(IOException e)
+            catch(IllegalStateException e)
             {
-                // ignored as stream is closed.
+                try
+                {
+                    response.getWriter().println("NOR THIS!!"); 
+                }
+                catch(IOException e2){}
             }
+            catch(IOException e){}
             return;
         }
 

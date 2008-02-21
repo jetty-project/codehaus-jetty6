@@ -206,7 +206,7 @@ public class HttpStatus
      */
     public static Buffer getResponseLine(int status)
     {
-        if (status>__responseLine.length)
+        if (status>=__responseLine.length)
             return null;
         return __responseLine[status];
     }
