@@ -63,5 +63,14 @@ detected.
     </Set>
     <Set name="checkWelcomeFiles">true</Set>
   </Get>
+  
+  <!-- Non standard error page mapping -->
+  <Get name="errorHandler">
+    <Call name="addErrorPage">
+      <Arg type="int">500</Arg>
+      <Arg type="int">599</Arg>
+      <Arg type="String">/dump/errorCodeRangeMapping</Arg>
+    </Call>
+  </Get>
 
 </Configure>
