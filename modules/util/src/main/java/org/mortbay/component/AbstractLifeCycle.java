@@ -16,7 +16,6 @@
 package org.mortbay.component;
 
 import org.mortbay.log.Log;
-import org.mortbay.util.MultiException;
 
 /**
  * Basic implementation of the life cycle interface for components.
