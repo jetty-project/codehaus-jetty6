@@ -889,6 +889,21 @@ public class JSON
                     escape=false;
                     switch (c)
                     {
+                        case '"':
+                            scratch[i++]='"';
+                            break;
+                        case '\\':
+                            scratch[i++]='\\';
+                            break;
+                        case '/':
+                            scratch[i++]='/';
+                            break;
+                        case 'b':
+                            scratch[i++]='\b';
+                            break;
+                        case 'f':
+                            scratch[i++]='\f';
+                            break;
                         case 'n':
                             scratch[i++]='\n';
                             break;
@@ -898,15 +913,12 @@ public class JSON
                         case 't':
                             scratch[i++]='\t';
                             break;
-                        case 'f':
-                            scratch[i++]='\f';
-                            break;
-                        case 'b':
-                            scratch[i++]='\b';
-                            break;
                         case 'u':
-                            scratch[i++]=((char)((TypeUtil.convertHexDigit((byte)source.next())<<24)+(TypeUtil.convertHexDigit((byte)source.next())<<16)
-                                    +(TypeUtil.convertHexDigit((byte)source.next())<<8)+(TypeUtil.convertHexDigit((byte)source.next()))));
+                            char uc=(char)((TypeUtil.convertHexDigit((byte)source.next())<<12)+
+                                    (TypeUtil.convertHexDigit((byte)source.next())<<8)+
+                                    (TypeUtil.convertHexDigit((byte)source.next())<<4)+
+                                    (TypeUtil.convertHexDigit((byte)source.next())));
+                            scratch[i++]=uc;
                             break;
                         default:
                             scratch[i++]=c;
