@@ -22,7 +22,8 @@ jetty-6.1-SNAPSHOT
  + Fixed JSON negative numbers
  + Improved Bayeux API
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
- + Add test case for JETTY-507
+ + Allow code ranges on ErrorPageErrorHandler
+ + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
  + JETTY-433 ContextDeployer constructor fails unnecessarily when using a security manager if jetty.home not set
@@ -33,7 +34,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-492 Null pointer in HashSSORealm
  + JETTY-493 JSON handles BigDecimals
  + JETTY-498 Improved cookie parsing
- + JETTY-507 Fixed encoding from JETTY-388
+ + JETTY-507 Fixed encoding from JETTY-388 and test case
  + JETTY-508 Extensible cometd handlers
  + JETTY-509 Fixed JSONP transport for changing callback names
  + JETTY-511 jetty.sh mishandled JETTY_HOME when launched from a relative path
