@@ -48,6 +48,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-508 Extensible cometd handlers
  + JETTY-509 Fixed JSONP transport for changing callback names
  + JETTY-511 jetty.sh mishandled JETTY_HOME when launched from a relative path 
+ + JETTY-512 add slf4j as optional to osgi manifest
 
 jetty-6.1-SNAPSHOT
  + Added QueuedThreadPool
