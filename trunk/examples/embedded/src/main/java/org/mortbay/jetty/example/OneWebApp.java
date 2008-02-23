@@ -24,13 +24,14 @@ public class OneWebApp
     public static void main(String[] args)
         throws Exception
     {
+        String jetty_default=new java.io.File("./start.jar").exists()?".":"../..";;
+        String jetty_home = System.getProperty("jetty.home",jetty_default);
+
         Server server = new Server();
         
         Connector connector=new SelectChannelConnector();
         connector.setPort(Integer.getInteger("jetty.port",8080).intValue());
         server.setConnectors(new Connector[]{connector});
-        
-        String jetty_home = System.getProperty("jetty.home","../..");
         
         WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/");
