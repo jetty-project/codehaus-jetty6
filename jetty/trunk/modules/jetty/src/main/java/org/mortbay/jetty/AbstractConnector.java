@@ -162,6 +162,28 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------ */
     /**
+     * Set the maximum Idle time for a connection, which roughly translates
+     * to the {@link Socket#setSoTimeout(int)} call, although with NIO 
+     * implementations other mechanisms may be used to implement the timeout.  
+     * The max idle time is applied:<ul>
+     * <li>When waiting for a new request to be received on a connection</li>
+     * <li>When reading the headers and content of a request</li>
+     * <li>When writing the headers and content of a response</li>
+     * </ul>
+     * Jetty interprets this value as the maximum time between some progress being
+     * made on the connection. So if a single byte is read or written, then the 
+     * timeout (if implemented by jetty) is reset.  However, in many instances,
+     * the reading/writing is delegated to the JVM, and the semantic is more
+     * strictly enforced as the maximum time a single read/write operation can
+     * take.  Note, that as Jetty supports writes of memory mapped file buffers,
+     * then a write may take many 10s of seconds for large content written to a 
+     * slow device.
+     * <p>
+     * Previously, Jetty supported separate idle timeouts and IO operation timeouts,
+     * however the expense of changing the value of soTimeout was significant, so
+     * these timeouts were merged. With the advent of NIO, it may be possible to
+     * again differentiate these values (if there is demand).
+     * 
      * @param maxIdleTime The maxIdleTime to set.
      */
     public void setMaxIdleTime(int maxIdleTime)
