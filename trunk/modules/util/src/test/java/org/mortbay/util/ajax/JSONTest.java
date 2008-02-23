@@ -148,6 +148,15 @@ public class JSONTest extends TestCase
         assertEquals("fred",((Map)o).get("name"));
         
     }
+    
+    /* ------------------------------------------------------------ */
+    public void testQuote()
+    {
+        String test="\"abc123|\\\"|\\\\|\\/|\\b|\\f|\\n|\\r|\\t|\\uaaaa|\"";
+        
+        String result = (String)JSON.parse(test,false);
+        assertEquals("abc123|\"|\\|/|\b|\f|\n|\r|\t|\uaaaa|",result);
+    }
 
     /* ------------------------------------------------------------ */
     public void testBigDecimal()
