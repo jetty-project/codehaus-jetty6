@@ -29,18 +29,19 @@ import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.QueuedThreadPool;
 
 public class LikeJettyXml
 {
     public static void main(String[] args)
         throws Exception
     {
-        Server server = new Server();
-        String jetty_home = System.getProperty("jetty.home");
-        if (jetty_home==null)
-            jetty_home=".";
+        String jetty_default=new java.io.File("./start.jar").exists()?".":"../..";;
+        String jetty_home = System.getProperty("jetty.home",jetty_default);
         
-        BoundedThreadPool threadPool = new BoundedThreadPool();
+        Server server = new Server();
+        
+        QueuedThreadPool threadPool = new QueuedThreadPool();
         threadPool.setMaxThreads(100);
         server.setThreadPool(threadPool);
              
