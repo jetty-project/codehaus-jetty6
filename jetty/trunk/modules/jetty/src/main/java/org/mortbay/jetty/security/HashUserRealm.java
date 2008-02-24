@@ -411,6 +411,10 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
                     if (filenames.size()==1 && filenames.get(0).equals(_config))
                         loadConfig();
                 }
+                public String toString()
+                {
+                    return "HashUserRealm$Scanner";
+                }
 
             });
             _scanner.setReportExistingFilesOnStartup(false);
