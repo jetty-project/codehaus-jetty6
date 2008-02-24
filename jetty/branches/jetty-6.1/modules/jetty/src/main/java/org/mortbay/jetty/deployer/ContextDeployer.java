@@ -108,6 +108,10 @@ public class ContextDeployer extends AbstractLifeCycle
         {
             undeploy(filename);
         }
+        public String toString()
+        {
+            return "ContextDeployer$Scanner";
+        }
     }
 
     /**
