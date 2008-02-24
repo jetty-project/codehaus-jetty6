@@ -24,11 +24,13 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 
@@ -143,6 +145,8 @@ public class Ajp13Connection extends HttpConnection
 
         public void parsedMethod(Buffer method) throws IOException
         {
+            if (method == null)
+                throw new HttpException(HttpServletResponse.SC_BAD_REQUEST);
             _request.setMethod(method.toString());
         }
 
