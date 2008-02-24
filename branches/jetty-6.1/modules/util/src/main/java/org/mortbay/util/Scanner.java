@@ -395,6 +395,11 @@ public class Scanner
         }
     }
 
+    private void warn(Object listener,String filename,Throwable th)
+    {
+        Log.warn(th);
+        Log.warn(listener+" failed on '"+filename);
+    }
 
     /**
      * Report a file addition to the registered FileAddedListeners
@@ -405,19 +410,19 @@ public class Scanner
         Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
+            Object l = itor.next();
             try
             {
-                Object l = itor.next();
                 if (l instanceof DiscreteListener)
                     ((DiscreteListener)l).fileAdded(filename);
             }
             catch (Exception e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
             catch (Error e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
         }
     }
@@ -432,19 +437,19 @@ public class Scanner
         Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
+            Object l = itor.next();
             try
             {
-                Object l = itor.next();
                 if (l instanceof DiscreteListener)
                     ((DiscreteListener)l).fileRemoved(filename);
             }
             catch (Exception e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
             catch (Error e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
         }
     }
@@ -459,19 +464,19 @@ public class Scanner
         Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
+            Object l = itor.next();
             try
             {
-                Object l = itor.next();
                 if (l instanceof DiscreteListener)
                     ((DiscreteListener)l).fileChanged(filename);
             }
             catch (Exception e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
             catch (Error e)
             {
-                Log.warn(e);
+                warn(l,filename,e);
             }
         }
     }
@@ -481,19 +486,19 @@ public class Scanner
         Iterator itor = _listeners.iterator();
         while (itor.hasNext())
         {
+            Object l = itor.next();
             try
             {
-                Object l = itor.next();
                 if (l instanceof BulkListener)
                     ((BulkListener)l).filesChanged(filenames);
             }
             catch (Exception e)
             {
-                Log.warn(e);
+                warn(l,filenames.toString(),e);
             }
             catch (Error e)
             {
-                Log.warn(e);
+                warn(l,filenames.toString(),e);
             }
         }
     }
