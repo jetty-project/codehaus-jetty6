@@ -370,9 +370,12 @@ public class Ajp13Generator extends AbstractGenerator
             int field_index = _buffer.putIndex();
             addInt(0);
 
+            int num_fields = 0;
+
+            if (fields != null)
+            { 
             // Add headers
             Iterator i = fields.getFields();
-            int num_fields = 0;
 
             while (i.hasNext())
             {
@@ -389,6 +392,7 @@ public class Ajp13Generator extends AbstractGenerator
                     addString(f.getName());
                 }
                 addString(f.getValue());
+            }
             }
 
             if (!has_server && _status > 100 && getSendServerVersion())
