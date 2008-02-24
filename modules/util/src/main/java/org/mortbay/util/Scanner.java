@@ -411,6 +411,11 @@ public class Scanner
                 if (l instanceof DiscreteListener)
                     ((DiscreteListener)l).fileAdded(filename);
             }
+            catch (ClassNotFoundException e)
+            {
+                Log.debug(e);
+                Log.warn(e.toString());
+            }
             catch (Exception e)
             {
                 Log.warn(e);
@@ -465,6 +470,11 @@ public class Scanner
                 if (l instanceof DiscreteListener)
                     ((DiscreteListener)l).fileChanged(filename);
             }
+            catch (ClassNotFoundException e)
+            {
+                Log.debug(e);
+                Log.warn(e.toString());
+            }
             catch (Exception e)
             {
                 Log.warn(e);
@@ -486,6 +496,11 @@ public class Scanner
                 Object l = itor.next();
                 if (l instanceof BulkListener)
                     ((BulkListener)l).filesChanged(filenames);
+            }
+            catch (ClassNotFoundException e)
+            {
+                Log.debug(e);
+                Log.warn(e.toString());
             }
             catch (Exception e)
             {
