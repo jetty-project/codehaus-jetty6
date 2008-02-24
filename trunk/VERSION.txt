@@ -25,6 +25,7 @@ jetty-6.2-SNAPSHOT
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
  + Allow code ranges on ErrorPageErrorHandler
  + JSON unquotes /
+ + AJP handles bad mod_jk methods
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
