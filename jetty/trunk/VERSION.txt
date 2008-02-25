@@ -38,6 +38,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-474 Fixed case sensitivity issue with HttpFields
  + JETTY-486 Improved jetty.sh script
  + JETTY-487 Handle empty chunked request
+ + JETTY-481 Handle empty Bayeux response
  + JETTY-489 Improve doco on the jetty.port property for plugin
  + JETTY-490 Fixed JSONEnumConvertor
  + JETTY-491 opendocument mime types
