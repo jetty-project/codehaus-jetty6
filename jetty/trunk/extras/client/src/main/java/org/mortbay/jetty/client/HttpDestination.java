@@ -41,7 +41,7 @@ public class HttpDestination
     private HttpClient _client;
     private boolean _ssl;
     private int _maxConnections;
-    private AtomicInteger _pendingConnections = new AtomicInteger(0);
+    private int _pendingConnections=0;
     
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
@@ -85,28 +85,40 @@ public class HttpDestination
     }
 
     /* ------------------------------------------------------------------------------- */
+    public HttpConnection getConnection() throws IOException
+    {
+        synchronized(this)
+        {
+            HttpConnection connection = getIdleConnection();
+
+            int tries=3;
+            while (connection==null && tries-->0)
+            {
+                try
+                {
+                    startNewConnection();
+                    if (_pendingConnections>0)
+                        this.wait();
+                }
+                catch (InterruptedException e)
+                {
+                    Log.ignore(e);
+                }
+                connection = getIdleConnection();
+            }
+            
+            return connection;
+        }
+    }
+    
+    /* ------------------------------------------------------------------------------- */
     public HttpConnection getIdleConnection() throws IOException
     {
         synchronized (this)
         {
             long now = System.currentTimeMillis();
             long idleTimeout=_client.getIdleTimeout();
-
-            // remove any really old connections
-            while (_idle.size() > 0)
-            {
-                HttpConnection connection = _idle.get(0);
-                long last = connection.getLast();
-                if (!connection.getEndPoint().isOpen() ||((now-last)>=idleTimeout) )
-                {
-                    _idle.remove(0);
-                    _connections.remove(connection);
-                    connection.getEndPoint().close();
-                }
-                else 
-                    break;
-            }
-            
+ 
             // Find an idle connection
             while (_idle.size() > 0)
             {
@@ -130,7 +142,10 @@ public class HttpDestination
     {
         try
         {
-            _pendingConnections.incrementAndGet();
+            synchronized (this)
+            {
+                _pendingConnections++;
+            }
             _client._connector.startConnection(this);
         }
         catch(Exception e)
@@ -142,9 +157,9 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void onConnectionFailed(Throwable throwable)
     {
-        _pendingConnections.decrementAndGet();
         synchronized (this)
         {
+            _pendingConnections--;
             if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
@@ -156,9 +171,10 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void onException(Throwable throwable)
     {
-        _pendingConnections.decrementAndGet();
         synchronized (this)
         {
+            _pendingConnections--;
+            this.notifyAll();
             if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
@@ -170,9 +186,10 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void onNewConnection(HttpConnection connection) throws IOException
     {
-        _pendingConnections.decrementAndGet();
         synchronized (this)
         {
+            _pendingConnections--;
+            this.notifyAll();
             _connections.add(connection);
             if (_queue.size()==0)
             {
@@ -203,6 +220,7 @@ public class HttpDestination
                     HttpExchange ex=_queue.removeFirst();
                     connection.send(ex);
                 }
+                this.notifyAll();
             }
         }
         else 
@@ -225,7 +243,7 @@ public class HttpDestination
             if (_queue.size()>0 || (connection=getIdleConnection())==null || !connection.send(ex))
             {
                 _queue.add(ex);
-                if (_connections.size()+_pendingConnections.get() <_maxConnections)
+                if (_connections.size()+_pendingConnections <_maxConnections)
                 {
                      startNewConnection();
                 }
@@ -263,5 +281,4 @@ public class HttpDestination
         
         return b.toString();
     }
-    
 }
