@@ -41,7 +41,7 @@ import org.mortbay.thread.Timeout;
  * @author Greg Wilkins
  * @author Guillaume Nodet
  */
-class HttpConnection implements Connection
+public class HttpConnection implements Connection
 {
     HttpDestination _destination;
     EndPoint _endp;
@@ -52,6 +52,11 @@ class HttpConnection implements Connection
     Buffer _requestContentChunk;
     long _last;
     boolean _requestComplete;
+    
+
+    /* The current exchange waiting for a response */
+    HttpExchange _exchange;  
+    HttpExchange _pipeline;
     
 
     Timeout.Task _timeout= new Timeout.Task()
@@ -93,10 +98,6 @@ class HttpConnection implements Connection
 
     };
 
-
-    /* The current exchange waiting for a response */
-    HttpExchange _exchange;  
-    
     
     /* ------------------------------------------------------------ */
     HttpConnection(Buffers buffers,EndPoint endp,int hbs,int cbs)
@@ -124,7 +125,12 @@ class HttpConnection implements Connection
         synchronized(this)
         {
             if (_exchange!=null)
-                throw new IllegalStateException(this+" PIPELINED!!!  _exchange="+_exchange);
+            {
+                if (_pipeline!=null)
+                    throw new IllegalStateException(this+" PIPELINED!!!  _exchange="+_exchange);
+                _pipeline=ex;
+                return true;
+            }
 
             if (!_endp.isOpen())
                 return false;
@@ -273,9 +279,28 @@ class HttpConnection implements Connection
                             }
                             _exchange=null;
                             boolean close=shouldClose();
-                            _destination.returnConnection(this, close); 
-                            if (close)
-                                return;
+                            
+                            if (_pipeline==null)
+                            {
+                                _destination.returnConnection(this, close); 
+                                if (close)
+                                    return;
+                            }
+                            else
+                            {
+                                if (close)
+                                {
+                                    _destination.returnConnection(this, close); 
+                                    _destination.send(_pipeline);
+                                    _pipeline=null;
+                                    return;
+                                }
+                                
+                                HttpExchange ex=_pipeline;
+                                _pipeline=null;
+                                
+                                send(ex);
+                            }
                         }
           
                     }
