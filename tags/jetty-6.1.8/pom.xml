@@ -99,10 +99,10 @@
   <repositories>
    <repository>
     <id>codehaus.org</id>
-    <name>Jetty snapshots</name>
+    <name>Jetty releases</name>
     <layout>default</layout>
-    <url>http://snapshots.repository.codehaus.org</url>
-    <snapshots><enabled>true</enabled></snapshots>
+    <url>http://repository.codehaus.org</url>
+    <snapshots><enabled>false</enabled></snapshots>
    </repository>
   </repositories>
   <pluginRepositories>
