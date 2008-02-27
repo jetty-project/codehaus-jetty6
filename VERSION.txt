@@ -42,6 +42,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-509 Fixed JSONP transport for changing callback names
  + JETTY-511 jetty.sh mishandled JETTY_HOME when launched from a relative path
  + JETTY-512 add slf4j as optional to manifest
+ + JETTY-513 Terracotta session replication does not work when the initial page on each server does not set any attributes
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
