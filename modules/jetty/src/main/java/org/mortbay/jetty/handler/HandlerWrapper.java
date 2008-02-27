@@ -113,7 +113,7 @@ public class HandlerWrapper extends AbstractHandlerContainer
         Handler old = getHandler();
         if (old!=null && (old instanceof HandlerContainer))
             ((HandlerContainer)old).removeHandler(handler);
-        else if (old!=null && handler==old)
+        else if (old!=null && handler.equals(old))
             setHandler(null);
         else
             throw new IllegalStateException("Cannot remove");

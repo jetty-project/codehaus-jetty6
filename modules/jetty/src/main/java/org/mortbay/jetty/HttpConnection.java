@@ -282,21 +282,8 @@ public class HttpConnection implements Connection
     /**
      * @return The input stream for this connection. The stream will be created if it does not already exist.
      */
-    public ServletInputStream getInputStream() throws IOException
+    public ServletInputStream getInputStream()
     {
-        if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
-        {
-            // TODO delay sending 100 response until a read is attempted.
-            if (((HttpParser)_parser).getHeaderBuffer()==null || ((HttpParser)_parser).getHeaderBuffer().length()<2)
-            {
-                _generator.setResponse(HttpStatus.ORDINAL_100_Continue, null);
-                _generator.completeHeader(null, true);
-                _generator.complete();
-                _generator.reset(false);
-            }
-            _expect = UNKNOWN;
-        }
-
         if (_in == null) 
             _in = new HttpParser.Input(((HttpParser)_parser),_connector.getMaxIdleTime());
         return _in;
@@ -519,7 +506,7 @@ public class HttpConnection implements Connection
             }
             catch (RetryRequest r)
             {
-                // Log.ignore(r);
+                Log.ignore(r);
                 retrying = true;
             }
             catch (EofException e)
@@ -555,12 +542,10 @@ public class HttpConnection implements Connection
                 
                 if (!retrying)
                 {
-                    if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
+                    if (_request.getContinuation()!=null)
                     {
-                        // Continue not sent so don't parse any content 
-                        _expect = UNKNOWN;
-                        if (_parser instanceof HttpParser)
-                            ((HttpParser)_parser).setState(HttpParser.STATE_END);
+                        Log.debug("continuation still pending {}");
+                        _request.getContinuation().reset();
                     }
                     
                     if(_endp.isOpen())
@@ -579,7 +564,7 @@ public class HttpConnection implements Connection
                     }
                     else
                     {
-                        _response.complete(); 
+                        _response.complete(); // TODO ????????????
                     }
                 }
             }
@@ -812,6 +797,14 @@ public class HttpConnection implements Connection
                     {
                         if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                         {
+                            // TODO delay sending 100 response until a read is attempted.
+                            if (((HttpParser)_parser).getHeaderBuffer()==null || ((HttpParser)_parser).getHeaderBuffer().length()<2)
+                            {
+                                _generator.setResponse(HttpStatus.ORDINAL_100_Continue, null);
+                                _generator.completeHeader(null, true);
+                                _generator.complete();
+                                _generator.reset(false);
+                            }
                         }
                         else if (_expect == HttpHeaderValues.PROCESSING_ORDINAL)
                         {
@@ -831,7 +824,7 @@ public class HttpConnection implements Connection
                 _request.setCharacterEncodingUnchecked(_charset);
             
             // Either handle now or wait for first content
-            if ((((HttpParser)_parser).getContentLength()<=0 && !((HttpParser)_parser).isChunking())||_expect==HttpHeaderValues.CONTINUE_ORDINAL) 
+            if (((HttpParser)_parser).getContentLength()<=0 && !((HttpParser)_parser).isChunking())
                 handleRequest();
             else
                 _delayedHandling=true;

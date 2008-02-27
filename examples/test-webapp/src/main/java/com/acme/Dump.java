@@ -62,7 +62,7 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        if(request.getPathInfo()!=null && request.getPathInfo().toLowerCase().indexOf("script")!=-1)
+        if(request.getPathInfo().toLowerCase().indexOf("script")!=-1)
         {
             response.sendRedirect(getServletContext().getContextPath() + "/dump/info");
             return;
@@ -117,7 +117,6 @@ public class Dump extends HttpServlet
         String data= request.getParameter("data");
         String block= request.getParameter("block");
         String dribble= request.getParameter("dribble");
-        boolean flush= request.getParameter("flush")!=null?Boolean.parseBoolean(request.getParameter("flush")):false;
         if (data != null && data.length() > 0)
         {
             int d=Integer.parseInt(data);
@@ -166,9 +165,6 @@ public class Dump extends HttpServlet
                 }
                 
             }
-            
-            if (flush)
-                out.flush();
             
             return;
         }

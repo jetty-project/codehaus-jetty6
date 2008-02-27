@@ -185,7 +185,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
     protected abstract SocketChannel acceptChannel(SelectionKey key) throws IOException;
 
     /* ------------------------------------------------------------------------------- */
-    public abstract boolean dispatch(Runnable task);
+    public abstract boolean dispatch(Runnable task) throws IOException;
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
@@ -351,7 +351,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 key = channel.register(_selector,SelectionKey.OP_READ,att);
                                 SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                 key.attach(endpoint);
-                                endpoint.schedule();
+                                endpoint.dispatch();
                             }
                             else
                             {
@@ -468,7 +468,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         if (att instanceof SelectChannelEndPoint)
                         {
                             SelectChannelEndPoint endpoint = (SelectChannelEndPoint)att;
-                            endpoint.schedule();
+                            endpoint.dispatch();
                         }
                         else if (key.isAcceptable())
                         {
@@ -489,7 +489,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                 SelectChannelEndPoint endpoint=newEndPoint(channel,_selectSet[_nextSet],cKey);
                                 cKey.attach(endpoint);
                                 if (endpoint != null)
-                                    endpoint.schedule();
+                                    endpoint.dispatch();
                             }
                             else
                             {
@@ -518,7 +518,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                                     key.interestOps(SelectionKey.OP_READ);
                                     SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                     key.attach(endpoint);
-                                    endpoint.schedule();
+                                    endpoint.dispatch();
                                 }
                                 else
                                 {
@@ -533,7 +533,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                             key.attach(endpoint);
                             if (key.isReadable())
-                                endpoint.schedule();                           
+                                endpoint.dispatch();                           
                         }
                         key = null;
                     }
@@ -628,15 +628,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
             synchronized (this)
             {
                 _retryTimeout.schedule(task, timeout);
-            }
-        }
-        
-        /* ------------------------------------------------------------ */
-        public void cancelTimeout(Timeout.Task task)
-        {
-            synchronized (this)
-            {
-                task.cancel();
             }
         }
 

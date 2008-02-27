@@ -214,8 +214,10 @@ if [ -z "$JETTY_HOME" ] ; then
     echo "** ERROR: JETTY_HOME not set, you need to set it or install in a standard location" 
     exit 1
 fi
+
 cd $JETTY_HOME
 JETTY_HOME=`pwd`
+
 
 #####################################################
 # Check that jetty is where we think it is

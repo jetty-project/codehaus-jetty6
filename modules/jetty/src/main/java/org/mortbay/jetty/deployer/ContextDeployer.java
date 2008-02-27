@@ -296,7 +296,7 @@ public class ContextDeployer extends AbstractLifeCycle
     protected void doStart() throws Exception
     {
         if (_configurationDir==null)
-            throw new IllegalStateException("No configuration dir specified");
+            throw new IllegalStateException("No configuraition dir specified");
 
         if (_contexts==null)
             throw new IllegalStateException("No context handler collection specified for deployer");

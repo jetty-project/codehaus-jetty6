@@ -40,7 +40,6 @@ import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
-import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
 
@@ -235,7 +234,7 @@ public class HttpClient extends AbstractBuffers
         
         if(_threadPool==null)
         {
-            QueuedThreadPool pool = new QueuedThreadPool();
+            BoundedThreadPool pool = new BoundedThreadPool();
             pool.setMaxThreads(16);
             pool.setDaemon(true);
             _threadPool=pool;
@@ -245,10 +244,6 @@ public class HttpClient extends AbstractBuffers
         if (_threadPool instanceof BoundedThreadPool)
         {
             ((BoundedThreadPool)_threadPool).setName("HttpClient");
-        }
-        if (_threadPool instanceof QueuedThreadPool)
-        {
-            ((QueuedThreadPool)_threadPool).setName("HttpClient");
         }
         if (_threadPool instanceof LifeCycle)
         {
@@ -401,7 +396,7 @@ public class HttpClient extends AbstractBuffers
                 throw new IllegalStateException();
             }
 
-            public boolean dispatch(Runnable task)
+            public boolean dispatch(Runnable task) throws IOException
             {
                 return _threadPool.dispatch(task);
             }

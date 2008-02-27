@@ -1,8 +1,8 @@
-
-jetty-6.2-SNAPSHOT
- + Added QueuedThreadPool (as default)
+jetty-6.1-SNAPSHOT
+ + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
+ + add removeHandler(Handler) method to HandlerContainer interface
  + remote close throws EofException instead of IOException("Closed");
  + RetryRequest exception now extends ThreadDeath
  + Refactor of Continuation towards servlet 3.0 proposal
@@ -21,52 +21,28 @@ jetty-6.2-SNAPSHOT
  + Add removeHandler(Handler) method to HandlerContainer interface
  + Fixed JSON negative numbers
  + Improved Bayeux API
- + Allow Bayeux subscriptions to meta channels
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
  + Allow code ranges on ErrorPageErrorHandler
  + JSON unquotes /
  + AJP handles bad mod_jk methods
- + HttpClient supports pipelined request
- + Bayeux use a single connection for polling
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
- + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
- + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
  + JETTY-433 ContextDeployer constructor fails unnecessarily when using a security manager if jetty.home not set
  + JETTY-434 ContextDeployer scanning of sub-directories should be optional
- + JETTY-467 allow URL rewriting to be disabled.
- + JETTY-468 unique holder names for addServletWithMapping
- + JETTY-474 Fixed case sensitivity issue with HttpFields
- + JETTY-486 Improved jetty.sh script
- + JETTY-487 Handle empty chunked request
  + JETTY-481 Handle empty Bayeux response
  + JETTY-489 Improve doco on the jetty.port property for plugin
  + JETTY-490 Fixed JSONEnumConvertor
  + JETTY-491 opendocument mime types
  + JETTY-492 Null pointer in HashSSORealm
  + JETTY-493 JSON handles BigDecimals
- + JETTY-494 Client side session replication
  + JETTY-498 Improved cookie parsing
  + JETTY-507 Fixed encoding from JETTY-388 and test case
  + JETTY-508 Extensible cometd handlers
  + JETTY-509 Fixed JSONP transport for changing callback names
- + JETTY-511 jetty.sh mishandled JETTY_HOME when launched from a relative path 
- + JETTY-512 add slf4j as optional to osgi manifest
+ + JETTY-511 jetty.sh mishandled JETTY_HOME when launched from a relative path
+ + JETTY-512 add slf4j as optional to manifest
  + JETTY-513 Terracotta session replication does not work when the initial page on each server does not set any attributes
-
-jetty-6.1-SNAPSHOT
- + Added QueuedThreadPool
- + Optimized QuotedStringTokenizer.quote()
- + further Optimizations and improvements of Cometd
- + JETTY-350 log ssl errors on SslSocketConnector
- + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
- + JETTY-434 ContextDeployer scanning of sub-directories should be optional
- + JETTY-489 Improve doco on the jetty.port property for plugin
- + JETTY-490 Fixed JSONEnumConvertor
- + JETTY-491 opendocument mime types
- + JETTY-492 Null pointer in HashSSORealm
- + JETTY-493 JSON handles BigDecimals
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
@@ -78,7 +54,7 @@ jetty-6.1.7 - 22 December 2007
  + jetty-6.1 branch created from 6.1.6 and r593 of jetty-contrib trunk
  + Optimizations and improvements of Cometd, more pooled objects
  + Update java5 patch
- + JETTY-386 CERT-553235. backout fix and replaced with ContextHandler.setCompactPath(boolean) 
+ + JETTY-386 CERT-553235 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
@@ -93,7 +69,7 @@ jetty-6.1.6 - 18 November 2007
  + JETTY-461 fixed cometd unknown channel
  + JETTY-464 typo in ErrorHandler
  + JETTY-465 System.exit() in constructor exception for MultiPartOutputStream
-
+ 
 jetty-6.1.6rc1 - 5 November 2007
  + Upgrade jsp 2.1 to SJSAS-9_1-B58G-FCS-08_Sept_2007
  + Housekeeping on poms
@@ -141,7 +117,7 @@ jetty-6.1.6rc0 - 3 October 2007
  + Removal of unneeded dependencies from management, maven-plugin, naming &  plus poms
  + Adding setUsername,setGroupname to setuid and mavenizing native build
  + UTF-8 for bayeux client
- + CVE-2007-5615 CERT21284 Added protection for response splitting with bad headers.
+ + CVE-2007-5615 Added protection for response splitting with bad headers.
  + Cached user agents strings in the /org/mortbay/jetty/useragents resource
  + Make default time format for RequestLog match NCSA default
  + Use terracotta repo for build; make jetty a terracotta module

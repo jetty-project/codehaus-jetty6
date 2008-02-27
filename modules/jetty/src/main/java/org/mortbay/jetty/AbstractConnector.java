@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.mortbay.component.LifeCycle;
-import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.ThreadPool;
@@ -324,6 +323,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
                     thread.interrupt();
             }
         }
+
     }
     
     /* ------------------------------------------------------------ */
@@ -463,7 +463,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     }
 
     /* ------------------------------------------------------------ */
-    public Continuation newContinuation(Connection connection)
+    public Continuation newContinuation()
     {
         return new WaitingContinuation();
     }

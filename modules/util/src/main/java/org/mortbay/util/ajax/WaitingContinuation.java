@@ -15,8 +15,6 @@
 
 package org.mortbay.util.ajax;
 
-import org.mortbay.log.Log;
-
 public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
 {
     Object _mutex;
@@ -24,7 +22,6 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
     boolean _new=true;
     boolean _resumed=false;
     boolean _pending=false;
-    boolean _expired=false;
 
     public WaitingContinuation()
     {
@@ -51,7 +48,6 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
         {
             _resumed=false;
             _pending=false;
-            _expired=false;
             _mutex.notify();
         }
     }
@@ -81,8 +77,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             }
             catch (InterruptedException e)
             {
-                _expired=true;
-                Log.ignore(e);
+                e.printStackTrace();
             }
             finally
             {
@@ -110,14 +105,6 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             return _resumed;
         }
     }
-    
-    public boolean isExpired()
-    {
-        synchronized (_mutex)
-        {
-            return _expired;
-        }
-    }
 
     public Object getObject()
     {
@@ -136,7 +123,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
 
     public void setMutex(Object mutex)
     {
-        if (!_new && _mutex!=this && _pending)
+        if (!_new && _mutex!=this)
             throw new IllegalStateException();
         _mutex = mutex==null ? this : mutex; 
     }
@@ -148,8 +135,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             return "WaitingContinuation@"+hashCode()+
             (_new?",new":"")+
             (_pending?",pending":"")+
-            (_resumed?",resumed":"")+
-            (_expired?",expired":"");
+            (_resumed?",resumed":"");
         }
     }
 }

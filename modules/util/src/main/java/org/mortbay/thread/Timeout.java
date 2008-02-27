@@ -211,22 +211,10 @@ public class Timeout
         long _delay;
         long _timestamp=0;
         boolean _expired=false;
-        Object _mutex=this;
 
         public Task()
         {
             _next=_prev=this;
-        }
-        
-        public Task(Object mutex)
-        {
-            _next=_prev=this;
-            _mutex=mutex;
-        }
-
-        public void setMutex(Object mutex)
-        {
-            _mutex=mutex;
         }
 
         public long getTimestamp()
@@ -313,7 +301,8 @@ public class Timeout
         public boolean isExpired() { return _expired; }
 
         /* ------------------------------------------------------------ */
-        public boolean isScheduled() { return _next!=this; }
+	public boolean isScheduled() { return _next!=this; }
+
         
         /* ------------------------------------------------------------ */
         /** Expire task.
@@ -324,7 +313,7 @@ public class Timeout
         
         private void doExpire()
         {
-            synchronized (_mutex)
+            synchronized (this)
             {
                 _expired=true;
                 expire();

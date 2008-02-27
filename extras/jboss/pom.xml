@@ -2,7 +2,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>6.2-SNAPSHOT</version>
+    <version>6.1-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -154,9 +154,6 @@
   <profiles>
     <profile>
       <id>jdk1.4</id>
-      <activation>
-        <jdk>1.4</jdk>
-      </activation>
       <build>
         <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.0</finalName>
       </build>
@@ -167,9 +164,9 @@
           <version>${project.version}</version>
           <type>pom</type>
           <exclusions>
-          <exclusion>
-            <artifactId>commons-logging</artifactId>
-            <groupId>commons-logging</groupId>
+            <exclusion>
+              <artifactId>commons-logging</artifactId>
+              <groupId>commons-logging</groupId>
             </exclusion>
             <exclusion>
               <groupId>org.slf4j</groupId>
@@ -204,9 +201,6 @@
     <profile>
       <id>jdk1.5</id>
       <!-- activated on JDK 5 and above -->
-      <activation>
-        <jdk>!1.4</jdk>
-      </activation>
       <build>
         <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.1</finalName>
       </build>

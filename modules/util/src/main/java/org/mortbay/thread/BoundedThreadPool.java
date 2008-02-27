@@ -35,7 +35,6 @@ import org.mortbay.log.Log;
  * By default there is no maximum pool size.  Idle threads timeout
  * and terminate until the minimum number of threads are running.
  * <p>
- * @deprecated Use {@link QueuedThreadPool}
  * @author Greg Wilkins <gregw@mortbay.com>
  * @author Juancarlo Anez <juancarlo@modelistica.com>
  */
@@ -65,7 +64,6 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
      */
     public BoundedThreadPool()
     {
-        Log.warn(BoundedThreadPool.class+" deprecated: use "+QueuedThreadPool.class);
         _name="btpool"+__id++;
     }
 
