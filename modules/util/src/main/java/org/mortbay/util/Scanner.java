@@ -260,7 +260,7 @@ public class Scanner
             throw new IllegalArgumentException("TimerTask is null");
         
         if (getScanInterval() > 0)
-            timer.scheduleAtFixedRate(task, 1000L*getScanInterval(),1000L*getScanInterval());
+            timer.schedule(task, 1000L*getScanInterval(),1000L*getScanInterval());
     }
     /**
      * Stop the scanning.
