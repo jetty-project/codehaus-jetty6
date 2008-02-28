@@ -278,6 +278,13 @@ public class HashSessionManager extends AbstractSessionManager
                 }
             }
         }
+        catch (Throwable t)
+        {
+            if (t instanceof ThreadDeath)
+                throw ((ThreadDeath)t);
+            else
+                Log.warn("Problem scavenging sessions", t);
+        }
         finally
         {
             thread.setContextClassLoader(old_loader);
