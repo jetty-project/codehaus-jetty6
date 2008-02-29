@@ -249,7 +249,10 @@ class HttpConnection implements Connection
                 synchronized(this)
                 {
                     if (_exchange!=null)
+                    {
                         _exchange.onException(e);
+                        _exchange.setStatus(HttpExchange.STATUS_EXCEPTED);
+                    }
                 }
             }
             finally

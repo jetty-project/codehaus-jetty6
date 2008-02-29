@@ -55,6 +55,7 @@ public class HttpExchange
     public static final int STATUS_PARSING_CONTENT = 6;
     public static final int STATUS_COMPLETED = 7;
     public static final int STATUS_EXPIRED = 8;
+    public static final int STATUS_EXCEPTED = 9;
 
 
     InetSocketAddress _address;
