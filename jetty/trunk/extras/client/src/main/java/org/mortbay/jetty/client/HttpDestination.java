@@ -179,6 +179,7 @@ public class HttpDestination
             {
                 HttpExchange ex=_queue.removeFirst();
                 ex.onException(throwable);
+                ex.setStatus(HttpExchange.STATUS_EXCEPTED);
             }
         }
     }
