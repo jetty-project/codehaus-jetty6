@@ -56,6 +56,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-512 add slf4j as optional to osgi manifest
  + JETTY-513 Terracotta session replication does not work when the initial page on each server does not set any attributes
  + JETTY-515 Timer is missing scavenging Task in HashSessionManager
+ + JETTY-519 HttpClient does not recycle closed connection.
 
 
 jetty-6.1.8 28 February 2008

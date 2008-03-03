@@ -487,12 +487,14 @@ public class HttpExchange
         /* ------------------------------------------------------------ */
         protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
         {
+            super.onResponseStatus(version,status,reason);
             _responseStatus = status;
         }
 
         /* ------------------------------------------------------------ */
         protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
+            super.onResponseHeader(name,value);
             if (_responseFields!=null)
                 _responseFields.add(name, value);
         }
@@ -530,6 +532,7 @@ public class HttpExchange
         /* ------------------------------------------------------------ */
         protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
+            super.onResponseHeader(name,value);
             int header = HttpHeaders.CACHE.getOrdinal(value);
             switch(header)
             {
