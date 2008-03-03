@@ -264,6 +264,7 @@ class HttpConnection implements Connection
 
                     synchronized(this)
                     {
+                        boolean close=shouldClose();
                         reset(true);
                         no_progress=0;
                         flushed=-1;
@@ -275,7 +276,6 @@ class HttpConnection implements Connection
                                 _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
                             }
                             _exchange=null;
-                            boolean close=shouldClose();
                             _destination.returnConnection(this, close); 
                             if (close)
                                 return;
@@ -399,7 +399,7 @@ class HttpConnection implements Connection
         @Override
         public void parsedHeader(Buffer name, Buffer value) throws IOException
         {
-            if (name == HttpHeaders.CONNECTION_BUFFER)
+            if (HttpHeaders.CACHE.getOrdinal(name)==HttpHeaders.CONNECTION_ORDINAL)
             {
                 _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
             }
