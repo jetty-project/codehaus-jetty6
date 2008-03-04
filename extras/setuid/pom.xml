@@ -96,6 +96,37 @@
         </profile>
 
         <profile>
+            <id>env-mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <modules>
+                <module>modules/java</module>
+                <module>modules/native</module>
+            </modules>
+            <properties>
+                <jetty-setuid-linkerStartOption>-lc -ldl -dynamiclib -undefined dynamic_lookup -single_module</jetty-setuid-linkerStartOption>
+                <jetty-setuid-linkerEndOption>target/libsetuid.so</jetty-setuid-linkerEndOption>
+            </properties>
+            <build>
+              <pluginManagement>
+                <plugins>
+                  <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <configuration>
+                      <javahOS>mac</javahOS>
+                      <jdkIncludePath>${java.home}/../Headers</jdkIncludePath>
+                    </configuration>
+                  </plugin>
+                </plugins>
+              </pluginManagement>
+            </build>
+        </profile>
+
+        <profile>
             <id>env-dos</id>
             <activation>
               <os>
