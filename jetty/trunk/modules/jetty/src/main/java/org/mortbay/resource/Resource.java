@@ -76,7 +76,7 @@ public abstract class Resource implements Serializable
      * @param useCaches true enables URLConnection caching if applicable to the type of resource
      * @return
      */
-    public static Resource newResource(URL url, boolean useCaches)
+    static Resource newResource(URL url, boolean useCaches)
     {
         if (url==null)
             return null;

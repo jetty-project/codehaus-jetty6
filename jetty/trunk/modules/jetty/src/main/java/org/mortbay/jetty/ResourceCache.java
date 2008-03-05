@@ -155,7 +155,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         Resource resource=factory.getResource(pathInContext);
         return load(pathInContext,resource);
     }
-    
+
+    /* ------------------------------------------------------------ */
     public Content lookup(String pathInContext, Resource resource)
         throws IOException
     {
@@ -175,6 +176,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         return load(pathInContext,resource);
     }
 
+    /* ------------------------------------------------------------ */
     private Content load(String pathInContext, Resource resource)
         throws IOException
     {
@@ -210,7 +212,27 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         return null; 
     }
 
+    /* ------------------------------------------------------------ */
+    public void miss(String pathInContext, Resource resource)
+        throws IOException
+    {
+        Miss miss = new Miss(resource);
+        synchronized(_cache)
+        {
+            // check that somebody else did not fill this spot.
+            Content content2 =(Content)_cache.get(pathInContext);
+            if (content2!=null)
+            {
+                miss.release();
+                return;
+            }
 
+            while(_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles)
+                _leastRecentlyUsed.invalidate();
+            miss.cache(pathInContext);
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     public synchronized void doStart()
         throws Exception
@@ -289,7 +311,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 _leastRecentlyUsed=this;
 
             _cache.put(_key,this);
-            _cachedSize+=_buffer.length();
+            if (_buffer!=null)
+                _cachedSize+=_buffer.length();
             _cachedFiles++;
             if (_lastModified!=-1)
                 _lastModifiedBytes=new ByteArrayBuffer(HttpFields.formatDate(_lastModified,false));
@@ -352,7 +375,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 // Invalidate it
                 _cache.remove(_key);
                 _key=null;
-                _cachedSize=_cachedSize-(int)_buffer.length();
+                if (_buffer!=null)
+                    _cachedSize=_cachedSize-(int)_buffer.length();
                 _cachedFiles--;
                 
                 if (_mostRecentlyUsed==this)
@@ -424,5 +448,28 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         }
         
     }
+    
 
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** MetaData associated with a context Resource.
+     */
+    public class Miss extends Content
+    {
+        Miss(Resource resource)
+        {
+            super(resource);
+        }
+
+        /* ------------------------------------------------------------ */
+        boolean isValid()
+        {
+            if (_resource.exists())
+            {
+                invalidate();
+                return false;
+            }
+            return true;
+        }
+    }
 }

@@ -89,7 +89,7 @@ public class URLResource extends Resource
 
     /* ------------------------------------------------------------ */
     /**
-     * Returns true if the respresened resource exists.
+     * Returns true if the represented resource exists.
      */
     public boolean exists()
     {

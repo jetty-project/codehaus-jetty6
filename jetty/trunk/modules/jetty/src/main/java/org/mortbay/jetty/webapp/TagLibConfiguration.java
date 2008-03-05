@@ -161,7 +161,7 @@ public class TagLibConfiguration implements Configuration
                             
                             Log.debug("TLD search of {}",urls[i]);
                             
-                            File file=Resource.newResource(urls[i]).getFile();
+                            File file=_context.newResource(urls[i]).getFile();
                             if (file==null || !file.exists() || !file.canRead())
                                 continue;
                             
@@ -175,7 +175,7 @@ public class TagLibConfiguration implements Configuration
                                     String name = entry.getName();
                                     if (name.startsWith("META-INF/") && name.toLowerCase().endsWith(".tld"))
                                     {
-                                        Resource tld=Resource.newResource("jar:"+urls[i]+"!/"+name);
+                                        Resource tld=_context.newResource("jar:"+urls[i]+"!/"+name);
                                         tlds.add(tld);
                                         Log.debug("TLD found {}",tld);
                                     }
