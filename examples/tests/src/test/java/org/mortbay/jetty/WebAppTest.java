@@ -187,7 +187,7 @@ public class WebAppTest extends TestCase
             try 
             {
                 url=new URL("http://127.0.0.1:"+connector.getLocalPort()+"/test"+hidden[i]);
-                IO.toString(url.openStream());
+                System.err.println(hidden[i]+" GOT "+IO.toString(url.openStream()));
                 assertTrue(false);
             }
             catch(FileNotFoundException e)

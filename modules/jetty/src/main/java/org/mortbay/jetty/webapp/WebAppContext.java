@@ -868,13 +868,13 @@ public class WebAppContext extends Context
                 _war=getResourceBase();
             
             // Set dir or WAR
-            web_app= Resource.newResource(_war);
+            web_app= newResource(_war);
 
             // Accept aliases for WAR files
             if (web_app.getAlias() != null)
             {
                 Log.debug(web_app + " anti-aliased to " + web_app.getAlias());
-                web_app= Resource.newResource(web_app.getAlias());
+                web_app= newResource(web_app.getAlias());
             }
 
             if (Log.isDebugEnabled())
@@ -884,7 +884,7 @@ public class WebAppContext extends Context
             if (web_app.exists() && !web_app.isDirectory() && !web_app.toString().startsWith("jar:"))
             {
                 // No - then lets see if it can be turned into a jar URL.
-                Resource jarWebApp= Resource.newResource("jar:" + web_app + "!/");
+                Resource jarWebApp= newResource("jar:" + web_app + "!/");
                 if (jarWebApp.exists() && jarWebApp.isDirectory())
                 {
                     web_app= jarWebApp;
@@ -1264,10 +1264,10 @@ public class WebAppContext extends Context
             if (resource == null)
             {
                 if (_war==null || _war.length()==0)
-                    resource=Resource.newResource(getResourceBase());
+                    resource=newResource(getResourceBase());
                 
                 // Set dir or WAR
-                resource= Resource.newResource(_war);
+                resource= newResource(_war);
             }
                 
             String tmp = resource.getURL().toExternalForm();
