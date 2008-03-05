@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.servlet.Servlet;
 import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.Handler;
@@ -82,46 +83,73 @@ public class WebXmlConfiguration implements Configuration
     {
         XmlParser xmlParser=new XmlParser();
         //set up cache of DTDs and schemas locally
-        URL dtd22=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_2.dtd");
-        URL dtd23=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_3.dtd");
-        URL jsp20xsd=WebAppContext.class.getResource("/javax/servlet/resources/jsp_2_0.xsd");
-        URL jsp21xsd=WebAppContext.class.getResource("/javax/servlet/resources/jsp_2_1.xsd");
-        URL j2ee14xsd=WebAppContext.class.getResource("/javax/servlet/resources/j2ee_1_4.xsd");
-        URL webapp24xsd=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_4.xsd");
-        URL webapp25xsd=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_5.xsd");
-        URL schemadtd=WebAppContext.class.getResource("/javax/servlet/resources/XMLSchema.dtd");
-        URL xmlxsd=WebAppContext.class.getResource("/javax/servlet/resources/xml.xsd");
-        URL webservice11xsd=WebAppContext.class.getResource("/javax/servlet/resources/j2ee_web_services_client_1_1.xsd");
-        URL webservice12xsd=WebAppContext.class.getResource("/javax/servlet/resources/javaee_web_services_client_1_2.xsd");
-        URL datatypesdtd=WebAppContext.class.getResource("/javax/servlet/resources/datatypes.dtd");
-        xmlParser.redirectEntity("web-app_2_2.dtd",dtd22);
-        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
-        xmlParser.redirectEntity("web.dtd",dtd23);
-        xmlParser.redirectEntity("web-app_2_3.dtd",dtd23);
-        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd23);
-        xmlParser.redirectEntity("XMLSchema.dtd",schemadtd);
-        xmlParser.redirectEntity("http://www.w3.org/2001/XMLSchema.dtd",schemadtd);
-        xmlParser.redirectEntity("-//W3C//DTD XMLSCHEMA 200102//EN",schemadtd);
-        xmlParser.redirectEntity("jsp_2_0.xsd",jsp20xsd);
-        xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/jsp_2_0.xsd",jsp20xsd);
-        xmlParser.redirectEntity("jsp_2_1.xsd",jsp21xsd);
-        xmlParser.redirectEntity("http://java.sun.com/xml/ns/javaee/jsp_2_1.xsd",jsp21xsd);
-        xmlParser.redirectEntity("j2ee_1_4.xsd",j2ee14xsd);
-        xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/j2ee_1_4.xsd",j2ee14xsd);
-        xmlParser.redirectEntity("web-app_2_4.xsd",webapp24xsd);
-        xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd",webapp24xsd);
-        xmlParser.redirectEntity("web-app_2_5.xsd",webapp25xsd);
-        xmlParser.redirectEntity("http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd",webapp25xsd);
-        xmlParser.redirectEntity("xml.xsd",xmlxsd);
-        xmlParser.redirectEntity("http://www.w3.org/2001/xml.xsd",xmlxsd);
-        xmlParser.redirectEntity("datatypes.dtd",datatypesdtd);
-        xmlParser.redirectEntity("http://www.w3.org/2001/datatypes.dtd",datatypesdtd);
-        xmlParser.redirectEntity("j2ee_web_services_client_1_1.xsd",webservice11xsd);
-        xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webservice11xsd);
-        xmlParser.redirectEntity("javaee_web_services_client_1_2.xsd",webservice12xsd);
-        xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/javaee_web_services_client_1_2.xsd",webservice12xsd);
+        URL dtd22=Servlet.class.getResource("/javax/servlet/resources/web-app_2_2.dtd");
+        URL dtd23=Servlet.class.getResource("/javax/servlet/resources/web-app_2_3.dtd");
+        URL j2ee14xsd=Servlet.class.getResource("/javax/servlet/resources/j2ee_1_4.xsd");
+        URL webapp24xsd=Servlet.class.getResource("/javax/servlet/resources/web-app_2_4.xsd");
+        URL webapp25xsd=Servlet.class.getResource("/javax/servlet/resources/web-app_2_5.xsd");
+        URL schemadtd=Servlet.class.getResource("/javax/servlet/resources/XMLSchema.dtd");
+        URL xmlxsd=Servlet.class.getResource("/javax/servlet/resources/xml.xsd");
+        URL webservice11xsd=Servlet.class.getResource("/javax/servlet/resources/j2ee_web_services_client_1_1.xsd");
+        URL webservice12xsd=Servlet.class.getResource("/javax/servlet/resources/javaee_web_services_client_1_2.xsd");
+        URL datatypesdtd=Servlet.class.getResource("/javax/servlet/resources/datatypes.dtd");
+
+        URL jsp20xsd=null;
+        URL jsp21xsd=null;
+        
+        try
+        {
+            Class jsp_page = Loader.loadClass(WebXmlConfiguration.class,"javax.servlet.jsp.JspPage");
+            jsp20xsd=jsp_page.getResource("/javax/servlet/resources/jsp_2_0.xsd");
+            jsp21xsd=jsp_page.getResource("/javax/servlet/resources/jsp_2_1.xsd");
+        }
+        catch(Exception e)
+        {
+            Log.ignore(e);
+        }
+        finally
+        {
+            if (jsp20xsd==null)
+                jsp20xsd=Servlet.class.getResource("/javax/servlet/resources/jsp_2_0.xsd");
+            if (jsp21xsd==null)
+                jsp21xsd=Servlet.class.getResource("/javax/servlet/resources/jsp_2_1.xsd");
+        }
+        
+        redirect(xmlParser,"web-app_2_2.dtd",dtd22);
+        redirect(xmlParser,"-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
+        redirect(xmlParser,"web.dtd",dtd23);
+        redirect(xmlParser,"web-app_2_3.dtd",dtd23);
+        redirect(xmlParser,"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd23);
+        redirect(xmlParser,"XMLSchema.dtd",schemadtd);
+        redirect(xmlParser,"http://www.w3.org/2001/XMLSchema.dtd",schemadtd);
+        redirect(xmlParser,"-//W3C//DTD XMLSCHEMA 200102//EN",schemadtd);
+        redirect(xmlParser,"jsp_2_0.xsd",jsp20xsd);
+        redirect(xmlParser,"http://java.sun.com/xml/ns/j2ee/jsp_2_0.xsd",jsp20xsd);
+        redirect(xmlParser,"jsp_2_1.xsd",jsp21xsd);
+        redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/jsp_2_1.xsd",jsp21xsd);
+        redirect(xmlParser,"j2ee_1_4.xsd",j2ee14xsd);
+        redirect(xmlParser,"http://java.sun.com/xml/ns/j2ee/j2ee_1_4.xsd",j2ee14xsd);
+        redirect(xmlParser,"web-app_2_4.xsd",webapp24xsd);
+        redirect(xmlParser,"http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd",webapp24xsd);
+        redirect(xmlParser,"web-app_2_5.xsd",webapp25xsd);
+        redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd",webapp25xsd);
+        redirect(xmlParser,"xml.xsd",xmlxsd);
+        redirect(xmlParser,"http://www.w3.org/2001/xml.xsd",xmlxsd);
+        redirect(xmlParser,"datatypes.dtd",datatypesdtd);
+        redirect(xmlParser,"http://www.w3.org/2001/datatypes.dtd",datatypesdtd);
+        redirect(xmlParser,"j2ee_web_services_client_1_1.xsd",webservice11xsd);
+        redirect(xmlParser,"http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webservice11xsd);
+        redirect(xmlParser,"javaee_web_services_client_1_2.xsd",webservice12xsd);
+        redirect(xmlParser,"http://www.ibm.com/webservices/xsd/javaee_web_services_client_1_2.xsd",webservice12xsd);
 
         return xmlParser;
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    private static void redirect(XmlParser parser,String resource, URL source)
+    {
+        if (source!=null)
+            parser.redirectEntity(resource,source);
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -158,7 +186,7 @@ public class WebXmlConfiguration implements Configuration
         {
             Resource dftResource=Resource.newSystemResource(defaultsDescriptor);
             if(dftResource==null)
-                dftResource=Resource.newResource(defaultsDescriptor);
+                dftResource=_context.newResource(defaultsDescriptor);
             configure(dftResource.getURL().toString());
             _defaultWelcomeFileList=_welcomeFiles!=null;
         }
@@ -184,7 +212,7 @@ public class WebXmlConfiguration implements Configuration
         {
             Resource orideResource=Resource.newSystemResource(overrideDescriptor);
             if(orideResource==null)
-                orideResource=Resource.newResource(overrideDescriptor);
+                orideResource=_context.newResource(overrideDescriptor);
             _xmlParser.setValidating(false);
             configure(orideResource.getURL().toString());
         }
@@ -196,7 +224,7 @@ public class WebXmlConfiguration implements Configuration
         String descriptor=getWebAppContext().getDescriptor();
         if (descriptor!=null)
         {
-            Resource web= Resource.newResource(descriptor);
+            Resource web= _context.newResource(descriptor);
             if (web.exists()&& !web.isDirectory())
                 return web.getURL();
         }

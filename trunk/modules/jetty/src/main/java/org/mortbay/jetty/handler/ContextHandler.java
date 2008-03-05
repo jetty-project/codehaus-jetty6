@@ -105,7 +105,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private String _contextPath;
     private Map _initParams;
     private String _displayName;
-    private String _docRoot;
     private Resource _baseResource;  
     private MimeTypes _mimeTypes;
     private Map _localeEncodingMap;
@@ -119,6 +118,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private boolean _allowNullPathInfo;
     private int _maxFormContentSize=Integer.getInteger("org.mortbay.jetty.Request.maxFormContentSize",200000).intValue();
     private boolean _compactPath=false;
+    private boolean _aliases=true;
 
     private Object _contextListeners;
     private Object _contextAttributeListeners;
@@ -352,7 +352,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         {
             try
             {
-                Resource resource = Resource.newResource(urls[i]);
+                Resource resource = newResource(urls[i]);
                 File file=resource.getFile();
                 if (file.exists())
                 {
@@ -891,23 +891,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     public void setBaseResource(Resource base) 
     {
         _baseResource=base;
-        _docRoot=null;
-        
-        try
-        {
-            File file=_baseResource.getFile();
-            if (file!=null)
-            {
-                _docRoot=file.getCanonicalPath();
-                if (_docRoot.endsWith(File.pathSeparator))
-                    _docRoot=_docRoot.substring(0,_docRoot.length()-1);
-            }
-        }
-        catch (Exception e)
-        {
-            Log.warn(e);
-            throw new IllegalArgumentException(base.toString());
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -918,13 +901,30 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     {
         try
         {
-            setBaseResource(Resource.newResource(resourceBase));
+            setBaseResource(newResource(resourceBase));
         }
         catch (Exception e)
         {
             Log.warn(e);
             throw new IllegalArgumentException(resourceBase);
         }
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if alias checking is performed on resources.
+     */
+    public boolean isAliases()
+    {
+        return _aliases;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param aliases  alias checking performed on resources.
+     */
+    public void setAliases(boolean aliases)
+    {
+        _aliases = aliases;
     }
 
     /* ------------------------------------------------------------ */
@@ -1081,6 +1081,16 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         {
             path=URIUtil.canonicalPath(path);
             Resource resource=_baseResource.addPath(path);
+            
+            if (_aliases && resource.getAlias()!=null)
+            {
+                if (resource.exists())
+                    Log.warn("Aliased resource: "+resource+"~="+resource.getAlias());
+                else if (Log.isDebugEnabled())
+                    Log.debug("Aliased resource: "+resource+"~="+resource.getAlias());
+                return null;
+            }
+            
             return resource;
         }
         catch(Exception e)
@@ -1091,6 +1101,25 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         return null;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Convert URL to Resource
+     * wrapper for {@link Resource#newResource(URL)} enables extensions to 
+     * provide alternate resource implementations.
+     */
+    public Resource newResource(URL url) throws IOException
+    {
+        return Resource.newResource(url);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Convert URL to Resource
+     * wrapper for {@link Resource#newResource(String)} enables extensions to 
+     * provide alternate resource implementations.
+     */
+    public Resource newResource(String url) throws IOException
+    {
+        return Resource.newResource(url);
+    }
 
     /* ------------------------------------------------------------ */
     /* 
@@ -1222,19 +1251,19 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public String getRealPath(String path)
         {
-            if (_docRoot==null)
-                return null;
+            try
+            {
+                Resource resource=ContextHandler.this.getResource(path);
+                File file =resource.getFile();
+                if (file!=null)
+                    return file.getCanonicalPath();
+            }
+            catch (Exception e)
+            {
+                Log.ignore(e);
+            }
             
-            if (path==null)
-                return null;
-            path=URIUtil.canonicalPath(path);
-            
-            if (!path.startsWith(URIUtil.SLASH))
-                path=URIUtil.SLASH+path;
-            if (File.separatorChar!='/')
-                path =path.replace('/', File.separatorChar);
-            
-            return _docRoot+path;
+            return null;
         }
 
         /* ------------------------------------------------------------ */
@@ -1247,8 +1276,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         }
 
         /* ------------------------------------------------------------ */
-        /* 
-         */
         public URL getResource(String path) throws MalformedURLException
         {
             Resource resource=ContextHandler.this.getResource(path);
@@ -1494,5 +1521,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
       
             return host;
     }
+
 
 }

@@ -59,6 +59,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-515 Timer is missing scavenging Task in HashSessionManager
  + JETTY-519 HttpClient does not recycle closed connection.
  + JETTY-522 Add build profile for macos for setuid
+ + JETTY-523 Default servlet uses ServletContext.getResource
 
 
 jetty-6.1.8 28 February 2008

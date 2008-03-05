@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -45,6 +46,7 @@ import org.mortbay.jetty.InclusiveByteRange;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.ResourceCache;
 import org.mortbay.jetty.Response;
+import org.mortbay.jetty.ResourceCache.Miss;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
@@ -113,7 +115,8 @@ import org.mortbay.util.URIUtil;
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory
 {   
-    private ContextHandler.SContext _context;
+    private ServletContext _servletContext;
+    private ContextHandler _contextHandler;
     
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
@@ -126,20 +129,25 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     
     private MimeTypes _mimeTypes;
     private String[] _welcomes;
-    private boolean _aliases=false;
     private boolean _useFileMappedBuffer=false;
-    ByteArrayBuffer _cacheControl;
+    private ByteArrayBuffer _cacheControl;
+    private String _relativeResourceBase;
     
     
     /* ------------------------------------------------------------ */
     public void init()
         throws UnavailableException
     {
-        ServletContext config=getServletContext();
-        _context = (ContextHandler.SContext)config;
-        _mimeTypes = _context.getContextHandler().getMimeTypes();
+        _servletContext=getServletContext();
+        ContextHandler.SContext scontext=ContextHandler.getCurrentContext();
+        if (scontext==null)
+            _contextHandler=((ContextHandler.SContext)_servletContext).getContextHandler();
+        else
+            _contextHandler = ContextHandler.getCurrentContext().getContextHandler();
         
-        _welcomes = _context.getContextHandler().getWelcomeFiles();
+        _mimeTypes = _contextHandler.getMimeTypes();
+        
+        _welcomes = _contextHandler.getWelcomeFiles();
         if (_welcomes==null)
             _welcomes=new String[] {"index.jsp","index.html"};
         
@@ -148,30 +156,20 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         _redirectWelcome=getInitBoolean("redirectWelcome",_redirectWelcome);
         _gzip=getInitBoolean("gzip",_gzip);
         
-        _aliases=getInitBoolean("aliases",_aliases);
+        String aliases=_servletContext.getInitParameter("aliases");
+        if (aliases!=null)
+            _contextHandler.setAliases(Boolean.parseBoolean(aliases));
+        
         _useFileMappedBuffer=getInitBoolean("useFileMappedBuffer",_useFileMappedBuffer);
         
-        String rrb = getInitParameter("relativeResourceBase");
-        if (rrb!=null)
-        {
-            try
-            {
-                _resourceBase=Resource.newResource(_context.getResource(URIUtil.SLASH)).addPath(rrb);
-            }
-            catch (Exception e) 
-            {
-                Log.warn(Log.EXCEPTION,e);
-                throw new UnavailableException(e.toString()); 
-            }
-        }
+        _relativeResourceBase = getInitParameter("relativeResourceBase");
         
         String rb=getInitParameter("resourceBase");
-        if (rrb != null && rb != null)
-            throw new  UnavailableException("resourceBase & relativeResourceBase");    
-        
         if (rb!=null)
         {
-            try{_resourceBase=Resource.newResource(rb);}
+            if (_relativeResourceBase!=null)
+                throw new  UnavailableException("resourceBase & relativeResourceBase");    
+            try{_resourceBase=_contextHandler.newResource(rb);}
             catch (Exception e) 
             {
                 Log.warn(Log.EXCEPTION,e);
@@ -185,9 +183,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         
         try
         {
-            if (_resourceBase==null)
-                _resourceBase=Resource.newResource(_context.getResource(URIUtil.SLASH));
-
             String cache_type =getInitParameter("cacheType");
             int max_cache_size=getInitInt("maxCacheSize", -2);
             int max_cached_file_size=getInitInt("maxCachedFileSize", -2);
@@ -277,18 +272,20 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
      */
     public Resource getResource(String pathInContext)
     {
-        if (_resourceBase==null)
-            return null;
         Resource r=null;
+        if (_relativeResourceBase!=null)
+            pathInContext=URIUtil.addPaths(_relativeResourceBase,pathInContext);
+        
         try
         {
-            r = _resourceBase.addPath(pathInContext);
-            if (!_aliases && r.getAlias()!=null)
+            if (_resourceBase!=null)
+                r = _resourceBase.addPath(pathInContext);
+            else
             {
-                if (r.exists())
-                    Log.warn("Aliased resource: "+r+"=="+r.getAlias());
-                return null;
+                URL u = _servletContext.getResource(pathInContext);
+                r = _contextHandler.newResource(u);
             }
+           
             if (Log.isDebugEnabled()) Log.debug("RESOURCE="+r);
         }
         catch (IOException e)
@@ -353,22 +350,29 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             if (gzip)
             {
                 pathInContextGz=pathInContext+".gz";  
-                resource=getResource(pathInContextGz);
 
-                if (resource==null || !resource.exists()|| resource.isDirectory())
+                if (cache==null)
                 {
-                    gzip=false;
-                    pathInContextGz=null;
+                    resource=getResource(pathInContextGz);
                 }
-                else if (cache!=null)
+                else
                 {
-                    content=cache.lookup(pathInContextGz,resource);
+                    content=cache.lookup(pathInContextGz,this);
+
                     if (content!=null)
                         resource=content.getResource();
+                    else
+                        resource=getResource(pathInContextGz);
                 }
 
                 if (resource==null || !resource.exists()|| resource.isDirectory())
                 {
+                    if (cache!=null && content==null)
+                    {
+                        String real_path=_servletContext.getRealPath(pathInContextGz);
+                        if (real_path!=null)
+                            cache.miss(pathInContextGz,_contextHandler.newResource(real_path));
+                    }
                     gzip=false;
                     pathInContextGz=null;
                 }
@@ -407,7 +411,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     if (gzip)
                     {
                        response.setHeader(HttpHeaders.CONTENT_ENCODING,"gzip");
-                       String mt=_context.getMimeType(pathInContext);
+                       String mt=_servletContext.getMimeType(pathInContext);
                        if (mt!=null)
                            response.setContentType(mt);
                     }
@@ -445,9 +449,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                         response.setContentLength(0);
                         String q=request.getQueryString();
                         if (q!=null&&q.length()!=0)
-                            response.sendRedirect(URIUtil.addPaths( _context.getContextPath(),ipath)+"?"+q);
+                            response.sendRedirect(URIUtil.addPaths( _servletContext.getContextPath(),ipath)+"?"+q);
                         else
-                            response.sendRedirect(URIUtil.addPaths( _context.getContextPath(),ipath));
+                            response.sendRedirect(URIUtil.addPaths( _servletContext.getContextPath(),ipath));
                     }
                     else
                     {
