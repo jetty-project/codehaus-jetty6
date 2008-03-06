@@ -49,7 +49,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
         _manager = selectSet.getManager();
         _selectSet = selectSet;
         _connection = _manager.newConnection(channel,this);
-        
+        _dispatched = false;
         _open=true;
         _manager.endPointOpened(this);
         

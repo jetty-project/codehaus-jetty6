@@ -352,17 +352,26 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     public static class SuspendableEndPoint extends SelectChannelEndPoint implements Continuation
     {
-        // Main states are D=Dispatched, S=suspended, T=triggered
-        // dst IDLE          Dst DISPATCHED
-        // dsT scheduled     DsT RETRY
-        // dSt SUSPENDED     DSt Suspending
-        // dST unsuspending  DST unsuspending 
-        protected boolean _suspended;
-        protected boolean _triggered;
+        static final int __UNDISPATCHED=0;
+        static final int __DISPATCHED=1;
+        static final int __SUSPENDING=2;
+        static final int __SUSPENDED=3;
+        static final int __RESUMING=4;
+        static final int __RESUMED=5;
+        
+        protected int _state;
+        //                  dispatch     undispatch    resume     suspend
+        // UNDISPATCHED     DISPATCHED   X             X          X
+        // DISPATCHED       X            UNDISPATCHED  X          SUSPENDING
+        // SUSPENDING       X            SUSPENDED     RESUMING   X
+        // SUSPENDED        RESUMED      X             RESUMED    X
+        // RESUMING         X            RESUMED       -          X
+        // RESUMED          X            UNDISPATCHED  -          DISPATCHED
+     
         
         // Secondary state
         protected boolean _new = true;
-        protected boolean _resumed = false;   // resume called.
+        protected boolean _resumed = false;   // resume called (different to resumed state)
         protected Object _object;
         
         // other
@@ -393,9 +402,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             super(channel,selectSet,key);
 
             _mutex=this;
-            _dispatched=false;
-            _suspended=false;
-            _triggered=false;
+            _state=__UNDISPATCHED;
                 
             HttpConnection connection = HttpConnection.getCurrentConnection();
             
@@ -449,7 +456,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
         {
             synchronized(_mutex)
             {
-                return _suspended||_triggered;
+                return _state>=__SUSPENDING;
             }
         }
 
@@ -474,9 +481,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
             synchronized (_mutex)
             {
                 // last("reset");
-                _suspended=false;
-                _triggered=false;
-  
+                _state=_dispatched?__DISPATCHED:__UNDISPATCHED;
                 _resumed = false;
             }
             
@@ -491,126 +496,182 @@ public class SelectChannelConnector extends AbstractNIOConnector
         {
             synchronized (_mutex)
             {
-                // last("suspend");
-                if (!_dispatched)
-                    throw new IllegalStateException("!Dispatched "+this);
-                if (_suspended)
-                    throw new IllegalStateException("Suspended "+this);
-                      
-                if (_triggered)
+                switch(_state)
                 {
-                    // suspending a retry == reset
-                    _suspended=false;
-                    _triggered=false;
-                    
-                    boolean resumed=_resumed;
-                    _resumed=false;
-                    return resumed;
-                }
-                else
-                {
-                    _suspended=true;
-
-                    _timeout = timeout;
-                    if (_retry==null)
-                        _retry = new RetryRequest();
+                    case __DISPATCHED:
+                        _state=__SUSPENDING;
+                        _timeout = timeout;
+                        if (_retry==null)
+                            _retry = new RetryRequest();
+                        getSelectSet().scheduleTimeout(_timeoutTask,_timeout);
+                        throw _retry;
+                        
+                    case __UNDISPATCHED:
+                        throw new IllegalStateException(this.toString());
+                    case __SUSPENDING:
+                        throw new IllegalStateException(this.toString());
+                    case __SUSPENDED:
+                        throw new IllegalStateException(this.toString());
+                    case __RESUMING:
+                        throw new IllegalStateException(this.toString());
+                    case __RESUMED:
+                        _state=__DISPATCHED;
+                        boolean resumed=_resumed;
+                        _resumed=false;
+                        return resumed;
+                    default:
+                        throw new IllegalStateException(""+_state);
                 }
             }
-
-            getSelectSet().scheduleTimeout(_timeoutTask,_timeout);
-            throw _retry;      
         }
         
         public void resume()
         {
-            boolean dispatched=false;
+
             synchronized (_mutex)
             {
-                // last("resume");
-                if (_suspended)
+                switch(_state)
                 {
-                    _triggered=true;   
-                    _resumed=true;
-
-                    if (!_dispatched)
-                    {
-                        _new =false;
-                        dispatched=super.dispatch();
-                        _suspended=false;
-                    }
+                    case __DISPATCHED:
+                        throw new IllegalStateException(this.toString());
+                    case __UNDISPATCHED:
+                        throw new IllegalStateException(this.toString());
+                        
+                    case __SUSPENDING:
+                        _state=__RESUMING;
+                        _resumed=true;
+                        break;
+                        
+                    case __SUSPENDED:
+                        if (super.dispatch())
+                            getSelectSet().cancelIdle(_timeoutTask);
+                        _state=__RESUMED;
+                        // fall through
+                        
+                    case __RESUMING:
+                    case __RESUMED:
+                        _resumed=true;
+                        return;
+                        
+                    default:
+                        throw new IllegalStateException(""+_state);
                 }
             }
-
-            if (dispatched)
-                getSelectSet().cancelIdle(_timeoutTask);
         }
 
         private void expire()
         {
-            boolean dispatched=false;
+            // just like resume, except don't set _resumed=true;
             synchronized (_mutex)
             {
-                // last("expire");
-                if (_suspended)
+                switch(_state)
                 {
-                    _triggered=true;
-                
-                    if (!_dispatched)
-                    {
-                        // -ST -> --T
-                        _new =false;
-                        dispatched=super.dispatch();
-                        _suspended=false;
-                    }
+                    case __DISPATCHED:
+                        throw new IllegalStateException(this.toString());
+                    case __UNDISPATCHED:
+                        throw new IllegalStateException(this.toString());
+                        
+                    case __SUSPENDING:
+                        _state=__RESUMING;
+                        break;
+                        
+                    case __SUSPENDED:
+                        if (super.dispatch())
+                            getSelectSet().cancelIdle(_timeoutTask);
+                        _state=__RESUMED;
+                        // fall through
+                        
+                    case __RESUMING:
+                    case __RESUMED:
+                        return;
+                        
+                    default:
+                        throw new IllegalStateException(""+_state);
                 }
             }
-            
-            if (dispatched)
-                getSelectSet().cancelIdle(_timeoutTask);
         }
            
         protected boolean dispatch()
         {
-            boolean dispatched=false;
-            boolean dispatchedFromSuspended=false;
             synchronized (_mutex)
             {
-                // last("dispatch");
-                _new=false;
-                dispatched=super.dispatch();
+                boolean dispatched=super.dispatch();
                 
-                if (_suspended)
+                switch(_state)
                 {
-                    _suspended=false;
-                    _triggered=true;
-                    dispatchedFromSuspended=true;
+                    case __DISPATCHED:
+                        throw new IllegalStateException(this.toString());
+                    case __UNDISPATCHED:
+                        if (dispatched)
+                            _state=__DISPATCHED;
+                        return dispatched;
+                        
+                    case __SUSPENDING:
+                        throw new IllegalStateException(this.toString());
+                    case __SUSPENDED:
+                        if (dispatched)
+                        {
+                            getSelectSet().cancelTimeout(_timeoutTask);
+                            _state=__RESUMED;
+                        }
+                        return dispatched;
+                        
+                    case __RESUMING:
+                        throw new IllegalStateException(this.toString());
+                    case __RESUMED:
+                        throw new IllegalStateException(this.toString());
+                    default:
+                        throw new IllegalStateException(""+_state);
                 }
             }
-
-            if (dispatchedFromSuspended)
-                getSelectSet().cancelTimeout(_timeoutTask);
-            
-            return dispatched;
         }
         
         public boolean undispatch()
         {
             synchronized (_mutex)
             {
-                if (!_dispatched)
-                    throw new IllegalStateException();
-                // last("undispatch");
-                
-                if (_suspended&&_triggered)
+                switch(_state)
                 {
-                    // short circuit
-                    _suspended=false;
-                    // last("!undispatch");
-                    return false;
+                    case __DISPATCHED:
+                         if (super.undispatch())
+                         {
+                             _state=__UNDISPATCHED;
+                             return true;
+                         }
+                        return false;
+                        
+                    case __UNDISPATCHED:
+                        throw new IllegalStateException(this.toString());
+                        
+                    case __SUSPENDING:
+                        _state=__SUSPENDED;
+                        if (super.undispatch())
+                        {
+                            _state=__SUSPENDED;
+                            return true;
+                        }
+                       return false;
+                        
+                    case __SUSPENDED:
+                        throw new IllegalStateException(this.toString());
+                        
+                    case __RESUMING:
+                        _state=__RESUMED;
+                        return false;  // SHORT CUT!
+                        
+                    case __RESUMED:
+                        if (super.undispatch())
+                        {
+                            _state=__UNDISPATCHED;
+                            return true;
+                        }
+                       return false;
+                        
+                    default:
+                        throw new IllegalStateException(""+_state);
                 }
-                
-                return super.undispatch();
             }
+            
         }
 
         public void setObject(Object object)
@@ -623,9 +684,13 @@ public class SelectChannelConnector extends AbstractNIOConnector
             synchronized (_mutex)
             {
                 return "RetryContinuation@"+hashCode()+
-                (_dispatched?",D":",d")+
-                (_suspended?"S":"s")+
-                (_triggered?"T":"t")+
+                ((_state==0)?" UNDISPATCHED":
+                    (_state==1)?" DISPATCHED":
+                        (_state==2)?" SUSPENDING":
+                            (_state==3)?" SUSPENDED":
+                                (_state==4)?" RESUMING":
+                                    (_state==5)?" RESUMED":
+                                        " ???")+
                 (_new?",new":"")+
                 (_resumed?",resumed":"")+
                 (isExpired()?",expired":"");

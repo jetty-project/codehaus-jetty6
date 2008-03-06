@@ -466,7 +466,8 @@ public class HttpConnection implements Connection
                 Continuation continuation = _request.getContinuation();
                 if (continuation != null && continuation.isPending())
                 {
-                    break;
+                    Log.debug("return with pending continuation");
+                    return;
                 }
                 else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
                     ((SelectChannelEndPoint)_endp).setWritable(false);
