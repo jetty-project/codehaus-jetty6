@@ -73,26 +73,26 @@ public class WebXmlConfiguration implements Configuration
     protected ServletHandler _servletHandler;
     protected int _version;
 
-    public WebXmlConfiguration()
+    public WebXmlConfiguration() throws ClassNotFoundException
     {
         // Get parser
         _xmlParser=webXmlParser();
     }
 
-    public static XmlParser webXmlParser()
+    public static XmlParser webXmlParser() throws ClassNotFoundException
     {
         XmlParser xmlParser=new XmlParser();
         //set up cache of DTDs and schemas locally
-        URL dtd22=Servlet.class.getResource("/javax/servlet/resources/web-app_2_2.dtd");
-        URL dtd23=Servlet.class.getResource("/javax/servlet/resources/web-app_2_3.dtd");
-        URL j2ee14xsd=Servlet.class.getResource("/javax/servlet/resources/j2ee_1_4.xsd");
-        URL webapp24xsd=Servlet.class.getResource("/javax/servlet/resources/web-app_2_4.xsd");
-        URL webapp25xsd=Servlet.class.getResource("/javax/servlet/resources/web-app_2_5.xsd");
-        URL schemadtd=Servlet.class.getResource("/javax/servlet/resources/XMLSchema.dtd");
-        URL xmlxsd=Servlet.class.getResource("/javax/servlet/resources/xml.xsd");
-        URL webservice11xsd=Servlet.class.getResource("/javax/servlet/resources/j2ee_web_services_client_1_1.xsd");
-        URL webservice12xsd=Servlet.class.getResource("/javax/servlet/resources/javaee_web_services_client_1_2.xsd");
-        URL datatypesdtd=Servlet.class.getResource("/javax/servlet/resources/datatypes.dtd");
+        URL dtd22=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_2.dtd",true);
+        URL dtd23=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_3.dtd",true);
+        URL j2ee14xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_1_4.xsd",true);
+        URL webapp24xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_4.xsd",true);
+        URL webapp25xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_5.xsd",true);
+        URL schemadtd=Loader.getResource(Servlet.class,"/javax/servlet/resources/XMLSchema.dtd",true);
+        URL xmlxsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/xml.xsd",true);
+        URL webservice11xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_web_services_client_1_1.xsd",true);
+        URL webservice12xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/javaee_web_services_client_1_2.xsd",true);
+        URL datatypesdtd=Loader.getResource(Servlet.class,"/javax/servlet/resources/datatypes.dtd",true);
 
         URL jsp20xsd=null;
         URL jsp21xsd=null;
@@ -110,9 +110,9 @@ public class WebXmlConfiguration implements Configuration
         finally
         {
             if (jsp20xsd==null)
-                jsp20xsd=Servlet.class.getResource("/javax/servlet/resources/jsp_2_0.xsd");
+                jsp20xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/jsp_2_0.xsd",true);
             if (jsp21xsd==null)
-                jsp21xsd=Servlet.class.getResource("/javax/servlet/resources/jsp_2_1.xsd");
+                jsp21xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/jsp_2_1.xsd",true);
         }
         
         redirect(xmlParser,"web-app_2_2.dtd",dtd22);
