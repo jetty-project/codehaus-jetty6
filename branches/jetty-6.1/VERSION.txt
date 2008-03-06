@@ -8,30 +8,23 @@ jetty-6.1.8 28 February 2008
  + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
- + add removeHandler(Handler) method to HandlerContainer interface
- + remote close throws EofException instead of IOException("Closed");
- + RetryRequest exception now extends ThreadDeath
- + Refactor of Continuation towards servlet 3.0 proposal
- + Added option to dispatch to suspended requests.
- + Delay 100 continues until getInputStream
+ + Optimizations and improvements of Cometd, more pooled objects
+ + Improved Cometd timeout handling
  + Added BayeuxService
+ + Cookie support in BayeuxClient
+ + Improved Bayeux API
+ + add removeHandler(Handler) method to HandlerContainer interface
  + Added JSON.Convertor and non static JSON instances
+ + Long cache for JSON
+ + Fixed JSON negative numbers
+ + JSON unquotes /
  + Add "mvn jetty:stop" 
  + allow sessions to be periodically persisted to disk
- + Cookie support in BayeuxClient
  + grizzly fixed for posts
- + Improved Cometd timeout handling
- + Optimizations and improvements of Cometd, more pooled objects
- + Long cache for JSON
- + Update java5 patch
  + Add removeHandler(Handler) method to HandlerContainer interface
- + Fixed JSON negative numbers
- + Improved Bayeux API
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
  + Allow code ranges on ErrorPageErrorHandler
- + JSON unquotes /
  + AJP handles bad mod_jk methods
- + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
  + JETTY-433 ContextDeployer constructor fails unnecessarily when using a security manager if jetty.home not set
