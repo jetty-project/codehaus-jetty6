@@ -958,6 +958,21 @@ public class JSON
                     escape=false;
                     switch (c)
                     {
+                        case '"':
+                            b.append('"');
+                            break;
+                        case '\\':
+                            b.append('\\');
+                            break;
+                        case '/':
+                            b.append('/');
+                            break;
+                        case 'b':
+                            b.append('\b');
+                            break;
+                        case 'f':
+                            b.append('\f');
+                            break;
                         case 'n':
                             b.append('\n');
                             break;
@@ -967,15 +982,12 @@ public class JSON
                         case 't':
                             b.append('\t');
                             break;
-                        case 'f':
-                            b.append('\f');
-                            break;
-                        case 'b':
-                            b.append('\b');
-                            break;
                         case 'u':
-                            b.append((char)((TypeUtil.convertHexDigit((byte)source.next())<<24)+(TypeUtil.convertHexDigit((byte)source.next())<<16)
-                                    +(TypeUtil.convertHexDigit((byte)source.next())<<8)+(TypeUtil.convertHexDigit((byte)source.next()))));
+                            char uc=(char)((TypeUtil.convertHexDigit((byte)source.next())<<12)+
+                                    (TypeUtil.convertHexDigit((byte)source.next())<<8)+
+                                    (TypeUtil.convertHexDigit((byte)source.next())<<4)+
+                                    (TypeUtil.convertHexDigit((byte)source.next())));
+                            b.append(uc);
                             break;
                         default:
                             b.append(c);
