@@ -16,16 +16,23 @@
 package org.mortbay.jetty.webapp;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+
+import javax.servlet.Servlet;
 
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
@@ -161,17 +168,16 @@ public class TagLibConfiguration implements Configuration
                             
                             Log.debug("TLD search of {}",urls[i]);
                             
-                            File file=_context.newResource(urls[i]).getFile();
-                            if (file==null || !file.exists() || !file.canRead())
+                            InputStream in = _context.newResource(urls[i]).getInputStream();
+                            if (in==null)
                                 continue;
                             
-                            JarFile jarfile = new JarFile(file);
+                            JarInputStream jar_in = new JarInputStream(in);
                             try
-                            {
-                                Enumeration e = jarfile.entries();
-                                while (e.hasMoreElements())
+                            { 
+                                JarEntry entry = jar_in.getNextJarEntry();
+                                while (entry!=null)
                                 {
-                                    ZipEntry entry = (ZipEntry)e.nextElement();
                                     String name = entry.getName();
                                     if (name.startsWith("META-INF/") && name.toLowerCase().endsWith(".tld"))
                                     {
@@ -179,11 +185,12 @@ public class TagLibConfiguration implements Configuration
                                         tlds.add(tld);
                                         Log.debug("TLD found {}",tld);
                                     }
+                                    entry = jar_in.getNextJarEntry();
                                 }
                             }
                             finally
                             {
-                                jarfile.close();
+                                jar_in.close();
                             }   
                         }
                     }
@@ -197,13 +204,60 @@ public class TagLibConfiguration implements Configuration
         
         // Create a TLD parser
         XmlParser parser = new XmlParser(false);
-        parser.redirectEntity("web-jsptaglib_1_1.dtd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd", false));
-        parser.redirectEntity("web-jsptaglib_1_2.dtd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd", false));
-        parser.redirectEntity("web-jsptaglib_2_0.xsd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd", false));
-        parser.redirectEntity("web-jsptaglibrary_1_1.dtd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd", false));
-        parser.redirectEntity("web-jsptaglibrary_1_2.dtd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd", false));
-        parser.redirectEntity("web-jsptaglibrary_2_0.xsd",Loader.getResource(TagLibConfiguration.class,"javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd", false));
+        
+        URL taglib11=null;
+        URL taglib12=null;
+        URL taglib20=null;
+        URL taglib21=null;
+
+        try
+        {
+            Class jsp_page = Loader.loadClass(WebXmlConfiguration.class,"javax.servlet.jsp.JspPage");
+            taglib11=jsp_page.getResource("javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd");
+            taglib12=jsp_page.getResource("javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd");
+            taglib20=jsp_page.getResource("javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd");
+            taglib21=jsp_page.getResource("javax/servlet/jsp/resources/web-jsptaglibrary_2_1.xsd");
+        }
+        catch(Exception e)
+        {
+            Log.ignore(e);
+        }
+        finally
+        {
+            if(taglib11==null)
+                taglib11=Loader.getResource(Servlet.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd",true);
+            if(taglib12==null)
+                taglib12=Loader.getResource(Servlet.class,"javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd",true);
+            if(taglib20==null)
+                taglib20=Loader.getResource(Servlet.class,"javax/servlet/jsp/resources/web-jsptaglibrary_2_0.xsd",true);
+            if(taglib21==null)
+                taglib21=Loader.getResource(Servlet.class,"javax/servlet/jsp/resources/web-jsptaglibrary_2_1.xsd",true);
+        }
+        
+
+        if(taglib11!=null)
+        {
+            parser.redirectEntity("web-jsptaglib_1_1.dtd",taglib11);
+            parser.redirectEntity("web-jsptaglibrary_1_1.dtd",taglib11);
+        }
+        if(taglib12!=null)
+        {
+            parser.redirectEntity("web-jsptaglib_1_2.dtd",taglib12);
+            parser.redirectEntity("web-jsptaglibrary_1_2.dtd",taglib12);
+        }
+        if(taglib20!=null)
+        {
+            parser.redirectEntity("web-jsptaglib_2_0.xsd",taglib20);
+            parser.redirectEntity("web-jsptaglibrary_2_0.xsd",taglib20);
+        }
+        if(taglib21!=null)
+        {
+            parser.redirectEntity("web-jsptaglib_2_1.xsd",taglib21);
+            parser.redirectEntity("web-jsptaglibrary_2_1.xsd",taglib21);
+        }
+        
         parser.setXpath("/taglib/listener/listener-class");
+        
         // Parse all the discovered TLDs
         Iterator iter = tlds.iterator();
         while (iter.hasNext())
