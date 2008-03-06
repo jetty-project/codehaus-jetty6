@@ -1,10 +1,10 @@
 
 jetty-6.2-SNAPSHOT
  + Jetty-6.1.8
+ + Refactor of Continuation towards servlet 3.0 proposal
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + QueuedThreadPool default
  + RetryRequest exception now extends ThreadDeath
- + Refactor of Continuation towards servlet 3.0 proposal
  + Added option to dispatch to suspended requests.
  + Delay 100 continues until getInputStream
  + HttpClient supports pipelined request
