@@ -1,95 +1,50 @@
 
 jetty-6.2-SNAPSHOT
- + Added QueuedThreadPool (as default)
- + Optimized QuotedStringTokenizer.quote()
- + further Optimizations and improvements of Cometd
- + remote close throws EofException instead of IOException("Closed");
+ + Jetty-6.1.8
+ + JETTY-282 Support manually-triggered reloading by maven plugin
+ + QueuedThreadPool default
  + RetryRequest exception now extends ThreadDeath
  + Refactor of Continuation towards servlet 3.0 proposal
  + Added option to dispatch to suspended requests.
  + Delay 100 continues until getInputStream
- + Added BayeuxService
- + Added JSON.Convertor and non static JSON instances
- + Add "mvn jetty:stop" 
- + allow sessions to be periodically persisted to disk
- + Cookie support in BayeuxClient
- + grizzly fixed for posts
- + Improved Cometd timeout handling
- + Optimizations and improvements of Cometd, more pooled objects
- + Long cache for JSON
- + Update java5 patch
- + Add removeHandler(Handler) method to HandlerContainer interface
- + Fixed JSON negative numbers
- + Improved Bayeux API
- + Allow Bayeux subscriptions to meta channels
- + Remove duplicate commons-logging jars and include sslengine in jboss sar
- + Allow code ranges on ErrorPageErrorHandler
- + JSON unquotes /
- + AJP handles bad mod_jk methods
  + HttpClient supports pipelined request
- + Bayeux use a single connection for polling
+ + BayeuxClient use a single connection for polling
  + Make javax.servlet.jsp optional osgi import for jetty module
  + JETTY-282 Support manually-triggered reloading by maven plugin
- + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
  + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
- + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
- + JETTY-433 ContextDeployer constructor fails unnecessarily when using a security manager if jetty.home not set
- + JETTY-434 ContextDeployer scanning of sub-directories should be optional
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
  + JETTY-475 AJP connector in RPMs
  + JETTY-486 Improved jetty.sh script
  + JETTY-487 Handle empty chunked request
- + JETTY-481 Handle empty Bayeux response
- + JETTY-489 Improve doco on the jetty.port property for plugin
- + JETTY-490 Fixed JSONEnumConvertor
- + JETTY-491 opendocument mime types
- + JETTY-492 Null pointer in HashSSORealm
- + JETTY-493 JSON handles BigDecimals
  + JETTY-494 Client side session replication
- + JETTY-498 Improved cookie parsing
- + JETTY-507 Fixed encoding from JETTY-388 and test case
- + JETTY-508 Extensible cometd handlers
- + JETTY-509 Fixed JSONP transport for changing callback names
- + JETTY-511 jetty.sh mishandled JETTY_HOME when launched from a relative path 
- + JETTY-512 add slf4j as optional to osgi manifest
- + JETTY-513 Terracotta session replication does not work when the initial page on each server does not set any attributes
- + JETTY-515 Timer is missing scavenging Task in HashSessionManager
  + JETTY-519 HttpClient does not recycle closed connection.
  + JETTY-522 Add build profile for macos for setuid
  + JETTY-523 Default servlet uses ServletContext.getResource
-
 
 jetty-6.1.8 28 February 2008
  + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
  + further Optimizations and improvements of Cometd
- + add removeHandler(Handler) method to HandlerContainer interface
- + remote close throws EofException instead of IOException("Closed");
- + RetryRequest exception now extends ThreadDeath
- + Refactor of Continuation towards servlet 3.0 proposal
- + Added option to dispatch to suspended requests.
- + Delay 100 continues until getInputStream
- + Added BayeuxService
- + Added JSON.Convertor and non static JSON instances
- + Add "mvn jetty:stop" 
- + allow sessions to be periodically persisted to disk
- + Cookie support in BayeuxClient
- + grizzly fixed for posts
- + Improved Cometd timeout handling
  + Optimizations and improvements of Cometd, more pooled objects
- + Long cache for JSON
- + Update java5 patch
- + Add removeHandler(Handler) method to HandlerContainer interface
- + Fixed JSON negative numbers
+ + Improved Cometd timeout handling
+ + Added BayeuxService
+ + Cookie support in BayeuxClient
  + Improved Bayeux API
+ + add removeHandler(Handler) method to HandlerContainer interface
+ + Added JSON.Convertor and non static JSON instances
+ + Long cache for JSON
+ + Fixed JSON negative numbers
+ + JSON unquotes /
+ + Add "mvn jetty:stop"
+ + allow sessions to be periodically persisted to disk
+ + grizzly fixed for posts
+ + Add removeHandler(Handler) method to HandlerContainer interface
  + Remove duplicate commons-logging jars and include sslengine in jboss sar
  + Allow code ranges on ErrorPageErrorHandler
- + JSON unquotes /
  + AJP handles bad mod_jk methods
- + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-350 log ssl errors on SslSocketConnector
  + JETTY-417 JETTY_LOGS environment variable not queried by jetty.sh
  + JETTY-433 ContextDeployer constructor fails unnecessarily when using a security manager if jetty.home not set
@@ -108,6 +63,7 @@ jetty-6.1.8 28 February 2008
  + JETTY-512 add slf4j as optional to manifest
  + JETTY-513 Terracotta session replication does not work when the initial page on each server does not set any attributes
  + JETTY-515 Timer is missing scavenging Task in HashSessionManager
+
 
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
