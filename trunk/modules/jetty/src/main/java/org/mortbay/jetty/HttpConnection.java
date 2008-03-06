@@ -284,9 +284,9 @@ public class HttpConnection implements Connection
      */
     public ServletInputStream getInputStream() throws IOException
     {
+        // If the client is expecting 100 CONTINUE, then send it now.
         if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
         {
-            // TODO delay sending 100 response until a read is attempted.
             if (((HttpParser)_parser).getHeaderBuffer()==null || ((HttpParser)_parser).getHeaderBuffer().length()<2)
             {
                 _generator.setResponse(HttpStatus.ORDINAL_100_Continue, null);
