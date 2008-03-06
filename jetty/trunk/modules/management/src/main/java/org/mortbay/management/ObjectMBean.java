@@ -504,8 +504,13 @@ public class ObjectMBean implements DynamicMBean
      *
      * @param name
      * @param metaData "description" or "access:description" or "type:access:description"  where type is
-     * the "Object","MBean" or "MObject" to indicate the method is on the object, the MBean or on the object but converted to an MBean, access
-     * is either "RW" or "RO".
+     * one of: <ul>
+     * <li>"Object" The field/method is on the managed object.
+     * <li>"MBean" The field/method is on the mbean proxy object
+     * <li>"MObject" The field/method is on the managed object and value should be converted to MBean reference
+     * <li>"MMBean" The field/method is on the mbean proxy object and value should be converted to MBean reference
+     * </ul>
+     * the access is either "RW" or "RO".
      */
     public MBeanAttributeInfo defineAttribute(String name, String metaData)
     {
@@ -519,12 +524,14 @@ public class ObjectMBean implements DynamicMBean
             String[] tokens = metaData.split(":", 3);
             for (int t=0;t<tokens.length-1;t++)
             {
+                tokens[t]=tokens[t].trim();
                 if ("RO".equals(tokens[t]))
                     writable=false;
-                else if ("MMBean".equalsIgnoreCase(tokens[t]) || "MBean".equalsIgnoreCase(tokens[t]))
-                    onMBean=true;
-                else if ("MMBean".equalsIgnoreCase(tokens[t]) || "MObject".equalsIgnoreCase(tokens[t]))
-                    convert=true;
+                else 
+                {
+                    onMBean=("MMBean".equalsIgnoreCase(tokens[t]) || "MBean".equalsIgnoreCase(tokens[t]));
+                    convert=("MMBean".equalsIgnoreCase(tokens[t]) || "MObject".equalsIgnoreCase(tokens[t]));
+                }
             }
             description=tokens[tokens.length-1];
         }
@@ -622,22 +629,24 @@ public class ObjectMBean implements DynamicMBean
      * Define an operation on the managed object. Defines an operation with parameters. Refection is
      * used to determine find the method and it's return type. The description of the method is
      * found with a call to findDescription on "name(signature)". The name and description of each
-     * parameter is found with a call to findDescription with "name(partialSignature", the returned
+     * parameter is found with a call to findDescription with "name(signature)[n]", the returned
      * description is for the last parameter of the partial signature and is assumed to start with
      * the parameter name, followed by a colon.
      *
      * @param metaData "description" or "impact:description" or "type:impact:description", type is
-     * the "Object","MBean" or "MObject" to indicate the method is on the object, the MBean or on the
-     * object but converted to an MBean, and impact is either "ACTION","INFO","ACTION_INFO" or "UNKNOWN".
+     * the "Object","MBean", "MMBean" or "MObject" to indicate the method is on the object, the MBean or on the
+     * object but converted to an MBean reference, and impact is either "ACTION","INFO","ACTION_INFO" or "UNKNOWN".
      */
     private MBeanOperationInfo defineOperation(String signature, String metaData, ResourceBundle bundle)
     {
         String[] tokens=metaData.split(":",3);
         int i=tokens.length-1;
         String description=tokens[i--];
-        String impact_name = i<0?"UNKNOWN":tokens[i--];
-        boolean onMBean= i==0 && "MBean".equalsIgnoreCase(tokens[0]);
-        boolean convert= i==0 && "MObject".equalsIgnoreCase(tokens[0]);
+        String impact_name = i<0?"UNKNOWN":tokens[i--].trim();
+        if (i==0)
+            tokens[0]=tokens[0].trim();
+        boolean onMBean= i==0 && ("MBean".equalsIgnoreCase(tokens[0])||"MMBean".equalsIgnoreCase(tokens[0]));
+        boolean convert= i==0 && ("MObject".equalsIgnoreCase(tokens[0])||"MMBean".equalsIgnoreCase(tokens[0]));
 
         if (Log.isDebugEnabled())
             Log.debug("defineOperation "+signature+" "+onMBean+":"+impact_name+":"+description);
