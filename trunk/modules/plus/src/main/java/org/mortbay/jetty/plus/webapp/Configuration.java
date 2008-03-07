@@ -41,9 +41,9 @@ public class Configuration extends AbstractConfiguration
     private Integer _key;
     
     
-    public Configuration ()
+    public Configuration () throws ClassNotFoundException
     {
-
+        super();
     }
     
     /** 

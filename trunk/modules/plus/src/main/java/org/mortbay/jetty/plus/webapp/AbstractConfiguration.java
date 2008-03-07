@@ -50,7 +50,6 @@ import org.mortbay.xml.XmlParser;
  */
 public abstract class AbstractConfiguration extends WebXmlConfiguration
 {
-    
     protected LifeCycleCallbackCollection _callbacks = new LifeCycleCallbackCollection();
     protected InjectionCollection _injections = new InjectionCollection();
     protected RunAsCollection _runAsCollection = new RunAsCollection();
@@ -67,6 +66,15 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     
     public abstract void bindMessageDestinationRef (String name, Class type)  throws Exception;
     
+    
+    /**
+     * @throws ClassNotFoundException
+     */
+    public AbstractConfiguration() throws ClassNotFoundException
+    {
+        super();
+    }
+
     
     public void setWebAppContext (WebAppContext context)
     {
