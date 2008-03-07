@@ -95,12 +95,6 @@ import org.mortbay.util.ajax.Continuation;
  */
 public class Request implements HttpServletRequest
 {
-    private static final byte STATE_DELIMITER = 1;
-    private static final byte STATE_NAME = 2;
-    private static final byte STATE_VALUE = 4;
-    private static final byte STATE_QUOTED_VALUE = 8;
-    private static final byte STATE_UNQUOTED_VALUE = 16;
-
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
     
@@ -139,14 +133,13 @@ public class Request implements HttpServletRequest
     private HttpSession _session;
     private SessionManager _sessionManager;
     private boolean _cookiesExtracted=false;
-    private Cookie[] _cookies;
-    private String[] _lastCookies;
     private long _timeStamp;
     private Buffer _timeStampBuffer;
     private Continuation _continuation;
     private Object _requestAttributeListeners;
     private Map _savedNewSessions;
     private UserRealm _userRealm;
+    private CookieCutter _cookies;
     
     /* ------------------------------------------------------------ */
     /**
@@ -331,223 +324,32 @@ public class Request implements HttpServletRequest
      */
     public Cookie[] getCookies()
     {
-        if (_cookiesExtracted) return _cookies;
+        if (_cookiesExtracted) 
+            return _cookies==null?null:_cookies.getCookies();
 
-        try
+        // Handle no cookies
+        if (!_connection.getRequestFields().containsKey(HttpHeaders.COOKIE_BUFFER))
         {
-            // Handle no cookies
-            if (!_connection.getRequestFields().containsKey(HttpHeaders.COOKIE_BUFFER))
-            {
-                _cookies = null;
-                _cookiesExtracted = true;
-                _lastCookies = null;
-                return _cookies;
-            }
-
-            // Check if cookie headers match last cookies
-            if (_lastCookies != null)
-            {
-                int last = 0;
-                Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
-                while (enm.hasMoreElements())
-                {
-                    String c = (String)enm.nextElement();
-                    if (last >= _lastCookies.length || !c.equals(_lastCookies[last]))
-                    {
-                        _lastCookies = null;
-                        break;
-                    }
-                    last++;
-                }
-                if (_lastCookies != null && _lastCookies.length==last)
-                {
-                    _cookiesExtracted = true;
-                    return _cookies;
-                }
-            }
-
-            // Get ready to parse cookies (Expensive!!!)
-            Object cookies = null;
-            Object lastCookies = null;
-
-            int version = 0;
-
-            // For each cookie header
-            Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
-            while (enm.hasMoreElements())
-            {
-                // Save a copy of the unparsed header as cache.
-                String hdr = (String)enm.nextElement();
-                lastCookies = LazyList.add(lastCookies, hdr);
-
-                // Parse the header
-                String name = null;
-                String value = null;
-
-                Cookie cookie = null;
-
-                byte state = STATE_NAME;
-                for (int i = 0, tokenstart = 0, length = hdr.length(); i < length; i++)
-                {
-                    char c = hdr.charAt(i);
-                    switch (c)
-                    {
-                        case ',':
-                        case ';':
-                            switch (state)
-                            {
-                                case STATE_DELIMITER:
-                                    state = STATE_NAME;
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_UNQUOTED_VALUE:
-                                    state = STATE_NAME;
-                                    // TODO remove this old style jetty cookie support (encoding)
-                                    value = URIUtil.decodePath(hdr.substring(tokenstart, i).trim());
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_NAME:
-                                    name = hdr.substring(tokenstart, i);
-                                    value = "";
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_VALUE:
-                                    state = STATE_NAME;
-                                    value = "";
-                                    tokenstart = i + 1;
-                                    break;
-                            }
-                            break;
-                        case '=':
-                            switch (state)
-                            {
-                                case STATE_NAME:
-                                    state = STATE_VALUE;
-                                    name = hdr.substring(tokenstart, i);
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_VALUE:
-                                    state = STATE_UNQUOTED_VALUE;
-                                    tokenstart = i;
-                                    break;
-                            }
-                            break;
-                        case '"':
-                            switch (state)
-                            {
-                                case STATE_VALUE:
-                                    state = STATE_QUOTED_VALUE;
-                                    tokenstart = i + 1;
-                                    break;
-                                case STATE_QUOTED_VALUE:
-                                    state = STATE_DELIMITER;
-                                    value = hdr.substring(tokenstart, i);
-                                    break;
-                            }
-                            break;
-                        case ' ':
-                        case '\t':
-                            break;
-                        default:
-                            switch (state)
-                            {
-                                case STATE_VALUE:
-                                    state = STATE_UNQUOTED_VALUE;
-                                    tokenstart = i;
-                                    break;
-                                case STATE_DELIMITER:
-                                    state = STATE_NAME;
-                                    tokenstart = i;
-                                    break;
-                            }
-                    }
-
-                    if (i + 1 == length)
-                    {
-                        switch (state)
-                        {
-                            case STATE_UNQUOTED_VALUE:
-                                // TODO remove this old style jetty cookie support (encoding)
-                                value = URIUtil.decodePath(hdr.substring(tokenstart).trim());
-                                break;
-                            case STATE_NAME:
-                                name = hdr.substring(tokenstart);
-                                value = "";
-                                break;
-                            case STATE_VALUE:
-                                value = "";
-                                break;
-                        }
-                    }
-
-                    if (name != null && value != null)
-                    {
-                        name = name.trim();
-
-                        try
-                        {
-                            if (name.startsWith("$"))
-                            {
-                                String lowercaseName = name.toLowerCase();
-                                if ("$path".equals(lowercaseName))
-                                {
-                                    cookie.setPath(value);
-                                }
-                                else if ("$domain".equals(lowercaseName))
-                                {
-                                    cookie.setDomain(value);
-                                }
-                                else if ("$version".equals(lowercaseName))
-                                {
-                                    version = Integer.parseInt(value);
-                                }
-                            }
-                            else
-                            {
-                                cookie = new Cookie(name, value);
-
-                                if (version > 0)
-                                {
-                                    cookie.setVersion(version);
-                                }
-
-                                cookies = LazyList.add(cookies, cookie);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Log.ignore(e);
-                        }
-
-                        name = null;
-                        value = null;
-                    }
-                }
-            }
-
-            int l = LazyList.size(cookies);
             _cookiesExtracted = true;
-            if (l>0)
-            {
-                if (_cookies == null || _cookies.length != l) _cookies = new Cookie[l];
-                for (int i = 0; i < l; i++)
-                    _cookies[i] = (Cookie) LazyList.get(cookies, i);
-
-                l = LazyList.size(lastCookies);
-                _lastCookies = new String[l];
-                for (int i = 0; i < l; i++)
-                    _lastCookies[i] = (String) LazyList.get(lastCookies, i);
-            }
-        }
-        catch (Exception e)
-        {
-            Log.warn(e);
-        }
-
-        if (_cookies==null || _cookies.length==0)
+            if (_cookies!=null)
+                _cookies.reset();
             return null;
-        return _cookies;
+        }
+
+        if (_cookies==null)
+            _cookies=new CookieCutter();
+
+        Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
+        while (enm.hasMoreElements())
+        {
+            String c = (String)enm.nextElement();
+            _cookies.addCookieField(c);
+        }
+        _cookiesExtracted=true;
+
+        return _cookies.getCookies();
     }
+
 
     /* ------------------------------------------------------------ */
     /* 
@@ -1487,7 +1289,9 @@ public class Request implements HttpServletRequest
      */
     public void setCookies(Cookie[] cookies)
     {
-        _cookies = cookies;
+        if (_cookies==null)
+            _cookies=new CookieCutter();
+        _cookies.setCookies(cookies);
     }
     
     /* ------------------------------------------------------------ */

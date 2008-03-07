@@ -18,8 +18,10 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -286,6 +288,114 @@ public class RequestTest extends TestCase
 
         
         
+        
+    }
+    
+    
+    public void testCookies() throws Exception
+    {
+        final ArrayList cookies = new ArrayList();
+
+        _handler._checker = new RequestTester()
+        {
+            public boolean check(HttpServletRequest request,HttpServletResponse response) throws IOException
+            {
+                javax.servlet.http.Cookie[] ca = request.getCookies();
+                if (ca!=null)
+                    cookies.addAll(Arrays.asList(ca));
+                response.getOutputStream().println("Hello World");
+                return true;
+            }  
+        };
+
+        String response;
+        _connector.reopen();
+
+        cookies.clear();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.1\n"+
+                    "Host: whatever\n"+
+                    "\n"
+                    );
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        assertEquals(0,cookies.size());
+        
+
+        cookies.clear();
+        response=_connector.getResponses(
+                    "GET / HTTP/1.1\n"+
+                    "Host: whatever\n"+
+                    "Cookie: name=value\n" +
+                    "\n"
+        );
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        assertEquals(1,cookies.size());
+        assertEquals("name",((Cookie)cookies.get(0)).getName());
+        assertEquals("value",((Cookie)cookies.get(0)).getValue());
+
+        cookies.clear();
+        response=_connector.getResponses(
+                "GET / HTTP/1.1\n"+
+                "Host: whatever\n"+
+                "Cookie: name=value; other=\"quoted=;value\"\n" +
+                "\n"
+        );
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        assertEquals(2,cookies.size());
+        assertEquals("name",((Cookie)cookies.get(0)).getName());
+        assertEquals("value",((Cookie)cookies.get(0)).getValue());
+        assertEquals("other",((Cookie)cookies.get(1)).getName());
+        assertEquals("quoted=;value",((Cookie)cookies.get(1)).getValue());
+
+
+        cookies.clear();
+        response=_connector.getResponses(
+                "GET /other HTTP/1.1\n"+
+                "Host: whatever\n"+
+                "Other: header\n"+
+                "Cookie: name=value; other=\"quoted=;value\"\n" +
+                "\n"+
+                "GET /other HTTP/1.1\n"+
+                "Host: whatever\n"+
+                "Other: header\n"+
+                "Cookie: name=value; other=\"quoted=;value\"\n" +
+                "\n"
+        );
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        assertEquals(4,cookies.size());
+        assertEquals("name",((Cookie)cookies.get(0)).getName());
+        assertEquals("value",((Cookie)cookies.get(0)).getValue());
+        assertEquals("other",((Cookie)cookies.get(1)).getName());
+        assertEquals("quoted=;value",((Cookie)cookies.get(1)).getValue());
+
+        assertTrue((Cookie)cookies.get(0)==(Cookie)cookies.get(2));
+        assertTrue((Cookie)cookies.get(1)==(Cookie)cookies.get(3));
+
+
+        cookies.clear();
+        response=_connector.getResponses(
+                "GET /other HTTP/1.1\n"+
+                "Host: whatever\n"+
+                "Other: header\n"+
+                "Cookie: name=value; other=\"quoted=;value\"\n" +
+                "\n"+
+                "GET /other HTTP/1.1\n"+
+                "Host: whatever\n"+
+                "Other: header\n"+
+                "Cookie: name=value; other=\"othervalue\"\n" +
+                "\n"
+        );
+        assertTrue(response.startsWith("HTTP/1.1 200 OK"));
+        assertEquals(4,cookies.size());
+        assertEquals("name",((Cookie)cookies.get(0)).getName());
+        assertEquals("value",((Cookie)cookies.get(0)).getValue());
+        assertEquals("other",((Cookie)cookies.get(1)).getName());
+        assertEquals("quoted=;value",((Cookie)cookies.get(1)).getValue());
+
+        assertTrue((Cookie)cookies.get(0)!=(Cookie)cookies.get(2));
+        assertTrue((Cookie)cookies.get(1)!=(Cookie)cookies.get(3));
+
+
         
     }
     
