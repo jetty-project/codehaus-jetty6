@@ -1,6 +1,8 @@
 jetty-6.1-SNAPSHOT
  + Make javax.servlet.jsp optional osgi import for jetty module
+ + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
  + JETTY-475 AJP connector in RPMs
+ + JETTY-482 update to JETTY-399
  + JETTY-519 HttpClient does not recycle closed connection.
  + JETTY-522 Add build profile for macos for setuid
  + JETTY-525 Fixed decoding for long strings
