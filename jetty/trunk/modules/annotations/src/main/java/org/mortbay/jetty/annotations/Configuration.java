@@ -29,6 +29,11 @@ import org.mortbay.util.LazyList;
  */
 public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
 {
+    
+    public Configuration () throws ClassNotFoundException
+    {
+        super();
+    }
 
     /** 
      * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#parseAnnotations()
