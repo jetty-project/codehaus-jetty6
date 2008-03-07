@@ -28,7 +28,7 @@ import org.mortbay.management.ObjectMBean;
  * Provides special object name for itself so that 
  * we can integrate with jboss jsr77 management system.
  */
-public class JBossWebAppContextMBean extends ObjectMBean
+public class JBossWebAppContextMBean extends WebAppContextMBean
 {
     private JBossWebAppContext _webAppContext;
     
