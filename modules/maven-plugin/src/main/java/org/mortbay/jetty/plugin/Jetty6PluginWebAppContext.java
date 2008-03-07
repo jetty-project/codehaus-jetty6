@@ -37,14 +37,20 @@ public class Jetty6PluginWebAppContext extends WebAppContext
     private File webXmlFile;
     private WebInfConfiguration webInfConfig = new WebInfConfiguration();
     private EnvConfiguration envConfig =  new EnvConfiguration();
-    private Jetty6MavenConfiguration mvnConfig = new Jetty6MavenConfiguration();
-    private JettyWebXmlConfiguration jettyWebConfig = new JettyWebXmlConfiguration();
-    private TagLibConfiguration tagConfig = new TagLibConfiguration();
-    private Configuration[] configs = new Configuration[]{webInfConfig,envConfig, mvnConfig, jettyWebConfig, tagConfig};
+    private Jetty6MavenConfiguration mvnConfig;
+    private JettyWebXmlConfiguration jettyWebConfig;
+    private TagLibConfiguration tagConfig;
+    private Configuration[] configs;
     
     public Jetty6PluginWebAppContext ()
+    throws Exception
     {
         super();
+       
+        mvnConfig = new Jetty6MavenConfiguration();
+        jettyWebConfig = new JettyWebXmlConfiguration();
+        tagConfig =  new TagLibConfiguration();
+        configs = new Configuration[]{webInfConfig,envConfig, mvnConfig, jettyWebConfig, tagConfig};
         setConfigurations(configs);
     }
     
@@ -78,29 +84,6 @@ public class Jetty6PluginWebAppContext extends WebAppContext
         {
             throw new RuntimeException(e);
         }
-        /*
-        Configuration[] configurations = getConfigurations();
-        for (int i=0;i<configurations.length; i++)
-        {
-            if (configurations[i] instanceof Jetty6MavenConfiguration)
-            {
-                ((Jetty6MavenConfiguration)configurations[i]).setClassPathConfiguration (classpathFiles);
-                ((Jetty6MavenConfiguration)configurations[i]).setWebXml (webXmlFile);              
-            }
-            else if (configurations[i] instanceof EnvConfiguration)
-            {
-                try
-                {
-                    if (this.jettyEnvXmlFile != null)
-                        ((EnvConfiguration)configurations[i]).setJettyEnvXml(this.jettyEnvXmlFile.toURL());
-                }
-                catch (Exception e)
-                {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        */
     }
 
 

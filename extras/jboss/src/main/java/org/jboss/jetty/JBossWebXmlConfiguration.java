@@ -32,7 +32,7 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
 {
     protected static Logger __log=Logger.getLogger(JBossWebAppContext.class); 
 
-    public JBossWebXmlConfiguration()
+    public JBossWebXmlConfiguration() throws ClassNotFoundException
     {
         super();
     }

@@ -39,7 +39,7 @@ public class Jetty6MavenConfiguration extends Configuration
     private List classPathFiles;
     private File webXmlFile;
    
-    public Jetty6MavenConfiguration()
+    public Jetty6MavenConfiguration() throws ClassNotFoundException
     {
         super();
     }
