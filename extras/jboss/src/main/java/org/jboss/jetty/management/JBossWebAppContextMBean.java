@@ -19,6 +19,7 @@ import javax.management.ObjectName;
 
 import org.jboss.jetty.JBossWebAppContext;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.webapp.management.WebAppContextMBean;
 import org.mortbay.log.Log;
 import org.mortbay.management.ObjectMBean;
 
@@ -28,7 +29,7 @@ import org.mortbay.management.ObjectMBean;
  * Provides special object name for itself so that 
  * we can integrate with jboss jsr77 management system.
  */
-public class JBossWebAppContextMBean extends ObjectMBean
+public class JBossWebAppContextMBean extends WebAppContextMBean
 {
     private JBossWebAppContext _webAppContext;
     
