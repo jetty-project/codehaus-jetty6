@@ -1,0 +1,630 @@
+Index: extras/jboss/pom.xml
+===================================================================
+--- extras/jboss/pom.xml	(revision 2419)
++++ extras/jboss/pom.xml	(working copy)
+@@ -154,9 +154,6 @@
+   <profiles>
+     <profile>
+       <id>jdk1.4</id>
+-      <activation>
+-        <jdk>1.4</jdk>
+-      </activation>
+       <build>
+         <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.0</finalName>
+       </build>
+@@ -203,10 +200,6 @@
+     </profile>
+     <profile>
+       <id>jdk1.5</id>
+-      <!-- activated on JDK 5 and above -->
+-      <activation>
+-        <jdk>!1.4</jdk>
+-      </activation>
+       <build>
+         <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.1</finalName>
+       </build>
+Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java
+===================================================================
+--- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2419)
++++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(working copy)
+@@ -48,4 +48,27 @@
+ 
+     /** The request is about to come into scope of the web application. */
+     public void requestInitialized ( ServletRequestEvent sre );
++    
++    /**
++     * A request has been suspended.
++     * Called by the thread that dispatched the servlet when it
++     * has returned to the container.
++     * @since 3.0
++     */
++    void requestSuspended(ServletRequestEvent rre);
++
++    /**
++     * A request has been resumed.
++     * Called by the thread that will dispatch to the servlet 
++     * immediately before dispatch. 
++     * @since 3.0
++     */
++    void requestResumed(ServletRequestEvent rre);
++
++    /**
++     * A request has been completed.
++     * Called from a call to {@ServletRequest#complete()} 
++     * @since 3.0
++     */
++    void requestCompleted(ServletRequestEvent rre);
+ }
+Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java
+===================================================================
+--- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(revision 2419)
++++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(working copy)
+@@ -605,6 +605,142 @@
+      * @since 2.4
+      */
+     public int getLocalPort();
++    
++    
++    
++    /**
++     * Suspend the processing of the request and associated {@link ServletResponse}.
++     * 
++     * <p>After this method has been called, the lifecycle of the request 
++     * will be extended beyond the return to the container from the 
++     * {@link Servlet#service(ServletRequest, ServletResponse)}  method and 
++     * {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)} calls. If a 
++     * request is suspended, then the container will not commit the associated response 
++     * when the call to the filter chain and/or servlet service method returns to the 
++     * container. Any exceptions thrown to the container by a filter chain and/or 
++     * servlet for a suspended requests are silently ignored.</p>
++     *
++     * <p>When the thread calling the filter chain and/or servlet has returned to the 
++     * container with a suspended request, the thread is freed for other tasks and 
++     * the request is held pending either: <ul>
++     * <li>a call to {@link ServletRequest#resume()}.</li>
++     * <li>a call to {@link ServletRequest#complete()}.</li>
++     * <li>the passed or default timeout expires.</li>
++     * <li>there is IO activity on the connection that received the request, such
++     * as the close of the connection or the receipt of a pipelined request.
++     * </ul>
++     * <p>After any of the events listed above, the suspended request will be 
++     * redispatched via the filter and servlet processing.
++     * </p>
++     * 
++     * <p>If a request is already suspended, any subsequent calls to suspend will set
++     * the timeout to the minimum of the previous timeout and the newly passed 
++     * timeout</p>
++     * 
++     * <p>Suspend may only be called by a thread that is within the service calling 
++     * stack of {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)}
++     * and/or {@link Servlet#service(ServletRequest, ServletResponse)}. A request that has    
++     * been dispatched for error handling may not be suspended.
++     * </p>
++     * 
++     * @see {@link #resume()}
++     * @see {@link #complete()}
++     * @since 3.0
++     * 
++     * @param timeoutMs The time in milliseconds to wait before retrying this request.
++     * 
++     * @exception IllegalStateException If the calling thread is not within the calling 
++     * stack of  {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)}
++     * and/or {@link Servlet#service(ServletRequest, ServletResponse)} or if the request 
++     * has been dispatched for error handling.
++     */
++     void suspend(long timeoutMs);
+ 
++   /**
++     * Suspend the processing of the request and associated {@link ServletResponse}.
++     * 
++     * <p>Acts as a call to {@link #suspend(long)} but with a container supplied 
++     * timeout. The timeout the container will use may be obtained or set as a Long
++     * context attribute with the name "javax.servlet.suspendTimeoutMs"</p>
++     * @see suspend(long)
++     */
++     void suspend();
++
++    /**
++     * Resume a suspended request.
++     * 
++     * <p>This method can be called by any thread that has been passed a reference to 
++     * a suspended request. When called the request is redispatched to the normal filter 
++     * chain and servlet processing.</p>
++     * 
++     * <p>If resume is called before a suspended request is returned to the container 
++     * (ie the thread that called {@link #suspend(long)} is still within the filter
++     * chain and/or servlet service method), then the resume does not take effect until
++     * the call to the filter chain and/or servlet returns to the container. In this 
++     * case both {@link #isSuspended()} and {@link isResumed()} return true.</p>
++     * 
++     * <p>Multiple calls to resume are ignored</p>
++     * 
++     * @see {@link #suspend()}
++     * @since 3.0
++     * @exception IllegalStateException if the request is not suspended.
++     * 
++     */
++     void resume();
++
++    /**
++     * Complete a suspended request.
++     * 
++     * <p>This method can be called by any thread that has been passed a reference to 
++     * a suspended request. When a request is completed, the associated response object 
++     * commited and flushed. The request is not redispatched.</p>
++     * 
++     * <p>If complete is called before a suspended request is returned to the container 
++     * (ie the thread that called {@link #suspend(long)} is still within the filter
++     * chain and/or servlet service method), then the complete does not take effect until
++     * the call to the filter chain and/or servlet returns to the container. In this 
++     * case both {@link #isSuspended()} and {@link isResumed()} return true.</p>
++     * 
++     * <p>Once complete has been called and any thread calling the filter chain and/or 
++     * servlet chain has returned to the container, the request lifecycle is complete.
++     * The container is able to recycle request objects, so it is not valid hold a request
++     * reference after the end of the life cycle or to call any request methods.
++     * 
++     * @see {@link #suspend()}
++     * @since 3.0
++     * @exception IllegalStateException if the request is not suspended.
++     * 
++     */
++     void complete();
++
++    /**
++     * @return true after {@link #suspend(long)} has been called and before the request 
++     * has been resumed, completed, timed out or reactived due to IO activity.
++     * @since 3.0
++     */
++     boolean isSuspended();
++
++    /**
++     * @return true if the request has been redispatched by a call to {@link #resume()}.   Returns false after any subsequent call to suspend
++     * @since 3.0
++     */
++     boolean isResumed();
++
++    /**
++     * @return true after a request has been redispatched as the result of a timeout. 
++     * Returns false after any subsequent call to suspend.
++     * @since 3.0
++     */
++     boolean isTimeout();
++
++    /**
++     * @return true while the request is within the initial dispatch to the filter chain
++     * and/or servlet. Will return false once the calling thread has returned to the
++     * container after suspend has been called and during any subsequent redispatch.
++     * @since 3.0
++     */
++     boolean isInitial();
++
++
+ }
+ 
+Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java
+===================================================================
+--- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(revision 2419)
++++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(working copy)
+@@ -407,6 +407,84 @@
+     public int getLocalPort(){
+         return this.request.getLocalPort();
+     }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @see javax.servlet.ServletRequest#complete()
++     */
++    public void complete()
++    {
++        request.complete();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#isInitial()
++     */
++    public boolean isInitial()
++    {
++        return request.isInitial();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#isResumed()
++     */
++    public boolean isResumed()
++    {
++        return request.isResumed();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#isSuspended()
++     */
++    public boolean isSuspended()
++    {
++        return request.isSuspended();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#isTimeout()
++     */
++    public boolean isTimeout()
++    {
++        return request.isTimeout();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @see javax.servlet.ServletRequest#resume()
++     */
++    public void resume()
++    {
++        request.resume();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @see javax.servlet.ServletRequest#suspend()
++     */
++    public void suspend()
++    {
++        request.suspend();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @param timeoutMs
++     * @see javax.servlet.ServletRequest#suspend(long)
++     */
++    public void suspend(long timeoutMs)
++    {
++        request.suspend(timeoutMs);
++    }
+     
++    
+ }
+ 
+Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java	(revision 2419)
++++ modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java	(working copy)
+@@ -60,7 +60,6 @@
+     private boolean _handling;
+     private boolean _destroy;
+     
+-    
+     protected Connector _connector;
+     protected EndPoint _endp;
+     protected Server _server;
+Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(revision 2419)
++++ modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(working copy)
+@@ -377,7 +377,6 @@
+         // other
+         protected RetryRequest _retry;
+         protected long _timeout;
+-        protected Object _mutex;
+         
+         protected final Timeout.Task _timeoutTask;
+         
+@@ -401,12 +400,11 @@
+         {
+             super(channel,selectSet,key);
+ 
+-            _mutex=this;
+             _state=__UNDISPATCHED;
+                 
+             HttpConnection connection = HttpConnection.getCurrentConnection();
+             
+-            _timeoutTask= new Timeout.Task(_mutex)
++            _timeoutTask= new Timeout.Task(this)
+             {
+                 public void expire()
+                 {
+@@ -426,12 +424,7 @@
+         
+         public void setMutex(Object mutex)
+         {
+-            synchronized(_mutex)
+-            {
+-                // TODO - is this a good idea?
+-                // _mutex=mutex;
+-                // _timeoutTask.setMutex(mutex);
+-            }
++            // ignored
+         }
+         
+         public Object getObject()
+@@ -446,7 +439,7 @@
+ 
+         public boolean isNew()
+         {
+-            synchronized(_mutex)
++            synchronized(this)
+             {
+                 return _new;
+             }
+@@ -454,7 +447,7 @@
+ 
+         public boolean isPending()
+         {
+-            synchronized(_mutex)
++            synchronized(this)
+             {
+                 return _state>=__SUSPENDING;
+             }
+@@ -462,7 +455,7 @@
+ 
+         public boolean isResumed()
+         {
+-            synchronized(_mutex)
++            synchronized(this)
+             {
+                 return _resumed;
+             }
+@@ -470,7 +463,7 @@
+         
+         public boolean isExpired()
+         {
+-            synchronized(_mutex)
++            synchronized(this)
+             {
+                 return _timeoutTask.isExpired();
+             }
+@@ -478,7 +471,7 @@
+ 
+         public void reset()
+         {
+-            synchronized (_mutex)
++            synchronized (this)
+             {
+                 // last("reset");
+                 _state=_dispatched?__DISPATCHED:__UNDISPATCHED;
+@@ -494,7 +487,7 @@
+         
+         public boolean suspend(long timeout)
+         {
+-            synchronized (_mutex)
++            synchronized (this)
+             {
+                 switch(_state)
+                 {
+@@ -528,7 +521,7 @@
+         public void resume()
+         {
+ 
+-            synchronized (_mutex)
++            synchronized (this)
+             {
+                 switch(_state)
+                 {
+@@ -562,7 +555,7 @@
+         private void expire()
+         {
+             // just like resume, except don't set _resumed=true;
+-            synchronized (_mutex)
++            synchronized (this)
+             {
+                 switch(_state)
+                 {
+@@ -593,7 +586,7 @@
+            
+         protected boolean dispatch()
+         {
+-            synchronized (_mutex)
++            synchronized (this)
+             {
+                 boolean dispatched=super.dispatch();
+                 
+@@ -628,7 +621,7 @@
+         
+         public boolean undispatch()
+         {
+-            synchronized (_mutex)
++            synchronized (this)
+             {
+                 switch(_state)
+                 {
+@@ -671,7 +664,6 @@
+                         throw new IllegalStateException(""+_state);
+                 }
+             }
+-            
+         }
+ 
+         public void setObject(Object object)
+@@ -681,9 +673,9 @@
+         
+         public String toString()
+         {
+-            synchronized (_mutex)
++            synchronized (this)
+             {
+-                return "RetryContinuation@"+hashCode()+
++                return super.toString()+
+                 ((_state==0)?" UNDISPATCHED":
+                     (_state==1)?" DISPATCHED":
+                         (_state==2)?" SUSPENDING":
+Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2419)
++++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
+@@ -1836,5 +1836,95 @@
+     {
+         return _roleMap;
+     }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#complete()
++     */
++    public void complete()
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#isInitial()
++     */
++    public boolean isInitial()
++    {
++        // TODO Auto-generated method stub
++        return false;
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#isResumed()
++     */
++    public boolean isResumed()
++    {
++        // TODO Auto-generated method stub
++        return false;
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#isSuspended()
++     */
++    public boolean isSuspended()
++    {
++        // TODO Auto-generated method stub
++        return false;
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#isTimeout()
++     */
++    public boolean isTimeout()
++    {
++        // TODO Auto-generated method stub
++        return false;
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#resume()
++     */
++    public void resume()
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#suspend()
++     */
++    public void suspend()
++    {
++        Long timeout = 30000L;
++        if (_context!=null)
++        {
++            Long t=(Long)_context.getAttribute("javax.servlet.suspendTimeoutMs");
++            if (t!=null)
++                timeout=t.longValue();
++        }
++        suspend(timeout);
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#suspend(long)
++     */
++    public void suspend(long timeoutMs)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++    
++    
++    
++    
+ }
+ 
+Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(revision 2419)
++++ modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(working copy)
+@@ -77,7 +77,7 @@
+             // If there are threads dispatched reading and writing
+             if (_readBlocked || _writeBlocked)
+             {
+-                assert _dispatched;
++                // assert _dispatched;
+                 if (_readBlocked && _key.isReadable())
+                     _readBlocked=false;
+                 if (_writeBlocked && _key.isWritable())
+@@ -122,7 +122,6 @@
+     {
+         synchronized(this)
+         {
+-            // Otherwise if we are still dispatched
+             if (_dispatched)
+                 throw new IllegalStateException("ALREADY DISPATCHED!!!");
+ 
+Index: examples/test-webapp/src/main/java/com/acme/TagListener.java
+===================================================================
+--- examples/test-webapp/src/main/java/com/acme/TagListener.java	(revision 2419)
++++ examples/test-webapp/src/main/java/com/acme/TagListener.java	(working copy)
+@@ -116,4 +116,22 @@
+          //System.err.println("tagListener: sessionDestroyed "+se);
+     }
+ 
++    public void requestCompleted(ServletRequestEvent rre)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++    public void requestResumed(ServletRequestEvent rre)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++    public void requestSuspended(ServletRequestEvent rre)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
+ }
+Index: examples/test-webapp/src/main/java/com/acme/TestListener.java
+===================================================================
+--- examples/test-webapp/src/main/java/com/acme/TestListener.java	(revision 2419)
++++ examples/test-webapp/src/main/java/com/acme/TestListener.java	(working copy)
+@@ -116,4 +116,22 @@
+         // System.err.println("sessionDestroyed "+se);
+     }
+ 
++    public void requestCompleted(ServletRequestEvent rre)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++    public void requestResumed(ServletRequestEvent rre)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++    public void requestSuspended(ServletRequestEvent rre)
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
+ }
