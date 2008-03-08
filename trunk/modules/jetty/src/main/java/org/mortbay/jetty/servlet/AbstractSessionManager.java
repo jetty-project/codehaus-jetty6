@@ -778,24 +778,30 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------ */
-        public synchronized Object getAttribute(String name)
+        public Object getAttribute(String name)
         {
-            if (_invalid)
-                throw new IllegalStateException();
+            synchronized (this)
+            {
+                if (_invalid)
+                    throw new IllegalStateException();
 
-            if (null == _values)
-                return null;
-            
-            return _values.get(name);
+                if (null == _values)
+                    return null;
+
+                return _values.get(name);
+            }
         }
 
         /* ------------------------------------------------------------ */
-        public synchronized Enumeration getAttributeNames()
+        public Enumeration getAttributeNames()
         {
-            if (_invalid)
-                throw new IllegalStateException();
-            List names=_values==null?Collections.EMPTY_LIST:new ArrayList(_values.keySet());
-            return Collections.enumeration(names);
+            synchronized (this)
+            {
+                if (_invalid)
+                    throw new IllegalStateException();
+                List names=_values==null?Collections.EMPTY_LIST:new ArrayList(_values.keySet());
+                return Collections.enumeration(names);
+            }
         }
         
         /* ------------------------------------------------------------- */
@@ -881,14 +887,17 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
          * @deprecated As of Version 2.2, this method is replaced by
          *             {@link #getAttributeNames}
          */
-        public synchronized String[] getValueNames() throws IllegalStateException
+        public String[] getValueNames() throws IllegalStateException
         {
-            if (_invalid)
-                throw new IllegalStateException();
-            if (_values==null)
-                return new String[0];
-            String[] a=new String[_values.size()];
-            return (String[])_values.keySet().toArray(a);
+            synchronized(this)
+            {
+                if (_invalid)
+                    throw new IllegalStateException();
+                if (_values==null)
+                    return new String[0];
+                String[] a=new String[_values.size()];
+                return (String[])_values.keySet().toArray(a);
+            }
         }
 
         /* ------------------------------------------------------------ */
@@ -1010,23 +1019,26 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------ */
-        public synchronized void removeAttribute(String name)
+        public void removeAttribute(String name)
         {
-            if (_invalid)
-                throw new IllegalStateException();
-            if (_values==null)
-                return;
-
-            Object old=_values.remove(name);
-            if (old!=null)
+            synchronized(this)
             {
-                unbindValue(name,old);
-                if (_sessionAttributeListeners!=null)
-                {
-                    HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,name,old);
+                if (_invalid)
+                    throw new IllegalStateException();
+                if (_values==null)
+                    return;
 
-                    for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
-                        ((HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i)).attributeRemoved(event);
+                Object old=_values.remove(name);
+                if (old!=null)
+                {
+                    unbindValue(name,old);
+                    if (_sessionAttributeListeners!=null)
+                    {
+                        HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,name,old);
+
+                        for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
+                            ((HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i)).attributeRemoved(event);
+                    }
                 }
             }
         }
@@ -1042,39 +1054,42 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------ */
-        public synchronized void setAttribute(String name, Object value)
+        public void setAttribute(String name, Object value)
         {
-            if (value==null)
+            synchronized(this)
             {
-                removeAttribute(name);
-                return;
-            }
-
-            if (_invalid)
-                throw new IllegalStateException();
-            if (_values==null)
-                _values=newAttributeMap();
-            Object oldValue=_values.put(name,value);
-
-            if (oldValue==null || !value.equals(oldValue)) 
-            {
-                unbindValue(name,oldValue);
-                bindValue(name,value);
-
-                if (_sessionAttributeListeners!=null)
+                if (value==null)
                 {
-                    HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,name,oldValue==null?value:oldValue);
+                    removeAttribute(name);
+                    return;
+                }
 
-                    for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
+                if (_invalid)
+                    throw new IllegalStateException();
+                if (_values==null)
+                    _values=newAttributeMap();
+                Object oldValue=_values.put(name,value);
+
+                if (oldValue==null || !value.equals(oldValue)) 
+                {
+                    unbindValue(name,oldValue);
+                    bindValue(name,value);
+
+                    if (_sessionAttributeListeners!=null)
                     {
-                        HttpSessionAttributeListener l=(HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i);
+                        HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,name,oldValue==null?value:oldValue);
 
-                        if (oldValue==null)
-                            l.attributeAdded(event);
-                        else if (value==null)
-                            l.attributeRemoved(event);
-                        else
-                            l.attributeReplaced(event);
+                        for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
+                        {
+                            HttpSessionAttributeListener l=(HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i);
+
+                            if (oldValue==null)
+                                l.attributeAdded(event);
+                            else if (value==null)
+                                l.attributeRemoved(event);
+                            else
+                                l.attributeReplaced(event);
+                        }
                     }
                 }
             }
@@ -1130,31 +1145,37 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
-        protected synchronized void willPassivate() 
+        protected void willPassivate() 
         {
-            HttpSessionEvent event = new HttpSessionEvent(this);
-            for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
+            synchronized(this)
             {
-                Object value = iter.next();
-                if (value instanceof HttpSessionActivationListener) 
+                HttpSessionEvent event = new HttpSessionEvent(this);
+                for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
                 {
-                    HttpSessionActivationListener listener = (HttpSessionActivationListener) value;
-                    listener.sessionWillPassivate(event);
+                    Object value = iter.next();
+                    if (value instanceof HttpSessionActivationListener) 
+                    {
+                        HttpSessionActivationListener listener = (HttpSessionActivationListener) value;
+                        listener.sessionWillPassivate(event);
+                    }
                 }
             }
         }
 
         /* ------------------------------------------------------------- */
-        protected synchronized void didActivate() 
+        protected void didActivate() 
         {
-            HttpSessionEvent event = new HttpSessionEvent(this);
-            for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
+            synchronized(this)
             {
-                Object value = iter.next();
-                if (value instanceof HttpSessionActivationListener) 
+                HttpSessionEvent event = new HttpSessionEvent(this);
+                for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
                 {
-                    HttpSessionActivationListener listener = (HttpSessionActivationListener) value;
-                    listener.sessionDidActivate(event);
+                    Object value = iter.next();
+                    if (value instanceof HttpSessionActivationListener) 
+                    {
+                        HttpSessionActivationListener listener = (HttpSessionActivationListener) value;
+                        listener.sessionDidActivate(event);
+                    }
                 }
             }
         }
