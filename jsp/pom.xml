@@ -1,0 +1,17 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <artifactId>project</artifactId>
+    <groupId>org.mortbay.jetty</groupId>
+    <version>6.2-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty.jsp</groupId>
+  <artifactId>jetty-jsp-parent</artifactId>
+  <name>Jetty JSP Parent</name>
+  <modules>
+    <module>jsp-api-2.0</module>
+    <module>jsp-2.0</module>
+    <module>jsp-api-2.1</module>
+    <module>jsp-2.1</module>
+  </modules>
+</project>
