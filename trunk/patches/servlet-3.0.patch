@@ -1,31 +1,6 @@
-Index: extras/jboss/pom.xml
-===================================================================
---- extras/jboss/pom.xml	(revision 2419)
-+++ extras/jboss/pom.xml	(working copy)
-@@ -154,9 +154,6 @@
-   <profiles>
-     <profile>
-       <id>jdk1.4</id>
--      <activation>
--        <jdk>1.4</jdk>
--      </activation>
-       <build>
-         <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.0</finalName>
-       </build>
-@@ -203,10 +200,6 @@
-     </profile>
-     <profile>
-       <id>jdk1.5</id>
--      <!-- activated on JDK 5 and above -->
--      <activation>
--        <jdk>!1.4</jdk>
--      </activation>
-       <build>
-         <finalName>jetty-${version}-jboss-${jboss.version}-jsp-2.1</finalName>
-       </build>
 Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java
 ===================================================================
---- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2419)
+--- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2442)
 +++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(working copy)
 @@ -48,4 +48,27 @@
  
@@ -57,7 +32,7 @@ Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListene
  }
 Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java
 ===================================================================
---- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(revision 2419)
+--- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(revision 2442)
 +++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(working copy)
 @@ -605,6 +605,142 @@
       * @since 2.4
@@ -204,7 +179,7 @@ Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java
  
 Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java
 ===================================================================
---- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(revision 2419)
+--- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(revision 2442)
 +++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(working copy)
 @@ -407,6 +407,84 @@
      public int getLocalPort(){
@@ -291,186 +266,113 @@ Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper
 +    
  }
  
-Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
+Index: modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java	(revision 2419)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java	(working copy)
-@@ -60,7 +60,6 @@
-     private boolean _handling;
-     private boolean _destroy;
-     
--    
-     protected Connector _connector;
-     protected EndPoint _endp;
-     protected Server _server;
-Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java
+--- modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(revision 2442)
++++ modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(working copy)
+@@ -9,6 +9,7 @@
+ import org.mortbay.io.nio.SelectChannelEndPoint;
+ import org.mortbay.io.nio.SelectorManager.SelectSet;
+ import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
+ 
+ /**
+  * HttpServer Tester.
+@@ -25,7 +26,7 @@
+              */
+             protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
+             {
+-                return new SuspendableEndPoint(channel,selectSet,key)
++                return new SuspendableSelectChannelEndPoint(channel,selectSet,key)
+                 {
+                     int write;
+                     int read;
+Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(revision 2419)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(working copy)
-@@ -377,7 +377,6 @@
-         // other
-         protected RetryRequest _retry;
-         protected long _timeout;
--        protected Object _mutex;
-         
-         protected final Timeout.Task _timeoutTask;
-         
-@@ -401,12 +400,11 @@
-         {
-             super(channel,selectSet,key);
- 
--            _mutex=this;
-             _state=__UNDISPATCHED;
-                 
-             HttpConnection connection = HttpConnection.getCurrentConnection();
-             
--            _timeoutTask= new Timeout.Task(_mutex)
-+            _timeoutTask= new Timeout.Task(this)
-             {
-                 public void expire()
-                 {
-@@ -426,12 +424,7 @@
-         
-         public void setMutex(Object mutex)
-         {
--            synchronized(_mutex)
--            {
--                // TODO - is this a good idea?
--                // _mutex=mutex;
--                // _timeoutTask.setMutex(mutex);
--            }
-+            // ignored
-         }
-         
-         public Object getObject()
-@@ -446,7 +439,7 @@
- 
-         public boolean isNew()
-         {
--            synchronized(_mutex)
-+            synchronized(this)
-             {
-                 return _new;
-             }
-@@ -454,7 +447,7 @@
- 
-         public boolean isPending()
-         {
--            synchronized(_mutex)
-+            synchronized(this)
-             {
-                 return _state>=__SUSPENDING;
-             }
-@@ -462,7 +455,7 @@
- 
-         public boolean isResumed()
-         {
--            synchronized(_mutex)
-+            synchronized(this)
-             {
-                 return _resumed;
-             }
-@@ -470,7 +463,7 @@
-         
-         public boolean isExpired()
-         {
--            synchronized(_mutex)
-+            synchronized(this)
-             {
-                 return _timeoutTask.isExpired();
-             }
-@@ -478,7 +471,7 @@
- 
-         public void reset()
-         {
--            synchronized (_mutex)
-+            synchronized (this)
-             {
-                 // last("reset");
-                 _state=_dispatched?__DISPATCHED:__UNDISPATCHED;
-@@ -494,7 +487,7 @@
-         
-         public boolean suspend(long timeout)
-         {
--            synchronized (_mutex)
-+            synchronized (this)
-             {
-                 switch(_state)
-                 {
-@@ -528,7 +521,7 @@
-         public void resume()
-         {
- 
--            synchronized (_mutex)
-+            synchronized (this)
-             {
-                 switch(_state)
-                 {
-@@ -562,7 +555,7 @@
-         private void expire()
-         {
-             // just like resume, except don't set _resumed=true;
--            synchronized (_mutex)
-+            synchronized (this)
-             {
-                 switch(_state)
-                 {
-@@ -593,7 +586,7 @@
-            
-         protected boolean dispatch()
-         {
--            synchronized (_mutex)
-+            synchronized (this)
-             {
-                 boolean dispatched=super.dispatch();
-                 
-@@ -628,7 +621,7 @@
-         
-         public boolean undispatch()
-         {
--            synchronized (_mutex)
-+            synchronized (this)
-             {
-                 switch(_state)
-                 {
-@@ -671,7 +664,6 @@
-                         throw new IllegalStateException(""+_state);
-                 }
-             }
--            
-         }
- 
-         public void setObject(Object object)
-@@ -681,9 +673,9 @@
-         
-         public String toString()
-         {
--            synchronized (_mutex)
-+            synchronized (this)
-             {
--                return "RetryContinuation@"+hashCode()+
-+                return super.toString()+
-                 ((_state==0)?" UNDISPATCHED":
-                     (_state==1)?" DISPATCHED":
-                         (_state==2)?" SUSPENDING":
-Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
-===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2419)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
-@@ -1836,5 +1836,95 @@
-     {
-         return _roleMap;
-     }
+--- modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
++++ modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
+@@ -0,0 +1,435 @@
++package org.mortbay.jetty;
++
++import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
++import org.mortbay.thread.Timeout;
++
++public class Suspendable
++{
++    // STATES:
++    private static final int __UNDISPATCHED=0; // Idle request
++    private static final int __DISPATCHED=1;   // Request dispatched to filter/servlet
++    private static final int __SUSPENDING=2;   // Suspend called, but not yet returned to container
++    private static final int __RESUMING=3;     // resumed while suspending
++    private static final int __COMPLETING=4;   // resumed while suspending
++    private static final int __SUSPENDED=5;    // Suspended and parked
++    private static final int __UNSUSPENDING=6; // Needs to be dispatched
++    
++    // State table
++    //                     __DISPATCH    __UNDISPATCH       __SUSPEND      __RESUME   
++    // UNDISPATCHED */  {__DISPATCHED,      __Illegal,      __Illegal,      __Illegal  },    
++    // DISPATCHED */    {   __Illegal, __UNDISPATCHED,   __SUSPENDING,       __Ignore  },
++    // SUSPENDING */    {   __Illegal,    __SUSPENDED,      __Illegal,     __RESUMING  },
++    // RESUMING */      {   __Illegal, __UNSUSPENDING,      __Ignored,       __Ignore  },
++    // COMPLETING */    {   __Illegal, __UNDISPATCHED,      __Illegal,       __Illegal },
++    // SUSPENDED */     {__DISPATCHED,      __Illegal,      __Illegal, __UNSUSPENDING  },
++    // UNSUSPENDING */  {__DISPATCHED,      __Illegal,      __Illegal,       __Ignore  }
++    
++    // State diagram
++    //
++    //   +-->  UNDISPATCHED  <---------------> DISPATCHED
++    //   |                                       ^   |
++    //   |                                       |   |
++    //   | +-------------------------------------+   |
++    //   | |                                     |   |
++    //   | |       +-----------------------------+   |
++    //   | |       |                                 v
++    //   | |   SUSPENDED <-------- ------------ SUSPENDING
++    //   | |       |                              |    |
++    //   | |       |                              |    |
++    //   | |       v                              v    |
++    //   | +-- UNSUSPENDING <--------------- RESUMING  |
++    //   |                                             |
++    //   |                                             v
++    //   +----------------------------------------COMPLETING
++    
++    
++    protected HttpConnection _connection;
++    
++    protected int _state;
++    protected boolean _initial;
++    protected boolean _resumed;   // resume called (different to resumed state)
++    
++    protected long _timeoutMs;
++    protected final Timeout.Task _timeoutTask;
++    
 +
 +    /* ------------------------------------------------------------ */
-+    /* (non-Javadoc)
-+     * @see javax.servlet.ServletRequest#complete()
-+     */
-+    public void complete()
++    public Suspendable(HttpConnection connection)
 +    {
-+        // TODO Auto-generated method stub
-+        
++        _connection=connection;
++        _state=__UNDISPATCHED;
++        _initial=true;
++        _resumed=false;
++            
++        _timeoutTask= new Timeout.Task(this)
++        {
++            public void expire()
++            {
++                Suspendable.this.expire();
++            }
++        };
 +    }
++
++
++
++    /* ------------------------------------------------------------ */
++    public long getTimeout()
++    {
++        return _timeoutMs;
++    } 
++
++    
 +
 +    /* ------------------------------------------------------------ */
 +    /* (non-Javadoc)
@@ -478,49 +380,49 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 +     */
 +    public boolean isInitial()
 +    {
-+        // TODO Auto-generated method stub
-+        return false;
++        synchronized(this)
++        {
++            return _initial;
++        }
 +    }
-+
++       
 +    /* ------------------------------------------------------------ */
 +    /* (non-Javadoc)
 +     * @see javax.servlet.ServletRequest#isResumed()
 +     */
 +    public boolean isResumed()
 +    {
-+        // TODO Auto-generated method stub
-+        return false;
++        synchronized(this)
++        {
++            return _resumed;
++        }
 +    }
-+
++    
 +    /* ------------------------------------------------------------ */
 +    /* (non-Javadoc)
 +     * @see javax.servlet.ServletRequest#isSuspended()
 +     */
 +    public boolean isSuspended()
 +    {
-+        // TODO Auto-generated method stub
-+        return false;
++        synchronized(this)
++        {
++            return _state==__SUSPENDING || _state==__SUSPENDED;
++        }
 +    }
 +
++    
 +    /* ------------------------------------------------------------ */
 +    /* (non-Javadoc)
 +     * @see javax.servlet.ServletRequest#isTimeout()
 +     */
 +    public boolean isTimeout()
 +    {
-+        // TODO Auto-generated method stub
-+        return false;
++        synchronized(this)
++        {
++            return _timeoutTask.isExpired();
++        }
 +    }
-+
-+    /* ------------------------------------------------------------ */
-+    /* (non-Javadoc)
-+     * @see javax.servlet.ServletRequest#resume()
-+     */
-+    public void resume()
-+    {
-+        // TODO Auto-generated method stub
-+        
-+    }
++    
 +
 +    /* ------------------------------------------------------------ */
 +    /* (non-Javadoc)
@@ -528,14 +430,65 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 +     */
 +    public void suspend()
 +    {
-+        Long timeout = 30000L;
-+        if (_context!=null)
-+        {
-+            Long t=(Long)_context.getAttribute("javax.servlet.suspendTimeoutMs");
-+            if (t!=null)
-+                timeout=t.longValue();
-+        }
++        long timeout = 30000L;
 +        suspend(timeout);
++    }
++
++    /* ------------------------------------------------------------ */
++    public String toString()
++    {
++        synchronized (this)
++        {
++            return super.toString()+
++            ((_state==0)?" UNDISPATCHED":
++                (_state==1)?" DISPATCHED":
++                    (_state==2)?" SUSPENDING":
++                        (_state==3)?" SUSPENDED":
++                            (_state==4)?" RESUMING":
++                                    " ???")+
++            (_initial?",initial":"")+
++            (_resumed?",resumed":"")+
++            (isTimeout()?",timeout":"");
++        }
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#resume()
++     */
++    public void dispatch()
++    {
++        synchronized (this)
++        {
++            synchronized (this)
++            {
++                switch(_state)
++                {
++                    case __DISPATCHED:
++                        throw new IllegalStateException(this.toString());
++                        
++                    case __UNDISPATCHED:
++                        _initial=true;
++                        _state=__DISPATCHED;
++                        return;
++                        
++                    case __SUSPENDING:
++                    case __RESUMING:
++                    case __COMPLETING:
++                        throw new IllegalStateException(this.toString());
++                        
++                    case __SUSPENDED:
++                    case __UNSUSPENDING:
++                        _initial=false;
++                        cancelTimeout();
++                        _state=__DISPATCHED;
++                        return;
++                        
++                    default:
++                        throw new IllegalStateException(""+_state);
++                }
++            }
++        }
 +    }
 +
 +    /* ------------------------------------------------------------ */
@@ -544,18 +497,990 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 +     */
 +    public void suspend(long timeoutMs)
 +    {
-+        // TODO Auto-generated method stub
-+        
++        synchronized (this)
++        {
++            synchronized (this)
++            {
++                switch(_state)
++                {
++                    case __DISPATCHED:
++                        _state=__SUSPENDING;
++                        _timeoutMs = timeoutMs;
++                        return;
++                        
++                    case __UNDISPATCHED:
++                        throw new IllegalStateException(this.toString());
++                        
++                    case __SUSPENDING:
++                    case __RESUMING:
++                        if (timeoutMs<_timeoutMs)
++                            _timeoutMs = timeoutMs;
++                        return;
++
++                    case __COMPLETING:
++                    case __SUSPENDED:
++                    case __UNSUSPENDING:
++                        throw new IllegalStateException(this.toString());
++                        
++                    default:
++                        throw new IllegalStateException(""+_state);
++                }
++            }
++        }
++    }
++
++    /* ------------------------------------------------------------ */
++    public boolean undispatch()
++    {
++        synchronized (this)
++        {
++            synchronized (this)
++            {
++                switch(_state)
++                {
++                    case __DISPATCHED:
++                        _state=__UNDISPATCHED;
++                        return true;
++                        
++                    case __UNDISPATCHED:
++                        throw new IllegalStateException(this.toString());
++                        
++                    case __SUSPENDING:
++                        _state=__SUSPENDED;
++                        scheduleTimeout();
++                        return true;
++                        
++                    case __RESUMING:
++                        _state=__UNSUSPENDING;
++                        scheduleDispatch();
++                        return false; // DON'T do the undispatch
++
++                    case __COMPLETING:
++                        // TODO?
++       
++                        _state=__UNDISPATCHED;
++                        return true;
++                        
++                    case __SUSPENDED:
++                        throw new IllegalStateException(this.toString());
++                        
++                    case __UNSUSPENDING:
++                        throw new IllegalStateException(this.toString());
++                        
++                    default:
++                        throw new IllegalStateException(""+_state);
++                }
++            }
++        }
++    }
++
++    /* ------------------------------------------------------------ */
++    public void resume()
++    {
++        synchronized (this)
++        {
++            switch(_state)
++            {
++                case __DISPATCHED:
++                    _resumed=true;
++                    return;
++                    
++                case __UNDISPATCHED:
++                    throw new IllegalStateException(this.toString());
++                    
++                case __SUSPENDING:
++                    _resumed=true;
++                    _state=__RESUMING;
++                    return;
++                    
++                case __RESUMING:
++                    _resumed=true;
++                    _state=__RESUMING;
++                    return;
++                    
++                case __COMPLETING:
++                    throw new IllegalStateException(this.toString());
++                    
++                case __SUSPENDED:
++                    _resumed=true;
++                    _state=__UNSUSPENDING;
++                    scheduleDispatch();
++                    return;
++                    
++                case __UNSUSPENDING:
++                    _resumed=true;
++                    return;
++                    
++                default:
++                    throw new IllegalStateException(""+_state);
++            }
++        }
++    }
++
++
++    /* ------------------------------------------------------------ */
++    protected void expire()
++    {
++        // just like resume, except don't set _resumed=true;
++        synchronized (this)
++        {
++            switch(_state)
++            {
++                case __DISPATCHED:
++                    return;
++                    
++                case __UNDISPATCHED:
++                    throw new IllegalStateException(this.toString());
++                    
++                case __SUSPENDING:
++                    _state=__RESUMING;
++                    return;
++                    
++                case __RESUMING:
++                    _state=__RESUMING;
++                    return;
++                    
++                case __COMPLETING:
++                    throw new IllegalStateException(this.toString());
++                    
++                case __SUSPENDED:
++                    _state=__UNSUSPENDING;
++                    scheduleDispatch();
++                    
++                case __UNSUSPENDING:
++                    return;
++                    
++                default:
++                    throw new IllegalStateException(""+_state);
++            }
++            
++        }
 +    }
 +    
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#complete()
++     */
++    public void complete()
++    {
++        // just like resume, except don't set _resumed=true;
++        synchronized (this)
++        {
++            switch(_state)
++            {
++                case __DISPATCHED:
++                    throw new IllegalStateException(this.toString());
++                    
++                case __UNDISPATCHED:
++                    throw new IllegalStateException(this.toString());
++                    
++                case __SUSPENDING:
++                case __RESUMING:
++                    _state=__COMPLETING;
++                    break;
++
++                case __COMPLETING:
++                    return;
++                    
++                case __SUSPENDED:
++                    _state=__UNDISPATCHED;
++                    // TODO complete ??;
++                    
++                case __UNSUSPENDING:
++                    throw new IllegalStateException(""+_state);
++                    
++                default:
++                    throw new IllegalStateException(""+_state);
++            }
++        }
++    }
++
++
++    /* ------------------------------------------------------------ */
++    protected void reset()
++    {
++        synchronized (this)
++        {
++            // last("reset");
++            _state=(_state==__SUSPENDED||_state==__UNDISPATCHED)?__UNDISPATCHED:__DISPATCHED;
++            _resumed = false;
++            _initial = true;
++        }
++    }
++
++    /* ------------------------------------------------------------ */
++    protected void scheduleDispatch()
++    {
++        ((SuspendableSelectChannelEndPoint)_connection.getEndPoint()).dispatch();
++    }
++
++    /* ------------------------------------------------------------ */
++    protected void scheduleTimeout()
++    {
++        _connection.scheduleTimeout(_timeoutTask,_timeoutMs);
++    }
++
++    /* ------------------------------------------------------------ */
++    protected void cancelTimeout()
++    {
++        _connection.cancelTimeout(_timeoutTask);
++    }
 +    
++}
+
+Property changes on: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Index: modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java	(revision 2442)
++++ modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java	(working copy)
+@@ -461,12 +461,6 @@
+     {
+         _integralScheme = integralScheme;
+     }
+-
+-    /* ------------------------------------------------------------ */
+-    public Continuation newContinuation(Connection connection)
+-    {
+-        return new WaitingContinuation();
+-    }
+     
+     /* ------------------------------------------------------------ */
+     protected abstract void accept(int acceptorID) throws IOException, InterruptedException;
+Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java	(revision 2442)
++++ modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java	(working copy)
+@@ -30,6 +30,7 @@
+ import org.mortbay.io.nio.SelectChannelEndPoint;
+ import org.mortbay.log.Log;
+ import org.mortbay.resource.Resource;
++import org.mortbay.thread.Timeout;
+ import org.mortbay.util.URIUtil;
+ import org.mortbay.util.ajax.Continuation;
+ 
+@@ -60,7 +61,6 @@
+     private boolean _handling;
+     private boolean _destroy;
+     
+-    
+     protected Connector _connector;
+     protected EndPoint _endp;
+     protected Server _server;
+@@ -378,12 +378,11 @@
+                 setCurrentConnection(this);
+                 long io=0;
+                 
+-                Continuation continuation = _request.getContinuation();
+-                if (continuation != null && continuation.isPending())
++                // TODO not the right test
++                if (!_request.isInitial())
+                 {
+-                    Log.debug("resume continuation {}",continuation);
+-                    if (_request.getMethod()==null)
+-                        throw new IllegalStateException();
++                    System.err.println("RETRYING!");
++                    Log.debug("resume request",_request);
+                     handleRequest();
+                 }
+                 else
+@@ -463,10 +462,10 @@
+                     no_progress=0;
+                 }
+                 
+-                Continuation continuation = _request.getContinuation();
+-                if (continuation != null && continuation.isPending())
++                // TODO - not the right test!
++                if (_request.isSuspended())
+                 {
+-                    Log.debug("return with pending continuation");
++                    Log.debug("return with suspended request");
+                     return;
+                 }
+                 else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
+@@ -474,8 +473,41 @@
+             }
+         }
+     }
+-
 +    
++    Timeout timeout = new Timeout();
++    
+     /* ------------------------------------------------------------ */
++    public void scheduleTimeout(Timeout.Task task, long timeoutMs)
++    {
++        boolean expire=false;
++        synchronized(this)
++        {
++            try
++            {
++                timeout.schedule(task,timeoutMs);
++                this.wait(timeoutMs);
++            }
++            catch (InterruptedException e)
++            {
++                Log.ignore(e);
++            }
++            expire=task.isScheduled();
++        }
++        if (expire)
++            task.expire();
++    }
++    
++    /* ------------------------------------------------------------ */
++    public void cancelTimeout(Timeout.Task task)
++    {
++        synchronized(this)
++        {
++            task.cancel();
++            this.notifyAll();
++        }
++    }
++    
++    /* ------------------------------------------------------------ */
+     public void reset(boolean returnBuffers)
+     {
+         _parser.reset(returnBuffers); // TODO maybe only release when low on resources
+@@ -520,8 +552,7 @@
+             }
+             catch (RetryRequest r)
+             {
+-                // Log.ignore(r);
+-                retrying = true;
++                Log.ignore(r);
+             }
+             catch (EofException e)
+             {
+@@ -554,8 +585,13 @@
+                 if (threadName!=null)
+                     Thread.currentThread().setName(threadName);
+                 
+-                if (!retrying)
++                // TODO - not the right test!
++                if (_request.isSuspended())
+                 {
++                    System.err.println("SUSPENDING!");
++                }
++                else
++                {
+                     if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
+                     {
+                         // Continue not sent so don't parse any content 
+Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java	(revision 0)
++++ modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java	(revision 0)
+@@ -0,0 +1,60 @@
++// ========================================================================
++// Copyright 2006 Mort Bay Consulting Pty. Ltd.
++// ------------------------------------------------------------------------
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at 
++// http://www.apache.org/licenses/LICENSE-2.0
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++// ========================================================================
++
++package org.mortbay.jetty.nio;
++
++import java.io.IOException;
++import java.nio.channels.SelectionKey;
++import java.nio.channels.SocketChannel;
++
++import org.mortbay.io.nio.SelectChannelEndPoint;
++import org.mortbay.io.nio.SelectorManager.SelectSet;
++import org.mortbay.jetty.HttpConnection;
++
++public class SuspendableSelectChannelEndPoint extends SelectChannelEndPoint
++{
++    
++    public SuspendableSelectChannelEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
++    {
++        super(channel,selectSet,key);
++
++        scheduleIdle();
++    }
++
++    public void close() throws IOException
++    {
++        super.close();
++    }
++    
++    public boolean dispatch()
++    {
++        synchronized (this)
++        {
++            ((HttpConnection)_connection).getRequest().dispatch();
++            boolean dispatched=super.dispatch();
++            return dispatched;
++        }
++    }
++    
++    public boolean undispatch()
++    {
++        synchronized (this)
++        {
++            boolean undispatch=((HttpConnection)_connection).getRequest().undispatch();
++            if (undispatch)
++                return super.undispatch();
++            return false;
++        }
++    }
++}
+\ No newline at end of file
+
+Property changes on: modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(revision 2442)
++++ modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(working copy)
+@@ -29,6 +29,7 @@
+ import org.mortbay.jetty.Request;
+ import org.mortbay.jetty.RetryRequest;
+ import org.mortbay.thread.Timeout;
++import org.mortbay.thread.Timeout.Task;
+ import org.mortbay.util.ajax.Continuation;
+ 
+ /* ------------------------------------------------------------------------------- */
+@@ -138,7 +139,7 @@
+     /* ------------------------------------------------------------------------------- */
+     public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
+     {
+-        SuspendableEndPoint cep = ((SuspendableEndPoint)endpoint);
++        SuspendableSelectChannelEndPoint cep = ((SuspendableSelectChannelEndPoint)endpoint);
+         cep.cancelIdle();
+         request.setTimeStamp(cep.getSelectSet().getNow());
+         super.customize(endpoint, request);
+@@ -147,7 +148,7 @@
+     /* ------------------------------------------------------------------------------- */
+     public void persist(org.mortbay.io.EndPoint endpoint) throws IOException
+     {
+-        ((SuspendableEndPoint)endpoint).scheduleIdle();
++        ((SuspendableSelectChannelEndPoint)endpoint).scheduleIdle();
+         super.persist(endpoint);
+     }
+ 
+@@ -181,15 +182,6 @@
+     }
+ 
+     /* ------------------------------------------------------------ */
+-    /*
+-     * @see org.mortbay.jetty.Connector#newContinuation()
+-     */
+-    public Continuation newContinuation(Connection connection)
+-    {
+-        return (SuspendableEndPoint)((HttpConnection)connection).getEndPoint();
+-    }
+-
+-    /* ------------------------------------------------------------ */
+     public void open() throws IOException
+     {
+         synchronized(this)
+@@ -338,365 +330,25 @@
+     /* ------------------------------------------------------------ */
+     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
+     {
+-        return new SuspendableEndPoint(channel,selectSet,key);
++        return new SuspendableSelectChannelEndPoint(channel,selectSet,key);
+     }
+ 
+     /* ------------------------------------------------------------------------------- */
+-    protected Connection newConnection(SocketChannel channel,SelectChannelEndPoint endpoint)
++    protected Connection newConnection(SocketChannel channel,final SelectChannelEndPoint endpoint)
+     {
+-        return new HttpConnection(SelectChannelConnector.this,endpoint,getServer());
+-    }
+-
+-    /* ------------------------------------------------------------ */
+-    /* ------------------------------------------------------------ */
+-    /* ------------------------------------------------------------ */
+-    public static class SuspendableEndPoint extends SelectChannelEndPoint implements Continuation
+-    {
+-        static final int __UNDISPATCHED=0;
+-        static final int __DISPATCHED=1;
+-        static final int __SUSPENDING=2;
+-        static final int __SUSPENDED=3;
+-        static final int __RESUMING=4;
+-        static final int __RESUMED=5;
+-        
+-        protected int _state;
+-        //                  dispatch     undispatch    resume     suspend
+-        // UNDISPATCHED     DISPATCHED   X             X          X
+-        // DISPATCHED       X            UNDISPATCHED  X          SUSPENDING
+-        // SUSPENDING       X            SUSPENDED     RESUMING   X
+-        // SUSPENDED        RESUMED      X             RESUMED    X
+-        // RESUMING         X            RESUMED       -          X
+-        // RESUMED          X            UNDISPATCHED  -          DISPATCHED
+-     
+-        
+-        // Secondary state
+-        protected boolean _new = true;
+-        protected boolean _resumed = false;   // resume called (different to resumed state)
+-        protected Object _object;
+-        
+-        // other
+-        protected RetryRequest _retry;
+-        protected long _timeout;
+-        protected Object _mutex;
+-        
+-        protected final Timeout.Task _timeoutTask;
+-        
+-        
+-        // TODO remove this debugging aid
+-        /*
+-        String[] last = {null,null,null,null,null,null};
+-        void last(String l)
++        return new HttpConnection(SelectChannelConnector.this,endpoint,getServer())
+         {
+-            last[5]=last[4];
+-            last[4]=last[3];
+-            last[3]=last[2];
+-            last[2]=last[1];
+-            last[1]=last[0];
+-            last[0]=l;
+-        }*/
+-        
+-        
+-        
+-        public SuspendableEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
+-        {
+-            super(channel,selectSet,key);
+-
+-            _mutex=this;
+-            _state=__UNDISPATCHED;
+-                
+-            HttpConnection connection = HttpConnection.getCurrentConnection();
+-            
+-            _timeoutTask= new Timeout.Task(_mutex)
++            /* ------------------------------------------------------------ */
++            public void cancelTimeout(Task task)
+             {
+-                public void expire()
+-                {
+-                    SuspendableEndPoint.this.expire();
+-                }
+-            };
+-            
+-            scheduleIdle();
+-        }
+-
+-        
+-        public void close() throws IOException
+-        {
+-            reset();
+-            super.close();
+-        }
+-        
+-        public void setMutex(Object mutex)
+-        {
+-            synchronized(_mutex)
+-            {
+-                // TODO - is this a good idea?
+-                // _mutex=mutex;
+-                // _timeoutTask.setMutex(mutex);
++                endpoint.getSelectSet().cancelTimeout(task);
+             }
+-        }
+-        
+-        public Object getObject()
+-        {
+-            return _object;
+-        }
+ 
+-        public long getTimeout()
+-        {
+-            return _timeout;
+-        }
+-
+-        public boolean isNew()
+-        {
+-            synchronized(_mutex)
++            /* ------------------------------------------------------------ */
++            public void scheduleTimeout(Task task, long timeoutMs)
+             {
+-                return _new;
++                endpoint.getSelectSet().scheduleTimeout(task,timeoutMs);
+             }
+-        }
+-
+-        public boolean isPending()
+-        {
+-            synchronized(_mutex)
+-            {
+-                return _state>=__SUSPENDING;
+-            }
+-        }
+-
+-        public boolean isResumed()
+-        {
+-            synchronized(_mutex)
+-            {
+-                return _resumed;
+-            }
+-        }
+-        
+-        public boolean isExpired()
+-        {
+-            synchronized(_mutex)
+-            {
+-                return _timeoutTask.isExpired();
+-            }
+-        }
+-
+-        public void reset()
+-        {
+-            synchronized (_mutex)
+-            {
+-                // last("reset");
+-                _state=_dispatched?__DISPATCHED:__UNDISPATCHED;
+-                _resumed = false;
+-            }
+-            
+-            synchronized (getSelectSet())
+-            {
+-                _timeoutTask.cancel();   
+-            }
+-        } 
+-
+-        
+-        public boolean suspend(long timeout)
+-        {
+-            synchronized (_mutex)
+-            {
+-                switch(_state)
+-                {
+-                    case __DISPATCHED:
+-                        _state=__SUSPENDING;
+-                        _timeout = timeout;
+-                        if (_retry==null)
+-                            _retry = new RetryRequest();
+-                        getSelectSet().scheduleTimeout(_timeoutTask,_timeout);
+-                        throw _retry;
+-                        
+-                    case __UNDISPATCHED:
+-                        throw new IllegalStateException(this.toString());
+-                    case __SUSPENDING:
+-                        throw new IllegalStateException(this.toString());
+-                    case __SUSPENDED:
+-                        throw new IllegalStateException(this.toString());
+-                    case __RESUMING:
+-                        throw new IllegalStateException(this.toString());
+-                    case __RESUMED:
+-                        _state=__DISPATCHED;
+-                        boolean resumed=_resumed;
+-                        _resumed=false;
+-                        return resumed;
+-                    default:
+-                        throw new IllegalStateException(""+_state);
+-                }
+-            }
+-        }
+-        
+-        public void resume()
+-        {
+-
+-            synchronized (_mutex)
+-            {
+-                switch(_state)
+-                {
+-                    case __DISPATCHED:
+-                        throw new IllegalStateException(this.toString());
+-                    case __UNDISPATCHED:
+-                        throw new IllegalStateException(this.toString());
+-                        
+-                    case __SUSPENDING:
+-                        _state=__RESUMING;
+-                        _resumed=true;
+-                        break;
+-                        
+-                    case __SUSPENDED:
+-                        if (super.dispatch())
+-                            getSelectSet().cancelIdle(_timeoutTask);
+-                        _state=__RESUMED;
+-                        // fall through
+-                        
+-                    case __RESUMING:
+-                    case __RESUMED:
+-                        _resumed=true;
+-                        return;
+-                        
+-                    default:
+-                        throw new IllegalStateException(""+_state);
+-                }
+-            }
+-        }
+-
+-        private void expire()
+-        {
+-            // just like resume, except don't set _resumed=true;
+-            synchronized (_mutex)
+-            {
+-                switch(_state)
+-                {
+-                    case __DISPATCHED:
+-                        throw new IllegalStateException(this.toString());
+-                    case __UNDISPATCHED:
+-                        throw new IllegalStateException(this.toString());
+-                        
+-                    case __SUSPENDING:
+-                        _state=__RESUMING;
+-                        break;
+-                        
+-                    case __SUSPENDED:
+-                        if (super.dispatch())
+-                            getSelectSet().cancelIdle(_timeoutTask);
+-                        _state=__RESUMED;
+-                        // fall through
+-                        
+-                    case __RESUMING:
+-                    case __RESUMED:
+-                        return;
+-                        
+-                    default:
+-                        throw new IllegalStateException(""+_state);
+-                }
+-            }
+-        }
+-           
+-        protected boolean dispatch()
+-        {
+-            synchronized (_mutex)
+-            {
+-                boolean dispatched=super.dispatch();
+-                
+-                switch(_state)
+-                {
+-                    case __DISPATCHED:
+-                        throw new IllegalStateException(this.toString());
+-                    case __UNDISPATCHED:
+-                        if (dispatched)
+-                            _state=__DISPATCHED;
+-                        return dispatched;
+-                        
+-                    case __SUSPENDING:
+-                        throw new IllegalStateException(this.toString());
+-                    case __SUSPENDED:
+-                        if (dispatched)
+-                        {
+-                            getSelectSet().cancelTimeout(_timeoutTask);
+-                            _state=__RESUMED;
+-                        }
+-                        return dispatched;
+-                        
+-                    case __RESUMING:
+-                        throw new IllegalStateException(this.toString());
+-                    case __RESUMED:
+-                        throw new IllegalStateException(this.toString());
+-                    default:
+-                        throw new IllegalStateException(""+_state);
+-                }
+-            }
+-        }
+-        
+-        public boolean undispatch()
+-        {
+-            synchronized (_mutex)
+-            {
+-                switch(_state)
+-                {
+-                    case __DISPATCHED:
+-                         if (super.undispatch())
+-                         {
+-                             _state=__UNDISPATCHED;
+-                             return true;
+-                         }
+-                        return false;
+-                        
+-                    case __UNDISPATCHED:
+-                        throw new IllegalStateException(this.toString());
+-                        
+-                    case __SUSPENDING:
+-                        _state=__SUSPENDED;
+-                        if (super.undispatch())
+-                        {
+-                            _state=__SUSPENDED;
+-                            return true;
+-                        }
+-                       return false;
+-                        
+-                    case __SUSPENDED:
+-                        throw new IllegalStateException(this.toString());
+-                        
+-                    case __RESUMING:
+-                        _state=__RESUMED;
+-                        return false;  // SHORT CUT!
+-                        
+-                    case __RESUMED:
+-                        if (super.undispatch())
+-                        {
+-                            _state=__UNDISPATCHED;
+-                            return true;
+-                        }
+-                       return false;
+-                        
+-                    default:
+-                        throw new IllegalStateException(""+_state);
+-                }
+-            }
+-            
+-        }
+-
+-        public void setObject(Object object)
+-        {
+-            _object = object;
+-        }
+-        
+-        public String toString()
+-        {
+-            synchronized (_mutex)
+-            {
+-                return "RetryContinuation@"+hashCode()+
+-                ((_state==0)?" UNDISPATCHED":
+-                    (_state==1)?" DISPATCHED":
+-                        (_state==2)?" SUSPENDING":
+-                            (_state==3)?" SUSPENDED":
+-                                (_state==4)?" RESUMING":
+-                                    (_state==5)?" RESUMED":
+-                                        " ???")+
+-                (_new?",new":"")+
+-                (_resumed?",resumed":"")+
+-                (isExpired()?",expired":"");
+-                // ">"+last[5]+">"+last[4]+">"+last[3]+">"+last[2]+">"+last[1]+">"+last[0];
+-            }
+-        }
+-
++        };
+     }
+ }
+\ No newline at end of file
+Index: modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java	(revision 2442)
++++ modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java	(working copy)
+@@ -15,14 +15,14 @@
+ 
+ package org.mortbay.jetty;
+ 
+-import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
+ import org.mortbay.util.ajax.Continuation;
+ 
+ 
+ /* ------------------------------------------------------------ */
+ /** Retry Request
+  * This is thrown by a non-blocking {@link Continuation} such as
+- * {@link SelectChannelConnector.SuspendableEndPoint}.  While it
++ * {@link SuspendableSelectChannelEndPoint}.  While it
+  * extends ThreadDeath, it does not actually stop the thread calling it.
+  * It extends ThreadDeath so as to be an Error that will not be caught
+  * by most frameworks.
+Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2442)
++++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
+@@ -59,6 +59,7 @@
+ import org.mortbay.util.URIUtil;
+ import org.mortbay.util.UrlEncoded;
+ import org.mortbay.util.ajax.Continuation;
++import org.mortbay.util.ajax.WaitingContinuation;
+ 
+ /* ------------------------------------------------------------ */
+ /** Jetty Request.
+@@ -93,15 +94,14 @@
+  * @author gregw
+  *
+  */
+-public class Request implements HttpServletRequest
++public class Request extends Suspendable implements HttpServletRequest
+ {
+     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
+     private static final int __NONE=0, _STREAM=1, __READER=2;
+     
+     private boolean _handled =false;
+-    private HttpConnection _connection;
++    private Map _roleMap;
+     private EndPoint _endp;
+-    private Map _roleMap;
+     
+     private Attributes _attributes;
+     private String _authType;
+@@ -147,7 +147,7 @@
+      */
+     public Request(HttpConnection connection)
+     {
+-        _connection=connection;
++        super(connection);
+         _endp=connection.getEndPoint();
+         _dns=_connection.getResolveNames();
+     }
+@@ -155,6 +155,7 @@
+     /* ------------------------------------------------------------ */
+     protected void recycle()
+     {
++        super.reset();
+         _handled=false;
+         if (_context!=null)
+             throw new IllegalStateException("Request in context!");
+@@ -1508,7 +1509,7 @@
+     public Continuation getContinuation(boolean create)
+     {
+         if (_continuation==null && create)
+-            _continuation=getConnection().getConnector().newContinuation(getConnection());
++            _continuation=new WaitingContinuation(); // TODO Replace with Servlet3Continuation
+         return _continuation;
+     }
+     
+@@ -1640,5 +1641,22 @@
+     {
+         return _roleMap;
+     }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see javax.servlet.ServletRequest#suspend()
++     */
++    public void suspend()
++    {
++        long timeout = 30000L;
++        if (_context!=null)
++        {
++            Long t=(Long)_context.getAttribute("javax.servlet.suspendTimeoutMs");
++            if (t!=null)
++                timeout=t.longValue();
++        }
++        suspend(timeout);
++    }
 +    
  }
  
+Index: modules/jetty/src/main/java/org/mortbay/jetty/Connector.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/jetty/Connector.java	(revision 2442)
++++ modules/jetty/src/main/java/org/mortbay/jetty/Connector.java	(working copy)
+@@ -169,9 +169,6 @@
+     void persist(EndPoint endpoint) throws IOException;
+     
+     /* ------------------------------------------------------------ */
+-    Continuation newContinuation(Connection connection);
+-
+-    /* ------------------------------------------------------------ */
+     String getHost();
+     
+     /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(revision 2419)
+--- modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(revision 2442)
 +++ modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(working copy)
 @@ -77,7 +77,7 @@
              // If there are threads dispatched reading and writing
@@ -574,9 +1499,113 @@ Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java
              if (_dispatched)
                  throw new IllegalStateException("ALREADY DISPATCHED!!!");
  
+Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java
+===================================================================
+--- modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java	(revision 2442)
++++ modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java	(working copy)
+@@ -252,7 +252,7 @@
+         private transient List[] _changes;
+         private transient Timeout _idleTimeout;
+         private transient int _nextSet;
+-        private transient Timeout _retryTimeout;
++        private transient Timeout _timeout;
+         private transient Selector _selector;
+         private transient int _setID;
+         private transient boolean _selecting;
+@@ -265,8 +265,8 @@
+ 
+             _idleTimeout = new Timeout();
+             _idleTimeout.setDuration(getMaxIdleTime());
+-            _retryTimeout = new Timeout();
+-            _retryTimeout.setDuration(0L);
++            _timeout = new Timeout();
++            _timeout.setDuration(0L);
+ 
+             // create a selector;
+             _selector = Selector.open();
+@@ -383,13 +383,13 @@
+                 synchronized (this)
+                 {
+                     _idleTimeout.setNow(now);
+-                    _retryTimeout.setNow(now);
++                    _timeout.setNow(now);
+                     if (_lowResourcesConnections>0 && _selector.keys().size()>_lowResourcesConnections)
+                         _idleTimeout.setDuration(_lowResourcesMaxIdleTime);
+                     else 
+                         _idleTimeout.setDuration(_maxIdleTime);
+                     idle_next=_idleTimeout.getTimeToNext();
+-                    retry_next=_retryTimeout.getTimeToNext();
++                    retry_next=_timeout.getTimeToNext();
+                 }
+ 
+                 // workout how low to wait in select
+@@ -406,7 +406,7 @@
+                     int selected=_selector.select(wait);
+                     now = System.currentTimeMillis();
+                     _idleTimeout.setNow(now);
+-                    _retryTimeout.setNow(now);
++                    _timeout.setNow(now);
+ 
+                     // Look for JVM bug 
+                     if (selected==0 && wait>0 && (now-before)<wait/2 && _selector.selectedKeys().size()==0)
+@@ -566,7 +566,7 @@
+                 {
+                     task=_idleTimeout.expired();
+                     if (task==null)
+-                        task=_retryTimeout.expired();
++                        task=_timeout.expired();
+                 }
+ 
+                 // handle any expired timers
+@@ -581,7 +581,7 @@
+                             break;
+                         task=_idleTimeout.expired();
+                         if (task==null)
+-                            task=_retryTimeout.expired();
++                            task=_timeout.expired();
+                     }
+                 }
+             }
+@@ -623,11 +623,12 @@
+         }
+ 
+         /* ------------------------------------------------------------ */
+-        public void scheduleTimeout(Timeout.Task task, long timeout)
++        public void scheduleTimeout(Timeout.Task task, long timeoutMs)
+         {
+             synchronized (this)
+             {
+-                _retryTimeout.schedule(task, timeout);
++                System.err.println("schedule: "+timeoutMs);
++                _timeout.schedule(task, timeoutMs);
+             }
+         }
+         
+@@ -692,7 +693,7 @@
+             synchronized (this)
+             {
+                 _idleTimeout.cancelAll();
+-                _retryTimeout.cancelAll();
++                _timeout.cancelAll();
+                 try
+                 {
+                     if (_selector != null)
+Index: modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java
+===================================================================
+--- modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(revision 2442)
++++ modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(working copy)
+@@ -68,6 +68,8 @@
+             for (int i=0;i<method.length;i++)
+             {
+                 handle(method[i],message[i],srequest,aResponse);
++                if (srequest.isSuspended())
++                    return;
+             }
+ 
+             out.println("</ajax-response>");
 Index: examples/test-webapp/src/main/java/com/acme/TagListener.java
 ===================================================================
---- examples/test-webapp/src/main/java/com/acme/TagListener.java	(revision 2419)
+--- examples/test-webapp/src/main/java/com/acme/TagListener.java	(revision 2442)
 +++ examples/test-webapp/src/main/java/com/acme/TagListener.java	(working copy)
 @@ -116,4 +116,22 @@
           //System.err.println("tagListener: sessionDestroyed "+se);
@@ -601,9 +1630,115 @@ Index: examples/test-webapp/src/main/java/com/acme/TagListener.java
 +    }
 +
  }
+Index: examples/test-webapp/src/main/java/com/acme/ChatFilter.java
+===================================================================
+--- examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(revision 2442)
++++ examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(working copy)
+@@ -193,36 +193,17 @@
+                 member = new Member(session,null);
+                 room.put(session.getId(),member);
+             }
+-
+-            Continuation continuation = ContinuationSupport.getContinuation(request, room);
+             
+-            if (!member.hasMessages())
++            if (!request.isInitial())
++                member.setPoll(null);
++            else if (!member.hasMessages())
+             {   
+-                if (member.getContinuation()!=null && member.getContinuation()!=continuation)
+-                {
+-                    // duplicate frames!
+-                    Message duplicate = new Message("System","Multiple frames/tabs/windows from same browser!",true);
+-                    Message action = new Message("System","Please use only one frame/tab/window",true);
+-                    member.addMessage(duplicate);
+-                    member.addMessage(action);
+-                    try
+-                    {
+-                        Thread.sleep(5000);
+-                    }
+-                    catch(Exception e)
+-                    {}
+-                }
+-                else
+-                {
+-                    member.setContinuation(continuation);
+-                    continuation.suspend(timeoutMS);
+-                }
++                member.setPoll(request);
++                request.suspend(timeoutMS);
++                return;
+             }
+             
+-            if (member.getContinuation()==continuation)
+-                member.setContinuation(null);
+ 
+-            
+             if (member.sendMessages(response))
+                 sendMembers(room,response);
+         }
+@@ -308,9 +289,6 @@
+         {
+             return "<chat from=\""+_from+"\" alert=\""+_alert+"\">"+encodeText(_text)+"</chat>";
+         }
+-        
+-        
+-        
+     }
+ 
+     private class Member
+@@ -318,7 +296,7 @@
+         private HttpSession _session;
+         private String _name;
+         private List _messages = new ArrayList();
+-        private Continuation _continuation;
++        private ServletRequest _request;;
+         
+         Member(HttpSession session, String name)
+         {
+@@ -353,35 +331,23 @@
+             return _session;
+         }
+ 
+-
+         /* ------------------------------------------------------------ */
+         /**
+          * @param continuation The continuation to set.
+          */
+-        public Continuation getContinuation()
++        public void setPoll(ServletRequest poll)
+         {
+-            return _continuation;
++            _request=poll;
+         }
+         
+         /* ------------------------------------------------------------ */
+-        /**
+-         * @param continuation The continuation to set.
+-         */
+-        public void setContinuation(Continuation continuation)
+-        {
+-            if (continuation!=null && _continuation!=null && _continuation!=continuation)
+-                _continuation.resume();
+-            _continuation=continuation;
+-        }
+-        
+-        /* ------------------------------------------------------------ */
+         public void addMessage(Message event)
+         {
+             if (_name==null)
+                 return;
+             _messages.add(event);
+-            if (_continuation!=null)
+-                _continuation.resume();
++            if (_request!=null)
++                _request.resume();
+         }
+ 
+         /* ------------------------------------------------------------ */
 Index: examples/test-webapp/src/main/java/com/acme/TestListener.java
 ===================================================================
---- examples/test-webapp/src/main/java/com/acme/TestListener.java	(revision 2419)
+--- examples/test-webapp/src/main/java/com/acme/TestListener.java	(revision 2442)
 +++ examples/test-webapp/src/main/java/com/acme/TestListener.java	(working copy)
 @@ -116,4 +116,22 @@
          // System.err.println("sessionDestroyed "+se);
