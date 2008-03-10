@@ -28,6 +28,7 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.loading.PrivateMLet;
 
+import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.component.Container;
 import org.mortbay.component.Container.Relationship;
 import org.mortbay.log.Log;
@@ -35,7 +36,7 @@ import org.mortbay.log.Logger;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.TypeUtil;
 
-public class MBeanContainer implements Container.Listener
+public class MBeanContainer extends AbstractLifeCycle implements Container.Listener
 {
     private final MBeanServer _server;
     private volatile int _managementPort;
@@ -66,16 +67,12 @@ public class MBeanContainer implements Container.Listener
     public MBeanContainer(MBeanServer server)
     {
         this._server = server;
-        Logger log = Log.getLog();
-        if (log!=null)
-            addBean(log);
     }
     
     public MBeanServer getMBeanServer()
     {
         return _server;
     }
-    
     
     public void setDomain (String domain)
     {
@@ -92,7 +89,7 @@ public class MBeanContainer implements Container.Listener
         this._managementPort = port;
     }
 
-    public void start()
+    public void doStart()
     {
         if (_managementPort > 0)
         {
@@ -125,7 +122,7 @@ public class MBeanContainer implements Container.Listener
     }
 
     public synchronized void add(Relationship relationship)
-    {
+    {   
         ObjectName parent=(ObjectName)_beans.get(relationship.getParent());
         if (parent==null)
         {
@@ -156,7 +153,7 @@ public class MBeanContainer implements Container.Listener
 
     public synchronized void removeBean(Object obj)
     {
-        ObjectName bean=(ObjectName)_beans.get(obj);
+        ObjectName bean=(ObjectName)_beans.remove(obj);
 
         if (bean!=null)
         {
@@ -259,7 +256,13 @@ public class MBeanContainer implements Container.Listener
             Log.warn("bean: "+obj,e);
         }
     }
-
+    
+    public void doStop()
+    {
+        while (_beans.size()>0)
+            removeBean(_beans.keySet().iterator().next());
+    }
+    
     private class ShutdownHook extends Thread
     {
         private final ObjectName mletName;
