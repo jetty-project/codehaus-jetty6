@@ -20,23 +20,36 @@
     <!-- Use an mx4j mbean server - use this if running with jdk<1.5 
     <Call id="MBeanServer" class="javax.management.MBeanServerFactory" name="createMBeanServer"/>
     -->
+
     
     <!-- =========================================================== -->
     <!-- Initialize the Jetty MBean container                        -->
     <!-- =========================================================== -->
+    <New id="MBeanContainer" class="org.mortbay.management.MBeanContainer">
+      <Arg><Ref id="MBeanServer"/></Arg>
+    </New>
+
+    <!-- Add to the Server to listen for object events -->
     <Get id="Container" name="container">
       <Call name="addEventListener">
-        <Arg>
-          <New class="org.mortbay.management.MBeanContainer">
-            <Arg><Ref id="MBeanServer"/></Arg>
-            <!-- If using < jdk1.5 uncomment to start http adaptor -->
-            <!-- Set name="managementPort">8082</Set -->
-            <Call name="start" />
-          </New>
-        </Arg>
+        <Arg><Ref id="MBeanContainer"/></Arg>
       </Call>
     </Get>
-    
+
+    <!-- Add to the Server as a lifecycle -->
+    <!-- Only do this if you know you will only have a single jetty server -->
+    <Call name="addLifeCycle">
+      <Arg><Ref id="MBeanContainer"/></Arg>
+    </Call>
+
+    <!-- Add the static log -->
+    <Get id="Logger" class="org.mortbay.log.Log" name="log"/>
+    <Ref id="MBeanContainer">
+      <Call name="addBean">
+          <Arg><Ref id="Logger"/></Arg>
+      </Call>
+    </Ref>
+
     <!-- optionally add a remote JMX connector 
     <Call id="jmxConnector" class="javax.management.remote.JMXConnectorServerFactory" name="newJMXConnectorServer">
       <Arg>
