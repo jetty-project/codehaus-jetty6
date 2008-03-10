@@ -235,17 +235,11 @@
     <module>plus</module>
     <module>jsp</module>
     <module>extra</module>
+    <module>examples</module>
     
-    <module>examples/test-webapp</module>
-    <module>examples/test-jaas-webapp</module>
-    <module>examples/test-jndi-webapp</module>
-    <module>examples/embedded</module>
-    <!-- <module>examples/spring-ebj3-demo</module> -->
-    <module>examples/tests</module>
-
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
-    <module>contrib/jetty-batch</module>
+    <!--module>contrib/jetty-batch</module-->
     <!--module>contrib/grizzly</module-->
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
