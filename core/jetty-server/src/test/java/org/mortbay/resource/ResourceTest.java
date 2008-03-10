@@ -28,6 +28,7 @@ import org.mortbay.util.IO;
 public class ResourceTest extends junit.framework.TestCase
 {
 
+    public static String __moduleDir = "/core/jetty-server";
     public static String __userDir = System.getProperty("user.dir",".");
     public static URL __userURL=null;
     private static String __relDir="";
@@ -121,8 +122,8 @@ public class ResourceTest extends junit.framework.TestCase
         File file = new File(__userDir);
         file=new File(file.getCanonicalPath());
         __userURL=file.toURL();
-        if (__userURL.toString().endsWith("/modules/jetty/") ||
-            __userURL.toString().endsWith("/modules/jetty"))
+        if (__userURL.toString().endsWith( __moduleDir + "/") ||
+            __userURL.toString().endsWith( __moduleDir ))
         {
             __userURL=new URL(__userURL.toString()+
                               "src/test/java/org/mortbay/resource/");
@@ -134,12 +135,12 @@ public class ResourceTest extends junit.framework.TestCase
         }
         else
         {
-            __userURL=new URL(__userURL.toString()+
-                              "modules/jetty/src/test/java/org/mortbay/resource/");
+            __userURL=new URL(__userURL.toString()+ __moduleDir
+                              + "/src/test/java/org/mortbay/resource/");
             FilePermission perm = (FilePermission)
                 __userURL.openConnection().getPermission();
             __userDir=new File(perm.getName()).getCanonicalPath()+File.separatorChar;
-            __relDir="modules/jetty/src/test/java/org/mortbay/resource/"
+            __relDir= __moduleDir + "/src/test/java/org/mortbay/resource/"
                 .replace('/',File.separatorChar);
         }
         
