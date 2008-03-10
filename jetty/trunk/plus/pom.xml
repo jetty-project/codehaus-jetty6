@@ -8,6 +8,7 @@
   <groupId>org.mortbay.jetty.plus</groupId>
   <artifactId>jetty-plus-parent</artifactId>
   <name>Jetty Plus Parent</name>
+  <packaging>pom</packaging>
   <modules>
     <module>jetty-plus</module>
     <module>jetty-naming</module>

@@ -13,7 +13,9 @@
     <module>jetty-ajp</module>
     <module>jetty-client</module>
     <module>jetty-gwt</module>
+<!--
     <module>jetty-jboss</module>
+-->
     <module>jetty-servlet-tester</module>
     <module>jetty-spring</module>
     <module>jetty-sslengine</module>
