@@ -1021,6 +1021,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         /* ------------------------------------------------------------ */
         public void removeAttribute(String name)
         {
+            Object old;
             synchronized(this)
             {
                 if (_invalid)
@@ -1028,19 +1029,21 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 if (_values==null)
                     return;
 
-                Object old=_values.remove(name);
-                if (old!=null)
+                old=_values.remove(name);
+            }
+            
+            if (old!=null)
+            {
+                unbindValue(name,old);
+                if (_sessionAttributeListeners!=null)
                 {
-                    unbindValue(name,old);
-                    if (_sessionAttributeListeners!=null)
-                    {
-                        HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,name,old);
+                    HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,name,old);
 
-                        for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
-                            ((HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i)).attributeRemoved(event);
-                    }
+                    for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
+                        ((HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i)).attributeRemoved(event);
                 }
             }
+
         }
 
         /* ------------------------------------------------------------- */
@@ -1056,40 +1059,41 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         /* ------------------------------------------------------------ */
         public void setAttribute(String name, Object value)
         {
+            Object old_value;
+            if (value==null)
+            {
+                removeAttribute(name);
+                return;
+            }
+
             synchronized(this)
             {
-                if (value==null)
-                {
-                    removeAttribute(name);
-                    return;
-                }
-
                 if (_invalid)
                     throw new IllegalStateException();
                 if (_values==null)
                     _values=newAttributeMap();
-                Object oldValue=_values.put(name,value);
+                old_value=_values.put(name,value);
+            }
 
-                if (oldValue==null || !value.equals(oldValue)) 
+            if (old_value==null || !value.equals(old_value)) 
+            {
+                unbindValue(name,old_value);
+                bindValue(name,value);
+
+                if (_sessionAttributeListeners!=null)
                 {
-                    unbindValue(name,oldValue);
-                    bindValue(name,value);
+                    HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,name,old_value==null?value:old_value);
 
-                    if (_sessionAttributeListeners!=null)
+                    for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
                     {
-                        HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,name,oldValue==null?value:oldValue);
+                        HttpSessionAttributeListener l=(HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i);
 
-                        for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
-                        {
-                            HttpSessionAttributeListener l=(HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i);
-
-                            if (oldValue==null)
-                                l.attributeAdded(event);
-                            else if (value==null)
-                                l.attributeRemoved(event);
-                            else
-                                l.attributeReplaced(event);
-                        }
+                        if (old_value==null)
+                            l.attributeAdded(event);
+                        else if (value==null)
+                            l.attributeRemoved(event);
+                        else
+                            l.attributeReplaced(event);
                     }
                 }
             }
