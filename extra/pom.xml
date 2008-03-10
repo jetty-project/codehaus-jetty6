@@ -8,6 +8,7 @@
   <groupId>org.mortbay.jetty.extra</groupId>
   <artifactId>jetty-extra-parent</artifactId>
   <name>Jetty Extra Parent</name>
+  <packaging>pom</packaging>
   <modules>
     <module>jetty-ajp</module>
     <module>jetty-client</module>
@@ -19,11 +20,11 @@
     <module>jetty-threadpool</module>
     <module>jetty-xbean</module>
     <module>jetty-html</module>
-    
+  
     <!--
       - Maven Plugins
       -->
-    <module>maven-jetty-jspc-plugin</module>
+    <module>jspc-jetty-maven-plugin</module>
     <module>jetty-maven-plugin</module>
   </modules>
 </project>
