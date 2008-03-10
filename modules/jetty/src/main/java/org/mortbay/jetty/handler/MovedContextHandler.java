@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.Request;
 import org.mortbay.util.URIUtil;
 
@@ -38,11 +39,13 @@ public class MovedContextHandler extends ContextHandler
     boolean _discardQuery;
     boolean _permanent;
     Redirector _redirector;
+    String _expires;
 
     public MovedContextHandler()
     {
         _redirector=new Redirector();
         addHandler(_redirector);
+        setAllowNullPathInfo(true);
     }
     
     public MovedContextHandler(HandlerContainer parent, String contextPath, String newContextURL)
@@ -102,19 +105,48 @@ public class MovedContextHandler extends ContextHandler
             
             Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             
-            String url = _newContextURL;
+
+            StringBuffer location = base_request.getRootURL();
+            String path=_newContextURL;
             if (!_discardPathInfo && request.getPathInfo()!=null)
-                url=URIUtil.addPaths(url, request.getPathInfo());
+                path=URIUtil.addPaths(path, request.getPathInfo());
+            
+            location.append(path);
+            
             if (!_discardQuery && request.getQueryString()!=null)
-                url+="?"+request.getQueryString();
+            {
+                location.append('?');
+                location.append(request.getQueryString());
+            }
             
-            response.sendRedirect(url);
-            if (_permanent)
-                response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+            response.setHeader(HttpHeaders.LOCATION,location.toString());
+
+            if (_expires!=null)
+                response.setHeader(HttpHeaders.EXPIRES,_expires);
             
+            response.setStatus(_permanent?HttpServletResponse.SC_MOVED_PERMANENTLY:HttpServletResponse.SC_FOUND);
+            response.setContentLength(0);
             base_request.setHandled(true);
         }
         
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the expires header value or null if no expires header
+     */
+    public String getExpires()
+    {
+        return _expires;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param expires the expires header value or null if no expires header
+     */
+    public void setExpires(String expires)
+    {
+        _expires = expires;
     }
 
 }
