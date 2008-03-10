@@ -29,6 +29,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-528 Factor our cookie parsing to CookieCutter
  + JETTY-530 Improved JMX MBeanContainer lifecycle
  + JETTY-531 Optional expires on MovedContextHandler
+ + JETTY-532 MBean properties for QueuedThreadPool
 
 jetty-6.1.8 28 February 2008
  + Added QueuedThreadPool
