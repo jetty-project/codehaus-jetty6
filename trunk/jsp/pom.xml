@@ -8,6 +8,7 @@
   <groupId>org.mortbay.jetty.jsp</groupId>
   <artifactId>jetty-jsp-parent</artifactId>
   <name>Jetty JSP Parent</name>
+  <packaging>pom</packaging>
   <modules>
     <module>jsp-api-2.0</module>
     <module>jsp-2.0</module>
