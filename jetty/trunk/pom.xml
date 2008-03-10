@@ -231,31 +231,14 @@
     </pluginManagement>
   </build>
   <modules>
-    <module>modules/servlet-api-2.5</module>
-    <module>modules/util</module>
-    <module>modules/jetty</module>
-    <module>modules/jsp-api-2.1</module>
-    <module>modules/jsp-2.1</module>
-    <module>modules/jsp-api-2.0</module>
-    <module>modules/jsp-2.0</module>
-    <module>modules/management</module>
-    <module>modules/start</module>
-    <module>modules/maven-plugin</module>
-    <module>modules/jspc-maven-plugin</module>
-    <module>modules/naming</module>
-    <module>modules/plus</module>
-    <module>modules/html</module>
-    <module>modules/annotations</module>
-
-    <module>extras/servlet-tester</module>
-    <module>extras/xbean</module>
-    <module>extras/spring</module>
-    <module>extras/sslengine</module>
-    <module>extras/ajp</module>
+    <module>core</module>
+    <module>plus</module>
+    <module>jsp</module>
+    <module>extra</module>
+    
     <module>extras/win32service</module>
     <!--module>extras/gwt</module-->
-    <module>extras/threadpool</module>
-    <module>extras/client</module>
+    
 
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
@@ -267,6 +250,7 @@
 
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
+    <module>contrib/jetty-batch</module>
     <!--module>contrib/grizzly</module-->
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
