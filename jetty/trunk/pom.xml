@@ -236,10 +236,6 @@
     <module>jsp</module>
     <module>extra</module>
     
-    <module>extras/win32service</module>
-    <!--module>extras/gwt</module-->
-    
-
     <module>examples/test-webapp</module>
     <module>examples/test-jaas-webapp</module>
     <module>examples/test-jndi-webapp</module>
@@ -247,15 +243,12 @@
     <!-- <module>examples/spring-ebj3-demo</module> -->
     <module>examples/tests</module>
 
-
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
     <module>contrib/jetty-batch</module>
     <!--module>contrib/grizzly</module-->
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
-
-    <module>extras/setuid</module>
   </modules>
 
   <reporting>
