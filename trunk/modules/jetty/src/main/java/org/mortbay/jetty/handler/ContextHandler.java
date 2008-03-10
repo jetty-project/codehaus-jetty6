@@ -605,6 +605,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         String old_path_info=null;
         ClassLoader old_classloader=null;
         Thread current_thread=null;
+        String pathInfo=null;
         
         Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
         if( !isStarted() || _shutdown || (dispatch==REQUEST && base_request.isHandled()))
@@ -647,7 +648,18 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 
                 if (target.equals(_contextPath))
                 {
-                    if (!_allowNullPathInfo && !target.endsWith(URIUtil.SLASH))
+                    if (_contextPath.length()==1)
+                    {
+                        target=URIUtil.SLASH;
+                        pathInfo=URIUtil.SLASH;
+                    }
+                    else if (_allowNullPathInfo)
+                    {
+                        target=URIUtil.SLASH;
+                        pathInfo=null;
+                        request.setAttribute("org.mortbay.jetty.nullPathInfo",target);
+                    }
+                    else
                     {
                         base_request.setHandled(true);
                         if (request.getQueryString()!=null)
@@ -656,16 +668,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                             response.sendRedirect(URIUtil.addPaths(request.getRequestURI(),URIUtil.SLASH));
                         return;
                     }
-                    if (_contextPath.length()>1)
-                    {
-                        target=URIUtil.SLASH;
-                        request.setAttribute("org.mortbay.jetty.nullPathInfo",target);
-                    }
                 }
                 else if (target.startsWith(_contextPath) && (_contextPath.length()==1 || target.charAt(_contextPath.length())=='/'))
                 {
                     if (_contextPath.length()>1)
                         target=target.substring(_contextPath.length());
+                    pathInfo=target;
                 }
                 else 
                 {
@@ -690,7 +698,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 else
                     base_request.setContextPath(_contextPath);
                 base_request.setServletPath(null);
-                base_request.setPathInfo(target);
+                base_request.setPathInfo(pathInfo);
             }
 
             ServletRequestEvent event=null;
