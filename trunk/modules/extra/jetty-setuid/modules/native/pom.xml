@@ -43,7 +43,7 @@ http://maven.apache.org/maven-v4_0_0.xsd">
                         </goals>
                         <configuration>
                             <tasks>
-                                <copy failonerror="false" file="target/libsetuid.so" todir="../../../lib/ext"/>
+                                <copy failonerror="false" file="target/libsetuid.so" todir="../../../../../lib/ext"/>
                             </tasks>
                         </configuration>
                     </execution>
