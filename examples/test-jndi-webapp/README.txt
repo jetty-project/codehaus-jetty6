@@ -18,7 +18,7 @@ as copy all the necessary jars for the flavour of transaction manager
 you are using. There are instructions for some of the popular 
 transaction managers on the wiki at:
 
-http://docs.codehaus.org/display/JETTY/Jetty+User+Guides
+http://docs.codehaus.org/display/JETTY/Jetty+Documentation
 
 You run the demo like so:
    
