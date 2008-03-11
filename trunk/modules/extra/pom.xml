@@ -29,7 +29,7 @@
     <!--
       - Maven Plugins
       -->
-    <module>jspc-jetty-maven-plugin</module>
+    <module>jetty-maven-jspc-plugin</module>
     <module>jetty-maven-plugin</module>
   </modules>
 </project>
