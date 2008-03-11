@@ -89,6 +89,14 @@
       <organization>Sun Microsystems</organization>
       <organizationUrl>http://www.sun.com</organizationUrl>
     </developer>
+    <developer>
+      <id>jesse</id>
+      <name>Jesse McConnell</name>
+      <email>jesse@webtide.org</email>
+      <organization>Webtide, LLC</organization>
+      <organizationUrl>http://www.webtide.com</organizationUrl>
+      <timezone>-6</timezone>
+    </developer>
   </developers>
   <licenses>
     <license>
