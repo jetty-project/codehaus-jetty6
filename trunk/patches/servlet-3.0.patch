@@ -1,7 +1,7 @@
 Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java
 ===================================================================
---- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2442)
-+++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(working copy)
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2442)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(working copy)
 @@ -48,4 +48,27 @@
  
      /** The request is about to come into scope of the web application. */
@@ -32,8 +32,8 @@ Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListene
  }
 Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java
 ===================================================================
---- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(revision 2442)
-+++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(working copy)
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(revision 2442)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(working copy)
 @@ -605,6 +605,142 @@
       * @since 2.4
       */
@@ -179,8 +179,8 @@ Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java
  
 Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java
 ===================================================================
---- modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(revision 2442)
-+++ modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(working copy)
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(revision 2442)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(working copy)
 @@ -407,6 +407,84 @@
      public int getLocalPort(){
          return this.request.getLocalPort();
@@ -268,8 +268,8 @@ Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper
  
 Index: modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java
 ===================================================================
---- modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(revision 2442)
-+++ modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(working copy)
+--- modules/server/jetty-server/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(revision 2442)
++++ modules/server/jetty-server/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(working copy)
 @@ -9,6 +9,7 @@
  import org.mortbay.io.nio.SelectChannelEndPoint;
  import org.mortbay.io.nio.SelectorManager.SelectSet;
@@ -289,8 +289,8 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest
                      int read;
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
 @@ -0,0 +1,435 @@
 +package org.mortbay.jetty;
 +
@@ -735,8 +735,8 @@ Name: svn:eol-style
 
 Index: modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java	(revision 2442)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java	(working copy)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/AbstractConnector.java	(revision 2442)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/AbstractConnector.java	(working copy)
 @@ -461,12 +461,6 @@
      {
          _integralScheme = integralScheme;
@@ -752,8 +752,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java
      protected abstract void accept(int acceptorID) throws IOException, InterruptedException;
 Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java	(revision 2442)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java	(working copy)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnection.java	(revision 2442)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnection.java	(working copy)
 @@ -30,6 +30,7 @@
  import org.mortbay.io.nio.SelectChannelEndPoint;
  import org.mortbay.log.Log;
@@ -871,8 +871,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
                          // Continue not sent so don't parse any content 
 Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java	(revision 0)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java	(revision 0)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java	(revision 0)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java	(revision 0)
 @@ -0,0 +1,60 @@
 +// ========================================================================
 +// Copyright 2006 Mort Bay Consulting Pty. Ltd.
@@ -943,8 +943,8 @@ Name: svn:eol-style
 
 Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(revision 2442)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(working copy)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(revision 2442)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(working copy)
 @@ -29,6 +29,7 @@
  import org.mortbay.jetty.Request;
  import org.mortbay.jetty.RetryRequest;
@@ -1366,8 +1366,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.
 \ No newline at end of file
 Index: modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java	(revision 2442)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java	(working copy)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/RetryRequest.java	(revision 2442)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/RetryRequest.java	(working copy)
 @@ -15,14 +15,14 @@
  
  package org.mortbay.jetty;
@@ -1387,8 +1387,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java
   * by most frameworks.
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(revision 2442)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/Request.java	(working copy)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java	(revision 2442)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java	(working copy)
 @@ -59,6 +59,7 @@
  import org.mortbay.util.URIUtil;
  import org.mortbay.util.UrlEncoded;
@@ -1466,8 +1466,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
  
 Index: modules/jetty/src/main/java/org/mortbay/jetty/Connector.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/jetty/Connector.java	(revision 2442)
-+++ modules/jetty/src/main/java/org/mortbay/jetty/Connector.java	(working copy)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Connector.java	(revision 2442)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Connector.java	(working copy)
 @@ -169,9 +169,6 @@
      void persist(EndPoint endpoint) throws IOException;
      
@@ -1480,8 +1480,8 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Connector.java
      /* ------------------------------------------------------------ */
 Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(revision 2442)
-+++ modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(working copy)
+--- modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(revision 2442)
++++ modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(working copy)
 @@ -77,7 +77,7 @@
              // If there are threads dispatched reading and writing
              if (_readBlocked || _writeBlocked)
@@ -1501,8 +1501,8 @@ Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java
  
 Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java
 ===================================================================
---- modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java	(revision 2442)
-+++ modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java	(working copy)
+--- modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorManager.java	(revision 2442)
++++ modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorManager.java	(working copy)
 @@ -252,7 +252,7 @@
          private transient List[] _changes;
          private transient Timeout _idleTimeout;
@@ -1592,8 +1592,8 @@ Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java
                      if (_selector != null)
 Index: modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java
 ===================================================================
---- modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(revision 2442)
-+++ modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(working copy)
+--- modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(revision 2442)
++++ modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(working copy)
 @@ -68,6 +68,8 @@
              for (int i=0;i<method.length;i++)
              {
@@ -1605,8 +1605,8 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java
              out.println("</ajax-response>");
 Index: examples/test-webapp/src/main/java/com/acme/TagListener.java
 ===================================================================
---- examples/test-webapp/src/main/java/com/acme/TagListener.java	(revision 2442)
-+++ examples/test-webapp/src/main/java/com/acme/TagListener.java	(working copy)
+--- modules/examples/test-webapp/src/main/java/com/acme/TagListener.java	(revision 2442)
++++ modules/examples/test-webapp/src/main/java/com/acme/TagListener.java	(working copy)
 @@ -116,4 +116,22 @@
           //System.err.println("tagListener: sessionDestroyed "+se);
      }
@@ -1632,8 +1632,8 @@ Index: examples/test-webapp/src/main/java/com/acme/TagListener.java
  }
 Index: examples/test-webapp/src/main/java/com/acme/ChatFilter.java
 ===================================================================
---- examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(revision 2442)
-+++ examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(working copy)
+--- modules/examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(revision 2442)
++++ modules/examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(working copy)
 @@ -193,36 +193,17 @@
                  member = new Member(session,null);
                  room.put(session.getId(),member);
@@ -1738,8 +1738,8 @@ Index: examples/test-webapp/src/main/java/com/acme/ChatFilter.java
          /* ------------------------------------------------------------ */
 Index: examples/test-webapp/src/main/java/com/acme/TestListener.java
 ===================================================================
---- examples/test-webapp/src/main/java/com/acme/TestListener.java	(revision 2442)
-+++ examples/test-webapp/src/main/java/com/acme/TestListener.java	(working copy)
+--- modules/examples/test-webapp/src/main/java/com/acme/TestListener.java	(revision 2442)
++++ modules/examples/test-webapp/src/main/java/com/acme/TestListener.java	(working copy)
 @@ -116,4 +116,22 @@
          // System.err.println("sessionDestroyed "+se);
      }
