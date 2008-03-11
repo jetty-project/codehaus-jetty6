@@ -239,18 +239,20 @@
     </pluginManagement>
   </build>
   <modules>
-    <module>core</module>
-    <module>plus</module>
-    <module>jsp</module>
-    <module>extra</module>
-    <module>examples</module>
+    <module>modules/server</module>
+    <module>modules/jsp</module>
+    <module>modules/plus</module>
+    <module>modules/extra</module>
+    <module>modules/examples</module>
     
-    <module>contrib/cometd</module>
-    <module>contrib/jetty-ant</module>
-    <!--module>contrib/jetty-batch</module-->
-    <!--module>contrib/grizzly</module-->
-    <!--module>contrib/wadi</module-->
-    <!--module>contrib/terracotta</module-->
+    <!--module>modules/contrib/cometd</module-->
+    <!--module>modules/contrib/jetty-ant</module-->
+    <!--module>modules/contrib/jetty-batch</module-->
+    <!--module>modules/contrib/grizzly</module-->
+    <!--module>modules/contrib/wadi</module-->
+    <!--module>modules/contrib/terracotta</module-->
+
+    <!--module>modules/website</module-->
   </modules>
 
   <reporting>
