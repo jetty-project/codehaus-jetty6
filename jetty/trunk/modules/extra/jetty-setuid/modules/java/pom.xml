@@ -33,8 +33,8 @@
                                 
                                 <copy failonerror="false"
                                       file="target/${project.artifactId}-${project.version}.jar"
-                                      tofile="../../../../lib/ext/jetty-setuid-${project.version}.jar"/>
-                                <copy failonerror="false" file="etc/jetty-setuid.xml" todir="../../../../etc"/>
+                                      tofile="../../../../../lib/ext/jetty-setuid-${project.version}.jar"/>
+                                <copy failonerror="false" file="etc/jetty-setuid.xml" todir="../../../../../etc"/>
                             </tasks>
                         </configuration>
                     </execution>

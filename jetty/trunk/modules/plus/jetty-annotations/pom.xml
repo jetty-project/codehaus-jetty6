@@ -106,7 +106,7 @@
                   <version>1.0</version>
                 </artifactItem>
               </artifactItems>
-              <outputDirectory>../../lib/annotations</outputDirectory>
+              <outputDirectory>../../../lib/annotations</outputDirectory>
             </configuration>
           </execution>
         </executions>
