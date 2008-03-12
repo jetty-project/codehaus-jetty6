@@ -31,6 +31,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-530 Improved JMX MBeanContainer lifecycle
  + JETTY-531 Optional expires on MovedContextHandler
  + JETTY-532 MBean properties for QueuedThreadPool
+ + JETTY-535 Fixed Bayeux server side client memory leak
 
 jetty-6.1.8 28 February 2008
  + Added QueuedThreadPool
