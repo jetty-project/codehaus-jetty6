@@ -22,7 +22,7 @@
     <menu name="Resources">
       <item name="Downloads" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#download"/>
       <item name="Resources" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
-      <item name="Documentation" href="http://docs.codehaus.org/display/JETTY/Jetty+Documentation"/>
+      <item name="Documentation" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
       <item name="JavaDoc" href="apidocs/index.html"/>
       <item name="Source XRef" href="xref/index.html"/>
     </menu>
