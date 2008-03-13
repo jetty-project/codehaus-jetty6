@@ -8,6 +8,8 @@ jetty-6.1-SNAPSHOT
  + JETTY-522 Add build profile for macos for setuid
  + JETTY-525 Fixed decoding for long strings
  + JETTY-526 Fixed MMBean fields on JMX MBeans
+ + JETTY-532 MBean properties for QueuedThreadPool
+ + JETTY-535 Fixed Bayeux server side client memory leak
 
 jetty-6.1.8 28 February 2008
  + Added QueuedThreadPool
