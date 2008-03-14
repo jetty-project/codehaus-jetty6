@@ -1,274 +1,96 @@
-Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java
+Index: modules/extra/jetty-sslengine/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java
 ===================================================================
---- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2442)
-+++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(working copy)
-@@ -48,4 +48,27 @@
+--- modules/extra/jetty-sslengine/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 2504)
++++ modules/extra/jetty-sslengine/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(working copy)
+@@ -15,7 +15,7 @@
+ import org.mortbay.io.Buffers;
+ import org.mortbay.io.nio.NIOBuffer;
+ import org.mortbay.io.nio.SelectorManager;
+-import org.mortbay.jetty.nio.SelectChannelConnector;
++import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
+ import org.mortbay.log.Log;
  
-     /** The request is about to come into scope of the web application. */
-     public void requestInitialized ( ServletRequestEvent sre );
-+    
-+    /**
-+     * A request has been suspended.
-+     * Called by the thread that dispatched the servlet when it
-+     * has returned to the container.
-+     * @since 3.0
-+     */
-+    void requestSuspended(ServletRequestEvent rre);
-+
-+    /**
-+     * A request has been resumed.
-+     * Called by the thread that will dispatch to the servlet 
-+     * immediately before dispatch. 
-+     * @since 3.0
-+     */
-+    void requestResumed(ServletRequestEvent rre);
-+
-+    /**
-+     * A request has been completed.
-+     * Called from a call to {@ServletRequest#complete()} 
-+     * @since 3.0
-+     */
-+    void requestCompleted(ServletRequestEvent rre);
- }
-Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java
+ /* ------------------------------------------------------------ */
+@@ -25,7 +25,7 @@
+  * @author Nik Gonzalez <ngonzalez@exist.com>
+  * @author Greg Wilkins <gregw@mortbay.com>
+  */
+-public class SslHttpChannelEndPoint extends SelectChannelConnector.SuspendableEndPoint 
++public class SslHttpChannelEndPoint extends SuspendableSelectChannelEndPoint
+ {
+     private static final ByteBuffer[] __NO_BUFFERS={};
+     private static final ByteBuffer __EMPTY=ByteBuffer.allocate(0);
+Index: modules/extra/jetty-client/src/main/java/org/mortbay/servlet/AsyncProxyServlet.java
 ===================================================================
---- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(revision 2442)
-+++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(working copy)
-@@ -605,6 +605,142 @@
-      * @since 2.4
-      */
-     public int getLocalPort();
-+    
-+    
-+    
-+    /**
-+     * Suspend the processing of the request and associated {@link ServletResponse}.
-+     * 
-+     * <p>After this method has been called, the lifecycle of the request 
-+     * will be extended beyond the return to the container from the 
-+     * {@link Servlet#service(ServletRequest, ServletResponse)}  method and 
-+     * {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)} calls. If a 
-+     * request is suspended, then the container will not commit the associated response 
-+     * when the call to the filter chain and/or servlet service method returns to the 
-+     * container. Any exceptions thrown to the container by a filter chain and/or 
-+     * servlet for a suspended requests are silently ignored.</p>
-+     *
-+     * <p>When the thread calling the filter chain and/or servlet has returned to the 
-+     * container with a suspended request, the thread is freed for other tasks and 
-+     * the request is held pending either: <ul>
-+     * <li>a call to {@link ServletRequest#resume()}.</li>
-+     * <li>a call to {@link ServletRequest#complete()}.</li>
-+     * <li>the passed or default timeout expires.</li>
-+     * <li>there is IO activity on the connection that received the request, such
-+     * as the close of the connection or the receipt of a pipelined request.
-+     * </ul>
-+     * <p>After any of the events listed above, the suspended request will be 
-+     * redispatched via the filter and servlet processing.
-+     * </p>
-+     * 
-+     * <p>If a request is already suspended, any subsequent calls to suspend will set
-+     * the timeout to the minimum of the previous timeout and the newly passed 
-+     * timeout</p>
-+     * 
-+     * <p>Suspend may only be called by a thread that is within the service calling 
-+     * stack of {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)}
-+     * and/or {@link Servlet#service(ServletRequest, ServletResponse)}. A request that has    
-+     * been dispatched for error handling may not be suspended.
-+     * </p>
-+     * 
-+     * @see {@link #resume()}
-+     * @see {@link #complete()}
-+     * @since 3.0
-+     * 
-+     * @param timeoutMs The time in milliseconds to wait before retrying this request.
-+     * 
-+     * @exception IllegalStateException If the calling thread is not within the calling 
-+     * stack of  {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)}
-+     * and/or {@link Servlet#service(ServletRequest, ServletResponse)} or if the request 
-+     * has been dispatched for error handling.
-+     */
-+     void suspend(long timeoutMs);
+--- modules/extra/jetty-client/src/main/java/org/mortbay/servlet/AsyncProxyServlet.java	(revision 2504)
++++ modules/extra/jetty-client/src/main/java/org/mortbay/servlet/AsyncProxyServlet.java	(working copy)
+@@ -18,11 +18,8 @@
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.io.OutputStream;
+-import java.net.HttpURLConnection;
+ import java.net.InetSocketAddress;
+ import java.net.Socket;
+-import java.net.URL;
+-import java.net.URLConnection;
+ import java.util.Enumeration;
+ import java.util.HashSet;
  
-+   /**
-+     * Suspend the processing of the request and associated {@link ServletResponse}.
-+     * 
-+     * <p>Acts as a call to {@link #suspend(long)} but with a container supplied 
-+     * timeout. The timeout the container will use may be obtained or set as a Long
-+     * context attribute with the name "javax.servlet.suspendTimeoutMs"</p>
-+     * @see suspend(long)
-+     */
-+     void suspend();
-+
-+    /**
-+     * Resume a suspended request.
-+     * 
-+     * <p>This method can be called by any thread that has been passed a reference to 
-+     * a suspended request. When called the request is redispatched to the normal filter 
-+     * chain and servlet processing.</p>
-+     * 
-+     * <p>If resume is called before a suspended request is returned to the container 
-+     * (ie the thread that called {@link #suspend(long)} is still within the filter
-+     * chain and/or servlet service method), then the resume does not take effect until
-+     * the call to the filter chain and/or servlet returns to the container. In this 
-+     * case both {@link #isSuspended()} and {@link isResumed()} return true.</p>
-+     * 
-+     * <p>Multiple calls to resume are ignored</p>
-+     * 
-+     * @see {@link #suspend()}
-+     * @since 3.0
-+     * @exception IllegalStateException if the request is not suspended.
-+     * 
-+     */
-+     void resume();
-+
-+    /**
-+     * Complete a suspended request.
-+     * 
-+     * <p>This method can be called by any thread that has been passed a reference to 
-+     * a suspended request. When a request is completed, the associated response object 
-+     * commited and flushed. The request is not redispatched.</p>
-+     * 
-+     * <p>If complete is called before a suspended request is returned to the container 
-+     * (ie the thread that called {@link #suspend(long)} is still within the filter
-+     * chain and/or servlet service method), then the complete does not take effect until
-+     * the call to the filter chain and/or servlet returns to the container. In this 
-+     * case both {@link #isSuspended()} and {@link isResumed()} return true.</p>
-+     * 
-+     * <p>Once complete has been called and any thread calling the filter chain and/or 
-+     * servlet chain has returned to the container, the request lifecycle is complete.
-+     * The container is able to recycle request objects, so it is not valid hold a request
-+     * reference after the end of the life cycle or to call any request methods.
-+     * 
-+     * @see {@link #suspend()}
-+     * @since 3.0
-+     * @exception IllegalStateException if the request is not suspended.
-+     * 
-+     */
-+     void complete();
-+
-+    /**
-+     * @return true after {@link #suspend(long)} has been called and before the request 
-+     * has been resumed, completed, timed out or reactived due to IO activity.
-+     * @since 3.0
-+     */
-+     boolean isSuspended();
-+
-+    /**
-+     * @return true if the request has been redispatched by a call to {@link #resume()}.   Returns false after any subsequent call to suspend
-+     * @since 3.0
-+     */
-+     boolean isResumed();
-+
-+    /**
-+     * @return true after a request has been redispatched as the result of a timeout. 
-+     * Returns false after any subsequent call to suspend.
-+     * @since 3.0
-+     */
-+     boolean isTimeout();
-+
-+    /**
-+     * @return true while the request is within the initial dispatch to the filter chain
-+     * and/or servlet. Will return false once the calling thread has returned to the
-+     * container after suspend has been called and during any subsequent redispatch.
-+     * @since 3.0
-+     */
-+     boolean isInitial();
-+
-+
- }
+@@ -39,7 +36,6 @@
+ import org.mortbay.jetty.Connector;
+ import org.mortbay.jetty.Handler;
+ import org.mortbay.jetty.HttpSchemes;
+-import org.mortbay.jetty.HttpVersions;
+ import org.mortbay.jetty.Server;
+ import org.mortbay.jetty.bio.SocketConnector;
+ import org.mortbay.jetty.client.HttpClient;
+@@ -47,13 +43,10 @@
+ import org.mortbay.jetty.handler.ContextHandlerCollection;
+ import org.mortbay.jetty.handler.DefaultHandler;
+ import org.mortbay.jetty.handler.HandlerCollection;
+-import org.mortbay.jetty.handler.RequestLogHandler;
+-import org.mortbay.jetty.nio.SelectChannelConnector;
+ import org.mortbay.jetty.servlet.Context;
+ import org.mortbay.jetty.servlet.ServletHolder;
+ import org.mortbay.jetty.webapp.WebAppContext;
+ import org.mortbay.util.IO;
+-import org.mortbay.util.ajax.Continuation;
+ import org.mortbay.util.ajax.ContinuationSupport;
  
-Index: modules/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java
+ 
+@@ -128,10 +121,9 @@
+         {
+             final InputStream in=request.getInputStream();
+             final OutputStream out=response.getOutputStream();
+-            final Continuation continuation = ContinuationSupport.getContinuation(request,request);
+ 
+             
+-            if (!continuation.isPending())
++            if (request.isInitial())
+             {
+                 final byte[] buffer = new byte[4096]; // TODO avoid this!
+                 String uri=request.getRequestURI();
+@@ -155,7 +147,7 @@
+                     protected void onResponseComplete() throws IOException
+                     {
+                         System.err.println("onResponseComplete()");
+-                        continuation.resume();
++                        request.complete();
+                     }
+ 
+                     protected void onResponseContent(Buffer content) throws IOException
+@@ -259,7 +251,7 @@
+ 
+                 _client.send(exchange);
+                 
+-                continuation.suspend(30000);
++                request.suspend();
+             }
+         }
+ 
+Index: modules/server/jetty-server/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java
 ===================================================================
---- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(revision 2442)
-+++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(working copy)
-@@ -407,6 +407,84 @@
-     public int getLocalPort(){
-         return this.request.getLocalPort();
-     }
-+
-+    /* ------------------------------------------------------------ */
-+    /**
-+     * @see javax.servlet.ServletRequest#complete()
-+     */
-+    public void complete()
-+    {
-+        request.complete();
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /**
-+     * @return
-+     * @see javax.servlet.ServletRequest#isInitial()
-+     */
-+    public boolean isInitial()
-+    {
-+        return request.isInitial();
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /**
-+     * @return
-+     * @see javax.servlet.ServletRequest#isResumed()
-+     */
-+    public boolean isResumed()
-+    {
-+        return request.isResumed();
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /**
-+     * @return
-+     * @see javax.servlet.ServletRequest#isSuspended()
-+     */
-+    public boolean isSuspended()
-+    {
-+        return request.isSuspended();
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /**
-+     * @return
-+     * @see javax.servlet.ServletRequest#isTimeout()
-+     */
-+    public boolean isTimeout()
-+    {
-+        return request.isTimeout();
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /**
-+     * @see javax.servlet.ServletRequest#resume()
-+     */
-+    public void resume()
-+    {
-+        request.resume();
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /**
-+     * @see javax.servlet.ServletRequest#suspend()
-+     */
-+    public void suspend()
-+    {
-+        request.suspend();
-+    }
-+
-+    /* ------------------------------------------------------------ */
-+    /**
-+     * @param timeoutMs
-+     * @see javax.servlet.ServletRequest#suspend(long)
-+     */
-+    public void suspend(long timeoutMs)
-+    {
-+        request.suspend(timeoutMs);
-+    }
-     
-+    
- }
- 
-Index: modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java
-===================================================================
---- modules/server/jetty-server/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(revision 2442)
+--- modules/server/jetty-server/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(revision 2504)
 +++ modules/server/jetty-server/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest.java	(working copy)
 @@ -9,6 +9,7 @@
  import org.mortbay.io.nio.SelectChannelEndPoint;
@@ -287,11 +109,254 @@ Index: modules/jetty/src/test/java/org/mortbay/jetty/BusySelectChannelServerTest
                  {
                      int write;
                      int read;
-Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
+Index: modules/server/jetty-server/src/test/java/org/mortbay/jetty/DumpHandler.java
+===================================================================
+--- modules/server/jetty-server/src/test/java/org/mortbay/jetty/DumpHandler.java	(revision 2504)
++++ modules/server/jetty-server/src/test/java/org/mortbay/jetty/DumpHandler.java	(working copy)
+@@ -82,7 +82,16 @@
+         writer.write("<pre>\ncontentType="+request.getContentType()+"\n</pre>\n");
+         writer.write("<pre>\nencoding="+request.getCharacterEncoding()+"\n</pre>\n");
+         writer.write("<h3>Header:</h3><pre>");
+-        writer.write(request.toString());
++        writer.write(request.getMethod()+" "+request.getRequestURI()+" "+request.getProtocol()+"\n");
++        Enumeration headers = request.getHeaderNames();
++        while(headers.hasMoreElements())
++        {
++            String name=(String)headers.nextElement();
++            writer.write(name);
++            writer.write(": ");
++            writer.write(request.getHeader(name));
++            writer.write("\n");
++        }
+         writer.write("</pre>\n<h3>Parameters:</h3>\n<pre>");
+         Enumeration names=request.getParameterNames();
+         while(names.hasMoreElements())
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/NCSARequestLog.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/NCSARequestLog.java	(working copy)
+@@ -262,12 +262,17 @@
+                 buf.append(' ');
+                 buf.append(request.getProtocol());
+                 buf.append("\" ");
+-                int status = response.getStatus();
+-                if (status<=0)
+-                    status=404;
+-                buf.append((char)('0'+((status/100)%10)));
+-                buf.append((char)('0'+((status/10)%10)));
+-                buf.append((char)('0'+(status%10)));
++                if (request.isSuspended())
++                    buf.append("SUS");
++                else
++                {
++                    int status = response.getStatus();
++                    if (status<=0)
++                        status=404;
++                    buf.append((char)('0'+((status/100)%10)));
++                    buf.append((char)('0'+((status/10)%10)));
++                    buf.append((char)('0'+(status%10)));
++                }
+ 
+ 
+                 long responseLength=response.getContentCount();
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/FilterMapping.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/FilterMapping.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/FilterMapping.java	(working copy)
+@@ -27,6 +27,9 @@
+     private transient FilterHolder _holder;
+     private String[] _pathSpecs;
+     private String[] _servletNames;
++    private boolean _redispatch;
++    private boolean _initial;
++    
+ 
+     /* ------------------------------------------------------------ */
+     public FilterMapping()
+@@ -38,15 +41,18 @@
+      * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
+      * @return True if this filter applies
+      */
+-    boolean appliesTo(String path, int type)
++    boolean appliesTo(String path, int type,boolean initial)
+     {
+-       if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
+-       {
+-           for (int i=0;i<_pathSpecs.length;i++)
+-               if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
+-                   return true;
+-       }
+-       return false;
++        if (_initial==_redispatch || _initial&&initial || _redispatch&&!initial)
++        {
++            if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
++            {
++                for (int i=0;i<_pathSpecs.length;i++)
++                    if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
++                        return true;
++            }
++        }
++        return false;
+     }
+     
+     /* ------------------------------------------------------------ */
+@@ -55,11 +61,14 @@
+      *      {@link Handler#REQUEST}, {@link Handler#FORWARD}, {@link Handler#INCLUDE} or {@link Handler#ERROR}.
+      * @return <code>true</code> if this filter applies
+      */
+-    boolean appliesTo(int type)
++    boolean appliesTo(int type, boolean initial)
+     {
+-       if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)))
+-           return true;
+-       return false;
++        if (_initial==_redispatch || _initial&&initial || _redispatch&&!initial)
++        {
++            if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)))
++                return true;
++        }
++        return false;
+     }
+ 
+     
+@@ -183,4 +192,40 @@
+     {
+         return "(F="+_filterName+","+(_pathSpecs==null?"[]":Arrays.asList(_pathSpecs).toString())+","+(_servletNames==null?"[]":Arrays.asList(_servletNames).toString())+","+_dispatches+")"; 
+     }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return the redispatch
++     */
++    public boolean isRedispatchLifeCycle()
++    {
++        return _redispatch;
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @param redispatch the redispatch to set
++     */
++    public void setRedispatchLifeCycle(boolean redispatch)
++    {
++        _redispatch = redispatch;
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return the initial
++     */
++    public boolean isInitialLifeCycle()
++    {
++        return _initial;
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @param initial the initial to set
++     */
++    public void setInitialLifeCycle(boolean initial)
++    {
++        _initial = initial;
++    }
+ }
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/ServletHandler.java	(working copy)
+@@ -291,7 +291,7 @@
+     {
+         if (!isStarted())
+             return;
+-
++        
+         // Get the base requests
+         final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+         final String old_servlet_name=base_request.getServletName();
+@@ -332,7 +332,7 @@
+                     }
+                     
+                     if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+-                        chain=getFilterChain(type, target, servlet_holder);
++                        chain=getFilterChain(type, target, servlet_holder,request.isInitial());
+                 }      
+             }
+             else
+@@ -342,7 +342,7 @@
+                 if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+                 {
+                     base_request.setServletName(servlet_holder.getName());
+-                    chain=getFilterChain(type, null,servlet_holder);
++                    chain=getFilterChain(type, null,servlet_holder,request.isInitial());
+                 }
+             }
+ 
+@@ -366,7 +366,6 @@
+         }
+         catch(RetryRequest e)
+         {
+-            base_request.setHandled(false);
+             throw e;
+         }
+         catch(EofException e)
+@@ -462,9 +461,12 @@
+     }
+ 
+     /* ------------------------------------------------------------ */
+-    private FilterChain getFilterChain(int requestType, String pathInContext, ServletHolder servletHolder) 
++    private FilterChain getFilterChain(int requestType, String pathInContext, ServletHolder servletHolder, boolean initial) 
+     {
+         String key=pathInContext==null?servletHolder.getName():pathInContext;
++        if (!initial)
++            key="!"+key;
++            
+         
+         if (_filterChainsCached && _chainCache!=null)
+         {
+@@ -486,7 +488,7 @@
+             for (int i= 0; i < _filterPathMappings.size(); i++)
+             {
+                 FilterMapping mapping = (FilterMapping)_filterPathMappings.get(i);
+-                if (mapping.appliesTo(pathInContext, requestType))
++                if (mapping.appliesTo(pathInContext, requestType,initial))
+                     filters= LazyList.add(filters, mapping.getFilterHolder());
+             }
+         }
+@@ -501,7 +503,7 @@
+                 for (int i=0; i<LazyList.size(o);i++)
+                 {
+                     FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+-                    if (mapping.appliesTo(requestType))
++                    if (mapping.appliesTo(requestType,initial))
+                         filters=LazyList.add(filters,mapping.getFilterHolder());
+                 }
+                 
+@@ -509,7 +511,7 @@
+                 for (int i=0; i<LazyList.size(o);i++)
+                 {
+                     FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+-                    if (mapping.appliesTo(requestType))
++                    if (mapping.appliesTo(requestType,initial))
+                         filters=LazyList.add(filters,mapping.getFilterHolder());
+                 }
+             }
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/servlet/DefaultServlet.java	(working copy)
+@@ -46,7 +46,6 @@
+ import org.mortbay.jetty.MimeTypes;
+ import org.mortbay.jetty.ResourceCache;
+ import org.mortbay.jetty.Response;
+-import org.mortbay.jetty.ResourceCache.Miss;
+ import org.mortbay.jetty.handler.ContextHandler;
+ import org.mortbay.jetty.nio.NIOConnector;
+ import org.mortbay.log.Log;
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
-@@ -0,0 +1,435 @@
+@@ -0,0 +1,481 @@
 +package org.mortbay.jetty;
 +
 +import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
@@ -300,41 +365,42 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +public class Suspendable
 +{
 +    // STATES:
-+    private static final int __UNDISPATCHED=0; // Idle request
-+    private static final int __DISPATCHED=1;   // Request dispatched to filter/servlet
++    private static final int __IDLE=0; // Idle request
++    private static final int __HANDLING=1;   // Request dispatched to filter/servlet
 +    private static final int __SUSPENDING=2;   // Suspend called, but not yet returned to container
 +    private static final int __RESUMING=3;     // resumed while suspending
-+    private static final int __COMPLETING=4;   // resumed while suspending
++    private static final int __COMPLETING=4;   // resumed while suspending or suspended
 +    private static final int __SUSPENDED=5;    // Suspended and parked
-+    private static final int __UNSUSPENDING=6; // Needs to be dispatched
++    private static final int __UNSUSPENDING=6; // Has been scheduled
 +    
 +    // State table
-+    //                     __DISPATCH    __UNDISPATCH       __SUSPEND      __RESUME   
-+    // UNDISPATCHED */  {__DISPATCHED,      __Illegal,      __Illegal,      __Illegal  },    
-+    // DISPATCHED */    {   __Illegal, __UNDISPATCHED,   __SUSPENDING,       __Ignore  },
++    //                       __HANDLE      __UNHANDLE       __SUSPEND        __RESUME   
++    // IDLE */          {  __HANDLING,      __Illegal,      __Illegal,      __Illegal  },    
++    // HANDLING */      {   __Illegal,         __IDLE,   __SUSPENDING,       __Ignore  },
 +    // SUSPENDING */    {   __Illegal,    __SUSPENDED,      __Illegal,     __RESUMING  },
-+    // RESUMING */      {   __Illegal, __UNSUSPENDING,      __Ignored,       __Ignore  },
-+    // COMPLETING */    {   __Illegal, __UNDISPATCHED,      __Illegal,       __Illegal },
-+    // SUSPENDED */     {__DISPATCHED,      __Illegal,      __Illegal, __UNSUSPENDING  },
-+    // UNSUSPENDING */  {__DISPATCHED,      __Illegal,      __Illegal,       __Ignore  }
++    // RESUMING */      {   __Illegal,      _HANDLING,      __Ignored,       __Ignore  },
++    // COMPLETING */    {   __Illegal,         __IDLE,      __Illegal,       __Illegal },
++    // SUSPENDED */     {  __HANDLING,      __Illegal,      __Illegal, __UNSUSPENDING  },
++    // UNSUSPENDING */  {  __HANDLING,      __Illegal,      __Illegal,       __Ignore  }
 +    
 +    // State diagram
 +    //
-+    //   +-->  UNDISPATCHED  <---------------> DISPATCHED
-+    //   |                                       ^   |
-+    //   |                                       |   |
-+    //   | +-------------------------------------+   |
-+    //   | |                                     |   |
-+    //   | |       +-----------------------------+   |
-+    //   | |       |                                 v
-+    //   | |   SUSPENDED <-------- ------------ SUSPENDING
-+    //   | |       |                              |    |
-+    //   | |       |                              |    |
-+    //   | |       v                              v    |
-+    //   | +-- UNSUSPENDING <--------------- RESUMING  |
-+    //   |                                             |
-+    //   |                                             v
-+    //   +----------------------------------------COMPLETING
++    //   +----->  IDLE  <---------------------> HANDLING
++    //   |                                       ^  |
++    //   |                                       |  |
++    //   |          +--------------------------->|  |
++    //   |          ^                            |  |
++    //   |          |     +--------------------->+  |   
++    //   |          |     ^                ^        |
++    //   |          |     |                |        v
++    //   |          |    SUSPENDED <----------- SUSPENDING
++    //   |          |     |  |             |    |   |
++    //   |          |     |  |             |    |   |
++    //   |          |     v  |             |    v   |
++    //   |     UNSUSPENDING  |            RESUMING  |
++    //   |                   |                |     |
++    //   |                   v                v     v
++    //   +---------------- COMPLETING  <------------+
 +    
 +    
 +    protected HttpConnection _connection;
@@ -342,6 +408,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +    protected int _state;
 +    protected boolean _initial;
 +    protected boolean _resumed;   // resume called (different to resumed state)
++    protected boolean _timeout;
 +    
 +    protected long _timeoutMs;
 +    protected final Timeout.Task _timeoutTask;
@@ -351,7 +418,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +    public Suspendable(HttpConnection connection)
 +    {
 +        _connection=connection;
-+        _state=__UNDISPATCHED;
++        _state=__IDLE;
 +        _initial=true;
 +        _resumed=false;
 +            
@@ -419,7 +486,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +    {
 +        synchronized(this)
 +        {
-+            return _timeoutTask.isExpired();
++            return _timeout;
 +        }
 +    }
 +    
@@ -437,18 +504,26 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +    /* ------------------------------------------------------------ */
 +    public String toString()
 +    {
++        return getStatusString();
++    }
++
++    /* ------------------------------------------------------------ */
++    public String getStatusString()
++    {
 +        synchronized (this)
 +        {
-+            return super.toString()+
-+            ((_state==0)?" UNDISPATCHED":
-+                (_state==1)?" DISPATCHED":
-+                    (_state==2)?" SUSPENDING":
-+                        (_state==3)?" SUSPENDED":
-+                            (_state==4)?" RESUMING":
-+                                    " ???")+
++            return
++            ((_state==__IDLE)?"IDLE":
++                (_state==__HANDLING)?"HANDLING":
++                    (_state==__SUSPENDING)?"SUSPENDING":
++                        (_state==__SUSPENDED)?"SUSPENDED":
++                            (_state==__RESUMING)?"RESUMING":
++                                (_state==__UNSUSPENDING)?"UNSUSPENDING":
++                                    (_state==__COMPLETING)?"COMPLETING":
++                                    ("???"+_state))+
 +            (_initial?",initial":"")+
 +            (_resumed?",resumed":"")+
-+            (isTimeout()?",timeout":"");
++            (_timeout?",timeout":"");
 +        }
 +    }
 +
@@ -456,38 +531,35 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +    /* (non-Javadoc)
 +     * @see javax.servlet.ServletRequest#resume()
 +     */
-+    public void dispatch()
++    public void handling()
 +    {
 +        synchronized (this)
 +        {
-+            synchronized (this)
++            switch(_state)
 +            {
-+                switch(_state)
-+                {
-+                    case __DISPATCHED:
-+                        throw new IllegalStateException(this.toString());
-+                        
-+                    case __UNDISPATCHED:
-+                        _initial=true;
-+                        _state=__DISPATCHED;
-+                        return;
-+                        
-+                    case __SUSPENDING:
-+                    case __RESUMING:
-+                    case __COMPLETING:
-+                        throw new IllegalStateException(this.toString());
-+                        
-+                    case __SUSPENDED:
-+                    case __UNSUSPENDING:
-+                        _initial=false;
-+                        cancelTimeout();
-+                        _state=__DISPATCHED;
-+                        return;
-+                        
-+                    default:
-+                        throw new IllegalStateException(""+_state);
-+                }
++                case __HANDLING:
++                    throw new IllegalStateException(this.getStatusString());
++
++                case __IDLE:
++                    _initial=true;
++                    _state=__HANDLING;
++                    return;
++
++                case __SUSPENDING:
++                case __RESUMING:
++                case __COMPLETING:
++                    throw new IllegalStateException(this.getStatusString());
++
++                case __SUSPENDED:
++                    cancelTimeout();
++                case __UNSUSPENDING:
++                    _state=__HANDLING;
++                    return;
++
++                default:
++                    throw new IllegalStateException(""+_state);
 +            }
++
 +        }
 +    }
 +
@@ -499,78 +571,76 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +    {
 +        synchronized (this)
 +        {
-+            synchronized (this)
++            switch(_state)
 +            {
-+                switch(_state)
-+                {
-+                    case __DISPATCHED:
-+                        _state=__SUSPENDING;
-+                        _timeoutMs = timeoutMs;
-+                        return;
-+                        
-+                    case __UNDISPATCHED:
-+                        throw new IllegalStateException(this.toString());
-+                        
-+                    case __SUSPENDING:
-+                    case __RESUMING:
-+                        if (timeoutMs<_timeoutMs)
-+                            _timeoutMs = timeoutMs;
-+                        return;
++                case __HANDLING:
++                    _timeout=false;
++                    _resumed=false;
++                    _state=__SUSPENDING;
++                    _timeoutMs = timeoutMs;
++                    return;
 +
-+                    case __COMPLETING:
-+                    case __SUSPENDED:
-+                    case __UNSUSPENDING:
-+                        throw new IllegalStateException(this.toString());
-+                        
-+                    default:
-+                        throw new IllegalStateException(""+_state);
-+                }
++                case __IDLE:
++                    throw new IllegalStateException(this.getStatusString());
++
++                case __SUSPENDING:
++                case __RESUMING:
++                    if (timeoutMs<_timeoutMs)
++                        _timeoutMs = timeoutMs;
++                    return;
++
++                case __COMPLETING:
++                case __SUSPENDED:
++                case __UNSUSPENDING:
++                    throw new IllegalStateException(this.getStatusString());
++
++                default:
++                    throw new IllegalStateException(""+_state);
 +            }
++
 +        }
 +    }
 +
 +    /* ------------------------------------------------------------ */
-+    public boolean undispatch()
++    public boolean unhandling()
 +    {
 +        synchronized (this)
 +        {
-+            synchronized (this)
++            switch(_state)
 +            {
-+                switch(_state)
-+                {
-+                    case __DISPATCHED:
-+                        _state=__UNDISPATCHED;
-+                        return true;
-+                        
-+                    case __UNDISPATCHED:
-+                        throw new IllegalStateException(this.toString());
-+                        
-+                    case __SUSPENDING:
-+                        _state=__SUSPENDED;
-+                        scheduleTimeout();
-+                        return true;
-+                        
-+                    case __RESUMING:
-+                        _state=__UNSUSPENDING;
-+                        scheduleDispatch();
-+                        return false; // DON'T do the undispatch
++                case __HANDLING:
++                    _state=__IDLE;
++                    return true;
 +
-+                    case __COMPLETING:
-+                        // TODO?
-+       
-+                        _state=__UNDISPATCHED;
-+                        return true;
-+                        
-+                    case __SUSPENDED:
-+                        throw new IllegalStateException(this.toString());
-+                        
-+                    case __UNSUSPENDING:
-+                        throw new IllegalStateException(this.toString());
-+                        
-+                    default:
-+                        throw new IllegalStateException(""+_state);
-+                }
++                case __IDLE:
++                    throw new IllegalStateException(this.getStatusString());
++
++                case __SUSPENDING:
++                    _initial=false;
++                    _state=__SUSPENDED;
++                    scheduleTimeout();
++                    return true;
++
++                case __RESUMING:
++                    _initial=false;
++                    _state=__HANDLING;
++                    return false; 
++
++                case __COMPLETING:
++                    _initial=false;
++                    _state=__IDLE;
++                    return true;
++
++                case __SUSPENDED:
++                    throw new IllegalStateException(this.getStatusString());
++
++                case __UNSUSPENDING:
++                    throw new IllegalStateException(this.getStatusString());
++
++                default:
++                    throw new IllegalStateException(""+_state);
 +            }
++
 +        }
 +    }
 +
@@ -581,12 +651,12 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +        {
 +            switch(_state)
 +            {
-+                case __DISPATCHED:
++                case __HANDLING:
 +                    _resumed=true;
 +                    return;
 +                    
-+                case __UNDISPATCHED:
-+                    throw new IllegalStateException(this.toString());
++                case __IDLE:
++                    return;
 +                    
 +                case __SUSPENDING:
 +                    _resumed=true;
@@ -599,12 +669,13 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +                    return;
 +                    
 +                case __COMPLETING:
-+                    throw new IllegalStateException(this.toString());
++                    throw new IllegalStateException(this.getStatusString());
 +                    
 +                case __SUSPENDED:
 +                    _resumed=true;
-+                    _state=__UNSUSPENDING;
++                    cancelTimeout();
 +                    scheduleDispatch();
++                    _state=__UNSUSPENDING;
 +                    return;
 +                    
 +                case __UNSUSPENDING:
@@ -626,34 +697,38 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +        {
 +            switch(_state)
 +            {
-+                case __DISPATCHED:
++                case __HANDLING:
 +                    return;
 +                    
-+                case __UNDISPATCHED:
-+                    throw new IllegalStateException(this.toString());
++                case __IDLE:
++                    throw new IllegalStateException(this.getStatusString());
 +                    
 +                case __SUSPENDING:
++                    _timeout=true;
 +                    _state=__RESUMING;
 +                    return;
 +                    
 +                case __RESUMING:
++                    _timeout=true;
 +                    _state=__RESUMING;
 +                    return;
 +                    
 +                case __COMPLETING:
-+                    throw new IllegalStateException(this.toString());
++                    throw new IllegalStateException(this.getStatusString());
 +                    
 +                case __SUSPENDED:
-+                    _state=__UNSUSPENDING;
++                    _timeout=true;
++                    cancelTimeout();
 +                    scheduleDispatch();
++                    _state=__UNSUSPENDING;
 +                    
 +                case __UNSUSPENDING:
++                    _timeout=true;
 +                    return;
 +                    
 +                default:
 +                    throw new IllegalStateException(""+_state);
 +            }
-+            
 +        }
 +    }
 +    
@@ -668,11 +743,12 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +        {
 +            switch(_state)
 +            {
-+                case __DISPATCHED:
-+                    throw new IllegalStateException(this.toString());
++                case __HANDLING:
++                    _state=__COMPLETING;
++                    break;
 +                    
-+                case __UNDISPATCHED:
-+                    throw new IllegalStateException(this.toString());
++                case __IDLE:
++                    throw new IllegalStateException(this.getStatusString());
 +                    
 +                case __SUSPENDING:
 +                case __RESUMING:
@@ -683,11 +759,12 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +                    return;
 +                    
 +                case __SUSPENDED:
-+                    _state=__UNDISPATCHED;
-+                    // TODO complete ??;
++                    cancelTimeout();
++                    scheduleDispatch();
++                    _state=__COMPLETING;
 +                    
 +                case __UNSUSPENDING:
-+                    throw new IllegalStateException(""+_state);
++                    _state=__COMPLETING;
 +                    
 +                default:
 +                    throw new IllegalStateException(""+_state);
@@ -702,7 +779,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +        synchronized (this)
 +        {
 +            // last("reset");
-+            _state=(_state==__SUSPENDED||_state==__UNDISPATCHED)?__UNDISPATCHED:__DISPATCHED;
++            _state=(_state==__SUSPENDED||_state==__IDLE)?__IDLE:__HANDLING;
 +            _resumed = false;
 +            _initial = true;
 +        }
@@ -725,19 +802,66 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
 +    {
 +        _connection.cancelTimeout(_timeoutTask);
 +    }
++
++    /* ------------------------------------------------------------ */
++    public boolean isCompleting()
++    {
++        return _state==__COMPLETING;
++    }
++    
++    /* ------------------------------------------------------------ */
++    public boolean shouldHandleRequest()
++    {
++        switch(_state)
++        {
++            case __COMPLETING:
++                return false;
++                
++            default:
++            return true;
++        }
++    }
++
++    /* ------------------------------------------------------------ */
++    public boolean shouldComplete()
++    {
++        switch(_state)
++        {
++            case __RESUMING:
++            case __SUSPENDED:
++            case __SUSPENDING:
++                return false;
++                
++            default:
++            return true;
++        }
++    }
 +    
 +}
 
-Property changes on: modules/jetty/src/main/java/org/mortbay/jetty/Suspendable.java
+Property changes on: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java
 ___________________________________________________________________
 Name: svn:eol-style
    + native
 
-Index: modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/AbstractConnector.java
 ===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/jetty/AbstractConnector.java	(revision 2442)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/AbstractConnector.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/AbstractConnector.java	(working copy)
-@@ -461,12 +461,6 @@
+@@ -19,12 +19,9 @@
+ import java.net.Socket;
+ 
+ import org.mortbay.component.LifeCycle;
+-import org.mortbay.io.Connection;
+ import org.mortbay.io.EndPoint;
+ import org.mortbay.log.Log;
+ import org.mortbay.thread.ThreadPool;
+-import org.mortbay.util.ajax.Continuation;
+-import org.mortbay.util.ajax.WaitingContinuation;
+ 
+ 
+ /** Abstract Connector implementation.
+@@ -461,12 +458,6 @@
      {
          _integralScheme = integralScheme;
      }
@@ -750,19 +874,121 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/AbstractConnector.java
      
      /* ------------------------------------------------------------ */
      protected abstract void accept(int acceptorID) throws IOException, InterruptedException;
-Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
 ===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnection.java	(revision 2442)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(working copy)
+@@ -1218,7 +1218,7 @@
+          */
+         public int getMajorVersion()
+         {
+-            return 2;
++            return 3;
+         }
+ 
+         /* ------------------------------------------------------------ */
+@@ -1241,7 +1241,7 @@
+          */
+         public int getMinorVersion()
+         {
+-            return 5;
++            return 0;
+         }
+ 
+         /* ------------------------------------------------------------ */
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/DefaultHandler.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/DefaultHandler.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/DefaultHandler.java	(working copy)
+@@ -77,6 +77,7 @@
+         
+         if (response.isCommitted() || base_request.isHandled())
+             return;
++        
+         base_request.setHandled(true);
+         
+         String method=request.getMethod();
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(working copy)
+@@ -88,6 +88,7 @@
+         URL j2ee14xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_1_4.xsd",true);
+         URL webapp24xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_4.xsd",true);
+         URL webapp25xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_5.xsd",true);
++        URL webapp30xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_3_0.xsd",true);
+         URL schemadtd=Loader.getResource(Servlet.class,"/javax/servlet/resources/XMLSchema.dtd",true);
+         URL xmlxsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/xml.xsd",true);
+         URL webservice11xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_web_services_client_1_1.xsd",true);
+@@ -133,6 +134,8 @@
+         redirect(xmlParser,"http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd",webapp24xsd);
+         redirect(xmlParser,"web-app_2_5.xsd",webapp25xsd);
+         redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd",webapp25xsd);
++        redirect(xmlParser,"web-app_3_0.xsd",webapp30xsd);
++        redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd",webapp30xsd);
+         redirect(xmlParser,"xml.xsd",xmlxsd);
+         redirect(xmlParser,"http://www.w3.org/2001/xml.xsd",xmlxsd);
+         redirect(xmlParser,"datatypes.dtd",datatypesdtd);
+@@ -489,6 +492,17 @@
+         }
+         mapping.setDispatches(dispatcher);
+ 
++        iter=node.iterator("life-cycle");
++        while(iter.hasNext())
++        {
++            String l=((XmlParser.Node)iter.next()).toString(false,true);
++            if ("initial".equalsIgnoreCase(l))
++                mapping.setInitialLifeCycle(true);
++            if ("redispatch".equalsIgnoreCase(l))
++                mapping.setRedispatchLifeCycle(true);
++        }
++        mapping.setDispatches(dispatcher);
++        
+         _filterMappings=LazyList.add(_filterMappings,mapping);
+     }
+ 
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java	(working copy)
+@@ -15,22 +15,16 @@
+ 
+ package org.mortbay.jetty.webapp;
+ 
+-import java.io.File;
+ import java.io.InputStream;
+ import java.net.URL;
+ import java.net.URLClassLoader;
+-import java.util.Enumeration;
+ import java.util.EventListener;
+ import java.util.HashSet;
+ import java.util.Iterator;
+-import java.util.Map;
+ import java.util.Set;
+ import java.util.jar.JarEntry;
+-import java.util.jar.JarFile;
+ import java.util.jar.JarInputStream;
+-import java.util.jar.Manifest;
+ import java.util.regex.Pattern;
+-import java.util.zip.ZipEntry;
+ 
+ import javax.servlet.Servlet;
+ 
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnection.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnection.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnection.java	(working copy)
-@@ -30,6 +30,7 @@
+@@ -30,8 +30,8 @@
  import org.mortbay.io.nio.SelectChannelEndPoint;
  import org.mortbay.log.Log;
  import org.mortbay.resource.Resource;
 +import org.mortbay.thread.Timeout;
  import org.mortbay.util.URIUtil;
- import org.mortbay.util.ajax.Continuation;
+-import org.mortbay.util.ajax.Continuation;
  
-@@ -60,7 +61,6 @@
+ /**
+  * <p>A HttpConnection represents the connection of a HTTP client to the server
+@@ -60,7 +60,6 @@
      private boolean _handling;
      private boolean _destroy;
      
@@ -770,30 +996,36 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
      protected Connector _connector;
      protected EndPoint _endp;
      protected Server _server;
-@@ -378,12 +378,11 @@
+@@ -369,21 +368,16 @@
+                 synchronized(this)
+                 {
+                     if (_handling)
+-                    {
+                         throw new IllegalStateException(); // TODO delete this check
+-                    }
+                     _handling=true;
+                 }
+                 
                  setCurrentConnection(this);
                  long io=0;
                  
 -                Continuation continuation = _request.getContinuation();
 -                if (continuation != null && continuation.isPending())
-+                // TODO not the right test
 +                if (!_request.isInitial())
                  {
 -                    Log.debug("resume continuation {}",continuation);
 -                    if (_request.getMethod()==null)
 -                        throw new IllegalStateException();
-+                    System.err.println("RETRYING!");
 +                    Log.debug("resume request",_request);
                      handleRequest();
                  }
                  else
-@@ -463,10 +462,10 @@
+@@ -463,10 +457,9 @@
                      no_progress=0;
                  }
                  
 -                Continuation continuation = _request.getContinuation();
 -                if (continuation != null && continuation.isPending())
-+                // TODO - not the right test!
 +                if (_request.isSuspended())
                  {
 -                    Log.debug("return with pending continuation");
@@ -801,7 +1033,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
                      return;
                  }
                  else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
-@@ -474,8 +473,41 @@
+@@ -474,8 +467,41 @@
              }
          }
      }
@@ -844,7 +1076,44 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
      public void reset(boolean returnBuffers)
      {
          _parser.reset(returnBuffers); // TODO maybe only release when low on resources
-@@ -520,8 +552,7 @@
+@@ -492,14 +518,16 @@
+     /* ------------------------------------------------------------ */
+     protected void handleRequest() throws IOException
+     {
+-        if (_server != null)
++        _request.handling();
++        boolean handling=true;
++        
++        while (handling)
+         {
+-            boolean retrying = false;
++            _request.setHandled(false);
+             boolean error = false;
+             String threadName=null;
+             try
+             {
+-                // TODO try to do this lazily or more efficiently
+                 String info=URIUtil.canonicalPath(_uri.getDecodedPath());
+                 if (info==null)
+                     throw new HttpException(400);
+@@ -508,20 +536,21 @@
+                 if (_out!=null)
+                     _out.reopen();
+                 
++                if (_request.isInitial())
++                    _connector.customize(_endp, _request);
++                  
+                 if (Log.isDebugEnabled())
+                 {
+                     threadName=Thread.currentThread().getName();
+                     Thread.currentThread().setName(threadName+" - "+_uri);
+                 }
+                 
+-                _connector.customize(_endp, _request);
+-                
+-                _server.handle(this);
++                if (_request.shouldHandleRequest())
++                    _server.handle(this);
              }
              catch (RetryRequest r)
              {
@@ -854,26 +1123,125 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/HttpConnection.java
              }
              catch (EofException e)
              {
-@@ -554,8 +585,13 @@
+@@ -551,10 +580,16 @@
+             }
+             finally
+             {   
++                handling = !_request.unhandling() && _server == null;
++                
++                if (handling)
++                    continue;
++                
                  if (threadName!=null)
                      Thread.currentThread().setName(threadName);
                  
 -                if (!retrying)
-+                // TODO - not the right test!
-+                if (_request.isSuspended())
++                
++                if (_request.shouldComplete() )
                  {
-+                    System.err.println("SUSPENDING!");
-+                }
-+                else
-+                {
                      if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                      {
-                         // Continue not sent so don't parse any content 
-Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/CookieCutter.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/CookieCutter.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/CookieCutter.java	(working copy)
+@@ -1,6 +1,4 @@
+ package org.mortbay.jetty;
+-import java.util.Enumeration;
+-
+ import javax.servlet.http.Cookie;
+ 
+ import org.mortbay.log.Log;
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Servlet3Continuation.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Servlet3Continuation.java	(revision 0)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Servlet3Continuation.java	(revision 0)
+@@ -0,0 +1,74 @@
++package org.mortbay.jetty;
++
++import org.mortbay.util.ajax.Continuation;
++
++public class Servlet3Continuation implements Continuation
++{
++    Request _request;
++    Object _object;
++    RetryRequest _retry;
++    
++    Servlet3Continuation(Request request)
++    {
++        _request=request;
++    }
++    
++    public Object getObject()
++    {
++        return _object;
++    }
++
++    public boolean isExpired()
++    {
++        return _request.isTimeout();
++    }
++
++    public boolean isNew()
++    {
++        return _retry==null;
++    }
++
++    public boolean isPending()
++    {
++        return _request.isSuspended() || !_request.isInitial();
++    }
++
++    public boolean isResumed()
++    {
++        return _request.isResumed();
++    }
++
++    public void reset()
++    {
++        _request.reset();
++    }
++
++    public void resume()
++    {
++        System.err.println("Resume");
++        _request.resume();
++    }
++
++    public void setMutex(Object mutex)
++    {
++    }
++
++    public void setObject(Object o)
++    {
++        _object=o;
++    }
++
++    public boolean suspend(long timeout)
++    {
++        System.err.println(_request);
++        if (!_request.isInitial()&&(_request.isResumed()||_request.isTimeout()))
++            return _request.isResumed();
++
++        _request.suspend(timeout);
++        if (_retry==null)
++            _retry=new RetryRequest();
++        throw _retry;
++        
++    }
++
++}
+
+Property changes on: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Servlet3Continuation.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java	(revision 0)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java	(revision 0)
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,48 @@
 +// ========================================================================
 +// Copyright 2006 Mort Bay Consulting Pty. Ltd.
 +// ------------------------------------------------------------------------
@@ -896,7 +1264,6 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChanne
 +
 +import org.mortbay.io.nio.SelectChannelEndPoint;
 +import org.mortbay.io.nio.SelectorManager.SelectSet;
-+import org.mortbay.jetty.HttpConnection;
 +
 +public class SuspendableSelectChannelEndPoint extends SelectChannelEndPoint
 +{
@@ -915,45 +1282,37 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChanne
 +    
 +    public boolean dispatch()
 +    {
-+        synchronized (this)
-+        {
-+            ((HttpConnection)_connection).getRequest().dispatch();
-+            boolean dispatched=super.dispatch();
-+            return dispatched;
-+        }
++        return super.dispatch();
 +    }
 +    
 +    public boolean undispatch()
 +    {
-+        synchronized (this)
-+        {
-+            boolean undispatch=((HttpConnection)_connection).getRequest().undispatch();
-+            if (undispatch)
-+                return super.undispatch();
-+            return false;
-+        }
++        return super.undispatch();
 +    }
 +}
 \ No newline at end of file
 
-Property changes on: modules/jetty/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java
+Property changes on: modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SuspendableSelectChannelEndPoint.java
 ___________________________________________________________________
 Name: svn:eol-style
    + native
 
-Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java
 ===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(revision 2442)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.java	(working copy)
-@@ -29,6 +29,7 @@
+@@ -27,9 +27,7 @@
+ import org.mortbay.io.nio.SelectorManager.SelectSet;
+ import org.mortbay.jetty.HttpConnection;
  import org.mortbay.jetty.Request;
- import org.mortbay.jetty.RetryRequest;
- import org.mortbay.thread.Timeout;
+-import org.mortbay.jetty.RetryRequest;
+-import org.mortbay.thread.Timeout;
+-import org.mortbay.util.ajax.Continuation;
 +import org.mortbay.thread.Timeout.Task;
- import org.mortbay.util.ajax.Continuation;
  
  /* ------------------------------------------------------------------------------- */
-@@ -138,7 +139,7 @@
+ /**
+@@ -138,7 +136,7 @@
      /* ------------------------------------------------------------------------------- */
      public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
      {
@@ -962,7 +1321,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.
          cep.cancelIdle();
          request.setTimeStamp(cep.getSelectSet().getNow());
          super.customize(endpoint, request);
-@@ -147,7 +148,7 @@
+@@ -147,7 +145,7 @@
      /* ------------------------------------------------------------------------------- */
      public void persist(org.mortbay.io.EndPoint endpoint) throws IOException
      {
@@ -971,7 +1330,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.
          super.persist(endpoint);
      }
  
-@@ -181,15 +182,6 @@
+@@ -181,15 +179,6 @@
      }
  
      /* ------------------------------------------------------------ */
@@ -987,7 +1346,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.
      public void open() throws IOException
      {
          synchronized(this)
-@@ -338,365 +330,25 @@
+@@ -338,365 +327,25 @@
      /* ------------------------------------------------------------ */
      protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
      {
@@ -1364,9 +1723,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/nio/SelectChannelConnector.
      }
  }
 \ No newline at end of file
-Index: modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/RetryRequest.java
 ===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/jetty/RetryRequest.java	(revision 2442)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/RetryRequest.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/RetryRequest.java	(working copy)
 @@ -15,14 +15,14 @@
  
@@ -1385,19 +1744,11 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/RetryRequest.java
   * extends ThreadDeath, it does not actually stop the thread calling it.
   * It extends ThreadDeath so as to be an Error that will not be caught
   * by most frameworks.
-Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
 ===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java	(revision 2442)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java	(working copy)
-@@ -59,6 +59,7 @@
- import org.mortbay.util.URIUtil;
- import org.mortbay.util.UrlEncoded;
- import org.mortbay.util.ajax.Continuation;
-+import org.mortbay.util.ajax.WaitingContinuation;
- 
- /* ------------------------------------------------------------ */
- /** Jetty Request.
-@@ -93,15 +94,14 @@
+@@ -93,15 +93,14 @@
   * @author gregw
   *
   */
@@ -1415,7 +1766,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
      
      private Attributes _attributes;
      private String _authType;
-@@ -147,7 +147,7 @@
+@@ -147,7 +146,7 @@
       */
      public Request(HttpConnection connection)
      {
@@ -1424,7 +1775,7 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
          _endp=connection.getEndPoint();
          _dns=_connection.getResolveNames();
      }
-@@ -155,6 +155,7 @@
+@@ -155,6 +154,7 @@
      /* ------------------------------------------------------------ */
      protected void recycle()
      {
@@ -1432,24 +1783,55 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
          _handled=false;
          if (_context!=null)
              throw new IllegalStateException("Request in context!");
-@@ -1508,7 +1509,7 @@
+@@ -233,6 +233,8 @@
+     /* ------------------------------------------------------------ */
+     public void setHandled(boolean h)
+     {
++        if (h&& !shouldComplete())
++            new Throwable().printStackTrace();
+         _handled=h;
+     }
+     
+@@ -1499,16 +1501,22 @@
+     }
+ 
+     /* ------------------------------------------------------------ */
++    /**
++     * @deprecated
++     */
+     public Continuation getContinuation()
+     {
+         return _continuation;
+     }
+     
+     /* ------------------------------------------------------------ */
++    /**
++     * @deprecated
++     */
      public Continuation getContinuation(boolean create)
      {
          if (_continuation==null && create)
 -            _continuation=getConnection().getConnector().newContinuation(getConnection());
-+            _continuation=new WaitingContinuation(); // TODO Replace with Servlet3Continuation
++            _continuation=new Servlet3Continuation(this); 
          return _continuation;
      }
      
-@@ -1640,5 +1641,22 @@
+@@ -1541,8 +1549,7 @@
+     /* ------------------------------------------------------------ */
+     public String toString()
+     {
+-        return getMethod()+" "+_uri+" "+getProtocol()+"\n"+
+-        _connection.getRequestFields().toString();
++        return (_handled?"[":"(")+getMethod()+" "+_uri+(_handled?"]@":")@")+hashCode()+" "+super.toString();
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -1640,5 +1647,19 @@
      {
          return _roleMap;
      }
 +
 +    /* ------------------------------------------------------------ */
-+    /* (non-Javadoc)
-+     * @see javax.servlet.ServletRequest#suspend()
-+     */
 +    public void suspend()
 +    {
 +        long timeout = 30000L;
@@ -1464,11 +1846,21 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Request.java
 +    
  }
  
-Index: modules/jetty/src/main/java/org/mortbay/jetty/Connector.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Connector.java
 ===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Connector.java	(revision 2442)
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Connector.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Connector.java	(working copy)
-@@ -169,9 +169,6 @@
+@@ -19,9 +19,7 @@
+ 
+ import org.mortbay.component.LifeCycle;
+ import org.mortbay.io.Buffers;
+-import org.mortbay.io.Connection;
+ import org.mortbay.io.EndPoint;
+-import org.mortbay.util.ajax.Continuation;
+ 
+ /** HTTP Connector.
+  * Implementations of this interface provide connectors for the HTTP protocol.
+@@ -169,9 +167,6 @@
      void persist(EndPoint endpoint) throws IOException;
      
      /* ------------------------------------------------------------ */
@@ -1478,9 +1870,9 @@ Index: modules/jetty/src/main/java/org/mortbay/jetty/Connector.java
      String getHost();
      
      /* ------------------------------------------------------------ */
-Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java
 ===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(revision 2442)
+--- modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(working copy)
 @@ -77,7 +77,7 @@
              // If there are threads dispatched reading and writing
@@ -1499,9 +1891,9 @@ Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java
              if (_dispatched)
                  throw new IllegalStateException("ALREADY DISPATCHED!!!");
  
-Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java
+Index: modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorManager.java
 ===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorManager.java	(revision 2442)
+--- modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorManager.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorManager.java	(working copy)
 @@ -252,7 +252,7 @@
          private transient List[] _changes;
@@ -1566,7 +1958,7 @@ Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java
                      }
                  }
              }
-@@ -623,11 +623,12 @@
+@@ -623,11 +623,11 @@
          }
  
          /* ------------------------------------------------------------ */
@@ -1576,12 +1968,11 @@ Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java
              synchronized (this)
              {
 -                _retryTimeout.schedule(task, timeout);
-+                System.err.println("schedule: "+timeoutMs);
 +                _timeout.schedule(task, timeoutMs);
              }
          }
          
-@@ -692,7 +693,7 @@
+@@ -692,7 +692,7 @@
              synchronized (this)
              {
                  _idleTimeout.cancelAll();
@@ -1590,9 +1981,9 @@ Index: modules/jetty/src/main/java/org/mortbay/io/nio/SelectorManager.java
                  try
                  {
                      if (_selector != null)
-Index: modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java
+Index: modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java
 ===================================================================
---- modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(revision 2442)
+--- modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(revision 2504)
 +++ modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(working copy)
 @@ -68,6 +68,8 @@
              for (int i=0;i<method.length;i++)
@@ -1603,9 +1994,1277 @@ Index: modules/util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java
              }
  
              out.println("</ajax-response>");
-Index: examples/test-webapp/src/main/java/com/acme/TagListener.java
+Index: modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/Continuation.java
 ===================================================================
---- modules/examples/test-webapp/src/main/java/com/acme/TagListener.java	(revision 2442)
+--- modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/Continuation.java	(revision 2504)
++++ modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/Continuation.java	(working copy)
+@@ -15,7 +15,9 @@
+ 
+ package org.mortbay.util.ajax;
+ 
++import javax.servlet.ServletRequest;
+ 
++
+ /* ------------------------------------------------------------ */
+ /** Continuation.
+  * 
+@@ -37,6 +39,7 @@
+  * for events (see {@link org.mortbay.jetty.nio.SelectChannelConnector}).
+  * 
+  * @author gregw
++ * @deprecated use {@link ServletRequest#suspend()}
+  *
+  */
+ public interface Continuation
+Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java
+===================================================================
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2504)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(working copy)
+@@ -48,4 +48,27 @@
+ 
+     /** The request is about to come into scope of the web application. */
+     public void requestInitialized ( ServletRequestEvent sre );
++    
++    /**
++     * A request has been suspended.
++     * Called by the thread that dispatched the servlet when it
++     * has returned to the container.
++     * @since 3.0
++     */
++    void requestSuspended(ServletRequestEvent rre);
++
++    /**
++     * A request has been resumed.
++     * Called by the thread that will dispatch to the servlet 
++     * immediately before dispatch. 
++     * @since 3.0
++     */
++    void requestResumed(ServletRequestEvent rre);
++
++    /**
++     * A request has been completed.
++     * Called from a call to {@ServletRequest#complete()} 
++     * @since 3.0
++     */
++    void requestCompleted(ServletRequestEvent rre);
+ }
+Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java
+===================================================================
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(revision 2504)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(working copy)
+@@ -605,6 +605,142 @@
+      * @since 2.4
+      */
+     public int getLocalPort();
++    
++    
++    
++    /**
++     * Suspend the processing of the request and associated {@link ServletResponse}.
++     * 
++     * <p>After this method has been called, the lifecycle of the request 
++     * will be extended beyond the return to the container from the 
++     * {@link Servlet#service(ServletRequest, ServletResponse)}  method and 
++     * {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)} calls. If a 
++     * request is suspended, then the container will not commit the associated response 
++     * when the call to the filter chain and/or servlet service method returns to the 
++     * container. Any exceptions thrown to the container by a filter chain and/or 
++     * servlet for a suspended requests are silently ignored.</p>
++     *
++     * <p>When the thread calling the filter chain and/or servlet has returned to the 
++     * container with a suspended request, the thread is freed for other tasks and 
++     * the request is held pending either: <ul>
++     * <li>a call to {@link ServletRequest#resume()}.</li>
++     * <li>a call to {@link ServletRequest#complete()}.</li>
++     * <li>the passed or default timeout expires.</li>
++     * <li>there is IO activity on the connection that received the request, such
++     * as the close of the connection or the receipt of a pipelined request.
++     * </ul>
++     * <p>After any of the events listed above, the suspended request will be 
++     * redispatched via the filter and servlet processing.
++     * </p>
++     * 
++     * <p>If a request is already suspended, any subsequent calls to suspend will set
++     * the timeout to the minimum of the previous timeout and the newly passed 
++     * timeout</p>
++     * 
++     * <p>Suspend may only be called by a thread that is within the service calling 
++     * stack of {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)}
++     * and/or {@link Servlet#service(ServletRequest, ServletResponse)}. A request that has    
++     * been dispatched for error handling may not be suspended.
++     * </p>
++     * 
++     * @see {@link #resume()}
++     * @see {@link #complete()}
++     * @since 3.0
++     * 
++     * @param timeoutMs The time in milliseconds to wait before retrying this request.
++     * 
++     * @exception IllegalStateException If the calling thread is not within the calling 
++     * stack of  {@link Filter#doFilter(ServletRequest, ServletResponse, FilterChain)}
++     * and/or {@link Servlet#service(ServletRequest, ServletResponse)} or if the request 
++     * has been dispatched for error handling.
++     */
++     void suspend(long timeoutMs);
+ 
++   /**
++     * Suspend the processing of the request and associated {@link ServletResponse}.
++     * 
++     * <p>Acts as a call to {@link #suspend(long)} but with a container supplied 
++     * timeout. The timeout the container will use may be obtained or set as a Long
++     * context attribute with the name "javax.servlet.suspendTimeoutMs"</p>
++     * @see suspend(long)
++     */
++     void suspend();
++
++    /**
++     * Resume a suspended request.
++     * 
++     * <p>This method can be called by any thread that has been passed a reference to 
++     * a suspended request. When called the request is redispatched to the normal filter 
++     * chain and servlet processing.</p>
++     * 
++     * <p>If resume is called before a suspended request is returned to the container 
++     * (ie the thread that called {@link #suspend(long)} is still within the filter
++     * chain and/or servlet service method), then the resume does not take effect until
++     * the call to the filter chain and/or servlet returns to the container. In this 
++     * case both {@link #isSuspended()} and {@link isResumed()} return true.</p>
++     * 
++     * <p>Multiple calls to resume are ignored</p>
++     * 
++     * @see {@link #suspend()}
++     * @since 3.0
++     * @exception IllegalStateException if the request is not suspended.
++     * 
++     */
++     void resume();
++
++    /**
++     * Complete a suspended request.
++     * 
++     * <p>This method can be called by any thread that has been passed a reference to 
++     * a suspended request. When a request is completed, the associated response object 
++     * commited and flushed. The request is not redispatched.</p>
++     * 
++     * <p>If complete is called before a suspended request is returned to the container 
++     * (ie the thread that called {@link #suspend(long)} is still within the filter
++     * chain and/or servlet service method), then the complete does not take effect until
++     * the call to the filter chain and/or servlet returns to the container. In this 
++     * case both {@link #isSuspended()} and {@link isResumed()} return true.</p>
++     * 
++     * <p>Once complete has been called and any thread calling the filter chain and/or 
++     * servlet chain has returned to the container, the request lifecycle is complete.
++     * The container is able to recycle request objects, so it is not valid hold a request
++     * reference after the end of the life cycle or to call any request methods.
++     * 
++     * @see {@link #suspend()}
++     * @since 3.0
++     * @exception IllegalStateException if the request is not suspended.
++     * 
++     */
++     void complete();
++
++    /**
++     * @return true after {@link #suspend(long)} has been called and before the request 
++     * has been resumed, completed, timed out or reactived due to IO activity.
++     * @since 3.0
++     */
++     boolean isSuspended();
++
++    /**
++     * @return true if the request has been redispatched by a call to {@link #resume()}.   Returns false after any subsequent call to suspend
++     * @since 3.0
++     */
++     boolean isResumed();
++
++    /**
++     * @return true after a request has been redispatched as the result of a timeout. 
++     * Returns false after any subsequent call to suspend.
++     * @since 3.0
++     */
++     boolean isTimeout();
++
++    /**
++     * @return true while the request is within the initial dispatch to the filter chain
++     * and/or servlet. Will return false once the calling thread has returned to the
++     * container after suspend has been called and during any subsequent redispatch.
++     * @since 3.0
++     */
++     boolean isInitial();
++
++
+ }
+ 
+Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java
+===================================================================
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(revision 2504)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(working copy)
+@@ -407,6 +407,84 @@
+     public int getLocalPort(){
+         return this.request.getLocalPort();
+     }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @see javax.servlet.ServletRequest#complete()
++     */
++    public void complete()
++    {
++        request.complete();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#isInitial()
++     */
++    public boolean isInitial()
++    {
++        return request.isInitial();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#isResumed()
++     */
++    public boolean isResumed()
++    {
++        return request.isResumed();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#isSuspended()
++     */
++    public boolean isSuspended()
++    {
++        return request.isSuspended();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#isTimeout()
++     */
++    public boolean isTimeout()
++    {
++        return request.isTimeout();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @see javax.servlet.ServletRequest#resume()
++     */
++    public void resume()
++    {
++        request.resume();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @see javax.servlet.ServletRequest#suspend()
++     */
++    public void suspend()
++    {
++        request.suspend();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @param timeoutMs
++     * @see javax.servlet.ServletRequest#suspend(long)
++     */
++    public void suspend(long timeoutMs)
++    {
++        request.suspend(timeoutMs);
++    }
+     
++    
+ }
+ 
+Index: modules/server/servlet-api-2.5/src/main/resources/javax/servlet/resources/web-app_3_0.xsd
+===================================================================
+--- modules/server/servlet-api-2.5/src/main/resources/javax/servlet/resources/web-app_3_0.xsd	(revision 0)
++++ modules/server/servlet-api-2.5/src/main/resources/javax/servlet/resources/web-app_3_0.xsd	(revision 0)
+@@ -0,0 +1,973 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<xsd:schema xmlns="http://www.w3.org/2001/XMLSchema"
++    targetNamespace="http://java.sun.com/xml/ns/javaee"
++    xmlns:javaee="http://java.sun.com/xml/ns/javaee"
++    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
++    elementFormDefault="qualified" attributeFormDefault="unqualified"
++    version="3.0">
++    <xsd:annotation>
++        <xsd:documentation>
++            @(#)web-app_3_0.xsds1.62 05/08/06
++        </xsd:documentation>
++    </xsd:annotation>
++    <xsd:annotation>
++        <xsd:documentation>
++         Copyright 2006 The Apache Software Foundation
++
++         Licensed under the Apache License, Version 2.0 (the "License");
++         you may not use this file except in compliance with the License.
++         You may obtain a copy of the License at
++
++         http://www.apache.org/licenses/LICENSE-2.0
++
++         Unless required by applicable law or agreed to in writing, software
++         distributed under the License is distributed on an "AS IS" BASIS,
++         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++         See the License for the specific language governing permissions and
++         limitations under the License.
++        </xsd:documentation>
++    </xsd:annotation>
++    <xsd:annotation>
++        <xsd:documentation>
++            <![CDATA[
++      This is the XML Schema for the Servlet 3.0 deployment descriptor. 
++The deployment descriptor must be named "WEB-INF/web.xml" in the 
++web application's war file.  All Servlet deployment descriptors 
++must indicate the web application schema by using the Java EE 
++namespace: 
++http://java.sun.com/xml/ns/javaee 
++and by indicating the version of the schema by 
++using the version element as shown below: 
++    <web-app xmlns="http://java.sun.com/xml/ns/javaee" 
++      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
++      xsi:schemaLocation="..." 
++      version="3.0"> 
++      ... 
++    </web-app> 
++The instance documents may indicate the published version of 
++the schema using the xsi:schemaLocation attribute for Java EE 
++namespace with the following location: 
++http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd 
++]]>
++        </xsd:documentation>
++    </xsd:annotation>
++    <xsd:annotation>
++        <xsd:documentation>
++            The following conventions apply to all Java EE deployment
++            descriptor elements unless indicated otherwise. - In
++            elements that specify a pathname to a file within the same
++            JAR file, relative filenames (i.e., those not starting with
++            "/") are considered relative to the root of the JAR file's
++            namespace. Absolute filenames (i.e., those starting with
++            "/") also specify names in the root of the JAR file's
++            namespace. In general, relative names are preferred. The
++            exception is .war files where absolute names are preferred
++            for consistency with the Servlet API.
++        </xsd:documentation>
++    </xsd:annotation>
++    <xsd:include schemaLocation="javaee_5.xsd" />
++    <xsd:include schemaLocation="jsp_2_1.xsd" />
++    <!-- **************************************************** -->
++    <xsd:element name="web-app" type="javaee:web-appType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The web-app element is the root of the deployment
++                descriptor for a web application. Note that the
++                sub-elements of this element can be in the arbitrary
++                order. Because of that, the multiplicity of the elements
++                of distributable, session-config, welcome-file-list,
++                jsp-config, login-config, and
++                locale-encoding-mapping-list was changed from "?" to "*"
++                in this schema. However, the deployment descriptor
++                instance file must not contain multiple elements of
++                session-config, jsp-config, and login-config. When there
++                are multiple elements of welcome-file-list or
++                locale-encoding-mapping-list, the container must
++                concatenate the element contents. The multiple occurence
++                of the element distributable is redundant and the
++                container treats that case exactly in the same way when
++                there is only one distributable.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:unique name="web-app-servlet-name-uniqueness">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The servlet element contains the name of a servlet.
++                    The name must be unique within the web application.
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:servlet" />
++            <xsd:field xpath="javaee:servlet-name" />
++        </xsd:unique>
++        <xsd:unique name="web-app-filter-name-uniqueness">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The filter element contains the name of a filter.
++                    The name must be unique within the web application.
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:filter" />
++            <xsd:field xpath="javaee:filter-name" />
++        </xsd:unique>
++        <xsd:unique name="web-app-ejb-local-ref-name-uniqueness">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The ejb-local-ref-name element contains the name of
++                    an EJB reference. The EJB reference is an entry in
++                    the web application's environment and is relative to
++                    the java:comp/env context. The name must be unique
++                    within the web application. It is recommended that
++                    name is prefixed with "ejb/".
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:ejb-local-ref" />
++            <xsd:field xpath="javaee:ejb-ref-name" />
++        </xsd:unique>
++        <xsd:unique name="web-app-ejb-ref-name-uniqueness">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The ejb-ref-name element contains the name of an EJB
++                    reference. The EJB reference is an entry in the web
++                    application's environment and is relative to the
++                    java:comp/env context. The name must be unique
++                    within the web application. It is recommended that
++                    name is prefixed with "ejb/".
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:ejb-ref" />
++            <xsd:field xpath="javaee:ejb-ref-name" />
++        </xsd:unique>
++        <xsd:unique name="web-app-resource-env-ref-uniqueness">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The resource-env-ref-name element specifies the name
++                    of a resource environment reference; its value is
++                    the environment entry name used in the web
++                    application code. The name is a JNDI name relative
++                    to the java:comp/env context and must be unique
++                    within a web application.
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:resource-env-ref" />
++            <xsd:field xpath="javaee:resource-env-ref-name" />
++        </xsd:unique>
++        <xsd:unique name="web-app-message-destination-ref-uniqueness">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The message-destination-ref-name element specifies
++                    the name of a message destination reference; its
++                    value is the environment entry name used in the web
++                    application code. The name is a JNDI name relative
++                    to the java:comp/env context and must be unique
++                    within a web application.
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:message-destination-ref" />
++            <xsd:field xpath="javaee:message-destination-ref-name" />
++        </xsd:unique>
++        <xsd:unique name="web-app-res-ref-name-uniqueness">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The res-ref-name element specifies the name of a
++                    resource manager connection factory reference. The
++                    name is a JNDI name relative to the java:comp/env
++                    context. The name must be unique within a web
++                    application.
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:resource-ref" />
++            <xsd:field xpath="javaee:res-ref-name" />
++        </xsd:unique>
++        <xsd:unique name="web-app-env-entry-name-uniqueness">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The env-entry-name element contains the name of a
++                    web application's environment entry. The name is a
++                    JNDI name relative to the java:comp/env context. The
++                    name must be unique within a web application.
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:env-entry" />
++            <xsd:field xpath="javaee:env-entry-name" />
++        </xsd:unique>
++        <xsd:key name="web-app-role-name-key">
++            <xsd:annotation>
++                <xsd:documentation>
++                    A role-name-key is specified to allow the references
++                    from the security-role-refs.
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector xpath="javaee:security-role" />
++            <xsd:field xpath="javaee:role-name" />
++        </xsd:key>
++        <xsd:keyref name="web-app-role-name-references"
++            refer="javaee:web-app-role-name-key">
++            <xsd:annotation>
++                <xsd:documentation>
++                    The keyref indicates the references from
++                    security-role-ref to a specified role-name.
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:selector
++                xpath="javaee:servlet/javaee:security-role-ref" />
++            <xsd:field xpath="javaee:role-link" />
++        </xsd:keyref>
++    </xsd:element>
++    <!-- **************************************************** -->
++    <xsd:complexType name="auth-constraintType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The auth-constraintType indicates the user roles that
++                should be permitted access to this resource collection.
++                The role-name used here must either correspond to the
++                role-name of one of the security-role elements defined
++                for this web application, or be the specially reserved
++                role-name "*" that is a compact syntax for indicating
++                all roles in the web application. If both "*" and
++                rolenames appear, the container interprets this as all
++                roles. If no roles are defined, no user is allowed
++                access to the portion of the web application described
++                by the containing security-constraint. The container
++                matches role names case sensitively when determining
++                access.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="description"
++                type="javaee:descriptionType" minOccurs="0"
++                maxOccurs="unbounded" />
++            <xsd:element name="role-name" type="javaee:role-nameType"
++                minOccurs="0" maxOccurs="unbounded" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="auth-methodType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The auth-methodType is used to configure the
++                authentication mechanism for the web application. As a
++                prerequisite to gaining access to any web resources
++                which are protected by an authorization constraint, a
++                user must have authenticated using the configured
++                mechanism. Legal values are "BASIC", "DIGEST", "FORM",
++                "CLIENT-CERT", or a vendor-specific authentication
++                scheme. Used in: login-config
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:restriction base="javaee:string" />
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="dispatcherType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The dispatcher has four legal values: FORWARD, REQUEST,
++                INCLUDE, and ERROR. A value of FORWARD means the Filter
++                will be applied under RequestDispatcher.forward() calls.
++                A value of REQUEST means the Filter will be applied
++                under ordinary client calls to the path or servlet. A
++                value of INCLUDE means the Filter will be applied under
++                RequestDispatcher.include() calls. A value of ERROR
++                means the Filter will be applied under the error page
++                mechanism. The absence of any dispatcher elements in a
++                filter-mapping indicates a default of applying filters
++                only under ordinary client calls to the path or servlet.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:restriction base="javaee:string">
++                <xsd:enumeration value="FORWARD" />
++                <xsd:enumeration value="INCLUDE" />
++                <xsd:enumeration value="REQUEST" />
++                <xsd:enumeration value="ERROR" />
++            </xsd:restriction>
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="lifecycleType">
++        <xsd:annotation>
++            <xsd:documentation>
++		The lifecycle has two legal values: INITIAL and REDISPATCH. A value 
++		of INITIAL means the Filter will be applied to initial dispatches of
++		unsuspended requests.  A value of REDISPATCH means the Filter will be applied 
++		to the dispatch of suspended requests after a resume, timeout or IO activity.
++		The absence of any lifecycle elements in a
++		filter-mapping indicates a default of applying filters to both initiale and
++		redispatched requests
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:restriction base="javaee:string">
++                <xsd:enumeration value="INITIAL" />
++                <xsd:enumeration value="REDISPATCH" />
++            </xsd:restriction>
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:simpleType name="encodingType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The encodingType defines IANA character sets.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:restriction base="xsd:string">
++            <xsd:pattern value="[^\s]+" />
++        </xsd:restriction>
++    </xsd:simpleType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="error-codeType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The error-code contains an HTTP error code, ex: 404 Used
++                in: error-page
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:restriction base="javaee:xsdPositiveIntegerType">
++                <xsd:pattern value="\d{3}" />
++                <xsd:attribute name="id" type="xsd:ID" />
++            </xsd:restriction>
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="error-pageType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The error-pageType contains a mapping between an error
++                code or exception type to the path of a resource in the
++                web application. Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:choice>
++                <xsd:element name="error-code"
++                    type="javaee:error-codeType" />
++                <xsd:element name="exception-type"
++                    type="javaee:fully-qualified-classType">
++                    <xsd:annotation>
++                        <xsd:documentation>
++                            The exception-type contains a fully
++                            qualified class name of a Java exception
++                            type.
++                        </xsd:documentation>
++                    </xsd:annotation>
++                </xsd:element>
++            </xsd:choice>
++            <xsd:element name="location" type="javaee:war-pathType">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The location element contains the location of
++                        the resource in the web application relative to
++                        the root of the web application. The value of
++                        the location must have a leading `/'.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="filter-mappingType">
++        <xsd:annotation>
++            <xsd:documentation>
++                Declaration of the filter mappings in this web
++                application is done by using filter-mappingType. The
++                container uses the filter-mapping declarations to decide
++                which filters to apply to a request, and in what order.
++                The container matches the request URI to a Servlet in
++                the normal way. To determine which filters to apply it
++                matches filter-mapping declarations either on
++                servlet-name, or on url-pattern for each filter-mapping
++                element, depending on which style is used. The order in
++                which filters are invoked is the order in which
++                filter-mapping declarations that match a request URI for
++                a servlet appear in the list of filter-mapping
++                elements.The filter-name value must be the value of the
++                filter-name sub-elements of one of the filter
++                declarations in the deployment descriptor.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="filter-name"
++                type="javaee:filter-nameType" />
++            <xsd:choice minOccurs="1" maxOccurs="unbounded">
++                <xsd:element name="url-pattern"
++                    type="javaee:url-patternType" />
++                <xsd:element name="servlet-name"
++                    type="javaee:servlet-nameType" />
++            </xsd:choice>
++            <xsd:element name="dispatcher" type="javaee:dispatcherType"
++                minOccurs="0" maxOccurs="4" />
++            <xsd:element name="life-cycle" type="javaee:lifecycleType"
++                minOccurs="0" maxOccurs="2" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="filter-nameType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The logical name of the filter is declare by using
++                filter-nameType. This name is used to map the filter.
++                Each filter name is unique within the web application.
++                Used in: filter, filter-mapping
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:extension base="javaee:nonEmptyStringType" />
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="filterType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The filterType is used to declare a filter in the web
++                application. The filter is mapped to either a servlet or
++                a URL pattern in the filter-mapping element, using the
++                filter-name value to reference. Filters can access the
++                initialization parameters declared in the deployment
++                descriptor at runtime via the FilterConfig interface.
++                Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:group ref="javaee:descriptionGroup" />
++            <xsd:element name="filter-name"
++                type="javaee:filter-nameType" />
++            <xsd:element name="filter-class"
++                type="javaee:fully-qualified-classType">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The fully qualified classname of the filter.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++            <xsd:element name="init-param" type="javaee:param-valueType"
++                minOccurs="0" maxOccurs="unbounded">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The init-param element contains a name/value
++                        pair as an initialization param of a servlet
++                        filter
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="form-login-configType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The form-login-configType specifies the login and error
++                pages that should be used in form based login. If form
++                based authentication is not used, these elements are
++                ignored. Used in: login-config
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="form-login-page"
++                type="javaee:war-pathType">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The form-login-page element defines the location
++                        in the web app where the page that can be used
++                        for login can be found. The path begins with a
++                        leading / and is interpreted relative to the
++                        root of the WAR.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++            <xsd:element name="form-error-page"
++                type="javaee:war-pathType">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The form-error-page element defines the location
++                        in the web app where the error page that is
++                        displayed when login is not successful can be
++                        found. The path begins with a leading / and is
++                        interpreted relative to the root of the WAR.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:simpleType name="http-methodType">
++        <xsd:annotation>
++            <xsd:documentation>
++                A HTTP method type as defined in HTTP 1.1 section 2.2.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:restriction base="xsd:token">
++            <xsd:pattern value="[\p{L}-[\p{Cc}\p{Z}]]+" />
++        </xsd:restriction>
++
++    </xsd:simpleType>
++    <!-- **************************************************** -->
++    <xsd:simpleType name="load-on-startupType">
++        <xsd:union memberTypes="javaee:null-charType xsd:integer" />
++    </xsd:simpleType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="locale-encoding-mapping-listType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The locale-encoding-mapping-list contains one or more
++                locale-encoding-mapping(s).
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="locale-encoding-mapping"
++                type="javaee:locale-encoding-mappingType"
++                maxOccurs="unbounded" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="locale-encoding-mappingType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The locale-encoding-mapping contains locale name and
++                encoding name. The locale name must be either
++                "Language-code", such as "ja", defined by ISO-639 or
++                "Language-code_Country-code", such as "ja_JP". "Country
++                code" is defined by ISO-3166.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="locale" type="javaee:localeType" />
++            <xsd:element name="encoding" type="javaee:encodingType" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:simpleType name="localeType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The localeType defines valid locale defined by ISO-639-1
++                and ISO-3166.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:restriction base="xsd:string">
++            <xsd:pattern value="[a-z]{2}(_|-)?([\p{L}\-\p{Nd}]{2})?" />
++        </xsd:restriction>
++    </xsd:simpleType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="login-configType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The login-configType is used to configure the
++                authentication method that should be used, the realm
++                name that should be used for this application, and the
++                attributes that are needed by the form login mechanism.
++                Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="auth-method"
++                type="javaee:auth-methodType" minOccurs="0" />
++            <xsd:element name="realm-name" type="javaee:string"
++                minOccurs="0">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The realm name element specifies the realm name
++                        to use in HTTP Basic authorization.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++            <xsd:element name="form-login-config"
++                type="javaee:form-login-configType" minOccurs="0" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="mime-mappingType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The mime-mappingType defines a mapping between an
++                extension and a mime type. Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:annotation>
++                <xsd:documentation>
++                    The extension element contains a string describing
++                    an extension. example: "txt"
++                </xsd:documentation>
++            </xsd:annotation>
++            <xsd:element name="extension" type="javaee:string" />
++            <xsd:element name="mime-type" type="javaee:mime-typeType" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="mime-typeType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The mime-typeType is used to indicate a defined mime
++                type. Example: "text/plain" Used in: mime-mapping
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:restriction base="javaee:string">
++                <xsd:pattern value="[^\p{Cc}^\s]+/[^\p{Cc}^\s]+" />
++            </xsd:restriction>
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="nonEmptyStringType">
++        <xsd:annotation>
++            <xsd:documentation>
++                This type defines a string which contains at least one
++                character.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:restriction base="javaee:string">
++                <xsd:minLength value="1" />
++            </xsd:restriction>
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:simpleType name="null-charType">
++        <xsd:restriction base="xsd:string">
++            <xsd:enumeration value="" />
++        </xsd:restriction>
++    </xsd:simpleType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="security-constraintType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The security-constraintType is used to associate
++                security constraints with one or more web resource
++                collections Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="display-name"
++                type="javaee:display-nameType" minOccurs="0"
++                maxOccurs="unbounded" />
++            <xsd:element name="web-resource-collection"
++                type="javaee:web-resource-collectionType"
++                maxOccurs="unbounded" />
++            <xsd:element name="auth-constraint"
++                type="javaee:auth-constraintType" minOccurs="0" />
++            <xsd:element name="user-data-constraint"
++                type="javaee:user-data-constraintType" minOccurs="0" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="servlet-mappingType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The servlet-mappingType defines a mapping between a
++                servlet and a url pattern. Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="servlet-name"
++                type="javaee:servlet-nameType" />
++            <xsd:element name="url-pattern"
++                type="javaee:url-patternType" minOccurs="1"
++                maxOccurs="unbounded" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="servlet-nameType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The servlet-name element contains the canonical name of
++                the servlet. Each servlet name is unique within the web
++                application.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:extension base="javaee:nonEmptyStringType" />
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="servletType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The servletType is used to declare a servlet. It
++                contains the declarative data of a servlet. If a
++                jsp-file is specified and the load-on-startup element is
++                present, then the JSP should be precompiled and loaded.
++                Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:group ref="javaee:descriptionGroup" />
++            <xsd:element name="servlet-name"
++                type="javaee:servlet-nameType" />
++            <xsd:choice>
++                <xsd:element name="servlet-class"
++                    type="javaee:fully-qualified-classType">
++                    <xsd:annotation>
++                        <xsd:documentation>
++                            The servlet-class element contains the fully
++                            qualified class name of the servlet.
++                        </xsd:documentation>
++                    </xsd:annotation>
++                </xsd:element>
++                <xsd:element name="jsp-file" type="javaee:jsp-fileType" />
++            </xsd:choice>
++            <xsd:element name="init-param" type="javaee:param-valueType"
++                minOccurs="0" maxOccurs="unbounded" />
++            <xsd:element name="load-on-startup"
++                type="javaee:load-on-startupType" minOccurs="0">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The load-on-startup element indicates that this
++                        servlet should be loaded (instantiated and have
++                        its init() called) on the startup of the web
++                        application. The optional contents of these
++                        element must be an integer indicating the order
++                        in which the servlet should be loaded. If the
++                        value is a negative integer, or the element is
++                        not present, the container is free to load the
++                        servlet whenever it chooses. If the value is a
++                        positive integer or 0, the container must load
++                        and initialize the servlet as the application is
++                        deployed. The container must guarantee that
++                        servlets marked with lower integers are loaded
++                        before servlets marked with higher integers. The
++                        container may choose the order of loading of
++                        servlets with the same load-on-start-up value.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++            <xsd:element name="run-as" type="javaee:run-asType"
++                minOccurs="0" />
++            <xsd:element name="security-role-ref"
++                type="javaee:security-role-refType" minOccurs="0"
++                maxOccurs="unbounded" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="session-configType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The session-configType defines the session parameters
++                for this web application.
++
++                Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="session-timeout"
++                type="javaee:xsdIntegerType" minOccurs="0">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The session-timeout element defines the default
++                        session timeout interval for all sessions
++                        created in this web application. The specified
++                        timeout must be expressed in a whole number of
++                        minutes. If the timeout is 0 or less, the
++                        container ensures the default behaviour of
++                        sessions is never to time out. If this element
++                        is not specified, the container must set its
++                        default timeout period.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="transport-guaranteeType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The transport-guaranteeType specifies that the
++                communication between client and server should be NONE,
++                INTEGRAL, or CONFIDENTIAL. NONE means that the
++                application does not require any transport guarantees. A
++                value of INTEGRAL means that the application requires
++                that the data sent between the client and server be sent
++                in such a way that it can't be changed in transit.
++                CONFIDENTIAL means that the application requires that
++                the data be transmitted in a fashion that prevents other
++                entities from observing the contents of the
++                transmission. In most cases, the presence of the
++                INTEGRAL or CONFIDENTIAL flag will indicate that the use
++                of SSL is required. Used in: user-data-constraint
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:restriction base="javaee:string">
++                <xsd:enumeration value="NONE" />
++                <xsd:enumeration value="INTEGRAL" />
++                <xsd:enumeration value="CONFIDENTIAL" />
++            </xsd:restriction>
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="user-data-constraintType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The user-data-constraintType is used to indicate how
++                data communicated between the client and container
++                should be protected. Used in: security-constraint
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="description"
++                type="javaee:descriptionType" minOccurs="0"
++                maxOccurs="unbounded" />
++            <xsd:element name="transport-guarantee"
++                type="javaee:transport-guaranteeType" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="war-pathType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The elements that use this type designate a path
++                starting with a "/" and interpreted relative to the root
++                of a WAR file.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:simpleContent>
++            <xsd:restriction base="javaee:string">
++                <xsd:pattern value="/.*" />
++            </xsd:restriction>
++        </xsd:simpleContent>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:simpleType name="web-app-versionType">
++        <xsd:annotation>
++            <xsd:documentation>
++                This type contains the recognized versions of
++                web-application supported. It is used to designate the
++                version of the web application.
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:restriction base="xsd:token">
++            <xsd:enumeration value="3.0" />
++        </xsd:restriction>
++    </xsd:simpleType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="web-appType">
++        <xsd:choice minOccurs="0" maxOccurs="unbounded">
++            <xsd:group ref="javaee:descriptionGroup" />
++            <xsd:element name="distributable" type="javaee:emptyType" />
++            <xsd:element name="context-param"
++                type="javaee:param-valueType">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The context-param element contains the
++                        declaration of a web application's servlet
++                        context initialization parameters.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++            <xsd:element name="filter" type="javaee:filterType" />
++            <xsd:element name="filter-mapping"
++                type="javaee:filter-mappingType" />
++            <xsd:element name="listener" type="javaee:listenerType" />
++            <xsd:element name="servlet" type="javaee:servletType" />
++            <xsd:element name="servlet-mapping"
++                type="javaee:servlet-mappingType" />
++            <xsd:element name="session-config"
++                type="javaee:session-configType" />
++            <xsd:element name="mime-mapping"
++                type="javaee:mime-mappingType" />
++            <xsd:element name="welcome-file-list"
++                type="javaee:welcome-file-listType" />
++            <xsd:element name="error-page" type="javaee:error-pageType" />
++            <xsd:element name="jsp-config" type="javaee:jsp-configType" />
++            <xsd:element name="security-constraint"
++                type="javaee:security-constraintType" />
++            <xsd:element name="login-config"
++                type="javaee:login-configType" />
++            <xsd:element name="security-role"
++                type="javaee:security-roleType" />
++            <xsd:group ref="javaee:jndiEnvironmentRefsGroup" />
++            <xsd:element name="message-destination"
++                type="javaee:message-destinationType" />
++            <xsd:element name="locale-encoding-mapping-list"
++                type="javaee:locale-encoding-mapping-listType" />
++        </xsd:choice>
++        <xsd:attribute name="version" type="javaee:web-app-versionType"
++            use="required" />
++        <xsd:attribute name="id" type="xsd:ID" />
++        <xsd:attribute name="metadata-complete" type="xsd:boolean">
++          <xsd:annotation>
++            <xsd:documentation>
++                The metadata-complete attribute defines whether this
++                deployment descriptor is complete, or whether the class
++                files of the jar file should be examined for annotations
++                that specify deployment information. If
++                metadata-complete is set to "true", the deployment tool
++                must ignore any Servlet annotations present in the class
++                files of the application. If metadata-complete is not
++                specified or is set to "false", the deployment tool must
++                examine the class files of the application for
++                annotations, as specified by the Servlet specifications.
++            </xsd:documentation>
++          </xsd:annotation>
++        </xsd:attribute>
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="web-resource-collectionType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The web-resource-collectionType is used to identify a
++                subset of the resources and HTTP methods on those
++                resources within a web application to which a security
++                constraint applies. If no HTTP methods are specified,
++                then the security constraint applies to all HTTP
++                methods. Used in: security-constraint
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="web-resource-name"
++                type="javaee:string">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The web-resource-name contains the name of this
++                        web resource collection.
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++            <xsd:element name="description"
++                type="javaee:descriptionType" minOccurs="0"
++                maxOccurs="unbounded" />
++            <xsd:element name="url-pattern"
++                type="javaee:url-patternType" maxOccurs="unbounded" />
++            <xsd:element name="http-method"
++                type="javaee:http-methodType" minOccurs="0"
++                maxOccurs="unbounded" />
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++    <!-- **************************************************** -->
++    <xsd:complexType name="welcome-file-listType">
++        <xsd:annotation>
++            <xsd:documentation>
++                The welcome-file-list contains an ordered list of
++                welcome files elements. Used in: web-app
++            </xsd:documentation>
++        </xsd:annotation>
++        <xsd:sequence>
++            <xsd:element name="welcome-file" type="xsd:string"
++                maxOccurs="unbounded">
++                <xsd:annotation>
++                    <xsd:documentation>
++                        The welcome-file element contains file name to
++                        use as a default welcome file, such as
++                        index.html
++                    </xsd:documentation>
++                </xsd:annotation>
++            </xsd:element>
++        </xsd:sequence>
++        <xsd:attribute name="id" type="xsd:ID" />
++    </xsd:complexType>
++</xsd:schema>
+Index: modules/examples/test-webapp/src/main/java/com/acme/TagListener.java
+===================================================================
+--- modules/examples/test-webapp/src/main/java/com/acme/TagListener.java	(revision 2504)
 +++ modules/examples/test-webapp/src/main/java/com/acme/TagListener.java	(working copy)
 @@ -116,4 +116,22 @@
           //System.err.println("tagListener: sessionDestroyed "+se);
@@ -1630,9 +3289,9 @@ Index: examples/test-webapp/src/main/java/com/acme/TagListener.java
 +    }
 +
  }
-Index: examples/test-webapp/src/main/java/com/acme/ChatFilter.java
+Index: modules/examples/test-webapp/src/main/java/com/acme/ChatFilter.java
 ===================================================================
---- modules/examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(revision 2442)
+--- modules/examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(revision 2504)
 +++ modules/examples/test-webapp/src/main/java/com/acme/ChatFilter.java	(working copy)
 @@ -193,36 +193,17 @@
                  member = new Member(session,null);
@@ -1736,9 +3395,70 @@ Index: examples/test-webapp/src/main/java/com/acme/ChatFilter.java
          }
  
          /* ------------------------------------------------------------ */
-Index: examples/test-webapp/src/main/java/com/acme/TestListener.java
+Index: modules/examples/test-webapp/src/main/java/com/acme/Dump.java
 ===================================================================
---- modules/examples/test-webapp/src/main/java/com/acme/TestListener.java	(revision 2442)
+--- modules/examples/test-webapp/src/main/java/com/acme/Dump.java	(revision 2504)
++++ modules/examples/test-webapp/src/main/java/com/acme/Dump.java	(working copy)
+@@ -60,7 +60,7 @@
+     }
+ 
+     /* ------------------------------------------------------------ */
+-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
++    public void doGet(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+     {
+         if(request.getPathInfo()!=null && request.getPathInfo().toLowerCase().indexOf("script")!=-1)
+         {
+@@ -101,6 +101,34 @@
+             Continuation continuation = ContinuationSupport.getContinuation(request, null);
+             continuation.suspend(Long.parseLong(request.getParameter("continue")));
+         }
++
++        if (request.isInitial() && request.getParameter("resume")!=null)
++        {
++            final long resume=Long.parseLong(request.getParameter("resume"));
++            new Thread(new Runnable()
++            {
++                public void run()
++                {
++                    try
++                    {
++                        Thread.sleep(resume);
++                    }
++                    catch (InterruptedException e)
++                    {
++                        e.printStackTrace();
++                    }
++                    request.resume();
++                }
++                
++            }).start();
++        }
++        
++        if (request.isInitial() && request.getParameter("suspend")!=null)
++        {
++            final long suspend=Long.parseLong(request.getParameter("suspend"));
++            request.suspend(suspend);
++            return;
++        }
+             
+         request.setAttribute("Dump", this);
+         getServletContext().setAttribute("Dump",this);
+Index: modules/examples/test-webapp/src/main/java/com/acme/TestFilter.java
+===================================================================
+--- modules/examples/test-webapp/src/main/java/com/acme/TestFilter.java	(revision 2504)
++++ modules/examples/test-webapp/src/main/java/com/acme/TestFilter.java	(working copy)
+@@ -67,7 +67,7 @@
+             request.setAttribute("testFilter", value);
+             
+             String qString = ((HttpServletRequest)request).getQueryString();
+-            if (qString != null && qString.indexOf("wrap")>0)
++            if (qString != null && qString.indexOf("wrap")>=0)
+             {
+                 request=new HttpServletRequestWrapper((HttpServletRequest)request);
+             }
+Index: modules/examples/test-webapp/src/main/java/com/acme/TestListener.java
+===================================================================
+--- modules/examples/test-webapp/src/main/java/com/acme/TestListener.java	(revision 2504)
 +++ modules/examples/test-webapp/src/main/java/com/acme/TestListener.java	(working copy)
 @@ -116,4 +116,22 @@
          // System.err.println("sessionDestroyed "+se);
@@ -1763,3 +3483,698 @@ Index: examples/test-webapp/src/main/java/com/acme/TestListener.java
 +    }
 +
  }
+Index: modules/examples/test-webapp/src/main/webapp/WEB-INF/web.xml
+===================================================================
+--- modules/examples/test-webapp/src/main/webapp/WEB-INF/web.xml	(revision 2504)
++++ modules/examples/test-webapp/src/main/webapp/WEB-INF/web.xml	(working copy)
+@@ -2,8 +2,8 @@
+ <web-app 
+    xmlns="http://java.sun.com/xml/ns/javaee" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+-   version="2.5"> 
++   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
++   version="3.0"> 
+ 
+   <display-name>Test WebApp</display-name>
+   
+@@ -26,6 +26,7 @@
+     <dispatcher>FORWARD</dispatcher>
+     <dispatcher>INCLUDE</dispatcher>
+     <dispatcher>ERROR</dispatcher>
++    <life-cycle>INITIAL</life-cycle>
+   </filter-mapping>
+   
+   <filter>
+Index: modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.java
+===================================================================
+--- modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.java	(revision 717)
++++ modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.java	(working copy)
+@@ -20,6 +20,7 @@
+ 
+ import org.mortbay.cometd.AbstractBayeux;
+ import org.mortbay.cometd.ClientImpl;
++import org.mortbay.cometd.SuspendingCometdServlet;
+ import org.mortbay.cometd.continuation.ContinuationClient;
+ import org.mortbay.cometd.continuation.ContinuationCometdServlet;
+ import org.mortbay.cometd.ext.TimesyncExtension;
+@@ -89,7 +90,7 @@
+         
+         
+         // Cometd servlet
+-        ContinuationCometdServlet cometd_servlet=new ContinuationCometdServlet();
++        SuspendingCometdServlet cometd_servlet=new SuspendingCometdServlet();
+         ServletHolder cometd_holder = new ServletHolder(cometd_servlet);
+         // cometd_holder.setInitParameter("filters","/WEB-INF/filters.json");
+         cometd_holder.setInitParameter("timeout","180000");
+Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/ClientImpl.java
+===================================================================
+--- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/ClientImpl.java	(revision 717)
++++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/ClientImpl.java	(working copy)
+@@ -154,6 +154,7 @@
+     {
+         synchronized(this)
+         {
++            System.err.println("Deliver "+message+" --> "+this);
+             ((MessageImpl)message).incRef();
+             
+             if (_maxQueue<0)
+@@ -267,6 +268,7 @@
+     {
+         synchronized(this)
+         {
++            System.err.println(this+" responsed "+_responsesPending);
+             return _responsesPending--;
+         }
+     }
+@@ -276,7 +278,9 @@
+     {
+         synchronized(this)
+         {
++            System.err.println(this+" responsePending "+_responsesPending);
+             return ++_responsesPending;
++            
+         }
+     }
+     
+Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingClient.java
+===================================================================
+--- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingClient.java	(revision 0)
++++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingClient.java	(revision 0)
+@@ -0,0 +1,178 @@
++// ========================================================================
++// Copyright 2006 Mort Bay Consulting Pty. Ltd.
++// ------------------------------------------------------------------------
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at 
++// http://www.apache.org/licenses/LICENSE-2.0
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++// ========================================================================
++
++package org.mortbay.cometd;
++
++import javax.servlet.ServletRequest;
++
++import org.mortbay.cometd.ClientImpl;
++import org.mortbay.thread.Timeout;
++
++/* ------------------------------------------------------------ */
++/**
++ * Extension of {@link ClientImpl} that uses {@link Continuation}s to
++ * resume clients waiting for messages. Continuation clients are used for
++ * remote clients and have removed if they are not accessed within
++ * an idle timeout (@link {@link SuspendingBayeux#_clientTimer}).
++ * 
++ * @author gregw
++ *
++ */
++public class SuspendingClient extends ClientImpl
++{
++    private long _accessed;
++    public transient Timeout.Task _timeout; 
++    private SuspendingBayeux _bayeux;
++    private transient ServletRequest _pollRequest;
++
++    /* ------------------------------------------------------------ */
++    protected SuspendingClient(SuspendingBayeux bayeux)
++    {
++        super(bayeux);
++        _bayeux=bayeux;
++
++        if (!isLocal())
++        {
++            _timeout=new Timeout.Task()
++            {
++                public void expire()
++                {
++                    remove(true);
++                }
++                public String toString()
++                {
++                    return "T-"+SuspendingClient.this.toString();
++                }
++            };
++            _bayeux.startTimeout(_timeout);
++        }
++    }
++
++
++    /* ------------------------------------------------------------ */
++    public void setPollRequest(ServletRequest request)
++    {
++        System.err.println(this+" SET "+request);
++        
++        Timeout.Task task=null;
++        
++        if (request==null)
++        {
++            synchronized (this)
++            {
++                if (_pollRequest!=null)
++                {
++                    if(_pollRequest.isSuspended())
++                        _pollRequest.resume(); 
++                }
++                _pollRequest=null;
++                task=_timeout;
++            }
++
++            if (task!=null)
++                _bayeux.startTimeout(task);
++        }
++        else
++        {
++            synchronized (this)
++            {
++                if (_pollRequest!=null)
++                {
++                    if(_pollRequest.isSuspended())
++                        _pollRequest.resume(); 
++                }
++                _pollRequest=request;
++                task=_timeout;
++            }
++
++            if (task!=null)
++                _bayeux.cancelTimeout(task);
++        }
++    }
++    
++    /* ------------------------------------------------------------ */
++    public ServletRequest getPollRequest()
++    {
++        return _pollRequest;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void resume()
++    {
++        Timeout.Task task=null;
++        synchronized (this)
++        {
++            System.err.println();
++            System.err.println(this+" RESUME "+_pollRequest);
++            if (_pollRequest!=null)
++            {
++                _pollRequest.resume();
++                task=_timeout;
++            }
++            _pollRequest=null;
++        }
++        
++        if (task!=null)
++            _bayeux.startTimeout(task);
++    }
++
++    /* ------------------------------------------------------------ */
++    public boolean isLocal()
++    {
++        return false;
++    }
++
++    /* ------------------------------------------------------------ */
++    public void access()
++    {
++        Timeout.Task task=null;
++        synchronized(this)
++        {
++            // distribute access time in cluster
++            _accessed=_bayeux.getNow();
++            if (_timeout!=null && _timeout.isScheduled())
++                task=_timeout;
++        }
++        
++        if (task!=null)
++            _bayeux.startTimeout(task);
++    }
++
++
++    /* ------------------------------------------------------------ */
++    public synchronized long lastAccessed()
++    {
++        return _accessed;
++    }
++    
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see org.mortbay.cometd.ClientImpl#remove(boolean)
++     */
++    public void remove(boolean wasTimeout) 
++    {
++        Timeout.Task task=null;
++        synchronized(this)
++        {
++            task=_timeout;
++            _timeout=null;
++            super.remove(wasTimeout);
++        }
++        
++        if (task!=null)
++            _bayeux.cancelTimeout(task);
++        
++    }
++
++}
+\ No newline at end of file
+
+Property changes on: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingClient.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingCometdServlet.java
+===================================================================
+--- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingCometdServlet.java	(revision 0)
++++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingCometdServlet.java	(revision 0)
+@@ -0,0 +1,213 @@
++//========================================================================
++//Copyright 2007 Mort Bay Consulting Pty. Ltd.
++//------------------------------------------------------------------------
++//Licensed under the Apache License, Version 2.0 (the "License");
++//you may not use this file except in compliance with the License.
++//You may obtain a copy of the License at 
++//http://www.apache.org/licenses/LICENSE-2.0
++//Unless required by applicable law or agreed to in writing, software
++//distributed under the License is distributed on an "AS IS" BASIS,
++//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++//See the License for the specific language governing permissions and
++//limitations under the License.
++//========================================================================
++
++package org.mortbay.cometd;
++import java.io.IOException;
++import java.util.List;
++
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++import org.mortbay.cometd.AbstractBayeux;
++import org.mortbay.cometd.AbstractCometdServlet;
++import org.mortbay.cometd.ClientImpl;
++import org.mortbay.cometd.MessageImpl;
++import org.mortbay.cometd.Transport;
++
++import dojox.cometd.Extension;
++import dojox.cometd.Message;
++
++public class SuspendingCometdServlet extends AbstractCometdServlet
++{
++    /* ------------------------------------------------------------ */
++    protected AbstractBayeux newBayeux()
++    {
++        return new SuspendingBayeux();
++    }
++
++    /* ------------------------------------------------------------ */
++    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
++    {
++        doPost(req,resp);
++    }
++
++    /* ------------------------------------------------------------ */
++    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
++    {
++        System.err.println(" doPost "+request);
++        
++        // Look for an existing client and protect from context restarts
++        SuspendingClient client=null;
++        Transport transport=null;
++        boolean connect=false;
++        int num_msgs=-1;
++        
++        System.err.println(request);
++        
++        // Have we seen this request before
++        if (request.isInitial())
++        {
++            Message[] messages = getMessages(request);
++            num_msgs=messages.length;
++
++            /* check jsonp parameter */
++            String jsonpParam=request.getParameter("jsonp");
++
++            // Handle all messages
++            boolean response_pending=false;
++            try
++            {
++                for (Message message : messages)
++                {
++                    if (jsonpParam!=null)
++                        message.put("jsonp",jsonpParam);
++
++                    if (client==null)
++                    {   
++                        client=(SuspendingClient)_bayeux.getClient((String)message.get(AbstractBayeux.CLIENT_FIELD));
++
++                        // If no client,  SHOULD be a handshake, so force a transport and handle
++                        if (client==null)
++                        {
++                            // Setup a browser ID
++                            String browser_id=browserId(request);
++                            if (browser_id==null)
++                                browser_id=newBrowserId(request,response);
++
++                            if (transport==null)
++                            {
++                                transport=_bayeux.newTransport(client,message);
++                                transport.setResponse(response);
++                            }
++                            _bayeux.handle(null,transport,message);
++                            message=null;
++
++                            continue;
++                        }
++                        else
++                        {
++                            String browser_id=browserId(request);
++                            if (browser_id!=null && (client.getBrowserId()==null || !client.getBrowserId().equals(browser_id)))
++                                client.setBrowserId(browser_id);
++
++                            // resolve transport
++                            if (transport==null)
++                            {
++                                transport=_bayeux.newTransport(client,message);
++                                transport.setResponse(response);
++                            }
++
++                            // Tell client to hold messages as a response is likely to be sent.
++                            if (!transport.alwaysResumePoll())
++                            {
++                                response_pending=true;
++                                client.responsePending();
++                            }
++                        }
++                    }
++
++                    String channel=_bayeux.handle(client,transport,message);
++                    connect|=AbstractBayeux.META_CONNECT.equals(channel);
++                }
++            }
++            finally
++            {
++                if (response_pending)
++                    client.responded();
++                
++                for (Message message : messages)
++                    ((MessageImpl)message).decRef();
++            }
++        }
++        else
++        {
++            transport=(Transport)request.getAttribute(TRANSPORT_ATTR);
++            transport.setResponse(response);
++            Object clientObj=request.getAttribute(CLIENT_ATTR); 
++            client=(clientObj instanceof ClientImpl)?(SuspendingClient)clientObj:null;
++            if (client!=null)
++                client.setPollRequest(null);
++        }
++
++        // Do we need to wait for messages
++        if (transport!=null)
++        {
++            Message pollReply=transport.getPollReply();
++            if (pollReply!=null)
++            {
++                if (_bayeux.isLogDebug())
++                    _bayeux.logDebug("doPost: transport is polling");
++                long timeout=_timeout;
++
++                if (request.isInitial())
++                    client.access();
++
++                // Get messages or wait
++                synchronized (client)
++                {
++                    if (!client.hasMessages() && request.isInitial() && num_msgs<=1)
++                    {
++                        // save state and suspend
++                        client.setPollRequest(request);
++                        request.setAttribute(CLIENT_ATTR,client);
++                        request.setAttribute(TRANSPORT_ATTR,transport);
++                        request.suspend(timeout);
++                        return;
++                    }
++                }
++
++                for (Extension e:_bayeux.getExtensions())
++                    pollReply=e.sendMeta(pollReply);
++                transport.send(pollReply);                 
++            }
++            else if (client!=null)
++            {
++                client.access();
++            }
++        }
++
++
++        // Send any messages.
++        if (client!=null) 
++        { 
++            List<Message> messages = null; 
++            Message message = null; 
++            synchronized(client)
++            {
++                switch (client.getMessages())
++                {
++                    case 0:
++                        break;
++                    case 1:
++                        message = client.takeMessage(); 
++                        break;
++                    default:
++                        messages = client.takeMessages(); 
++                        break;
++                }
++            }
++            if (message!=null)
++                transport.send(message); 
++            else if (messages!=null)
++                transport.send(messages); 
++            
++            if (transport.alwaysResumePoll())
++            	client.resume();
++        }
++        
++        if (transport!=null)
++            transport.complete();
++    }
++}
+
+Property changes on: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingCometdServlet.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationBayeux.java
+===================================================================
+--- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationBayeux.java	(revision 717)
++++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationBayeux.java	(working copy)
+@@ -21,6 +21,7 @@
+ 
+ import org.mortbay.cometd.AbstractBayeux;
+ import org.mortbay.cometd.ClientImpl;
++import org.mortbay.cometd.SuspendingBayeux;
+ import org.mortbay.thread.Timeout;
+ import org.mortbay.thread.Timeout.Task;
+ 
+@@ -28,6 +29,7 @@
+ /**
+  * Extension of Bayeux that uses {@link ContinuationClient}s.
+  * @author gregw
++ * @deprecated use {@link SuspendingBayeux}
+  *
+  */
+ public class ContinuationBayeux extends AbstractBayeux
+Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationClient.java
+===================================================================
+--- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationClient.java	(revision 717)
++++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationClient.java	(working copy)
+@@ -15,6 +15,7 @@
+ package org.mortbay.cometd.continuation;
+ 
+ import org.mortbay.cometd.ClientImpl;
++import org.mortbay.cometd.SuspendingClient;
+ import org.mortbay.thread.Timeout;
+ import org.mortbay.util.ajax.Continuation;
+ 
+@@ -26,6 +27,7 @@
+  * an idle timeout (@link {@link ContinuationBayeux#_clientTimer}).
+  * 
+  * @author gregw
++ * @deprecated use {@link SuspendingClient}
+  *
+  */
+ public class ContinuationClient extends ClientImpl
+Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationCometdServlet.java
+===================================================================
+--- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationCometdServlet.java	(revision 717)
++++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/continuation/ContinuationCometdServlet.java	(working copy)
+@@ -1,4 +1,3 @@
+-package org.mortbay.cometd.continuation;
+ //========================================================================
+ //Copyright 2007 Mort Bay Consulting Pty. Ltd.
+ //------------------------------------------------------------------------
+@@ -13,6 +12,8 @@
+ //limitations under the License.
+ //========================================================================
+ 
++package org.mortbay.cometd.continuation;
++
+ import java.io.IOException;
+ import java.util.List;
+ 
+@@ -24,6 +25,7 @@
+ import org.mortbay.cometd.AbstractCometdServlet;
+ import org.mortbay.cometd.ClientImpl;
+ import org.mortbay.cometd.MessageImpl;
++import org.mortbay.cometd.SuspendingCometdServlet;
+ import org.mortbay.cometd.Transport;
+ import org.mortbay.util.ajax.Continuation;
+ import org.mortbay.util.ajax.ContinuationSupport;
+@@ -31,6 +33,11 @@
+ import dojox.cometd.Extension;
+ import dojox.cometd.Message;
+ 
++/* ------------------------------------------------------------ */
++/**
++ * @author gregw
++ * @deprecated use {@link SuspendingCometdServlet}
++ */
+ public class ContinuationCometdServlet extends AbstractCometdServlet
+ {
+     /* ------------------------------------------------------------ */
+Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingBayeux.java
+===================================================================
+--- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingBayeux.java	(revision 0)
++++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingBayeux.java	(revision 0)
+@@ -0,0 +1,117 @@
++// ========================================================================
++// Copyright 2006 Mort Bay Consulting Pty. Ltd.
++// ------------------------------------------------------------------------
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at 
++// http://www.apache.org/licenses/LICENSE-2.0
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//========================================================================
++
++package org.mortbay.cometd;
++
++import java.util.Timer;
++import java.util.TimerTask;
++
++import javax.servlet.ServletContext;
++
++import org.mortbay.cometd.AbstractBayeux;
++import org.mortbay.cometd.ClientImpl;
++import org.mortbay.thread.Timeout;
++import org.mortbay.thread.Timeout.Task;
++
++/* ------------------------------------------------------------ */
++/**
++ * Extension of Bayeux that uses {@link SuspendingClient}s.
++ * @author gregw
++ *
++ */
++public class SuspendingBayeux extends AbstractBayeux
++{
++    private static int __id;
++    private transient Timer _tick;
++    private transient Timeout _timeout;
++    private long _now;
++    
++    
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see org.mortbay.cometd.AbstractBayeux#newClient(java.lang.String, dojox.io.cometd.Destination)
++     */
++    public ClientImpl newRemoteClient()
++    {
++        return new SuspendingClient(this);
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see org.mortbay.cometd.AbstractBayeux#initialize(javax.servlet.ServletContext)
++     */
++    protected void initialize(ServletContext context)
++    {
++        super.initialize(context);
++        
++        _tick=new Timer("SuspendingBayeux-"+__id++, true);
++        _timeout=new Timeout();
++        _timeout.setDuration(getMaxInterval());
++    
++        _tick.schedule(new TimerTask()
++        {
++            public void run()
++            {
++                synchronized(_timeout)
++                {
++                    _timeout.setNow();
++                    _now=_timeout.getNow();
++                    _timeout.tick();
++                }
++            }
++        },500L,500L);
++    }
++
++    /* ------------------------------------------------------------ */
++    long getNow()
++    {
++        return _now;
++    }
++    
++    /* ------------------------------------------------------------ */
++    public void setMaxInterval(long ms)
++    {
++        _timeout.setDuration(ms);
++        super.setMaxInterval(ms);
++    }
++
++    /* ------------------------------------------------------------ */
++    /* (non-Javadoc)
++     * @see org.mortbay.cometd.AbstractBayeux#initialize(javax.servlet.ServletContext)
++     */
++    public void destroy()
++    {
++        _tick.cancel();
++    }
++
++    /* ------------------------------------------------------------ */
++    void startTimeout(Task timeout)
++    {
++        synchronized(_timeout)
++        {
++            _timeout.schedule(timeout);
++        }
++    }
++
++    /* ------------------------------------------------------------ */
++    public void cancelTimeout(Task timeout)
++    {
++        synchronized(_timeout)
++        {
++            if (timeout!=null)
++                timeout.cancel();
++        }
++    }
++    
++}
+\ No newline at end of file
+
+Property changes on: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingBayeux.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
