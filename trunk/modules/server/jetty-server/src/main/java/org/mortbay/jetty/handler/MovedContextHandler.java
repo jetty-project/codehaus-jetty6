@@ -105,14 +105,21 @@ public class MovedContextHandler extends ContextHandler
             
             Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             
+            String url = _newContextURL;
+            if (!_discardPathInfo && request.getPathInfo()!=null)
+                url=URIUtil.addPaths(url, request.getPathInfo());
+            if (!_discardQuery && request.getQueryString()!=null)
+                url+="?"+request.getQueryString();
+            
+            response.sendRedirect(url);
 
-            StringBuffer location = base_request.getRootURL();
             String path=_newContextURL;
             if (!_discardPathInfo && request.getPathInfo()!=null)
                 path=URIUtil.addPaths(path, request.getPathInfo());
             
+            StringBuffer location = URIUtil.hasScheme(path)?new StringBuffer():base_request.getRootURL();
+
             location.append(path);
-            
             if (!_discardQuery && request.getQueryString()!=null)
             {
                 location.append('?');
