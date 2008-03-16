@@ -382,7 +382,6 @@ public class HttpServerTestBase extends TestCase
                             InputStream in = (InputStream)url.getContent();
                             String response=IO.toString(in,e==0?null:encoding[e]);
                             
-                            // System.err.println(test+": "+(b*w)+" "+response.length()+" "+(response.length()-(b*w))/w);
                             assertEquals(test,b*w,response.length());
                         }
                     }
@@ -787,7 +786,8 @@ public class HttpServerTestBase extends TestCase
             
             while ((line=reader.readLine())!=null)
             {
-                writer.println(line);
+                writer.print(line);
+                writer.print("\n");
                 count+=line.length();
             }
 
