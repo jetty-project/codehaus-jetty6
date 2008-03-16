@@ -356,10 +356,17 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
-@@ -0,0 +1,481 @@
+@@ -0,0 +1,535 @@
 +package org.mortbay.jetty;
 +
++import java.io.IOException;
++
++import javax.xml.ws.Endpoint;
++
++import org.mortbay.io.AsyncEndPoint;
++import org.mortbay.io.EndPoint;
 +import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
++import org.mortbay.log.Log;
 +import org.mortbay.thread.Timeout;
 +
 +public class Suspendable
@@ -547,8 +554,10 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +
 +                case __SUSPENDING:
 +                case __RESUMING:
-+                case __COMPLETING:
 +                    throw new IllegalStateException(this.getStatusString());
++
++                case __COMPLETING:
++                    return;
 +
 +                case __SUSPENDED:
 +                    cancelTimeout();
@@ -618,8 +627,10 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +                case __SUSPENDING:
 +                    _initial=false;
 +                    _state=__SUSPENDED;
-+                    scheduleTimeout();
-+                    return true;
++                    scheduleTimeout(); // could block and change state.
++                    if (_state==__SUSPENDED)
++                        return true;
++                    // fall through to resuming action
 +
 +                case __RESUMING:
 +                    _initial=false;
@@ -669,13 +680,13 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +                    return;
 +                    
 +                case __COMPLETING:
-+                    throw new IllegalStateException(this.getStatusString());
++                    return;
 +                    
 +                case __SUSPENDED:
 +                    _resumed=true;
++                    _state=__UNSUSPENDING;
 +                    cancelTimeout();
 +                    scheduleDispatch();
-+                    _state=__UNSUSPENDING;
 +                    return;
 +                    
 +                case __UNSUSPENDING:
@@ -718,9 +729,10 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +                    
 +                case __SUSPENDED:
 +                    _timeout=true;
++                    _state=__UNSUSPENDING;
 +                    cancelTimeout();
 +                    scheduleDispatch();
-+                    _state=__UNSUSPENDING;
++                    return;
 +                    
 +                case __UNSUSPENDING:
 +                    _timeout=true;
@@ -736,7 +748,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +    /* (non-Javadoc)
 +     * @see javax.servlet.ServletRequest#complete()
 +     */
-+    public void complete()
++    public void complete() throws IOException
 +    {
 +        // just like resume, except don't set _resumed=true;
 +        synchronized (this)
@@ -748,7 +760,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +                    break;
 +                    
 +                case __IDLE:
-+                    throw new IllegalStateException(this.getStatusString());
++                    return;
 +                    
 +                case __SUSPENDING:
 +                case __RESUMING:
@@ -759,12 +771,14 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +                    return;
 +                    
 +                case __SUSPENDED:
++                    _state=__COMPLETING;
 +                    cancelTimeout();
 +                    scheduleDispatch();
-+                    _state=__COMPLETING;
++                    return;
 +                    
 +                case __UNSUSPENDING:
 +                    _state=__COMPLETING;
++                    return;
 +                    
 +                default:
 +                    throw new IllegalStateException(""+_state);
@@ -778,29 +792,69 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +    {
 +        synchronized (this)
 +        {
-+            // last("reset");
 +            _state=(_state==__SUSPENDED||_state==__IDLE)?__IDLE:__HANDLING;
 +            _resumed = false;
 +            _initial = true;
++            cancelTimeout();
 +        }
 +    }
 +
 +    /* ------------------------------------------------------------ */
 +    protected void scheduleDispatch()
 +    {
-+        ((SuspendableSelectChannelEndPoint)_connection.getEndPoint()).dispatch();
++        EndPoint endp=_connection.getEndPoint();
++        if (!endp.isBlocking())
++        {
++            ((AsyncEndPoint)endp).dispatch();
++        }
 +    }
 +
 +    /* ------------------------------------------------------------ */
 +    protected void scheduleTimeout()
 +    {
-+        _connection.scheduleTimeout(_timeoutTask,_timeoutMs);
++        EndPoint endp=_connection.getEndPoint();
++        if (endp.isBlocking())
++        {
++            synchronized(this)
++            {
++                long expire_at = System.currentTimeMillis()+_timeoutMs;
++                long wait=_timeoutMs;
++                while (_timeoutMs>0 && wait>0)
++                {
++                    try
++                    {
++                        this.wait(wait);
++                    }
++                    catch (InterruptedException e)
++                    {
++                        Log.ignore(e);
++                    }
++                    wait=expire_at-System.currentTimeMillis();
++                }
++
++                if (_timeoutMs>0 && wait<=0)
++                    expire();
++            }
++            
++        }
++        else
++            _connection.scheduleTimeout(_timeoutTask,_timeoutMs);
 +    }
 +
 +    /* ------------------------------------------------------------ */
 +    protected void cancelTimeout()
 +    {
-+        _connection.cancelTimeout(_timeoutTask);
++        EndPoint endp=_connection.getEndPoint();
++        if (endp.isBlocking())
++        {
++            synchronized(this)
++            {
++                _timeoutMs=0;
++                this.notifyAll();
++            }
++        }
++        else
++            _connection.cancelTimeout(_timeoutTask);
 +    }
 +
 +    /* ------------------------------------------------------------ */
@@ -908,6 +962,258 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/Defau
          base_request.setHandled(true);
          
          String method=request.getMethod();
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Response.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Response.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Response.java	(working copy)
+@@ -80,6 +80,8 @@
+     private String _contentType;
+     private int _outputState;
+     private PrintWriter _writer;
++    private boolean _disabled;
++    private int _disabledOutputState;
+ 
+     /* ------------------------------------------------------------ */
+     /**
+@@ -231,7 +233,7 @@
+      */
+     public void sendError(int code, String message) throws IOException
+     {
+-    	if (_connection.isIncluding())
++    	if (_connection.isIncluding() || _disabled)
+     		return;
+     	
+         if (isCommitted())
+@@ -334,7 +336,7 @@
+      */
+     public void sendError(int sc) throws IOException
+     {
+-        if (sc==102)
++        if (sc==102 && !_disabled)
+             sendProcessing();
+         else
+             sendError(sc,null);
+@@ -377,7 +379,7 @@
+      */
+     public void sendRedirect(String location) throws IOException
+     {
+-    	if (_connection.isIncluding())
++    	if (_connection.isIncluding()|| _disabled)
+     		return;
+     	
+         if (location==null)
+@@ -414,7 +416,7 @@
+      */
+     public void setDateHeader(String name, long date)
+     {
+-        if (!_connection.isIncluding())
++        if (!_connection.isIncluding()&& !_disabled)
+             _connection.getResponseFields().putDateField(name, date);
+     }
+ 
+@@ -424,7 +426,7 @@
+      */
+     public void addDateHeader(String name, long date)
+     {
+-        if (!_connection.isIncluding())
++        if (!_connection.isIncluding()&& !_disabled)
+             _connection.getResponseFields().addDateField(name, date);
+     }
+ 
+@@ -434,7 +436,7 @@
+      */
+     public void setHeader(String name, String value)
+     {
+-        if (!_connection.isIncluding())
++        if (!_connection.isIncluding()&& !_disabled)
+         {
+             _connection.getResponseFields().put(name, value);
+             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+@@ -472,7 +474,7 @@
+      */
+     public void addHeader(String name, String value)
+     {
+-        if (!_connection.isIncluding())
++        if (!_connection.isIncluding()&& !_disabled)
+         {
+             _connection.getResponseFields().add(name, value);
+             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+@@ -486,7 +488,7 @@
+      */
+     public void setIntHeader(String name, int value)
+     {
+-        if (!_connection.isIncluding())
++        if (!_connection.isIncluding()&& !_disabled)
+         {
+             _connection.getResponseFields().putLongField(name, value);
+             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+@@ -500,7 +502,7 @@
+      */
+     public void addIntHeader(String name, int value)
+     {
+-        if (!_connection.isIncluding())
++        if (!_connection.isIncluding()&& !_disabled)
+         {
+             _connection.getResponseFields().addLongField(name, value);
+             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
+@@ -525,7 +527,7 @@
+     {
+         if (sc<=0)
+             throw new IllegalArgumentException();
+-        if (!_connection.isIncluding())
++        if (!_connection.isIncluding() && !_disabled)
+         {
+             _status=sc;
+             _reason=sm;
+@@ -617,7 +619,7 @@
+      */
+     public void setCharacterEncoding(String encoding)
+     {
+-    	if (_connection.isIncluding())
++    	if (_connection.isIncluding() || _disabled)
+     		return;
+     	
+         // TODO throw unsupported encoding exception ???
+@@ -696,7 +698,7 @@
+         // Protect from setting after committed as default handling
+         // of a servlet HEAD request ALWAYS sets _content length, even
+         // if the getHandling committed the response!
+-        if (isCommitted() || _connection.isIncluding())
++        if (isCommitted() || _connection.isIncluding() || _disabled)
+             return;
+         _connection._generator.setContentLength(len);
+         if (len>=0)
+@@ -730,7 +732,7 @@
+         // Protect from setting after committed as default handling
+         // of a servlet HEAD request ALWAYS sets _content length, even
+         // if the getHandling committed the response!
+-        if (isCommitted() || _connection.isIncluding())
++        if (isCommitted() || _connection.isIncluding() || _disabled)
+         	return;
+         _connection._generator.setContentLength(len);
+         _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
+@@ -742,7 +744,7 @@
+      */
+     public void setContentType(String contentType)
+     {
+-        if (isCommitted() || _connection.isIncluding())
++        if (isCommitted() || _connection.isIncluding() || _disabled)
+             return;
+         
+         // Yes this method is horribly complex.... but there are lots of special cases and
+@@ -908,6 +910,8 @@
+      */
+     public void setBufferSize(int size)
+     {
++        if (_disabled)
++            return;
+         if (isCommitted() || getContentCount()>0)
+             throw new IllegalStateException("Committed or content written");
+         _connection.getGenerator().increaseContentBufferSize(size);
+@@ -928,7 +932,8 @@
+      */
+     public void flushBuffer() throws IOException
+     {
+-        _connection.flushResponse();
++        if (!_disabled)
++            _connection.flushResponse();
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -985,6 +990,8 @@
+         _locale=null;
+         _outputState=NONE;
+         _writer=null;
++        _disabled=false;
++        _disabledOutputState=NONE;
+     }
+ 
+     /* ------------------------------------------------------------ */
+@@ -993,6 +1000,8 @@
+      */
+     public void resetBuffer()
+     {
++        if (_disabled)
++            return;
+         if (isCommitted())
+             throw new IllegalStateException("Committed");
+         _connection.getGenerator().resetBuffer();
+@@ -1014,7 +1023,7 @@
+      */
+     public void setLocale(Locale locale)
+     {
+-        if (locale == null || isCommitted() ||_connection.isIncluding())
++        if (locale == null || isCommitted() ||_connection.isIncluding() || _disabled)
+             return;
+ 
+         _locale = locale;
+@@ -1087,11 +1096,8 @@
+     }
+ 
+ 
+-
+-
+     /* ------------------------------------------------------------ */
+     /**
+-     *
+      */
+     public void complete()
+         throws IOException
+@@ -1124,14 +1130,53 @@
+     }
+ 
+     /* ------------------------------------------------------------ */
++    public void disable()
++    {
++        if (!_disabled)
++            _disabledOutputState=_outputState;
++        _disabled=true;
++        _outputState=DISABLED;
++        
++    }
++
++
+     /* ------------------------------------------------------------ */
++    public void enable()
++    {
++        if (_disabled)
++            _outputState=_disabledOutputState;
++        _disabled=false;
++    }
++
++
+     /* ------------------------------------------------------------ */
++    public boolean isDisabled()
++    {
++        return _disabled;
++    }
++
++
++    /* ------------------------------------------------------------ */
++    /* ------------------------------------------------------------ */
++    /* ------------------------------------------------------------ */
+     private static class NullOutput extends ServletOutputStream
+     {
+         public void write(int b) throws IOException
+         {
+         }
++
++        public void print(String s) throws IOException
++        {
++        }
++
++        public void println(String s) throws IOException
++        {
++        }
++
++        public void write(byte[] b, int off, int len) throws IOException
++        {
++        }
++        
+     }
+ 
+-
+ }
 Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(revision 2504)
@@ -1033,7 +1339,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnectio
                      return;
                  }
                  else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
-@@ -474,8 +467,41 @@
+@@ -474,8 +467,22 @@
              }
          }
      }
@@ -1044,39 +1350,20 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnectio
      /* ------------------------------------------------------------ */
 +    public void scheduleTimeout(Timeout.Task task, long timeoutMs)
 +    {
-+        boolean expire=false;
-+        synchronized(this)
-+        {
-+            try
-+            {
-+                timeout.schedule(task,timeoutMs);
-+                this.wait(timeoutMs);
-+            }
-+            catch (InterruptedException e)
-+            {
-+                Log.ignore(e);
-+            }
-+            expire=task.isScheduled();
-+        }
-+        if (expire)
-+            task.expire();
++        throw new UnsupportedOperationException();
 +    }
 +    
 +    /* ------------------------------------------------------------ */
 +    public void cancelTimeout(Timeout.Task task)
 +    {
-+        synchronized(this)
-+        {
-+            task.cancel();
-+            this.notifyAll();
-+        }
++        throw new UnsupportedOperationException();
 +    }
 +    
 +    /* ------------------------------------------------------------ */
      public void reset(boolean returnBuffers)
      {
          _parser.reset(returnBuffers); // TODO maybe only release when low on resources
-@@ -492,14 +518,16 @@
+@@ -492,14 +499,17 @@
      /* ------------------------------------------------------------ */
      protected void handleRequest() throws IOException
      {
@@ -1088,6 +1375,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnectio
          {
 -            boolean retrying = false;
 +            _request.setHandled(false);
++            _response.enable();
              boolean error = false;
              String threadName=null;
              try
@@ -1096,7 +1384,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnectio
                  String info=URIUtil.canonicalPath(_uri.getDecodedPath());
                  if (info==null)
                      throw new HttpException(400);
-@@ -508,20 +536,21 @@
+@@ -508,20 +518,23 @@
                  if (_out!=null)
                      _out.reopen();
                  
@@ -1114,6 +1402,8 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnectio
 -                _server.handle(this);
 +                if (_request.shouldHandleRequest())
 +                    _server.handle(this);
++                else
++                    _request.setHandled(true);
              }
              catch (RetryRequest r)
              {
@@ -1123,11 +1413,11 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnectio
              }
              catch (EofException e)
              {
-@@ -551,10 +580,16 @@
+@@ -551,10 +564,16 @@
              }
              finally
              {   
-+                handling = !_request.unhandling() && _server == null;
++                handling = !_request.unhandling() && _server != null;
 +                
 +                if (handling)
 +                    continue;
@@ -1748,7 +2038,20 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java	(working copy)
-@@ -93,15 +93,14 @@
+@@ -33,10 +33,12 @@
+ import java.util.Map;
+ 
+ import javax.servlet.RequestDispatcher;
++import javax.servlet.ServletContext;
+ import javax.servlet.ServletInputStream;
+ import javax.servlet.ServletRequestAttributeEvent;
+ import javax.servlet.ServletRequestAttributeListener;
+ import javax.servlet.ServletRequestWrapper;
++import javax.servlet.ServletResponse;
+ import javax.servlet.http.Cookie;
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpSession;
+@@ -93,15 +95,14 @@
   * @author gregw
   *
   */
@@ -1766,7 +2069,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
      
      private Attributes _attributes;
      private String _authType;
-@@ -147,7 +146,7 @@
+@@ -147,7 +148,7 @@
       */
      public Request(HttpConnection connection)
      {
@@ -1775,7 +2078,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
          _endp=connection.getEndPoint();
          _dns=_connection.getResolveNames();
      }
-@@ -155,6 +154,7 @@
+@@ -155,6 +156,7 @@
      /* ------------------------------------------------------------ */
      protected void recycle()
      {
@@ -1783,7 +2086,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
          _handled=false;
          if (_context!=null)
              throw new IllegalStateException("Request in context!");
-@@ -233,6 +233,8 @@
+@@ -233,6 +235,8 @@
      /* ------------------------------------------------------------ */
      public void setHandled(boolean h)
      {
@@ -1792,7 +2095,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
          _handled=h;
      }
      
-@@ -1499,16 +1501,22 @@
+@@ -1499,16 +1503,22 @@
      }
  
      /* ------------------------------------------------------------ */
@@ -1816,7 +2119,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
          return _continuation;
      }
      
-@@ -1541,8 +1549,7 @@
+@@ -1541,8 +1551,7 @@
      /* ------------------------------------------------------------ */
      public String toString()
      {
@@ -1826,7 +2129,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
      }
  
      /* ------------------------------------------------------------ */
-@@ -1640,5 +1647,19 @@
+@@ -1640,5 +1649,44 @@
      {
          return _roleMap;
      }
@@ -1842,6 +2145,31 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Request.java
 +                timeout=t.longValue();
 +        }
 +        suspend(timeout);
++    }
++    
++    /* ------------------------------------------------------------ */
++    public void complete() throws IOException
++    {
++        try
++        {
++            _connection.getResponse().flushBuffer();
++        }
++        finally
++        {
++            super.complete();
++        }
++    }
++    
++    /* ------------------------------------------------------------ */
++    public ServletContext getServletContext()
++    {
++        return _context;
++    }
++
++    /* ------------------------------------------------------------ */
++    public ServletResponse getServletResponse()
++    {
++        return _connection.getResponse();
 +    }
 +    
  }
@@ -1874,7 +2202,24 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChanne
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(revision 2504)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChannelEndPoint.java	(working copy)
-@@ -77,7 +77,7 @@
+@@ -6,6 +6,7 @@
+ import java.nio.channels.SelectionKey;
+ import java.nio.channels.SocketChannel;
+ 
++import org.mortbay.io.AsyncEndPoint;
+ import org.mortbay.io.Buffer;
+ import org.mortbay.io.Connection;
+ import org.mortbay.io.nio.SelectorManager.SelectSet;
+@@ -21,7 +22,7 @@
+  * @author gregw
+  *
+  */
+-public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
++public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, AsyncEndPoint
+ {
+     protected SelectorManager _manager;
+     protected SelectorManager.SelectSet _selectSet;
+@@ -77,7 +78,7 @@
              // If there are threads dispatched reading and writing
              if (_readBlocked || _writeBlocked)
              {
@@ -1883,14 +2228,25 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectChanne
                  if (_readBlocked && _key.isReadable())
                      _readBlocked=false;
                  if (_writeBlocked && _key.isWritable())
-@@ -122,7 +122,6 @@
+@@ -118,13 +119,15 @@
+     }
+         
+     /* ------------------------------------------------------------ */
+-    protected boolean dispatch() 
++    public boolean dispatch() 
      {
          synchronized(this)
          {
 -            // Otherwise if we are still dispatched
              if (_dispatched)
-                 throw new IllegalStateException("ALREADY DISPATCHED!!!");
+-                throw new IllegalStateException("ALREADY DISPATCHED!!!");
++            {
++                Log.warn("ALREADY DISPATCHED "+this); // TODO is this ignorable?
++                return true;
++            }
  
+             _dispatched = _manager.dispatch((Runnable)this);   
+             if(!_dispatched)
 Index: modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorManager.java
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorManager.java	(revision 2504)
@@ -1981,6 +2337,30 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/io/nio/SelectorMana
                  try
                  {
                      if (_selector != null)
+Index: modules/server/jetty-server/src/main/java/org/mortbay/io/AsyncEndPoint.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/io/AsyncEndPoint.java	(revision 0)
++++ modules/server/jetty-server/src/main/java/org/mortbay/io/AsyncEndPoint.java	(revision 0)
+@@ -0,0 +1,13 @@
++package org.mortbay.io;
++
++public interface AsyncEndPoint extends EndPoint
++{
++    /* ------------------------------------------------------------ */
++    /**
++     * Dispatch the endpoint to a thread to attend to it.
++     * 
++     * @return True If the dispatched succeeded
++     */
++    public boolean dispatch();
++    
++}
+
+Property changes on: modules/server/jetty-server/src/main/java/org/mortbay/io/AsyncEndPoint.java
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
 Index: modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java
 ===================================================================
 --- modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(revision 2504)
@@ -2016,6 +2396,35 @@ Index: modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/Continuatio
   *
   */
  public interface Continuation
+Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServlet.java
+===================================================================
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServlet.java	(revision 2504)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServlet.java	(working copy)
+@@ -986,6 +986,24 @@
+     public String encodeRedirectUrl(String url)
+       { return this.encodeRedirectURL(url); }
+ 
++    public void disable()
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++    public void enable()
++    {
++        // TODO Auto-generated method stub
++        
++    }
++
++    public boolean isDisabled()
++    {
++        // TODO Auto-generated method stub
++        return false;
++    }
++
+ }
+ 
+ 
 Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java
 ===================================================================
 --- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2504)
@@ -2048,11 +2457,93 @@ Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest
 +     */
 +    void requestCompleted(ServletRequestEvent rre);
  }
+Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponse.java
+===================================================================
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponse.java	(revision 2504)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponse.java	(working copy)
+@@ -456,6 +456,37 @@
+ 
+ 
+ 
++    /**
++     * Disable the response.
++     * <p>The response is disabled by this call, so that all calls to set headers,
++     * write to output streams or writers, commit the response or otherwise modify the
++     * response are silently ignored. A response will remain disabled until a call
++     * to {@link #enable()} or the scope of the response returns to the container.
++     * Disabling a response may be used  to prevent servlets, filters and frameworks 
++     * that are unaware of the {@link ServletRequest#suspend()} mechanism 
++     * from committing a response on a suspended request.
++     * 
++     * @see {@link #enable()}
++     * @since 3.0
++     */
++     void disable();
++
++    /**
++     * Enable the response.
++     * <p>A disabled response is enabled by this call, so that it can be modified and 
++     * committed.
++     * @see {@link enable()}
++     * @since 3.0
++     */
++     void enable();
++
++    /**
++     * Is the response disabled.
++     * @return true if the response is disabled
++     * @since 3.0
++     */
++     boolean isDisabled(); 
++
+ }
+ 
+ 
+Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponseWrapper.java
+===================================================================
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponseWrapper.java	(revision 2504)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponseWrapper.java	(working copy)
+@@ -219,7 +219,35 @@
+ 	return this.response.getLocale();
+     }
+ 
++    /* ------------------------------------------------------------ */
++    /**
++     * @see javax.servlet.ServletResponse#disable()
++     */
++    public void disable()
++    {
++        response.disable();
++    }
+ 
++    /* ------------------------------------------------------------ */
++    /**
++     * @see javax.servlet.ServletResponse#enable()
++     */
++    public void enable()
++    {
++        response.enable();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletResponse#isDisabled()
++     */
++    public boolean isDisabled()
++    {
++        return response.isDisabled();
++    }
++
++
+ }
+ 
+ 
 Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java
 ===================================================================
 --- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(revision 2504)
 +++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest.java	(working copy)
-@@ -605,6 +605,142 @@
+@@ -605,6 +605,145 @@
       * @since 2.4
       */
      public int getLocalPort();
@@ -2162,7 +2653,7 @@ Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest
 +     * @exception IllegalStateException if the request is not suspended.
 +     * 
 +     */
-+     void complete();
++     void complete() throws IOException;
 +
 +    /**
 +     * @return true after {@link #suspend(long)} has been called and before the request 
@@ -2192,6 +2683,9 @@ Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest
 +     */
 +     boolean isInitial();
 +
++     ServletResponse getServletResponse();
++     
++     ServletContext getServletContext();
 +
  }
  
@@ -2199,16 +2693,17 @@ Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest
 ===================================================================
 --- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(revision 2504)
 +++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestWrapper.java	(working copy)
-@@ -407,6 +407,84 @@
+@@ -407,6 +407,105 @@
      public int getLocalPort(){
          return this.request.getLocalPort();
      }
 +
 +    /* ------------------------------------------------------------ */
 +    /**
++     * @throws IOException 
 +     * @see javax.servlet.ServletRequest#complete()
 +     */
-+    public void complete()
++    public void complete() throws IOException
 +    {
 +        request.complete();
 +    }
@@ -2279,6 +2774,26 @@ Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequest
 +    public void suspend(long timeoutMs)
 +    {
 +        request.suspend(timeoutMs);
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#getServletContext()
++     */
++    public ServletContext getServletContext()
++    {
++        return request.getServletContext();
++    }
++
++    /* ------------------------------------------------------------ */
++    /**
++     * @return
++     * @see javax.servlet.ServletRequest#getServletResponse()
++     */
++    public ServletResponse getServletResponse()
++    {
++        return request.getServletResponse();
 +    }
      
 +    
@@ -3408,7 +3923,7 @@ Index: modules/examples/test-webapp/src/main/java/com/acme/Dump.java
      {
          if(request.getPathInfo()!=null && request.getPathInfo().toLowerCase().indexOf("script")!=-1)
          {
-@@ -101,6 +101,34 @@
+@@ -101,6 +101,65 @@
              Continuation continuation = ContinuationSupport.getContinuation(request, null);
              continuation.suspend(Long.parseLong(request.getParameter("continue")));
          }
@@ -3434,6 +3949,37 @@ Index: modules/examples/test-webapp/src/main/java/com/acme/Dump.java
 +            }).start();
 +        }
 +        
++        if (request.isInitial() && request.getParameter("complete")!=null)
++        {
++            final long complete=Long.parseLong(request.getParameter("complete"));
++            new Thread(new Runnable()
++            {
++                public void run()
++                {
++                    try
++                    {
++                        Thread.sleep(complete);
++                    }
++                    catch (InterruptedException e)
++                    {
++                        e.printStackTrace();
++                    }
++                    try
++                    {
++                        HttpServletResponse response = (HttpServletResponse) request.getServletResponse();
++                        response.setContentType("text/html");
++                        response.getOutputStream().println("<h1>COMPLETED</h1>"); 
++                        request.complete();
++                    }
++                    catch (IOException e)
++                    {
++                        e.printStackTrace();
++                    }
++                }
++                
++            }).start();
++        }
++        
 +        if (request.isInitial() && request.getParameter("suspend")!=null)
 +        {
 +            final long suspend=Long.parseLong(request.getParameter("suspend"));
@@ -3443,6 +3989,28 @@ Index: modules/examples/test-webapp/src/main/java/com/acme/Dump.java
              
          request.setAttribute("Dump", this);
          getServletContext().setAttribute("Dump",this);
+@@ -343,8 +402,21 @@
+             pout.write("</tr><tr>\n");
+             pout.write("<th align=\"right\">getQueryString:&nbsp;</th>");
+             pout.write("<td>"+notag(request.getQueryString())+"</td>");
++            pout.write("</tr><tr>\n");
+ 
++            pout.write("<th align=\"right\">isInitial:&nbsp;</th>");
++            pout.write("<td>"+request.isInitial()+"</td>");
+             pout.write("</tr><tr>\n");
++            pout.write("<th align=\"right\">isTimeout:&nbsp;</th>");
++            pout.write("<td>"+request.isTimeout()+"</td>");
++            pout.write("</tr><tr>\n");
++            pout.write("<th align=\"right\">isResumed:&nbsp;</th>");
++            pout.write("<td>"+request.isResumed()+"</td>");
++            pout.write("</tr><tr>\n");
++            pout.write("<th align=\"right\">isSuspended:&nbsp;</th>");
++            pout.write("<td>"+request.isSuspended()+"</td>");
++            pout.write("</tr><tr>\n");
++            
+             pout.write("<th align=\"right\">getProtocol:&nbsp;</th>");
+             pout.write("<td>"+request.getProtocol()+"</td>");
+             pout.write("</tr><tr>\n");
 Index: modules/examples/test-webapp/src/main/java/com/acme/TestFilter.java
 ===================================================================
 --- modules/examples/test-webapp/src/main/java/com/acme/TestFilter.java	(revision 2504)
@@ -3510,7 +4078,7 @@ Index: modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.ja
 ===================================================================
 --- modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.java	(revision 717)
 +++ modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.java	(working copy)
-@@ -20,6 +20,7 @@
+@@ -20,10 +20,12 @@
  
  import org.mortbay.cometd.AbstractBayeux;
  import org.mortbay.cometd.ClientImpl;
@@ -3518,7 +4086,22 @@ Index: modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.ja
  import org.mortbay.cometd.continuation.ContinuationClient;
  import org.mortbay.cometd.continuation.ContinuationCometdServlet;
  import org.mortbay.cometd.ext.TimesyncExtension;
-@@ -89,7 +90,7 @@
+ import org.mortbay.jetty.Server;
++import org.mortbay.jetty.bio.SocketConnector;
+ import org.mortbay.jetty.handler.ContextHandlerCollection;
+ import org.mortbay.jetty.handler.MovedContextHandler;
+ import org.mortbay.jetty.nio.SelectChannelConnector;
+@@ -61,6 +63,9 @@
+         SelectChannelConnector connector=new SelectChannelConnector();
+         connector.setPort(port);
+         server.addConnector(connector);
++        SocketConnector bconnector=new SocketConnector();
++        bconnector.setPort(port+1);
++        server.addConnector(bconnector);
+         
+         
+         SslSocketConnector connector2=new SslSocketConnector();
+@@ -89,7 +94,7 @@
          
          
          // Cometd servlet
@@ -3527,31 +4110,26 @@ Index: modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.ja
          ServletHolder cometd_holder = new ServletHolder(cometd_servlet);
          // cometd_holder.setInitParameter("filters","/WEB-INF/filters.json");
          cometd_holder.setInitParameter("timeout","180000");
+Index: modules/contrib/cometd/demo/src/main/webapp/WEB-INF/web.xml
+===================================================================
+--- modules/contrib/cometd/demo/src/main/webapp/WEB-INF/web.xml	(revision 717)
++++ modules/contrib/cometd/demo/src/main/webapp/WEB-INF/web.xml	(working copy)
+@@ -14,7 +14,7 @@
+   
+   <servlet>
+     <servlet-name>cometd</servlet-name>
+-    <servlet-class>org.mortbay.cometd.continuation.ContinuationCometdServlet</servlet-class>
++    <servlet-class>org.mortbay.cometd.SuspendingCometdServlet</servlet-class>
+     <init-param>
+       <param-name>filters</param-name>
+       <param-value>/WEB-INF/filters.json</param-value>
 Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/ClientImpl.java
 ===================================================================
 --- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/ClientImpl.java	(revision 717)
 +++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/ClientImpl.java	(working copy)
-@@ -154,6 +154,7 @@
-     {
+@@ -277,6 +277,7 @@
          synchronized(this)
          {
-+            System.err.println("Deliver "+message+" --> "+this);
-             ((MessageImpl)message).incRef();
-             
-             if (_maxQueue<0)
-@@ -267,6 +268,7 @@
-     {
-         synchronized(this)
-         {
-+            System.err.println(this+" responsed "+_responsesPending);
-             return _responsesPending--;
-         }
-     }
-@@ -276,7 +278,9 @@
-     {
-         synchronized(this)
-         {
-+            System.err.println(this+" responsePending "+_responsesPending);
              return ++_responsesPending;
 +            
          }
@@ -3561,7 +4139,7 @@ Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Suspending
 ===================================================================
 --- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingClient.java	(revision 0)
 +++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingClient.java	(revision 0)
-@@ -0,0 +1,178 @@
+@@ -0,0 +1,175 @@
 +// ========================================================================
 +// Copyright 2006 Mort Bay Consulting Pty. Ltd.
 +// ------------------------------------------------------------------------
@@ -3627,8 +4205,6 @@ Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Suspending
 +    /* ------------------------------------------------------------ */
 +    public void setPollRequest(ServletRequest request)
 +    {
-+        System.err.println(this+" SET "+request);
-+        
 +        Timeout.Task task=null;
 +        
 +        if (request==null)
@@ -3677,10 +4253,9 @@ Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Suspending
 +        Timeout.Task task=null;
 +        synchronized (this)
 +        {
-+            System.err.println();
-+            System.err.println(this+" RESUME "+_pollRequest);
 +            if (_pollRequest!=null)
 +            {
++                _pollRequest.getServletResponse().disable();
 +                _pollRequest.resume();
 +                task=_timeout;
 +            }
@@ -3751,7 +4326,7 @@ Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Suspending
 ===================================================================
 --- modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingCometdServlet.java	(revision 0)
 +++ modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/SuspendingCometdServlet.java	(revision 0)
-@@ -0,0 +1,213 @@
+@@ -0,0 +1,209 @@
 +//========================================================================
 +//Copyright 2007 Mort Bay Consulting Pty. Ltd.
 +//------------------------------------------------------------------------
@@ -3800,15 +4375,11 @@ Index: modules/contrib/cometd/bayeux/src/main/java/org/mortbay/cometd/Suspending
 +    /* ------------------------------------------------------------ */
 +    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 +    {
-+        System.err.println(" doPost "+request);
-+        
 +        // Look for an existing client and protect from context restarts
 +        SuspendingClient client=null;
 +        Transport transport=null;
 +        boolean connect=false;
 +        int num_msgs=-1;
-+        
-+        System.err.println(request);
 +        
 +        // Have we seen this request before
 +        if (request.isInitial())
