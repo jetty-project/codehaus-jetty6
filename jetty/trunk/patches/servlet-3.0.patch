@@ -1,3 +1,16 @@
+Index: modules/extra/jetty-win32service/pom.xml
+===================================================================
+--- modules/extra/jetty-win32service/pom.xml	(revision 2504)
++++ modules/extra/jetty-win32service/pom.xml	(working copy)
+@@ -87,7 +87,7 @@
+     </dependency>
+      <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+      </dependency>
+      <dependency>
 Index: modules/extra/jetty-sslengine/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java
 ===================================================================
 --- modules/extra/jetty-sslengine/src/main/java/org/mortbay/jetty/security/SslHttpChannelEndPoint.java	(revision 2504)
@@ -356,13 +369,10 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
 +++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.java	(revision 0)
-@@ -0,0 +1,535 @@
+@@ -0,0 +1,532 @@
 +package org.mortbay.jetty;
 +
 +import java.io.IOException;
-+
-+import javax.xml.ws.Endpoint;
-+
 +import org.mortbay.io.AsyncEndPoint;
 +import org.mortbay.io.EndPoint;
 +import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
@@ -788,7 +798,7 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Suspendable.j
 +
 +
 +    /* ------------------------------------------------------------ */
-+    protected void reset()
++    public void reset()
 +    {
 +        synchronized (this)
 +        {
@@ -928,6 +938,24 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/AbstractConne
      
      /* ------------------------------------------------------------ */
      protected abstract void accept(int acceptorID) throws IOException, InterruptedException;
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/bio/SocketConnector.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/bio/SocketConnector.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/bio/SocketConnector.java	(working copy)
+@@ -201,6 +201,13 @@
+             return l;
+         }
+         
++        
++        public void close() throws IOException
++        {
++            _connection.getRequest().reset();
++            super.close();
++        }
++
+         public void run()
+         {
+             try
 Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/ContextHandler.java
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/ContextHandler.java	(revision 2504)
@@ -962,6 +990,72 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/handler/Defau
          base_request.setHandled(true);
          
          String method=request.getMethod();
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(working copy)
+@@ -88,6 +88,7 @@
+         URL j2ee14xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_1_4.xsd",true);
+         URL webapp24xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_4.xsd",true);
+         URL webapp25xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_5.xsd",true);
++        URL webapp30xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_3_0.xsd",true);
+         URL schemadtd=Loader.getResource(Servlet.class,"/javax/servlet/resources/XMLSchema.dtd",true);
+         URL xmlxsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/xml.xsd",true);
+         URL webservice11xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_web_services_client_1_1.xsd",true);
+@@ -133,6 +134,8 @@
+         redirect(xmlParser,"http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd",webapp24xsd);
+         redirect(xmlParser,"web-app_2_5.xsd",webapp25xsd);
+         redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd",webapp25xsd);
++        redirect(xmlParser,"web-app_3_0.xsd",webapp30xsd);
++        redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd",webapp30xsd);
+         redirect(xmlParser,"xml.xsd",xmlxsd);
+         redirect(xmlParser,"http://www.w3.org/2001/xml.xsd",xmlxsd);
+         redirect(xmlParser,"datatypes.dtd",datatypesdtd);
+@@ -489,6 +492,17 @@
+         }
+         mapping.setDispatches(dispatcher);
+ 
++        iter=node.iterator("life-cycle");
++        while(iter.hasNext())
++        {
++            String l=((XmlParser.Node)iter.next()).toString(false,true);
++            if ("initial".equalsIgnoreCase(l))
++                mapping.setInitialLifeCycle(true);
++            if ("redispatch".equalsIgnoreCase(l))
++                mapping.setRedispatchLifeCycle(true);
++        }
++        mapping.setDispatches(dispatcher);
++        
+         _filterMappings=LazyList.add(_filterMappings,mapping);
+     }
+ 
+Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java
+===================================================================
+--- modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java	(revision 2504)
++++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java	(working copy)
+@@ -15,22 +15,16 @@
+ 
+ package org.mortbay.jetty.webapp;
+ 
+-import java.io.File;
+ import java.io.InputStream;
+ import java.net.URL;
+ import java.net.URLClassLoader;
+-import java.util.Enumeration;
+ import java.util.EventListener;
+ import java.util.HashSet;
+ import java.util.Iterator;
+-import java.util.Map;
+ import java.util.Set;
+ import java.util.jar.JarEntry;
+-import java.util.jar.JarFile;
+ import java.util.jar.JarInputStream;
+-import java.util.jar.Manifest;
+ import java.util.regex.Pattern;
+-import java.util.zip.ZipEntry;
+ 
+ import javax.servlet.Servlet;
+ 
 Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Response.java
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/Response.java	(revision 2504)
@@ -1214,72 +1308,6 @@ Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/Response.java
  
 -
  }
-Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java
-===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(revision 2504)
-+++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/WebXmlConfiguration.java	(working copy)
-@@ -88,6 +88,7 @@
-         URL j2ee14xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_1_4.xsd",true);
-         URL webapp24xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_4.xsd",true);
-         URL webapp25xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_5.xsd",true);
-+        URL webapp30xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_3_0.xsd",true);
-         URL schemadtd=Loader.getResource(Servlet.class,"/javax/servlet/resources/XMLSchema.dtd",true);
-         URL xmlxsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/xml.xsd",true);
-         URL webservice11xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_web_services_client_1_1.xsd",true);
-@@ -133,6 +134,8 @@
-         redirect(xmlParser,"http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd",webapp24xsd);
-         redirect(xmlParser,"web-app_2_5.xsd",webapp25xsd);
-         redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd",webapp25xsd);
-+        redirect(xmlParser,"web-app_3_0.xsd",webapp30xsd);
-+        redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd",webapp30xsd);
-         redirect(xmlParser,"xml.xsd",xmlxsd);
-         redirect(xmlParser,"http://www.w3.org/2001/xml.xsd",xmlxsd);
-         redirect(xmlParser,"datatypes.dtd",datatypesdtd);
-@@ -489,6 +492,17 @@
-         }
-         mapping.setDispatches(dispatcher);
- 
-+        iter=node.iterator("life-cycle");
-+        while(iter.hasNext())
-+        {
-+            String l=((XmlParser.Node)iter.next()).toString(false,true);
-+            if ("initial".equalsIgnoreCase(l))
-+                mapping.setInitialLifeCycle(true);
-+            if ("redispatch".equalsIgnoreCase(l))
-+                mapping.setRedispatchLifeCycle(true);
-+        }
-+        mapping.setDispatches(dispatcher);
-+        
-         _filterMappings=LazyList.add(_filterMappings,mapping);
-     }
- 
-Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java
-===================================================================
---- modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java	(revision 2504)
-+++ modules/server/jetty-server/src/main/java/org/mortbay/jetty/webapp/TagLibConfiguration.java	(working copy)
-@@ -15,22 +15,16 @@
- 
- package org.mortbay.jetty.webapp;
- 
--import java.io.File;
- import java.io.InputStream;
- import java.net.URL;
- import java.net.URLClassLoader;
--import java.util.Enumeration;
- import java.util.EventListener;
- import java.util.HashSet;
- import java.util.Iterator;
--import java.util.Map;
- import java.util.Set;
- import java.util.jar.JarEntry;
--import java.util.jar.JarFile;
- import java.util.jar.JarInputStream;
--import java.util.jar.Manifest;
- import java.util.regex.Pattern;
--import java.util.zip.ZipEntry;
- 
- import javax.servlet.Servlet;
- 
 Index: modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnection.java
 ===================================================================
 --- modules/server/jetty-server/src/main/java/org/mortbay/jetty/HttpConnection.java	(revision 2504)
@@ -2361,6 +2389,28 @@ ___________________________________________________________________
 Name: svn:eol-style
    + native
 
+Index: modules/server/jetty-server/pom.xml
+===================================================================
+--- modules/server/jetty-server/pom.xml	(revision 2504)
++++ modules/server/jetty-server/pom.xml	(working copy)
+@@ -37,7 +37,7 @@
+               <tasks>
+                 <delete includeemptydirs="true">
+                   <fileset dir="../../../lib/" includes="${project.artifactId}-${project.version}.${project.packaging}" />
+-                  <fileset dir="../../../lib/" includes="servlet-api-2.5.jar" />
++                  <fileset dir="../../../lib/" includes="servlet-api-3.0.jar" />
+                   <fileset dir="../../../etc/" includes="webdefault.xml" />
+                 </delete>
+               </tasks>
+@@ -104,7 +104,7 @@
+     </dependency>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+     </dependency>
+   </dependencies>
 Index: modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java
 ===================================================================
 --- modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/AjaxFilter.java	(revision 2504)
@@ -2396,6 +2446,19 @@ Index: modules/server/jetty-util/src/main/java/org/mortbay/util/ajax/Continuatio
   *
   */
  public interface Continuation
+Index: modules/server/jetty-util/pom.xml
+===================================================================
+--- modules/server/jetty-util/pom.xml	(revision 2504)
++++ modules/server/jetty-util/pom.xml	(working copy)
+@@ -107,7 +107,7 @@
+     </dependency>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+       <scope>provided</scope>
+     </dependency>
 Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServlet.java
 ===================================================================
 --- modules/server/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServlet.java	(revision 2504)
@@ -2425,38 +2488,6 @@ Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServl
  }
  
  
-Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java
-===================================================================
---- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2504)
-+++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(working copy)
-@@ -48,4 +48,27 @@
- 
-     /** The request is about to come into scope of the web application. */
-     public void requestInitialized ( ServletRequestEvent sre );
-+    
-+    /**
-+     * A request has been suspended.
-+     * Called by the thread that dispatched the servlet when it
-+     * has returned to the container.
-+     * @since 3.0
-+     */
-+    void requestSuspended(ServletRequestEvent rre);
-+
-+    /**
-+     * A request has been resumed.
-+     * Called by the thread that will dispatch to the servlet 
-+     * immediately before dispatch. 
-+     * @since 3.0
-+     */
-+    void requestResumed(ServletRequestEvent rre);
-+
-+    /**
-+     * A request has been completed.
-+     * Called from a call to {@ServletRequest#complete()} 
-+     * @since 3.0
-+     */
-+    void requestCompleted(ServletRequestEvent rre);
- }
 Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponse.java
 ===================================================================
 --- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponse.java	(revision 2504)
@@ -2499,6 +2530,38 @@ Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRespons
  }
  
  
+Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java
+===================================================================
+--- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(revision 2504)
++++ modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletRequestListener.java	(working copy)
+@@ -48,4 +48,27 @@
+ 
+     /** The request is about to come into scope of the web application. */
+     public void requestInitialized ( ServletRequestEvent sre );
++    
++    /**
++     * A request has been suspended.
++     * Called by the thread that dispatched the servlet when it
++     * has returned to the container.
++     * @since 3.0
++     */
++    void requestSuspended(ServletRequestEvent rre);
++
++    /**
++     * A request has been resumed.
++     * Called by the thread that will dispatch to the servlet 
++     * immediately before dispatch. 
++     * @since 3.0
++     */
++    void requestResumed(ServletRequestEvent rre);
++
++    /**
++     * A request has been completed.
++     * Called from a call to {@ServletRequest#complete()} 
++     * @since 3.0
++     */
++    void requestCompleted(ServletRequestEvent rre);
+ }
 Index: modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponseWrapper.java
 ===================================================================
 --- modules/server/servlet-api-2.5/src/main/java/javax/servlet/ServletResponseWrapper.java	(revision 2504)
@@ -3777,6 +3840,89 @@ Index: modules/server/servlet-api-2.5/src/main/resources/javax/servlet/resources
 +        <xsd:attribute name="id" type="xsd:ID" />
 +    </xsd:complexType>
 +</xsd:schema>
+Index: modules/server/servlet-api-2.5/pom.xml
+===================================================================
+--- modules/server/servlet-api-2.5/pom.xml	(revision 2504)
++++ modules/server/servlet-api-2.5/pom.xml	(working copy)
+@@ -7,9 +7,9 @@
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.mortbay.jetty</groupId>
+-  <artifactId>servlet-api-2.5</artifactId>
+-  <name>Servlet Specification 2.5 API</name>
+-  <description>Servlet Specification 2.5 API</description>
++  <artifactId>servlet-api-3.0</artifactId>
++  <name>Servlet Specification 3.0 API</name>
++  <description>Servlet Specification 3.0 API</description>
+   <packaging>jar</packaging>
+   <url>http://jetty.mortbay.org</url>
+   <licenses>
+@@ -78,11 +78,11 @@
+             </goals>
+             <configuration>
+               <instructions>
+-              <Bundle-Version>2.5</Bundle-Version>
++              <Bundle-Version>3.0</Bundle-Version>
+               <Import-Package>!javax.servlet.*,*</Import-Package>
+               <Bundle-RequiredExecutionEnvironment>J2SE-1.4</Bundle-RequiredExecutionEnvironment>
+               <Implementation-Vendor>JCP</Implementation-Vendor>
+-              <Specification-Version>2.5</Specification-Version>
++              <Specification-Version>3.0</Specification-Version>
+               </instructions>
+             </configuration>
+            </execution>
+Index: modules/jsp/jsp-api-2.0/pom.xml
+===================================================================
+--- modules/jsp/jsp-api-2.0/pom.xml	(revision 2504)
++++ modules/jsp/jsp-api-2.0/pom.xml	(working copy)
+@@ -73,7 +73,7 @@
+   <dependencies>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+     </dependency>
+   </dependencies>
+Index: modules/jsp/jsp-api-2.1/pom.xml
+===================================================================
+--- modules/jsp/jsp-api-2.1/pom.xml	(revision 2504)
++++ modules/jsp/jsp-api-2.1/pom.xml	(working copy)
+@@ -114,7 +114,7 @@
+   <dependencies>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+     </dependency>
+   </dependencies>
+Index: modules/jsp/jsp-2.0/pom.xml
+===================================================================
+--- modules/jsp/jsp-2.0/pom.xml	(revision 2504)
++++ modules/jsp/jsp-2.0/pom.xml	(working copy)
+@@ -167,7 +167,7 @@
+     </dependency>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+     </dependency>
+     <dependency>
+Index: modules/jsp/jsp-2.1/pom.xml
+===================================================================
+--- modules/jsp/jsp-2.1/pom.xml	(revision 2504)
++++ modules/jsp/jsp-2.1/pom.xml	(working copy)
+@@ -164,7 +164,7 @@
+     </dependency>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+       <scope>provided</scope>
+     </dependency>
 Index: modules/examples/test-webapp/src/main/java/com/acme/TagListener.java
 ===================================================================
 --- modules/examples/test-webapp/src/main/java/com/acme/TagListener.java	(revision 2504)
@@ -4074,6 +4220,32 @@ Index: modules/examples/test-webapp/src/main/webapp/WEB-INF/web.xml
    </filter-mapping>
    
    <filter>
+Index: modules/examples/test-webapp/pom.xml
+===================================================================
+--- modules/examples/test-webapp/pom.xml	(revision 2504)
++++ modules/examples/test-webapp/pom.xml	(working copy)
+@@ -132,7 +132,7 @@
+     </dependency>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+       <scope>provided</scope>
+     </dependency>
+Index: modules/contrib/wadi/pom.xml
+===================================================================
+--- modules/contrib/wadi/pom.xml	(revision 717)
++++ modules/contrib/wadi/pom.xml	(working copy)
+@@ -197,7 +197,7 @@
+     </dependency>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+       <scope>provided</scope>
+     </dependency>
 Index: modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.java
 ===================================================================
 --- modules/contrib/cometd/demo/src/main/java/dojox/cometd/demo/CometdDemo.java	(revision 717)
@@ -4749,3 +4921,29 @@ ___________________________________________________________________
 Name: svn:eol-style
    + native
 
+Index: modules/contrib/cometd/bayeux/pom.xml
+===================================================================
+--- modules/contrib/cometd/bayeux/pom.xml	(revision 717)
++++ modules/contrib/cometd/bayeux/pom.xml	(working copy)
+@@ -25,7 +25,7 @@
+     </dependency>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+       <scope>provided</scope>
+     </dependency>
+Index: modules/contrib/cometd/client/pom.xml
+===================================================================
+--- modules/contrib/cometd/client/pom.xml	(revision 717)
++++ modules/contrib/cometd/client/pom.xml	(working copy)
+@@ -30,7 +30,7 @@
+     </dependency>
+     <dependency>
+       <groupId>org.mortbay.jetty</groupId>
+-      <artifactId>servlet-api-2.5</artifactId>
++      <artifactId>servlet-api-3.0</artifactId>
+       <version>${project.version}</version>
+       <scope>provided</scope>
+     </dependency>
