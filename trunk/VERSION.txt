@@ -1,6 +1,6 @@
 
-jetty-6.2-SNAPSHOT
- + Jetty-6.1.8
+jetty-7.0-SNAPSHOT
+ + Jetty-6.1.8 Changes
  + Refactor of Continuation towards servlet 3.0 proposal
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + QueuedThreadPool default
@@ -33,6 +33,7 @@ jetty-6.2-SNAPSHOT
  + JETTY-532 MBean properties for QueuedThreadPool
  + JETTY-535 Fixed Bayeux server side client memory leak
  + JETTY-538 test harness fix for windows
+ + JETTY-540 Servlet-3.0 support (work in progress)
 
 jetty-6.1.8 28 February 2008
  + Added QueuedThreadPool

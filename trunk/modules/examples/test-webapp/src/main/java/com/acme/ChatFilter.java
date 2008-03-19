@@ -193,36 +193,17 @@ public class ChatFilter extends AjaxFilter
                 member = new Member(session,null);
                 room.put(session.getId(),member);
             }
-
-            Continuation continuation = ContinuationSupport.getContinuation(request, room);
             
-            if (!member.hasMessages())
+            if (!request.isInitial())
+                member.setPoll(null);
+            else if (!member.hasMessages())
             {   
-                if (member.getContinuation()!=null && member.getContinuation()!=continuation)
-                {
-                    // duplicate frames!
-                    Message duplicate = new Message("System","Multiple frames/tabs/windows from same browser!",true);
-                    Message action = new Message("System","Please use only one frame/tab/window",true);
-                    member.addMessage(duplicate);
-                    member.addMessage(action);
-                    try
-                    {
-                        Thread.sleep(5000);
-                    }
-                    catch(Exception e)
-                    {}
-                }
-                else
-                {
-                    member.setContinuation(continuation);
-                    continuation.suspend(timeoutMS);
-                }
+                member.setPoll(request);
+                request.suspend(timeoutMS);
+                return;
             }
             
-            if (member.getContinuation()==continuation)
-                member.setContinuation(null);
 
-            
             if (member.sendMessages(response))
                 sendMembers(room,response);
         }
@@ -308,9 +289,6 @@ public class ChatFilter extends AjaxFilter
         {
             return "<chat from=\""+_from+"\" alert=\""+_alert+"\">"+encodeText(_text)+"</chat>";
         }
-        
-        
-        
     }
 
     private class Member
@@ -318,7 +296,7 @@ public class ChatFilter extends AjaxFilter
         private HttpSession _session;
         private String _name;
         private List _messages = new ArrayList();
-        private Continuation _continuation;
+        private ServletRequest _request;;
         
         Member(HttpSession session, String name)
         {
@@ -353,25 +331,13 @@ public class ChatFilter extends AjaxFilter
             return _session;
         }
 
-
         /* ------------------------------------------------------------ */
         /**
          * @param continuation The continuation to set.
          */
-        public Continuation getContinuation()
+        public void setPoll(ServletRequest poll)
         {
-            return _continuation;
-        }
-        
-        /* ------------------------------------------------------------ */
-        /**
-         * @param continuation The continuation to set.
-         */
-        public void setContinuation(Continuation continuation)
-        {
-            if (continuation!=null && _continuation!=null && _continuation!=continuation)
-                _continuation.resume();
-            _continuation=continuation;
+            _request=poll;
         }
         
         /* ------------------------------------------------------------ */
@@ -380,8 +346,8 @@ public class ChatFilter extends AjaxFilter
             if (_name==null)
                 return;
             _messages.add(event);
-            if (_continuation!=null)
-                _continuation.resume();
+            if (_request!=null)
+                _request.resume();
         }
 
         /* ------------------------------------------------------------ */

@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>project</artifactId>
-    <version>6.2-SNAPSHOT</version>
+    <version>7.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -11,8 +11,6 @@
   <name>Jetty JSP Modules</name>
   <packaging>pom</packaging>
   <modules>
-    <module>jsp-api-2.0</module>
-    <module>jsp-2.0</module>
     <module>jsp-api-2.1</module>
     <module>jsp-2.1</module>
   </modules>

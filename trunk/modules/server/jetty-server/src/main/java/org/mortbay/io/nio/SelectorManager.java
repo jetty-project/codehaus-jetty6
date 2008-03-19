@@ -252,7 +252,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         private transient List[] _changes;
         private transient Timeout _idleTimeout;
         private transient int _nextSet;
-        private transient Timeout _retryTimeout;
+        private transient Timeout _timeout;
         private transient Selector _selector;
         private transient int _setID;
         private transient boolean _selecting;
@@ -265,8 +265,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
             _idleTimeout = new Timeout();
             _idleTimeout.setDuration(getMaxIdleTime());
-            _retryTimeout = new Timeout();
-            _retryTimeout.setDuration(0L);
+            _timeout = new Timeout();
+            _timeout.setDuration(0L);
 
             // create a selector;
             _selector = Selector.open();
@@ -383,13 +383,13 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 synchronized (this)
                 {
                     _idleTimeout.setNow(now);
-                    _retryTimeout.setNow(now);
+                    _timeout.setNow(now);
                     if (_lowResourcesConnections>0 && _selector.keys().size()>_lowResourcesConnections)
                         _idleTimeout.setDuration(_lowResourcesMaxIdleTime);
                     else 
                         _idleTimeout.setDuration(_maxIdleTime);
                     idle_next=_idleTimeout.getTimeToNext();
-                    retry_next=_retryTimeout.getTimeToNext();
+                    retry_next=_timeout.getTimeToNext();
                 }
 
                 // workout how low to wait in select
@@ -406,7 +406,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     int selected=_selector.select(wait);
                     now = System.currentTimeMillis();
                     _idleTimeout.setNow(now);
-                    _retryTimeout.setNow(now);
+                    _timeout.setNow(now);
 
                     // Look for JVM bug 
                     if (selected==0 && wait>0 && (now-before)<wait/2 && _selector.selectedKeys().size()==0)
@@ -566,7 +566,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 {
                     task=_idleTimeout.expired();
                     if (task==null)
-                        task=_retryTimeout.expired();
+                        task=_timeout.expired();
                 }
 
                 // handle any expired timers
@@ -581,7 +581,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             break;
                         task=_idleTimeout.expired();
                         if (task==null)
-                            task=_retryTimeout.expired();
+                            task=_timeout.expired();
                     }
                 }
             }
@@ -623,11 +623,11 @@ public abstract class SelectorManager extends AbstractLifeCycle
         }
 
         /* ------------------------------------------------------------ */
-        public void scheduleTimeout(Timeout.Task task, long timeout)
+        public void scheduleTimeout(Timeout.Task task, long timeoutMs)
         {
             synchronized (this)
             {
-                _retryTimeout.schedule(task, timeout);
+                _timeout.schedule(task, timeoutMs);
             }
         }
         
@@ -692,7 +692,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
             synchronized (this)
             {
                 _idleTimeout.cancelAll();
-                _retryTimeout.cancelAll();
+                _timeout.cancelAll();
                 try
                 {
                     if (_selector != null)

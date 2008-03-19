@@ -201,6 +201,13 @@ public class SocketConnector extends AbstractConnector
             return l;
         }
         
+        
+        public void close() throws IOException
+        {
+            _connection.getRequest().reset();
+            super.close();
+        }
+
         public void run()
         {
             try

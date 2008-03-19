@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>modules-server</artifactId>
-    <version>6.2-SNAPSHOT</version>
+    <version>7.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -37,7 +37,7 @@
               <tasks>
                 <delete includeemptydirs="true">
                   <fileset dir="../../../lib/" includes="${project.artifactId}-${project.version}.${project.packaging}" />
-                  <fileset dir="../../../lib/" includes="servlet-api-2.5.jar" />
+                  <fileset dir="../../../lib/" includes="servlet-api-3.0.jar" />
                   <fileset dir="../../../etc/" includes="webdefault.xml" />
                 </delete>
               </tasks>
@@ -104,7 +104,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api-2.5</artifactId>
+      <artifactId>servlet-api-3.0</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

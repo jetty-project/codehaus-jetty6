@@ -15,22 +15,16 @@
 
 package org.mortbay.jetty.webapp;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
 
 import javax.servlet.Servlet;
 

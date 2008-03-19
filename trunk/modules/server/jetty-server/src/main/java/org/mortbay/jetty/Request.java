@@ -33,10 +33,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -93,15 +95,14 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class Request implements HttpServletRequest
+public class Request extends Suspendable implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
     
     private boolean _handled =false;
-    private HttpConnection _connection;
-    private EndPoint _endp;
     private Map _roleMap;
+    private EndPoint _endp;
     
     private Attributes _attributes;
     private String _authType;
@@ -147,7 +148,7 @@ public class Request implements HttpServletRequest
      */
     public Request(HttpConnection connection)
     {
-        _connection=connection;
+        super(connection);
         _endp=connection.getEndPoint();
         _dns=_connection.getResolveNames();
     }
@@ -155,6 +156,7 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     protected void recycle()
     {
+        super.reset();
         _handled=false;
         if (_context!=null)
             throw new IllegalStateException("Request in context!");
@@ -233,6 +235,8 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public void setHandled(boolean h)
     {
+        if (h&& !shouldComplete())
+            new Throwable().printStackTrace();
         _handled=h;
     }
     
@@ -1499,16 +1503,22 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
     public Continuation getContinuation()
     {
         return _continuation;
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
     public Continuation getContinuation(boolean create)
     {
         if (_continuation==null && create)
-            _continuation=getConnection().getConnector().newContinuation(getConnection());
+            _continuation=new Servlet3Continuation(this); 
         return _continuation;
     }
     
@@ -1541,8 +1551,7 @@ public class Request implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return getMethod()+" "+_uri+" "+getProtocol()+"\n"+
-        _connection.getRequestFields().toString();
+        return (_handled?"[":"(")+getMethod()+" "+_uri+(_handled?"]@":")@")+hashCode()+" "+super.toString();
     }
 
     /* ------------------------------------------------------------ */
@@ -1640,5 +1649,44 @@ public class Request implements HttpServletRequest
     {
         return _roleMap;
     }
+
+    /* ------------------------------------------------------------ */
+    public void suspend()
+    {
+        long timeout = 30000L;
+        if (_context!=null)
+        {
+            Long t=(Long)_context.getAttribute("javax.servlet.suspendTimeoutMs");
+            if (t!=null)
+                timeout=t.longValue();
+        }
+        suspend(timeout);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void complete() throws IOException
+    {
+        try
+        {
+            _connection.getResponse().flushBuffer();
+        }
+        finally
+        {
+            super.complete();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ServletContext getServletContext()
+    {
+        return _context;
+    }
+
+    /* ------------------------------------------------------------ */
+    public ServletResponse getServletResponse()
+    {
+        return _connection.getResponse();
+    }
+    
 }
 

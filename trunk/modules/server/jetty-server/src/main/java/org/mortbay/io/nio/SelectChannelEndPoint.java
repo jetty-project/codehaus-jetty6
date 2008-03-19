@@ -6,6 +6,7 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
@@ -21,7 +22,7 @@ import org.mortbay.thread.Timeout;
  * @author gregw
  *
  */
-public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
+public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, AsyncEndPoint
 {
     protected SelectorManager _manager;
     protected SelectorManager.SelectSet _selectSet;
@@ -77,7 +78,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
             // If there are threads dispatched reading and writing
             if (_readBlocked || _writeBlocked)
             {
-                assert _dispatched;
+                // assert _dispatched;
                 if (_readBlocked && _key.isReadable())
                     _readBlocked=false;
                 if (_writeBlocked && _key.isWritable())
@@ -118,13 +119,15 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable
     }
         
     /* ------------------------------------------------------------ */
-    protected boolean dispatch() 
+    public boolean dispatch() 
     {
         synchronized(this)
         {
-            // Otherwise if we are still dispatched
             if (_dispatched)
-                throw new IllegalStateException("ALREADY DISPATCHED!!!");
+            {
+                Log.warn("ALREADY DISPATCHED "+this); // TODO is this ignorable?
+                return true;
+            }
 
             _dispatched = _manager.dispatch((Runnable)this);   
             if(!_dispatched)

@@ -291,7 +291,7 @@ public class ServletHandler extends AbstractHandler
     {
         if (!isStarted())
             return;
-
+        
         // Get the base requests
         final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         final String old_servlet_name=base_request.getServletName();
@@ -332,7 +332,7 @@ public class ServletHandler extends AbstractHandler
                     }
                     
                     if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
-                        chain=getFilterChain(type, target, servlet_holder);
+                        chain=getFilterChain(type, target, servlet_holder,request.isInitial());
                 }      
             }
             else
@@ -342,7 +342,7 @@ public class ServletHandler extends AbstractHandler
                 if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
                 {
                     base_request.setServletName(servlet_holder.getName());
-                    chain=getFilterChain(type, null,servlet_holder);
+                    chain=getFilterChain(type, null,servlet_holder,request.isInitial());
                 }
             }
 
@@ -366,7 +366,6 @@ public class ServletHandler extends AbstractHandler
         }
         catch(RetryRequest e)
         {
-            base_request.setHandled(false);
             throw e;
         }
         catch(EofException e)
@@ -462,9 +461,12 @@ public class ServletHandler extends AbstractHandler
     }
 
     /* ------------------------------------------------------------ */
-    private FilterChain getFilterChain(int requestType, String pathInContext, ServletHolder servletHolder) 
+    private FilterChain getFilterChain(int requestType, String pathInContext, ServletHolder servletHolder, boolean initial) 
     {
         String key=pathInContext==null?servletHolder.getName():pathInContext;
+        if (!initial)
+            key="!"+key;
+            
         
         if (_filterChainsCached && _chainCache!=null)
         {
@@ -486,7 +488,7 @@ public class ServletHandler extends AbstractHandler
             for (int i= 0; i < _filterPathMappings.size(); i++)
             {
                 FilterMapping mapping = (FilterMapping)_filterPathMappings.get(i);
-                if (mapping.appliesTo(pathInContext, requestType))
+                if (mapping.appliesTo(pathInContext, requestType,initial))
                     filters= LazyList.add(filters, mapping.getFilterHolder());
             }
         }
@@ -501,7 +503,7 @@ public class ServletHandler extends AbstractHandler
                 for (int i=0; i<LazyList.size(o);i++)
                 {
                     FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
-                    if (mapping.appliesTo(requestType))
+                    if (mapping.appliesTo(requestType,initial))
                         filters=LazyList.add(filters,mapping.getFilterHolder());
                 }
                 
@@ -509,7 +511,7 @@ public class ServletHandler extends AbstractHandler
                 for (int i=0; i<LazyList.size(o);i++)
                 {
                     FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
-                    if (mapping.appliesTo(requestType))
+                    if (mapping.appliesTo(requestType,initial))
                         filters=LazyList.add(filters,mapping.getFilterHolder());
                 }
             }

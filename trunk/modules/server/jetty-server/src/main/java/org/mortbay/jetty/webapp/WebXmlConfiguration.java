@@ -88,6 +88,7 @@ public class WebXmlConfiguration implements Configuration
         URL j2ee14xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_1_4.xsd",true);
         URL webapp24xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_4.xsd",true);
         URL webapp25xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_2_5.xsd",true);
+        URL webapp30xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/web-app_3_0.xsd",true);
         URL schemadtd=Loader.getResource(Servlet.class,"/javax/servlet/resources/XMLSchema.dtd",true);
         URL xmlxsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/xml.xsd",true);
         URL webservice11xsd=Loader.getResource(Servlet.class,"/javax/servlet/resources/j2ee_web_services_client_1_1.xsd",true);
@@ -133,6 +134,8 @@ public class WebXmlConfiguration implements Configuration
         redirect(xmlParser,"http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd",webapp24xsd);
         redirect(xmlParser,"web-app_2_5.xsd",webapp25xsd);
         redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd",webapp25xsd);
+        redirect(xmlParser,"web-app_3_0.xsd",webapp30xsd);
+        redirect(xmlParser,"http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd",webapp30xsd);
         redirect(xmlParser,"xml.xsd",xmlxsd);
         redirect(xmlParser,"http://www.w3.org/2001/xml.xsd",xmlxsd);
         redirect(xmlParser,"datatypes.dtd",datatypesdtd);
@@ -489,6 +492,17 @@ public class WebXmlConfiguration implements Configuration
         }
         mapping.setDispatches(dispatcher);
 
+        iter=node.iterator("life-cycle");
+        while(iter.hasNext())
+        {
+            String l=((XmlParser.Node)iter.next()).toString(false,true);
+            if ("initial".equalsIgnoreCase(l))
+                mapping.setInitialLifeCycle(true);
+            if ("redispatch".equalsIgnoreCase(l))
+                mapping.setRedispatchLifeCycle(true);
+        }
+        mapping.setDispatches(dispatcher);
+        
         _filterMappings=LazyList.add(_filterMappings,mapping);
     }
 
