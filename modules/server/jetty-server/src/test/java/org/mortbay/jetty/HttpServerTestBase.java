@@ -41,7 +41,7 @@ public class HttpServerTestBase extends TestCase
     private static final String REQUEST1=REQUEST1_HEADER+REQUEST1_CONTENT.getBytes().length+"\n\n"+REQUEST1_CONTENT;
 
     /** The expected response. */
-    private static final String RESPONSE1="HTTP/1.1 200 OK\n"+"Connection: close\n"+"Server: Jetty(6.1.x)\n"+"\n"+"Hello world\n";
+    private static final String RESPONSE1="HTTP/1.1 200 OK\n"+"Connection: close\n"+"Server: Jetty(7.0.x)\n"+"\n"+"Hello world\n";
 
     // Break the request up into three pieces, splitting the header.
     private static final String FRAGMENT1=REQUEST1.substring(0,16);
@@ -72,7 +72,7 @@ public class HttpServerTestBase extends TestCase
         "HTTP/1.1 200 OK\n"+
         "Content-Type: text/xml; charset=iso-8859-1\n"+
         "Content-Length: "+RESPONSE2_CONTENT.getBytes().length+"\n"+
-        "Server: Jetty(6.1.x)\n"+
+        "Server: Jetty(7.0.x)\n"+
         "\n"+
         RESPONSE2_CONTENT;
 

@@ -68,6 +68,8 @@ public class AjaxFilter implements Filter
             for (int i=0;i<method.length;i++)
             {
                 handle(method[i],message[i],srequest,aResponse);
+                if (srequest.isSuspended())
+                    return;
             }
 
             out.println("</ajax-response>");

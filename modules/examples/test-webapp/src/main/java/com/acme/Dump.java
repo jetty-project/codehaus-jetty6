@@ -60,7 +60,7 @@ public class Dump extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public void doGet(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         if(request.getPathInfo()!=null && request.getPathInfo().toLowerCase().indexOf("script")!=-1)
         {
@@ -100,6 +100,65 @@ public class Dump extends HttpServlet
         {
             Continuation continuation = ContinuationSupport.getContinuation(request, null);
             continuation.suspend(Long.parseLong(request.getParameter("continue")));
+        }
+
+        if (request.isInitial() && request.getParameter("resume")!=null)
+        {
+            final long resume=Long.parseLong(request.getParameter("resume"));
+            new Thread(new Runnable()
+            {
+                public void run()
+                {
+                    try
+                    {
+                        Thread.sleep(resume);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    request.resume();
+                }
+                
+            }).start();
+        }
+        
+        if (request.isInitial() && request.getParameter("complete")!=null)
+        {
+            final long complete=Long.parseLong(request.getParameter("complete"));
+            new Thread(new Runnable()
+            {
+                public void run()
+                {
+                    try
+                    {
+                        Thread.sleep(complete);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    try
+                    {
+                        HttpServletResponse response = (HttpServletResponse) request.getServletResponse();
+                        response.setContentType("text/html");
+                        response.getOutputStream().println("<h1>COMPLETED</h1>"); 
+                        request.complete();
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                
+            }).start();
+        }
+        
+        if (request.isInitial() && request.getParameter("suspend")!=null)
+        {
+            final long suspend=Long.parseLong(request.getParameter("suspend"));
+            request.suspend(suspend);
+            return;
         }
             
         request.setAttribute("Dump", this);
@@ -343,8 +402,21 @@ public class Dump extends HttpServlet
             pout.write("</tr><tr>\n");
             pout.write("<th align=\"right\">getQueryString:&nbsp;</th>");
             pout.write("<td>"+notag(request.getQueryString())+"</td>");
-
             pout.write("</tr><tr>\n");
+
+            pout.write("<th align=\"right\">isInitial:&nbsp;</th>");
+            pout.write("<td>"+request.isInitial()+"</td>");
+            pout.write("</tr><tr>\n");
+            pout.write("<th align=\"right\">isTimeout:&nbsp;</th>");
+            pout.write("<td>"+request.isTimeout()+"</td>");
+            pout.write("</tr><tr>\n");
+            pout.write("<th align=\"right\">isResumed:&nbsp;</th>");
+            pout.write("<td>"+request.isResumed()+"</td>");
+            pout.write("</tr><tr>\n");
+            pout.write("<th align=\"right\">isSuspended:&nbsp;</th>");
+            pout.write("<td>"+request.isSuspended()+"</td>");
+            pout.write("</tr><tr>\n");
+            
             pout.write("<th align=\"right\">getProtocol:&nbsp;</th>");
             pout.write("<td>"+request.getProtocol()+"</td>");
             pout.write("</tr><tr>\n");

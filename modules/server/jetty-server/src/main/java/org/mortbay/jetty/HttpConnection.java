@@ -30,8 +30,8 @@ import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
+import org.mortbay.thread.Timeout;
 import org.mortbay.util.URIUtil;
-import org.mortbay.util.ajax.Continuation;
 
 /**
  * <p>A HttpConnection represents the connection of a HTTP client to the server
@@ -59,7 +59,6 @@ public class HttpConnection implements Connection
     private int _requests;
     private boolean _handling;
     private boolean _destroy;
-    
     
     protected Connector _connector;
     protected EndPoint _endp;
@@ -369,21 +368,16 @@ public class HttpConnection implements Connection
                 synchronized(this)
                 {
                     if (_handling)
-                    {
                         throw new IllegalStateException(); // TODO delete this check
-                    }
                     _handling=true;
                 }
                 
                 setCurrentConnection(this);
                 long io=0;
                 
-                Continuation continuation = _request.getContinuation();
-                if (continuation != null && continuation.isPending())
+                if (!_request.isInitial())
                 {
-                    Log.debug("resume continuation {}",continuation);
-                    if (_request.getMethod()==null)
-                        throw new IllegalStateException();
+                    Log.debug("resume request",_request);
                     handleRequest();
                 }
                 else
@@ -463,10 +457,9 @@ public class HttpConnection implements Connection
                     no_progress=0;
                 }
                 
-                Continuation continuation = _request.getContinuation();
-                if (continuation != null && continuation.isPending())
+                if (_request.isSuspended())
                 {
-                    Log.debug("return with pending continuation");
+                    Log.debug("return with suspended request");
                     return;
                 }
                 else if (_generator.isCommitted() && !_generator.isComplete() && _endp instanceof SelectChannelEndPoint) // TODO remove SelectChannel dependency
@@ -474,7 +467,21 @@ public class HttpConnection implements Connection
             }
         }
     }
-
+    
+    Timeout timeout = new Timeout();
+    
+    /* ------------------------------------------------------------ */
+    public void scheduleTimeout(Timeout.Task task, long timeoutMs)
+    {
+        throw new UnsupportedOperationException();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void cancelTimeout(Timeout.Task task)
+    {
+        throw new UnsupportedOperationException();
+    }
+    
     /* ------------------------------------------------------------ */
     public void reset(boolean returnBuffers)
     {
@@ -492,14 +499,17 @@ public class HttpConnection implements Connection
     /* ------------------------------------------------------------ */
     protected void handleRequest() throws IOException
     {
-        if (_server != null)
+        _request.handling();
+        boolean handling=true;
+        
+        while (handling)
         {
-            boolean retrying = false;
+            _request.setHandled(false);
+            _response.enable();
             boolean error = false;
             String threadName=null;
             try
             {
-                // TODO try to do this lazily or more efficiently
                 String info=URIUtil.canonicalPath(_uri.getDecodedPath());
                 if (info==null)
                     throw new HttpException(400);
@@ -508,20 +518,23 @@ public class HttpConnection implements Connection
                 if (_out!=null)
                     _out.reopen();
                 
+                if (_request.isInitial())
+                    _connector.customize(_endp, _request);
+                  
                 if (Log.isDebugEnabled())
                 {
                     threadName=Thread.currentThread().getName();
                     Thread.currentThread().setName(threadName+" - "+_uri);
                 }
                 
-                _connector.customize(_endp, _request);
-                
-                _server.handle(this);
+                if (_request.shouldHandleRequest())
+                    _server.handle(this);
+                else
+                    _request.setHandled(true);
             }
             catch (RetryRequest r)
             {
-                // Log.ignore(r);
-                retrying = true;
+                Log.ignore(r);
             }
             catch (EofException e)
             {
@@ -551,10 +564,16 @@ public class HttpConnection implements Connection
             }
             finally
             {   
+                handling = !_request.unhandling() && _server != null;
+                
+                if (handling)
+                    continue;
+                
                 if (threadName!=null)
                     Thread.currentThread().setName(threadName);
                 
-                if (!retrying)
+                
+                if (_request.shouldComplete() )
                 {
                     if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                     {

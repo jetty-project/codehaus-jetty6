@@ -19,12 +19,9 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.mortbay.component.LifeCycle;
-import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.ThreadPool;
-import org.mortbay.util.ajax.Continuation;
-import org.mortbay.util.ajax.WaitingContinuation;
 
 
 /** Abstract Connector implementation.
@@ -460,12 +457,6 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     public void setIntegralScheme(String integralScheme)
     {
         _integralScheme = integralScheme;
-    }
-
-    /* ------------------------------------------------------------ */
-    public Continuation newContinuation(Connection connection)
-    {
-        return new WaitingContinuation();
     }
     
     /* ------------------------------------------------------------ */

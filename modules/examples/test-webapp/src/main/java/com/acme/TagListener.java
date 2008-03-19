@@ -116,4 +116,22 @@ public class TagListener implements HttpSessionListener,  HttpSessionAttributeLi
          //System.err.println("tagListener: sessionDestroyed "+se);
     }
 
+    public void requestCompleted(ServletRequestEvent rre)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void requestResumed(ServletRequestEvent rre)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void requestSuspended(ServletRequestEvent rre)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

@@ -18,11 +18,8 @@ package org.mortbay.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashSet;
 
@@ -39,7 +36,6 @@ import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.client.HttpClient;
@@ -47,13 +43,10 @@ import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.handler.RequestLogHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.util.IO;
-import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
 
@@ -128,10 +121,9 @@ public class AsyncProxyServlet implements Servlet
         {
             final InputStream in=request.getInputStream();
             final OutputStream out=response.getOutputStream();
-            final Continuation continuation = ContinuationSupport.getContinuation(request,request);
 
             
-            if (!continuation.isPending())
+            if (request.isInitial())
             {
                 final byte[] buffer = new byte[4096]; // TODO avoid this!
                 String uri=request.getRequestURI();
@@ -155,7 +147,7 @@ public class AsyncProxyServlet implements Servlet
                     protected void onResponseComplete() throws IOException
                     {
                         System.err.println("onResponseComplete()");
-                        continuation.resume();
+                        request.complete();
                     }
 
                     protected void onResponseContent(Buffer content) throws IOException
@@ -259,7 +251,7 @@ public class AsyncProxyServlet implements Servlet
 
                 _client.send(exchange);
                 
-                continuation.suspend(30000);
+                request.suspend();
             }
         }
 

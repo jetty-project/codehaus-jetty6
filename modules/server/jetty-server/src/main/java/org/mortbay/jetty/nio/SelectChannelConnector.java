@@ -27,9 +27,7 @@ import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.RetryRequest;
-import org.mortbay.thread.Timeout;
-import org.mortbay.util.ajax.Continuation;
+import org.mortbay.thread.Timeout.Task;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -138,7 +136,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
     {
-        SuspendableEndPoint cep = ((SuspendableEndPoint)endpoint);
+        SuspendableSelectChannelEndPoint cep = ((SuspendableSelectChannelEndPoint)endpoint);
         cep.cancelIdle();
         request.setTimeStamp(cep.getSelectSet().getNow());
         super.customize(endpoint, request);
@@ -147,7 +145,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void persist(org.mortbay.io.EndPoint endpoint) throws IOException
     {
-        ((SuspendableEndPoint)endpoint).scheduleIdle();
+        ((SuspendableSelectChannelEndPoint)endpoint).scheduleIdle();
         super.persist(endpoint);
     }
 
@@ -178,15 +176,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 return -1;
             return _acceptChannel.socket().getLocalPort();
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    /*
-     * @see org.mortbay.jetty.Connector#newContinuation()
-     */
-    public Continuation newContinuation(Connection connection)
-    {
-        return (SuspendableEndPoint)((HttpConnection)connection).getEndPoint();
     }
 
     /* ------------------------------------------------------------ */
@@ -338,365 +327,25 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SuspendableEndPoint(channel,selectSet,key);
+        return new SuspendableSelectChannelEndPoint(channel,selectSet,key);
     }
 
     /* ------------------------------------------------------------------------------- */
-    protected Connection newConnection(SocketChannel channel,SelectChannelEndPoint endpoint)
+    protected Connection newConnection(SocketChannel channel,final SelectChannelEndPoint endpoint)
     {
-        return new HttpConnection(SelectChannelConnector.this,endpoint,getServer());
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static class SuspendableEndPoint extends SelectChannelEndPoint implements Continuation
-    {
-        static final int __UNDISPATCHED=0;
-        static final int __DISPATCHED=1;
-        static final int __SUSPENDING=2;
-        static final int __SUSPENDED=3;
-        static final int __RESUMING=4;
-        static final int __RESUMED=5;
-        
-        protected int _state;
-        //                  dispatch     undispatch    resume     suspend
-        // UNDISPATCHED     DISPATCHED   X             X          X
-        // DISPATCHED       X            UNDISPATCHED  X          SUSPENDING
-        // SUSPENDING       X            SUSPENDED     RESUMING   X
-        // SUSPENDED        RESUMED      X             RESUMED    X
-        // RESUMING         X            RESUMED       -          X
-        // RESUMED          X            UNDISPATCHED  -          DISPATCHED
-     
-        
-        // Secondary state
-        protected boolean _new = true;
-        protected boolean _resumed = false;   // resume called (different to resumed state)
-        protected Object _object;
-        
-        // other
-        protected RetryRequest _retry;
-        protected long _timeout;
-        protected Object _mutex;
-        
-        protected final Timeout.Task _timeoutTask;
-        
-        
-        // TODO remove this debugging aid
-        /*
-        String[] last = {null,null,null,null,null,null};
-        void last(String l)
+        return new HttpConnection(SelectChannelConnector.this,endpoint,getServer())
         {
-            last[5]=last[4];
-            last[4]=last[3];
-            last[3]=last[2];
-            last[2]=last[1];
-            last[1]=last[0];
-            last[0]=l;
-        }*/
-        
-        
-        
-        public SuspendableEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
-        {
-            super(channel,selectSet,key);
-
-            _mutex=this;
-            _state=__UNDISPATCHED;
-                
-            HttpConnection connection = HttpConnection.getCurrentConnection();
-            
-            _timeoutTask= new Timeout.Task(_mutex)
+            /* ------------------------------------------------------------ */
+            public void cancelTimeout(Task task)
             {
-                public void expire()
-                {
-                    SuspendableEndPoint.this.expire();
-                }
-            };
-            
-            scheduleIdle();
-        }
-
-        
-        public void close() throws IOException
-        {
-            reset();
-            super.close();
-        }
-        
-        public void setMutex(Object mutex)
-        {
-            synchronized(_mutex)
-            {
-                // TODO - is this a good idea?
-                // _mutex=mutex;
-                // _timeoutTask.setMutex(mutex);
+                endpoint.getSelectSet().cancelTimeout(task);
             }
-        }
-        
-        public Object getObject()
-        {
-            return _object;
-        }
 
-        public long getTimeout()
-        {
-            return _timeout;
-        }
-
-        public boolean isNew()
-        {
-            synchronized(_mutex)
+            /* ------------------------------------------------------------ */
+            public void scheduleTimeout(Task task, long timeoutMs)
             {
-                return _new;
+                endpoint.getSelectSet().scheduleTimeout(task,timeoutMs);
             }
-        }
-
-        public boolean isPending()
-        {
-            synchronized(_mutex)
-            {
-                return _state>=__SUSPENDING;
-            }
-        }
-
-        public boolean isResumed()
-        {
-            synchronized(_mutex)
-            {
-                return _resumed;
-            }
-        }
-        
-        public boolean isExpired()
-        {
-            synchronized(_mutex)
-            {
-                return _timeoutTask.isExpired();
-            }
-        }
-
-        public void reset()
-        {
-            synchronized (_mutex)
-            {
-                // last("reset");
-                _state=_dispatched?__DISPATCHED:__UNDISPATCHED;
-                _resumed = false;
-            }
-            
-            synchronized (getSelectSet())
-            {
-                _timeoutTask.cancel();   
-            }
-        } 
-
-        
-        public boolean suspend(long timeout)
-        {
-            synchronized (_mutex)
-            {
-                switch(_state)
-                {
-                    case __DISPATCHED:
-                        _state=__SUSPENDING;
-                        _timeout = timeout;
-                        if (_retry==null)
-                            _retry = new RetryRequest();
-                        getSelectSet().scheduleTimeout(_timeoutTask,_timeout);
-                        throw _retry;
-                        
-                    case __UNDISPATCHED:
-                        throw new IllegalStateException(this.toString());
-                    case __SUSPENDING:
-                        throw new IllegalStateException(this.toString());
-                    case __SUSPENDED:
-                        throw new IllegalStateException(this.toString());
-                    case __RESUMING:
-                        throw new IllegalStateException(this.toString());
-                    case __RESUMED:
-                        _state=__DISPATCHED;
-                        boolean resumed=_resumed;
-                        _resumed=false;
-                        return resumed;
-                    default:
-                        throw new IllegalStateException(""+_state);
-                }
-            }
-        }
-        
-        public void resume()
-        {
-
-            synchronized (_mutex)
-            {
-                switch(_state)
-                {
-                    case __DISPATCHED:
-                        throw new IllegalStateException(this.toString());
-                    case __UNDISPATCHED:
-                        throw new IllegalStateException(this.toString());
-                        
-                    case __SUSPENDING:
-                        _state=__RESUMING;
-                        _resumed=true;
-                        break;
-                        
-                    case __SUSPENDED:
-                        if (super.dispatch())
-                            getSelectSet().cancelIdle(_timeoutTask);
-                        _state=__RESUMED;
-                        // fall through
-                        
-                    case __RESUMING:
-                    case __RESUMED:
-                        _resumed=true;
-                        return;
-                        
-                    default:
-                        throw new IllegalStateException(""+_state);
-                }
-            }
-        }
-
-        private void expire()
-        {
-            // just like resume, except don't set _resumed=true;
-            synchronized (_mutex)
-            {
-                switch(_state)
-                {
-                    case __DISPATCHED:
-                        throw new IllegalStateException(this.toString());
-                    case __UNDISPATCHED:
-                        throw new IllegalStateException(this.toString());
-                        
-                    case __SUSPENDING:
-                        _state=__RESUMING;
-                        break;
-                        
-                    case __SUSPENDED:
-                        if (super.dispatch())
-                            getSelectSet().cancelIdle(_timeoutTask);
-                        _state=__RESUMED;
-                        // fall through
-                        
-                    case __RESUMING:
-                    case __RESUMED:
-                        return;
-                        
-                    default:
-                        throw new IllegalStateException(""+_state);
-                }
-            }
-        }
-           
-        protected boolean dispatch()
-        {
-            synchronized (_mutex)
-            {
-                boolean dispatched=super.dispatch();
-                
-                switch(_state)
-                {
-                    case __DISPATCHED:
-                        throw new IllegalStateException(this.toString());
-                    case __UNDISPATCHED:
-                        if (dispatched)
-                            _state=__DISPATCHED;
-                        return dispatched;
-                        
-                    case __SUSPENDING:
-                        throw new IllegalStateException(this.toString());
-                    case __SUSPENDED:
-                        if (dispatched)
-                        {
-                            getSelectSet().cancelTimeout(_timeoutTask);
-                            _state=__RESUMED;
-                        }
-                        return dispatched;
-                        
-                    case __RESUMING:
-                        throw new IllegalStateException(this.toString());
-                    case __RESUMED:
-                        throw new IllegalStateException(this.toString());
-                    default:
-                        throw new IllegalStateException(""+_state);
-                }
-            }
-        }
-        
-        public boolean undispatch()
-        {
-            synchronized (_mutex)
-            {
-                switch(_state)
-                {
-                    case __DISPATCHED:
-                         if (super.undispatch())
-                         {
-                             _state=__UNDISPATCHED;
-                             return true;
-                         }
-                        return false;
-                        
-                    case __UNDISPATCHED:
-                        throw new IllegalStateException(this.toString());
-                        
-                    case __SUSPENDING:
-                        _state=__SUSPENDED;
-                        if (super.undispatch())
-                        {
-                            _state=__SUSPENDED;
-                            return true;
-                        }
-                       return false;
-                        
-                    case __SUSPENDED:
-                        throw new IllegalStateException(this.toString());
-                        
-                    case __RESUMING:
-                        _state=__RESUMED;
-                        return false;  // SHORT CUT!
-                        
-                    case __RESUMED:
-                        if (super.undispatch())
-                        {
-                            _state=__UNDISPATCHED;
-                            return true;
-                        }
-                       return false;
-                        
-                    default:
-                        throw new IllegalStateException(""+_state);
-                }
-            }
-            
-        }
-
-        public void setObject(Object object)
-        {
-            _object = object;
-        }
-        
-        public String toString()
-        {
-            synchronized (_mutex)
-            {
-                return "RetryContinuation@"+hashCode()+
-                ((_state==0)?" UNDISPATCHED":
-                    (_state==1)?" DISPATCHED":
-                        (_state==2)?" SUSPENDING":
-                            (_state==3)?" SUSPENDED":
-                                (_state==4)?" RESUMING":
-                                    (_state==5)?" RESUMED":
-                                        " ???")+
-                (_new?",new":"")+
-                (_resumed?",resumed":"")+
-                (isExpired()?",expired":"");
-                // ">"+last[5]+">"+last[4]+">"+last[3]+">"+last[2]+">"+last[1]+">"+last[0];
-            }
-        }
-
+        };
     }
 }

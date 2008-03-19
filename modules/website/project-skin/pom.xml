@@ -7,7 +7,7 @@
   </parent>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-skin</artifactId>
-  <version>6.2-SNAPSHOT</version>
+  <version>7.0-SNAPSHOT</version>
   <name>Maven Jetty Site Skin</name>
   <description>Maven Jetty Site Skin</description>
 </project>
