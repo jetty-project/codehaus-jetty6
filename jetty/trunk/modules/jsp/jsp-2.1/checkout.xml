@@ -122,6 +122,7 @@
         <exclude name="**/resources/*"/>
         <exclude name="**/CVS/*"/>
         <exclude name="**/Jsr199JavaCompiler.java"/>
+        <exclude name="**/JspCServletContext.java"/>
         <!-- exclude name="**/JDTJavaCompiler.java"/ -->
       </fileset>
     </copy>

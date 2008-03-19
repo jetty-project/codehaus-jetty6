@@ -23,6 +23,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -1218,7 +1220,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public int getMajorVersion()
         {
-            return 2;
+            return 3;
         }
 
         /* ------------------------------------------------------------ */
@@ -1241,7 +1243,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public int getMinorVersion()
         {
-            return 5;
+            return 0;
         }
 
         /* ------------------------------------------------------------ */
@@ -1516,6 +1518,40 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         {
             return "ServletContext@"+Integer.toHexString(hashCode())+"{"+(getContextPath().equals("")?URIUtil.SLASH:getContextPath())+","+getBaseResource()+"}";
         }
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see javax.servlet.ServletContext#addFilter(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
+         */
+        public void addFilter(String filterName, String description, String className, Map<String, String> initParameters)
+        {
+        }
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see javax.servlet.ServletContext#addFilterMapping(java.lang.String, java.lang.String[], java.lang.String[], java.util.EnumSet, boolean)
+         */
+        public void addFilterMapping(String filterName, String[] urlPatterns, String[] servletNames, EnumSet<DispatcherType> dispatcherTypes,
+                boolean isMatchAfter)
+        {
+        }
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see javax.servlet.ServletContext#addServlet(java.lang.String, java.lang.String, java.lang.String, java.util.Map, int)
+         */
+        public void addServlet(String servletName, String description, String className, Map<String, String> initParameters, int loadOnStartup)
+        {
+        }
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see javax.servlet.ServletContext#addServletMapping(java.lang.String, java.lang.String[])
+         */
+        public void addServletMapping(String servletName, String[] urlPatterns)
+        {
+        }
+        
     }
 
     /* ------------------------------------------------------------ */

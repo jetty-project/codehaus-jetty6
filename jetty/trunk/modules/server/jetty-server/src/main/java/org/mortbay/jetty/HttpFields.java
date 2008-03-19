@@ -1017,7 +1017,8 @@ public class HttpFields
             {
                 buf.append(";Secure");
             }
-            if (cookie instanceof HttpOnlyCookie) buf.append(";HttpOnly");
+            if (cookie.isHttpOnly()) 
+	        buf.append(";HttpOnly");
 
             // TODO - straight to Buffer?
             name_value_params = buf.toString();

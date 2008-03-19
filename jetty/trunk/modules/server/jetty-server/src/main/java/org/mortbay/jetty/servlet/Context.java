@@ -15,6 +15,10 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.util.EnumSet;
+import java.util.Map;
+
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
@@ -344,6 +348,76 @@ public class Context extends ContextHandler
             }
             return null;
         }
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see org.mortbay.jetty.handler.ContextHandler.SContext#addFilter(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
+         */
+        public void addFilter(String filterName, String description, String className, Map<String, String> initParameters)
+        {
+            ServletHandler handler = Context.this.getServletHandler();
+            FilterHolder holder= handler.newFilterHolder();
+            holder.setClassName(className);
+            holder.setName(filterName);
+            holder.setInitParameters(initParameters);
+            handler.addFilter(holder);
+            
+        }
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see org.mortbay.jetty.handler.ContextHandler.SContext#addFilterMapping(java.lang.String, java.lang.String[], java.lang.String[], java.util.EnumSet, boolean)
+         */
+        public void addFilterMapping(String filterName, String[] urlPatterns, String[] servletNames, EnumSet<DispatcherType> dispatcherTypes,
+                boolean isMatchAfter)
+        {
+            ServletHandler handler = Context.this.getServletHandler();
+            FilterMapping mapping = new FilterMapping();
+            mapping.setPathSpecs(urlPatterns);
+            mapping.setServletNames(servletNames);
+            
+            int dispatches=mapping.getDispatches();
+            if (dispatcherTypes.contains(DispatcherType.ERROR)) 
+                dispatches|=ERROR;
+            if (dispatcherTypes.contains(DispatcherType.FORWARD)) 
+                dispatches|=FORWARD;
+            if (dispatcherTypes.contains(DispatcherType.INCLUDE)) 
+                dispatches|=INCLUDE;
+            if (dispatcherTypes.contains(DispatcherType.REQUEST)) 
+                dispatches|=REQUEST;
+            mapping.setDispatches(dispatches);
+            
+            handler.addFilterMapping(mapping);
+        }
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see org.mortbay.jetty.handler.ContextHandler.SContext#addServlet(java.lang.String, java.lang.String, java.lang.String, java.util.Map, int)
+         */
+        public void addServlet(String servletName, String description, String className, Map<String, String> initParameters, int loadOnStartup)
+        {
+            ServletHandler handler = Context.this.getServletHandler();
+            ServletHolder holder= handler.newServletHolder();
+            holder.setClassName(className);
+            holder.setName(servletName);
+            holder.setInitParameters(initParameters);
+            holder.setInitOrder(loadOnStartup);
+            handler.addServlet(holder);
+        }
+
+        /* ------------------------------------------------------------ */
+        /* (non-Javadoc)
+         * @see org.mortbay.jetty.handler.ContextHandler.SContext#addServletMapping(java.lang.String, java.lang.String[])
+         */
+        public void addServletMapping(String servletName, String[] urlPattern)
+        {
+            ServletHandler handler = Context.this.getServletHandler();
+            ServletMapping mapping = new ServletMapping();
+            mapping.setPathSpecs(urlPattern);
+            handler.addServletMapping(mapping);
+        }
+        
+        
     }
     
 }

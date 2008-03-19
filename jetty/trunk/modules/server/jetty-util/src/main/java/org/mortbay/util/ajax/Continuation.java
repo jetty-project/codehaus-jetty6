@@ -15,6 +15,8 @@
 
 package org.mortbay.util.ajax;
 
+import javax.servlet.ServletRequest;
+
 
 /* ------------------------------------------------------------ */
 /** Continuation.
@@ -37,6 +39,7 @@ package org.mortbay.util.ajax;
  * for events (see {@link org.mortbay.jetty.nio.SelectChannelConnector}).
  * 
  * @author gregw
+ * @deprecated use {@link ServletRequest#suspend()}
  *
  */
 public interface Continuation

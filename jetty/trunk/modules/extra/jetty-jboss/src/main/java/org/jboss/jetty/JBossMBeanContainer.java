@@ -38,7 +38,7 @@ public class JBossMBeanContainer extends MBeanContainer
         setDomain(JBOSS_DOMAIN);
 	}
 	
-	public void start ()
+	public void doStart ()
     {
      //do nothing - the superclass does initialization of stuff we don't want 
     }

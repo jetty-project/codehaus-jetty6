@@ -1,6 +1,4 @@
 package org.mortbay.jetty;
-import java.util.Enumeration;
-
 import javax.servlet.http.Cookie;
 
 import org.mortbay.log.Log;

@@ -316,7 +316,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         if (isUsingCookies())
         {
             String id = getNodeId(session);
-            Cookie cookie=getHttpOnly()?new HttpOnlyCookie(_sessionCookie,id):new Cookie(_sessionCookie,id);
+            Cookie cookie=new Cookie(_sessionCookie,id);
+	    cookie.setHttpOnly(getHttpOnly());
 
             cookie.setPath((contextPath==null||contextPath.length()==0)?"/":contextPath);
             cookie.setMaxAge(getMaxCookieAge());

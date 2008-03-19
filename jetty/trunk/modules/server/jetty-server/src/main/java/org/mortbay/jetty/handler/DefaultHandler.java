@@ -77,6 +77,7 @@ public class DefaultHandler extends AbstractHandler
         
         if (response.isCommitted() || base_request.isHandled())
             return;
+        
         base_request.setHandled(true);
         
         String method=request.getMethod();

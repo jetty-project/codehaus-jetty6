@@ -46,7 +46,6 @@ import org.mortbay.jetty.InclusiveByteRange;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.ResourceCache;
 import org.mortbay.jetty.Response;
-import org.mortbay.jetty.ResourceCache.Miss;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
