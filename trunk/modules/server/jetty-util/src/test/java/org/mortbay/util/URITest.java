@@ -45,7 +45,7 @@ public class URITest extends junit.framework.TestCase
     public void testEncodePath()
     {
         // test basic encode/decode
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         
         
         buf.setLength(0);

@@ -395,7 +395,7 @@ public class TypeUtil
     /* ------------------------------------------------------------ */
     public static String toString(byte[] bytes, int base)
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i=0;i<bytes.length;i++)
         {
             int bi=0xff&bytes[i];
@@ -427,7 +427,7 @@ public class TypeUtil
     /* ------------------------------------------------------------ */
     public static String toHexString(byte[] b)
     {   
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i=0;i<b.length;i++)
         {
             int bi=0xff&b[i];
@@ -446,7 +446,7 @@ public class TypeUtil
     /* ------------------------------------------------------------ */
     public static String toHexString(byte[] b,int offset,int length)
     {   
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i=offset;i<offset+length;i++)
         {
             int bi=0xff&b[i];

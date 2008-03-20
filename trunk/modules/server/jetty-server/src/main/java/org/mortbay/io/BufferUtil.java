@@ -315,7 +315,7 @@ public class BufferUtil
             if (bytes!=null)
                 return new String(bytes,buffer.getIndex(),buffer.length(),StringUtil.__ISO_8859_1);
             
-            StringBuffer b = new StringBuffer(buffer.length());
+            StringBuilder b = new StringBuilder(buffer.length());
             for (int i=buffer.getIndex(),c=0;c<buffer.length();i++,c++)
                 b.append((char)(0x7f&buffer.peek(i)));
             return b.toString();

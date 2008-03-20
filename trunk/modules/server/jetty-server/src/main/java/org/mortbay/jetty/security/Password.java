@@ -122,31 +122,29 @@ public class Password extends Credential
     /* ------------------------------------------------------------ */
     public static String obfuscate(String s)
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         byte[] b = s.getBytes();
-        
-        synchronized(buf)
-        {
-            buf.append(__OBFUSCATE);
-            for (int i=0;i<b.length;i++)
-            {
-                byte b1 = b[i];
-                byte b2 = b[s.length()-(i+1)];
-                int i1= 127+b1+b2;
-                int i2= 127+b1-b2;
-                int i0=i1*256+i2;
-                String x=Integer.toString(i0,36);
 
-                switch(x.length())
-                {
-                  case 1:buf.append('0');
-                  case 2:buf.append('0');
-                  case 3:buf.append('0');
-                  default:buf.append(x);
-                }
+        buf.append(__OBFUSCATE);
+        for (int i=0;i<b.length;i++)
+        {
+            byte b1 = b[i];
+            byte b2 = b[s.length()-(i+1)];
+            int i1= 127+b1+b2;
+            int i2= 127+b1-b2;
+            int i0=i1*256+i2;
+            String x=Integer.toString(i0,36);
+
+            switch(x.length())
+            {
+                case 1:buf.append('0');
+                case 2:buf.append('0');
+                case 3:buf.append('0');
+                default:buf.append(x);
             }
-            return buf.toString();
         }
+        return buf.toString();
+
     }
     
     /* ------------------------------------------------------------ */

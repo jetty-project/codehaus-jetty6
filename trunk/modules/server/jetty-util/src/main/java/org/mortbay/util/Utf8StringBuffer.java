@@ -26,6 +26,7 @@ package org.mortbay.util;
  * The UTF-8 decoding is done by this class and no additional buffers or Readers are used.
  * The UTF-8 code was inspired by http://javolution.org
  * 
+ * This class is not synchronized and should probably be called Utf8StringBuilder
  */
 public class Utf8StringBuffer 
 {

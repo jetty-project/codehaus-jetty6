@@ -133,7 +133,7 @@ public class StringMapTest extends TestCase
         m5.put("aBc", "x");
         m5i.put("AbC", "x");
 
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("aBc");
         assertEquals("2",m5.get("abc"));
         assertEquals("x",m5.get(buffer));

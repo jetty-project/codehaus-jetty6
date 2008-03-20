@@ -387,7 +387,7 @@ public class Response implements HttpServletResponse
 
         if (!URIUtil.hasScheme(location))
         {
-            StringBuffer buf = _connection.getRequest().getRootURL();
+            StringBuilder buf = _connection.getRequest().getRootURL();
             if (location.startsWith("/"))
                 buf.append(URIUtil.canonicalPath(location));
             else
