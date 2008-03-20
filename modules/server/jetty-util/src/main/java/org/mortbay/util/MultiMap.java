@@ -105,21 +105,20 @@ public class MultiMap extends HashMap
               Object o=LazyList.get(l,0);
               return o==null?null:o.toString();
           default:
-              StringBuffer values=new StringBuffer(128);
-              synchronized(values)
+          {
+              StringBuilder values=new StringBuilder(128);
+              for (int i=0; i<LazyList.size(l); i++)              
               {
-                  for (int i=0; i<LazyList.size(l); i++)              
+                  Object e=LazyList.get(l,i);
+                  if (e!=null)
                   {
-                      Object e=LazyList.get(l,i);
-                      if (e!=null)
-                      {
-                          if (values.length()>0)
-                              values.append(',');
-                          values.append(e.toString());
-                      }
-                  }   
-                  return values.toString();
-              }
+                      if (values.length()>0)
+                          values.append(',');
+                      values.append(e.toString());
+                  }
+              }   
+              return values.toString();
+          }
         }
     }
     

@@ -56,17 +56,17 @@ public class URIUtil
         if (path==null || path.length()==0)
             return path;
         
-        StringBuffer buf = encodePath(null,path);
+        StringBuilder buf = encodePath(null,path);
         return buf==null?path:buf.toString();
     }
         
     /* ------------------------------------------------------------ */
     /** Encode a URI path.
      * @param path The path the encode
-     * @param buf StringBuffer to encode path into (or null)
-     * @return The StringBuffer or null if no substitutions required.
+     * @param buf StringBuilder to encode path into (or null)
+     * @return The StringBuilder or null if no substitutions required.
      */
-    public static StringBuffer encodePath(StringBuffer buf, String path)
+    public static StringBuilder encodePath(StringBuilder buf, String path)
     {
         if (buf==null)
         {
@@ -81,7 +81,7 @@ public class URIUtil
                   case ';':
                   case '#':
                   case ' ':
-                      buf=new StringBuffer(path.length()<<1);
+                      buf=new StringBuilder(path.length()<<1);
                       break loop;
                 }
             }
@@ -124,13 +124,13 @@ public class URIUtil
     /* ------------------------------------------------------------ */
     /** Encode a URI path.
      * @param path The path the encode
-     * @param buf StringBuffer to encode path into (or null)
+     * @param buf StringBuilder to encode path into (or null)
      * @param encode String of characters to encode. % is always encoded.
-     * @return The StringBuffer or null if no substitutions required.
+     * @return The StringBuilder or null if no substitutions required.
      */
-    public static StringBuffer encodeString(StringBuffer buf,
-                                            String path,
-                                            String encode)
+    public static StringBuilder encodeString(StringBuilder buf,
+                                             String path,
+                                             String encode)
     {
         if (buf==null)
         {
@@ -140,7 +140,7 @@ public class URIUtil
                 char c=path.charAt(i);
                 if (c=='%' || encode.indexOf(c)>=0)
                 {    
-                    buf=new StringBuffer(path.length()<<1);
+                    buf=new StringBuilder(path.length()<<1);
                     break loop;
                 }
             }
@@ -169,7 +169,7 @@ public class URIUtil
     /* ------------------------------------------------------------ */
     /* Decode a URI path.
      * @param path The path the encode
-     * @param buf StringBuffer to encode path into
+     * @param buf StringBuilder to encode path into
      */
     public static String decodePath(String path)
     {
@@ -247,7 +247,7 @@ public class URIUtil
     /* ------------------------------------------------------------ */
     /* Decode a URI path.
      * @param path The path the encode
-     * @param buf StringBuffer to encode path into
+     * @param buf StringBuilder to encode path into
      */
     public static String decodePath(byte[] buf, int offset, int length)
     {
@@ -321,7 +321,7 @@ public class URIUtil
         if (split<0)
             split=p1.length();
 
-        StringBuffer buf = new StringBuffer(p1.length()+p2.length()+2);
+        StringBuilder buf = new StringBuilder(p1.length()+p2.length()+2);
         buf.append(p1);
         
         if (buf.charAt(split-1)=='/')
@@ -415,7 +415,7 @@ public class URIUtil
         if (start>=end)
             return path;
         
-        StringBuffer buf = new StringBuffer(path);
+        StringBuilder buf = new StringBuilder(path);
         int delStart=-1;
         int delEnd=-1;
         int skip=0;

@@ -668,7 +668,7 @@ public class HTAccessHandler extends SecurityHandler
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            StringBuffer buf=new StringBuffer();
+            StringBuilder buf=new StringBuilder();
 
             buf.append("AuthUserFile=");
             buf.append(_userFile);

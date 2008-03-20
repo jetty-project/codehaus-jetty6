@@ -236,7 +236,7 @@ public class HttpServerTestBase extends TestCase
             {
 
                 int[] points=new int[pointCount];
-                StringBuffer message=new StringBuffer();
+                StringBuilder message=new StringBuilder();
 
                 message.append("iteration #"+(i+1));
 
@@ -281,7 +281,7 @@ public class HttpServerTestBase extends TestCase
             for (int i=0; i<bytes.length; i+=3)
             {
                 int[] points=new int[] { i };
-                StringBuffer message=new StringBuffer();
+                StringBuilder message=new StringBuilder();
 
                 message.append("iteration #"+(i+1));
 
@@ -333,7 +333,7 @@ public class HttpServerTestBase extends TestCase
             {
                 Socket client=new Socket(HOST,port);
                 OutputStream os=client.getOutputStream();
-                StringBuffer message=new StringBuffer();
+                StringBuilder message=new StringBuilder();
 
                 message.append("iteration #"+(i+1));
                 writeFragments(bytes,badPoints[i],message,os);
@@ -690,7 +690,7 @@ public class HttpServerTestBase extends TestCase
         {
             br=new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-            StringBuffer sb=new StringBuffer();
+            StringBuilder sb=new StringBuilder();
             String line;
 
             while ((line=br.readLine())!=null)
@@ -737,7 +737,7 @@ public class HttpServerTestBase extends TestCase
         return server;
     }
 
-    private void writeFragments(byte[] bytes, int[] points, StringBuffer message, OutputStream os) throws IOException, InterruptedException
+    private void writeFragments(byte[] bytes, int[] points, StringBuilder message, OutputStream os) throws IOException, InterruptedException
     {
         int last=0;
 

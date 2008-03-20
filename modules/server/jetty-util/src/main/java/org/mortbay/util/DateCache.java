@@ -156,7 +156,7 @@ public class DateCache
             String ss2 = _formatString.substring( zIndex+3 );
             int tzOffset = tz.getRawOffset();
             
-            StringBuffer sb = new StringBuffer(_formatString.length()+10);
+            StringBuilder sb = new StringBuilder(_formatString.length()+10);
             sb.append(ss1);
             sb.append("'");
             if( tzOffset >= 0 )
@@ -255,17 +255,15 @@ public class DateCache
 
         // Always format if we get here
         _lastSeconds = seconds;
-        StringBuffer sb=new StringBuffer(_secFormatString.length());
-        synchronized(sb)
-        {
-            sb.append(_secFormatString0);
-            int s=(int)(seconds%60);
-            if (s<10)
-                sb.append('0');
-            sb.append(s);
-            sb.append(_secFormatString1);
-            _lastResult=sb.toString();
-        }
+        StringBuilder sb=new StringBuilder(_secFormatString.length());
+        sb.append(_secFormatString0);
+        int s=(int)(seconds%60);
+        if (s<10)
+            sb.append('0');
+        sb.append(s);
+        sb.append(_secFormatString1);
+        _lastResult=sb.toString();
+
                 
         return _lastResult;
     }
@@ -273,9 +271,9 @@ public class DateCache
     /* ------------------------------------------------------------ */
     /** Format to string buffer. 
      * @param inDate Date the format
-     * @param buffer StringBuffer
+     * @param buffer StringBuilder
      */
-    public void format(long inDate, StringBuffer buffer)
+    public void format(long inDate, StringBuilder buffer)
     {
         buffer.append(format(inDate));
     }

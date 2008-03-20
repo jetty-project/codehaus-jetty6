@@ -424,19 +424,22 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 if (!endsWithSlash || (pathInContext.length()==1 && request.getAttribute("org.mortbay.jetty.nullPathInfo")!=null))
                 {
                     StringBuffer buf=request.getRequestURL();
-                    int param=buf.lastIndexOf(";");
-                    if (param<0)
-                        buf.append('/');
-                    else
-                        buf.insert(param,'/');
-                    String q=request.getQueryString();
-                    if (q!=null&&q.length()!=0)
+                    synchronized(buf)
                     {
-                        buf.append('?');
-                        buf.append(q);
+                        int param=buf.lastIndexOf(";");
+                        if (param<0)
+                            buf.append('/');
+                        else
+                            buf.insert(param,'/');
+                        String q=request.getQueryString();
+                        if (q!=null&&q.length()!=0)
+                        {
+                            buf.append('?');
+                            buf.append(q);
+                        }
+                        response.setContentLength(0);
+                        response.sendRedirect(response.encodeRedirectURL(buf.toString()));
                     }
-                    response.setContentLength(0);
-                    response.sendRedirect(response.encodeRedirectURL(buf.toString()));
                 }
                 // else look for a welcome file
                 else if (null!=(welcome=getWelcomeFile(resource)))

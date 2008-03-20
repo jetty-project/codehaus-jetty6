@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.mortbay.log.Log;
@@ -45,6 +47,7 @@ import org.mortbay.util.LazyList;
  */
 public class HashSessionManager extends AbstractSessionManager
 {
+    private static int __id;
     private Timer _timer;
     private TimerTask _task;
     private int _scavengePeriodMs=30000;
@@ -65,10 +68,10 @@ public class HashSessionManager extends AbstractSessionManager
      */
     public void doStart() throws Exception
     {
-        _sessions=new HashMap();
+        _sessions=new ConcurrentHashMap(); // TODO: use syncronizedMap for JDK 1.4
         super.doStart();
 
-        _timer=new Timer(true);
+        _timer=new Timer("HashSessionScavenger-"+__id++, true);
         
         setScavengePeriod(getScavengePeriod());
 

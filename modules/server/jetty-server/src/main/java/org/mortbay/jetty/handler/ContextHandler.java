@@ -349,7 +349,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return null;
         URLClassLoader loader = (URLClassLoader)_classLoader;
         URL[] urls =loader.getURLs();
-        StringBuffer classpath=new StringBuffer();
+        StringBuilder classpath=new StringBuilder();
         for (int i=0;i<urls.length;i++)
         {
             try

@@ -25,7 +25,7 @@ import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
 import org.mortbay.log.Log;
-import org.mortbay.util.MultiMap;
+import org.mortbay.util.ConcurrentMultiMap;
 
 /* ------------------------------------------------------------ */
 /**
@@ -37,7 +37,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
     protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
 
-    MultiMap _sessions;
+    ConcurrentMultiMap _sessions;
     protected Random _random;
     private boolean _weakRandom;
     private String _workerName;
@@ -133,7 +133,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
             }
         }
         _random.setSeed(_random.nextLong()^System.currentTimeMillis()^hashCode()^Runtime.getRuntime().freeMemory());
-        _sessions=new MultiMap();
+        _sessions=new ConcurrentMultiMap();
     }
 
     /* ------------------------------------------------------------ */
@@ -159,10 +159,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
      */
     public void addSession(HttpSession session)
     {
-        synchronized (this)
-        {
-            _sessions.add(getClusterId(session.getId()),session);
-        }
+        _sessions.add(getClusterId(session.getId()),session);
     }
 
     /* ------------------------------------------------------------ */
@@ -171,10 +168,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
      */
     public void removeSession(HttpSession session)
     {
-        synchronized (this)
-        {
-            _sessions.removeValue(getClusterId(session.getId()),session);
-        }
+        _sessions.removeValue(getClusterId(session.getId()),session);
     }
 
     /* ------------------------------------------------------------ */
@@ -183,19 +177,16 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
      */
     public void invalidateAll(String id)
     {
-        synchronized (this)
-        {
-            // Do not use interators as this method tends to be called recursively 
-            // by the invalidate calls.
-            while (_sessions.containsKey(id))
-            {
-                Session session=(Session)_sessions.getValue(id,0);
-                if (session.isValid())
-                    session.invalidate();
-                else
-                    _sessions.removeValue(id,session);
-            }
-        }
+	// Do not use interators as this method tends to be called recursively 
+	// by the invalidate calls.
+	while (_sessions.containsKey(id))
+	{
+	    Session session=(Session)_sessions.getValue(id,0);
+	    if (session.isValid())
+		session.invalidate();
+	    else
+		_sessions.removeValue(id,session);
+	}
     }
 
     /* ------------------------------------------------------------ */

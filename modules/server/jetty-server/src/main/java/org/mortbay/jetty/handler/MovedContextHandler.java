@@ -117,7 +117,7 @@ public class MovedContextHandler extends ContextHandler
             if (!_discardPathInfo && request.getPathInfo()!=null)
                 path=URIUtil.addPaths(path, request.getPathInfo());
             
-            StringBuffer location = URIUtil.hasScheme(path)?new StringBuffer():base_request.getRootURL();
+            StringBuilder location = URIUtil.hasScheme(path)?new StringBuilder():base_request.getRootURL();
 
             location.append(path);
             if (!_discardQuery && request.getQueryString()!=null)
