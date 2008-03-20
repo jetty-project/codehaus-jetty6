@@ -137,7 +137,7 @@ public class StringUtilTest extends TestCase
 
     public void testAppend()
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append('a');
         StringUtil.append(buf, "abc", 1, 1);
         StringUtil.append(buf, (byte)12, 16);

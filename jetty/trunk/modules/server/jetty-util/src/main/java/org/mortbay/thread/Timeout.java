@@ -177,7 +177,7 @@ public class Timeout
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(super.toString());
         
         Task task = _head._next;

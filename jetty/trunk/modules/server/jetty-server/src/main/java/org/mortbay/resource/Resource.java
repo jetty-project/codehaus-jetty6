@@ -432,7 +432,7 @@ public abstract class Resource implements Serializable
         String decodedBase = URIUtil.decodePath(base);
         String title = "Directory: "+decodedBase;
 
-        StringBuffer buf=new StringBuffer(4096);
+        StringBuilder buf=new StringBuilder(4096);
         buf.append("<HTML><HEAD><TITLE>");
         buf.append(title);
         buf.append("</TITLE></HEAD><BODY>\n<H1>");

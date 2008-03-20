@@ -175,7 +175,7 @@ public class InclusiveByteRange
     /* ------------------------------------------------------------ */
     public String toHeaderRangeString(long size)
     {
-        StringBuffer sb = new StringBuffer(40);
+        StringBuilder sb = new StringBuilder(40);
         sb.append("bytes ");
         sb.append(getFirst(size));
         sb.append('-');
@@ -188,7 +188,7 @@ public class InclusiveByteRange
     /* ------------------------------------------------------------ */
     public static String to416HeaderRangeString(long size)
     {
-        StringBuffer sb = new StringBuffer(40);
+        StringBuilder sb = new StringBuilder(40);
         sb.append("bytes */");
         sb.append(size);
         return sb.toString();
@@ -198,7 +198,7 @@ public class InclusiveByteRange
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        StringBuffer sb = new StringBuffer(60);
+        StringBuilder sb = new StringBuilder(60);
         sb.append(Long.toString(first));
         sb.append(":");
         sb.append(Long.toString(last));

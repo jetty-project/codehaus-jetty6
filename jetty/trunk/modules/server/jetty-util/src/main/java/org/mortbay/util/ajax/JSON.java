@@ -1012,7 +1012,7 @@ public class JSON
     {
         boolean minus=false;
         long number=0;
-        StringBuffer buffer=null;
+        StringBuilder buffer=null;
 
         longLoop: while (source.hasNext())
         {
@@ -1044,7 +1044,7 @@ public class JSON
                 case '.':
                 case 'e':
                 case 'E':
-                    buffer=new StringBuffer(16);
+                    buffer=new StringBuilder(16);
                     buffer.append(minus?-1*number:number);
                     buffer.append(c);
                     source.next();
@@ -1058,8 +1058,7 @@ public class JSON
         if (buffer==null)
             return TypeUtil.newLong(minus?-1*number:number);
 
-        synchronized (buffer)
-        {
+
             doubleLoop: while (source.hasNext())
             {
                 char c=source.peek();
@@ -1089,7 +1088,7 @@ public class JSON
                 }
             }
             return new Double(buffer.toString());
-        }
+
     }
 
     protected void seekTo(char seek, Source source)

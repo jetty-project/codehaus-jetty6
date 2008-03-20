@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -94,7 +95,7 @@ public class ServletHandler extends AbstractHandler
     private transient Map _servletNameMap=new HashMap();
     private transient PathMap _servletPathMap;
     
-    protected transient HashMap _chainCache[];
+    protected transient ConcurrentHashMap _chainCache[];
 
 
     /* ------------------------------------------------------------ */
@@ -139,7 +140,7 @@ public class ServletHandler extends AbstractHandler
         updateMappings();
         
         if(_filterChainsCached)
-            _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
+            _chainCache=     new ConcurrentHashMap[]{null,new ConcurrentHashMap(),new ConcurrentHashMap(),null,new ConcurrentHashMap(),null,null,null,new ConcurrentHashMap()};
 
         super.doStart();
         
@@ -470,17 +471,13 @@ public class ServletHandler extends AbstractHandler
         
         if (_filterChainsCached && _chainCache!=null)
         {
-            synchronized(this)
-            {
-                if(_chainCache[requestType].containsKey(key))
-                    return (FilterChain)_chainCache[requestType].get(key);
-            }
+            FilterChain chain = (FilterChain)_chainCache[requestType].get(key);
+            if (chain!=null)
+                return chain;
         }
-        
         
         // Build list of filters
         Object filters= null;
-    
         
         // Path filters
         if (pathInContext!=null && _filterPathMappings!=null)
@@ -525,12 +522,9 @@ public class ServletHandler extends AbstractHandler
         {
             if (LazyList.size(filters) > 0)
                 chain= new CachedChain(filters, servletHolder);
-            synchronized(this)
-            {
-                if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
-                    _chainCache[requestType].clear();
-                _chainCache[requestType].put(key,chain);
-            }
+	    if (_maxFilterChainsCacheSize>0 && _chainCache[requestType].size()>_maxFilterChainsCacheSize)
+		_chainCache[requestType].clear();
+	    _chainCache[requestType].put(key,chain);
         }
         else if (LazyList.size(filters) > 0)
             chain = new Chain(filters, servletHolder);
@@ -1152,7 +1146,7 @@ public class ServletHandler extends AbstractHandler
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            StringBuffer b = new StringBuffer();
+            StringBuilder b = new StringBuilder();
             for (int i=0; i<LazyList.size(_chain);i++)
             {
                 b.append(LazyList.get(_chain, i).toString());

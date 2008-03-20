@@ -215,95 +215,92 @@ public class NCSARequestLog extends AbstractLifeCycle implements RequestLog
 
     public void log(Request request, Response response)
     {
-        if (!isStarted()) 
-            return;
-        
-        try 
-        {
-            if (_ignorePathMap != null && _ignorePathMap.getMatch(request.getRequestURI()) != null)
-                return;
-            
-            if (_fileOut == null)
-                return;
+    	if (!isStarted()) 
+    		return;
 
-            StringBuffer buf = new StringBuffer(160);
-            String log =null;
-            synchronized(buf) // for efficiency until we can use StringBuilder
-            {
-                if (_logServer)
-                {
-                    buf.append(request.getServerName());
-                    buf.append(' ');
-                }
+    	try 
+    	{
+    		if (_ignorePathMap != null && _ignorePathMap.getMatch(request.getRequestURI()) != null)
+    			return;
 
-                String addr = null;
-                if (_preferProxiedForAddress) 
-                {
-                    addr = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
-                }
+    		if (_fileOut == null)
+    			return;
 
-                if (addr == null) 
-                    addr = request.getRemoteAddr();
+    		StringBuilder buf = new StringBuilder(160);
+    		String log =null;
+    		if (_logServer)
+    		{
+    			buf.append(request.getServerName());
+    			buf.append(' ');
+    		}
 
-                buf.append(addr);
-                buf.append(" - ");
-                String user = request.getRemoteUser();
-                buf.append((user == null)? " - " : user);
-                buf.append(" [");
-                if (_logDateCache!=null)
-                    buf.append(_logDateCache.format(request.getTimeStamp()));
-                else
-                    buf.append(request.getTimeStampBuffer().toString());
-                    
-                buf.append("] \"");
-                buf.append(request.getMethod());
-                buf.append(' ');
-                buf.append(request.getUri());
-                buf.append(' ');
-                buf.append(request.getProtocol());
-                buf.append("\" ");
-                if (request.isSuspended())
-                    buf.append("SUS");
-                else
-                {
-                    int status = response.getStatus();
-                    if (status<=0)
-                        status=404;
-                    buf.append((char)('0'+((status/100)%10)));
-                    buf.append((char)('0'+((status/10)%10)));
-                    buf.append((char)('0'+(status%10)));
-                }
+    		String addr = null;
+    		if (_preferProxiedForAddress) 
+    		{
+    			addr = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
+    		}
+
+    		if (addr == null) 
+    			addr = request.getRemoteAddr();
+
+    		buf.append(addr);
+    		buf.append(" - ");
+    		String user = request.getRemoteUser();
+    		buf.append((user == null)? " - " : user);
+    		buf.append(" [");
+    		if (_logDateCache!=null)
+    			buf.append(_logDateCache.format(request.getTimeStamp()));
+    		else
+    			buf.append(request.getTimeStampBuffer().toString());
+
+    		buf.append("] \"");
+    		buf.append(request.getMethod());
+    		buf.append(' ');
+    		buf.append(request.getUri());
+    		buf.append(' ');
+    		buf.append(request.getProtocol());
+    		buf.append("\" ");
+    		if (request.isSuspended())
+    			buf.append("SUS");
+    		else
+    		{
+    			int status = response.getStatus();
+    			if (status<=0)
+    				status=404;
+    			buf.append((char)('0'+((status/100)%10)));
+    			buf.append((char)('0'+((status/10)%10)));
+    			buf.append((char)('0'+(status%10)));
+    		}
 
 
-                long responseLength=response.getContentCount();
-                if (responseLength >=0)
-                {
-                    buf.append(' ');
-                    if (responseLength > 99999)
-                        buf.append(Long.toString(responseLength));
-                    else 
-                    {
-                        if (responseLength > 9999)
-                            buf.append((char)('0' + ((responseLength / 10000)%10)));
-                        if (responseLength > 999)
-                            buf.append((char)('0' + ((responseLength /1000)%10)));
-                        if (responseLength > 99)
-                            buf.append((char)('0' + ((responseLength / 100)%10)));
-                        if (responseLength > 9)
-                            buf.append((char)('0' + ((responseLength / 10)%10)));
-                        buf.append((char)('0' + (responseLength)%10));
-                    }
-                    buf.append(' ');
-                }
-                else 
-                    buf.append(" - ");
+    		long responseLength=response.getContentCount();
+    		if (responseLength >=0)
+    		{
+    			buf.append(' ');
+    			if (responseLength > 99999)
+    				buf.append(Long.toString(responseLength));
+    			else 
+    			{
+    				if (responseLength > 9999)
+    					buf.append((char)('0' + ((responseLength / 10000)%10)));
+    				if (responseLength > 999)
+    					buf.append((char)('0' + ((responseLength /1000)%10)));
+    				if (responseLength > 99)
+    					buf.append((char)('0' + ((responseLength / 100)%10)));
+    				if (responseLength > 9)
+    					buf.append((char)('0' + ((responseLength / 10)%10)));
+    				buf.append((char)('0' + (responseLength)%10));
+    			}
+    			buf.append(' ');
+    		}
+    		else 
+    			buf.append(" - ");
 
-                log = buf.toString();
-            }
-            
-            synchronized(_writer)
-            {
-                _writer.write(log);
+    		log = buf.toString();
+
+    		synchronized(_writer)
+    		{
+    			_writer.write(log);
                 if (_extended)
                     logExtended(request, response, _writer);
                 

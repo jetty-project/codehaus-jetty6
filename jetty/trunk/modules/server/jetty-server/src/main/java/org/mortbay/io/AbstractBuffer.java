@@ -495,7 +495,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public String toDetailString()
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append("[");
         buf.append(super.hashCode());
         buf.append(",");

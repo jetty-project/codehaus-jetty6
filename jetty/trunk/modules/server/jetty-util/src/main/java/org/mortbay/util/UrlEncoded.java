@@ -116,55 +116,54 @@ public class UrlEncoded extends MultiMap
     {
         if (charset==null)
             charset=StringUtil.__UTF8;
-        
-        StringBuffer result = new StringBuffer(128);
-        synchronized(result)
-        {
-            Iterator iter = map.entrySet().iterator();
-            while(iter.hasNext())
-            {
-                Map.Entry entry = (Map.Entry)iter.next();
-                
-                String key = entry.getKey().toString();
-                Object list = entry.getValue();
-                int s=LazyList.size(list);
-                
-                if (s==0)
-                {
-                    result.append(encodeString(key,charset));
-                    if(equalsForNullValue)
-                        result.append('=');
-                }
-                else
-                {
-                    for (int i=0;i<s;i++)
-                    {
-                        if (i>0)
-                            result.append('&');
-                        Object val=LazyList.get(list,i);
-                        result.append(encodeString(key,charset));
 
-                        if (val!=null)
+        StringBuilder result = new StringBuilder(128);
+
+        Iterator iter = map.entrySet().iterator();
+        while(iter.hasNext())
+        {
+            Map.Entry entry = (Map.Entry)iter.next();
+
+            String key = entry.getKey().toString();
+            Object list = entry.getValue();
+            int s=LazyList.size(list);
+
+            if (s==0)
+            {
+                result.append(encodeString(key,charset));
+                if(equalsForNullValue)
+                    result.append('=');
+            }
+            else
+            {
+                for (int i=0;i<s;i++)
+                {
+                    if (i>0)
+                        result.append('&');
+                    Object val=LazyList.get(list,i);
+                    result.append(encodeString(key,charset));
+
+                    if (val!=null)
+                    {
+                        String str=val.toString();
+                        if (str.length()>0)
                         {
-                            String str=val.toString();
-                            if (str.length()>0)
-                            {
-                                result.append('=');
-                                result.append(encodeString(str,charset));
-                            }
-                            else if (equalsForNullValue)
-                                result.append('=');
+                            result.append('=');
+                            result.append(encodeString(str,charset));
                         }
                         else if (equalsForNullValue)
                             result.append('=');
                     }
+                    else if (equalsForNullValue)
+                        result.append('=');
                 }
-                if (iter.hasNext())
-                    result.append('&');
             }
-            return result.toString();
+            if (iter.hasNext())
+                result.append('&');
         }
+        return result.toString();
     }
+
 
 
     /* -------------------------------------------------------------- */

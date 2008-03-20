@@ -1463,25 +1463,22 @@ public class Request extends Suspendable implements HttpServletRequest
      * 
      * @return "scheme://host:port"
      */
-    public StringBuffer getRootURL()
+    public StringBuilder getRootURL()
     {
-        StringBuffer url = new StringBuffer(48);
-        synchronized (url)
-        {
-            String scheme = getScheme();
-            int port = getServerPort();
+        StringBuilder url = new StringBuilder(48);
+        String scheme = getScheme();
+        int port = getServerPort();
 
-            url.append(scheme);
-            url.append("://");
-            url.append(getServerName());
-            
-            if (port > 0 && ((scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)))
-            {
-                url.append(':');
-                url.append(port);
-            }
-            return url;
+        url.append(scheme);
+        url.append("://");
+        url.append(getServerName());
+
+        if (port > 0 && ((scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)))
+        {
+            url.append(':');
+            url.append(port);
         }
+        return url;
     }
 
     /* ------------------------------------------------------------ */

@@ -373,7 +373,7 @@ public class CGI extends HttpServlet
      * @throws IOException
      */
     private String getTextLineFromStream( InputStream is ) throws IOException {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         int b;
 
        	while( (b = is.read()) != -1 && b != (int) '\n' ) {

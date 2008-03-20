@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,7 +56,7 @@ import javax.servlet.http.HttpServletRequest;
 public class UserAgentFilter implements Filter
 {
     private Pattern _pattern;
-    private Map _agentCache = new HashMap();
+    private Map _agentCache = new ConcurrentHashMap();
     private int _agentCacheSize=1024;
     private String _attribute;
 
@@ -118,11 +119,8 @@ public class UserAgentFilter implements Filter
         if (ua==null)
             return null;
         
-        String tag;
-        synchronized(_agentCache)
-        {
-            tag = (String)_agentCache.get(ua);
-        }
+        String tag = (String)_agentCache.get(ua);
+        
 
         if (tag==null)
         {
@@ -144,12 +142,9 @@ public class UserAgentFilter implements Filter
             else
                 tag=ua;
 
-            synchronized(_agentCache)
-            {
-                if (_agentCache.size()>=_agentCacheSize)
+            if (_agentCache.size()>=_agentCacheSize)
                     _agentCache.clear();
                 _agentCache.put(ua,tag);
-            }
 
         }
         return tag;

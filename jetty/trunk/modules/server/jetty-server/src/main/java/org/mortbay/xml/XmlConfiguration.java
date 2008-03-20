@@ -830,16 +830,13 @@ public class XmlConfiguration
             else
             {
                 // Get the multiple items as a single string
-                StringBuffer buf = new StringBuffer();
-                synchronized (buf)
+                StringBuilder buf = new StringBuilder();
+                for (int i = first; i <= last; i++)
                 {
-                    for (int i = first; i <= last; i++)
-                    {
-                        Object item = node.get(i);
-                        buf.append(itemValue(obj, item));
-                    }
-                    value = buf.toString();
+                    Object item = node.get(i);
+                    buf.append(itemValue(obj, item));
                 }
+                value = buf.toString();
             }
         }
 

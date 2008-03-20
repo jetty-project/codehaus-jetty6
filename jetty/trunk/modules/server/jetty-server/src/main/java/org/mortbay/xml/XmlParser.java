@@ -669,12 +669,9 @@ public class XmlParser
          */
         public synchronized String toString(boolean tag)
         {
-            StringBuffer buf = new StringBuffer();
-            synchronized (buf)
-            {
-                toString(buf, tag);
-                return buf.toString();
-            }
+            StringBuilder buf = new StringBuilder();
+            toString(buf, tag);
+            return buf.toString();
         }
 
         /* ------------------------------------------------------------ */
@@ -692,7 +689,7 @@ public class XmlParser
         }
 
         /* ------------------------------------------------------------ */
-        private synchronized void toString(StringBuffer buf, boolean tag)
+        private synchronized void toString(StringBuilder buf, boolean tag)
         {
             if (tag)
             {

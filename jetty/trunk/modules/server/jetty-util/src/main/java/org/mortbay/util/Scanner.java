@@ -44,6 +44,7 @@ import org.mortbay.log.Log;
  */
 public class Scanner
 {
+    private static int __scannerId=0;
     private int _scanInterval;
     private List _listeners = Collections.synchronizedList(new ArrayList());
     private Map _prevScan = Collections.EMPTY_MAP;
@@ -249,7 +250,7 @@ public class Scanner
 
     public Timer newTimer ()
     {
-        return new Timer(true);
+        return new Timer("Scanner-"+__scannerId++, true);
     }
     
     public void schedule (Timer timer, TimerTask task)

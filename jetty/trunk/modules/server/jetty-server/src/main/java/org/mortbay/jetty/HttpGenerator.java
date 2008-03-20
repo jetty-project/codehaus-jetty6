@@ -368,7 +368,7 @@ public class HttpGenerator extends AbstractGenerator
         HttpFields.Field transfer_encoding = null;
         boolean keep_alive = false;
         boolean close=false;
-        StringBuffer connection = null;
+        StringBuilder connection = null;
 
         if (fields != null)
         {
@@ -439,7 +439,7 @@ public class HttpGenerator extends AbstractGenerator
                                             
                                             default:
                                                 if (connection==null)
-                                                    connection=new StringBuffer();
+                                                    connection=new StringBuilder();
                                                 else
                                                     connection.append(',');
                                                 connection.append(values[i]);
@@ -448,7 +448,7 @@ public class HttpGenerator extends AbstractGenerator
                                     else
                                     {
                                         if (connection==null)
-                                            connection=new StringBuffer();
+                                            connection=new StringBuilder();
                                         else
                                             connection.append(',');
                                         connection.append(values[i]);
@@ -479,7 +479,7 @@ public class HttpGenerator extends AbstractGenerator
                             default:
                             {
                                 if (connection==null)
-                                    connection=new StringBuffer();
+                                    connection=new StringBuilder();
                                 else
                                     connection.append(',');
                                 connection.append(field.getValue());

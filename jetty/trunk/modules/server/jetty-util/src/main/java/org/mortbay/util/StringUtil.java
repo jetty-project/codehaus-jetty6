@@ -191,22 +191,20 @@ public class StringUtil
         if (i == -1)
             return s;
     
-        StringBuffer buf = new StringBuffer(s.length()+with.length());
+        StringBuilder buf = new StringBuilder(s.length()+with.length());
 
-        synchronized(buf)
+        do
         {
-            do
-            {
-                buf.append(s.substring(c,i));
-                buf.append(with);
-                c=i+sub.length();
-            } while ((i=s.indexOf(sub,c))!=-1);
-            
-            if (c<s.length())
-                buf.append(s.substring(c,s.length()));
-            
-            return buf.toString();
-        }
+            buf.append(s.substring(c,i));
+            buf.append(with);
+            c=i+sub.length();
+        } while ((i=s.indexOf(sub,c))!=-1);
+
+        if (c<s.length())
+            buf.append(s.substring(c,s.length()));
+
+        return buf.toString();
+        
     }
 
 
@@ -220,13 +218,13 @@ public class StringUtil
 
 
     /* ------------------------------------------------------------ */
-    /** Append substring to StringBuffer 
-     * @param buf StringBuffer to append to
+    /** Append substring to StringBuilder 
+     * @param buf StringBuilder to append to
      * @param s String to append from
      * @param offset The offset of the substring
      * @param length The length of the substring
      */
-    public static void append(StringBuffer buf,
+    public static void append(StringBuilder buf,
                               String s,
                               int offset,
                               int length)
@@ -249,7 +247,7 @@ public class StringUtil
      * append hex digit
      * 
      */
-    public static void append(StringBuffer buf,byte b,int base)
+    public static void append(StringBuilder buf,byte b,int base)
     {
         int bi=0xff&b;
         int c='0'+(bi/base)%base;
@@ -262,9 +260,18 @@ public class StringUtil
         buf.append((char)c);
     }
 
-    
     /* ------------------------------------------------------------ */
     public static void append2digits(StringBuffer buf,int i)
+    {
+        if (i<100)
+        {
+            buf.append((char)(i/10+'0'));
+            buf.append((char)(i%10+'0'));
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static void append2digits(StringBuilder buf,int i)
     {
         if (i<100)
         {
@@ -347,7 +354,7 @@ public class StringUtil
     {
         if (name==null)
             return null;
-        StringBuffer buf = new StringBuffer(name.length());
+        StringBuilder buf = new StringBuilder(name.length());
         for (int i=0;i<name.length();i++)
         {
             char c=name.charAt(i);

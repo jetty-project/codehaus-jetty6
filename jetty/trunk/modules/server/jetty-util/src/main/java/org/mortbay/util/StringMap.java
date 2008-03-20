@@ -613,15 +613,12 @@ public class StringMap extends AbstractMap implements Externalizable
         public Object setValue(Object o){Object old=_value;_value=o;return old;}
         public String toString()
         {
-            StringBuffer buf=new StringBuffer();
-            synchronized(buf)
-            {
-                toString(buf);
-            }
+            StringBuilder buf=new StringBuilder();
+            toString(buf);
             return buf.toString();
         }
 
-        private void toString(StringBuffer buf)
+        private void toString(StringBuilder buf)
         {
             buf.append("{[");
             if (_char==null)
