@@ -11,6 +11,7 @@
     <listener-class>com.acme.TestListener</listener-class>
   </listener>
 
+  <!-- TestFilter is initialized by TestListener
   <filter>
     <filter-name>TestFilter</filter-name>
     <filter-class>com.acme.TestFilter</filter-class>
@@ -28,7 +29,8 @@
     <dispatcher>ERROR</dispatcher>
     <life-cycle>INITIAL</life-cycle>
   </filter-mapping>
-  
+  -->
+
   <filter>
     <filter-name>MultiPart</filter-name>
     <filter-class>org.mortbay.servlet.MultiPartFilter</filter-class>
