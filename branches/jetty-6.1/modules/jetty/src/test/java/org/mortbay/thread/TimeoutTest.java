@@ -112,20 +112,42 @@ public class TimeoutTest extends TestCase
     public void testDelay()
     {
         Timeout.Task task = new Timeout.Task();
+        timeout.cancelAll();
+        timeout.setDuration(200);
+
+        timeout.setNow(100);
+        timeout.schedule(task);
+        assertEquals("delay", false, task.isExpired());
+        timeout.setNow(200);
+        timeout.tick();
+        assertEquals("delay", false, task.isExpired());
+        timeout.setNow(400);
+        timeout.tick();
+        assertEquals("delay", true, task.isExpired());
+        
+
+
+        timeout.setNow(500);
+        timeout.schedule(task, 100);
+        
+        timeout.setNow(550);
+        timeout.tick();
+        assertEquals("delay", false, task.isExpired());
+        
+        timeout.setNow(650);
+        timeout.tick();
+        assertEquals("delay", true, task.isExpired());
+        
+        
 
         timeout.setNow(1100);
         timeout.schedule(task, 300);
-        timeout.setDuration(200);
         
-        timeout.setNow(1300);
+        timeout.setNow(1350);
         timeout.tick();
         assertEquals("delay", false, task.isExpired());
         
-        timeout.setNow(1500);
-        timeout.tick();
-        assertEquals("delay", false, task.isExpired());
-        
-        timeout.setNow(1700);
+        timeout.setNow(1450);
         timeout.tick();
         assertEquals("delay", true, task.isExpired());
     }
