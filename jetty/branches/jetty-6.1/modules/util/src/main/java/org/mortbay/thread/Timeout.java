@@ -140,7 +140,7 @@ public class Timeout
         }
         task._expired=false;
         task._delay=delay;
-        task._timestamp = _now+delay;
+        task._timestamp = delay==0?(_now+delay):(_now-_duration+delay);
         
         Task last=_head._prev;
         while (last!=_head)
