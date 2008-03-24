@@ -136,11 +136,11 @@ public class Context extends ContextHandler
      */
     protected void startContext() throws Exception
     {
-        super.startContext();
-        
-        // OK to Initialize servlet handler now
-        if (_servletHandler != null && _servletHandler.isStarted())
-            _servletHandler.initialize();
+    	super.startContext();
+
+    	// OK to Initialize servlet handler now
+    	if (_servletHandler != null && _servletHandler.isStarted())
+    		_servletHandler.initialize();
     }
 
     /* ------------------------------------------------------------ */
@@ -355,13 +355,15 @@ public class Context extends ContextHandler
          */
         public void addFilter(String filterName, String description, String className, Map<String, String> initParameters)
         {
+        	if (!isStarting())
+        		throw new IllegalStateException();
+        	
             ServletHandler handler = Context.this.getServletHandler();
             FilterHolder holder= handler.newFilterHolder();
             holder.setClassName(className);
             holder.setName(filterName);
             holder.setInitParameters(initParameters);
             handler.addFilter(holder);
-            
         }
 
         /* ------------------------------------------------------------ */
@@ -371,8 +373,11 @@ public class Context extends ContextHandler
         public void addFilterMapping(String filterName, String[] urlPatterns, String[] servletNames, EnumSet<DispatcherType> dispatcherTypes,
                 boolean isMatchAfter)
         {
+        	if (!isStarting())
+        		throw new IllegalStateException();
             ServletHandler handler = Context.this.getServletHandler();
             FilterMapping mapping = new FilterMapping();
+            mapping.setFilterName(filterName);
             mapping.setPathSpecs(urlPatterns);
             mapping.setServletNames(servletNames);
             
@@ -396,6 +401,8 @@ public class Context extends ContextHandler
          */
         public void addServlet(String servletName, String description, String className, Map<String, String> initParameters, int loadOnStartup)
         {
+        	if (!isStarting())
+        		throw new IllegalStateException();
             ServletHandler handler = Context.this.getServletHandler();
             ServletHolder holder= handler.newServletHolder();
             holder.setClassName(className);
@@ -411,13 +418,12 @@ public class Context extends ContextHandler
          */
         public void addServletMapping(String servletName, String[] urlPattern)
         {
+        	if (!isStarting())
+        		throw new IllegalStateException();
             ServletHandler handler = Context.this.getServletHandler();
             ServletMapping mapping = new ServletMapping();
             mapping.setPathSpecs(urlPattern);
             handler.addServletMapping(mapping);
-        }
-        
-        
+        }   
     }
-    
 }

@@ -15,6 +15,14 @@
 
 package com.acme;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
@@ -28,6 +36,7 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+import javax.servlet.DispatcherType;
 
 public class TestListener implements HttpSessionListener,  HttpSessionAttributeListener, HttpSessionActivationListener, ServletContextListener, ServletContextAttributeListener, ServletRequestListener, ServletRequestAttributeListener
 {
@@ -58,7 +67,16 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
 
     public void contextInitialized(ServletContextEvent sce)
     {
-        // System.err.println("contextInitialized "+sce);
+    	ServletContext context=sce.getServletContext();
+    	
+    	context.addFilter("TestFilter", null, TestFilter.class.getName(), null);
+    	
+    	context.addFilterMapping(
+    			"TestFilter", 
+    			new String[]{"/dump/*","/dispatch/*","*.dump"}, new String[]{"*"}, 
+    			EnumSet.of(DispatcherType.ERROR,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.REQUEST), 
+    			true);
+    
     }
 
     public void contextDestroyed(ServletContextEvent sce)
