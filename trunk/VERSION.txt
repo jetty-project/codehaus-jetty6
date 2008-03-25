@@ -16,6 +16,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
+ + JETTY-471 LDAP JAAS Realm
  + JETTY-474 Fixed case sensitivity issue with HttpFields
  + JETTY-475 AJP connector in RPMs
  + JETTY-486 Improved jetty.sh script
