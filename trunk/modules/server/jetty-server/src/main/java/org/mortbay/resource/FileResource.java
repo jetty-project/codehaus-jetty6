@@ -141,8 +141,10 @@ public class FileResource extends URLResource
         String url=null;
 
         path = org.mortbay.util.URIUtil.canonicalPath(path);
-        
-        if (!isDirectory())
+       
+        if ("/".equals(path))
+            return this;
+        else if (!isDirectory())
         {
             r=(FileResource)super.addPath(path);
             url=r._urlString;

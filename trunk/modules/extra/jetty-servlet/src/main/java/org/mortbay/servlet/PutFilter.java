@@ -196,7 +196,7 @@ public class PutFilter implements Filter
                 _hidden.put(pathInContext,pathInContext);
                 int toRead = request.getContentLength();
                 InputStream in = request.getInputStream();
-                OutputStream out = new FileOutputStream(file);
+                OutputStream out = new FileOutputStream(file,false);
                 if (toRead >= 0)
                     IO.copy(in, out, toRead);
                 else
@@ -273,7 +273,7 @@ public class PutFilter implements Filter
         if (contextPath != null)
             newInfo = newInfo.substring(contextPath.length());
 
-        String new_resource = URIUtil.addPaths(_baseURI,pathInContext);
+        String new_resource = URIUtil.addPaths(_baseURI,newInfo);
         File new_file=new File(new URI(new_resource));
 
         file.renameTo(new_file);
