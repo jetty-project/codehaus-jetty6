@@ -12,7 +12,6 @@
   <name>Jetty Extra Modules</name>
   <packaging>pom</packaging>
   <modules>
-    <module>jetty-sslengine</module>
     <module>jetty-client</module>
     <module>jetty-html</module>
     <module>jetty-servlet-tester</module>
