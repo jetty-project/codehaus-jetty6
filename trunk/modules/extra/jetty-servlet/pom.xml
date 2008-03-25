@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>modules-extra</artifactId>
+    <groupId>org.mortbay.jetty</groupId>
+    <version>7.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.jetty</groupId>
+  <artifactId>jetty-servlet</artifactId>
+  <name>Jetty Utility Servlets and Filters</name>
+  <description>Portable Utility Servlets from Jetty</description>
+</project>
