@@ -12,26 +12,20 @@
   <name>Jetty Extra Modules</name>
   <packaging>pom</packaging>
   <modules>
-    <module>jetty-ajp</module>
-    <module>jetty-client</module>
-    <module>jetty-gwt</module>
-<!--
-    <module>jetty-jboss</module>
--->
-    <module>jetty-servlet-tester</module>
-    <module>jetty-spring</module>
     <module>jetty-sslengine</module>
+    <module>jetty-client</module>
+    <module>jetty-html</module>
+    <module>jetty-servlet-tester</module>
+    <module>jetty-servlet</module>
+    <module>jetty-ajp</module>
+    <module>jetty-gwt</module>
+    <!-- module>jetty-jboss</module-->
+    <module>jetty-spring</module>
     <module>jetty-threadpool</module>
     <module>jetty-xbean</module>
-    <module>jetty-html</module>
     <module>jetty-setuid</module>
     <module>jetty-win32service</module>
-  
-    <!--
-      - Maven Plugins
-      -->
     <module>jetty-maven-jspc-plugin</module>
     <module>jetty-maven-plugin</module>
-    <module>jetty-servlet</module>
   </modules>
 </project>
