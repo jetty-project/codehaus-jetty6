@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
-  <artifactId>extratests</artifactId>
+  <artifactId>test-webapp-test</artifactId>
   <name>extra tests</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
