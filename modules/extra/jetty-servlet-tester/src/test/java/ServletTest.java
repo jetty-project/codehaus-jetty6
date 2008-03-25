@@ -19,7 +19,6 @@ public class ServletTest extends TestCase
 {
     ServletTester tester;
     
-    
     /* ------------------------------------------------------------ */
     protected void setUp() throws Exception
     {
