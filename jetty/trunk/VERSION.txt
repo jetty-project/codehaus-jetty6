@@ -35,6 +35,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-535 Fixed Bayeux server side client memory leak
  + JETTY-538 test harness fix for windows
  + JETTY-540 Servlet-3.0 & java5 support (work in progress)
+ + JETTY-543 Atomic batch get and put of files.
 
 jetty-6.1.8 28 February 2008
  + Added QueuedThreadPool
