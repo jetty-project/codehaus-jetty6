@@ -11,9 +11,10 @@
   <name>Jetty Server Modules</name>
   <packaging>pom</packaging>
   <modules>
-    <module>jetty-server</module>
-    <module>jetty-start</module>
-    <module>jetty-util</module>
     <module>servlet-api-3.0</module>
+    <module>jetty-util</module>
+    <module>jetty-server</module>
+    <module>jetty-ssl</module>
+    <module>jetty-start</module>
   </modules>
 </project>
