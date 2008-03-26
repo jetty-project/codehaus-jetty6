@@ -4,7 +4,7 @@
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Server Project</name>
-  <version>7.0-SNAPSHOT</version>
+  <version>6.1-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
     <system>jira</system>
@@ -89,14 +89,6 @@
       <organization>Sun Microsystems</organization>
       <organizationUrl>http://www.sun.com</organizationUrl>
     </developer>
-    <developer>
-      <id>jesse</id>
-      <name>Jesse McConnell</name>
-      <email>jesse@webtide.org</email>
-      <organization>Webtide, LLC</organization>
-      <organizationUrl>http://www.webtide.com</organizationUrl>
-      <timezone>-6</timezone>
-    </developer>
   </developers>
   <licenses>
     <license>
@@ -164,8 +156,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.4</source>
+          <target>1.4</target>
         </configuration>
       </plugin>
       <plugin>
@@ -239,21 +231,47 @@
     </pluginManagement>
   </build>
   <modules>
-    <module>modules/server</module>
-    <module>modules/jsp</module>
+    <module>modules/servlet-api-2.5</module>
+    <module>modules/util</module>
+    <module>modules/jetty</module>
+    <module>modules/jsp-api-2.1</module>
+    <module>modules/jsp-2.1</module>
+    <module>modules/jsp-api-2.0</module>
+    <module>modules/jsp-2.0</module>
+    <module>modules/management</module>
+    <module>modules/start</module>
+    <module>modules/maven-plugin</module>
+    <module>modules/jspc-maven-plugin</module>
+    <module>modules/naming</module>
     <module>modules/plus</module>
-    <module>modules/extra</module>
-    <module>modules/examples</module>
-    
-    <module>modules/contrib/cometd</module>
-    <module>modules/contrib/jetty-ant</module>
+    <module>modules/html</module>
+    <module>modules/annotations</module>
 
-    <!--module>modules/contrib/jetty-batch</module-->
-    <!--module>modules/contrib/grizzly</module-->
-    <!--module>modules/contrib/wadi</module-->
-    <!--module>modules/contrib/terracotta</module-->
+    <module>extras/servlet-tester</module>
+    <module>extras/xbean</module>
+    <module>extras/spring</module>
+    <module>extras/sslengine</module>
+    <module>extras/ajp</module>
+    <module>extras/win32service</module>
+    <!--module>extras/gwt</module-->
+    <module>extras/threadpool</module>
+    <module>extras/client</module>
 
-    <!--module>modules/website</module-->
+    <module>examples/test-webapp</module>
+    <module>examples/test-jaas-webapp</module>
+    <module>examples/test-jndi-webapp</module>
+    <module>examples/embedded</module>
+    <!-- <module>examples/spring-ebj3-demo</module> -->
+    <module>examples/tests</module>
+
+
+    <module>contrib/cometd</module>
+    <module>contrib/jetty-ant</module>
+    <!--module>contrib/grizzly</module-->
+    <!--module>contrib/wadi</module-->
+    <!--module>contrib/terracotta</module-->
+
+    <module>extras/setuid</module>
   </modules>
 
   <reporting>
