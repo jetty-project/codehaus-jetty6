@@ -57,7 +57,6 @@ public class HttpExchange
     public static final int STATUS_EXPIRED = 8;
     public static final int STATUS_EXCEPTED = 9;
 
-
     InetSocketAddress _address;
     String _method = HttpMethods.GET;
     Buffer _scheme;
@@ -68,12 +67,11 @@ public class HttpExchange
     Buffer _requestContent;
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     // methods to build request
-    
 
     /* ------------------------------------------------------------ */
     public int getStatus()
@@ -98,12 +96,12 @@ public class HttpExchange
     {
         synchronized (this)
         {
-            _status=status;
+            _status = status;
             this.notifyAll();
-            
+
             try
             {
-                switch(status)
+                switch (status)
                 {
                     case STATUS_WAITING_FOR_CONNECTION:
                         break;
@@ -126,7 +124,7 @@ public class HttpExchange
                         break;
 
                     case STATUS_COMPLETED:
-                        onResponseComplete(); 
+                        onResponseComplete();
                         break;
 
                     case STATUS_EXPIRED:
@@ -135,22 +133,22 @@ public class HttpExchange
 
                 }
             }
-            catch(IOException e)
+            catch (IOException e)
             {
                 Log.warn(e);
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param url Including protocol, host and port
      */
     public void setURL(String url)
     {
-        HttpURI uri=new HttpURI(url);
-        String scheme=uri.getScheme();
-        if (scheme!=null)
+        HttpURI uri = new HttpURI(url);
+        String scheme = uri.getScheme();
+        if (scheme != null)
         {
             if (HttpSchemes.HTTP.equalsIgnoreCase(scheme))
                 setScheme(HttpSchemes.HTTP_BUFFER);
@@ -159,27 +157,27 @@ public class HttpExchange
             else
                 setScheme(new ByteArrayBuffer(scheme));
         }
-        
-        int port=uri.getPort();
-        if (port<=0)
-            port="https".equalsIgnoreCase(scheme)?443:80;
-        
+
+        int port = uri.getPort();
+        if (port <= 0)
+            port = "https".equalsIgnoreCase(scheme)?443:80;
+
         setAddress(new InetSocketAddress(uri.getHost(),port));
-        
-        String completePath=uri.getCompletePath();
-        if (completePath!=null)
+
+        String completePath = uri.getCompletePath();
+        if (completePath != null)
             setURI(completePath);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param address
      */
     public void setAddress(InetSocketAddress address)
     {
-        _address=address;
+        _address = address;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return
@@ -195,7 +193,7 @@ public class HttpExchange
      */
     public void setScheme(Buffer scheme)
     {
-        _scheme=scheme;
+        _scheme = scheme;
     }
 
     /* ------------------------------------------------------------ */
@@ -206,24 +204,25 @@ public class HttpExchange
     {
         return _scheme;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param version as integer, 9, 10 or 11 for 0.9, 1.0 or 1.1
      */
     public void setVersion(int version)
     {
-        _version=version;
+        _version = version;
     }
-    
-   public void setVersion(String version)
-   {
-       CachedBuffer v = HttpVersions.CACHE.get(version);
-       if (v==null)
-           _version=10;
-       else
-           _version=v.getOrdinal();
-   }
+
+    /* ------------------------------------------------------------ */
+    public void setVersion(String version)
+    {
+        CachedBuffer v = HttpVersions.CACHE.get(version);
+        if (v == null)
+            _version = 10;
+        else
+            _version = v.getOrdinal();
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -233,16 +232,16 @@ public class HttpExchange
     {
         return _version;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param method
      */
     public void setMethod(String method)
     {
-        _method=method;
+        _method = method;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return
@@ -251,7 +250,6 @@ public class HttpExchange
     {
         return _method;
     }
-    
 
     /* ------------------------------------------------------------ */
     /**
@@ -262,16 +260,15 @@ public class HttpExchange
         return _uri;
     }
 
-
     /* ------------------------------------------------------------ */
     /**
      * @param uri
      */
     public void setURI(String uri)
     {
-        _uri=uri;
+        _uri = uri;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param name
@@ -281,7 +278,7 @@ public class HttpExchange
     {
         getRequestFields().add(name,value);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param name
@@ -291,7 +288,7 @@ public class HttpExchange
     {
         getRequestFields().add(name,value);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param name
@@ -301,7 +298,7 @@ public class HttpExchange
     {
         getRequestFields().put(name,value);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param name
@@ -330,13 +327,10 @@ public class HttpExchange
         return _requestFields;
     }
 
-    
-
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     // methods to commit and/or send the request
-    
 
     /* ------------------------------------------------------------ */
     /**
@@ -344,18 +338,18 @@ public class HttpExchange
      */
     public void setRequestContent(Buffer requestContent)
     {
-        _requestContent=requestContent;
+        _requestContent = requestContent;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param requestContent
      */
     public void setRequestContentSource(InputStream in)
     {
-        _requestContentSource=in;
+        _requestContentSource = in;
     }
-    
+
     /* ------------------------------------------------------------ */
     public InputStream getRequestContentSource()
     {
@@ -365,20 +359,20 @@ public class HttpExchange
     /* ------------------------------------------------------------ */
     public Buffer getRequestContentChunk() throws IOException
     {
-        synchronized(this)
+        synchronized (this)
         {
-            if (_requestContentChunk==null)
-                _requestContentChunk=new ByteArrayBuffer(4096); // TODO configure
+            if (_requestContentChunk == null)
+                _requestContentChunk = new ByteArrayBuffer(4096); // TODO configure
             else
             {
                 if (_requestContentChunk.hasContent())
                     throw new IllegalStateException();
                 _requestContentChunk.clear();
             }
-            
-            int read=_requestContentChunk.capacity();
+
+            int read = _requestContentChunk.capacity();
             int length = _requestContentSource.read(_requestContentChunk.array(),0,read);
-            if (length>=0)
+            if (length >= 0)
             {
                 _requestContentChunk.setPutIndex(length);
                 return _requestContentChunk;
@@ -392,12 +386,22 @@ public class HttpExchange
     {
         return _requestContent;
     }
-    
-    public String toString()
+
+    /* ------------------------------------------------------------ */
+    /** Cancel this exchange
+     * Currently this implementation does nothing.
+     */
+    public void cancel()
     {
-        return "HttpExchange@"+hashCode()+"="+_method+"//"+_address.getHostName()+":"+_address.getPort()+_uri+"#"+_status;
+        
     }
     
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return "HttpExchange@" + hashCode() + "=" + _method + "//" + _address.getHostName() + ":" + _address.getPort() + _uri + "#" + _status;
+    }
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -405,11 +409,11 @@ public class HttpExchange
     protected void onRequestCommitted() throws IOException
     {
     }
-    
+
     protected void onRequestComplete() throws IOException
     {
     }
-    
+
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
     }
@@ -417,7 +421,7 @@ public class HttpExchange
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
     }
-    
+
     protected void onResponseHeaderComplete() throws IOException
     {
     }
@@ -432,21 +436,20 @@ public class HttpExchange
 
     protected void onConnectionFailed(Throwable ex)
     {
-        System.err.println("CONNECTION FAILED on "+this);
+        System.err.println("CONNECTION FAILED on " + this);
         // ex.printStackTrace();
     }
 
     protected void onException(Throwable ex)
     {
-        System.err.println("EXCEPTION on "+this);
+        System.err.println("EXCEPTION on " + this);
         ex.printStackTrace();
     }
-    
+
     protected void onExpire()
     {
-        System.err.println("EXPIRED "+this);
+        System.err.println("EXPIRED " + this);
     }
-
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -461,13 +464,13 @@ public class HttpExchange
     {
         int _responseStatus;
         HttpFields _responseFields;
-        
+
         public CachedExchange(boolean cacheFields)
         {
             if (cacheFields)
                 _responseFields = new HttpFields();
         }
-        
+
         /* ------------------------------------------------------------ */
         public int getResponseStatus()
         {
@@ -483,7 +486,7 @@ public class HttpExchange
                 throw new IllegalStateException("Headers not complete");
             return _responseFields;
         }
-        
+
         /* ------------------------------------------------------------ */
         protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
         {
@@ -495,12 +498,12 @@ public class HttpExchange
         protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
             super.onResponseHeader(name,value);
-            if (_responseFields!=null)
-                _responseFields.add(name, value);
+            if (_responseFields != null)
+                _responseFields.add(name,value);
         }
 
     }
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -510,56 +513,56 @@ public class HttpExchange
      */
     public static class ContentExchange extends CachedExchange
     {
-        int _contentLength=1024;
-        String _encoding="utf-8";
+        int _contentLength = 1024;
+        String _encoding = "utf-8";
         ByteArrayOutputStream _responseContent;
-        
+
         public ContentExchange()
         {
             super(false);
         }
-        
+
         /* ------------------------------------------------------------ */
         public String getResponseContent() throws UnsupportedEncodingException
         {
-            if (_responseContent!=null)
+            if (_responseContent != null)
             {
                 return _responseContent.toString(_encoding);
             }
             return null;
         }
-        
+
         /* ------------------------------------------------------------ */
         protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
             super.onResponseHeader(name,value);
             int header = HttpHeaders.CACHE.getOrdinal(value);
-            switch(header)
+            switch (header)
             {
                 case HttpHeaders.CONTENT_LANGUAGE_ORDINAL:
-                    _contentLength=BufferUtil.toInt(value);
+                    _contentLength = BufferUtil.toInt(value);
                     break;
                 case HttpHeaders.CONTENT_TYPE_ORDINAL:
-                    
-                    String mime=StringUtil.asciiToLowerCase(value.toString());
-                    int i=mime.indexOf("charset=");
-                    if (i>0)
+
+                    String mime = StringUtil.asciiToLowerCase(value.toString());
+                    int i = mime.indexOf("charset=");
+                    if (i > 0)
                     {
-                        mime=mime.substring(i+8);
-                        i=mime.indexOf(';');
-                        if (i>0)
-                            mime=mime.substring(0,i);
+                        mime = mime.substring(i + 8);
+                        i = mime.indexOf(';');
+                        if (i > 0)
+                            mime = mime.substring(0,i);
                     }
-                    if (mime!=null && mime.length()>0)
-                        _encoding=mime;
+                    if (mime != null && mime.length() > 0)
+                        _encoding = mime;
                     break;
             }
         }
 
         protected void onResponseContent(Buffer content) throws IOException
         {
-            if (_responseContent==null)
-                _responseContent= new ByteArrayOutputStream(_contentLength);
+            if (_responseContent == null)
+                _responseContent = new ByteArrayOutputStream(_contentLength);
             content.writeTo(_responseContent);
         }
     }
