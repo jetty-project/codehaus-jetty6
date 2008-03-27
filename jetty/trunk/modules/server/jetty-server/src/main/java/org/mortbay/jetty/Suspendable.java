@@ -3,7 +3,6 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.EndPoint;
-import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 

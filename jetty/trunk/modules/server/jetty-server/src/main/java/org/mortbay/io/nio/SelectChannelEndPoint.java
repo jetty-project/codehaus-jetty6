@@ -55,6 +55,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
         _manager.endPointOpened(this);
         
         _key = key;
+        scheduleIdle();
     }
 
     /* ------------------------------------------------------------ */
