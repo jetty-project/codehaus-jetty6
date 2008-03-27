@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>test-ws</artifactId>
   <packaging>war</packaging>
-  <name>Test - cxf content aggregation webapp</name>
+  <name>Jetty Test :: cxf content aggregation webapp</name>
   <licenses>
     <license>
       <name>Apache License Version 2</name>
