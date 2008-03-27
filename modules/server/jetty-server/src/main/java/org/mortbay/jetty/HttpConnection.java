@@ -53,7 +53,7 @@ import org.mortbay.util.URIUtil;
 public class HttpConnection implements Connection
 {
     private static int UNKNOWN = -2;
-    private static ThreadLocal __currentConnection = new ThreadLocal();
+    private static ThreadLocal<HttpConnection> __currentConnection = new ThreadLocal<HttpConnection>();
 
     private long _timeStamp=System.currentTimeMillis();
     private int _requests;
@@ -377,6 +377,10 @@ public class HttpConnection implements Connection
                 
                 if (!_request.isInitial())
                 {
+                    if (_request.isSuspended())
+                    {
+                        // TODO - unregister key for further updates!
+                    }
                     Log.debug("resume request",_request);
                     handleRequest();
                 }

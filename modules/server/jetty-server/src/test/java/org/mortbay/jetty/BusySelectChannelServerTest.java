@@ -9,7 +9,6 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
 
 /**
  * HttpServer Tester.
@@ -26,7 +25,7 @@ public class BusySelectChannelServerTest extends HttpServerTestBase
              */
             protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
             {
-                return new SuspendableSelectChannelEndPoint(channel,selectSet,key)
+                return new SelectChannelEndPoint(channel,selectSet,key)
                 {
                     int write;
                     int read;

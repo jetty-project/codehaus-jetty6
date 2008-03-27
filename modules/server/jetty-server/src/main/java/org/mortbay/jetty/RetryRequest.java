@@ -15,10 +15,6 @@
 
 package org.mortbay.jetty;
 
-import org.mortbay.jetty.nio.SuspendableSelectChannelEndPoint;
-import org.mortbay.util.ajax.Continuation;
-
-
 /* ------------------------------------------------------------ */
 /** Retry Request
  * This is thrown by a non-blocking {@link Continuation} such as
