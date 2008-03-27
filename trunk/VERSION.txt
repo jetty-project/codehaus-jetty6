@@ -12,6 +12,7 @@ jetty-7.0-SNAPSHOT
  + Make javax.servlet.jsp optional osgi import for jetty module
  + Ensure Jotm tx mgr can be found in jetty-env.xml
  + JETTY-282 Support manually-triggered reloading by maven plugin
+ + JETTY-341 100-Continues sent only after getInputStream called.
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
  + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
  + JETTY-467 allow URL rewriting to be disabled.
