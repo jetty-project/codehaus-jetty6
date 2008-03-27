@@ -16,5 +16,6 @@
     <module>test-webapp-test</module>
     <module>test-jaas-webapp</module>
     <module>test-jndi-webapp</module>
+    <module>test-ws-cxf</module>
   </modules>
 </project>
