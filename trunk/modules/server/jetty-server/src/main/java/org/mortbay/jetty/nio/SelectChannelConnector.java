@@ -136,7 +136,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
     {
-        SuspendableSelectChannelEndPoint cep = ((SuspendableSelectChannelEndPoint)endpoint);
+        SelectChannelEndPoint cep = ((SelectChannelEndPoint)endpoint);
         cep.cancelIdle();
         request.setTimeStamp(cep.getSelectSet().getNow());
         super.customize(endpoint, request);
@@ -145,7 +145,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------------------------- */
     public void persist(org.mortbay.io.EndPoint endpoint) throws IOException
     {
-        ((SuspendableSelectChannelEndPoint)endpoint).scheduleIdle();
+        ((SelectChannelEndPoint)endpoint).scheduleIdle();
         super.persist(endpoint);
     }
 
@@ -327,7 +327,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SuspendableSelectChannelEndPoint(channel,selectSet,key);
+        return new SelectChannelEndPoint(channel,selectSet,key);
     }
 
     /* ------------------------------------------------------------------------------- */
