@@ -18,9 +18,8 @@ package org.jboss.jetty.management;
 import javax.management.ObjectName;
 
 import org.jboss.jetty.JBossWebAppContext;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.webapp.management.WebAppContextMBean;
 import org.mortbay.log.Log;
-import org.mortbay.management.ObjectMBean;
 
 /**
  * JBossWebApplicationContextMBean
