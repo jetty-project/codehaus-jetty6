@@ -22,93 +22,68 @@ import java.util.Iterator;
 
 import ebay.apis.eblbasecomponents.*;
 
+import javax.servlet.ServletRequest;
 import javax.xml.ws.BindingProvider;
 
 /* ------------------------------------------------------------ */
 
 public class EbayFindItemAsync
 {
+    ServletRequest _request;
     private long _accessed;
     private long _totalTime; // purely for test purposes
 
     ShoppingInterface _shoppingPort;
     private EbayFindItemAsyncHandler _handler;
-    private Future _freply;
 
-    private List _handlers = new ArrayList();
-    private List _futures = new ArrayList();
+    private List<EbayFindItemAsyncHandler> _handlers = new ArrayList<EbayFindItemAsyncHandler>();
+    private int _todo;
 
     /* ------------------------------------------------------------ */
 
-    public EbayFindItemAsync()
+    public EbayFindItemAsync(ShoppingInterface port, ServletRequest request)
     {
-
         _totalTime = System.currentTimeMillis();
+        _request=request;
+        _shoppingPort=port;
 
-        try
-        {
-
-            _shoppingPort = new Shopping().getShopping();
-            BindingProvider bp = (BindingProvider) _shoppingPort;
-
-            // retrieve the URL stub from the WSDL
-            String ebayURL = (String) bp.getRequestContext().
-                    get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
-
-            // add eBay-required parameters to the URL
-            String endpointURL = ebayURL + "?callname=FindItems&siteid=0" +
-                    "&appid=JesseMcC-1aff-4c3c-b0be-e8379d036f56" +
-                    "&version=551&requestencoding=SOAP";
-
-            // replace the endpoint address with the new value
-            bp.getRequestContext().
-                    put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointURL);
-
-        }
-        catch (Exception e)
-        {
-            System.out.println("Exception: " + e.getMessage());
-        }
+        _handler = new EbayFindItemAsyncHandler(this);
     }
 
+    /* ------------------------------------------------------------ */
     public void search(String item)
     {
         FindItemsRequestType req = new FindItemsRequestType();
         req.setQueryKeywords(item);
         req.setMaxEntries( 100 );
 
-        _handler = new EbayFindItemAsyncHandler();
-
-        _freply = _shoppingPort.findItemsAsync(req, _handler);
-
-        _handlers.add(_handler);
-        _futures.add(_freply);
+        synchronized (this)
+        {
+            _todo++;
+            _shoppingPort.findItemsAsync(req, _handler);
+            _handlers.add(_handler);
+        }
     }
 
-
-    public boolean isDone()
+    /* ------------------------------------------------------------ */
+    public void done()
     {
-        boolean isDone = true;
-        int f = 0;
-        for (Iterator i = _futures.iterator(); i.hasNext();)
+        synchronized (this)
         {
-            ++f;
-            Future future = (Future) i.next();
-
-            if (!future.isDone())
+            System.err.println("done "+_todo);
+            if (_todo>0)
             {
-                isDone = false;
-            }
-            else
-            {
-                System.out.println( f + "# future is complete");
+                if (--_todo==0)
+                {
+                    System.err.println("Resuming request");
+                    _request.resume();
+                }
             }
         }
-
-        return isDone; // all futures are back
     }
 
-    public List getPayload()
+    /* ------------------------------------------------------------ */
+    public List<EbayFindItemAsyncHandler> getPayload()
     {
         _totalTime = System.currentTimeMillis() - _totalTime;
         return _handlers;
@@ -124,13 +99,13 @@ public class EbayFindItemAsync
         }
     }
 
-
     /* ------------------------------------------------------------ */
     public synchronized long lastAccessed()
     {
         return _accessed;
     }
 
+    /* ------------------------------------------------------------ */
     public synchronized long getTotalTime()
     {
         return _totalTime;
