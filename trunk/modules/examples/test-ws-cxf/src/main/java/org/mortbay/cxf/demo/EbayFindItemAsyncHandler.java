@@ -1,4 +1,4 @@
-package org.mortbay.cxf.continuation;
+package org.mortbay.cxf.demo;
 
 // ========================================================================
 // Copyright 2007 Mort Bay Consulting Pty. Ltd.

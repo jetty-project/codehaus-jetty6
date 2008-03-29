@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.cxf.continuation;
+package org.mortbay.cxf.demo;
 
 
 import java.util.concurrent.Future;
