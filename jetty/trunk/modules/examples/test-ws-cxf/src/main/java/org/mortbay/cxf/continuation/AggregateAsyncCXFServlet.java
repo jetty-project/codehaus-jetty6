@@ -151,27 +151,19 @@ public class AggregateAsyncCXFServlet extends HttpServlet
             PrintWriter out = resp.getWriter();
             out.println( "<HTML><BODY>");
             
-            out.print( "Total Time: ");
-            out.print( ebayAggregate.getTotalTime() );
-            out.println( "ms<br/>");
-            out.print( "Servlet Thread held: ");
-            duration+=System.currentTimeMillis()-start;
-            out.print( duration );
-            out.println( "ms<br/><br/>");
-
             int i=0;
             for (EbayFindItemAsyncHandler handler : handlers)
             {
                 
                 if (handler.getResponse()==null)
                 {
-                    out.println("MISSING RESPONSE!");
+                    out.println(items.get(i) +": MISSING RESPONSE!");
                 }
                 else
                 {
                     out.print( "<b>" );
                     out.print( items.get(i) );
-                    out.println( "</b>:<br/>" );
+                    out.println( "</b>: " );
                     String coma=null;
                     for (SimpleItemType sit : handler.getResponse().getItem())
                     {
@@ -182,18 +174,26 @@ public class AggregateAsyncCXFServlet extends HttpServlet
                         out.print("<a href=\"");
                         out.print( sit.getViewItemURLForNaturalSearch());
                         out.print("\">");
-                        out.print( sit.getItemID());
+                        out.print(sit.getTitle());
                         out.print("</a>");
                     }
                 }
                 i++;
-                out.println( "<br/><br/><br/>");
+                out.println( "<br/>");
             }
 
+            long now=System.currentTimeMillis();
+            out.print( "Total Time: ");
+            out.print( now-ebayAggregate.getStartTime() );
+            out.println( "ms<br/>");
+            out.print( "Servlet Thread held: ");
+            long duration2=now-start;
+            out.print( duration+duration2 );
+            out.println( "ms ("+duration+" initial + "+duration2+" resume )<br/><br/>");
+
+            
             out.println("</BODY></HTML>" );
             out.close();
-
-            req.removeAttribute( CLIENT_ATTR );
         }
 
     }
