@@ -109,7 +109,7 @@ public class AggregateSerialCXFServlet extends HttpServlet
         {
             FindItemsRequestType ebayReq = new FindItemsRequestType();
             ebayReq.setQueryKeywords( item );
-            ebayReq.setMaxEntries(100);
+            ebayReq.setMaxEntries(4);
             responses[r++] = _shoppingPort.findItems(ebayReq);
         }
             
@@ -118,13 +118,6 @@ public class AggregateSerialCXFServlet extends HttpServlet
         PrintWriter out = resp.getWriter();
         out.println( "<HTML><BODY>");
         
-        out.print( "Total Time: ");
-        long duration=System.currentTimeMillis()-_totalTime;
-        out.print( duration );
-        out.println( "ms<br/>");
-        out.print( "Servlet Thread held: ");
-        out.print( duration );
-        out.println( "ms<br/><br/>");
 
         int i=0;
         for (String item: items)
@@ -132,13 +125,13 @@ public class AggregateSerialCXFServlet extends HttpServlet
             FindItemsResponseType response=responses[i];
             if (response==null)
             {
-                out.println("MISSING RESPONSE!");
+                out.println(items.get(i)+" MISSING RESPONSE!");
             }
             else
             {
                 out.print( "<b>" );
                 out.print( items.get(i) );
-                out.println( "</b>:<br/>" );
+                out.println( "</b>: " );
                 String coma=null;
                 for (SimpleItemType sit : response.getItem())
                 {
@@ -149,14 +142,22 @@ public class AggregateSerialCXFServlet extends HttpServlet
                     out.print("<a href=\"");
                     out.print( sit.getViewItemURLForNaturalSearch());
                     out.print("\">");
-                    out.print( sit.getItemID());
+                    out.print( sit.getTitle());
                     out.print("</a>");
                 }
             }
             i++;
-            out.println( "<br/><br/><br/>");
+            out.println( "<br/>");
         }
 
+        out.print( "Total Time: ");
+        long duration=System.currentTimeMillis()-_totalTime;
+        out.print( duration );
+        out.println( "ms<br/>");
+        out.print( "Servlet Thread held: ");
+        out.print( duration );
+        out.println( "ms<br/><br/>");
+        
         out.println("</BODY></HTML>" );
         out.close();   
         
