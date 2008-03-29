@@ -5,6 +5,7 @@ To give it a try run:
 
   mvn jetty:run
 
-Now open up a browser and surf to 
+It is a bit slow to start as the CXF framework takes some time to initialize.
+Once it is started, open up a browser and surf to 
 
 http://localhost:9090/

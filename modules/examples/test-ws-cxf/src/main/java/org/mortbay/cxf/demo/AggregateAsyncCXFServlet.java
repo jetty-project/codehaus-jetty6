@@ -1,4 +1,4 @@
-package org.mortbay.cxf.continuation;
+package org.mortbay.cxf.demo;
 //========================================================================
 //Copyright 2007 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
@@ -60,11 +60,6 @@ public class AggregateAsyncCXFServlet extends HttpServlet
             bp.getRequestContext().
                     put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointURL);
             
-            // make a request to initialize everything
-            FindItemsRequestType ebayReq = new FindItemsRequestType();
-            ebayReq.setQueryKeywords( "shoe" );
-            ebayReq.setMaxEntries(1);
-            _shoppingPort.findItems(ebayReq);
         }
         catch (Exception e)
         {

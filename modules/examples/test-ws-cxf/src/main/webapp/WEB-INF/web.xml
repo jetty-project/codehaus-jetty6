@@ -9,7 +9,8 @@
 
  <servlet>
    <servlet-name>AggregateAsyncCXFServlet</servlet-name>
-   <servlet-class>org.mortbay.cxf.continuation.AggregateAsyncCXFServlet</servlet-class>
+   <servlet-class>org.mortbay.cxf.demo.AggregateAsyncCXFServlet</servlet-class>
+   <load-on-startup>1</load-on-startup>
  </servlet>
  <servlet-mapping>
    <servlet-name>AggregateAsyncCXFServlet</servlet-name>
@@ -18,7 +19,8 @@
 
  <servlet>
    <servlet-name>AggregateSerialCXFServlet</servlet-name>
-   <servlet-class>org.mortbay.cxf.continuation.AggregateSerialCXFServlet</servlet-class>
+   <servlet-class>org.mortbay.cxf.demo.AggregateSerialCXFServlet</servlet-class>
+   <load-on-startup>1</load-on-startup>
  </servlet>
  <servlet-mapping>
    <servlet-name>AggregateSerialCXFServlet</servlet-name>
