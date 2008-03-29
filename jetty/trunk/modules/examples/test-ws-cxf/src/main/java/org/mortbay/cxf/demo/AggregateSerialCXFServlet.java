@@ -151,7 +151,7 @@ public class AggregateSerialCXFServlet extends HttpServlet
         out.println( "ms<br/>");
         out.print( "Thread held: ");
         out.print( duration );
-        out.println( "ms<br/><br/>");
+        out.println( "ms");
         
         out.println("</BODY></HTML>" );
         out.close();   
