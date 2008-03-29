@@ -149,7 +149,7 @@ public class AggregateSerialCXFServlet extends HttpServlet
         long duration=System.currentTimeMillis()-_totalTime;
         out.print( duration );
         out.println( "ms<br/>");
-        out.print( "Servlet Thread held: ");
+        out.print( "Thread held: ");
         out.print( duration );
         out.println( "ms<br/><br/>");
         
