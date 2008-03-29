@@ -15,7 +15,7 @@ The
 href="https://svn.codehaus.org/jetty/jetty/trunk/modules/examples/test-ws-cxf/src/main/java/org/mortbay/cxf/demo/AggregateSerialCXFServlet.java">synchronous
 servlet</a>, a ws call is made for each keyword and the thread servicing the
 web request blocks waiting for each ws response before making the next
-request.
+request. The servlet thread is held for the entire elapsed time of all ws calls.
 
 </p>
 <p>
@@ -26,8 +26,8 @@ Asynchronous Servlet
 </a> initiates an async CFX webservice to for all keywords in parallel, and
 then uses the Servlet 3.0 suspend call to return the thread to the thread
 pool. The CFX async call backs check to see if all callbacks are complete and
-if so, the request is resumed.
-
+if so, the request is resumed.  The ws calls are done in parrallel and the 
+servlet thread is only held for a short time at the start and end of the elapsed time.
 </p>
 
 
