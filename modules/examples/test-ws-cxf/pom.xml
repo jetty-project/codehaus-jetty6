@@ -56,9 +56,6 @@
         <executions>
           <execution>
             <phase>compile</phase>
-            <goals>
-              <goal>inplace</goal>
-            </goals>
             <configuration>
               <archiveClasses>false</archiveClasses>
               <dependentWarExcludes>WEB-INF/web.xml,WEB-INF/lib/**/*.jar</dependentWarExcludes>
