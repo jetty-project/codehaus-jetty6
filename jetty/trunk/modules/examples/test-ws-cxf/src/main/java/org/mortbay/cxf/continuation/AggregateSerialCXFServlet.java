@@ -29,7 +29,44 @@ import ebay.apis.eblbasecomponents.*;
 public class AggregateSerialCXFServlet extends HttpServlet
 {
     ShoppingInterface _shoppingPort;
-    public static final String ITEMS_ATTR="items";
+    public static final String ITEMS_PARAM="items";
+    
+    
+
+    public void init() throws ServletException
+    {
+        super.init();
+
+        try
+        {
+            _shoppingPort = new Shopping().getShopping();
+            BindingProvider bp = (BindingProvider) _shoppingPort;
+
+            // retrieve the URL stub from the WSDL
+            String ebayURL = (String) bp.getRequestContext().
+                    get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+
+            // add eBay-required parameters to the URL
+            String endpointURL = ebayURL + "?callname=FindItems&siteid=0" +
+                    "&appid=JesseMcC-1aff-4c3c-b0be-e8379d036f56" +
+                    "&version=551&requestencoding=SOAP";
+
+            // replace the endpoint address with the new value
+            bp.getRequestContext().
+                    put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointURL);
+            
+            // make a request to initialize everything
+            FindItemsRequestType ebayReq = new FindItemsRequestType();
+            ebayReq.setQueryKeywords( "shoe" );
+            ebayReq.setMaxEntries(1);
+            _shoppingPort.findItems(ebayReq);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Exception: " + e.getMessage());
+            throw new ServletException(e);
+        }
+    }
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
@@ -38,8 +75,8 @@ public class AggregateSerialCXFServlet extends HttpServlet
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
-        Object itemsObj = req.getParameter(ITEMS_ATTR);
-        List items = new ArrayList();
+        Object itemsObj = req.getParameter(ITEMS_PARAM);
+        List<String> items = new ArrayList<String>();
 
         if (itemsObj == null)
         {
@@ -63,74 +100,66 @@ public class AggregateSerialCXFServlet extends HttpServlet
 
         long _totalTime = System.currentTimeMillis();
         
-        try
-        {
-
-            _shoppingPort = new Shopping().getShopping();
-            BindingProvider bp = (BindingProvider) _shoppingPort;
-
-            // retrieve the URL stub from the WSDL
-            String ebayURL = (String) bp.getRequestContext().
-                    get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
-
-            // add eBay-required parameters to the URL
-            String endpointURL = ebayURL + "?callname=FindItems&siteid=0" +
-                    "&appid=JesseMcC-1aff-4c3c-b0be-e8379d036f56" +
-                    "&version=551&requestencoding=SOAP";
-
-            // replace the endpoint address with the new value
-            bp.getRequestContext().
-                    put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointURL);
-
-        }
-        catch (Exception e)
-        {
-            System.out.println("Exception: " + e.getMessage());
-        }
-
-        StringBuffer sb = new StringBuffer();
         
-        for (Iterator i = items.iterator(); i.hasNext();)
+        FindItemsResponseType[] responses=new FindItemsResponseType[items.size()];
+        int r=0;
+        
+        // make all requests serially
+        for (String item: items)
         {
-            String item = (String)i.next();
-            long time = System.currentTimeMillis();
             FindItemsRequestType ebayReq = new FindItemsRequestType();
             ebayReq.setQueryKeywords( item );
-
             ebayReq.setMaxEntries(100);
+            responses[r++] = _shoppingPort.findItems(ebayReq);
+        }
+            
 
-            FindItemsResponseType ebayRes = _shoppingPort.findItems(ebayReq);
+        resp.setContentType( "text/html" );
+        PrintWriter out = resp.getWriter();
+        out.println( "<HTML><BODY>");
+        
+        out.print( "Total Time: ");
+        long duration=System.currentTimeMillis()-_totalTime;
+        out.print( duration );
+        out.println( "ms<br/>");
+        out.print( "Servlet Thread held: ");
+        out.print( duration );
+        out.println( "ms<br/><br/>");
 
-            List lsit = ebayRes.getItem();
-
-            ListIterator lsitItr = lsit.listIterator();
-
-            while (lsitItr.hasNext())
+        int i=0;
+        for (String item: items)
+        {
+            FindItemsResponseType response=responses[i];
+            if (response==null)
             {
-                SimpleItemType sit = (SimpleItemType) lsitItr.next();
-                sb.append(sit.getDescription() + " ");
-                sb.append(sit.getItemID() + " ");
-                sb.append(sit.getViewItemURLForNaturalSearch() + " ");
-                sb.append(sit.getLocation() + " ");
-                sb.append("<br/>");
+                out.println("MISSING RESPONSE!");
             }
-            sb.append("<br/><br/><br/>");
-
-            time = System.currentTimeMillis() - time;
-            System.out.println("search for " + item + " took " + time + "ms");
+            else
+            {
+                out.print( "<b>" );
+                out.print( items.get(i) );
+                out.println( "</b>:<br/>" );
+                String coma=null;
+                for (SimpleItemType sit : response.getItem())
+                {
+                    if (coma==null)
+                        coma=", ";
+                    else
+                        out.print(coma);
+                    out.print("<a href=\"");
+                    out.print( sit.getViewItemURLForNaturalSearch());
+                    out.print("\">");
+                    out.print( sit.getItemID());
+                    out.print("</a>");
+                }
+            }
+            i++;
+            out.println( "<br/><br/><br/>");
         }
 
-
-        _totalTime = System.currentTimeMillis() - _totalTime;
-
-        resp.setContentType("text/html");
-        PrintWriter out = resp.getWriter();
-
-        System.out.println("total time: " + _totalTime + "ms");
-
-        out.println("<HTML><BODY>Total Time: " + _totalTime + "ms<br/><br/>" + sb.toString() + "</BODY></HTML>");
-        out.close();
-
+        out.println("</BODY></HTML>" );
+        out.close();   
+        
         
 
     }
