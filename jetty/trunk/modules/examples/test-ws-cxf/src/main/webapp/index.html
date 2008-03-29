@@ -12,7 +12,7 @@ string.
 <p>
 The 
 <a
-href="https://svn.codehaus.org/jetty/jetty/trunk/modules/examples/test-ws-cxf/src/main/java/org/mortbay/cxf/continuation/AggregateSerialCXFServlet.java">synchronous
+href="https://svn.codehaus.org/jetty/jetty/trunk/modules/examples/test-ws-cxf/src/main/java/org/mortbay/cxf/demo/AggregateSerialCXFServlet.java">synchronous
 servlet</a>, a ws call is made for each keyword and the thread servicing the
 web request blocks waiting for each ws response before making the next
 request.
@@ -21,7 +21,7 @@ request.
 <p>
 
 The <a
-href="https://svn.codehaus.org/jetty/jetty/trunk/modules/examples/test-ws-cxf/src/main/java/org/mortbay/cxf/continuation/AggregateAsyncCXFServlet.java">
+href="https://svn.codehaus.org/jetty/jetty/trunk/modules/examples/test-ws-cxf/src/main/java/org/mortbay/cxf/demo/AggregateAsyncCXFServlet.java">
 Asynchronous Servlet
 </a> initiates an async CFX webservice to for all keywords in parallel, and
 then uses the Servlet 3.0 suspend call to return the thread to the thread
