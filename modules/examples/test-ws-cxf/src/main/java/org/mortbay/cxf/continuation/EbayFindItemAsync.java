@@ -31,10 +31,9 @@ public class EbayFindItemAsync
 {
     ServletRequest _request;
     private long _accessed;
-    private long _totalTime; // purely for test purposes
+    private long _startTime; // purely for test purposes
 
     ShoppingInterface _shoppingPort;
-    private EbayFindItemAsyncHandler _handler;
 
     private List<EbayFindItemAsyncHandler> _handlers = new ArrayList<EbayFindItemAsyncHandler>();
     private int _todo;
@@ -43,11 +42,9 @@ public class EbayFindItemAsync
 
     public EbayFindItemAsync(ShoppingInterface port, ServletRequest request)
     {
-        _totalTime = System.currentTimeMillis();
+        _startTime = System.currentTimeMillis();
         _request=request;
         _shoppingPort=port;
-
-        _handler = new EbayFindItemAsyncHandler(this);
     }
 
     /* ------------------------------------------------------------ */
@@ -55,13 +52,14 @@ public class EbayFindItemAsync
     {
         FindItemsRequestType req = new FindItemsRequestType();
         req.setQueryKeywords(item);
-        req.setMaxEntries( 100 );
+        req.setMaxEntries(4);
 
         synchronized (this)
         {
             _todo++;
-            _shoppingPort.findItemsAsync(req, _handler);
-            _handlers.add(_handler);
+            EbayFindItemAsyncHandler handler = new EbayFindItemAsyncHandler(this);
+            _shoppingPort.findItemsAsync(req, handler);
+            _handlers.add(handler);
         }
     }
 
@@ -85,7 +83,6 @@ public class EbayFindItemAsync
     /* ------------------------------------------------------------ */
     public List<EbayFindItemAsyncHandler> getPayload()
     {
-        _totalTime = System.currentTimeMillis() - _totalTime;
         return _handlers;
     }
 
@@ -106,9 +103,9 @@ public class EbayFindItemAsync
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized long getTotalTime()
+    public synchronized long getStartTime()
     {
-        return _totalTime;
+        return _startTime;
     }
 
 }
