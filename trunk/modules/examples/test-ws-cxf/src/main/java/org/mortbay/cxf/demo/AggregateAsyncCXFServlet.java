@@ -181,7 +181,7 @@ public class AggregateAsyncCXFServlet extends HttpServlet
             out.print( "Total Time: ");
             out.print( now-ebayAggregate.getStartTime() );
             out.println( "ms<br/>");
-            out.print( "Servlet Thread held: ");
+            out.print( "Thread held: ");
             long duration2=now-start;
             out.print( duration+duration2 );
             out.println( "ms ("+duration+" initial + "+duration2+" resume )<br/><br/>");
