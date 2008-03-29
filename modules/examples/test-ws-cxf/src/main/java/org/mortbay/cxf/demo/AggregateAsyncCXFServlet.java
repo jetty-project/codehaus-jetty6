@@ -184,7 +184,7 @@ public class AggregateAsyncCXFServlet extends HttpServlet
             out.print( "Thread held: ");
             long duration2=now-start;
             out.print( duration+duration2 );
-            out.println( "ms ("+duration+" initial + "+duration2+" resume )<br/><br/>");
+            out.println( "ms ("+duration+" initial + "+duration2+" resume )");
 
             
             out.println("</BODY></HTML>" );
