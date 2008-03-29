@@ -21,19 +21,35 @@ import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
 
 
-public class EbayFindItemAsyncHandler implements AsyncHandler<FindItemsResponseType> {
-  private FindItemsResponseType reply;
-
-  public void handleResponse(Response<FindItemsResponseType> response) {
-    try {
-      reply = response.get();
-    } catch (Exception ex) {
-      ex.printStackTrace();
+public class EbayFindItemAsyncHandler implements AsyncHandler<FindItemsResponseType> 
+{
+    private EbayFindItemAsync finder;
+    private FindItemsResponseType reply;
+    
+    public EbayFindItemAsyncHandler(EbayFindItemAsync finder)
+    {
+        this.finder=finder;
     }
-  }
+    
+    public void handleResponse(Response<FindItemsResponseType> response) 
+    {
+        try 
+        {
+            reply = response.get();
+        } 
+        catch (Exception ex) 
+        {
+            ex.printStackTrace();
+        }
+        finally
+        {
+            finder.done();
+        }
+    }
 
-  public FindItemsResponseType getResponse() {
-    return reply;
-  }
+    public FindItemsResponseType getResponse() 
+    {
+        return reply;
+    }
 }
 

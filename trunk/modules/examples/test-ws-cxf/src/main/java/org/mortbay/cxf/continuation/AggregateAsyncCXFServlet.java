@@ -18,17 +18,60 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.BindingProvider;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
+import ebay.apis.eblbasecomponents.FindItemsRequestType;
+import ebay.apis.eblbasecomponents.Shopping;
+import ebay.apis.eblbasecomponents.ShoppingInterface;
 import ebay.apis.eblbasecomponents.SimpleItemType;
 
 public class AggregateAsyncCXFServlet extends HttpServlet
 {
     public static final String CLIENT_ATTR="org.mortbay.cxf.client";
-    public static final String ITEMS_ATTR="items";
-    
+    public static final String ITEMS_ATTR="org.mortbay.cxf.items";
+    public static final String DURATION_ATTR="org.mortbay.cxf.duration";
+    public static final String ITEMS_PARAM="items";
+
+    ShoppingInterface _shoppingPort;
+
+    public void init() throws ServletException
+    {
+        super.init();
+
+        try
+        {
+            _shoppingPort = new Shopping().getShopping();
+            BindingProvider bp = (BindingProvider) _shoppingPort;
+
+            // retrieve the URL stub from the WSDL
+            String ebayURL = (String) bp.getRequestContext().
+                    get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+
+            // add eBay-required parameters to the URL
+            String endpointURL = ebayURL + "?callname=FindItems&siteid=0" +
+                    "&appid=JesseMcC-1aff-4c3c-b0be-e8379d036f56" +
+                    "&version=551&requestencoding=SOAP";
+
+            // replace the endpoint address with the new value
+            bp.getRequestContext().
+                    put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointURL);
+            
+            // make a request to initialize everything
+            FindItemsRequestType ebayReq = new FindItemsRequestType();
+            ebayReq.setQueryKeywords( "shoe" );
+            ebayReq.setMaxEntries(1);
+            _shoppingPort.findItems(ebayReq);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Exception: " + e.getMessage());
+            throw new ServletException(e);
+        }
+    }
     
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
@@ -37,95 +80,121 @@ public class AggregateAsyncCXFServlet extends HttpServlet
          
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
-        Object itemsObj = req.getParameter( ITEMS_ATTR );
-        ArrayList items = new ArrayList();
-
-        if ( itemsObj == null )
+        long start = System.currentTimeMillis();
+        if (req.isInitial())
         {
-            resp.setContentType("text/html");
-            PrintWriter out = resp.getWriter();
+            // first time we have seen this request, so lets start handling it
 
-            out.println("<HTML><BODY>pass in url with ?items=a,b,c,d<br/>for more dramatic results run multiple times with 10 or more items</BODY></HTML>");
-            out.close();
+            // look for key words in query string
+            Object itemsObj = req.getParameter( ITEMS_PARAM );
+            if ( itemsObj == null )
+            {
+                resp.setContentType("text/html");
+                PrintWriter out = resp.getWriter();
 
-        }
-         else
-        {
+                out.println("<HTML><BODY>pass in url with ?items=a,b,c,d<br/>for more dramatic results run multiple times with 10 or more items</BODY></HTML>");
+                out.close();
+                return;
+            }
+                
+
+            ArrayList<String> items = new ArrayList<String>();
             StringTokenizer strtok = new StringTokenizer( (String)itemsObj, ",");
-
             while ( strtok.hasMoreTokens() )
             {
                 items.add( strtok.nextToken() );
             }
-        }
 
-        // Look for an existing client and protect from context restarts
-        Object clientObj=req.getAttribute(CLIENT_ATTR);
 
-        if ( clientObj != null && clientObj instanceof EbayFindItemAsync)
-        {
-            System.out.println("found client in req");
-            EbayFindItemAsync ebayAggregate = (EbayFindItemAsync)clientObj;
-
-            if ( ebayAggregate.isDone() )
+            try
             {
-                List handlers = ebayAggregate.getPayload();
-                
-                StringBuffer sb = new StringBuffer();
-                sb.append( "Total Time: ").append( ebayAggregate.getTotalTime() ).append( "ms<br/><br/>");
+                System.out.println("suspending after making initial request");
+                req.suspend();
 
-                for ( Iterator i = handlers.iterator(); i.hasNext(); )
+                // Make the webservice requests
+                EbayFindItemAsync greets = new EbayFindItemAsync(_shoppingPort,req);
+                synchronized (greets)
                 {
-                    EbayFindItemAsyncHandler handler = (EbayFindItemAsyncHandler) i.next();
-
-                    List lsit = handler.getResponse().getItem();
-
-                    ListIterator lsitItr = lsit.listIterator();
-
-                    while ( lsitItr.hasNext() )
+                    // add as many different searchs here, each will be a seperate async call and ebayAggregate will not be 'done'
+                    // until all Future's are returned.
+                    for (String keyword : items)
                     {
-                        SimpleItemType sit = (SimpleItemType) lsitItr.next();
-                        sb.append( sit.getDescription() + " " );
-                        sb.append( sit.getItemID() + " " );
-                        sb.append( sit.getViewItemURLForNaturalSearch() + " " );
-                        sb.append( sit.getLocation() + " " );
-                        sb.append( "<br/>" );
+                        greets.search( keyword );
                     }
-                    sb.append( "<br/><br/><br/>");
                 }
 
-
-                resp.setContentType( "text/html" );
-                PrintWriter out = resp.getWriter();
-
-                out.println( "<HTML><BODY>" + sb.toString() + "</BODY></HTML>" );
-                out.close();
-
-                req.removeAttribute( CLIENT_ATTR );
+                req.setAttribute( CLIENT_ATTR, greets );
+                req.setAttribute( ITEMS_ATTR, items );
+                req.setAttribute( DURATION_ATTR, new Long(System.currentTimeMillis()-start));
             }
-            else
+            catch(Exception e)
             {
-                System.out.println("suspending for 1000ms since its not done");
-                req.suspend( 1000 );
+                // there was a problem sending the requests, so lets resume now
+                req.resume();
             }
+            
         }
         else
         {
+            // This is a resumed request - 
+            // so either we have all the results or we timed out
+            System.out.println("resumed request "+req.isResumed());
 
-            EbayFindItemAsync greets = new EbayFindItemAsync();
-            // add as many different searchs here, each will be a seperate async call and ebayAggregate will not be 'done'
-            // until all Future's are returned.
-            for ( Iterator i = items.iterator(); i.hasNext(); )
+            // Look for an existing client and protect from context restarts
+            EbayFindItemAsync ebayAggregate =(EbayFindItemAsync)req.getAttribute(CLIENT_ATTR);
+            ArrayList<String> items = (ArrayList<String>)req.getAttribute(ITEMS_ATTR);
+            long duration=(Long)(req.getAttribute(DURATION_ATTR));
+
+            List<EbayFindItemAsyncHandler> handlers = ebayAggregate.getPayload();
+
+            resp.setContentType( "text/html" );
+            PrintWriter out = resp.getWriter();
+            out.println( "<HTML><BODY>");
+            
+            out.print( "Total Time: ");
+            out.print( ebayAggregate.getTotalTime() );
+            out.println( "ms<br/>");
+            out.print( "Servlet Thread held: ");
+            duration+=System.currentTimeMillis()-start;
+            out.print( duration );
+            out.println( "ms<br/><br/>");
+
+            int i=0;
+            for (EbayFindItemAsyncHandler handler : handlers)
             {
-                greets.search( (String) i.next() );
+                
+                if (handler.getResponse()==null)
+                {
+                    out.println("MISSING RESPONSE!");
+                }
+                else
+                {
+                    out.print( "<b>" );
+                    out.print( items.get(i) );
+                    out.println( "</b>:<br/>" );
+                    String coma=null;
+                    for (SimpleItemType sit : handler.getResponse().getItem())
+                    {
+                        if (coma==null)
+                            coma=", ";
+                        else
+                            out.print(coma);
+                        out.print("<a href=\"");
+                        out.print( sit.getViewItemURLForNaturalSearch());
+                        out.print("\">");
+                        out.print( sit.getItemID());
+                        out.print("</a>");
+                    }
+                }
+                i++;
+                out.println( "<br/><br/><br/>");
             }
 
-            
-            req.setAttribute( CLIENT_ATTR, greets );
+            out.println("</BODY></HTML>" );
+            out.close();
 
-            System.out.println("suspending for 1000ms after making initial request");
-            req.suspend( 1000 );
-
+            req.removeAttribute( CLIENT_ATTR );
         }
+
     }
 }
