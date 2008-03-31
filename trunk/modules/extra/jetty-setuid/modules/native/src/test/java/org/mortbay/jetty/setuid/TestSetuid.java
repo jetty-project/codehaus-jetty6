@@ -34,8 +34,8 @@ public class TestSetuid extends TestCase
     
         try
         {        
-            
-            File lib = new File("target/libsetuid.so");
+            String userDir = System.getProperty("user.dir",".");
+            File lib = new File( userDir + "/target/libsetuid.so");
             String libPath = lib.getCanonicalPath();
             System.setProperty("jetty.libsetuid.path", libPath);   
             
