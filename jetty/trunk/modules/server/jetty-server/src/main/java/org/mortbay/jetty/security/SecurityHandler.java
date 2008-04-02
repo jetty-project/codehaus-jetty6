@@ -28,8 +28,10 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.servlet.PathMap;
+import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.Loader;
 import org.mortbay.util.StringUtil;
 
 
@@ -164,8 +166,9 @@ public class SecurityHandler extends HandlerWrapper
                 _authenticator=new BasicAuthenticator();
             else if (Constraint.__DIGEST_AUTH.equalsIgnoreCase(_authMethod))
                 _authenticator=new DigestAuthenticator();
-            else if (Constraint.__CERT_AUTH.equalsIgnoreCase(_authMethod))
-               _authenticator=new ClientCertAuthenticator();
+            else if(Constraint.__CERT_AUTH.equals(_authMethod) || 
+                    Constraint.__CERT_AUTH2.equals(_authMethod))
+                _authenticator=(Authenticator)Loader.loadClass(WebXmlConfiguration.class,"org.mortbay.jetty.security.ClientCertAuthenticator").newInstance();
             else if (Constraint.__FORM_AUTH.equalsIgnoreCase(_authMethod))
                 _authenticator=new FormAuthenticator();
             else
