@@ -15,6 +15,7 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
+import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
@@ -24,7 +25,7 @@ import org.mortbay.log.Log;
  * @author Nik Gonzalez <ngonzalez@exist.com>
  * @author Greg Wilkins <gregw@mortbay.com>
  */
-public class SslHttpChannelEndPoint extends SelectChannelEndPoint
+public class SslHttpChannelEndPoint extends SelectChannelConnector.EndPoint
 {
     private static final ByteBuffer[] __NO_BUFFERS={};
     private static final ByteBuffer __EMPTY=ByteBuffer.allocate(0);

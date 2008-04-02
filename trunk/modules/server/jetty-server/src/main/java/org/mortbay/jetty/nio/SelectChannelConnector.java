@@ -63,7 +63,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
     private transient ServerSocketChannel _acceptChannel;
     private long _lowResourcesConnections;
     private long _lowResourcesMaxIdleTime;
-    private boolean _dispatchToSuspended=true;
 
     private SelectorManager _manager = new SelectorManager()
     {
@@ -279,24 +278,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
         super.setLowResourceMaxIdleTime(lowResourcesMaxIdleTime); 
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the dispatchToSuspended True if IO activity should cause a dispatch to a suspended request.
-     */
-    public boolean isDispatchToSuspended()
-    {
-        return _dispatchToSuspended;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param dispatchToSuspended True if IO activity should cause a dispatch to a suspended request.
-     */
-    public void setDispatchToSuspended(boolean dispatchToSuspended)
-    {
-        _dispatchToSuspended=dispatchToSuspended;
-    }
-
     
     /* ------------------------------------------------------------ */
     /*
@@ -327,7 +308,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SelectChannelEndPoint(channel,selectSet,key);
+        return new EndPoint(channel,selectSet,key);
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -347,5 +328,19 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 endpoint.getSelectSet().scheduleTimeout(task,timeoutMs);
             }
         };
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public static class EndPoint extends SelectChannelEndPoint
+    {
+        public EndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
+        {
+            super(channel,selectSet,key);
+        }
+
+        public boolean isReadyForDispatch()
+        {
+            return super.isReadyForDispatch() && !((HttpConnection)getConnection()).getRequest().isSuspended();
+        }
     }
 }
