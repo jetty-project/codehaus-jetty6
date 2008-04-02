@@ -30,7 +30,6 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.BasicAuthenticator;
-import org.mortbay.jetty.security.ClientCertAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.DigestAuthenticator;
@@ -898,7 +897,7 @@ public class WebXmlConfiguration implements Configuration
     }
 
     /* ------------------------------------------------------------ */
-    protected void initLoginConfig(XmlParser.Node node)
+    protected void initLoginConfig(XmlParser.Node node) throws Exception
     {
         XmlParser.Node method=node.get("auth-method");
         FormAuthenticator _formAuthenticator=null;
@@ -912,10 +911,9 @@ public class WebXmlConfiguration implements Configuration
                 authenticator=new BasicAuthenticator();
             else if(Constraint.__DIGEST_AUTH.equals(m))
                 authenticator=new DigestAuthenticator();
-            else if(Constraint.__CERT_AUTH.equals(m))
-                authenticator=new ClientCertAuthenticator();
-            else if(Constraint.__CERT_AUTH2.equals(m))
-                authenticator=new ClientCertAuthenticator();
+            else if(Constraint.__CERT_AUTH.equals(m) || 
+                    Constraint.__CERT_AUTH2.equals(m))
+                authenticator=(Authenticator)Loader.loadClass(WebXmlConfiguration.class,"org.mortbay.jetty.security.ClientCertAuthenticator").newInstance();
             else
                 Log.warn("UNKNOWN AUTH METHOD: "+m);
             getWebAppContext().getSecurityHandler().setAuthenticator(authenticator);
