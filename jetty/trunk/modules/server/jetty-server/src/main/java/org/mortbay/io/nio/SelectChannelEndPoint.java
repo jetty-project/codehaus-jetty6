@@ -98,7 +98,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
 
             
             // Otherwise if we are still dispatched
-            if (_dispatched)
+            if (!isReadyForDispatch())
             {
                 // we are not interested in further selecting
                 _key.interestOps(0);
@@ -198,6 +198,12 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
         return l;
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isReadyForDispatch()
+    {
+        return !_dispatched;
+    }
+    
     /* ------------------------------------------------------------ */
     /*
      * Allows thread to block waiting for further events.

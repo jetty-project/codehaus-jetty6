@@ -194,7 +194,7 @@ public class HttpFields
     public final static Buffer __01Jan1970_BUFFER = new ByteArrayBuffer(__01Jan1970);
 
     /* -------------------------------------------------------------- */
-    protected ArrayList _fields = new ArrayList(20);
+    protected ArrayList<Field> _fields = new ArrayList<Field>(20);
     protected int _revision;
     protected HashMap _bufferMap = new HashMap(32);
     protected SimpleDateFormat _dateReceive[] = new SimpleDateFormat[__dateReceive.length];
@@ -265,9 +265,10 @@ public class HttpFields
             public boolean hasNext()
             {
                 if (field != null) return true;
-                while (i < _fields.size())
+                List<Field> fields=_fields;
+                while (fields!=null &&i < fields.size())
                 {
-                    Field f = (Field) _fields.get(i++);
+                    Field f = fields.get(i++);
                     if (f != null && f._revision == revision)
                     {
                         field = f;
