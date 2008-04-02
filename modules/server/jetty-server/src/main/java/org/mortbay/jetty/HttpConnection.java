@@ -379,7 +379,7 @@ public class HttpConnection implements Connection
                 {
                     if (_request.isSuspended())
                     {
-                        // TODO - unregister key for further updates!
+                        Log.warn("suspended dispatch");
                     }
                     Log.debug("resume request",_request);
                     handleRequest();

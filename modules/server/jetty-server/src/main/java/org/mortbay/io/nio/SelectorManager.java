@@ -413,25 +413,18 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     {
                         if (_jvmBug++>5)  // TODO tune or configure this
                         {
-                            // Probably JVM BUG!
-                            
+                            // Probably JVM BUG!  http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
                             Iterator iter = _selector.keys().iterator();
                             while(iter.hasNext())
                             {
                                 key = (SelectionKey) iter.next();
                                 if (key.isValid()&&key.interestOps()==0)
                                 {
+                                    System.err.println("CANCEL "+key);
                                     key.cancel();
                                 }
                             }
-                            try
-                            {
-                                Thread.sleep(20);  // tune or configure this
-                            }
-                            catch (InterruptedException e)
-                            {
-                                Log.ignore(e);
-                            }
+                            _selector.selectNow();
                         } 
                     }
                     else
