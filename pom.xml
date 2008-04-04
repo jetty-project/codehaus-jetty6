@@ -247,10 +247,10 @@
     
     <module>modules/contrib/cometd</module>
     <module>modules/contrib/jetty-ant</module>
+    <module>modules/contrib/jetty-rewrite-handler</module>
 
-    <!--module>modules/contrib/jetty-batch</module-->
-    <!--module>modules/contrib/grizzly</module-->
-    <!--module>modules/contrib/wadi</module-->
+    <module>modules/contrib/grizzly</module>
+    <module>modules/contrib/wadi</module>
     <!--module>modules/contrib/terracotta</module-->
 
     <!--module>modules/website</module-->
