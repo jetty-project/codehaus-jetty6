@@ -153,18 +153,6 @@ public class SelectChannelConnector extends AbstractNIOConnector
     {
         return _acceptChannel;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Get delay select key update
-     * If true, the select set is not updated when a endpoint is dispatched for
-     * reading. The assumption is that the task will be short and thus will probably
-     * be complete before the select is tried again.
-     * @return Returns the assumeShortDispatch.
-     */
-    public boolean getDelaySelectKeyUpdate()
-    {
-        return _manager.isDelaySelectKeyUpdate();
-    }
 
     /* ------------------------------------------------------------------------------- */
     public int getLocalPort()
@@ -199,25 +187,12 @@ public class SelectChannelConnector extends AbstractNIOConnector
         }
     }
 
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param delay If true, updating a {@link SelectionKey} is delayed until a redundant event is 
-     * schedules.  This is an optimization that assumes event handling can be completed before the next select
-     * completes.
-     */
-    public void setDelaySelectKeyUpdate(boolean delay)
-    {
-        _manager.setDelaySelectKeyUpdate(delay);
-    }
-
     /* ------------------------------------------------------------ */
     public void setMaxIdleTime(int maxIdleTime)
     {
         _manager.setMaxIdleTime(maxIdleTime);
         super.setMaxIdleTime(maxIdleTime);
     }
-
 
     /* ------------------------------------------------------------ */
     /**

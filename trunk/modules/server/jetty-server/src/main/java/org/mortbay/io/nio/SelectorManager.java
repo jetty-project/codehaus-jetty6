@@ -27,7 +27,6 @@ import org.mortbay.thread.Timeout;
  */
 public abstract class SelectorManager extends AbstractLifeCycle
 {
-    private boolean _delaySelectKeyUpdate=true;
     private long _maxIdleTime;
     private long _lowResourcesConnections;
     private long _lowResourcesMaxIdleTime;
@@ -75,15 +74,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
         return _selectSets;
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * @return
-     */
-    public boolean isDelaySelectKeyUpdate()
-    {
-        return _delaySelectKeyUpdate;
-    }
-
     /* ------------------------------------------------------------ */
     /** Register a channel
      * @param channel
@@ -164,16 +154,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
         SelectSet[] sets= _selectSet;
         if (sets!=null && sets.length>acceptorID && sets[acceptorID]!=null)
             sets[acceptorID].doSelect();
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param delaySelectKeyUpdate
-     */
-    public void setDelaySelectKeyUpdate(boolean delaySelectKeyUpdate)
-    {
-        _delaySelectKeyUpdate=delaySelectKeyUpdate;
     }
 
     /* ------------------------------------------------------------ */
@@ -312,8 +292,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
          */
         public void doSelect() throws IOException
         {
-            SelectionKey key=null;
-            
             try
             {
                 List changes;
@@ -348,7 +326,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
                             if (channel.isConnected())
                             {
-                                key = channel.register(_selector,SelectionKey.OP_READ,att);
+                                SelectionKey key = channel.register(_selector,SelectionKey.OP_READ,att);
                                 SelectChannelEndPoint endpoint = newEndPoint(channel,this,key);
                                 key.attach(endpoint);
                                 endpoint.schedule();
@@ -400,7 +378,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     wait = retry_next;
     
                 // Do the select.
-                if (wait > 10) // TODO tune or configure this
+                if (wait > 0) 
                 {
                     long before=now;
                     int selected=_selector.select(wait);
@@ -408,21 +386,16 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     _idleTimeout.setNow(now);
                     _timeout.setNow(now);
 
-                    // Look for JVM bug 
-                    if (selected==0 && wait>0 && (now-before)<wait/2 && _selector.selectedKeys().size()==0)
+                    // Look for JVM bug  http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
+                    if (selected==0  && (now-before)<wait/2)
                     {
                         if (_jvmBug++>5)  // TODO tune or configure this
                         {
-                            // Probably JVM BUG!  http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
-                            Iterator iter = _selector.keys().iterator();
-                            while(iter.hasNext())
-                            {
-                                key = (SelectionKey) iter.next();
-                                if (key.isValid()&&key.interestOps()==0)
-                                {
-                                    System.err.println("CANCEL "+key);
+                            // Probably JVM BUG!    
+                            for (SelectionKey key: _selector.keys())
+                            {    
+                                if (key.interestOps()==0 && key.isValid())
                                     key.cancel();
-                                }
                             }
                             _selector.selectNow();
                         } 
@@ -441,11 +414,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     return;
 
                 // Look for things to do
-                Iterator iter = _selector.selectedKeys().iterator();
-                while (iter.hasNext())
-                {
-                    key = (SelectionKey) iter.next();
-                                        
+                for (SelectionKey key: _selector.selectedKeys())
+                {   
                     try
                     {
                         if (!key.isValid())
@@ -460,8 +430,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                         Object att = key.attachment();
                         if (att instanceof SelectChannelEndPoint)
                         {
-                            SelectChannelEndPoint endpoint = (SelectChannelEndPoint)att;
-                            endpoint.schedule();
+                            ((SelectChannelEndPoint)att).schedule();
                         }
                         else if (key.isAcceptable())
                         {
