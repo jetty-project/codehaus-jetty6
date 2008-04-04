@@ -70,7 +70,7 @@ public class JBossWebXmlConfiguration extends WebXmlConfiguration
         super.initSessionConfig(node);
     }
 
-    protected void initLoginConfig(XmlParser.Node node)
+    protected void initLoginConfig(XmlParser.Node node) throws Exception
     {
         // check if a realm has been explicitly set
         String realmName=null;
