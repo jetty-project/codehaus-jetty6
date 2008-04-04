@@ -66,18 +66,6 @@
                   <version>${project.version}</version>
                   <destFileName>${project.artifactId}-${project.version}.jar</destFileName>
                 </artifactItem>
-                <artifactItem>
-                  <groupId>mx4j</groupId>
-                  <artifactId>mx4j</artifactId>
-                  <version>${mx4j-version}</version>
-                  <outputDirectory>${basedir}/../../../lib/management/mx4j</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>mx4j</groupId>
-                  <artifactId>mx4j-tools</artifactId>
-                  <version>${mx4j-version}</version>
-                  <outputDirectory>${basedir}/../../../lib/management/mx4j</outputDirectory>
-                </artifactItem>
               </artifactItems>
               <outputDirectory>${basedir}/../../../lib/management</outputDirectory>
             </configuration>
@@ -129,7 +117,4 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-  <properties>
-     <mx4j-version>3.0.1</mx4j-version>
-  </properties>
 </project>
