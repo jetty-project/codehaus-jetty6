@@ -141,6 +141,12 @@ public class Request extends Suspendable implements HttpServletRequest
     private Map _savedNewSessions;
     private UserRealm _userRealm;
     private CookieCutter _cookies;
+
+    /* ------------------------------------------------------------ */
+    public Request()
+    {
+        super(null);
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -150,7 +156,7 @@ public class Request extends Suspendable implements HttpServletRequest
     {
         super(connection);
         _endp=connection.getEndPoint();
-        _dns=_connection.getResolveNames();
+        _dns=connection.getResolveNames();
     }
 
     /* ------------------------------------------------------------ */
