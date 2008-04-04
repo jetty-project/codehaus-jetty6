@@ -39,7 +39,6 @@ import org.mortbay.util.TypeUtil;
 public class MBeanContainer extends AbstractLifeCycle implements Container.Listener
 {
     private final MBeanServer _server;
-    private volatile int _managementPort;
     private final WeakHashMap _beans = new WeakHashMap();
     private final HashMap _unique = new HashMap();
     private String _domain = null;
@@ -84,41 +83,8 @@ public class MBeanContainer extends AbstractLifeCycle implements Container.Liste
         return _domain;
     }
     
-    public void setManagementPort(int port)
-    {
-        this._managementPort = port;
-    }
-
     public void doStart()
     {
-        if (_managementPort > 0)
-        {
-            try
-            {
-                Log.warn("HttpAdaptor for mx4j is not secure");
-
-                PrivateMLet mlet = new PrivateMLet(new URL[0], Thread.currentThread().getContextClassLoader(), false);
-                ObjectName mletName = ObjectName.getInstance("mx4j", "name", "HttpAdaptorLoader");
-                _server.registerMBean(mlet, mletName);
-
-                ObjectName adaptorName = ObjectName.getInstance("mx4j", "name", "HttpAdaptor");
-                _server.createMBean("mx4j.tools.adaptor.http.HttpAdaptor", adaptorName, mletName);
-                _server.setAttribute(adaptorName, new Attribute("Port", new Integer(_managementPort)));
-                _server.setAttribute(adaptorName, new Attribute("Host", "localhost"));
-
-                ObjectName processorName = ObjectName.getInstance("mx4j", "name", "XSLTProcessor");
-                _server.createMBean("mx4j.tools.adaptor.http.XSLTProcessor", processorName, mletName);
-                _server.setAttribute(adaptorName, new Attribute("ProcessorName", processorName));
-
-                _server.invoke(adaptorName, "start", null, null);
-
-                Runtime.getRuntime().addShutdownHook(new ShutdownHook(mletName, adaptorName, processorName));
-            }
-            catch (Exception e)
-            {
-                Log.warn(e);
-            }
-        }
     }
 
     public synchronized void add(Relationship relationship)
