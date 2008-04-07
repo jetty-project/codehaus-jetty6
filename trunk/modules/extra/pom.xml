@@ -26,5 +26,6 @@
     <module>jetty-win32service</module>
     <module>jetty-maven-jspc-plugin</module>
     <module>jetty-maven-plugin</module>
+    <module>jetty-runner</module>
   </modules>
 </project>
