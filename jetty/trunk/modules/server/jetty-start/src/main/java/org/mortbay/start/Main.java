@@ -98,9 +98,7 @@ public class Main
         {
             if (args.length>0&&args[0].equalsIgnoreCase("--help"))
             {
-                System.err
-                        .println("Usage: java [-DDEBUG] [-DSTART=start.config] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop|--version] [config ...]");
-                System.exit(1);
+                usage();
             }
             else if (args.length>0&&args[0].equalsIgnoreCase("--stop"))
             {
@@ -122,7 +120,14 @@ public class Main
         catch (Exception e)
         {
             e.printStackTrace();
+            usage();
         }
+    }
+    
+    private static void usage()
+    {
+        System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop|--version] [config ...]");
+        System.exit(1);
     }
 
     static File getDirectory(String name)
