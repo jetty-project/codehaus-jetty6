@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,6 +43,8 @@ public class HttpDestination
     private boolean _ssl;
     private int _maxConnections;
     private int _pendingConnections=0;
+    private ArrayBlockingQueue<Object> _newQueue = new ArrayBlockingQueue<Object>(10,true);
+    private int _newConnection=0;
     
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
@@ -87,28 +90,30 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public HttpConnection getConnection() throws IOException
     {
-        synchronized(this)
-        {
-            HttpConnection connection = getIdleConnection();
+        HttpConnection connection = getIdleConnection();
 
-            int tries=3;
-            while (connection==null && tries-->0)
+        while (connection==null)
+        {
+            synchronized(this)
             {
-                try
-                {
-                    startNewConnection();
-                    if (_pendingConnections>0)
-                        this.wait();
-                }
-                catch (InterruptedException e)
-                {
-                    Log.ignore(e);
-                }
-                connection = getIdleConnection();
+                _newConnection++;
+                startNewConnection();
             }
-            
-            return connection;
+
+            try
+            {
+                Object o =_newQueue.take();
+                if (o instanceof HttpConnection)
+                    connection=(HttpConnection)o;
+                else
+                    throw (IOException)o;
+            }
+            catch (InterruptedException e)
+            {
+                Log.ignore(e);
+            }
         }
+        return connection;
     }
     
     /* ------------------------------------------------------------------------------- */
@@ -150,20 +155,39 @@ public class HttpDestination
         }
         catch(Exception e)
         {
-            onException(e);
+            onConnectionFailed(e);
         }
     }
 
     /* ------------------------------------------------------------------------------- */
     public void onConnectionFailed(Throwable throwable)
     {
+        Throwable connect_failure=null;
+        
         synchronized (this)
         {
             _pendingConnections--;
-            if (_queue.size()>0)
+            if (_newConnection>0)
+            {
+                connect_failure=throwable;
+                _newConnection--;
+            }
+            else if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
                 ex.onConnectionFailed(throwable);
+            }
+        }
+
+        if(connect_failure!=null)
+        {
+            try
+            {
+                _newQueue.put(connect_failure);
+            }
+            catch (InterruptedException e)
+            {
+                Log.ignore(e);
             }
         }
     }
@@ -174,7 +198,6 @@ public class HttpDestination
         synchronized (this)
         {
             _pendingConnections--;
-            this.notifyAll();
             if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
@@ -187,12 +210,19 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void onNewConnection(HttpConnection connection) throws IOException
     {
+        HttpConnection q_connection=null;
+        
         synchronized (this)
         {
             _pendingConnections--;
-            this.notifyAll();
             _connections.add(connection);
-            if (_queue.size()==0)
+            
+            if (_newConnection>0)
+            {
+                q_connection=connection;
+                _newConnection--;
+            }
+            else if (_queue.size()==0)
             {
                 _idle.add(connection);
             }
@@ -200,6 +230,18 @@ public class HttpDestination
             {
                 HttpExchange ex=_queue.removeFirst();
                 connection.send(ex);
+            }
+        }
+
+        if (q_connection!=null)
+        {
+            try
+            {
+                _newQueue.put(q_connection);
+            }
+            catch (InterruptedException e)
+            {
+                Log.ignore(e);
             }
         }
     }
