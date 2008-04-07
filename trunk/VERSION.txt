@@ -38,6 +38,22 @@ jetty-7.0-SNAPSHOT
  + JETTY-540 Servlet-3.0 & java5 support (work in progress)
  + JETTY-543 Atomic batch get and put of files.
 
+jetty-6.1.9 26 March 2008
+ + Make javax.servlet.jsp optional osgi import for jetty module
+ + Ensure Jotm tx mgr can be found in jetty-env.xml
+ + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
+ + JETTY-471 LDAP JAAS Realm
+ + JETTY-475 AJP connector in RPMs
+ + JETTY-482 update to JETTY-399
+ + JETTY-519 HttpClient does not recycle closed connection.
+ + JETTY-522 Add build profile for macos for setuid
+ + JETTY-525 Fixed decoding for long strings
+ + JETTY-526 Fixed MMBean fields on JMX MBeans
+ + JETTY-532 MBean properties for QueuedThreadPool
+ + JETTY-535 Fixed Bayeux server side client memory leak
+ + JETTY-538 test harness fix for windows
+ + JETTY-541 Cometd per client timeouts
+
 jetty-6.1.8 28 February 2008
  + Added QueuedThreadPool
  + Optimized QuotedStringTokenizer.quote()
@@ -186,7 +202,7 @@ jetty-6.1.5 - 19 Jul 2007
  + Fixed reset of reason
  + JETTY-392 - updated LikeJettyXml example
 
-jetty-6.1.5rc0 - 15 Jul 200
+jetty-6.1.5rc0 - 15 Jul 2007
  + update terracotta session clustering to terracotta 2.4
  + SetUID option to only open connectors before setUID.
  + Protect SslSelectChannelConnector from exceptions during close
