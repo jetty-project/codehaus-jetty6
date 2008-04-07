@@ -27,7 +27,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.security.Policy;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 /*-------------------------------------------*/
@@ -79,6 +84,20 @@ import java.util.StringTokenizer;
  * local port to stop the server. The default port can be set with the STOP.PORT system property (a
  * port of < 0 disables the stop mechanism). If the STOP.KEY system property is set, then a random
  * key is generated and written to stdout. This key must be passed to the stop.jar.
+ * <p>
+ * The configuration file may be divided into sections with option names like:
+ * <pre>
+ * [ssl,default]
+ * </pre>
+ * Clauses after a section header will only be included if they match one of the tags in the 
+ * options property.  By default options are set to "default,*" or the OPTIONS property may
+ * be used to pass in a list of tags, eg. :
+ * <pre>
+ *  java -DOPTIONS=jetty,jsp,ssl -jar start.jar
+ * </pre>
+ * The tag '*' is always appended to the options, so any section with the * tag is always 
+ * applied.
+ *
  * 
  * @author Jan Hlavaty (hlavac@code.cz)
  * @author Greg Wilkins
@@ -126,7 +145,7 @@ public class Main
     
     private static void usage()
     {
-        System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop|--version] [config ...]");
+        System.err.println("Usage: java [-DDEBUG] [-DSTART=start.config] [-DOPTIONS=opts] [-Dmain.class=org.MyMain] -jar start.jar [--help|--stop|--version] [config ...]");        
         System.exit(1);
     }
 
@@ -225,7 +244,7 @@ public class Main
         Version java_version=new Version(System.getProperty("java.version"));
         Version ver=new Version();
         // JAR's already processed
-        java.util.Hashtable done=new Hashtable();
+        Hashtable done=new Hashtable();
         // Initial classpath
         String classpath=System.getProperty("CLASSPATH");
         if (classpath!=null)
@@ -234,6 +253,14 @@ public class Main
             while (tok.hasMoreTokens())
                 _classpath.addComponent(tok.nextToken());
         }
+
+        List section=null;
+        List options=null;
+        String o=System.getProperty("OPTIONS");
+        if (o==null)
+            o="default";
+        options=Arrays.asList((o.toString()+",*").split("[ ,]")); 
+        
         // Handle line by line
         String line=null;
         while (true)
@@ -241,8 +268,17 @@ public class Main
             line=cfg.readLine();
             if (line==null)
                 break;
-            if (line.length()==0||line.startsWith("#"))
+            String trim=line.trim();
+            if (trim.length()==0||trim.startsWith("#"))
                 continue;
+            
+            // handle options
+            if (trim.startsWith("[") && trim.endsWith("]"))
+                section = Arrays.asList(trim.substring(1,trim.length()-1).split("[ ,]"));  
+            
+            if (section!=null && Collections.disjoint(section,options))
+                continue;
+            
             try
             {
                 StringTokenizer st=new StringTokenizer(line);

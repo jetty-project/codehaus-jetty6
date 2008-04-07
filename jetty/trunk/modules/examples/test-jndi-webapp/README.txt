@@ -22,7 +22,7 @@ http://docs.codehaus.org/display/JETTY/Jetty+Documentation
 
 You run the demo like so:
    
-   java -jar start.jar 
+   java -DOPTIONS=plus -jar start.jar 
 
 
 Adding Support for a Different Transaction Manager

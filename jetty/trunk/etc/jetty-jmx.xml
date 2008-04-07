@@ -6,8 +6,7 @@
 <!-- Configure the JVM JMX Server                                    -->
 <!-- this configuration file should be used in combination with      -->
 <!-- other configuration files.  e.g.                                -->
-<!--    java -jar start.jar etc/jetty-jmx.xml etc/jetty.xml          -->
-<!-- See jetty-jmx-mx4j.xml for a non JVM server solution            -->
+<!--    java -DOPTIONS=jmx -jar start.jar etc/jetty-jmx.xml etc/jetty.xml  -->
 <!-- =============================================================== -->
 <Configure id="Server" class="org.mortbay.jetty.Server">
 
