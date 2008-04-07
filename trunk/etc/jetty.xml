@@ -38,12 +38,7 @@
     <!-- =========================================================== -->
     <!-- Set connectors                                              -->
     <!-- =========================================================== -->
-    <!-- One of each type!                                           -->
-    <!-- =========================================================== -->
 
-    <!-- Use this connector for many frequently idle connections
-         and for threadless continuations.
-    -->    
     <Call name="addConnector">
       <Arg>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
@@ -59,34 +54,18 @@
       </Arg>
     </Call>
 
-    <!-- Use this connector if NIO is not available. 
-    <Call name="addConnector">
-      <Arg>
-          <New class="org.mortbay.jetty.bio.SocketConnector">
-            <Set name="port">8081</Set>
-            <Set name="maxIdleTime">50000</Set>
-            <Set name="lowResourceMaxIdleTime">1500</Set>
-          </New>
-      </Arg>
-    </Call>
-    -->
-
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <!-- To add a HTTPS SSL listener                                     -->
-    <!-- see jetty-ssl.xml to add an ssl connector. use                  -->
-    <!-- java -jar start.jar etc/jetty.xml etc/jetty-ssl.xml             -->
+    <!-- To add a HTTPS SSL connector                                    -->
+    <!-- mixin jetty-ssl.xml:                                            -->
+    <!--   java -jar start.jar etc/jetty.xml etc/jetty-ssl.xml           -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     
-    <!-- =========================================================== -->
-    <!-- Set up global session ID manager                            -->
-    <!-- =========================================================== -->
-    <!--
-    <Set name="sessionIdManager">
-      <New class="org.mortbay.jetty.servlet.HashSessionIdManager">
-        <Set name="workerName">node1</Set>
-      </New>
-    </Set>
-    -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- To add a HTTP blocking connector                                -->
+    <!-- mixin jetty-bio.xml:                                            -->
+    <!--   java -jar start.jar etc/jetty.xml etc/jetty-bio.xml           -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    
 
     <!-- =========================================================== -->
     <!-- Set handler Collection Structure                            --> 
