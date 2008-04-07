@@ -37,6 +37,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-538 test harness fix for windows
  + JETTY-540 Servlet-3.0 & java5 support (work in progress)
  + JETTY-543 Atomic batch get and put of files.
+ + JETTY-546 Webapp runner. All in one jar to run a webapps
 
 jetty-6.1.9 26 March 2008
  + Make javax.servlet.jsp optional osgi import for jetty module

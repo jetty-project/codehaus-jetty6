@@ -30,6 +30,7 @@ import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
+import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
 import org.mortbay.thread.QueuedThreadPool;
@@ -80,7 +81,7 @@ public class Server extends HandlerWrapper implements Attributes
     {
         setServer(this);
 
-        Connector connector=new SocketConnector();
+        Connector connector=new SelectChannelConnector();
         connector.setPort(port);
         setConnectors(new Connector[]{connector});
     }
