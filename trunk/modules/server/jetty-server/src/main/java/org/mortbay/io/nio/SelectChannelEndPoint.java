@@ -27,6 +27,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
     protected SelectorManager _manager;
     protected SelectorManager.SelectSet _selectSet;
     protected boolean _dispatched = false;
+    protected boolean _redispatched = false;
     protected boolean _writable = true; 
     protected SelectionKey _key;
     protected int _interestOps;
@@ -51,6 +52,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
         _selectSet = selectSet;
         _connection = _manager.newConnection(channel,this);
         _dispatched = false;
+        _redispatched = false;
         _open=true;
         _manager.endPointOpened(this);
         
@@ -122,7 +124,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
         {
             if (_dispatched)
             {
-                Log.warn("ALREADY DISPATCHED "+this); // TODO is this ignorable?
+                _redispatched=true;
                 return true;
             }
 
@@ -142,6 +144,11 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
     {
         synchronized (this)
         {
+            if (_redispatched)
+            {
+                _redispatched=false;
+                return false;
+            }
             _dispatched = false;
             updateKey();
 
