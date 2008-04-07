@@ -31,7 +31,7 @@
             <configuration>
               <tasks>
                 <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}"
-		todir="../../../lib/ext" />
+		todir="../../../lib/ssl" />
               </tasks>
             </configuration>
           </execution>
@@ -43,7 +43,7 @@
             </goals>
             <configuration>
               <tasks>
-                <delete failonerror="false" file="../../../lib/ext/${project.artifactId}-${project.version}.${project.packaging}"/>
+                <delete failonerror="false" file="../../../lib/ssl/${project.artifactId}-${project.version}.${project.packaging}"/>
               </tasks>
             </configuration>
           </execution>		  

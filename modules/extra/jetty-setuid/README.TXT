@@ -41,3 +41,9 @@ In the top level jetty directory do:
   libsetuid.so file:
        sudo java -Djetty.libsetuid.path=/directory/path/to/your/jetty/lib/libsetuid.so -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
 
+Options
+-------
+If start.jar options are not defaulted, then the ext option should be included to put the setuid classes on the classpath:
+
+  java -DOPTIONS=jetty,ssl,ext -jar start.jar etc/jetty-setuid.xml etc/jetty.xml
+

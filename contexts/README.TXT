@@ -10,3 +10,6 @@ Frequenty the context configuration files here will reference
 war files or directories from $JETTY_HOME/webapps.  Care must be
 taken to avoid a WebAppDeployer deploying duplicates of such
 webapplications.
+
+The directory ../contexts-available contains more example contexts
+that may be deployed by being copied here.
