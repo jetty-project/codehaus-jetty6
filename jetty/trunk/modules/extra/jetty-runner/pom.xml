@@ -51,7 +51,7 @@
                   <fileset dir="${project.build.directory}/unpacked-dependencies"/>
                   <manifest>
                     <attribute name="mode" value="development"/>
-                    <attribute name="Main-Class" value="org.mortbay.jetty.runner.Main"/>
+                    <attribute name="Main-Class" value="org.mortbay.jetty.runner.Runner"/>
                     <attribute name="Built-By" value="${user.name}"/>
                     <attribute name="implementation-version" value="${project.version}"/>
                     <attribute name="package" value="org.mortbay.jetty.runner"/>
