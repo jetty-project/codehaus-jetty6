@@ -279,6 +279,7 @@
     <module>contrib/jetty-ant</module>
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
+    <module>contrib/jetty-rewrite-handler</module>
   </modules>
 
   <reporting>
