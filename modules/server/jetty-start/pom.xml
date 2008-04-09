@@ -6,8 +6,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>start</artifactId>
-  <name>Jetty start jar</name>
+  <artifactId>jetty-start</artifactId>
+  <name>Jetty :: Start</name>
+  <description>The jetty startup artifact.</description>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
@@ -41,7 +42,7 @@
             </goals>
             <configuration>
               <tasks>
-                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../../${project.artifactId}.${project.packaging}" />
+                <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../../${start-jar-file-name}" />
               </tasks>
             </configuration>
           </execution>
@@ -59,4 +60,7 @@
       </plugin>
     </plugins>
   </build>
+  <properties>
+    <start-jar-file-name>start.jar</start-jar-file-name>
+  </properties>
 </project>

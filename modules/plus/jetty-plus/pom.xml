@@ -6,9 +6,8 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-plus</artifactId>
-  <name>Jetty Plus</name>
+  <name>Jetty :: Plus</name>
   <description>Jetty JavaEE style services</description>
   <url>http://jetty.mortbay.org</url>
   <build>
@@ -65,7 +64,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>${maven-bundle-plugin-version}</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -85,7 +83,6 @@
       <plugin>
        <groupId>org.apache.maven.plugins</groupId>
        <artifactId>maven-jar-plugin</artifactId>
-       <version>${maven-jar-plugin-version}</version>
        <configuration>
          <archive>
            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
@@ -124,7 +121,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
+      <artifactId>jetty-server</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
