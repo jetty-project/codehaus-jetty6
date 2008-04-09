@@ -34,6 +34,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -60,16 +61,18 @@ public class PutFilter implements Filter
     public final static String __OPTIONS="OPTIONS";
 
     Set<String> _operations = new HashSet<String>();
-    ConcurrentMap<String,String> _hidden = new ConcurrentHashMap<String, String>();
+    protected ConcurrentMap<String,String> _hidden = new ConcurrentHashMap<String, String>();
 
-    private ServletContext _context;
-    private String _baseURI;
-    private boolean _delAllowed;
+    protected ServletContext _context;
+    protected String _baseURI;
+    protected boolean _delAllowed;
     
     /* ------------------------------------------------------------ */
     public void init(FilterConfig config) throws ServletException
     {
         _context=config.getServletContext();
+        if (_context.getRealPath("/")==null)
+           throw new UnavailableException("Unable to find real path for /, could be running as war");
         
         String b = config.getInitParameter("baseURI");
         if (b != null)
@@ -103,6 +106,7 @@ public class PutFilter implements Filter
     /* ------------------------------------------------------------ */
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException
     {
+       
         HttpServletRequest request=(HttpServletRequest)req;
         HttpServletResponse response=(HttpServletResponse)res;
 
@@ -110,8 +114,9 @@ public class PutFilter implements Filter
         String pathInfo = request.getPathInfo();
         String pathInContext = URIUtil.addPaths(servletPath, pathInfo);    
 
-        String resource = URIUtil.addPaths(_baseURI,pathInContext);
-
+        String resource = URIUtil.addPaths(_baseURI,pathInContext); 
+        System.err.println("Doing PUT filter "+resource);
+   
         String method = request.getMethod();
         boolean op = _operations.contains(method);
         
@@ -194,6 +199,8 @@ public class PutFilter implements Filter
             try
             {
                 _hidden.put(pathInContext,pathInContext);
+                File parent = file.getParentFile();
+                parent.mkdirs();
                 int toRead = request.getContentLength();
                 InputStream in = request.getInputStream();
                 OutputStream out = new FileOutputStream(file,false);
