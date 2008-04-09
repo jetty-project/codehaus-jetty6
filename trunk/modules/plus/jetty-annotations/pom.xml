@@ -87,10 +87,8 @@
           </archive>
         </configuration>
       </plugin>
-      <!-- TODO replace with maven-dependency-plugin -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>dependency-maven-plugin</artifactId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
             <id>copy-deps</id>

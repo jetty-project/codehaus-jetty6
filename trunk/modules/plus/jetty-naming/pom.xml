@@ -89,8 +89,8 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>dependency-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
             <id>copy-deps</id>
@@ -146,8 +146,7 @@
 	  <build>
 	    <plugins>
 		  <plugin>
-		    <groupId>org.codehaus.mojo</groupId>
-			<artifactId>dependency-maven-plugin</artifactId>
+			<artifactId>maven-dependency-plugin</artifactId>
 			<executions>
 			  <execution>
 			    <id>copy-deps-below1.6</id>
