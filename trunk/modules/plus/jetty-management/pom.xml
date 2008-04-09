@@ -48,7 +48,6 @@
           </execution>
         </executions>
       </plugin>
-      <!-- TODO port to maven-dependency-plugin -->
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
