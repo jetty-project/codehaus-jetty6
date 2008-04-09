@@ -23,7 +23,7 @@
     <module>jetty-threadpool</module>
     <module>jetty-xbean</module>
     <module>jetty-setuid</module>
-    <module>jetty-win32service</module>
+    <module>jetty-win32-service-java</module>
     <module>jetty-maven-jspc-plugin</module>
     <module>jetty-maven-plugin</module>
     <module>jetty-runner</module>
