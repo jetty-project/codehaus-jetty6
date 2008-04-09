@@ -1,9 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">\
+  <parent>
+    <groupId>org.mortbay.jetty.example</groupId>
+    <artifactId>jetty-examples-parent</artifactId>
+    <version>7.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-proxy</artifactId>
   <version>7.0-SNAPSHOT</version>
-  <name>Proxy example</name>
+  <name>Jetty Example :: Proxy</name>
   <url>http://jetty.mortbay.org</url>
   <repositories>
    <repository>
@@ -29,7 +34,7 @@
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
+      <artifactId>jetty-server</artifactId>
       <version>7.0-SNAPSHOT</version>
     </dependency>
     <dependency>

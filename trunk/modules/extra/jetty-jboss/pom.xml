@@ -6,10 +6,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty</groupId>
   <artifactId>jboss-jetty</artifactId>
   <packaging>sar</packaging>
-  <name>Jetty JBoss</name>
+  <name>Jetty :: JBoss</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
     <license>
@@ -40,7 +39,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jboss-sar-maven-plugin</artifactId>
-        <version>2.0-SNAPSHOT</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>
@@ -152,6 +150,7 @@
     </dependency>
   </dependencies>
   <profiles>
+<!-- not pushing 2.0 anymore on trunk 
     <profile>
       <id>jdk1.4</id>
       <build>
@@ -198,6 +197,7 @@
         </dependency>
       </dependencies>
     </profile>
+-->
     <profile>
       <id>jdk1.5</id>
       <!-- activated on JDK 5 and above -->

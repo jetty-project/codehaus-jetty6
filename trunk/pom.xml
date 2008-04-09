@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
-  <artifactId>project</artifactId>
+  <artifactId>jetty-project</artifactId>
   <packaging>pom</packaging>
-  <name>Jetty Server Project</name>
+  <name>Jetty :: Project Parent</name>
   <version>7.0-SNAPSHOT</version>
   <url>http://jetty.mortbay.org</url>
   <issueManagement>
@@ -107,7 +107,7 @@
   <repositories>
    <repository>
     <id>codehaus.org</id>
-    <name>Jetty snapshots</name>
+    <name>Jetty Snapshot Repository</name>
     <layout>default</layout>
     <url>http://snapshots.repository.codehaus.org</url>
     <snapshots><enabled>true</enabled></snapshots>
@@ -166,8 +166,10 @@
         <configuration>
           <source>1.5</source>
           <target>1.5</target>
+          <verbose>false</verbose>
         </configuration>
       </plugin>
+
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
@@ -178,7 +180,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.1</version>
         <configuration>
           <archive>
             <manifestEntries>
@@ -234,6 +235,51 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.0.1</version>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.2</version>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.1</version>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0.2</version>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.4.2</version>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.0</version>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.0.1</version>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.4.0</version>
+       </plugin>
+       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>dependency-maven-plugin</artifactId>
+        <version>1.0</version>
+       </plugin>
+       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>jboss-sar-maven-plugin</artifactId>
+        <version>2.0-SNAPSHOT</version>
        </plugin>
       </plugins>
     </pluginManagement>
@@ -348,8 +394,6 @@
     <junit-version>3.8.2</junit-version>
     <mail-version>1.4</mail-version>
     <slf4j-version>1.3.1</slf4j-version>
-    <maven-bundle-plugin-version>1.4.0</maven-bundle-plugin-version>
-    <maven-jar-plugin-version>2.2</maven-jar-plugin-version>
     <maven-wagon-version>1.0-beta-2</maven-wagon-version>
   </properties>
 </project>

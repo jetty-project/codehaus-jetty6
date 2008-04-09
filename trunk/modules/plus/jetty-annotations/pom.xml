@@ -7,7 +7,8 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-annotations</artifactId>
-  <name>Servlet Annotations</name>
+  <name>Jetty :: Servlet Annotations</name>
+  <description>Annotation support for deploying servlets in jetty.</description>
   <build>
     <defaultGoal>install</defaultGoal>
     <resources>
@@ -60,7 +61,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>${maven-bundle-plugin-version}</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -81,13 +81,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin-version}</version>
         <configuration>
           <archive>
             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
           </archive>
         </configuration>
       </plugin>
+      <!-- TODO replace with maven-dependency-plugin -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>dependency-maven-plugin</artifactId>
@@ -132,7 +132,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
+      <artifactId>jetty-server</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

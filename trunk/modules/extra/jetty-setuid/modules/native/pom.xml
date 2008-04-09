@@ -9,9 +9,8 @@ http://maven.apache.org/maven-v4_0_0.xsd">
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.mortbay.jetty</groupId>
     <artifactId>libsetuid</artifactId>
-    <name>Jetty SetUID Native</name>
+    <name>Jetty :: SetUID Native</name>
     <url>http://jetty.mortbay.org</url>
     <packaging>so</packaging>
     <build>
