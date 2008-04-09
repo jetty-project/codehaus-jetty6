@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jsp-api-2.1</artifactId>
-  <name>Glassfish Jasper API</name>
+  <name>Glassfish :: Jasper API JSP 2.1</name>
   <description>JSP2.1 API</description>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -79,7 +79,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>${maven-bundle-plugin-version}</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -102,7 +101,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin-version}</version>
         <configuration>
           <archive>
               <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>

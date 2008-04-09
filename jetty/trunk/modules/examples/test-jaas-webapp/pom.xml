@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <groupId>org.mortbay.jetty</groupId>
-    <artifactId>modules-examples</artifactId>
+    <groupId>org.mortbay.jetty.example</groupId>
+    <artifactId>jetty-examples-parent</artifactId>
     <version>7.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-test-jaas</artifactId>
   <packaging>war</packaging>
-  <name>Jetty Test JAAS Webapp</name>
+  <name>Jetty Example :: JAAS Test Webapp</name>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>
@@ -59,7 +58,7 @@
       </plugin>
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
+        <artifactId>jetty-maven-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>

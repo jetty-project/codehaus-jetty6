@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>servlet-api-3.0</artifactId>
-  <name>Servlet Specification 3.0 API</name>
+  <name>Jetty :: Servlet Specification 3.0 API</name>
   <description>Servlet Specification 3.0 API</description>
   <packaging>jar</packaging>
   <url>http://jetty.mortbay.org</url>
@@ -69,7 +69,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>${maven-bundle-plugin-version}</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -92,7 +91,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin-version}</version>
         <configuration>
           <archive>
              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>

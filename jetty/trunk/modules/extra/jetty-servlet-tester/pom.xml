@@ -6,10 +6,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-servlet-tester</artifactId>
   <packaging>jar</packaging>
-  <name>Jetty Servlet Tester</name>
+  <name>Jetty :: Servlet Tester</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
     <license>
@@ -55,7 +54,7 @@
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
+      <artifactId>jetty-server</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
