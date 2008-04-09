@@ -23,7 +23,7 @@
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
+      <artifactId>jetty</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
