@@ -93,6 +93,7 @@ public class DefaultHandler extends AbstractHandler
                 response.setContentType("image/x-icon");
                 response.setContentLength(_favicon.length);
                 response.setDateHeader(HttpHeaders.LAST_MODIFIED, _faviconModified);
+                response.setHeader(HttpHeaders.CACHE_CONTROL,"max-age=360000,public");
                 response.getOutputStream().write(_favicon);
             }
             return;
