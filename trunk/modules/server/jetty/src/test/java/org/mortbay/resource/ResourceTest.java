@@ -121,8 +121,8 @@ public class ResourceTest extends junit.framework.TestCase
         File file = new File(__userDir);
         file=new File(file.getCanonicalPath());
         __userURL=file.toURL();
-        if (__userURL.toString().endsWith( "/modules/server/jetty-server/") ||
-            __userURL.toString().endsWith( "/modules/server/jetty-server" ))
+        if (__userURL.toString().endsWith( "/modules/server/jetty/") ||
+            __userURL.toString().endsWith( "/modules/server/jetty" ))
         {
             __userURL=new URL(__userURL.toString() + "src/test/java/org/mortbay/resource/");
             FilePermission perm = (FilePermission)
@@ -134,20 +134,20 @@ public class ResourceTest extends junit.framework.TestCase
         else if (__userURL.toString().endsWith( "/server/") ||
             __userURL.toString().endsWith( "/server" ))
         {
-            __userURL=new URL(__userURL.toString() + "jetty-server/src/test/java/org/mortbay/resource/");
+            __userURL=new URL(__userURL.toString() + "jetty/src/test/java/org/mortbay/resource/");
             FilePermission perm = (FilePermission)
                 __userURL.openConnection().getPermission();
             __userDir=new File(perm.getName()).getCanonicalPath()+File.separatorChar;
-            __relDir="jetty-server/src/test/java/org/mortbay/resource/"
+            __relDir="jetty/src/test/java/org/mortbay/resource/"
                 .replace('/',File.separatorChar);
         }
         else
         {
-            __userURL=new URL(__userURL.toString()+ "/modules/server/jetty-server/src/test/java/org/mortbay/resource/");
+            __userURL=new URL(__userURL.toString()+ "/modules/server/jetty/src/test/java/org/mortbay/resource/");
             FilePermission perm = (FilePermission)
                 __userURL.openConnection().getPermission();
             __userDir=new File(perm.getName()).getCanonicalPath()+File.separatorChar;
-            __relDir= "/modules/server/jetty-server/src/test/java/org/mortbay/resource/"
+            __relDir= "/modules/server/jetty/src/test/java/org/mortbay/resource/"
                 .replace('/',File.separatorChar);
         }
         
