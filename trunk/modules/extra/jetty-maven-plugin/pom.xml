@@ -106,7 +106,7 @@
         </dependency>
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
-          <artifactId>start</artifactId>
+          <artifactId>jetty-start</artifactId>
           <version>${project.version}</version>
         </dependency>        
       </dependencies>
