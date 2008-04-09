@@ -11,11 +11,18 @@
   <name>Jetty Example :: Parent</name>
   <packaging>pom</packaging>
   <modules>
-    <module>embedded</module>
-    <module>test-webapp</module>
-    <module>test-webapp-test</module>
-    <module>test-jaas-webapp</module>
-    <module>test-jndi-webapp</module>
-    <module>test-ws-cxf</module>
+    <module>async-webservices-example-webapp</module>
+    <module>jaas-example-webapp</module>
+    <!--
+    <module>jetty-annotation-example-webapp</module>
+    -->
+    <module>jetty-embedded</module>
+    <module>jetty-example-webapp</module>
+    <module>jetty-extra-example-webapp</module>
+    <module>jetty-proxy</module>
+    <module>jndi-example-webapp</module>
+    <!--
+    <module>spring-ebj3-example-webapp</module>
+    -->
   </modules>
 </project>

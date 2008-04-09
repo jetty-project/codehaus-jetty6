@@ -6,7 +6,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>jetty-webapp-test-extra</artifactId>
+  <artifactId>jetty-extra-example-webapp</artifactId>
   <name>Jetty Example :: Extra Webapp tests</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
