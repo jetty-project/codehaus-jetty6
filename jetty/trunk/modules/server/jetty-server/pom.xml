@@ -7,7 +7,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>jetty-server</artifactId>
+  <artifactId>jetty</artifactId>
   <name>Jetty :: Server Core</name>
   <url>http://jetty.mortbay.org</url>
   <description>The core jetty server artifact.</description>
