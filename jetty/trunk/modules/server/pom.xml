@@ -13,7 +13,7 @@
   <modules>
     <module>servlet-api-3.0</module>
     <module>jetty-util</module>
-    <module>jetty-server</module>
+    <module>jetty</module>
     <module>jetty-ssl</module>
     <module>jetty-start</module>
   </modules>
