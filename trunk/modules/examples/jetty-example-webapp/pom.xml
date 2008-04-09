@@ -6,8 +6,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mortbay.jetty</groupId>
-  <artifactId>jetty-test-webapp</artifactId>
+  <artifactId>jetty-example-webapp</artifactId>
   <packaging>war</packaging>
   <name>Jetty Example :: Test Webapp</name>
   <url>http://jetty.mortbay.org</url>
