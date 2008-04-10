@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-xbean</artifactId>
-  <name>Jetty :: XBean</name>
+  <name>Jetty Extra :: XBean</name>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>

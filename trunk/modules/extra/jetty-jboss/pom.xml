@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jboss-jetty</artifactId>
   <packaging>sar</packaging>
-  <name>Jetty :: JBoss</name>
+  <name>Jetty Extra :: JBoss</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
     <license>

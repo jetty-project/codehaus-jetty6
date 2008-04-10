@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-naming</artifactId>
-  <name>Jetty :: JNDI Naming</name>
+  <name>Jetty Plus :: JNDI Naming</name>
   <description>JNDI spi impl for java namespace.</description>
   <url>http://jetty.mortbay.org</url>
   <build>

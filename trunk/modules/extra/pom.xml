@@ -8,7 +8,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>modules-extra</artifactId>
-  <name>Jetty :: Extra Modules</name>
+  <name>Jetty Extra :: Extra Modules</name>
   <description>Additional artifacts supporting jetty from the server or client side.</description>
   <packaging>pom</packaging>
   <modules>
