@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-ajp</artifactId>
-  <name>Jetty :: AJP</name>
+  <name>Jetty Extra :: AJP</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
     <license>

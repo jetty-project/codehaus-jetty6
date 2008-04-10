@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-servlet</artifactId>
-  <name>Jetty :: Utility Servlets and Filters</name>
+  <name>Jetty Extra :: Utility Servlets and Filters</name>
   <description>Portable Utility Servlets from Jetty</description>
   <dependencies>
     <dependency>

@@ -7,7 +7,7 @@
   </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>jetty-setuid</artifactId>
-    <name>Jetty :: SetUID Parent</name>
+    <name>Jetty Extra :: SetUID Parent</name>
     <url>http://jetty.mortbay.org</url>
     <packaging>pom</packaging>
 

@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-win32-service-java</artifactId>
-  <name>Jetty :: Win32 Service - Java</name>
+  <name>Jetty Extra :: Win32 Service - Java</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
     <license>
