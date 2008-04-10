@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-gwt</artifactId>
   <packaging>jar</packaging>
-  <name>Jetty :: GWT Test Webapp</name>
+  <name>Jetty Extra :: GWT Test Webapp</name>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>

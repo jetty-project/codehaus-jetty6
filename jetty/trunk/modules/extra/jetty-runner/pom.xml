@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-runner</artifactId>
-  <name>Jetty :: Web Runner</name>
+  <name>Jetty Extra :: Web Runner</name>
   <url>http://jetty.mortbay.org</url>
   <build>
     <defaultGoal>install</defaultGoal>

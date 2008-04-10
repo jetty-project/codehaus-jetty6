@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-threadpool</artifactId>
-  <name>Jetty :: Java5 Threadpool</name>
+  <name>Jetty Extra :: Java5 Threadpool</name>
   <url>http://jetty.mortbay.org</url>
   <licenses>
     <license>
