@@ -288,7 +288,6 @@
     
     <module>modules/contrib/cometd</module>
     <module>modules/contrib/jetty-ant</module>
-    <module>modules/contrib/jetty-rewrite-handler</module>
 
     <!--<module>modules/contrib/jetty-batch</module>-->
     <!--module>modules/contrib/grizzly</module-->
