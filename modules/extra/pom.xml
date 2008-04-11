@@ -12,6 +12,7 @@
   <description>Additional artifacts supporting jetty from the server or client side.</description>
   <packaging>pom</packaging>
   <modules>
+    <module>jetty-rewrite</module>
     <module>jetty-client</module>
     <module>jetty-html</module>
     <module>jetty-servlet-tester</module>
