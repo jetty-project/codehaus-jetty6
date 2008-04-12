@@ -14,7 +14,6 @@
   <modules>
     <module>jetty-rewrite</module>
     <module>jetty-client</module>
-    <module>jetty-cometd</module>
     <module>jetty-html</module>
     <module>jetty-servlet-tester</module>
     <module>jetty-servlet</module>
@@ -29,5 +28,6 @@
     <module>jetty-maven-jspc-plugin</module>
     <module>jetty-maven-plugin</module>
     <module>jetty-runner</module>
+    <module>cometd</module>
   </modules>
 </project>
