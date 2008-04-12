@@ -285,10 +285,11 @@
     <module>modules/plus</module>
     <module>modules/extra</module>
     <module>modules/examples</module>
-    
+   
+    <!--
     <module>modules/contrib/cometd</module>
     <module>modules/contrib/jetty-ant</module>
-
+    -->
     <!--<module>modules/contrib/jetty-batch</module>-->
     <!--module>modules/contrib/grizzly</module-->
     <!--module>modules/contrib/wadi</module-->
