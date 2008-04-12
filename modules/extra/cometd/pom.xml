@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.mortbay.jetty</groupId>
+    <artifactId>modules-extra</artifactId>
+    <version>7.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>cometd-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Cometd :: Parent</name>
+  <url>http://www.cometd.org</url>
+  <licenses>
+    <license>
+      <name>Apache License Version 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+    <license>
+      <name>The New BSD License</name>
+    </license>
+    <license>
+      <name>The Academic Free License, v. 2.1</name>
+    </license>
+  </licenses>
+  <build>
+  </build>
+  <dependencyManagement>
+  </dependencyManagement>
+  <distributionManagement>
+  </distributionManagement>
+  <modules>
+    <module>api</module>
+    <module>bayeux</module>
+    <module>client</module>
+    <module>session</module>
+    <module>demo</module>
+    <module>install</module>
+  </modules>
+
+  <properties>
+  </properties>
+</project>
