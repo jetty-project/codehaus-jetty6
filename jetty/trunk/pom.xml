@@ -165,7 +165,6 @@
           <configuration>
             <aggregate>true</aggregate>
             <debug>false</debug>
-            <stylesheetfile>${basedir}/modules/website/project-site/src/resources/javadoc.css</stylesheetfile>
             <links>
               <link>http://java.sun.com/javaee/5/docs/api</link>
               <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
@@ -233,4 +232,20 @@
     <mail-version>1.4</mail-version>
     <slf4j-version>1.3.1</slf4j-version>
   </properties>
+  <profiles>
+    <profile>
+      <id>custom-javadoc</id>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <stylesheetfile>${basedir}/modules/website/project-site/src/resources/javadoc.css</stylesheetfile>
+            </configuration>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
 </project>
