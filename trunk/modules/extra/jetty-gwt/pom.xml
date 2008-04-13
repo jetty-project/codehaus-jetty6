@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>modules-extra</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0-pre0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -38,7 +38,7 @@
             <configuration>
               <tasks>
                 <delete quiet="true" dir="../../../webapps/gwt/" />
-                <copy failonerror="false" todir="../../../webapps/gwt" >
+                <copy failonerror="false" todir="../../../webapps/gwt">
                   <fileset dir="target/${project.artifactId}-${project.version}" includes="**" />
 		</copy>
               </tasks>
