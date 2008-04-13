@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <artifactId>jetty-setuid</artifactId>
         <groupId>org.mortbay.jetty</groupId>
-        <version>7.0-SNAPSHOT</version>
+        <version>7.0.0-pre0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -25,15 +24,11 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <copy failonerror="false"
-                                      file="target/${project.artifactId}-${project.version}.jar"
-                                      tofile="../../target/jetty-setuid-${project.version}.jar"/>
-                                <copy failonerror="false" file="etc/jetty-setuid.xml" todir="../../target"/>
+                                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.jar" tofile="../../target/jetty-setuid-${project.version}.jar" />
+                                <copy failonerror="false" file="etc/jetty-setuid.xml" todir="../../target" />
                                 
-                                <copy failonerror="false"
-                                      file="target/${project.artifactId}-${project.version}.jar"
-                                      tofile="../../../../../lib/ext/jetty-setuid-${project.version}.jar"/>
-                                <copy failonerror="false" file="etc/jetty-setuid.xml" todir="../../../../../etc"/>
+                                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.jar" tofile="../../../../../lib/ext/jetty-setuid-${project.version}.jar" />
+                                <copy failonerror="false" file="etc/jetty-setuid.xml" todir="../../../../../etc" />
                             </tasks>
                         </configuration>
                     </execution>

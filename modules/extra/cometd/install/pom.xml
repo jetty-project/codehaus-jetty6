@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>cometd-parent</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0-pre0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -24,12 +24,9 @@
             </goals>
             <configuration>
               <tasks>
-                <copy failonerror="false" file="../api/target/cometd-api-${project.version}.jar" 
-		todir="../../../../lib/cometd" />
-                <copy failonerror="false" file="../bayeux/target/cometd-bayeux-${project.version}.jar" 
-		todir="../../../../lib/cometd" />
-                <copy failonerror="false" file="../demo/target/cometd-demo-${project.version}.war"
-		tofile="../../../../webapps/cometd.war" />
+                <copy failonerror="false" file="../api/target/cometd-api-${project.version}.jar" todir="../../../../lib/cometd" />
+                <copy failonerror="false" file="../bayeux/target/cometd-bayeux-${project.version}.jar" todir="../../../../lib/cometd" />
+                <copy failonerror="false" file="../demo/target/cometd-demo-${project.version}.war" tofile="../../../../webapps/cometd.war" />
               </tasks>
             </configuration>
           </execution>
@@ -41,8 +38,8 @@
             </goals>
             <configuration>
               <tasks>
-                <delete failonerror="false" dir="../../../../lib/cometd"/>
-                <delete failonerror="false" file="../../../../webapps/cometd.war"/>
+                <delete failonerror="false" dir="../../../../lib/cometd" />
+                <delete failonerror="false" file="../../../../webapps/cometd.war" />
               </tasks>
             </configuration>
           </execution>		  
