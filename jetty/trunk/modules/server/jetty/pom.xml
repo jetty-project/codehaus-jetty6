@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>modules-server</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0-pre0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -43,9 +42,9 @@
             <configuration>
               <tasks>
                 <delete includeemptydirs="true">
-                  <fileset dir="../../../lib/" includes="${project.artifactId}-${project.version}.${project.packaging}"/>
-                  <fileset dir="../../../lib/" includes="servlet-api-3.0.jar"/>
-                  <fileset dir="../../../etc/" includes="webdefault.xml"/>
+                  <fileset dir="../../../lib/" includes="${project.artifactId}-${project.version}.${project.packaging}" />
+                  <fileset dir="../../../lib/" includes="servlet-api-3.0.jar" />
+                  <fileset dir="../../../etc/" includes="webdefault.xml" />
                 </delete>
               </tasks>
             </configuration>
@@ -58,8 +57,8 @@
             </goals>
             <configuration>
               <tasks>
-                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../../lib/${project.artifactId}-${project.version}.${project.packaging}"/>
-                <copy failonerror="false" file="src/main/resources/org/mortbay/jetty/webapp/webdefault.xml" tofile="../../../etc/webdefault.xml"/>
+                <copy failonerror="false" file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../../lib/${project.artifactId}-${project.version}.${project.packaging}" />
+                <copy failonerror="false" file="src/main/resources/org/mortbay/jetty/webapp/webdefault.xml" tofile="../../../etc/webdefault.xml" />
               </tasks>
             </configuration>
           </execution>

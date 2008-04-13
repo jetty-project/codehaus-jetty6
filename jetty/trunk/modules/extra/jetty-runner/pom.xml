@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>modules-extra</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0-pre0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -46,18 +46,18 @@
             <configuration>
               <tasks>
                 <jar jarfile="${project.build.directory}/jetty-runner.jar">
-                  <fileset dir="${project.build.directory}/classes"/>
-                  <fileset dir="${project.build.directory}/unpacked-dependencies"/>
+                  <fileset dir="${project.build.directory}/classes" />
+                  <fileset dir="${project.build.directory}/unpacked-dependencies" />
                   <manifest>
-                    <attribute name="mode" value="development"/>
-                    <attribute name="Main-Class" value="org.mortbay.jetty.runner.Runner"/>
-                    <attribute name="Built-By" value="${user.name}"/>
-                    <attribute name="implementation-version" value="${project.version}"/>
-                    <attribute name="package" value="org.mortbay.jetty.runner"/>
-                    <attribute name="url" value="http://jetty.mortbay.org"/>
-                    <attribute name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0"/>
-                    <attribute name="Bundle-Name" value="Jetty Runner"/>
-                    <attribute name="Bundle-Vendor" value="Mort Bay Consulting"/>
+                    <attribute name="mode" value="development" />
+                    <attribute name="Main-Class" value="org.mortbay.jetty.runner.Runner" />
+                    <attribute name="Built-By" value="${user.name}" />
+                    <attribute name="implementation-version" value="${project.version}" />
+                    <attribute name="package" value="org.mortbay.jetty.runner" />
+                    <attribute name="url" value="http://jetty.mortbay.org" />
+                    <attribute name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0" />
+                    <attribute name="Bundle-Name" value="Jetty Runner" />
+                    <attribute name="Bundle-Vendor" value="Mort Bay Consulting" />
                   </manifest>
                 </jar>
               </tasks>
