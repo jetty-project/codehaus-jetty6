@@ -60,13 +60,6 @@
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <stylesheetfile>${basedir}/../../website/project-site/src/resources/javadoc.css</stylesheetfile>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
