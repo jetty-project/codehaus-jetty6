@@ -59,7 +59,9 @@
               <workingDirectory>../..</workingDirectory>
               <arguments>
                 <argument>-Dmaven.test.skip=true</argument>
-                <argument>site</argument>
+                <argument>-Psite-generation</argument>
+                <argument>jxr:jxr</argument>
+                <argument>javadoc:javadoc</argument>
               </arguments>
             </configuration>
           </execution>
@@ -163,8 +165,6 @@
               <goal>site</goal>
             </goals>
           </execution>
-         <configuration>
-         </configuration>
        </executions>
       </plugin>
     </plugins>

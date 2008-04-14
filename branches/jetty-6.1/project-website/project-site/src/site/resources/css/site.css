@@ -134,3 +134,7 @@ iframe.study *.description
   color: #666666;
 }
 
+.externalLink, a.externalLink:link, a.externalLink:visited, a.externalLink:active, a.externalLink:hover
+{
+  padding-right: 0px  
+}

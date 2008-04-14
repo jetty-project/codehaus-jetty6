@@ -267,38 +267,13 @@
 
     <module>contrib/cometd</module>
     <module>contrib/jetty-ant</module>
+    <module>contrib/jetty-rewrite-handler</module>
     <!--module>contrib/grizzly</module-->
     <!--module>contrib/wadi</module-->
     <!--module>contrib/terracotta</module-->
 
     <module>extras/setuid</module>
   </modules>
-
-  <reporting>
-    <outputDirectory>target/site</outputDirectory>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-          <configuration>
-            <aggregate>true</aggregate>
-            <debug>false</debug>
-            <stylesheetfile>${basedir}/project-website/project-site/src/resources/javadoc.css</stylesheetfile>
-            <links>
-              <link>http://java.sun.com/javaee/5/docs/api</link>
-              <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
-            </links>
-          </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <configuration>
-          <aggregate>true</aggregate>
-       </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -370,4 +345,34 @@
     <maven-jar-plugin-version>2.2</maven-jar-plugin-version>
     <maven-wagon-version>1.0-beta-2</maven-wagon-version>
   </properties>
-</project>
+  <profiles>
+    <profile>
+      <id>site-generation</id>
+      <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <excludePackageNames>org.apache.*:ebay.*:javax.*:com.sun.*:com.google.*:dojox.*:com.acme.*</excludePackageNames>
+            <aggregate>true</aggregate>
+            <debug>false</debug>
+            <stylesheetfile>${basedir}/project-website/project-site/src/resources/javadoc.css</stylesheetfile>
+            <links>
+              <link>http://java.sun.com/javaee/5/docs/api</link>
+              <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+            </links>
+          </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <configuration>
+          <aggregate>true</aggregate>
+       </configuration>
+      </plugin>
+    </plugins>
+      </build>
+    </profile>
+		  </profiles>
+	</project>
