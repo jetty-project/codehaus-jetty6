@@ -22,7 +22,6 @@
     <module>jetty-spring</module>
     <module>jetty-threadpool</module>
     <module>jetty-xbean</module>
-    <module>jetty-setuid</module>
     <module>jetty-win32-service-java</module>
     <module>jetty-maven-jspc-plugin</module>
     <module>jetty-maven-plugin</module>
