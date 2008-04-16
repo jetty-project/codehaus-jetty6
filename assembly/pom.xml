@@ -22,6 +22,9 @@
         <executions>
           <execution>
             <phase>install</phase>
+            <goals>
+              <goal>assembly</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
