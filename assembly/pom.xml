@@ -19,10 +19,14 @@
             <descriptor>src/main/assembly/jetty.xml</descriptor>
           </descriptors>
         </configuration>
+        <executions>
+          <execution>
+            <phase>install</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
-
   <scm>
     <connection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-assembly-7.0.0-pre0</connection>
     <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/tags/jetty-assembly-7.0.0-pre0</developerConnection>
