@@ -152,6 +152,14 @@ public class Request implements HttpServletRequest
     /**
      * 
      */
+    public Request()
+    {
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * 
+     */
     public Request(HttpConnection connection)
     {
         _connection=connection;
