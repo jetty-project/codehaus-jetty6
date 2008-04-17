@@ -40,6 +40,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-543 Atomic batch get and put of files.
  + JETTY-545 Rewrite handler
  + JETTY-546 Webapp runner. All in one jar to run a webapps
+ + JETTY-550 Reading 0 bytes corrupts ServletInputStream
  + JETTY-556 Encode all URI fragments
  + JETTY-557 Allow ServletContext.setAttribute before start
 
