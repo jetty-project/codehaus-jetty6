@@ -21,7 +21,6 @@
     <module>jetty-maven-jspc-plugin</module>
     <module>jetty-maven-plugin</module>
     <module>maven-jetty-plugin</module>
-    <module>jetty-runner</module>
     <module>cometd</module>
   </modules>
 </project>
