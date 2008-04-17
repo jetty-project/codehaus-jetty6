@@ -126,7 +126,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-naming</artifactId>
+      <artifactId>jetty-jndi</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>

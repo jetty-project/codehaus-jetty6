@@ -11,6 +11,7 @@ jetty-7.0-SNAPSHOT
  + BayeuxClient use a single connection for polling
  + Make javax.servlet.jsp optional osgi import for jetty module
  + Ensure Jotm tx mgr can be found in jetty-env.xml
+ + Renamed modules management and naming to jmx and jndi.
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-341 100-Continues sent only after getInputStream called.
  + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
