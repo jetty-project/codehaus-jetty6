@@ -1,3 +1,6 @@
+jetty-6.1-SNAPSHOT
+ + JETTY-556 Encode all URI fragments
+
 jetty-6.1.9 26 March 2008
  + Make javax.servlet.jsp optional osgi import for jetty module
  + Ensure Jotm tx mgr can be found in jetty-env.xml
