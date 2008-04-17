@@ -145,8 +145,7 @@
       </fileset>
     </copy>
 	
-	<fixcrlf srcdir="src/main/patches" includes="**/*.patch"/>
-	<patch dir="${generated.java}/org/apache/taglibs/standard/tag/common/sql" patchfile="src/main/patches/DataSourceWrapper.patch"/>
+    <patch dir="${generated.java}/org/apache/taglibs/standard/tag/common/sql" patchfile="src/main/patches/DataSourceWrapper.patch"/>
 
     <copy todir="${generated.resources}/org/apache/taglibs/standard/lang/jstl">
       <fileset dir="target/glassfish/appserv-jstl/src/org/apache/taglibs/standard/lang/jstl">
