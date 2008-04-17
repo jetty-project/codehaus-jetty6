@@ -1,4 +1,3 @@
-
 jetty-7.0-SNAPSHOT
  + Jetty-6.1.8 Changes
  + Refactor of Continuation towards servlet 3.0 proposal
