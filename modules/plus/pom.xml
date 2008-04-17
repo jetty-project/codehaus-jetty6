@@ -11,9 +11,9 @@
   <description>Additional modules which enhance the core jetty server experience.</description>
   <packaging>pom</packaging>
   <modules>
+    <module>jetty-jmx</module>
     <module>jetty-plus</module>
-    <module>jetty-naming</module>
+    <module>jetty-jndi</module>
     <module>jetty-annotations</module>
-    <module>jetty-management</module>
   </modules>
 </project>

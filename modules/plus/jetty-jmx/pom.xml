@@ -6,7 +6,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>jetty-management</artifactId>
+  <artifactId>jetty-jmx</artifactId>
   <name>Jetty Plus :: JMX Management</name>
   <description>JMX management artifact for jetty.</description>
   <url>http://jetty.mortbay.org</url>
@@ -41,7 +41,7 @@
             <configuration>
               <tasks>
                 <delete includeemptydirs="true" failonerror="false">
-                  <fileset dir="../../../lib/management/" includes="**/**" />
+                  <fileset dir="../../../lib/jmx/" includes="**/**" />
                 </delete>
               </tasks>
             </configuration>
@@ -65,7 +65,7 @@
                   <destFileName>${project.artifactId}-${project.version}.jar</destFileName>
                 </artifactItem>
               </artifactItems>
-              <outputDirectory>${basedir}/../../../lib/management</outputDirectory>
+              <outputDirectory>${basedir}/../../../lib/jmx</outputDirectory>
             </configuration>
           </execution>
         </executions>
