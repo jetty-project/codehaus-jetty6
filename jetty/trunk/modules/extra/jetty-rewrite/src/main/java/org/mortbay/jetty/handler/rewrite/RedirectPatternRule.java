@@ -19,8 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * RedirectPatternRule.
- * Rule that will redirect the response if it matches.
+ * Redirects the response whenever the rule finds a match.
  */
 public class RedirectPatternRule extends PatternRule
 {
@@ -56,6 +55,9 @@ public class RedirectPatternRule extends PatternRule
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the redirect location.
+     */
     public String toString()
     {
         return super.toString()+"["+_location+"]";

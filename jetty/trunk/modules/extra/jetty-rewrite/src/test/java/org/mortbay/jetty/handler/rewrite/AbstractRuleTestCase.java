@@ -13,8 +13,6 @@
 // ========================================================================
 package org.mortbay.jetty.handler.rewrite;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import junit.framework.TestCase;
 
 import org.mortbay.io.bio.StringEndPoint;
@@ -28,21 +26,40 @@ import org.mortbay.jetty.Server;
 public abstract class AbstractRuleTestCase extends TestCase
 {
     protected Server _server=new Server();
-    protected LocalConnector _connector=new LocalConnector();
+    protected LocalConnector _connector;
     protected StringEndPoint _endpoint=new StringEndPoint();
+    protected HttpConnection _connection;
     
     protected Request _request;
     protected Response _response;
     
+    protected boolean _isSecure = false;
     
     public void setUp() throws Exception
     {
+        start();
+    }
+    
+    public void tearDown() throws Exception
+    {
+        stop();
+    }
+    
+    public void start() throws Exception
+    {
+        _connector = new LocalConnector() {
+            public boolean isConfidential(Request request)
+            {
+                return _isSecure;
+            }
+        };
+        
         _server.setConnectors(new Connector[]{_connector});
         _server.start();
         reset();
     }
     
-    public void tearDown() throws Exception
+    public void stop() throws Exception
     {
         _server.stop();
         _request = null;
@@ -51,9 +68,9 @@ public abstract class AbstractRuleTestCase extends TestCase
     
     public void reset()
     {
-        HttpConnection connection=new HttpConnection(_connector,_endpoint,_server);
-        _request = new Request();
-        _response = new Response(connection);
+        _connection = new HttpConnection(_connector,_endpoint,_server);
+        _request = new Request(_connection);
+        _response = new Response(_connection);
         
         _request.setRequestURI("/test/");
     }

@@ -22,10 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.servlet.PathMap;
 
 /**
- * PatternRule.
- * 
- * Abstract rule for other rules that use a {@link PathMap} pattern to match.
- * 
+ * Abstract rule that use a {@link PathMap} for pattern matching. It uses the 
+ * servlet pattern syntax.
  */
 public abstract class PatternRule extends Rule
 {
@@ -40,7 +38,7 @@ public abstract class PatternRule extends Rule
 
     /* ------------------------------------------------------------ */
     /**
-     * Sets the rule pattern. It uses the servlet pattern syntax.
+     * Sets the rule pattern.
      * 
      * @param pattern the pattern
      */
@@ -72,6 +70,9 @@ public abstract class PatternRule extends Rule
      */
     protected abstract String apply(String target, HttpServletRequest request, HttpServletResponse response) throws IOException;
 
+    /**
+     * Returns the rule pattern.
+     */
     public String toString()
     {
         return super.toString()+"["+_pattern+"]";                

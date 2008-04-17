@@ -60,7 +60,6 @@ public class HeaderPatternRuleTest extends AbstractRuleTestCase
         assertHeaders(headers);
     }
     
-    @SuppressWarnings("unchecked")
     public void testHeaderOverwriteValues() throws IOException
     {
         String headers[][] = {

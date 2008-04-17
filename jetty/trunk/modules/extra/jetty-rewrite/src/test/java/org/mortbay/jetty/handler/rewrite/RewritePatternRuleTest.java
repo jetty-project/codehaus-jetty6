@@ -45,7 +45,7 @@ public class RewritePatternRuleTest extends AbstractRuleTestCase
         {
             _rule.setPattern(_tests[i][1]);
             
-            String result = _rule.apply(_tests[i][0], _request, _response);
+            String result = _rule.matchAndApply(_tests[i][0], _request, _response);
         
             assertEquals(_tests[i][1],_tests[i][2], result);
         }

@@ -21,8 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 /**
- * HeaderPatternRule.
- * If the rule matches, a header is set in the response
+ * Sets the header in the response whenever the rule finds a match.
  */
 public class HeaderPatternRule extends PatternRule
 {
@@ -90,24 +89,38 @@ public class HeaderPatternRule extends PatternRule
     
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the header name.
+     * @return the header name.
+     */
     public String getName()
     {
         return _name;
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the header value.
+     * @return the header value.
+     */
     public String getValue()
     {
         return _value;
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the add flag value.
+     */
     public boolean isAdd()
     {
         return _add;
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the header contents.
+     */
     public String toString()
     {
         return super.toString()+"["+_name+","+_value+"]";

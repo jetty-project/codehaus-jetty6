@@ -22,8 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 /**
- * CookiePatternRule.
- * If the rule matches, a cookie is set in the response.
+ * Sets the cookie in the response whenever the rule finds a match.
  * 
  * @see Cookie
  */
@@ -41,7 +40,7 @@ public class CookiePatternRule extends PatternRule
 
     /* ------------------------------------------------------------ */
     /**
-     * Assigns name of cookie.
+     * Assigns the cookie name.
      * 
      * @param name a <code>String</code> specifying the name of the cookie.
      */
@@ -52,7 +51,7 @@ public class CookiePatternRule extends PatternRule
 
     /* ------------------------------------------------------------ */
     /**
-     * Assigns a value to the cookie.
+     * Assigns the cookie value.
      * 
      * @param value a <code>String</code> specifying the value of the cookie
      * @see Cookie#setValue(String)
@@ -74,6 +73,9 @@ public class CookiePatternRule extends PatternRule
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the cookie contents.
+     */
     public String toString()
     {
         return super.toString()+"["+_name+","+_value + "]";
