@@ -278,19 +278,10 @@ public class URIUtil
             
             bytes[n++]=b;
         }
-        
-        try
-        {
-            if (bytes==null)
-                return new String(buf,offset,length,__CHARSET);
-            return new String(bytes,0,n,__CHARSET);
-        }
-        catch(UnsupportedEncodingException e)
-        {
-            if (bytes==null)
-                return new String(buf,offset,length);
-            return new String(bytes,0,n);
-        }
+
+        if (bytes==null)
+            return StringUtil.toString(buf,offset,length,__CHARSET);
+        return StringUtil.toString(bytes,0,n,__CHARSET);
     }
 
     

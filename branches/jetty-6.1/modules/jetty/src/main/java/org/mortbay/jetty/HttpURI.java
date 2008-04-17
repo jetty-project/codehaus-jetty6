@@ -157,7 +157,7 @@ public class HttpURI
                         break;
                     }
                     else
-                        throw new IllegalArgumentException(new String(_raw,offset,length));
+                        throw new IllegalArgumentException(StringUtil.toString(_raw,offset,length,URIUtil.__CHARSET));
                     
                     continue;
                 }
@@ -357,21 +357,21 @@ public class HttpURI
             _raw[_scheme+3]=='p' && 
             _raw[_scheme+4]=='s' )
             return HttpSchemes.HTTPS;
-        return new String(_raw,_scheme,_authority-_scheme-1);
+        return StringUtil.toString(_raw,_scheme,_authority-_scheme-1,URIUtil.__CHARSET);
     }
     
     public String getAuthority()
     {
         if (_authority==_path)
             return null;
-        return new String(_raw,_authority,_path-_authority);
+        return StringUtil.toString(_raw,_authority,_path-_authority,URIUtil.__CHARSET);
     }
     
     public String getHost()
     {
         if (_host==_port)
             return null;
-        return new String(_raw,_host,_port-_host);
+        return StringUtil.toString(_raw,_host,_port-_host,URIUtil.__CHARSET);
     }
     
     public int getPort()
@@ -434,7 +434,7 @@ public class HttpURI
     {
         if (_fragment==_end)
             return null;
-        return new String(_raw,_fragment+1,_end-_fragment-1);
+        return StringUtil.toString(_raw,_fragment+1,_end-_fragment-1,URIUtil.__CHARSET);
     }
 
     public void decodeQueryTo(MultiMap parameters, String encoding) 
@@ -462,7 +462,7 @@ public class HttpURI
     public String toString()
     {
         if (_rawString==null)
-            _rawString=new String(_raw,_scheme,_end-_scheme);
+            _rawString= StringUtil.toString(_raw,_scheme,_end-_scheme,URIUtil.__CHARSET);
         return _rawString;
     }
     
