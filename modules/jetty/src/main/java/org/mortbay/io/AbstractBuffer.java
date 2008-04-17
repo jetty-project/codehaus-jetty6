@@ -219,10 +219,15 @@ public abstract class AbstractBuffer implements Buffer
     {
         int gi = getIndex();
         int l=length();
+        if (l==0)
+            return -1;
+        
         if (length>l)
             length=l;
+        
         length = peek(gi, b, offset, length);
-        setGetIndex(gi + length);
+        if (length>0)
+            setGetIndex(gi + length);
         return length;
     }
 

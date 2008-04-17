@@ -90,8 +90,13 @@ public class NIOBuffer extends AbstractBuffer
     {
         int l = length;
         if (index+l > capacity())
+        {
             l=capacity()-index;
-        if (l <= 0) 
+            if (l==0)
+                return -1;
+        }
+        
+        if (l < 0) 
             return -1;
         try
         {
