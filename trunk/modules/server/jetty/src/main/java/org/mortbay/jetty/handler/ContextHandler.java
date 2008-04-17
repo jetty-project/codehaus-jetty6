@@ -1411,7 +1411,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         public synchronized Object getAttribute(String name)
         {
             Object o = ContextHandler.this.getAttribute(name);
-            if (o==null)
+            if (o==null && _contextAttributes!=null)
                 o=_contextAttributes.getAttribute(name);
             return o;
         }
@@ -1423,10 +1423,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         public synchronized Enumeration getAttributeNames()
         {
             HashSet set = new HashSet();
-            Enumeration e = _contextAttributes.getAttributeNames();
-            while(e.hasMoreElements())
-                set.add(e.nextElement());
-            e = ContextHandler.this.getAttributeNames();
+            if (_contextAttributes!=null)
+            {
+            	Enumeration e = _contextAttributes.getAttributeNames();
+            	while(e.hasMoreElements())
+            		set.add(e.nextElement());
+            }
+            Enumeration e = ContextHandler.this.getAttributeNames();
             while(e.hasMoreElements())
                 set.add(e.nextElement());
             
@@ -1440,7 +1443,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         public synchronized void setAttribute(String name, Object value)
         {
             if (_contextAttributes==null)
+            {
+            	// Set it on the handler
+            	ContextHandler.this.setAttribute(name, value);
                 return;
+            }
             
             Object old_value=_contextAttributes==null?null:_contextAttributes.getAttribute(name);
             
@@ -1474,6 +1481,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public synchronized void removeAttribute(String name)
         {
+            if (_contextAttributes==null)
+            {
+            	// Set it on the handler
+            	ContextHandler.this.removeAttribute(name);
+                return;
+            }
+            
             Object old_value=_contextAttributes.getAttribute(name);
             _contextAttributes.removeAttribute(name);
             if (old_value!=null)
