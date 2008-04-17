@@ -21,8 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * RewriteRegexRule.
- * Rewrite the URI by matching with a Regex.
+ * Rewrite the URI by matching with a regular expression. 
  * The replacement string may use $n" to replace the nth capture group.
  */
 public class RewriteRegexRule extends RegexRule
@@ -65,6 +64,9 @@ public class RewriteRegexRule extends RegexRule
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the replacement string.
+     */
     public String toString()
     {
         return super.toString()+"["+_replacement+"]";

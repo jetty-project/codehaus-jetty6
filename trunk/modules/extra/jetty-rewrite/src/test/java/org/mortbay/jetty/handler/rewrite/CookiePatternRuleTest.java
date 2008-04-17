@@ -48,7 +48,6 @@ public class CookiePatternRuleTest extends AbstractRuleTestCase
         assertCookies(cookies);
     }
     
-    @SuppressWarnings("unchecked")
     private void assertCookies(String[][] cookies) throws IOException
     {
         for (int i = 0; i < cookies.length; i++)

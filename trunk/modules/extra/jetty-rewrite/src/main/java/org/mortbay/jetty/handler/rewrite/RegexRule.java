@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 
 
 /**
- * RegexRule.
  * Abstract rule to use as a base class for rules that match with a regular expression.
  */
 public abstract class RegexRule extends Rule
@@ -65,17 +64,20 @@ public abstract class RegexRule extends Rule
     /** 
      * Apply this rule to the request/response pair.
      * Called by {@link #matchAndApply(String, HttpServletRequest, HttpServletResponse)} if the regex matches.
-     * @param target TODO
-     * @param request The request
-     * @param response The response
+     * @param target field to attempt match
+     * @param request request object
+     * @param response response object
      * @param matcher The Regex matcher that matched the request (with capture groups available for replacement).
-     * @return TODO
-     * @throws IOException TODO
+     * @return The target (possible updated).
+     * @throws IOException exceptions dealing with operating on request or response objects
      */
     protected abstract String apply(String target, HttpServletRequest request, HttpServletResponse response, Matcher matcher) throws IOException;
     
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the regular expression string.
+     */
     public String toString()
     {
         return super.toString()+"["+_regex+"]";
