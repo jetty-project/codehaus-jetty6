@@ -95,6 +95,9 @@ public class Runner
             else if ("--lib".equals(args[i]))
             {
             }
+            else if ("--jar".equals(args[i]))
+            {
+            }
             else if ("--classes".equals(args[i]))
             {
             }
