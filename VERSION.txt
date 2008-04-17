@@ -39,6 +39,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-543 Atomic batch get and put of files.
  + JETTY-545 Rewrite handler
  + JETTY-546 Webapp runner. All in one jar to run a webapps
+ + JETTY-556 Encode all URI fragments
 
 jetty-6.1.9 26 March 2008
  + Make javax.servlet.jsp optional osgi import for jetty module
