@@ -104,8 +104,16 @@ public class ByteArrayBuffer extends AbstractBuffer
     public int peek(int index, byte[] b, int offset, int length)
     {
         int l = length;
-        if (index + l > capacity()) l = capacity() - index;
-        if (l <= 0) return -1;
+        if (index + l > capacity())
+        {
+            l = capacity() - index;
+            if (l==0)
+                return -1;
+        }
+        
+        if (l < 0) 
+            return -1;
+        
         Portable.arraycopy(_bytes, index, b, offset, l);
         return l;
     }
