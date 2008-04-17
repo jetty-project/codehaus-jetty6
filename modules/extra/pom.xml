@@ -17,12 +17,7 @@
     <module>jetty-servlet-tester</module>
     <module>jetty-servlet</module>
     <module>jetty-ajp</module>
-    <module>jetty-gwt</module>
-    <!-- module>jetty-jboss</module-->
-    <module>jetty-spring</module>
     <module>jetty-threadpool</module>
-    <module>jetty-xbean</module>
-    <module>jetty-win32-service-java</module>
     <module>jetty-maven-jspc-plugin</module>
     <module>jetty-maven-plugin</module>
     <module>jetty-runner</module>
