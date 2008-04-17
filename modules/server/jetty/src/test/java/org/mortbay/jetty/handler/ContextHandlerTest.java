@@ -56,48 +56,49 @@ public class ContextHandlerTest extends TestCase
 
         ContextHandler handler = new ContextHandler();
 
-        assertTrue("Not a directory " + testDirectory, testDirectory.isDirectory());
+        assertTrue("Not a directory " + testDirectory,testDirectory.isDirectory());
         handler.setBaseResource(Resource.newResource(testDirectory.toURL()));
 
         List paths = new ArrayList(handler.getResourcePaths(root));
-        assertEquals(2, paths.size());
+        assertEquals(2,paths.size());
 
         Collections.sort(paths);
-        assertEquals("/WEB-INF/jsp/", paths.get(0));
-        assertEquals("/WEB-INF/web.xml", paths.get(1));
+        assertEquals("/WEB-INF/jsp/",paths.get(0));
+        assertEquals("/WEB-INF/web.xml",paths.get(1));
     }
 
     private File setupTestDirectory() throws IOException
     {
-        File root = new File(System.getProperty("basedir", "modules/jetty"), "target/" + getClass().getName());
+        File root = new File(System.getProperty("basedir","modules/jetty"),"target/" + getClass().getName());
         root.mkdir();
 
-        File webInf = new File(root, "WEB-INF");
+        File webInf = new File(root,"WEB-INF");
         webInf.mkdir();
 
-        new File(webInf, "jsp").mkdir();
-        new File(webInf, "web.xml").createNewFile();
+        new File(webInf,"jsp").mkdir();
+        new File(webInf,"web.xml").createNewFile();
 
         return root;
     }
 
-    public void testVirtualHostNormalization()
-        throws Exception
+    public void testVirtualHostNormalization() throws Exception
     {
         Server server = new Server();
         LocalConnector connector = new LocalConnector();
-        server.setConnectors(new Connector[] {connector});
+        server.setConnectors(new Connector[]
+        { connector });
 
         ContextHandler contextA = new ContextHandler("/");
-        contextA.setVirtualHosts(new String[] {"www.example.com"});
+        contextA.setVirtualHosts(new String[]
+        { "www.example.com" });
         IsHandledHandler handlerA = new IsHandledHandler();
         contextA.setHandler(handlerA);
-
 
         ContextHandler contextB = new ContextHandler("/");
         IsHandledHandler handlerB = new IsHandledHandler();
         contextB.setHandler(handlerB);
-        contextB.setVirtualHosts(new String[] {"www.example2.com."});
+        contextB.setVirtualHosts(new String[]
+        { "www.example2.com." });
 
         ContextHandler contextC = new ContextHandler("/");
         IsHandledHandler handlerC = new IsHandledHandler();
@@ -109,14 +110,12 @@ public class ContextHandlerTest extends TestCase
         c.addHandler(contextB);
         c.addHandler(contextC);
 
-
         server.setHandler(c);
 
         try
         {
             server.start();
-            connector.getResponses("GET / HTTP/1.1\n" +
-                "Host: www.example.com.\n\n");
+            connector.getResponses("GET / HTTP/1.1\n" + "Host: www.example.com.\n\n");
 
             assertTrue(handlerA.isHandled());
             assertFalse(handlerB.isHandled());
@@ -126,13 +125,11 @@ public class ContextHandlerTest extends TestCase
             handlerB.reset();
             handlerC.reset();
 
-            connector.getResponses("GET / HTTP/1.1\n" +
-                "Host: www.example2.com\n\n");
+            connector.getResponses("GET / HTTP/1.1\n" + "Host: www.example2.com\n\n");
 
             assertFalse(handlerA.isHandled());
             assertTrue(handlerB.isHandled());
             assertFalse(handlerC.isHandled());
-
 
         }
         finally
@@ -140,27 +137,61 @@ public class ContextHandlerTest extends TestCase
             server.stop();
         }
 
-
     }
 
-     public static final class IsHandledHandler extends AbstractHandler {
+    public static final class IsHandledHandler extends AbstractHandler
+    {
         private boolean handled;
 
-        public boolean isHandled() {
+        public boolean isHandled()
+        {
             return handled;
         }
 
-        public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException,
-            ServletException
+        public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException
         {
-            Request base_request = (request instanceof Request) ? (Request) request : HttpConnection.getCurrentConnection().getRequest();
+            Request base_request = (request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             base_request.setHandled(true);
             this.handled = true;
         }
 
-         public void reset()
-         {
-             handled = false;
-         }
-     }
+        public void reset()
+        {
+            handled = false;
+        }
+    }
+
+    public void testAttributes() throws Exception
+    {
+        ContextHandler handler = new ContextHandler();
+        handler.setAttribute("aaa","111");
+        handler.getServletContext().setAttribute("bbb","222");
+        assertEquals("111",handler.getServletContext().getAttribute("aaa"));
+        assertEquals("222",handler.getAttribute("bbb"));
+        
+        handler.start();
+
+        handler.getServletContext().setAttribute("aaa","000");
+        handler.setAttribute("ccc","333");
+        handler.getServletContext().setAttribute("ddd","444");
+        assertEquals("111",handler.getServletContext().getAttribute("aaa"));
+        assertEquals("222",handler.getServletContext().getAttribute("bbb"));
+        assertEquals("333",handler.getServletContext().getAttribute("ccc"));
+        assertEquals("444",handler.getServletContext().getAttribute("ddd"));
+        
+        assertEquals("111",handler.getAttribute("aaa"));
+        assertEquals("222",handler.getAttribute("bbb"));
+        assertEquals("333",handler.getAttribute("ccc"));
+        assertEquals(null,handler.getAttribute("ddd"));
+        
+
+        handler.stop();
+
+        assertEquals("111",handler.getServletContext().getAttribute("aaa"));
+        assertEquals("222",handler.getServletContext().getAttribute("bbb"));
+        assertEquals("333",handler.getServletContext().getAttribute("ccc"));
+        assertEquals(null,handler.getServletContext().getAttribute("ddd"));
+        
+
+    }
 }
