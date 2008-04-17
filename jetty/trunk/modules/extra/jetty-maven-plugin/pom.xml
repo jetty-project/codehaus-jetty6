@@ -60,12 +60,12 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-naming</artifactId>
+      <artifactId>jetty-jndi</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-management</artifactId>
+      <artifactId>jetty-jmx</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
