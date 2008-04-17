@@ -23,7 +23,6 @@ import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.util.URIUtil;
 
 /**
- * RewritePatternRule.
  * Rewrite the URI by replacing the matched {@link PathMap} path with a fixed string. 
  */
 public class RewritePatternRule extends PatternRule
@@ -60,6 +59,9 @@ public class RewritePatternRule extends PatternRule
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the replacement string.
+     */
     public String toString()
     {
         return super.toString()+"["+_replacement+"]";

@@ -19,8 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * ResponsePatternRule.
- * Rule that sends a response code if it matches
+ * Sends the response code whenever the rule finds a match.
  */
 public class ResponsePatternRule extends PatternRule
 {
@@ -78,6 +77,9 @@ public class ResponsePatternRule extends PatternRule
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Returns the code and reason string.
+     */
     public String toString()
     {
         return super.toString()+"["+_code+","+_reason+"]";

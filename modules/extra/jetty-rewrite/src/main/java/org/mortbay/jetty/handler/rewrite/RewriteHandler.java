@@ -1,5 +1,18 @@
+//========================================================================
+//$Id$
+//Copyright 2004-2005 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
 package org.mortbay.jetty.handler.rewrite;
-
 
 import java.io.IOException;
 
@@ -15,9 +28,29 @@ import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
-/** Path Rewrite Handler
- *<p>This path uses the pattern matching of {@link PathMap} to rewrite URI's 
- * of received requests. A typical jetty.xml configuration would be: <pre>
+/**
+ *<p> Rewrite handler is responsible for managing the rules. Its capabilities
+ * is not only limited for url rewrites such as RewritePatternRule or RewriteRegexRule. 
+ * There is also handling for cookies, headers, redirection, setting status or error codes 
+ * whenever the rule finds a match. 
+ * 
+ * <p> The rules can be matched by the ff. options: pattern matching of PathMap 
+ * (class PatternRule), regular expressions (class RegexRule) or certain conditions set 
+ * (e.g. MsieSslRule - the requests must be in SSL mode).
+ * 
+ * Here are the list of rules:
+ * <ul>
+ * <li> CookiePatternRule - adds a new cookie in response. </li>
+ * <li> HeaderPatternRule - adds/modifies the HTTP headers in response. </li>
+ * <li> RedirectPatternRule - sets the redirect location. </li>
+ * <li> ResponsePatternRule - sets the status/error codes. </li>
+ * <li> RewritePatternRule - rewrites the requested URI. </li>
+ * <li> RewriteRegexRule - rewrites the requested URI using regular expression for pattern matching. </li>
+ * <li> MsieSslRule - disables the keep alive on SSL for IE5 and IE6. </li>
+ * <li> LegacyRule - the old version of rewrite. </li>
+ * </ul>
+ * 
+ * Here is a typical jetty.xml configuration would be: <pre>
  * 
  *   &lt;Set name="handler"&gt;
  *     &lt;New id="Handlers" class="org.mortbay.jetty.handler.RewriteHandler"&gt;

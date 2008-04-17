@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Rule.
+ * An abstract rule for creating rewrite rules.
  */
 public abstract class Rule
 {   
@@ -80,6 +80,9 @@ public abstract class Rule
         _handling=handling;
     }
     
+    /**
+     * Returns the handling and terminating flag values.
+     */
     public String toString()
     {
         return this.getClass().getName()+(_handling?"[H":"[h")+(_terminating?"T]":"t]");
