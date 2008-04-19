@@ -92,14 +92,8 @@ public class ChannelEndPoint implements EndPoint
                 {
                     // TODO - is this really required?
                     Socket socket= ((SocketChannel)_channel).socket();
-                    try
-                    {
+                    if (!socket.isClosed()&&!socket.isOutputShutdown())
                         socket.shutdownOutput();
-                    }
-                    finally
-                    {
-                        socket.close();
-                    }
                 }
             }
             finally
