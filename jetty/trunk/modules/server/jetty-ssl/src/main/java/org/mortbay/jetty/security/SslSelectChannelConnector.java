@@ -222,6 +222,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
      * @param request
      *                HttpRequest to be customised.
      */
+    @Override
     public void customize(EndPoint endpoint, Request request) throws IOException
     {
         super.customize(endpoint,request);
