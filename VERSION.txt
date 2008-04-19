@@ -42,6 +42,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-547 Shutdown SocketEndpoint output before close
  + JETTY-550 Reading 0 bytes corrupts ServletInputStream
  + JETTY-551 Wadi 2.0-M10
+ + JETTY-553 Fixed customize override
  + JETTY-556 Encode all URI fragments
  + JETTY-557 Allow ServletContext.setAttribute before start
 
