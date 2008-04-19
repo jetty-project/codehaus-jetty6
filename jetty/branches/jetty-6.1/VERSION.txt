@@ -1,7 +1,9 @@
 jetty-6.1-SNAPSHOT
  + JETTY-550 Reading 0 bytes corrupts ServletInputStream
+ + JETTY-551 Upgraded to Wadi 2.0-M10
  + JETTY-556 Encode all URI fragments
  + JETTY-557 Allow ServletContext.setAttribute before start
+
 
 jetty-6.1.9 26 March 2008
  + Make javax.servlet.jsp optional osgi import for jetty module
