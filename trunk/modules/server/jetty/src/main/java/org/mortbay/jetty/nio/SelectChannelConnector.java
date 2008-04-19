@@ -22,6 +22,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Connection;
+import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
@@ -133,7 +134,8 @@ public class SelectChannelConnector extends AbstractNIOConnector
     }
     
     /* ------------------------------------------------------------------------------- */
-    public void customize(org.mortbay.io.EndPoint endpoint, Request request) throws IOException
+    @Override
+    public void customize(EndPoint endpoint, Request request) throws IOException
     {
         SelectChannelEndPoint cep = ((SelectChannelEndPoint)endpoint);
         cep.cancelIdle();
@@ -142,7 +144,8 @@ public class SelectChannelConnector extends AbstractNIOConnector
     }
     
     /* ------------------------------------------------------------------------------- */
-    public void persist(org.mortbay.io.EndPoint endpoint) throws IOException
+    @Override
+    public void persist(EndPoint endpoint) throws IOException
     {
         ((SelectChannelEndPoint)endpoint).scheduleIdle();
         super.persist(endpoint);
@@ -283,7 +286,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new EndPoint(channel,selectSet,key);
+        return new SuspendingEndPoint(channel,selectSet,key);
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -306,9 +309,9 @@ public class SelectChannelConnector extends AbstractNIOConnector
     }
 
     /* ------------------------------------------------------------------------------- */
-    public static class EndPoint extends SelectChannelEndPoint
+    public static class SuspendingEndPoint extends SelectChannelEndPoint
     {
-        public EndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
+        public SuspendingEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
         {
             super(channel,selectSet,key);
         }
