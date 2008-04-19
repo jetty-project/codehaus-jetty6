@@ -187,8 +187,9 @@ public class SslSelectChannelConnector extends SelectChannelConnector
 
             return javaCerts;
         }
-        catch (SSLPeerUnverifiedException pue)
+        catch (SSLPeerUnverifiedException e)
         {
+            Log.warn(Log.EXCEPTION,e);
             return null;
         }
         catch (Exception e)
