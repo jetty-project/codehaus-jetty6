@@ -1,4 +1,6 @@
 jetty-7.0-SNAPSHOT
+
+jetty-7.0.0pre0 - 21 April 2008
  + Jetty-6.1.8 Changes
  + Refactor of Continuation towards servlet 3.0 proposal
  + JETTY-282 Support manually-triggered reloading by maven plugin
