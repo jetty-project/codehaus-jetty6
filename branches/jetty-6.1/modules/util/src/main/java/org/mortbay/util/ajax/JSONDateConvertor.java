@@ -1,7 +1,9 @@
 package org.mortbay.util.ajax;
 
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -38,6 +40,15 @@ public class JSONDateConvertor implements JSON.Convertor
         _dateCache.setTimeZone(zone);
         _fromJSON=fromJSON;
         _format=new SimpleDateFormat(format);
+        _format.setTimeZone(zone);
+    }
+    
+    public JSONDateConvertor(String format, TimeZone zone, boolean fromJSON, Locale locale)
+    {
+        _dateCache = new DateCache(format, locale);
+        _dateCache.setTimeZone(zone);
+        _fromJSON = fromJSON;
+        _format = new SimpleDateFormat(format, new DateFormatSymbols(locale));
         _format.setTimeZone(zone);
     }
     
