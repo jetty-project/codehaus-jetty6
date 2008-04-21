@@ -17,6 +17,11 @@
     <Arg type="boolean">true</Arg>
   </New>
 
+<!-- Add a mapping from name in web.xml to the environment -->
+  <New id="map1" class="org.mortbay.jetty.plus.naming.Link">
+    <Arg>jdbc/mydatasource1</Arg> <!-- name in web.xml -->
+    <Arg>jdbc/mydatasource</Arg>  <!-- name in environment -->
+  </New>
 
   <!-- ==============================================================  -->
   <!-- Add a DataSource only valid for this webapp                     -->

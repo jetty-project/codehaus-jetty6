@@ -44,7 +44,7 @@ public class Transaction extends NamingEntry
     public static Transaction getTransaction (int scopeType)
     throws NamingException
     {
-       return (Transaction)lookupNamingEntry(scopeType, Transaction.class, USER_TRANSACTION);
+       return (Transaction)NamingEntryUtil.lookupNamingEntry(scopeType, Transaction.class, USER_TRANSACTION);
     }
     
 
@@ -68,7 +68,6 @@ public class Transaction extends NamingEntry
     }
     
     
-    
     /**
      * Unbind this Transaction from a java:comp
      */
@@ -86,6 +85,4 @@ public class Transaction extends NamingEntry
             Log.warn(e);
         }
     }
-    
-    
 }

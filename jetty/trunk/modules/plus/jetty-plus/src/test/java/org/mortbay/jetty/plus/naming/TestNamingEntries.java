@@ -170,6 +170,16 @@ public class TestNamingEntries extends TestCase
         assertEquals(icontext.lookup("resourceA"), someObject);
     }
     
+    public void testLink ()
+    throws Exception
+    {
+        InitialContext icontext = new InitialContext();
+        Link link = new Link ("resourceA", "resourceB");
+        assertTrue(NamingEntryUtil.exists(NamingEntry.SCOPE_GLOBAL, Link.class, "resourceA"));
+        assertTrue(NamingEntryUtil.lookupNamingEntry(NamingEntry.SCOPE_GLOBAL, Link.class, "resourceA") instanceof Link);
+        assertEquals(icontext.lookup("resourceA"), "resourceB");
+    }
+    
     
     public void testResourceReferenceable ()
     throws Exception

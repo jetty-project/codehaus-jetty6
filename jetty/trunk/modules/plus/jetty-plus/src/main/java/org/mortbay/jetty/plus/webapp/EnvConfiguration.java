@@ -25,6 +25,7 @@ import javax.naming.NamingException;
 
 import org.mortbay.jetty.plus.naming.EnvEntry;
 import org.mortbay.jetty.plus.naming.NamingEntry;
+import org.mortbay.jetty.plus.naming.NamingEntryUtil;
 import org.mortbay.jetty.plus.naming.Resource;
 import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.jetty.webapp.Configuration;
@@ -160,7 +161,7 @@ public class EnvConfiguration implements Configuration
     throws NamingException
     {
         Log.debug("Finding global env entries");
-        List  list = NamingEntry.lookupNamingEntries (NamingEntry.SCOPE_GLOBAL, EnvEntry.class);
+        List  list = NamingEntryUtil.lookupNamingEntries (NamingEntry.SCOPE_GLOBAL, EnvEntry.class);
         Iterator itor = list.iterator();
         
         Log.debug("Finding env entries: size="+list.size());
@@ -179,9 +180,9 @@ public class EnvConfiguration implements Configuration
     public void unbindLocalNamingEntries ()
     throws NamingException
     {
-        List  list = NamingEntry.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, EnvEntry.class);
-        list.addAll(NamingEntry.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, Resource.class));
-        list.addAll(NamingEntry.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, Transaction.class));
+        List  list = NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, EnvEntry.class);
+        list.addAll(NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, Resource.class));
+        list.addAll(NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, Transaction.class));
         
         Iterator itor = list.iterator();
         

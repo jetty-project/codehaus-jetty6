@@ -22,7 +22,9 @@ import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 
 import org.mortbay.jetty.plus.naming.EnvEntry;
+import org.mortbay.jetty.plus.naming.Link;
 import org.mortbay.jetty.plus.naming.NamingEntry;
+import org.mortbay.jetty.plus.naming.NamingEntryUtil;
 import org.mortbay.jetty.plus.naming.Resource;
 import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.jetty.plus.servlet.ServletHandler;
@@ -70,7 +72,27 @@ public class Configuration extends AbstractConfiguration
     public void bindResourceRef(String name, Class typeClass)
     throws Exception
     {
-        NamingEntry.bindToENC(name, name, Resource.class);
+        try
+        {
+            Link link = (Link)NamingEntryUtil.lookupNamingEntry(NamingEntry.SCOPE_LOCAL, Link.class, name);
+            if (link == null)
+                link = (Link)NamingEntryUtil.lookupNamingEntry(NamingEntry.SCOPE_GLOBAL, Link.class, name);
+            
+            String localName = name;
+            String envName = localName;
+            
+            if (link!=null)
+                envName=(String)link.getObjectToBind();
+            
+            NamingEntryUtil.bindToENC(envName, localName, Resource.class);
+        }
+        catch (NameNotFoundException e)
+        {
+            //There is no matching resource bound into the container's environment, try a default name.
+            //The default name syntax is: the [res-type]/default
+            //eg       javax.sql.DataSource/default
+            NamingEntryUtil.bindToENC(typeClass.getName()+"/default", name, Resource.class);
+        }
     }
 
     /** 
@@ -81,14 +103,54 @@ public class Configuration extends AbstractConfiguration
     public void bindResourceEnvRef(String name, Class typeClass)
     throws Exception
     {
-        NamingEntry.bindToENC(name, name, Resource.class);
+        try
+        {
+            Link link = (Link)NamingEntryUtil.lookupNamingEntry(NamingEntry.SCOPE_LOCAL, Link.class, name);
+            if (link == null)
+                link = (Link)NamingEntryUtil.lookupNamingEntry(NamingEntry.SCOPE_GLOBAL, Link.class, name);
+            
+            String localName = name;
+            String envName = localName;
+            
+            if (link!=null)
+                envName=(String)link.getObjectToBind();
+            
+            NamingEntryUtil.bindToENC(envName, localName, Resource.class);
+        }
+        catch (NameNotFoundException e)
+        {
+            //There is no matching resource bound into the container's environment, try a default            
+            //The default name syntax is: the [res-type]/default
+            //eg       javax.sql.DataSource/default
+            NamingEntryUtil.bindToENC(typeClass.getName()+"/default", name, Resource.class);
+        }
     }
     
     
     public void bindMessageDestinationRef(String name, Class typeClass)
     throws Exception
     {
-        NamingEntry.bindToENC(name, name, Resource.class);
+        try
+        {            
+            Link link = (Link)NamingEntryUtil.lookupNamingEntry(NamingEntry.SCOPE_LOCAL, Link.class, name);
+            if (link == null)
+                link = (Link)NamingEntryUtil.lookupNamingEntry(NamingEntry.SCOPE_GLOBAL, Link.class, name);
+
+            String localName = name;
+            String envName = localName;
+
+            if (link!=null)
+                envName=(String)link.getObjectToBind();
+            
+            NamingEntryUtil.bindToENC(envName, localName, Resource.class);
+        }        
+        catch (NameNotFoundException e)
+        {
+            //There is no matching resource bound into the container's environment, try a default            
+            //The default name syntax is: the [res-type]/default
+            //eg       javax.sql.DataSource/default
+            NamingEntryUtil.bindToENC(typeClass.getName()+"/default", name, Resource.class);
+        }
     }
     
     public void bindUserTransaction ()
@@ -96,7 +158,7 @@ public class Configuration extends AbstractConfiguration
     {
         try
         {
-            NamingEntry.bindToENC(Transaction.USER_TRANSACTION,Transaction.USER_TRANSACTION, Transaction.class);
+            NamingEntryUtil.bindToENC(Transaction.USER_TRANSACTION,Transaction.USER_TRANSACTION, Transaction.class);
         }
         catch (NameNotFoundException e)
         {
