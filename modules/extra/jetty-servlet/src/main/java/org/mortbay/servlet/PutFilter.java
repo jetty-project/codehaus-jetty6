@@ -72,7 +72,7 @@ public class PutFilter implements Filter
     {
         _context=config.getServletContext();
         if (_context.getRealPath("/")==null)
-           throw new UnavailableException("Unable to find real path for /, could be running as war");
+           throw new UnavailableException("Packed war");
         
         String b = config.getInitParameter("baseURI");
         if (b != null)

@@ -35,7 +35,7 @@ public class EnvEntry extends NamingEntry
     public static EnvEntry getEnvEntry (int scopeType, String jndiName)
     throws NamingException
     {
-       return (EnvEntry)lookupNamingEntry(scopeType, EnvEntry.class, jndiName);
+       return (EnvEntry)NamingEntryUtil.lookupNamingEntry(scopeType, EnvEntry.class, jndiName);
     }
     
     
@@ -83,7 +83,6 @@ public class EnvEntry extends NamingEntry
         Context envCtx = (Context)ic.lookup("java:comp/env");
         NamingUtil.bind(envCtx, name, value);
         Log.debug("Bound java:comp/env/"+name+"="+value);  
-        
     }
     
     
