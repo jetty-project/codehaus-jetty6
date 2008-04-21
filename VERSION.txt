@@ -34,6 +34,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-531 Optional expires on MovedContextHandler
  + JETTY-532 MBean properties for QueuedThreadPool
  + JETTY-535 Fixed Bayeux server side client memory leak
+ + JETTY-537 JSON handles Locales
  + JETTY-538 test harness fix for windows
  + JETTY-540 Servlet-3.0 & java5 support (work in progress)
  + JETTY-543 Atomic batch get and put of files.

@@ -2,14 +2,18 @@ package org.mortbay.util.ajax;
 import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
-
-import org.mortbay.util.ajax.JSON;
-import org.mortbay.util.ajax.JSON.Output;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
+
+import org.mortbay.util.DateCache;
+import org.mortbay.util.ajax.JSON.Output;
 
 public class JSONTest extends TestCase
 {   
@@ -228,8 +232,9 @@ public class JSONTest extends TestCase
     /* ------------------------------------------------------------ */
     public void testConvertor()
     {
+        // test case#1 - force timezone to GMT
         JSON json = new JSON();
-        json.addConvertor(Date.class,new JSONDateConvertor());
+        json.addConvertor(Date.class, new JSONDateConvertor("MM/dd/yyyy HH:mm:ss zzz", TimeZone.getTimeZone("GMT"),false));
         json.addConvertor(Object.class,new JSONObjectConvertor());
 
         Woggle w0 = new Woggle();
@@ -244,7 +249,8 @@ public class JSONTest extends TestCase
         g0.tested=true;
         
         HashMap map = new HashMap();
-        map.put("date",new Date(1));
+        Date dummyDate = new Date(1);
+        map.put("date", dummyDate);
         map.put("w0",w0);
 
         StringBuffer buf = new StringBuffer();
@@ -252,11 +258,59 @@ public class JSONTest extends TestCase
         String js=buf.toString();
         
         System.err.println(js);
-        assertTrue(js.indexOf("\"date\":\"Thu Jan 01 00:00:00 GMT 1970\"")>=0);
+        assertTrue(js.indexOf("\"date\":\"01/01/1970 00:00:00 GMT\"")>=0);
         assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Woggle")>=0);
         assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Gizmo")<0);
         assertTrue(js.indexOf("\"tested\":true")>=0);
 
+        // test case#2 - using the system timezone
+        Locale l = new Locale(System.getProperty("user.language"), System.getProperty("user.country"));
+        String tzone3Letter = TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT);
+        String format = "MM/dd/yyyy HH:mm:ss zzz";
+        
+        System.err.print("language: " + System.getProperty("user.language") + ", ");
+        System.err.print("country: " + System.getProperty("user.country") + ", ");
+        System.err.println("timezone: " + tzone3Letter);
+        
+        json.addConvertor(Date.class, new JSONDateConvertor(format, TimeZone.getDefault(), true, l));
+        buf = new StringBuffer();
+        json.append(buf,map);
+        js=buf.toString();
+        
+        System.err.println(js);
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        sdf.setTimeZone(TimeZone.getDefault());
+        assertTrue(js.indexOf("\"value\":\"" + sdf.format(dummyDate) + "\"")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Woggle")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Gizmo")<0);
+        assertTrue(js.indexOf("\"tested\":true")>=0);
+        
+        // test case#3
+        l = new Locale("ja", "JP");
+        TimeZone tzone = TimeZone.getTimeZone("JST");
+        tzone3Letter = tzone.getDisplayName(false, TimeZone.SHORT);
+        format = "EEE MMMMM dd HH:mm:ss zzz yyyy";
+        
+        System.err.print("language: ja" + ", ");
+        System.err.print("country: JP" + ", ");
+        System.err.println("timezone: " + tzone3Letter);
+        
+        json.addConvertor(Date.class, new JSONDateConvertor(format, tzone, false, l));
+        buf = new StringBuffer();
+        json.append(buf,map);
+        js=buf.toString();
+        
+        System.err.println(js);
+        sdf.applyPattern(format);
+        sdf.setDateFormatSymbols(new DateFormatSymbols(l));
+        sdf.setTimeZone(tzone);
+        
+        assertTrue(js.indexOf("\"date\":\"" + sdf.format(dummyDate) + "\"")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Woggle")>=0);
+        assertTrue(js.indexOf("org.mortbay.util.ajax.JSONTest$Gizmo")<0);
+        assertTrue(js.indexOf("\"tested\":true")>=0);
+        
+        // test case#4 
         json.addConvertor(Date.class,new JSONDateConvertor(true));
         w0.nested=null;
         buf = new StringBuffer();
@@ -271,8 +325,6 @@ public class JSONTest extends TestCase
         
         assertTrue(map.get("date") instanceof Date);
         assertTrue(map.get("w0") instanceof Woggle);
-        
-           
     }
     
     enum Color { Red, Green, Blue };
@@ -280,7 +332,8 @@ public class JSONTest extends TestCase
     public void testEnumConvertor()
     {
         JSON json = new JSON();
-        json.addConvertor(Date.class,new JSONDateConvertor());
+        Locale l = new Locale("en", "US");
+        json.addConvertor(Date.class,new JSONDateConvertor(DateCache.DEFAULT_FORMAT,TimeZone.getTimeZone("GMT"),false,l));
         json.addConvertor(Enum.class,new JSONEnumConvertor(false));
         json.addConvertor(Object.class,new JSONObjectConvertor());
 
@@ -314,7 +367,8 @@ public class JSONTest extends TestCase
         assertTrue(js.indexOf("\"Green\"")>=0);
         assertTrue(js.indexOf("\"Blue\"")<0);
 
-        json.addConvertor(Date.class,new JSONDateConvertor(true));
+        json.addConvertor(Date.class,new JSONDateConvertor(DateCache.DEFAULT_FORMAT,TimeZone.getTimeZone("GMT"),true,l));
+        json.addConvertor(Enum.class,new JSONEnumConvertor(false));
         w0.nested=null;
         buf = new StringBuffer();
         json.append(buf,map);
@@ -332,7 +386,8 @@ public class JSONTest extends TestCase
         assertEquals(Color.Green.toString(), ((Map)map2.get("g0")).get("other"));
         
         
-        
+
+        json.addConvertor(Date.class,new JSONDateConvertor(DateCache.DEFAULT_FORMAT,TimeZone.getTimeZone("GMT"),true,l));
         json.addConvertor(Enum.class,new JSONEnumConvertor(true));
         buf = new StringBuffer();
         json.append(buf,map);
