@@ -45,6 +45,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-553 Fixed customize override
  + JETTY-556 Encode all URI fragments
  + JETTY-557 Allow ServletContext.setAttribute before start
+ + JETTY-560 Allow decoupling of jndi names in web.xml
 
 jetty-6.1.9 26 March 2008
  + Make javax.servlet.jsp optional osgi import for jetty module
