@@ -395,19 +395,22 @@ public class Main
                 {
                     // single JAR file
                     File f=new File(file);
-                    String d=f.getCanonicalPath();
-                    if (!done.containsKey(d))
-                    {
-                        done.put(d,d);
-                        boolean added=_classpath.addComponent(d);
-                        if (!added)
-                        {
-                            added=_classpath.addClasspath(expand(subject));
-                            if (_debug)
-                                System.err.println((added?"  CLASSPATH+=":"  !")+d);
-                        }
-                        else if (_debug)
-                            System.err.println((added?"  CLASSPATH+=":"  !")+d);
+		    if(f.exists())
+		    {
+			String d=f.getCanonicalPath();
+			if (!done.containsKey(d))
+			{
+			    done.put(d,d);
+			    boolean added=_classpath.addComponent(d);
+			    if (!added)
+			    {
+				added=_classpath.addClasspath(expand(subject));
+				if (_debug)
+				    System.err.println((added?"  CLASSPATH+=":"  !")+d);
+			    }
+			    else if (_debug)
+				System.err.println((added?"  CLASSPATH+=":"  !")+d);
+		        }
                     }
                 }
             }
