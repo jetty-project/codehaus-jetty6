@@ -162,7 +162,9 @@ public class PutFilterTest extends TestCase
         
         File file=new File(_dir,"file.txt");
         assertTrue(file.exists());
-        assertEquals(data1,IO.toString(new FileInputStream(file)));
+        FileInputStream fis = new FileInputStream(file);
+        assertEquals(data1,IO.toString(fis));
+        fis.close();
         
 
         request.setMethod("DELETE");
@@ -203,7 +205,9 @@ public class PutFilterTest extends TestCase
         
         File file=new File(_dir,"file.txt");
         assertTrue(file.exists());
-        assertEquals(data1,IO.toString(new FileInputStream(file)));
+        FileInputStream fis = new FileInputStream(file);
+        assertEquals(data1,IO.toString(fis));
+        fis.close();
         
 
         request.setMethod("MOVE");
