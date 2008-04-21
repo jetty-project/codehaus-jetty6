@@ -220,26 +220,26 @@ public class AnnotationCollection
                         //the runtime environment. If present the mappedName would represent the JNDI name set
                         //for a Resource entry in jetty.xml or jetty-env.xml.
                         if (type!=null && isEnvEntryType(type))
-                            org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.EnvEntry.class);
+                            org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.EnvEntry.class);
                         else
                         {
                             //try all types of naming resources to see what the name has been bound as
                             try
                             {
                                 //try a non-EnvEntry, non-Transaction type first
-                                org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Resource.class);
+                                org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Resource.class);
                             }
                             catch (NameNotFoundException e)
                             {
                                 //try an EnvEntry
                                 try
                                 {
-                                    org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.EnvEntry.class);
+                                    org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.EnvEntry.class);
                                 }
                                 catch (NameNotFoundException x)
                                 {
                                     //try a Transaction type
-                                    org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Transaction.class);
+                                    org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Transaction.class);
                                 }
                             }
                         }
@@ -283,7 +283,7 @@ public class AnnotationCollection
                    //make it optional to use the mappedName to represent the JNDI name of the resource in
                    //the runtime environment. If present the mappedName would represent the JNDI name set
                    //for a Resource entry in jetty.xml or jetty-env.xml.
-                   org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Resource.class);
+                   org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Resource.class);
                }
                catch (NamingException e)
                {
@@ -347,7 +347,7 @@ public class AnnotationCollection
                 {
                     try
                     {
-                        org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
+                        org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
                         Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it
                         Injection injection = new Injection();
@@ -437,7 +437,7 @@ public class AnnotationCollection
                     try
                     {
                          //Check there is a JNDI entry for this annotation 
-                        org.mortbay.jetty.plus.naming.NamingEntry.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
+                        org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
                         
                         Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it if the binding succeeded
