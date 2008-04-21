@@ -275,7 +275,6 @@ public class JSONTest extends TestCase
            
     }
     
-/* java 1.5 only 
     enum Color { Red, Green, Blue };
 
     public void testEnumConvertor()
@@ -348,7 +347,6 @@ public class JSONTest extends TestCase
         assertEquals(Color.Green, o);
            
     }
-*/
 
     /* ------------------------------------------------------------ */
     public static class Gizmo
