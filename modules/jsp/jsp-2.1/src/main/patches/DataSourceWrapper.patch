@@ -20,25 +20,3 @@ Index: DataSourceWrapper.java
 +	}	
  
  }
-Index: DataSourceWrapper.java
-===================================================================
---- DataSourceWrapper.java	(revision 38)
-+++ DataSourceWrapper.java	(working copy)
-@@ -133,5 +133,17 @@
-         throw new SQLException(Resources.getMessage("NOT_SUPPORTED"));
-     }
- 
-+	/**
-+	* Always return false.
-+	*/
-+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-+		return false;
-+	}
-+	/**
-+	* Always throws a SQLException. Not supported.
-+	*/
-+	public <T> T unwrap(Class<T> iface) throws SQLException {
-+		throw new SQLException(Resources.getMessage("NOT_SUPPORTED"));
-+	}	
- 
- }
