@@ -5,6 +5,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-551 Upgraded to Wadi 2.0-M10
  + JETTY-556 Encode all URI fragments
  + JETTY-557 Allow ServletContext.setAttribute before start
+ + JETTY-558 optional handling of X-Forwarded-For/Host/Server
 
 
 jetty-6.1.9 26 March 2008
