@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
 import org.mortbay.jetty.plus.naming.EnvEntry;
@@ -108,7 +109,7 @@ public class EnvConfiguration implements Configuration
         
         //set up java:comp/env as the Context in which to bind directly
         //the entries in jetty-env.xml
-        NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
+        NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
         
         //check to see if an explicit file has been set, if not,
         //look in WEB-INF/jetty-env.xml
@@ -145,10 +146,10 @@ public class EnvConfiguration implements Configuration
         //get rid of any bindings only defined for the webapp
         ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(webAppContext.getClassLoader());
-        NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
+        NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
         unbindLocalNamingEntries();
         compCtx.destroySubcontext("env");
-        NamingEntry.setScope(NamingEntry.SCOPE_GLOBAL);
+        NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
         Thread.currentThread().setContextClassLoader(oldLoader);
     }
     
@@ -161,15 +162,16 @@ public class EnvConfiguration implements Configuration
     throws NamingException
     {
         Log.debug("Finding global env entries");
-        List  list = NamingEntryUtil.lookupNamingEntries (NamingEntry.SCOPE_GLOBAL, EnvEntry.class);
+        
+        List  list = EnvEntry.lookupGlobalEnvEntries();
         Iterator itor = list.iterator();
         
-        Log.debug("Finding env entries: size="+list.size());
+        System.err.println("Finding env entries: size="+list.size());
         while (itor.hasNext())
         {
             EnvEntry ee = (EnvEntry)itor.next();
-            Log.debug("configuring env entry "+ee.getJndiName());
-            ee.bindToENC();
+            System.err.println("configuring env entry "+ee.getJndiName());
+            ee.bindToENC(ee.getJndiName());
         }
     }
     
@@ -180,9 +182,12 @@ public class EnvConfiguration implements Configuration
     public void unbindLocalNamingEntries ()
     throws NamingException
     {
-        List  list = NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, EnvEntry.class);
-        list.addAll(NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, Resource.class));
-        list.addAll(NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_LOCAL, Transaction.class));
+        //YODO is this necessary??? Why not just cut loose the context at java:comp/env??
+   
+        /*
+        List  list = NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_WEBAPP, EnvEntry.class);
+        list.addAll(NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_WEBAPP, Resource.class));
+        list.addAll(NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_WEBAPP, Transaction.class));
         
         Iterator itor = list.iterator();
         
@@ -194,6 +199,8 @@ public class EnvConfiguration implements Configuration
             ne.unbindENC();
             ne.release();
         }
+        */
+        
     }
     
 }

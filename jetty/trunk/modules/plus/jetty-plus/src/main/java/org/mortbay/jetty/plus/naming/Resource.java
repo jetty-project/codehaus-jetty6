@@ -27,14 +27,6 @@ import javax.naming.NamingException;
  */
 public class Resource extends NamingEntry
 {
-  
-    public static Resource getResource (int scopeType, String jndiName)
-    throws NamingException
-    {
-        return (Resource)NamingEntryUtil.lookupNamingEntry (scopeType, Resource.class, jndiName);
-    }
-    
-    
     
     
     /**

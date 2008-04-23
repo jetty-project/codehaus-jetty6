@@ -1,6 +1,7 @@
 jetty-7.0-SNAPSHOT
  + Allow annotations example to be built regularly, copy to contexts-available
  + Make annotations example consistent with servlet 3.0
+ + Refactor JNDI impl to simplify
 
 jetty-7.0.0pre0 - 21 April 2008
  + Jetty-6.1.8 Changes

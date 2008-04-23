@@ -43,7 +43,7 @@ public class TestAnnotationInheritance extends TestCase
     public void testInheritance ()
     throws Exception
     {        
-        NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
+        NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
         
         AnnotationParser processor = new AnnotationParser();
         AnnotationCollection collection = processor.processClass(ClassB.class);
@@ -83,7 +83,7 @@ public class TestAnnotationInheritance extends TestCase
         assertTrue(fields.indexOf(f) >= 0);
         
      
-        NamingEntry.setScope(NamingEntry.SCOPE_GLOBAL);
+        NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
     }
     
     
@@ -97,7 +97,7 @@ public class TestAnnotationInheritance extends TestCase
         org.mortbay.jetty.plus.naming.EnvEntry resourceA = new org.mortbay.jetty.plus.naming.EnvEntry("resA", new Integer(1000));
         org.mortbay.jetty.plus.naming.EnvEntry resourceB = new org.mortbay.jetty.plus.naming.EnvEntry("resB", new Integer(2000));
         
-        NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
+        NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
         
         AnnotationParser processor = new AnnotationParser();
         processor.processClass(ResourceB.class);
@@ -135,9 +135,20 @@ public class TestAnnotationInheritance extends TestCase
         
         List fieldInjections = injections.getFieldInjections(ResourceB.class);
         assertNotNull(fieldInjections);
+        
+        Iterator itor = fieldInjections.iterator();
+        System.err.println("Field injections:");
+        while (itor.hasNext())
+        {
+            System.err.println(itor.next());
+        }
         assertEquals(5, fieldInjections.size());
         
         List methodInjections = injections.getMethodInjections(ResourceB.class);
+        itor = methodInjections.iterator();
+        System.err.println("Method injections:");
+        while (itor.hasNext())
+            System.err.println(itor.next());
         assertNotNull(methodInjections);
         assertEquals(3, methodInjections.size());
     }
