@@ -13,9 +13,7 @@
   <modules>
     <module>async-webservices-example-webapp</module>
     <module>jaas-example-webapp</module>
-    <!--
     <module>jetty-annotation-example-webapp</module>
-    -->
     <module>jetty-embedded</module>
     <module>jetty-example-webapp</module>
     <module>jetty-extra-example-webapp</module>
