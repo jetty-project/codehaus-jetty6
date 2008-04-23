@@ -114,6 +114,8 @@ public class Request implements HttpServletRequest
     private String _characterEncoding;
     private String _queryEncoding;
     private String _serverName;
+    private String _remoteAddr;
+    private String _remoteHost;
     private String _method;
     private String _pathInfo;
     private int _port;
@@ -863,6 +865,8 @@ public class Request implements HttpServletRequest
      */
     public String getRemoteAddr()
     {
+        if (_remoteAddr != null)
+            return _remoteAddr;	
         return _endp==null?null:_endp.getRemoteAddr();
     }
 
@@ -873,8 +877,14 @@ public class Request implements HttpServletRequest
     public String getRemoteHost()
     {
         if (_dns)
+        {
+            if (_remoteHost != null)
+            {
+                return _remoteHost;
+            }
             return _endp==null?null:_endp.getRemoteHost();
-        return _endp==null?null:_endp.getRemoteAddr();
+        }
+        return getRemoteAddr();
     }
 
     /* ------------------------------------------------------------ */
@@ -1437,11 +1447,29 @@ public class Request implements HttpServletRequest
     
     /* ------------------------------------------------------------ */
     /**
-     * @param host The host to set.
+     * @param port The port to set.
      */
     public void setServerPort(int port)
     {
         _port = port;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param addr The address to set.
+     */
+    public void setRemoteAddr(String addr)
+    {
+        _remoteAddr = addr;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param host The host to set.
+     */
+    public void setRemoteHost(String host)
+    {
+        _remoteHost = host;
     }
     
     /* ------------------------------------------------------------ */
