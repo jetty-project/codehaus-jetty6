@@ -15,15 +15,10 @@ public class Link extends NamingEntry
     }
 
 
-    public void bindToENC() throws NamingException
-    {
-      throw new UnsupportedOperationException();
-    }
 
-
-    public void bindToENC(String overrideName) throws NamingException
+    public void bindToENC(String localName) throws NamingException
     {
-      throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Method not supported for Link objects");
     }
     
 

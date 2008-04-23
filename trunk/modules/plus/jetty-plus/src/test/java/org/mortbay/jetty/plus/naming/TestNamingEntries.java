@@ -145,19 +145,105 @@ public class TestNamingEntries extends TestCase
         this.someObject = new SomeObject(4);
     }
 
-    public void testEnvEntry ()
+    public void testEnvEntryOverride ()
+    throws Exception
+    {        
+        Context compCtx = null;
+        Context envCtx = null;
+
+        try
+        {
+            InitialContext icontext = new InitialContext();
+            compCtx =  (Context)icontext.lookup ("java:comp");
+            envCtx = compCtx.createSubcontext("env");
+
+            //override webxml
+            EnvEntry ee = new EnvEntry ("nameA", someObject, true);
+            NamingEntry ne = NamingEntryUtil.lookupNamingEntry("nameA");
+            assertNotNull(ne);
+            assertTrue(ne.isGlobal());
+            assertTrue(ne instanceof EnvEntry);
+            Object x = icontext.lookup("nameA");
+            assertNotNull(x);
+            assertEquals(x, someObject);
+
+            EnvEntry.bindToENC("nameA", "foo");
+            assertFalse("foo".equals(envCtx.lookup("nameA")));
+        }
+        finally 
+        {
+            compCtx.destroySubcontext("env");
+            NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
+        }
+    }
+    
+    public void testEnvEntryNonOverride ()
     throws Exception
     {
-        InitialContext icontext = new InitialContext();
-        
-        //override webxml
-        EnvEntry ee = new EnvEntry ("nameA", someObject, true);
-        assertNotNull(EnvEntry.getEnvEntry(NamingEntry.SCOPE_GLOBAL,"nameA"));
-        assertTrue(EnvEntry.getEnvEntry(NamingEntry.SCOPE_GLOBAL, "nameA") instanceof EnvEntry);
-        Object x = icontext.lookup("nameA");
-        assertNotNull(x);
-        assertEquals(x, someObject);
+        Context compCtx = null;
+        Context envCtx = null;
+        try
+        {
+            InitialContext icontext = new InitialContext();        
+            compCtx =  (Context)icontext.lookup ("java:comp");
+            envCtx = compCtx.createSubcontext("env");
+
+            EnvEntry ee = new EnvEntry ("nameA", someObject, false);
+            EnvEntry.bindToENC("nameA", "foo");
+            assertTrue("foo".equals(icontext.lookup("java:/comp/env/nameA")));
+        }
+        finally
+        {
+            compCtx.destroySubcontext("env");
+            NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
+        }
     }
+    
+    
+    public void testEnvEntryOverrideLocal ()
+    throws Exception
+    {
+        Context compCtx = null;
+        Context envCtx = null;
+        try
+        {
+            InitialContext icontext = new InitialContext();        
+            compCtx =  (Context)icontext.lookup ("java:comp");
+            envCtx = compCtx.createSubcontext("env");
+            NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
+            EnvEntry ee = new EnvEntry ("nameA", "bar", true);
+            EnvEntry.bindToENC("nameA", "foo");
+            assertTrue("bar".equals(icontext.lookup("java:/comp/env/nameA")));
+        }
+        finally
+        {
+            compCtx.destroySubcontext("env");
+            NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
+        }
+    }
+    
+    public void testEnvEntryNonOverrideLocal()
+    throws Exception
+    {
+        Context compCtx = null;
+        Context envCtx = null;
+        try
+        {
+            InitialContext icontext = new InitialContext();        
+            compCtx =  (Context)icontext.lookup ("java:comp");
+            envCtx = compCtx.createSubcontext("env");
+            NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
+            EnvEntry ee = new EnvEntry ("nameA", "bar", false);
+            EnvEntry.bindToENC("nameA", "foo");
+            assertTrue("foo".equals(icontext.lookup("java:/comp/env/nameA")));
+        }
+        finally
+        {
+            compCtx.destroySubcontext("env");
+            NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
+        }
+    }
+    
     
     public void testResource ()
     throws Exception
@@ -165,8 +251,10 @@ public class TestNamingEntries extends TestCase
         InitialContext icontext = new InitialContext();
  
         Resource resource = new Resource ("resourceA", someObject);
-        assertNotNull(Resource.getResource(NamingEntry.SCOPE_GLOBAL, "resourceA"));
-        assertTrue(Resource.getResource(NamingEntry.SCOPE_GLOBAL, "resourceA") instanceof Resource);
+        NamingEntry ne = NamingEntryUtil.lookupNamingEntry("resourceA");
+        assertNotNull(ne);
+        assertTrue(ne.isGlobal());
+        assertTrue(ne instanceof Resource);
         assertEquals(icontext.lookup("resourceA"), someObject);
     }
     
@@ -175,9 +263,36 @@ public class TestNamingEntries extends TestCase
     {
         InitialContext icontext = new InitialContext();
         Link link = new Link ("resourceA", "resourceB");
-        assertTrue(NamingEntryUtil.exists(NamingEntry.SCOPE_GLOBAL, Link.class, "resourceA"));
-        assertTrue(NamingEntryUtil.lookupNamingEntry(NamingEntry.SCOPE_GLOBAL, Link.class, "resourceA") instanceof Link);
+        NamingEntry ne = NamingEntryUtil.lookupNamingEntry("resourceA");
+        assertNotNull(ne);
+        assertTrue(ne.isGlobal());
+        assertTrue(ne instanceof Link);
         assertEquals(icontext.lookup("resourceA"), "resourceB");
+    }
+    
+    public void testLinkLocal ()
+    throws Exception
+    {        
+        InitialContext icontext = new InitialContext();
+        Context compCtx =  (Context)icontext.lookup ("java:comp");
+        Context envCtx = compCtx.createSubcontext("env");
+        try
+        {
+
+            NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
+            Link link = new Link ("jdbc/resourceX", "jdbc/resourceY");
+            assertNotNull(envCtx.lookup("__jdbc/resourceX"));        
+            NamingEntry ne = NamingEntryUtil.lookupNamingEntry("jdbc/resourceX");        
+            assertTrue(ne.isLocal());
+            assertTrue(ne instanceof Link);
+            assertEquals(envCtx.lookup("jdbc/resourceX"), "jdbc/resourceY");
+        }
+        finally
+        {
+            compCtx.destroySubcontext("env");
+            NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
+        }
+
     }
     
     
@@ -203,8 +318,10 @@ public class TestNamingEntries extends TestCase
         
         InitialContext icontext = new InitialContext();
         Resource resource = new Resource ("resourceByRef", ref);
-        assertNotNull(Resource.getResource(NamingEntry.SCOPE_GLOBAL, "resourceByRef"));
-        assertTrue (Resource.getResource(NamingEntry.SCOPE_GLOBAL, "resourceByRef") instanceof Resource);
+        NamingEntry ne = NamingEntryUtil.lookupNamingEntry("resourceByRef");
+        assertNotNull(ne);
+        assertTrue(ne.isGlobal());
+        assertTrue (ne instanceof Resource);
         Object o = icontext.lookup("resourceByRef");
         assertNotNull (o);
         assertTrue (o instanceof SomeObject);

@@ -219,30 +219,16 @@ public class AnnotationCollection
                         //make it optional to use the mappedName to represent the JNDI name of the resource in
                         //the runtime environment. If present the mappedName would represent the JNDI name set
                         //for a Resource entry in jetty.xml or jetty-env.xml.
-                        if (type!=null && isEnvEntryType(type))
-                            org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.EnvEntry.class);
-                        else
-                        {
+                        //if (type!=null && isEnvEntryType(type))
+                        //{  
+                            org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name, mappedName);
+                        //}
+                       // else
+                        //{
                             //try all types of naming resources to see what the name has been bound as
-                            try
-                            {
-                                //try a non-EnvEntry, non-Transaction type first
-                                org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Resource.class);
-                            }
-                            catch (NameNotFoundException e)
-                            {
-                                //try an EnvEntry
-                                try
-                                {
-                                    org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.EnvEntry.class);
-                                }
-                                catch (NameNotFoundException x)
-                                {
-                                    //try a Transaction type
-                                    org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Transaction.class);
-                                }
-                            }
-                        }
+                        //    org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name, mappedName);
+                         
+                        //}
                     }
                     catch (NamingException e)
                     {
@@ -283,7 +269,7 @@ public class AnnotationCollection
                    //make it optional to use the mappedName to represent the JNDI name of the resource in
                    //the runtime environment. If present the mappedName would represent the JNDI name set
                    //for a Resource entry in jetty.xml or jetty-env.xml.
-                   org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, org.mortbay.jetty.plus.naming.Resource.class);
+                   org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name,mappedName);
                }
                catch (NamingException e)
                {
@@ -329,6 +315,7 @@ public class AnnotationCollection
                 
                 Class type = m.getParameterTypes()[0];
 
+               
                 //get other parts that can be specified in @Resource
                 Resource.AuthenticationType auth = resource.authenticationType();
                 boolean shareable = resource.shareable();
@@ -347,7 +334,8 @@ public class AnnotationCollection
                 {
                     try
                     {
-                        org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
+                        org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name, mappedName);
+
                         Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it
                         Injection injection = new Injection();
@@ -429,16 +417,16 @@ public class AnnotationCollection
                 //get other parts that can be specified in @Resource
                 Resource.AuthenticationType auth = resource.authenticationType();
                 boolean shareable = resource.shareable();
-                
+                System.err.println("Name="+name+" mappedName="+mappedName);
                 //check if an injection has already been setup for this target by web.xml
                 Injection webXmlInjection = webXmlInjections.getInjection(getTargetClass(), f);
                 if (webXmlInjection == null)
                 {
                     try
                     {
-                         //Check there is a JNDI entry for this annotation 
-                        org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC((mappedName==null?name:mappedName), name, getNamingEntryType(type));
-                        
+                        //Check there is a JNDI entry for this annotation 
+                        org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name, mappedName);
+
                         Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
                         //   Make the Injection for it if the binding succeeded
                         Injection injection = new Injection();
@@ -447,6 +435,7 @@ public class AnnotationCollection
                         injection.setMappingName(mappedName);
                         injection.setTarget(f);
                         webXmlInjections.add(injection); 
+
                     }
                     catch (NamingException e)
                     {
