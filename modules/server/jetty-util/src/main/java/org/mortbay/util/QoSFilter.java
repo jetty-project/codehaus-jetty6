@@ -61,9 +61,9 @@ public class QoSFilter implements Filter
 
                 if (!accepted)
                 {
+                    request.suspend();
                     int priority = getPriority(request);
                     _queue[priority].add(request);
-                    request.suspend();
                     return;
                 }
             }
