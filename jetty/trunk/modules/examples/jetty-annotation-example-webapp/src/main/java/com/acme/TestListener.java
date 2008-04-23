@@ -120,4 +120,22 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
         // System.err.println("sessionDestroyed "+se);
     }
 
+    public void requestCompleted(ServletRequestEvent rre)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void requestResumed(ServletRequestEvent rre)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void requestSuspended(ServletRequestEvent rre)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
