@@ -25,7 +25,7 @@
             <configuration>
               <tasks>
                 <delete failonerror="false" includeemptydirs="true">
-                  <fileset dir="../../../contexts/">
+                  <fileset dir="../../../contexts-available/">
                     <include name="test-annotations.d/**"/>
                     <include name="test-annotations.xml"/>
                   </fileset>
@@ -58,8 +58,8 @@
             </goals>
             <configuration>
               <tasks>
-                <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../../contexts/test-annotations.d/"></unjar>
-                <copy file="target/config/annotations-context.xml" tofile="../../../contexts/test-annotations.xml" overwrite="true"/>
+                <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../../contexts-available/test-annotations.d/"></unjar>
+                <copy file="target/config/annotations-context.xml" tofile="../../../contexts-available/test-annotations.xml" overwrite="true"/>
               </tasks>
             </configuration>
           </execution>
