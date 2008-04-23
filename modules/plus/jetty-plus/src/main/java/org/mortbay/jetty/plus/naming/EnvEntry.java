@@ -15,8 +15,15 @@
 
 package org.mortbay.jetty.plus.naming;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
 import org.mortbay.log.Log;
@@ -32,58 +39,70 @@ public class EnvEntry extends NamingEntry
 {
     private boolean overrideWebXml;
     
-    public static EnvEntry getEnvEntry (int scopeType, String jndiName)
-    throws NamingException
-    {
-       return (EnvEntry)NamingEntryUtil.lookupNamingEntry(scopeType, EnvEntry.class, jndiName);
-    }
-    
-    
     
     /**
-     * @param name
-     * @param value
+     * Bind a name and value to java:comp/env, taking into account
+     * any overriding EnvEntrys in the environment, either local or global.
+     * 
+     * @param name the name from web.xml env-entry
+     * @param value the value from web.xml env-entry
      * @throws NamingException
      */
-    public static void bindToENC (String name, String overrideName, Object value)
+    public static void bindToENC (String name, Object value)
     throws NamingException
     {       
         if (name==null||name.trim().equals(""))
             throw new NamingException("No name for EnvEntry");
-        if (overrideName==null||overrideName.trim().equals(""))
-            overrideName = name;
-        
-        //if a locally scoped EnvEntry is present (which takes precedence over globally scoped EnvEntry of the same name)
-        //then it should be bound to the ENC
-        EnvEntry envEntry = EnvEntry.getEnvEntry(NamingEntry.SCOPE_LOCAL, name);
-        if ((envEntry != null) && envEntry.isOverrideWebXml())
+
+        //Is there an EnvEntry with the same name? If so, check its overrideWebXml setting. If true,
+        //it's value should be used instead of the one supplied in web.xml - as the name matches, then in
+        //fact the value is already bound, so there's nothing to do . If false, use the value
+        //from web.xml. In the case where the EnvEntry has been scoped only to the webapp (ie it was
+        //in jetty-env.xml).
+        EnvEntry envEntry = (EnvEntry)NamingEntryUtil.lookupNamingEntry(name);
+        if (envEntry!=null && envEntry.isOverrideWebXml())
+            envEntry.bindToENC(name);
+        else
         {
-            if (!overrideName.equals(name))
-                envEntry.bindToENC(overrideName);
-            else
-                envEntry.bindToENC();
-            return;
+            //No EnvEntry, or it wasnt set to override, so just bind the value from web.xml
+            InitialContext ic = new InitialContext();
+            Context envCtx = (Context)ic.lookup("java:comp/env");
+            NamingUtil.bind(envCtx, name, value);
+            System.err.println("Bound java:comp/env/"+name+"="+value);
+        }     
+    }
+    
+    public static List lookupGlobalEnvEntries ()
+    throws NamingException
+    {
+        ArrayList list = new ArrayList();
+        lookupEnvEntries(list, new InitialContext());
+        return list;
+    }
+    
+    private static List lookupEnvEntries (List list, Context context)
+    throws NamingException
+    {
+        try
+        {
+            NamingEnumeration nenum = context.listBindings("");
+            while (nenum.hasMoreElements())
+            {
+                Binding binding = (Binding)nenum.next();
+                if (binding.getObject() instanceof Context)
+                    lookupEnvEntries (list, (Context)binding.getObject());
+                else if (EnvEntry.class.isInstance(binding.getObject()))
+                  list.add(binding.getObject());
+            }
+        }
+        catch (NameNotFoundException e)
+        {
+            Log.debug("No EnvEntries in context="+context);
         }
 
-        //otherwise, we either have no locally scoped EnvEntry, or it was not
-        //supposed to override what is in web.xml, so check to see if we have
-        //a global scoped EnvEntry that should override web.xml
-        envEntry = EnvEntry.getEnvEntry(NamingEntry.SCOPE_GLOBAL, name);
-        if ((envEntry != null) && envEntry.isOverrideWebXml())
-        {
-            if(!overrideName.equals(name))
-                envEntry.bindToENC(overrideName);
-            else
-                envEntry.bindToENC();
-            return;
-        }
-        
-        //No EnvEntrys of this name, so we use the value from web.xml
-        InitialContext ic = new InitialContext();
-        Context envCtx = (Context)ic.lookup("java:comp/env");
-        NamingUtil.bind(envCtx, name, value);
-        Log.debug("Bound java:comp/env/"+name+"="+value);  
+        return list;
     }
+
     
     
     public EnvEntry (String jndiName, Object objToBind)
@@ -103,19 +122,5 @@ public class EnvEntry extends NamingEntry
     public boolean isOverrideWebXml ()
     {
         return this.overrideWebXml;
-    }
-    
-    /** Bind the object wrapped in this EnvEntry into java:comp/env.
-     * If, however, it is set to NOT override the web.xml entry,
-     * then don't bind it. This method works in conjunction with
-     * org.mortbay.jetty.plus.webapp.Configuration.bindEnvEntry().
-     * TODO clean this up
-     * @see org.mortbay.jetty.plus.naming.NamingEntry#bindToENC()
-     * @throws NamingException
-     */
-    public void bindToENC ()
-    throws NamingException
-    {
-        super.bindToENC();
     }
 }
