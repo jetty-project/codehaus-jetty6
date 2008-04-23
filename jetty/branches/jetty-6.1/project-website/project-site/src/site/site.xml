@@ -20,7 +20,7 @@
       <item name="Jetty Powered" href="http://docs.codehaus.org/display/JETTY/Jetty+Powered"/>
     </menu>
     <menu name="Resources">
-      <item name="Downloads" href="http://docs.codehaus.org/display/JETTY/Downloading+and+Installing#download"/>
+      <item name="Downloads" href="http://docs.codehaus.org/display/JETTY/Downloading+Jetty"/>
       <item name="Resources" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
       <item name="Documentation" href="http://docs.codehaus.org/display/JETTY/Jetty+Wiki"/>
       <item name="JavaDoc" href="apidocs/index.html"/>
