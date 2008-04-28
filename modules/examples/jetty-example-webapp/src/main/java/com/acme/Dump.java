@@ -154,8 +154,9 @@ public class Dump extends HttpServlet
             }).start();
         }
         
-        if (request.isInitial() && request.getParameter("suspend")!=null)
+        if (request.getAttribute("Dump"+this.hashCode())==null && request.getParameter("suspend")!=null)
         {
+            request.setAttribute("Dump"+this.hashCode(),Boolean.TRUE);
             final long suspend=Long.parseLong(request.getParameter("suspend"));
             request.suspend(suspend);
             return;
