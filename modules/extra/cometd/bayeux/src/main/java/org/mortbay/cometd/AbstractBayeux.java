@@ -59,7 +59,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     public static final ChannelId META_SUBSCRIBE_ID=new ChannelId(META_SUBSCRIBE);
     public static final ChannelId META_UNSUBSCRIBE_ID=new ChannelId(META_UNSUBSCRIBE);
     
-    protected static JSON.Literal TRANSPORTS=new JSON.Literal("[\""+Bayeux.TRANSPORT_LONG_POLL+ "\",\""+Bayeux.TRANSPORT_CALLBACK_POLL+"\"]");
 
     private static final Map<String,Object> EXT_JSON_COMMENTED=new HashMap<String,Object>(2){
         {
@@ -94,8 +93,8 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     protected Handler _publishHandler;
     protected Handler _metaPublishHandler;
    
-    
     protected List<Extension> _extensions=new CopyOnWriteArrayList<Extension>();
+    protected JSON.Literal _transports=new JSON.Literal("[\""+Bayeux.TRANSPORT_LONG_POLL+ "\",\""+Bayeux.TRANSPORT_CALLBACK_POLL+"\"]");
     
     /* ------------------------------------------------------------ */
     /**
@@ -1001,7 +1000,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
 
             if (client!=null)
             {
-                reply.put("supportedConnectionTypes",TRANSPORTS);
+                reply.put("supportedConnectionTypes",_transports);
                 reply.put("successful",Boolean.TRUE);
                 reply.put(CLIENT_FIELD,client.getId());
                 if (_advice!=null)
