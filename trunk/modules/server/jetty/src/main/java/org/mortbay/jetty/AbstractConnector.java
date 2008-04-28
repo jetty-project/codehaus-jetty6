@@ -16,7 +16,9 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.EndPoint;
@@ -31,6 +33,7 @@ import org.mortbay.thread.ThreadPool;
  * <li>Buffer management</li>
  * <li>Socket configuration</li>
  * <li>Base acceptor thread</li>
+ * <li>Optional reverse proxy headers checking</li>
  * </ul>
  * 
  * @author gregw
@@ -40,6 +43,7 @@ import org.mortbay.thread.ThreadPool;
 public abstract class AbstractConnector extends AbstractBuffers implements Connector
 {
     private String _name;
+    
     private Server _server;
     private ThreadPool _threadPool;
     private String _host;
@@ -52,6 +56,10 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     private int _acceptors=1;
     private int _acceptorPriorityOffset=0;
     private boolean _useDNS;
+    private boolean _forwarded;
+    private String _forwardedHostHeader = "X-Forwarded-Host";             // default to mod_proxy_http header
+    private String _forwardedServerHeader = "X-Forwarded-Server";         // default to mod_proxy_http header
+    private String _forwardedForHeader = "X-Forwarded-For";               // default to mod_proxy_http header
     private boolean _reuseAddress=true;
     
     protected int _maxIdleTime=200000; 
@@ -357,9 +365,75 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     /* ------------------------------------------------------------ */
     public void customize(EndPoint endpoint, Request request)
         throws IOException
-    {      
+    {
+        if (isForwarded())
+            checkForwardedHeaders(endpoint, request);
     }
-    
+
+    /* ------------------------------------------------------------ */
+    protected void checkForwardedHeaders(EndPoint endpoint, Request request)
+        throws IOException
+    {
+        HttpFields httpFields = request.getConnection().getRequestFields();
+        
+        // Retrieving headers from the request
+        String forwardedHost = getLeftMostValue(httpFields.getStringField(getForwardedHostHeader()));
+        String forwardedServer = getLeftMostValue(httpFields.getStringField(getForwardedServerHeader()));
+        String forwardedFor = getLeftMostValue(httpFields.getStringField(getForwardedForHeader()));
+        
+        if (forwardedHost != null)
+        {
+            // Update host header	
+            httpFields.put(HttpHeaders.HOST_BUFFER, forwardedHost);
+            request.setServerName(null);
+            request.setServerPort(-1);
+            request.getServerName();
+        }
+        
+        if (forwardedServer != null)
+        {
+            // Use provided server name
+            request.setServerName(forwardedServer);
+        }
+        
+        if (forwardedFor != null)
+        {
+            request.setRemoteAddr(forwardedFor);
+            InetAddress inetAddress = null;
+            
+            if (_useDNS)
+            {
+                try
+                {
+                    inetAddress = InetAddress.getByName(forwardedFor);
+                }
+                catch (UnknownHostException e)
+                {
+                    Log.ignore(e);
+                }
+            }
+            
+            request.setRemoteHost(inetAddress==null?forwardedFor:inetAddress.getHostName());
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    protected String getLeftMostValue(String headerValue) {
+        if (headerValue == null)
+            return null;
+        
+        int commaIndex = headerValue.indexOf(',');
+        
+        if (commaIndex == -1)
+        {
+            // Single value
+            return headerValue;
+        }
+
+        // The left-most value is the farthest downstream client
+        return headerValue.substring(0, commaIndex);
+    }
+
     /* ------------------------------------------------------------ */
     public void persist(EndPoint endpoint)
         throws IOException
@@ -477,6 +551,64 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     public void setResolveNames(boolean resolve)
     {
         _useDNS=resolve;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * Is reverse proxy handling on?
+     * @return true if this connector is checking the x-forwarded-for/host/server headers
+     */
+    public boolean isForwarded()
+    {
+        return _forwarded;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Set reverse proxy handling
+     * @param check true if this connector is checking the x-forwarded-for/host/server headers
+     */
+    public void setForwarded(boolean check)
+    {
+        if (check)
+            Log.debug(this+" is forwarded");
+        _forwarded=check;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getForwardedHostHeader()
+    {
+        return _forwardedHostHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setForwardedHostHeader(String forwardedHostHeader)
+    {
+        _forwardedHostHeader=forwardedHostHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getForwardedServerHeader()
+    {
+        return _forwardedServerHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setForwardedServerHeader(String forwardedServerHeader)
+    {
+        _forwardedServerHeader=forwardedServerHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getForwardedForHeader()
+    {
+        return _forwardedForHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setForwardedForHeader(String forwardedRemoteAddressHeade)
+    {
+        _forwardedForHeader=forwardedRemoteAddressHeade;
     }
     
     /* ------------------------------------------------------------ */
