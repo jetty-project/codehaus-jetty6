@@ -7,27 +7,23 @@
 
   <display-name>Test WebApp</display-name>
   
+  <!-- Declare TestListener, which declares TestFilter -->
   <listener>
     <listener-class>com.acme.TestListener</listener-class>
   </listener>
 
-  <!-- TestFilter is initialized by TestListener
+  <!--
   <filter>
-    <filter-name>TestFilter</filter-name>
-    <filter-class>com.acme.TestFilter</filter-class>
+    <filter-name>QoSFilter</filter-name>
+    <filter-class>org.mortbay.servlet.QoSFilter</filter-class>
+    <init-param>
+      <param-name>maxRequests</param-name>
+      <param-value>0</param-value>
+    </init-param>
   </filter>
-
   <filter-mapping>
-    <filter-name>TestFilter</filter-name>
-    <url-pattern>/dump/*</url-pattern>
-    <url-pattern>/dispatch/*</url-pattern>
-    <url-pattern>*.dump</url-pattern>
-    <servlet-name>*</servlet-name>
-    <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
-    <dispatcher>INCLUDE</dispatcher>
-    <dispatcher>ERROR</dispatcher>
-    <life-cycle>INITIAL</life-cycle>
+    <filter-name>QoSFilter</filter-name>
+    <url-pattern>/*</url-pattern>
   </filter-mapping>
   -->
 
