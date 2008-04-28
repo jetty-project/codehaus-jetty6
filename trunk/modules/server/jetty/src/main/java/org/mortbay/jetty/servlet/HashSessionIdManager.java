@@ -25,7 +25,7 @@ import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.servlet.AbstractSessionManager.Session;
 import org.mortbay.log.Log;
-import org.mortbay.util.ConcurrentMultiMap;
+import org.mortbay.util.MultiMap;
 
 /* ------------------------------------------------------------ */
 /**
@@ -37,7 +37,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
     protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
 
-    ConcurrentMultiMap _sessions;
+    MultiMap<String> _sessions;
     protected Random _random;
     private boolean _weakRandom;
     private String _workerName;
@@ -133,7 +133,7 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
             }
         }
         _random.setSeed(_random.nextLong()^System.currentTimeMillis()^hashCode()^Runtime.getRuntime().freeMemory());
-        _sessions=new ConcurrentMultiMap();
+        _sessions=new MultiMap<String>(true);
     }
 
     /* ------------------------------------------------------------ */
