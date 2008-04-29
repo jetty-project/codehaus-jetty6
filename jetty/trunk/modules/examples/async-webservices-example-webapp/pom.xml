@@ -8,22 +8,7 @@
   <artifactId>async-webservices-example-webapp</artifactId>
   <packaging>war</packaging>
   <name>Jetty Example :: cxf content aggregation webapp</name>
-  <licenses>
-    <license>
-      <name>Apache License Version 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
   <repositories>
-    <repository>
-      <id>apache.incubating.releases</id>
-      <name>
-        Apache Incubating Release Distribution Repository
-      </name>
-      <url>
-        http://people.apache.org/repo/m2-incubating-repository
-      </url>
-    </repository>
     <repository>
       <id>java.net</id>
       <url>http://download.java.net/maven/2</url>
@@ -41,19 +26,8 @@
       </releases>
     </repository>
    </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>apache.incubating.releases</id>
-      <name>
-        Apache Incubating Release Distribution Repository
-      </name>
-      <url>
-        http://people.apache.org/repo/m2-incubating-repository
-      </url>
-    </pluginRepository>
-  </pluginRepositories>
   <properties>
-    <cxf.version>2.0.2-incubator</cxf.version>
+    <cxf.version>2.1</cxf.version>
   </properties>
   <build>
     <plugins>
@@ -72,7 +46,7 @@
       <plugin>
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-codegen-plugin</artifactId>
-        <version>2.0.2-incubator</version>
+        <version>2.1</version>
         <executions>
           <execution>
             <id>generate-sources</id>
@@ -100,7 +74,7 @@
         <artifactId>jetty-maven-plugin</artifactId>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
-          <contextPath>/</contextPath>
+          <contextPath>/async</contextPath>
           <!-- <jettyEnvXml>src/jetty-env.xml</jettyEnvXml>-->
           <connectors>
             <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
