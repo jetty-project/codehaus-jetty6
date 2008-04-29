@@ -583,7 +583,7 @@ public class HashSessionManager extends AbstractSessionManager
             Class clazz;
             try
             {
-                return Thread.currentThread().getContextClassLoader().loadClass(cl.getName());
+                return Class.forName(cl.getName(), false, Thread.currentThread().getContextClassLoader());
             }
             catch (ClassNotFoundException e)
             {
