@@ -603,10 +603,9 @@ public class HashSessionManager extends AbstractSessionManager
         /* ------------------------------------------------------------ */
         public Class resolveClass (java.io.ObjectStreamClass cl) throws IOException, ClassNotFoundException
         {
-            Class clazz;
             try
             {
-                return Thread.currentThread().getContextClassLoader().loadClass(cl.getName());
+                return Class.forName(cl.getName(), false, Thread.currentThread().getContextClassLoader());
             }
             catch (ClassNotFoundException e)
             {
