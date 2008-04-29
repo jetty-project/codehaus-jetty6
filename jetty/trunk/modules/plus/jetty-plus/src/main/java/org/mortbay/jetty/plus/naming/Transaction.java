@@ -15,10 +15,7 @@
 
 package org.mortbay.jetty.plus.naming;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.LinkRef;
-import javax.naming.NamingException;
+import javax.naming.*;
 import javax.transaction.UserTransaction;
 
 import org.mortbay.log.Log;
@@ -45,7 +42,15 @@ public class Transaction extends NamingEntry
     throws NamingException
     {
         Transaction txEntry = (Transaction)NamingEntryUtil.lookupNamingEntry(Transaction.USER_TRANSACTION);
-        txEntry.bindToComp();
+
+        if ( txEntry != null )
+        {
+            txEntry.bindToComp();
+        }
+        else
+        {
+            throw new NameNotFoundException( USER_TRANSACTION + " not found" );
+        }
     }
  
     
