@@ -32,6 +32,22 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <copy file="target/${project.artifactId}-${project.version}.war" failonerror="false" tofile="../../../webapps/async.war"/>            
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-war-plugin</artifactId>
         <executions>
           <execution>
