@@ -6,6 +6,7 @@ jetty-7.0-SNAPSHOT
  + async web services example now an example app in release
  + JETTY-529 CNFE when deserializing Array from session resolved
  + JETTY-558 optional handling of X-Forwarded-For/Host/Server
+ + JETTY-566 allow for non-blocking behavior in jetty maven plugin
 
 jetty-7.0.0pre0 - 21 April 2008
  + Jetty-6.1.8 Changes
