@@ -23,6 +23,7 @@ import javax.xml.ws.BindingProvider;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.net.URL;
 
 import ebay.apis.eblbasecomponents.FindItemsRequestType;
 import ebay.apis.eblbasecomponents.Shopping;
@@ -44,7 +45,7 @@ public class AggregateAsyncCXFServlet extends HttpServlet
 
         try
         {
-            _shoppingPort = new Shopping().getShopping();
+            _shoppingPort = new Shopping(new URL("http://developer.ebay.com/webservices/551/ShoppingService.wsdl")).getShopping();
             BindingProvider bp = (BindingProvider) _shoppingPort;
 
             // retrieve the URL stub from the WSDL
