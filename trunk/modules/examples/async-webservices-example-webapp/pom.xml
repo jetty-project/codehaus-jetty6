@@ -72,7 +72,7 @@
               <wsdlOptions>
                 <wsdlOption>
                   <wsdl>${basedir}/src/main/wsdl/ShoppingService.wsdl</wsdl>
-                  <extraargs>
+                  <extraargs>                  
                     <extraarg>-b</extraarg>
                     <extraarg>${basedir}/src/main/wsdl/async_binding.xml</extraarg>
                   </extraargs>
@@ -131,7 +131,7 @@
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>servlet-api-3.0</artifactId>
       <version>${project.version}</version>
-      <scope>provided</scope>
+      <!--<scope>provided</scope> -->
     </dependency>
      <dependency>
       <groupId>log4j</groupId>
