@@ -98,9 +98,10 @@
         </configuration>
       </plugin>
       <!-- uncomment to precompile jsps -->
-      <!-- plugin>
+      <!--
+      <plugin>
           <groupId>org.mortbay.jetty</groupId>
-          <artifactId>maven-jetty-jspc-plugin</artifactId>
+          <artifactId>jetty-maven-jspc-plugin</artifactId>
           <version>${project.version}</version>
           <executions>
             <execution>
@@ -109,6 +110,8 @@
                 <goal>jspc</goal>
               </goals>
               <configuration>
+                 <includes>**/*.foo</includes>
+                 <excludes>**/*.fff</excludes>
               </configuration>
             </execution>
           </executions>
@@ -119,7 +122,8 @@
           <configuration>
             <webXml>${basedir}/target/web.xml</webXml>
           </configuration>
-       </plugin -->
+        </plugin>
+        -->
     </plugins>
   </build>
   <dependencies>
