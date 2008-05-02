@@ -97,6 +97,10 @@ public class ChannelEndPoint implements EndPoint
                         socket.shutdownOutput();
                 }
             }
+            catch(IOException e)
+            {
+                Log.ignore(e);
+            }
             catch(UnsupportedOperationException e)
             {
                 Log.ignore(e);
