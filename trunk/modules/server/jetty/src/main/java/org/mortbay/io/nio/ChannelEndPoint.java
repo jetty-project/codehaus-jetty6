@@ -27,6 +27,7 @@ import java.nio.channels.SocketChannel;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.log.Log;
 
 
 /**
@@ -95,6 +96,10 @@ public class ChannelEndPoint implements EndPoint
                     if (!socket.isClosed()&&!socket.isOutputShutdown())
                         socket.shutdownOutput();
                 }
+            }
+            catch(UnsupportedOperationException e)
+            {
+                Log.ignore(e);
             }
             finally
             {

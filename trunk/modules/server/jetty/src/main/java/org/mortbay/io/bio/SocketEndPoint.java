@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.mortbay.io.Portable;
+import org.mortbay.log.Log;
 
 /**
  * @author gregw
@@ -58,7 +59,16 @@ public class SocketEndPoint extends StreamEndPoint
     public void close() throws IOException
     {
         if (!_socket.isClosed() && !_socket.isOutputShutdown())
-            _socket.shutdownOutput();
+        {
+            try
+            {
+                _socket.shutdownOutput();
+            }
+            catch(UnsupportedOperationException e)
+            {
+                Log.ignore(e);
+            }
+        }
         _socket.close();
         _in=null;
         _out=null;
