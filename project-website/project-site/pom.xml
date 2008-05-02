@@ -59,7 +59,8 @@
               <workingDirectory>../..</workingDirectory>
               <arguments>
                 <argument>-Dmaven.test.skip=true</argument>
-                <argument>-Psite-generation</argument>
+                <argument>-Daggregate=true</argument>
+                <argument>-Pgenerate-site</argument>
                 <argument>jxr:jxr</argument>
                 <argument>javadoc:javadoc</argument>
               </arguments>
