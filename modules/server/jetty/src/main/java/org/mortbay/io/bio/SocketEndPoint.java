@@ -64,6 +64,10 @@ public class SocketEndPoint extends StreamEndPoint
             {
                 _socket.shutdownOutput();
             }
+            catch(IOException e)
+            {
+                Log.ignore(e);
+            }
             catch(UnsupportedOperationException e)
             {
                 Log.ignore(e);
