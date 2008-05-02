@@ -150,17 +150,17 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     /**
  	 * <p>
  	 * Determines whether or not the server blocks when started. The default
- 	 * behavior (integration = false) will cause the server to pause other processes
+ 	 * behavior (daemon = false) will cause the server to pause other processes
  	 * while it continues to handle web requests. This is useful when starting the
  	 * server with the intent to work with it interactively.
  	 * </p><p>
  	 * Often, it is desirable to let the server start and continue running subsequent
  	 * processes in an automated build environment. This can be facilitated by setting
- 	 * integration to true.
+ 	 * daemon to true.
  	 * </p>
- 	 * @parameter expression="${jetty.integration}" default-value="false"
+ 	 * @parameter expression="${jetty.daemon}" default-value="false"
  	 */
- 	protected boolean integration;
+ 	protected boolean daemon;
     
     /**
      * A scanner to check for changes to the webapp
@@ -376,8 +376,8 @@ public abstract class AbstractJettyMojo extends AbstractMojo
             configureScanner ();            
             startScanner();
 
-            // keep the thread going if not in integration mode
-            if (!integration)
+            // keep the thread going if not in daemon mode
+            if (!daemon)
             {
                 server.join();
             }
@@ -388,7 +388,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
         }
         finally
         {
-            if (!integration)
+            if (!daemon)
             {
                 getLog().info("Jetty server exiting.");
             }            
