@@ -20,6 +20,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.servlet.ServletRequest;
+
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
@@ -57,6 +59,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     private int _acceptorPriorityOffset=0;
     private boolean _useDNS;
     private boolean _forwarded;
+    private String _hostHeader;
     private String _forwardedHostHeader = "X-Forwarded-Host";             // default to mod_proxy_http header
     private String _forwardedServerHeader = "X-Forwarded-Server";         // default to mod_proxy_http header
     private String _forwardedForHeader = "X-Forwarded-For";               // default to mod_proxy_http header
@@ -381,7 +384,15 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
         String forwardedServer = getLeftMostValue(httpFields.getStringField(getForwardedServerHeader()));
         String forwardedFor = getLeftMostValue(httpFields.getStringField(getForwardedForHeader()));
         
-        if (forwardedHost != null)
+        if (_hostHeader!=null)
+        {
+            // Update host header       
+            httpFields.put(HttpHeaders.HOST_BUFFER, _hostHeader);
+            request.setServerName(null);
+            request.setServerPort(-1);
+            request.getServerName();
+        }
+        else if (forwardedHost != null)
         {
             // Update host header	
             httpFields.put(HttpHeaders.HOST_BUFFER, forwardedHost);
@@ -576,12 +587,33 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     }
     
     /* ------------------------------------------------------------ */
+    public String getHostHeader()
+    {
+        return _hostHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * Set a forced valued for the host header to control what is returned
+     * by {@link ServletRequest#getServerName()} and {@link ServletRequest#getServerPort()}.
+     * This value is only used if {@link #isForwarded()} is true.
+     * @param hostHeader The value of the host header to force.
+     */
+    public void setHostHeader(String hostHeader)
+    {
+        _hostHeader=hostHeader;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String getForwardedHostHeader()
     {
         return _forwardedHostHeader;
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param forwardedHostHeader The header name for forwarded hosts (default x-forwarded-host)
+     */
     public void setForwardedHostHeader(String forwardedHostHeader)
     {
         _forwardedHostHeader=forwardedHostHeader;
@@ -594,6 +626,9 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param forwardedHostHeader The header name for forwarded server (default x-forwarded-server)
+     */
     public void setForwardedServerHeader(String forwardedServerHeader)
     {
         _forwardedServerHeader=forwardedServerHeader;
@@ -606,6 +641,9 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param forwardedHostHeader The header name for forwarded for (default x-forwarded-for)
+     */
     public void setForwardedForHeader(String forwardedRemoteAddressHeade)
     {
         _forwardedForHeader=forwardedRemoteAddressHeade;

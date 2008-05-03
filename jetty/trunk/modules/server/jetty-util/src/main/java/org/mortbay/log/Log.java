@@ -130,7 +130,7 @@ public class Log
             __log.warn(IGNORED,th);
             unwind(th);
         }
-        if (__verbose)
+        else if (__verbose)
         {
             __log.warn(IGNORED,th);
             unwind(th);
