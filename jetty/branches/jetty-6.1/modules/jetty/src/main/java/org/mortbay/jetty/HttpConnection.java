@@ -506,7 +506,8 @@ public class HttpConnection implements Connection
             }
             catch (RetryRequest r)
             {
-                Log.ignore(r);
+                if (Log.isDebugEnabled())
+                    Log.ignore(r);
                 retrying = true;
             }
             catch (EofException e)
