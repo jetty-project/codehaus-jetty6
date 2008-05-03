@@ -3,7 +3,6 @@ jetty-7.0-SNAPSHOT
  + Make annotations example consistent with servlet 3.0
  + Refactor JNDI impl to simplify
  + Improved suspend examples
- + async web services example now an example app in release
  + JETTY-529 CNFE when deserializing Array from session resolved
  + JETTY-558 optional handling of X-Forwarded-For/Host/Server
  + JETTY-559 ignore unsupported shutdownOutput
