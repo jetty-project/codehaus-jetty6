@@ -3,11 +3,10 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-project</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0pre1</version>
   </parent>
   <artifactId>jetty-assembly</artifactId>
   <name>Jetty :: Assembly</name>
-  <version>7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <build>
     <finalName>jetty-${project.version}</finalName>
