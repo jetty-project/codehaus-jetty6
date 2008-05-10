@@ -23,7 +23,6 @@ import org.mortbay.log.Log;
  */
 public abstract class AbstractLifeCycle implements LifeCycle
 {
-    private Object _lock=new Object();
     private final int FAILED=-1,STOPPED=0,STARTING=1,STARTED=2,STOPPING=3;
     private transient int _state=STOPPED;
     protected void doStart() throws Exception {}
@@ -32,57 +31,51 @@ public abstract class AbstractLifeCycle implements LifeCycle
 
     public final void start() throws Exception
     {
-        synchronized (_lock)
+        try
         {
-            try
-            {
-                if (_state==STARTED || _state==STARTING)
-                    return;
-                _state=STARTING;
-                doStart();
-                Log.debug("started {}",this);
-                _state=STARTED;
-            }
-            catch (Exception e)
-            {
-                Log.warn("failed "+this,e);
-                _state=FAILED;
-                throw e;
-            }
-            catch(Error e)
-            {
-                Log.warn("failed "+this,e);
-                _state=FAILED;
-                throw e;
-            }
+            if (_state==STARTED)
+                return;
+            _state=STARTING;
+            doStart();
+            Log.debug("started {}",this);
+            _state=STARTED;
+        }
+        catch (Exception e)
+        {
+            Log.warn("failed "+this,e);
+            _state=FAILED;
+            throw e;
+        }
+        catch(Error e)
+        {
+            Log.warn("failed "+this,e);
+            _state=FAILED;
+            throw e;
         }
     }
 
     public final void stop() throws Exception
     {
-        synchronized (_lock)
+        try
         {
-            try
-            {
-                if (_state==STOPPING || _state==STOPPED)
-                    return;
-                _state=STOPPING;
-                doStop();
-                Log.debug("stopped {}",this);
-                _state=STOPPED;
-            }
-            catch (Exception e)
-            {
-                Log.warn("failed "+this,e);
-                _state=FAILED;
-                throw e;
-            }
-            catch(Error e)
-            {
-                Log.warn("failed "+this,e);
-                _state=FAILED;
-                throw e;
-            }
+            if (_state==STOPPING || _state==STOPPED)
+                return;
+            _state=STOPPING;
+            doStop();
+            Log.debug("stopped {}",this);
+            _state=STOPPED;
+        }
+        catch (Exception e)
+        {
+            Log.warn("failed "+this,e);
+            _state=FAILED;
+            throw e;
+        }
+        catch(Error e)
+        {
+            Log.warn("failed "+this,e);
+            _state=FAILED;
+            throw e;
         }
     }
 
