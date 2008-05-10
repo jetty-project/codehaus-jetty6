@@ -101,7 +101,7 @@ public class CometdDemo
         cometd_holder.setInitParameter("interval","0");
         cometd_holder.setInitParameter("maxInterval","10000");
         cometd_holder.setInitParameter("multiFrameInterval","1500");
-        cometd_holder.setInitParameter("JSONCommented","true");
+        cometd_holder.setInitParameter("JSONCommented","false");
         cometd_holder.setInitParameter("logLevel","1");
         
         context.addServlet(cometd_holder, "/cometd/*");
