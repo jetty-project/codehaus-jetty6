@@ -14,7 +14,6 @@
 
 package org.mortbay.jetty.servlet;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,7 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.WriterOutputStream;
-import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpContent;
@@ -192,6 +190,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 if (max_cache_size==-2 || max_cache_size>0)
                 {
                     _nioCache=new NIOResourceCache(_mimeTypes);
+                    _nioCache.setUseFileMappedBuffer(_useFileMappedBuffer);
                     if (max_cache_size>0)
                         _nioCache.setMaxCacheSize(max_cache_size);    
                     if (max_cached_file_size>=-1)
@@ -891,49 +890,5 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             _resource=null;
         }
         
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    class NIOResourceCache extends ResourceCache
-    {
-        /* ------------------------------------------------------------ */
-        public NIOResourceCache(MimeTypes mimeTypes)
-        {
-            super(mimeTypes);
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void fill(Content content) throws IOException
-        {
-            Buffer buffer=null;
-            Resource resource=content.getResource();
-            long length=resource.length();
-
-            if (_useFileMappedBuffer && resource.getFile()!=null) 
-            {    
-                File file = resource.getFile();
-                if (file != null) 
-                    buffer = new NIOBuffer(file);
-            } 
-            else 
-            {
-                InputStream is = resource.getInputStream();
-                try
-                {
-                    Connector connector = HttpConnection.getCurrentConnection().getConnector();
-                    buffer = new NIOBuffer((int) length, ((NIOConnector)connector).getUseDirectBuffers()?NIOBuffer.DIRECT:NIOBuffer.INDIRECT);
-                }
-                catch(OutOfMemoryError e)
-                {
-                    Log.warn(e.toString());
-                    Log.debug(e);
-                    buffer = new NIOBuffer((int) length, NIOBuffer.INDIRECT);
-                }
-                buffer.readFrom(is,(int)length);
-                is.close();
-            }
-            content.setBuffer(buffer);
-        }
     }
 }
