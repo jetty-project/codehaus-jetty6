@@ -45,6 +45,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     protected transient Content _mostRecentlyUsed;
     protected transient Content _leastRecentlyUsed;
 
+
     /* ------------------------------------------------------------ */
     /** Constructor.
      */
@@ -184,20 +185,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         {
             long len = resource.length();
             if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
-            {   
-                int must_be_smaller_than=_maxCacheSize-(int)len;
-                
-                synchronized(_cache)
-                {
-                    // check the cache is not full of locked content before loading content
-
-                    while(_leastRecentlyUsed!=null && (_cachedSize>must_be_smaller_than || (_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles)))
-                        _leastRecentlyUsed.invalidate();
-                    
-                    if(_cachedSize>must_be_smaller_than || (_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles))
-                        return null;
-                }
-                
+            {
                 content = new Content(resource);
                 fill(content);
 
@@ -211,12 +199,9 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                         return content2;
                     }
 
-                    while(_leastRecentlyUsed!=null && (_cachedSize>must_be_smaller_than || (_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles)))
+                    int must_be_smaller_than=_maxCacheSize-(int)len;
+                    while(_cachedSize>must_be_smaller_than || (_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles))
                         _leastRecentlyUsed.invalidate();
-                    
-                    if(_cachedSize>must_be_smaller_than || (_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles))
-                        return null; // this could waste an allocated File or DirectBuffer
-                    
                     content.cache(pathInContext);
                     
                     return content;
@@ -228,23 +213,13 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     }
 
     /* ------------------------------------------------------------ */
-    /** Remember a Resource Miss!
-     * @param pathInContext
-     * @param resource
-     * @throws IOException
-     */
     public void miss(String pathInContext, Resource resource)
         throws IOException
     {
+        Miss miss = new Miss(resource);
         synchronized(_cache)
         {
-            while(_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles && _leastRecentlyUsed!=null)
-                _leastRecentlyUsed.invalidate();
-            if (_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles)
-                return;
-            
             // check that somebody else did not fill this spot.
-            Miss miss = new Miss(resource);
             Content content2 =(Content)_cache.get(pathInContext);
             if (content2!=null)
             {
@@ -252,6 +227,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 return;
             }
 
+            while(_maxCachedFiles>0 && _cachedFiles>=_maxCachedFiles)
+                _leastRecentlyUsed.invalidate();
             miss.cache(pathInContext);
         }
     }
@@ -299,7 +276,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
      */
     public class Content implements HttpContent
     {
-        boolean _locked;
         String _key;
         Resource _resource;
         long _lastModified;
@@ -322,65 +298,18 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             _lastModified=resource.lastModified();
         }
 
-
-        /* ------------------------------------------------------------ */
-        /**
-         * @return true if the content is locked in the cache
-         */
-        public boolean isLocked()
-        {
-            return _locked;
-        }
-
-
-        /* ------------------------------------------------------------ */
-        /**
-         * @param locked true if the content is locked in the cache
-         */
-        public void setLocked(boolean locked)
-        {
-            synchronized (_cache)
-            {
-                if (_locked && !locked)
-                {
-                    _locked = locked;
-                    _next=_mostRecentlyUsed;
-                    _mostRecentlyUsed=this;
-                    if (_next!=null)
-                        _next._prev=this;
-                    _prev=null;
-                    if (_leastRecentlyUsed==null)
-                        _leastRecentlyUsed=this;
-                }
-                else if (!_locked && locked)
-                {
-                    if (_prev!=null)
-                        _prev._next=_next;
-                    if (_next!=null)
-                        _next._prev=_prev;
-                    _next=_prev=null;
-                }
-                else
-                    _locked = locked;
-            }
-        }
-
-
         /* ------------------------------------------------------------ */
         void cache(String pathInContext)
         {
             _key=pathInContext;
-            
-            if (!_locked)
-            {
-                _next=_mostRecentlyUsed;
-                _mostRecentlyUsed=this;
-                if (_next!=null)
-                    _next._prev=this;
-                _prev=null;
-                if (_leastRecentlyUsed==null)
-                    _leastRecentlyUsed=this;
-            }
+            _next=_mostRecentlyUsed;
+            _mostRecentlyUsed=this;
+            if (_next!=null)
+                _next._prev=this;
+            _prev=null;
+            if (_leastRecentlyUsed==null)
+                _leastRecentlyUsed=this;
+
             _cache.put(_key,this);
             if (_buffer!=null)
                 _cachedSize+=_buffer.length();
@@ -412,7 +341,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         {
             if (_lastModified==_resource.lastModified())
             {
-                if (!_locked && _mostRecentlyUsed!=this)
+                if (_mostRecentlyUsed!=this)
                 {
                     Content tp = _prev;
                     Content tn = _next;
@@ -516,7 +445,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         public InputStream getInputStream() throws IOException
         {
             return _resource.getInputStream();
-        }   
+        }
+        
     }
     
 

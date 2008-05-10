@@ -14,15 +14,17 @@ import org.mortbay.io.Buffers;
  */
 public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffers
 {
+    protected static int BUFFER_LOSS_RATE=256; // Leak buffers to shrink pools
+    
     private int _headerBufferSize=4*1024;
     private int _requestBufferSize=8*1024;
     private int _responseBufferSize=32*1024;
-    
+
     // Use and array of buffers to avoid contention
-    private transient ArrayList<Buffer> _headerBuffers=new ArrayList<Buffer>();
+    private transient ArrayList _headerBuffers=new ArrayList();
     protected transient int _loss;
-    private transient ArrayList<Buffer> _requestBuffers;
-    private transient ArrayList<Buffer> _responseBuffers;
+    private transient ArrayList _requestBuffers;
+    private transient ArrayList _responseBuffers;
 
     /* ------------------------------------------------------------ */
     /**
@@ -91,7 +93,7 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
             synchronized(_headerBuffers)
             {
                 if (_headerBuffers.size()>0)
-                    return _headerBuffers.remove(_headerBuffers.size()-1);
+                    return (Buffer) _headerBuffers.remove(_headerBuffers.size()-1);
             }
             return newBuffer(size);
         }
@@ -101,7 +103,7 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
             {
                 if (_responseBuffers.size()==0)
                     return newBuffer(size);
-                return _responseBuffers.remove(_responseBuffers.size()-1);
+                return (Buffer) _responseBuffers.remove(_responseBuffers.size()-1);
             }
         }
         else if (size==_requestBufferSize)
@@ -110,7 +112,7 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
             {
                 if (_requestBuffers.size()==0)
                     return newBuffer(size);
-                return _requestBuffers.remove(_requestBuffers.size()-1);
+                return (Buffer) _requestBuffers.remove(_requestBuffers.size()-1);
             }   
         }
         
@@ -121,6 +123,13 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     /* ------------------------------------------------------------ */
     public void returnBuffer(Buffer buffer)
     {
+        buffer.clear();
+        if (_loss++>BUFFER_LOSS_RATE)
+        {
+            _loss=0;
+            return;
+        }
+
         buffer.clear();
         if (!buffer.isVolatile() && !buffer.isImmutable())
         {
@@ -157,17 +166,17 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
         if (_headerBuffers!=null)
             _headerBuffers.clear();
         else
-            _headerBuffers=new ArrayList<Buffer>();
+            _headerBuffers=new ArrayList();
 
         if (_requestBuffers!=null)
             _requestBuffers.clear();
         else
-            _requestBuffers=new ArrayList<Buffer>();
+            _requestBuffers=new ArrayList();
         
         if (_responseBuffers!=null)
             _responseBuffers.clear();
         else
-            _responseBuffers=new ArrayList<Buffer>(); 
+            _responseBuffers=new ArrayList(); 
     }
     
     
