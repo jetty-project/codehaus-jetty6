@@ -14,8 +14,6 @@ import org.mortbay.io.Buffers;
  */
 public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffers
 {
-    protected static int BUFFER_LOSS_RATE=256; // Leak buffers to shrink pools
-    
     private int _headerBufferSize=4*1024;
     private int _requestBufferSize=8*1024;
     private int _responseBufferSize=24*1024;
@@ -123,13 +121,6 @@ public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffe
     /* ------------------------------------------------------------ */
     public void returnBuffer(Buffer buffer)
     {
-        buffer.clear();
-        if (_loss++>BUFFER_LOSS_RATE)
-        {
-            _loss=0;
-            return;
-        }
-
         buffer.clear();
         if (!buffer.isVolatile() && !buffer.isImmutable())
         {
