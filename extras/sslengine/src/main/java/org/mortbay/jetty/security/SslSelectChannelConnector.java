@@ -133,11 +133,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
      */
     public void returnBuffer(Buffer buffer)
     {
-        if (_loss++>BUFFER_LOSS_RATE)
-        {
-            _loss=0;
-            return;
-        }
         buffer.clear();
         int size=buffer.capacity();
         ByteBuffer bbuf = ((NIOBuffer)buffer).getByteBuffer();
@@ -148,6 +143,8 @@ public class SslSelectChannelConnector extends SelectChannelConnector
             _applicationBuffers.add(buffer);
         else if (size==_packetBufferSize)
             _packetBuffers.add(buffer);
+        else 
+            super.returnBuffer(buffer);
     }
     
     
