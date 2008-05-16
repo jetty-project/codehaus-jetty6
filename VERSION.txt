@@ -1,5 +1,6 @@
 jetty-7.0-SNAPSHOT
  + JETTY-568 Avoid freeing DirectBuffers. New locking NIO ResourceCache.
+ + JETTY-576 servlet dtds and xsds not being loaded locally
 
 jetty-7.0.0pre1 - 3 May 2008
  + Allow annotations example to be built regularly, copy to contexts-available
