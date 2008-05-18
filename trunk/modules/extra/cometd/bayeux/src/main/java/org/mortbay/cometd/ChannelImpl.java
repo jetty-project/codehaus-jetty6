@@ -140,22 +140,7 @@ public class ChannelImpl implements Channel
     {
         return _id.toString();
     }
-    
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param client The client for which this token will be valid
-     * @param subscribe True if this token may be used for subscriptions
-     * @param send True if this token may be used for send
-     * @param oneTime True if this token may only be used in one request batch.
-     * @return A new token that can be used for subcriptions and or sending.
-     */
-    public String getToken(Client client, boolean subscribe, boolean send, boolean oneTime)
-    {
-        String token=Long.toString(_bayeux.getRandom(client.hashCode()),36);
-        // TODO register somewhere ?
-        return token;
-    }
     
     /* ------------------------------------------------------------ */
     public boolean isPersistent()

@@ -57,8 +57,7 @@ public class ClientImpl implements Client
     {
         _bayeux=bayeux;
         _maxQueue=-1;
-        _id=Long.toString(bayeux.getRandom(System.identityHashCode(this)^System.currentTimeMillis()),36);
-        _bayeux.addClient(this);
+        _bayeux.addClient(this,null);
         if (_bayeux.isLogInfo())
             _bayeux.logInfo("newClient: "+this);
     }
@@ -68,12 +67,8 @@ public class ClientImpl implements Client
     {
         _bayeux=bayeux;
         _maxQueue=0;
-        if (idPrefix==null)
-            _id=Long.toString(bayeux.getRandom(System.identityHashCode(this)^System.currentTimeMillis()),36);
-        else
-            _id=idPrefix+"_"+Long.toString(bayeux.getRandom(System.identityHashCode(this)^System.currentTimeMillis()),36);
         
-        _bayeux.addClient(this);
+        _bayeux.addClient(this,idPrefix);
         
         if (_bayeux.isLogInfo())
             _bayeux.logInfo("newClient: "+this);

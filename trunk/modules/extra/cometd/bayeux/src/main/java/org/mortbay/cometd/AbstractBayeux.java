@@ -521,11 +521,27 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         return false;
     }
 
+    /* ------------------------------------------------------------ */
+    protected String newClientId(long variation, String idPrefix)
+    {
+        if (idPrefix==null)
+            return Long.toString(getRandom(),36)+Long.toString(variation,36);
+        else
+            return idPrefix+"_"+Long.toString(getRandom(),36);
+    }
 
     /* ------------------------------------------------------------ */
-    void addClient(ClientImpl client)
+    protected void addClient(ClientImpl client,String idPrefix)
     {
-        _clients.put(client.getId(),client);
+        while(true)
+        {
+            String id = newClientId(client.hashCode(),idPrefix);
+            client.setId(id);
+            
+            ClientImpl other = _clients.putIfAbsent(id,client);
+            if (other==null)
+                return;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -750,11 +766,10 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         }
     }
 
-
     /* ------------------------------------------------------------ */
-    long getRandom(long variation)
+    long getRandom()
     {
-        long l=_random.nextLong()^variation;
+        long l=_random.nextLong();
         return l<0?-l:l;
     }
 
@@ -1136,9 +1151,9 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             // select a random channel ID if none specifified
             if (subscribe_id==null)
             {
-                subscribe_id=Long.toString(getRandom(message.hashCode()^client.hashCode()),36);
+                subscribe_id=Long.toString(getRandom(),36);
                 while (getChannel(subscribe_id)!=null)
-                    subscribe_id=Long.toString(getRandom(message.hashCode()^client.hashCode()),36);
+                    subscribe_id=Long.toString(getRandom(),36);
             }
 
             ChannelId cid=null;
