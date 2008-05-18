@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + Use QueuedThreadPool as default
+ + JETTY-440 allow file name patterns for jsp compilation for jspc plugin
  + JETTY-529 CNFE when deserializing Array from session resolved
  + JETTY-537 JSON handles Locales
  + JETTY-547 Shutdown SocketEndpoint output before close
@@ -9,7 +10,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-557 Allow ServletContext.setAttribute before start
  + JETTY-558 optional handling of X-Forwarded-For/Host/Server
  + JETTY-566 allow for non-blocking behavior in jetty maven plugin
- + JETTY-440 allow file name patterns for jsp compilation for jspc plugin
+ + JETTY-572 unique cometd client ID
 
 jetty-6.1.9 26 March 2008
  + Make javax.servlet.jsp optional osgi import for jetty module
