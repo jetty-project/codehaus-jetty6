@@ -72,17 +72,6 @@
   
   
   <filter>
-    <filter-name>Chat</filter-name>
-    <filter-class>com.acme.ChatFilter</filter-class>
-  </filter>
-  <filter-mapping>
-    <filter-name>Chat</filter-name>
-    <url-pattern>/chat/*</url-pattern>
-    <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
-  </filter-mapping>
-  
-  <filter>
     <filter-name>Throttle</filter-name>
     <filter-class>org.mortbay.servlet.ThrottlingFilter</filter-class>
   </filter>

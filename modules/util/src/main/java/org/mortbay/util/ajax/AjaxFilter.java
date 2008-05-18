@@ -30,6 +30,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+/**
+ * @author gregw
+ * @deprecated Use Cometd
+ */
 public class AjaxFilter implements Filter
 {
     ServletContext context;
