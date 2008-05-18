@@ -34,6 +34,10 @@ import org.mortbay.util.ajax.AjaxFilter;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
+/**
+ * @author gregw
+ * @deprecated Use Cometd
+ */
 public class ChatFilter extends AjaxFilter
 {       
     private Map chatrooms;
