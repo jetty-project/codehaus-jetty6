@@ -245,9 +245,9 @@ public abstract class AbstractCometdServlet extends HttpServlet
     protected String newBrowserId(HttpServletRequest request,HttpServletResponse response)
     {
         String browser_id=Long.toHexString(request.getRemotePort())+
-        Long.toHexString(_bayeux.getRandom(0xffffff))+
-        Long.toHexString(System.currentTimeMillis())+
-        Long.toHexString(request.hashCode());
+        Long.toString(_bayeux.getRandom(),36)+
+        Long.toString(System.currentTimeMillis(),36)+
+        Long.toString(request.getRemotePort(),36);
         
         Cookie cookie = new Cookie(BROWSER_ID,browser_id);
         cookie.setPath("/");
