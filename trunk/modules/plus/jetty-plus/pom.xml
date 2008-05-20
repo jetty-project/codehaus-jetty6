@@ -71,7 +71,7 @@
             </goals>
             <configuration>
               <instructions>
-                <Bundle-RequiredExcutionEnvironment>J2SE-1.4</Bundle-RequiredExcutionEnvironment>
+                <Bundle-RequiredExcutionEnvironment>J2SE-1.5</Bundle-RequiredExcutionEnvironment>
                 <Bundle-SymbolicName>org.mortbay.jetty.plus</Bundle-SymbolicName>
                 <Import-Package>!org.mortbay.jetty.plus.*,*</Import-Package>
               </instructions>
