@@ -83,7 +83,7 @@
             <configuration>
               <instructions>
                 <Bundle-SymbolicName>org.mortbay.jetty.util</Bundle-SymbolicName>
-                <Bundle-RequiredExcutionEnvironment>J2SE-1.4</Bundle-RequiredExcutionEnvironment>
+                <Bundle-RequiredExcutionEnvironment>J2SE-1.5</Bundle-RequiredExcutionEnvironment>
                 <Import-Package>!org.mortbay.*,org.slf4j;resolution:=optional,*</Import-Package>
                 <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
               </instructions>

@@ -83,7 +83,7 @@
               <instructions>
                 <Bundle-SymbolicName>org.mortbay.jetty.management</Bundle-SymbolicName>
                 <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
-                <Bundle-RequiredExcutionEnvironment>J2SE-1.4</Bundle-RequiredExcutionEnvironment>
+                <Bundle-RequiredExcutionEnvironment>J2SE-1.5</Bundle-RequiredExcutionEnvironment>
                 <Import-Package>!org.mortbay.component.management.*,!org.mortbay.jetty.deployer.management.*,!org.mortbay.jetty.nio.management.*,!org.mortbay.log.management.*,!org.mortbay.management.*,!org.mortbay.thread.management.*,!org.mortbay.jetty.handler.management.*,!org.mortbay.jetty.management.*,!org.mortbay.jetty.servlet.management.*,!org.mortbay.jetty.webapp.management.*,*</Import-Package>
               </instructions>
             </configuration>
