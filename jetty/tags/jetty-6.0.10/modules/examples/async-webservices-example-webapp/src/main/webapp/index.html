@@ -1,0 +1,63 @@
+
+
+<h1>Asynchronous Jetty+CFX Web Services Demo</h1>
+<p>
+This demonstration shows how the proposed servlet 3.0 asynchronous 
+API (inspired by Jetty continuations) can be used to greatly 
+improve web services. 
+The demo calls the EBay WS API both synchronously and asynchronously,
+to obtain items matching each of the keywords passed on the query
+string.
+</p>
+<p>
+The 
+<a
+href="https://svn.codehaus.org/jetty/jetty/trunk/modules/examples/test-ws-cxf/src/main/java/org/mortbay/cxf/demo/AggregateSerialCXFServlet.java">synchronous
+servlet</a>, a ws call is made for each keyword and the thread servicing the
+web request blocks waiting for each ws response before making the next
+request. The servlet thread is held for the entire elapsed time of all ws calls.
+
+</p>
+<p>
+
+The <a
+href="https://svn.codehaus.org/jetty/jetty/trunk/modules/examples/test-ws-cxf/src/main/java/org/mortbay/cxf/demo/AggregateAsyncCXFServlet.java">
+Asynchronous Servlet
+</a> initiates an async CFX webservice to for all keywords in parallel, and
+then uses the Servlet 3.0 suspend call to return the thread to the thread
+pool. The CFX async call backs check to see if all callbacks are complete and
+if so, the request is resumed.  The ws calls are done in parrallel and the 
+servlet thread is only held for a short time at the start and end of the elapsed time.
+</p>
+
+
+<table width='100%' border=1 cellpadding=5 cellspacing=0>
+<tr>
+<th>Keys</th>
+<th>Synchronous</th>
+<th>Asynchronous</th>
+</tr>
+
+<tr>
+<td>tang</td>
+<td>
+  <iframe id="f1" width='100%' height='160px' src="testSerial?items=tang"></iframe>
+</td>
+<td>
+  <iframe id="f2" width='100%' height='160px' src="testAsync?items=tang"/></iframe>
+</td>
+</tr>
+
+<tr>
+<td>mouse,<br/>beer,<br/>gnome</a></td>
+<td>
+  <iframe id="f1" width='100%' height='400px' src="testSerial?items=mouse,beer,gnome"></iframe>
+</td>
+<td>
+  <iframe id="f2" width='100%' height='400px' src="testAsync?items=mouse,beer,gnome"/></iframe>
+</td>
+</tr>
+
+</table>
+</p>
+  
