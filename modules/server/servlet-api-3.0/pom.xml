@@ -72,7 +72,7 @@
               <instructions>
               <Bundle-Version>3.0</Bundle-Version>
               <Import-Package>!javax.servlet.*,*</Import-Package>
-              <Bundle-RequiredExecutionEnvironment>J2SE-1.4</Bundle-RequiredExecutionEnvironment>
+              <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
               <Implementation-Vendor>JCP</Implementation-Vendor>
               <Specification-Version>3.0</Specification-Version>
               </instructions>
