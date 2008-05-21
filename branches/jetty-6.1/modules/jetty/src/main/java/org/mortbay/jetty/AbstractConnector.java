@@ -636,7 +636,7 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------ */
     /**
-     * @param forwardedHostHeader The header name for forwarded server (default x-forwarded-server)
+     * @param forwardedServerHeader The header name for forwarded server (default x-forwarded-server)
      */
     public void setForwardedServerHeader(String forwardedServerHeader)
     {
@@ -651,11 +651,11 @@ public abstract class AbstractConnector extends AbstractBuffers implements Conne
     
     /* ------------------------------------------------------------ */
     /**
-     * @param forwardedHostHeader The header name for forwarded for (default x-forwarded-for)
+     * @param forwardedRemoteAddressHeader The header name for forwarded for (default x-forwarded-for)
      */
-    public void setForwardedForHeader(String forwardedRemoteAddressHeade)
+    public void setForwardedForHeader(String forwardedRemoteAddressHeader)
     {
-        _forwardedForHeader=forwardedRemoteAddressHeade;
+        _forwardedForHeader=forwardedRemoteAddressHeader;
     }
     
     /* ------------------------------------------------------------ */
