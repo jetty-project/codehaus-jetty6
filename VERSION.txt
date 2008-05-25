@@ -7,7 +7,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-579 OSGI resolved management and servlet.resources import error
  + JETTY-580 Fixed SSL shutdown
 
-jetty-6.0.10 20 May 2008
+jetty-6.1.10 20 May 2008
  + Use QueuedThreadPool as default
  + JETTY-440 allow file name patterns for jsp compilation for jspc plugin
  + JETTY-529 CNFE when deserializing Array from session resolved
