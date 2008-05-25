@@ -1,3 +1,5 @@
+ + JETTY-580 Fixed SSL shutdown
+ 
 jetty-6.0.10 20 May 2008
  + Use QueuedThreadPool as default
  + JETTY-440 allow file name patterns for jsp compilation for jspc plugin

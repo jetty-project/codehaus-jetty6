@@ -251,6 +251,10 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                     }
                 }
             }
+            catch(SSLException e)
+            {
+                Log.warn(e);
+            }
             finally
             {
                 buffer.setPutIndex(bbuf.position());
