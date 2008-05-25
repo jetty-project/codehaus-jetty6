@@ -1,9 +1,26 @@
+
 jetty-7.0-SNAPSHOT
  + JETTY-568 Avoid freeing DirectBuffers. New locking NIO ResourceCache.
  + JETTY-576 servlet dtds and xsds not being loaded locally
  + JETTY-572 Unique cometd client ID
  + JETTY-578 OSGI Bundle-RequiredExcutionEnvironment set to J2SE-1.5
  + JETTY-579 OSGI resolved management and servlet.resources import error
+ + JETTY-580 Fixed SSL shutdown
+
+jetty-6.0.10 20 May 2008
+ + Use QueuedThreadPool as default
+ + JETTY-440 allow file name patterns for jsp compilation for jspc plugin
+ + JETTY-529 CNFE when deserializing Array from session resolved
+ + JETTY-537 JSON handles Locales
+ + JETTY-547 Shutdown SocketEndpoint output before close
+ + JETTY-550 Reading 0 bytes corrupts ServletInputStream
+ + JETTY-551 Upgraded to Wadi 2.0-M10
+ + JETTY-556 Encode all URI fragments
+ + JETTY-557 Allow ServletContext.setAttribute before start
+ + JETTY-558 optional handling of X-Forwarded-For/Host/Server
+ + JETTY-566 allow for non-blocking behavior in jetty maven plugin
+ + JETTY-572 unique cometd client ID
+ + JETTY-579 osgi fixes with management and servlet resources
 
 jetty-7.0.0pre1 - 3 May 2008
  + Allow annotations example to be built regularly, copy to contexts-available
