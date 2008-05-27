@@ -1,4 +1,5 @@
  + JETTY-580 Fixed SSL shutdown
+ + JETTY-585 handle null contextPath
  
 jetty-6.1.10 20 May 2008
  + Use QueuedThreadPool as default
