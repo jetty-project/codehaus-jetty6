@@ -484,6 +484,9 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      */
     protected void doStart() throws Exception
     {
+        if (_contextPath==null)
+            throw new IllegalStateException("Null contextPath");
+        
         _logger=Log.getLogger(getDisplayName()==null?getContextPath():getDisplayName());
         ClassLoader old_classloader=null;
         Thread current_thread=null;
