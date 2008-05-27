@@ -102,7 +102,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private Attributes _attributes;
     private Attributes _contextAttributes;
     private ClassLoader _classLoader;
-    private String _contextPath;
+    private String _contextPath="/";
     private Map _initParams;
     private String _displayName;
     private String _docRoot;
