@@ -31,25 +31,25 @@ public class StringUtil
     public static final String CRLF="\015\012";
     public static final String __LINE_SEPARATOR=
         System.getProperty("line.separator","\n");
-    
-    public static String __ISO_8859_1;
+       
+    public static final String __ISO_8859_1;
     static
     {
         String iso=System.getProperty("ISO_8859_1");
-        if (iso!=null)
-            __ISO_8859_1=iso;
-        else
+        if (iso==null)
         {
             try{
                 new String(new byte[]{(byte)20},"ISO-8859-1");
-                __ISO_8859_1="ISO-8859-1";
+                iso="ISO-8859-1";
             }
             catch(java.io.UnsupportedEncodingException e)
             {
-                __ISO_8859_1="ISO8859_1";
+                iso="ISO8859_1";
             }        
         }
+        __ISO_8859_1=iso;
     }
+    
     
     public final static String __UTF8="UTF-8";
     public final static String __UTF16="UTF-16";
