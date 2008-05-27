@@ -6,6 +6,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-578 OSGI Bundle-RequiredExcutionEnvironment set to J2SE-1.5
  + JETTY-579 OSGI resolved management and servlet.resources import error
  + JETTY-580 Fixed SSL shutdown
+ + JETTY-582 final ISO_8859_1
  + JETTY-584 handle null contextPath
 
 jetty-6.1.10 20 May 2008
