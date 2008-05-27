@@ -67,15 +67,13 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     public Context(HandlerContainer parent, String contextPath)
     {
-        this(parent,null,null,null,null);
-        setContextPath(contextPath);
+        this(parent,contextPath,null,null,null,null);
     }
     
     /* ------------------------------------------------------------ */
     public Context(HandlerContainer parent, String contextPath, int options)
     {
-        this(parent,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?new SecurityHandler():null,null,null);
-        setContextPath(contextPath);
+        this(parent,contextPath,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?new SecurityHandler():null,null,null);
     }
     
     /* ------------------------------------------------------------ */
@@ -85,9 +83,13 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     */
     public Context(HandlerContainer parent, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    {   
+        this(parent,null,sessionHandler,securityHandler,servletHandler,errorHandler);
+    }
+
+    /* ------------------------------------------------------------ */
+    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         super((ContextHandler.SContext)null);
         _scontext = new SContext();
@@ -121,13 +123,12 @@ public class Context extends ContextHandler
             
         if (errorHandler!=null)
             setErrorHandler(errorHandler);
-        
+
+        if (contextPath!=null)
+            setContextPath(contextPath);
 
         if (parent!=null)
-        {
             parent.addHandler(this);
-        }
-        
     }    
     
     /* ------------------------------------------------------------ */
