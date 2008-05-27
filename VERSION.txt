@@ -1,4 +1,5 @@
  + JETTY-580 Fixed SSL shutdown
+ + JETTY-581 ContextPath constructor
  + JETTY-582 final ISO_8859_1
  + JETTY-584 handle null contextPath
  
