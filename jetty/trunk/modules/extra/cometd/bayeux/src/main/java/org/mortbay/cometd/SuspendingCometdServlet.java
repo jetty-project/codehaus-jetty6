@@ -53,8 +53,11 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
         int num_msgs=-1;
         
         // Have we seen this request before
-        if (request.isInitial())
+        boolean initial=false;
+        if (request.isInitial() || request.getAttribute(CLIENT_ATTR)==null)
         {
+            initial=true;
+            
             Message[] messages = getMessages(request);
             num_msgs=messages.length;
 
@@ -145,15 +148,17 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
             {
                 if (_bayeux.isLogDebug())
                     _bayeux.logDebug("doPost: transport is polling");
-                long timeout=_timeout;
+                long timeout=client.getTimeout();
+                if (timeout==0)
+                    timeout=_bayeux.getTimeout();
 
-                if (request.isInitial())
+                if (initial)
                     client.access();
 
                 // Get messages or wait
                 synchronized (client)
                 {
-                    if (!client.hasMessages() && request.isInitial() && num_msgs<=1)
+                    if (!client.hasMessages() && initial && num_msgs<=1)
                     {
                         // save state and suspend
                         client.setPollRequest(request);

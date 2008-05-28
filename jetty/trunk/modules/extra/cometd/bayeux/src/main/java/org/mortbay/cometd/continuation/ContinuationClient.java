@@ -15,7 +15,6 @@
 package org.mortbay.cometd.continuation;
 
 import org.mortbay.cometd.ClientImpl;
-import org.mortbay.cometd.SuspendingClient;
 import org.mortbay.thread.Timeout;
 import org.mortbay.util.ajax.Continuation;
 
@@ -27,7 +26,7 @@ import org.mortbay.util.ajax.Continuation;
  * an idle timeout (@link {@link ContinuationBayeux#_clientTimer}).
  * 
  * @author gregw
- * @deprecated use {@link SuspendingClient}
+ * @deprecated use {@link org.mortbay.cometd.SuspendingClient}
  *
  */
 public class ContinuationClient extends ClientImpl
@@ -56,7 +55,7 @@ public class ContinuationClient extends ClientImpl
                     return "T-"+ContinuationClient.this.toString();
                 }
             };
-            _bayeux.startTimeout(_timeout);
+            _bayeux.startTimeout(_timeout,getTimeout());
         }
     }
 
@@ -80,7 +79,7 @@ public class ContinuationClient extends ClientImpl
             }
 
             if (task!=null)
-                _bayeux.startTimeout(task);
+                _bayeux.startTimeout(task,getTimeout());
         }
         else
         {
@@ -121,7 +120,7 @@ public class ContinuationClient extends ClientImpl
         }
         
         if (task!=null)
-            _bayeux.startTimeout(task);
+            _bayeux.startTimeout(task,getTimeout());
     }
 
     /* ------------------------------------------------------------ */
@@ -143,7 +142,7 @@ public class ContinuationClient extends ClientImpl
         }
         
         if (task!=null)
-            _bayeux.startTimeout(task);
+            _bayeux.startTimeout(task,getTimeout());
     }
 
 

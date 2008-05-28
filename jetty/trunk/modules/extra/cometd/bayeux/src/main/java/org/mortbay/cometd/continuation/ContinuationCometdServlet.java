@@ -25,7 +25,6 @@ import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.cometd.AbstractCometdServlet;
 import org.mortbay.cometd.ClientImpl;
 import org.mortbay.cometd.MessageImpl;
-import org.mortbay.cometd.SuspendingCometdServlet;
 import org.mortbay.cometd.Transport;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -36,7 +35,7 @@ import dojox.cometd.Message;
 /* ------------------------------------------------------------ */
 /**
  * @author gregw
- * @deprecated use {@link SuspendingCometdServlet}
+ * @deprecated use {@link org.mortbay.cometd.SuspendingCometdServlet}
  */
 public class ContinuationCometdServlet extends AbstractCometdServlet
 {
@@ -148,7 +147,9 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
             {
                 if (_bayeux.isLogDebug())
                     _bayeux.logDebug("doPost: transport is polling");
-                long timeout=_timeout;
+                long timeout=client.getTimeout();
+                if (timeout==0)
+                    timeout=_bayeux.getTimeout();
 
                 Continuation continuation=ContinuationSupport.getContinuation(req,client);
                 if (!continuation.isPending())

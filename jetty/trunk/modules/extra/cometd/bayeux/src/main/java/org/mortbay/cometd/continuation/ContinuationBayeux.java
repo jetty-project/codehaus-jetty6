@@ -21,7 +21,6 @@ import javax.servlet.ServletContext;
 
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.cometd.ClientImpl;
-import org.mortbay.cometd.SuspendingBayeux;
 import org.mortbay.thread.Timeout;
 import org.mortbay.thread.Timeout.Task;
 
@@ -29,7 +28,7 @@ import org.mortbay.thread.Timeout.Task;
 /**
  * Extension of Bayeux that uses {@link ContinuationClient}s.
  * @author gregw
- * @deprecated use {@link SuspendingBayeux}
+ * @deprecated use {@link org.mortbay.cometd.SuspendingBayeux}
  *
  */
 public class ContinuationBayeux extends AbstractBayeux
@@ -98,11 +97,14 @@ public class ContinuationBayeux extends AbstractBayeux
     }
 
     /* ------------------------------------------------------------ */
-    void startTimeout(Task timeout)
+    void startTimeout(Task timeout,long delay)
     {
         synchronized(_timeout)
         {
-            _timeout.schedule(timeout);
+            if (delay==0)
+                _timeout.schedule(timeout);
+            else
+                _timeout.schedule(timeout,delay);
         }
     }
 

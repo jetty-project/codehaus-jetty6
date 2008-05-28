@@ -55,7 +55,7 @@ public class SuspendingClient extends ClientImpl
                     return "T-"+SuspendingClient.this.toString();
                 }
             };
-            _bayeux.startTimeout(_timeout);
+            _bayeux.startTimeout(_timeout,getTimeout());
         }
     }
 
@@ -79,7 +79,7 @@ public class SuspendingClient extends ClientImpl
             }
 
             if (task!=null)
-                _bayeux.startTimeout(task);
+                _bayeux.startTimeout(task,getTimeout());
         }
         else
         {
@@ -121,7 +121,7 @@ public class SuspendingClient extends ClientImpl
         }
         
         if (task!=null)
-            _bayeux.startTimeout(task);
+            _bayeux.startTimeout(task,getTimeout());
     }
 
     /* ------------------------------------------------------------ */
@@ -143,7 +143,7 @@ public class SuspendingClient extends ClientImpl
         }
         
         if (task!=null)
-            _bayeux.startTimeout(task);
+            _bayeux.startTimeout(task,getTimeout());
     }
 
 
