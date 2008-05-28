@@ -71,17 +71,19 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     
     private ChannelImpl _root = new ChannelImpl("/",this);
     private ConcurrentHashMap<String,ClientImpl> _clients=new ConcurrentHashMap<String,ClientImpl>();
-    SecurityPolicy _securityPolicy=new DefaultPolicy();
-    Object _advice=new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":0}");
-    int _adviceVersion=0;
-    Object _unknownAdvice=new JSON.Literal("{\"reconnect\":\"handshake\",\"interval\":500}");
-    int _logLevel;
-    long _maxInterval=30000;
-    boolean _JSONCommented;
-    boolean _initialized;
-    ConcurrentHashMap<String, List<String>> _browser2client=new ConcurrentHashMap<String, List<String>>();
-    int _multiFrameInterval=-1;
-    JSON.Literal _multiFrameAdvice; 
+    protected SecurityPolicy _securityPolicy=new DefaultPolicy();
+    protected Object _advice;
+    protected int _adviceVersion=0;
+    protected Object _unknownAdvice=new JSON.Literal("{\"reconnect\":\"handshake\",\"interval\":500}");
+    protected int _logLevel;
+    protected long _timeout=240000;
+    protected long _interval=0;
+    protected long _maxInterval=30000;
+    protected boolean _JSONCommented;
+    protected boolean _initialized;
+    protected ConcurrentHashMap<String, List<String>> _browser2client=new ConcurrentHashMap<String, List<String>>();
+    protected int _multiFrameInterval=-1;
+    protected JSON.Literal _multiFrameAdvice; 
     
     protected boolean _directDeliver=true;
     protected boolean _requestAvailable;
@@ -92,7 +94,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     transient ConcurrentHashMap<String, ChannelId> _channelIdCache;
     protected Handler _publishHandler;
     protected Handler _metaPublishHandler;
-   
+
     protected List<Extension> _extensions=new CopyOnWriteArrayList<Extension>();
     protected JSON.Literal _transports=new JSON.Literal("[\""+Bayeux.TRANSPORT_LONG_POLL+ "\",\""+Bayeux.TRANSPORT_CALLBACK_POLL+"\"]");
     
@@ -112,6 +114,8 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         _handlers.put(META_SUBSCRIBE,new SubscribeHandler());
         _handlers.put(META_UNSUBSCRIBE,new UnsubscribeHandler());
         _handlers.put(META_PING,new PingHandler());
+        
+        setTimeout(getTimeout());
     }
 
     /* ------------------------------------------------------------ */
@@ -264,7 +268,19 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     {
         return _securityPolicy;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public long getTimeout()
+    {
+        return _timeout;
+    }
+
+    /* ------------------------------------------------------------ */
+    public long getInterval()
+    {
+        return _interval;
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * @return true if published messages are directly delivered to subscribers. False if
@@ -602,7 +618,27 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
 
     
+    /* ------------------------------------------------------------ */
+    public void setTimeout(long ms)
+    {
+        _timeout = ms;
+        generateAdvice();
+    }
+
     
+    /* ------------------------------------------------------------ */
+    public void setInterval(long ms)
+    {
+        _interval = ms;
+        generateAdvice();
+    }
+
+    /* ------------------------------------------------------------ */
+    void generateAdvice()
+    {
+        setAdvice(new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+getInterval()+",\"timeout\":"+getTimeout()+"}"));        
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * @return TRUE if {@link #getCurrentRequest()} will return the current request
@@ -683,9 +719,10 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     {
         _multiFrameInterval=multiFrameInterval;
         if (multiFrameInterval>0)
-            _multiFrameAdvice=new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+_multiFrameInterval+",\"multiple-clients\":true}");
+            _multiFrameAdvice=new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+_multiFrameInterval+",\"multiple-clients\":true,\"timeout\":"+getTimeout()+"}");
         else
-            _multiFrameAdvice=new JSON.Literal("{\"reconnect\":\"none\",\"interval\":30000,\"multiple-clients\":true}");
+            _multiFrameAdvice=new JSON.Literal("{\"reconnect\":\"none\",\"multiple-clients\":true,\"timeout\":"+getTimeout()+"}");
+        
     }
 
 
@@ -881,7 +918,19 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
                 polling=false;
             }
             
-            Object advice=null; 
+            Object advice = message.get(ADVICE_FIELD);
+            if (advice!=null)
+            {
+            	Long timeout=(Long)((Map)advice).get("timeout");
+            	if (timeout!=null && timeout.longValue()>0)
+            		client.setTimeout(timeout.longValue());
+            	else
+            		client.setTimeout(0);
+            }
+            else
+        		client.setTimeout(0);
+            
+            advice=null; 
         
             if (polling && _multiFrameInterval>0 && client.getBrowserId()!=null)
             {
@@ -1004,7 +1053,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
 
             Map<?,?> ext = (Map<?,?>)message.get(EXT_FIELD);
 
-            boolean commented=_JSONCommented && ext!=null && ((Boolean)ext.get("json-comment-filtered")).booleanValue();
+            boolean commented=_JSONCommented && ext!=null && Boolean.TRUE.equals(ext.get("json-comment-filtered"));
             
             Message reply=newMessage(message);
             reply.put(CHANNEL_FIELD,META_HANDSHAKE);
@@ -1066,7 +1115,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
 
             ChannelId cid=getChannelId(channel_id);
             Object data=message.get(Bayeux.DATA_FIELD);
-            
 
             Message reply=newMessage(message);
             reply.put(CHANNEL_FIELD,channel_id);

@@ -51,6 +51,7 @@ public class ClientImpl implements Client
     private int _adviseVersion;
     private int _batch;
     private int _maxQueue;
+    private long _timeout;
 
     /* ------------------------------------------------------------ */
     protected ClientImpl(AbstractBayeux bayeux)
@@ -272,7 +273,6 @@ public class ClientImpl implements Client
         synchronized(this)
         {
             return ++_responsesPending;
-            
         }
     }
     
@@ -513,6 +513,18 @@ public class ClientImpl implements Client
                    _rListeners.remove((RemoveListener)listener);
            }
        }
+   }
+
+   /* ------------------------------------------------------------ */
+   public long getTimeout() 
+   {
+       return _timeout;
+   }
+   
+   /* ------------------------------------------------------------ */
+   public void setTimeout(long timeoutMS) 
+   {
+       _timeout=timeoutMS;
    }
 
 }

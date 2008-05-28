@@ -96,11 +96,14 @@ public class SuspendingBayeux extends AbstractBayeux
     }
 
     /* ------------------------------------------------------------ */
-    void startTimeout(Task timeout)
+    void startTimeout(Task timeout,long delay)
     {
         synchronized(_timeout)
         {
-            _timeout.schedule(timeout);
+            if (delay==0)
+                _timeout.schedule(timeout);
+            else
+                _timeout.schedule(timeout,delay);
         }
     }
 
