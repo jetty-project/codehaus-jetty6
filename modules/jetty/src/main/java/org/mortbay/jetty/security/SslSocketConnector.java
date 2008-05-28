@@ -167,11 +167,26 @@ public class SslSocketConnector extends SocketConnector
     public void accept(int acceptorID)
         throws IOException, InterruptedException
     {   
-        Socket socket = _serverSocket.accept();
-        configure(socket);
-        
-        Connection connection=new SslConnection(socket);
-        connection.dispatch();
+        try
+        {
+            Socket socket = _serverSocket.accept();
+            configure(socket);
+
+            Connection connection=new SslConnection(socket);
+            connection.dispatch();
+        }
+        catch(SSLException e)
+        {
+            Log.warn(e);
+            try
+            {
+                stop();
+            }
+            catch(Exception e2)
+            {
+                throw new IllegalStateException(e2);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
