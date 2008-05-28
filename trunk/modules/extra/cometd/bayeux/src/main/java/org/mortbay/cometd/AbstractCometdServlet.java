@@ -111,7 +111,6 @@ public abstract class AbstractCometdServlet extends HttpServlet
     
 
     protected AbstractBayeux _bayeux;
-    protected long _timeout=240000;
 
     public AbstractBayeux getBayeux()
     {
@@ -175,7 +174,7 @@ public abstract class AbstractCometdServlet extends HttpServlet
 
                 String timeout=getInitParameter("timeout");
                 if (timeout!=null)
-                    _timeout=Long.parseLong(timeout);
+                    _bayeux.setTimeout(Long.parseLong(timeout));
                 
                 String maxInterval=getInitParameter("maxInterval");
                 if (maxInterval!=null)
@@ -190,10 +189,7 @@ public abstract class AbstractCometdServlet extends HttpServlet
                 
                 String interval=getInitParameter("interval");
                 if (interval!=null)
-                {
-                    JSON.Literal advice = new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+interval+"}");
-                    _bayeux.setAdvice(advice);
-                }
+                    _bayeux.setInterval(Long.parseLong(interval));
                 
                 String mfInterval=getInitParameter("multiFrameInterval");
                 if (mfInterval!=null)
@@ -204,7 +200,9 @@ public abstract class AbstractCometdServlet extends HttpServlet
 
                 String direct=getInitParameter("directDeliver");
                 if (direct!=null)
-                    _bayeux.setDirectDeliver(Boolean.parseBoolean(direct));       
+                    _bayeux.setDirectDeliver(Boolean.parseBoolean(direct));
+
+                _bayeux.generateAdvice();
             }
         }
 
