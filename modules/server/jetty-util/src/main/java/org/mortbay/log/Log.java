@@ -89,7 +89,7 @@ public class Log
     
     public static void debug(Throwable th)
     {
-        if (__log==null)
+        if (__log==null || !isDebugEnabled())
             return;
         __log.debug(EXCEPTION,th);
         unwind(th);
