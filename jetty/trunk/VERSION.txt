@@ -10,6 +10,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-582 final ISO_8859_1
  + JETTY-584 handle null contextPath
  + JETTY-587 persist sessions to database
+ + JETTY-588 handle Retry in ServletException
 
 jetty-6.1.10 20 May 2008
  + Use QueuedThreadPool as default
