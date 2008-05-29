@@ -98,8 +98,15 @@ public class Dump extends HttpServlet
         
         if (request.getParameter("continue")!=null)
         {
-            Continuation continuation = ContinuationSupport.getContinuation(request, null);
-            continuation.suspend(Long.parseLong(request.getParameter("continue")));
+            try
+            {
+                Continuation continuation = ContinuationSupport.getContinuation(request, null);
+                continuation.suspend(Long.parseLong(request.getParameter("continue")));
+            }
+            catch(Exception e)
+            {
+                throw new ServletException(e);
+            }
         }
 
         if (request.isInitial() && request.getParameter("resume")!=null)
