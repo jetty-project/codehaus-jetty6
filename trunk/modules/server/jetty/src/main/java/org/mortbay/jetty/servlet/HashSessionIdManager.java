@@ -97,10 +97,10 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the session ID with any worker ID.
+    /** Get the session ID without any worker ID.
      * 
      * @param request
-     * @return sessionId plus any worker ID.
+     * @return sessionId without any worker ID.
      */
     public String getClusterId(String nodeId) 
     {
