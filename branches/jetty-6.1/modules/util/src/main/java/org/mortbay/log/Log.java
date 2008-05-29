@@ -77,7 +77,7 @@ public class Log
     
     public static void debug(Throwable th)
     {
-        if (log==null)
+        if (log==null || !isDebugEnabled())
             return;
         log.debug(EXCEPTION,th);
         unwind(th);
@@ -92,7 +92,7 @@ public class Log
     
     public static void debug(String msg,Object arg)
     {
-        if (log==null)
+        if (log==null) 
             return;
         log.debug(msg,arg,null);
     }
