@@ -393,8 +393,12 @@ public class ServletHandler extends AbstractHandler
                 if (cause!=th && cause!=null)
                     th=cause;
             }
-            
-            if (th instanceof HttpException)
+            if (th instanceof RetryRequest)
+            {
+                base_request.setHandled(false);
+                throw (RetryRequest)th;  
+            }
+            else if (th instanceof HttpException)
                 throw (HttpException)th;
             else if (th instanceof UnavailableException)
             {
