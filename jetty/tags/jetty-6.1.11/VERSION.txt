@@ -1,3 +1,4 @@
+jetty-6.1.11 29 May 2008 
  + JETTY-580 Fixed SSL shutdown
  + JETTY-581 ContextPath constructor
  + JETTY-582 final ISO_8859_1
