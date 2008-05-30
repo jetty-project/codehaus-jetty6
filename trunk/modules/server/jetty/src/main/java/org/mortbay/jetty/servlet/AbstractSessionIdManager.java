@@ -69,9 +69,13 @@ public abstract class AbstractSessionIdManager extends AbstractLifeCycle impleme
         {
             // A requested session ID can only be used if it is in use already.
             String requested_id=request.getRequestedSessionId();
-            if (requested_id!=null&&idInUse(requested_id))
-                return requested_id;
-
+            if (requested_id!=null)
+            {
+                String cluster_id=getClusterId(requested_id);
+                if (idInUse(cluster_id))
+                    return cluster_id;
+            }
+          
             // Else reuse any new session ID already defined for this request.
             String new_id=(String)request.getAttribute(__NEW_SESSION_ID);
             if (new_id!=null&&idInUse(new_id))
@@ -92,6 +96,10 @@ public abstract class AbstractSessionIdManager extends AbstractLifeCycle impleme
                 if (r<0)
                     r=-r;
                 id=Long.toString(r,36);
+                
+                //add in the id of the node to ensure unique id across cluster
+                //NOTE this is different to the node suffix which denotes which node the request was received on
+                id=_workerName + id;
             }
 
             request.setAttribute(__NEW_SESSION_ID,id);
