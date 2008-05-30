@@ -153,19 +153,21 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         if (id == null)
             return false;
         
+        String clusterId = getClusterId(id);
+        
         synchronized (_sessionIds)
         {
-            if (_sessionIds.contains(id))
+            if (_sessionIds.contains(clusterId))
                 return true; //optimisation - if this session is one we've been managing, we can check locally
-
+            
             //otherwise, we need to go to the database to check
             try
             {
-                return exists(id);
+                return exists(clusterId);
             }
             catch (Exception e)
             {
-                Log.warn("Problem checking inUse for id="+id, e);
+                Log.warn("Problem checking inUse for id="+clusterId, e);
                 return false;
             }
         }
@@ -226,7 +228,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
                 tableName = tableName.toLowerCase();
             if (metaData.storesUpperCaseIdentifiers())
                 tableName = tableName.toUpperCase();
-            System.err.println("Transformed table name to "+tableName);
+            
             ResultSet result = metaData.getTables(null, null, tableName, null);
             if (!result.next())
             {
@@ -248,10 +250,17 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         try
         {
             connection = getConnection();
-            connection.setAutoCommit(true);
-            PreparedStatement statement = connection.prepareStatement(__insertString);
-            statement.setString(1, id);
-            statement.executeUpdate();
+            connection.setAutoCommit(true);            
+            PreparedStatement query = connection.prepareStatement(__queryString);
+            query.setString(1, id);
+            ResultSet result = query.executeQuery();
+            //only insert the id if it isn't in the db already 
+            if (!result.next())
+            {
+                PreparedStatement statement = connection.prepareStatement(__insertString);
+                statement.setString(1, id);
+                statement.executeUpdate();
+            }
         }
         finally
         {
