@@ -41,15 +41,15 @@ import org.mortbay.log.Log;
 public class JDBCSessionManager extends AbstractSessionManager
 {
     //TODO do we need to persist both the previous access time and the current access time????
-    private static final String __createString = "create table JettySessions (rowId varchar(60), sessionId varchar(60), lastNode varchar(60), accessTime bigint, "+
+    private static final String __createString = "create table JettySessions (rowId varchar(60), sessionId varchar(60), contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
                                                 " lastAccessTime bigint, createTime bigint, cookieTime bigint, map blob, primary key(rowId))";
     
-    private static final String __insertString = "insert into JettySessions (rowId, sessionId, lastNode, accessTime, lastAccessTime, createTime, cookieTime, map) "+
-                                                 " values (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String __insertString = "insert into JettySessions (rowId, sessionId, contextPath, lastNode, accessTime, lastAccessTime, createTime, cookieTime, map) "+
+                                                 " values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     private static final String __deleteString = "delete from JettySessions where rowId = ?";
     
-    private static final String __selectString = "select * from JettySessions where sessionId = ?";
+    private static final String __selectString = "select * from JettySessions where sessionId = ? and contextPath = ?";
     
     private static final String __updateString = "update JettySessions set lastNode = ?, accessTime = ?, lastAccessTime = ?, map = ? where rowId = ?";
     
@@ -76,6 +76,7 @@ public class JDBCSessionManager extends AbstractSessionManager
         private long _created;
         private Map _attributes;
         private String _lastNode;
+        private String _canonicalContext;
 
         public SessionData (String sessionId)
         {
@@ -171,6 +172,16 @@ public class JDBCSessionManager extends AbstractSessionManager
             return _lastNode;
         }
         
+        public synchronized void setCanonicalContext(String str)
+        {
+            _canonicalContext=str;
+        }
+        
+        public synchronized String getCanonicalContext ()
+        {
+            return _canonicalContext;
+        }
+        
         public String toString ()
         {
             return "Session rowId="+_rowId+",id="+_id+",lastNode="+_lastNode+",created="+_created+",accessed="+_accessed+",lastAccessed="+_lastAccessed+",cookieSet="+_cookieSet;
@@ -196,9 +207,11 @@ public class JDBCSessionManager extends AbstractSessionManager
          */
         protected Session (HttpServletRequest request)
         {
-            super(request);
-            _data = new SessionData(getClusterId());
+         
+            super(request);   
+            _data = new SessionData(_clusterId);
             _data.setMaxIdleMs(_dftMaxIdleSecs*1000);
+            _data.setCanonicalContext(canonicalize(_context.getContextPath()));
         }
 
         /**
@@ -322,10 +335,14 @@ public class JDBCSessionManager extends AbstractSessionManager
    
     /** 
      * A session has been requested by it's id on this node.
-     * Check to see if we already have the session in memory, otherwise
-     * pull it in from the database.
      * 
-     * TODO always read from database and check the last node id is my node id?
+     * Load the session by id AND context path from the database.
+     * Multiple contexts may share the same session id (due to dispatching)
+     * but they CANNOT share the same contents.
+     * 
+     * Check if last node id is my node id, if so, then the session we have
+     * in memory cannot be stale. If another node used the session last, then
+     * we need to refresh from the db.
      * @see org.mortbay.jetty.servlet.AbstractSessionManager#getSession(java.lang.String)
      */
     public Session getSession(String idInCluster)
@@ -333,11 +350,10 @@ public class JDBCSessionManager extends AbstractSessionManager
         Session session = (Session)_sessions.get(idInCluster);
         
         synchronized (this)
-        {  
-            
+        {        
             try
             {
-                SessionData data = loadSession(idInCluster);
+                SessionData data = loadSession(idInCluster, canonicalize(_context.getContextPath()));
                 if (data != null)
                 {
                     if (!data.getLastNode().equals(getIdManager().getWorkerName()) || session==null)
@@ -352,12 +368,11 @@ public class JDBCSessionManager extends AbstractSessionManager
                     }
                     else
                         if (Log.isDebugEnabled()) Log.debug("Session not stale "+session._data);
+                    //session in db shares same id, but is not for this context
                 }
                 else
                 {
-                    //TODO no session in the database with that id, should we remove it if we have it in memory?
-                    //Should we do it with the invocation of all the listeners?
-                    //_sessions.remove(idInCluster);
+                    //No session in db with matching id and context path.
                     session=null;
                     if (Log.isDebugEnabled()) Log.debug("No session in database matching id="+idInCluster);
                 }
@@ -479,7 +494,7 @@ public class JDBCSessionManager extends AbstractSessionManager
      * @return
      * @throws Exception
      */
-    protected SessionData loadSession (String id)
+    protected SessionData loadSession (String id, String canonicalContextPath)
     throws Exception
     {
         SessionData data = null;
@@ -489,6 +504,7 @@ public class JDBCSessionManager extends AbstractSessionManager
         {
             statement = connection.prepareStatement(__selectString);
             statement.setString(1, id);
+            statement.setString(2, canonicalContextPath);
             ResultSet result = statement.executeQuery();
             if (result.next())
             {
@@ -499,6 +515,7 @@ public class JDBCSessionManager extends AbstractSessionManager
                data.setAccessed (result.getLong("accessTime"));
                data.setCreated(result.getLong("createTime"));
                data.setLastNode(result.getString("lastNode"));
+               data.setCanonicalContext(result.getString("contextPath"));
                Blob blob = result.getBlob("map");
                ClassLoadingObjectInputStream ois = new ClassLoadingObjectInputStream(blob.getBinaryStream());
                Object o = ois.readObject();
@@ -540,18 +557,19 @@ public class JDBCSessionManager extends AbstractSessionManager
             statement = connection.prepareStatement(__insertString);
             statement.setString(1, rowId); //rowId
             statement.setString(2, data.getId()); //session id
-            statement.setString(3, getIdManager().getWorkerName());//my node id
-            statement.setLong(4, data.getAccessed());//accessTime
-            statement.setLong(5, data.getLastAccessed()); //lastAccessTime
-            statement.setLong(6, data.getCreated()); //time created
-            statement.setLong(7, data.getCookieSet());//time cookie was set
+            statement.setString(3, data.getCanonicalContext()); //context path
+            statement.setString(4, getIdManager().getWorkerName());//my node id
+            statement.setLong(5, data.getAccessed());//accessTime
+            statement.setLong(6, data.getLastAccessed()); //lastAccessTime
+            statement.setLong(7, data.getCreated()); //time created
+            statement.setLong(8, data.getCookieSet());//time cookie was set
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(data.getAttributeMap());
             byte[] bytes = baos.toByteArray();
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            statement.setBinaryStream(8, bais, bytes.length);//attribute map as blob
+            statement.setBinaryStream(9, bais, bytes.length);//attribute map as blob
             
             statement.executeUpdate();
             
@@ -688,7 +706,6 @@ public class JDBCSessionManager extends AbstractSessionManager
             if (metaData.storesUpperCaseIdentifiers())
                 tableName = tableName.toUpperCase();
             
-            System.err.println("transformed table name to "+tableName);
             ResultSet result = metaData.getTables(null, null, tableName, null);
             if (!result.next())
             {
@@ -724,10 +741,18 @@ public class JDBCSessionManager extends AbstractSessionManager
      */
     private String calculateRowId (SessionData data)
     {
-        String rowId = _context.getContextPath().replace('/', '_').replace('.','_').replace('\\','_');
+        String rowId = canonicalize(_context.getContextPath());
         String[] vhosts = _context.getContextHandler().getVirtualHosts();
         rowId = rowId + "_" + ((vhosts==null||vhosts[0]==null?"":vhosts[0]));
         rowId = rowId+"_"+data.getId();
         return rowId;
+    }
+    
+    private String canonicalize (String path)
+    {
+        if (path==null)
+            return "";
+        
+        return path.replace('/', '_').replace('.','_').replace('\\','_');
     }
 }
