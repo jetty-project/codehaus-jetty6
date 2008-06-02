@@ -56,19 +56,16 @@ public class SuspendingBayeux extends AbstractBayeux
         super.initialize(context);
         
         _tick=new Timer("SuspendingBayeux-"+__id++, true);
-        _timeout=new Timeout();
+        _timeout=new Timeout(this);
         _timeout.setDuration(getMaxInterval());
     
         _tick.schedule(new TimerTask()
         {
             public void run()
             {
-                synchronized(_timeout)
-                {
-                    _timeout.setNow();
-                    _now=_timeout.getNow();
-                    _timeout.tick();
-                }
+                _timeout.setNow();
+                _now=_timeout.getNow();
+                _timeout.tick();
             }
         },500L,500L);
     }
@@ -98,23 +95,17 @@ public class SuspendingBayeux extends AbstractBayeux
     /* ------------------------------------------------------------ */
     void startTimeout(Task timeout,long delay)
     {
-        synchronized(_timeout)
-        {
-            if (delay==0)
-                _timeout.schedule(timeout);
-            else
-                _timeout.schedule(timeout,delay);
-        }
+        if (delay==0)
+            _timeout.schedule(timeout);
+        else
+            _timeout.schedule(timeout,delay);
     }
 
     /* ------------------------------------------------------------ */
     public void cancelTimeout(Task timeout)
     {
-        synchronized(_timeout)
-        {
-            if (timeout!=null)
-                timeout.cancel();
-        }
+        if (timeout!=null)
+            timeout.cancel();
     }
     
 }

@@ -472,8 +472,6 @@ public class HttpConnection implements Connection
         }
     }
     
-    Timeout timeout = new Timeout();
-    
     /* ------------------------------------------------------------ */
     public void scheduleTimeout(Timeout.Task task, long timeoutMs)
     {

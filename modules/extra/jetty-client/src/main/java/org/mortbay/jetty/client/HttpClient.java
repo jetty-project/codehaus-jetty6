@@ -137,19 +137,13 @@ public class HttpClient extends AbstractBuffers
     /* ------------------------------------------------------------ */
     public void schedule(Timeout.Task task)
     {
-        synchronized(_timeoutQ)
-        {
-           _timeoutQ.schedule(task); 
-        }
+        _timeoutQ.schedule(task); 
     }
 
     /* ------------------------------------------------------------ */
     public void cancel(Timeout.Task task)
     {
-        synchronized(_timeoutQ)
-        {
-            task.cancel();
-        }
+        task.cancel();
     }
     
     /* ------------------------------------------------------------ */
@@ -271,11 +265,8 @@ public class HttpClient extends AbstractBuffers
             {
                 while (isStarted())
                 {
-                    synchronized(_timeoutQ)
-                    {
-                        _timeoutQ.setNow();
-                        _timeoutQ.tick();
-                    }
+                    _timeoutQ.setNow();
+                    _timeoutQ.tick();
                     try
                     {
                         Thread.sleep(1000);
