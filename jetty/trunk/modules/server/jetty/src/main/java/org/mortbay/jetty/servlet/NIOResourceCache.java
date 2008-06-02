@@ -39,10 +39,7 @@ class NIOResourceCache extends ResourceCache
         {    
             File file = resource.getFile();
             if (file != null) 
-            {
                 buffer = new NIOBuffer(file);
-                content.setLocked(true);
-            }
         } 
         else 
         {
