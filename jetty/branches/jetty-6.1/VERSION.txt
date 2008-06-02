@@ -3,6 +3,7 @@
  + JETTY-582 final ISO_8859_1
  + JETTY-584 handle null contextPath
  + JETTY-588 handle Retry in ServletException
+ + JETTY-592 expired timeout callback without synchronization
  
 jetty-6.1.10 20 May 2008
  + Use QueuedThreadPool as default

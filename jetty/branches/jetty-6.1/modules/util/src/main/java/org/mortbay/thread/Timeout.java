@@ -81,6 +81,13 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
+    /** Get an expired tasks.
+     * This is called instead of {@link #tick()} to obtain the next
+     * expired Task, but without calling it's {@link Task#expire()} or
+     * {@link Task#expired()} methods.
+     * 
+     * @returns the next expired task or null.
+     */
     public Task expired()
     {
         long _expiry = _now-_duration;
@@ -91,9 +98,9 @@ public class Timeout
             if (task._timestamp>_expiry)
                 return null;
             
-            task.unlink();
             synchronized (task)
             {
+                task.unlink();
                 task._expired=true;
             }
             return task;
@@ -112,7 +119,6 @@ public class Timeout
             if (task._timestamp>_expiry)
                 break;
             
-            task.unlink();
             try
             {
                 task.doExpire();
@@ -302,21 +308,39 @@ public class Timeout
 
         /* ------------------------------------------------------------ */
 	public boolean isScheduled() { return _next!=this; }
-
         
         /* ------------------------------------------------------------ */
         /** Expire task.
-         * This method is called when the timeout expires.
-         * 
+         * This method is called when the timeout expires. It is called
+         * in the scope of the synchronize block (on this) that sets 
+         * the {@link #isExpired()} state to true.
+         * @see #expired() For an unsynchronized callback.
          */
         public void expire(){}
-        
+
+        /* ------------------------------------------------------------ */
+        /** Expire task.
+         * This method is called when the timeout expires. It is called 
+         * outside of any synchronization scope and may be delayed. 
+         * 
+         */
+        public void expired(){}
+
+        /* ------------------------------------------------------------ */
         private void doExpire()
         {
-            synchronized (this)
+            try
             {
-                _expired=true;
-                expire();
+                synchronized (this)
+                {
+                    unlink();
+                    _expired=true;
+                    expire();
+                }
+            }
+            finally
+            {
+                expired();
             }
         }
     }
