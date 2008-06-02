@@ -151,7 +151,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
             }
             _dispatched = false;
             updateKey();
-
         }
         return true;
     }
@@ -383,10 +382,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements Runnable, 
             else    
             {
                 if (_key!=null && _key.isValid())
-                {
-                    _key.interestOps(0);
                     _key.cancel(); 
-                }
+                
                 cancelIdle();
                 if (_open)
                     _manager.endPointClosed(this);
