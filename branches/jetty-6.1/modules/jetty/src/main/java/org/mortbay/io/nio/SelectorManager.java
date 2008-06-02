@@ -573,7 +573,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 while (task!=null)
                 {
                     task.expire();
-                    task.expired();
 
                     // get the next timer tasks
                     synchronized(this)
