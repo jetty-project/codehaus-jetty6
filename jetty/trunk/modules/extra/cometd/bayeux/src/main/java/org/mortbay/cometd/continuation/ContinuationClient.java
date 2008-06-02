@@ -46,7 +46,7 @@ public class ContinuationClient extends ClientImpl
         {
             _timeout=new Timeout.Task()
             {
-                public void expire()
+                public void expired()
                 {
                     remove(true);
                 }
@@ -161,7 +161,8 @@ public class ContinuationClient extends ClientImpl
         Timeout.Task task=null;
         synchronized(this)
         {
-            task=_timeout;
+            if (!wasTimeout)
+                task=_timeout;
             _timeout=null;
             super.remove(wasTimeout);
         }

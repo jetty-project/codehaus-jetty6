@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 
 public class TimeoutTest extends TestCase
 {
-    Timeout timeout = new Timeout();
+    Timeout timeout = new Timeout(null);
     Timeout.Task[] tasks;
 
     /* ------------------------------------------------------------ */
@@ -30,7 +30,7 @@ public class TimeoutTest extends TestCase
     {
         super.setUp();
         
-        timeout=new Timeout();
+        timeout=new Timeout(null);
         timeout.setDuration(1000000);
         tasks= new Timeout.Task[10]; 
         
@@ -89,8 +89,7 @@ public class TimeoutTest extends TestCase
     {
         timeout.setDuration(200);
         timeout.setNow(1350);
-        tasks[2].reschedule();
-        
+        timeout.schedule(tasks[2]);
         
         timeout.setNow(1500);
         timeout.tick();

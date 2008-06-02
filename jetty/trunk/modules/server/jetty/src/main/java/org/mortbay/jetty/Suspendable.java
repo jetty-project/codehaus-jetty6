@@ -66,9 +66,9 @@ public class Suspendable
         _initial=true;
         _resumed=false;
             
-        _timeoutTask= new Timeout.Task(this)
+        _timeoutTask= new Timeout.Task()
         {
-            public void expire()
+            public void expired()
             {
                 Suspendable.this.expire();
             }
