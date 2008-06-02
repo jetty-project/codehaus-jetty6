@@ -243,9 +243,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
         {
             _setID=acceptorID;
 
-            _idleTimeout = new Timeout();
+            _idleTimeout = new Timeout(this);
             _idleTimeout.setDuration(getMaxIdleTime());
-            _timeout = new Timeout();
+            _timeout = new Timeout(this);
             _timeout.setDuration(0L);
 
             // create a selector;
@@ -278,10 +278,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         /* ------------------------------------------------------------ */
         public void cancelIdle(Timeout.Task task)
         {
-            synchronized (this)
-            {
-                task.cancel();
-            }
+            task.cancel();
         }
 
         /* ------------------------------------------------------------ */
@@ -524,28 +521,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
                 // tick over the timers
                 Timeout.Task task=null;
-                synchronized (this)
-                {
-                    task=_idleTimeout.expired();
-                    if (task==null)
-                        task=_timeout.expired();
-                }
+                _idleTimeout.tick();
+                _timeout.tick();
 
-                // handle any expired timers
-                while (task!=null)
-                {
-                    task.expire();
-
-                    // get the next timer tasks
-                    synchronized(this)
-                    {
-                        if (_selector==null)
-                            break;
-                        task=_idleTimeout.expired();
-                        if (task==null)
-                            task=_timeout.expired();
-                    }
-                }
             }
             catch (CancelledKeyException e)
             {
@@ -575,31 +553,21 @@ public abstract class SelectorManager extends AbstractLifeCycle
         /* ------------------------------------------------------------ */
         public void scheduleIdle(Timeout.Task task)
         {
-            synchronized (this)
-            {
-                if (_idleTimeout.getDuration() <= 0)
-                    return;
-                
-                task.schedule(_idleTimeout);
-            }
+            if (_idleTimeout.getDuration() <= 0)
+                return;
+            _idleTimeout.schedule(task);
         }
 
         /* ------------------------------------------------------------ */
         public void scheduleTimeout(Timeout.Task task, long timeoutMs)
         {
-            synchronized (this)
-            {
-                _timeout.schedule(task, timeoutMs);
-            }
+            _timeout.schedule(task, timeoutMs);
         }
         
         /* ------------------------------------------------------------ */
         public void cancelTimeout(Timeout.Task task)
         {
-            synchronized (this)
-            {
-                task.cancel();
-            }
+            task.cancel();
         }
 
         /* ------------------------------------------------------------ */
