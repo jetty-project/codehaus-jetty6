@@ -12,6 +12,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-587 persist sessions to database
  + JETTY-588 handle Retry in ServletException
  + JETTY-589 Added Statistics Servlet
+ + JETTY-590 Digest auth domain for root context
  + JETTY-592 expired timeout callback without synchronization
 
 jetty-6.1.10 20 May 2008
