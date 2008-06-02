@@ -5,6 +5,7 @@
  + JETTY-588 handle Retry in ServletException
  + JETTY-590 Digest auth domain for root context
  + JETTY-592 expired timeout callback without synchronization
+ + JETTY-595 SessionHandler only deals with base request session
  
 jetty-6.1.10 20 May 2008
  + Use QueuedThreadPool as default
