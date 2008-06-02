@@ -229,7 +229,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
     public class SelectSet 
     {
         private transient int _change;
-        private transient List[] _changes;
+        private transient List<Object>[] _changes;
         private transient Timeout _idleTimeout;
         private transient int _nextSet;
         private transient Timeout _timeout;
@@ -250,7 +250,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
 
             // create a selector;
             _selector = Selector.open();
-            _changes = new ArrayList[] {new ArrayList(),new ArrayList()};
+            _changes = new List[] {new ArrayList(),new ArrayList()};
             _change=0;
         }
         
@@ -291,7 +291,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
         {
             try
             {
-                List changes;
+                List<?> changes;
                 synchronized (_changes)
                 {
                     changes=_changes[_change];
@@ -386,7 +386,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                     // Look for JVM bug  http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933
                     if (selected==0  && (now-before)<wait/2)
                     {
-                        if (_jvmBug++>5)  // TODO tune or configure this
+                        if (_jvmBug++>5) 
                         {
                             // Probably JVM BUG!    
                             for (SelectionKey key: _selector.keys())
@@ -508,11 +508,7 @@ public abstract class SelectorManager extends AbstractLifeCycle
                             Log.ignore(e);
 
                         if (key != null && !(key.channel() instanceof ServerSocketChannel) && key.isValid())
-                        {
-                            key.interestOps(0);
-
                             key.cancel();
-                        } 
                     }
                 }
                 
@@ -520,7 +516,6 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 _selector.selectedKeys().clear();
 
                 // tick over the timers
-                Timeout.Task task=null;
                 _idleTimeout.tick();
                 _timeout.tick();
 
@@ -597,8 +592,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 }
             }
             
-            ArrayList keys=new ArrayList(_selector.keys());
-            Iterator iter =keys.iterator();
+            ArrayList<SelectionKey> keys=new ArrayList<SelectionKey>(_selector.keys());
+            Iterator<SelectionKey> iter =keys.iterator();
 
             while (iter.hasNext())
             {
