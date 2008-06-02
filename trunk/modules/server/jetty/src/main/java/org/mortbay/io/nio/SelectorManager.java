@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mortbay.component.AbstractLifeCycle;
+import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
@@ -188,7 +189,11 @@ public abstract class SelectorManager extends AbstractLifeCycle
         _selectSet=null;
         if (sets!=null)
             for (int i=0;i<sets.length;i++)
-                sets[i].stop();
+            {
+                SelectSet set = sets[i];
+                if (set!=null)
+                    set.stop();
+            }
         super.doStop();
     }
 
