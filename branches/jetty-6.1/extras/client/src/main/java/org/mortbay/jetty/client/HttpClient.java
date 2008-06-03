@@ -15,6 +15,7 @@
 package org.mortbay.jetty.client;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -22,6 +23,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.net.ssl.SSLSocket;
 
@@ -86,6 +88,8 @@ public class HttpClient extends AbstractBuffers
     private long _timeout=320000;
     private int _soTimeout = 10000;
     private Timeout _timeoutQ = new Timeout();
+    private InetSocketAddress _proxy;
+    private Set<InetAddress> _noProxy;
     
     
     /* ------------------------------------------------------------------------------- */
@@ -127,6 +131,8 @@ public class HttpClient extends AbstractBuffers
             if (destination==null)
             {
                 destination=new HttpDestination(this,remote,ssl,_maxConnectionsPerAddress);
+                if (_proxy!=null && (_noProxy==null || !_noProxy.contains(remote.getAddress())))
+                    destination.setProxy(_proxy);
                 _destinations.put(remote,destination);
             }
             return destination;
@@ -319,7 +325,7 @@ public class HttpClient extends AbstractBuffers
             {
                 socket= new Socket();
             }
-            socket.connect(destination.getAddress());
+            socket.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
             
             EndPoint endpoint=new SocketEndPoint(socket);
             
@@ -369,7 +375,7 @@ public class HttpClient extends AbstractBuffers
             }
             SocketChannel channel=SocketChannel.open();
             channel.configureBlocking(false);
-            channel.connect(destination.getAddress());
+            channel.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
             channel.socket().setSoTimeout(_soTimeout);
             _selectorManager.register(channel,destination);
         }
@@ -488,5 +494,37 @@ public class HttpClient extends AbstractBuffers
     {
         _timeout=ms;
     }
+
+    /* ------------------------------------------------------------ */
+    public InetSocketAddress getProxy()
+    {
+        return _proxy;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setProxy(InetSocketAddress proxy)
+    {
+        this._proxy = proxy;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isProxied()
+    {
+        return this._proxy!=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public Set<InetAddress> getNoProxy()
+    {
+        return _noProxy;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setNoProxy(Set<InetAddress> noProxyAddresses)
+    {
+        _noProxy = noProxyAddresses;
+    }
+    
+    
 
 }

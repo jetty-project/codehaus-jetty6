@@ -59,7 +59,7 @@ public class HttpExchange
 
     InetSocketAddress _address;
     String _method = HttpMethods.GET;
-    Buffer _scheme;
+    Buffer _scheme = HttpSchemes.HTTP_BUFFER;
     int _version = HttpVersions.HTTP_1_1_ORDINAL;
     String _uri;
     int _status = STATUS_UNKOWN;
