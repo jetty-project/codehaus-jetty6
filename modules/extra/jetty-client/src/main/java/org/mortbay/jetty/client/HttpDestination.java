@@ -45,6 +45,7 @@ public class HttpDestination
     private int _pendingConnections=0;
     private ArrayBlockingQueue<Object> _newQueue = new ArrayBlockingQueue<Object>(10,true);
     private int _newConnection=0;
+    private InetSocketAddress _proxy;
     
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
@@ -324,4 +325,23 @@ public class HttpDestination
         
         return b.toString();
     }
+
+    /* ------------------------------------------------------------ */
+    public void setProxy(InetSocketAddress proxy)
+    {
+        _proxy=proxy;
+    }
+
+    /* ------------------------------------------------------------ */
+    public InetSocketAddress getProxy()
+    {
+        return _proxy;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isProxied()
+    {
+        return _proxy!=null;
+    }
+    
 }
