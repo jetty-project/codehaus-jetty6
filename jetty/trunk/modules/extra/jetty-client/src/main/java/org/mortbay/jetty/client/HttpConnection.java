@@ -17,6 +17,7 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.net.URI;
 import java.nio.channels.CancelledKeyException;
 import java.util.Date;
 
@@ -31,6 +32,7 @@ import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpParser;
+import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
@@ -339,7 +341,15 @@ public class HttpConnection implements Connection
             _exchange.setStatus(HttpExchange.STATUS_SENDING_REQUEST);
 
             _generator.setVersion(_exchange._version);
-            _generator.setRequest(_exchange._method, _exchange._uri);
+            
+            String uri=_exchange._uri;
+            if (_destination.isProxied() && uri.startsWith("/"))
+            {
+                // TODO suppress port 80 or 443
+                uri=(_destination.isSecure()?HttpSchemes.HTTPS:HttpSchemes.HTTP)+"://"+
+                _destination.getAddress().getHostName()+":"+_destination.getAddress().getPort()+uri;
+            }
+            _generator.setRequest(_exchange._method,uri);
 
             if (_exchange._version>=HttpVersions.HTTP_1_1_ORDINAL)
             {
