@@ -14,13 +14,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 import javax.sql.DataSource;
 
+import org.mortbay.jetty.servlet.HashSessionManager.Session;
 import org.mortbay.log.Log;
+import org.mortbay.util.LazyList;
 
 /**
  * JDBCSessionManager
@@ -41,24 +48,22 @@ import org.mortbay.log.Log;
 public class JDBCSessionManager extends AbstractSessionManager
 {
     //TODO do we need to persist both the previous access time and the current access time????
-    private static final String __createString = "create table JettySessions (rowId varchar(60), sessionId varchar(60), contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
-                                                " lastAccessTime bigint, createTime bigint, cookieTime bigint, map blob, primary key(rowId))";
+  
+    private static final String __insertSession = "insert into JettySessions (rowId, sessionId, contextPath, lastNode, accessTime, lastAccessTime, createTime, cookieTime, lastSavedTime, expiryTime, map) "+
+                                                 " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
-    private static final String __insertString = "insert into JettySessions (rowId, sessionId, contextPath, lastNode, accessTime, lastAccessTime, createTime, cookieTime, map) "+
-                                                 " values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String __deleteSession = "delete from JettySessions where rowId = ?";
     
-    private static final String __deleteString = "delete from JettySessions where rowId = ?";
+    private static final String __selectSession = "select * from JettySessions where sessionId = ? and contextPath = ?";
     
-    private static final String __selectString = "select * from JettySessions where sessionId = ? and contextPath = ?";
+    private static final String __updateSession = "update JettySessions set lastNode = ?, accessTime = ?, lastAccessTime = ?, lastSavedTime = ?, expiryTime = ?, map = ? where rowId = ?";
     
-    private static final String __updateString = "update JettySessions set lastNode = ?, accessTime = ?, lastAccessTime = ?, map = ? where rowId = ?";
+    private static final String __updateSessionNode = "update JettySessions set lastNode = ? where rowId = ?";
     
-    private static final String __updateNodeString = "update JettySessions set lastNode = ? where rowId = ?";
+    private static final String __updateSessionAccessTime = "update JettySessions set lastNode = ?, accessTime = ?, lastAccessTime = ?, lastSavedTime = ?, expiryTime = ? where rowId = ?";
     
-    
-    private String _driverClassName;
-    private String _connectionUrl;
     private ConcurrentHashMap _sessions;
+    protected long _saveIntervalSec = 60; //only persist changes to session access times every 60 secs
     
     /**
      * SessionData
@@ -77,6 +82,8 @@ public class JDBCSessionManager extends AbstractSessionManager
         private Map _attributes;
         private String _lastNode;
         private String _canonicalContext;
+        private long _lastSaved;
+        private long _expiryTime;
 
         public SessionData (String sessionId)
         {
@@ -182,9 +189,32 @@ public class JDBCSessionManager extends AbstractSessionManager
             return _canonicalContext;
         }
         
+        public synchronized long getLastSaved ()
+        {
+            return _lastSaved;
+        }
+        
+        public synchronized void setLastSaved (long time)
+        {
+            _lastSaved=time;
+        }
+        
+        public synchronized void setExpiryTime (long time)
+        {
+            _expiryTime=time;
+        }
+        
+        public synchronized long getExpiryTime ()
+        {
+            return _expiryTime;
+        }
+        
         public String toString ()
         {
-            return "Session rowId="+_rowId+",id="+_id+",lastNode="+_lastNode+",created="+_created+",accessed="+_accessed+",lastAccessed="+_lastAccessed+",cookieSet="+_cookieSet;
+            return "Session rowId="+_rowId+",id="+_id+",lastNode="+_lastNode+
+                            ",created="+_created+",accessed="+_accessed+
+                            ",lastAccessed="+_lastAccessed+",cookieSet="+_cookieSet+
+                            "lastSaved="+_lastSaved;
         }
     }
 
@@ -212,6 +242,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             _data = new SessionData(_clusterId);
             _data.setMaxIdleMs(_dftMaxIdleSecs*1000);
             _data.setCanonicalContext(canonicalize(_context.getContextPath()));
+            _data.setExpiryTime(_maxIdleMs < 0 ? 0 : (System.currentTimeMillis() + _maxIdleMs));
         }
 
         /**
@@ -253,7 +284,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             super.access(time);
             _data.setLastAccessed(_data.getAccessed());
             _data.setAccessed(time);
-            _dirty=true;
+            _data.setExpiryTime(_maxIdleMs < 0 ? 0 : (time + _maxIdleMs));
         }
 
         /** 
@@ -263,21 +294,28 @@ public class JDBCSessionManager extends AbstractSessionManager
         protected void complete()
         {
             super.complete();
-            if (_dirty)
+            try
             {
-                try
-                {
+                if (_dirty)
                     updateSession(_data);
-                }
-                catch (Exception e)
-                {
-                    Log.warn("Problem persisting changed session data id="+getId(), e);
-                }
-                finally
-                {
-                    _dirty=false;
-                }
+                else if ((_data._accessed - _data._lastSaved) >= getSaveInterval())
+                    updateSessionAccessTime(_data);
+                
             }
+            catch (Exception e)
+            {
+                Log.warn("Problem persisting changed session data id="+getId(), e);
+            }
+            finally
+            {
+                _dirty=false;
+            }
+        }
+        
+        protected void timeout() throws IllegalStateException
+        {
+            if (Log.isDebugEnabled()) Log.debug("Timing out session id="+getClusterId());
+            super.timeout();
         }
     }
     
@@ -316,22 +354,35 @@ public class JDBCSessionManager extends AbstractSessionManager
     
     
 
-    
-    
-    /**
-     * Configure jdbc connection information
-     * 
-     * @param driverClassName
-     * @param connectionUrl
-     */
-    public void setDriverInfo (String driverClassName, String connectionUrl)
-    {
-        _driverClassName=driverClassName;
-        _connectionUrl=connectionUrl;
-    }
-   
 
+    /**
+     * Set the time in seconds which is the interval between
+     * saving the session access time to the database.
+     * 
+     * This is an optimization that prevents the database from
+     * being overloaded when a session is accessed very frequently.
+     * 
+     * On session exit, if the session attributes have NOT changed,
+     * the time at which we last saved the accessed
+     * time is compared to the current accessed time. If the interval
+     * is at least saveIntervalSecs, then the access time will be
+     * persisted to the database.
+     * 
+     * If any session attribute does change, then the attributes and
+     * the accessed time are persisted.
+     * 
+     * @param sec
+     */
+    public void setSaveInterval (long sec)
+    {
+        _saveIntervalSec=sec;
+    }
   
+    public long getSaveInterval ()
+    {
+        return _saveIntervalSec;
+    }
+
    
     /** 
      * A session has been requested by it's id on this node.
@@ -353,6 +404,8 @@ public class JDBCSessionManager extends AbstractSessionManager
         {        
             try
             {
+                new Throwable().printStackTrace();
+                
                 SessionData data = loadSession(idInCluster, canonicalize(_context.getContextPath()));
                 if (data != null)
                 {
@@ -409,15 +462,8 @@ public class JDBCSessionManager extends AbstractSessionManager
     {
         if (_sessionIdManager==null)
             throw new IllegalStateException("No session id manager defined");
-        
-        if (_driverClassName==null)
-            _driverClassName = ((JDBCSessionIdManager)_sessionIdManager).getDriverClassName();
-        
-        if (_connectionUrl==null)
-            _connectionUrl = ((JDBCSessionIdManager)_sessionIdManager).getConnectionUrl();
-        
+     
         _sessions = new ConcurrentHashMap();
-        prepareTables();
         super.doStart();
     }
     
@@ -431,6 +477,17 @@ public class JDBCSessionManager extends AbstractSessionManager
         //any other nodes
     }
 
+    protected void invalidateSession (String idInCluster)
+    {
+        synchronized (this)
+        {
+            Session session = (Session)_sessions.get(idInCluster);
+            if (session != null)
+            {
+                session.invalidate();
+            }
+        }
+    }
    
     protected void removeSession(String idInCluster)
     {
@@ -486,7 +543,104 @@ public class JDBCSessionManager extends AbstractSessionManager
         return new Session(request);
     }
     
+    /* ------------------------------------------------------------ */
+    /** Remove session from manager 
+     * @param session The session to remove
+     * @param invalidate True if {@link HttpSessionListener#sessionDestroyed(HttpSessionEvent)} and
+     * {@link SessionIdManager#invalidateAll(String)} should be called.
+     */
+    public void removeSession(AbstractSessionManager.Session session, boolean invalidate)
+    {
+        // Remove session from context and global maps
+        synchronized (_sessionIdManager)
+        {
+            boolean removed = false;
+            
+            synchronized (this)
+            {
+                //take this session out of the map of sessions for this context
+                if (_sessions.get(session.getClusterId()) != null)
+                {
+                    removed = true;
+                    removeSession(session.getClusterId());
+                }
+            }   
+            
+            if (removed)
+            {
+                // Remove session from all context and global id maps
+                _sessionIdManager.removeSession(session);
+                if (invalidate)
+                    _sessionIdManager.invalidateAll(session.getClusterId());
+            }
+        }
+        
+        if (invalidate && _sessionListeners!=null)
+        {
+            HttpSessionEvent event=new HttpSessionEvent(session);
+            for (int i=LazyList.size(_sessionListeners); i-->0;)
+                ((HttpSessionListener)LazyList.get(_sessionListeners,i)).sessionDestroyed(event);
+        }
+        if (!invalidate)
+        {
+            session.willPassivate();
+        }
+    }
     
+    
+    /**
+     * Expire any Sessions we have in memory matching the list of
+     * expired Session ids.
+     * 
+     * @param sessionIds
+     */
+    protected void expire (List sessionIds)
+    {
+        
+        //don't attempt to scavenge if we are shutting down
+        if (isStopping() || isStopped())
+            return;
+
+        //Remove any sessions we already have in memory that match the ids
+        Thread thread=Thread.currentThread();
+        ClassLoader old_loader=thread.getContextClassLoader();
+        ListIterator itor = sessionIds.listIterator();
+
+        try
+        {
+            while (itor.hasNext())
+            {
+                String sessionId = (String)itor.next();
+                if (Log.isDebugEnabled()) Log.debug("Expiring session id "+sessionId);
+                Session session = (Session)_sessions.get(sessionId);
+                if (session != null)
+                {
+                    session.timeout();
+                    itor.remove();
+                    int count = this._sessions.size();
+                    if (count < this._minSessions)
+                        this._minSessions=count;
+                }
+                else
+                {
+                    if (Log.isDebugEnabled()) Log.debug("Unrecognized session id="+sessionId);
+                }
+            }
+        }
+        catch (Throwable t)
+        {
+            if (t instanceof ThreadDeath)
+                throw ((ThreadDeath)t);
+            else
+                Log.warn("Problem expiring sessions", t);
+        }
+        finally
+        {
+            thread.setContextClassLoader(old_loader);
+        }
+    }
+    
+ 
     
     /**
      * Load a session from the database
@@ -502,7 +656,7 @@ public class JDBCSessionManager extends AbstractSessionManager
         PreparedStatement statement = null;
         try
         {
-            statement = connection.prepareStatement(__selectString);
+            statement = connection.prepareStatement(__selectSession);
             statement.setString(1, id);
             statement.setString(2, canonicalContextPath);
             ResultSet result = statement.executeQuery();
@@ -511,10 +665,12 @@ public class JDBCSessionManager extends AbstractSessionManager
                data = new SessionData(id);
                data.setRowId(result.getString("rowId"));
                data.setCookieSet(result.getLong("cookieTime"));
-               data.setLastAccessed(result.getLong("lastAccessTime")); //TODO is this necessary?
+               data.setLastAccessed(result.getLong("lastAccessTime"));
                data.setAccessed (result.getLong("accessTime"));
                data.setCreated(result.getLong("createTime"));
                data.setLastNode(result.getString("lastNode"));
+               data.setLastSaved(result.getLong("lastSavedTime"));
+               data.setExpiryTime(result.getLong("expiryTime"));
                data.setCanonicalContext(result.getString("contextPath"));
                Blob blob = result.getBlob("map");
                ClassLoadingObjectInputStream ois = new ClassLoadingObjectInputStream(blob.getBinaryStream());
@@ -552,9 +708,10 @@ public class JDBCSessionManager extends AbstractSessionManager
         try
         {   
             String rowId = calculateRowId(data);
-            data.setRowId(rowId); //set it on the in-memory data as well as in db
+            
+            long now = System.currentTimeMillis();
             connection.setAutoCommit(true);
-            statement = connection.prepareStatement(__insertString);
+            statement = connection.prepareStatement(__insertSession);
             statement.setString(1, rowId); //rowId
             statement.setString(2, data.getId()); //session id
             statement.setString(3, data.getCanonicalContext()); //context path
@@ -563,15 +720,19 @@ public class JDBCSessionManager extends AbstractSessionManager
             statement.setLong(6, data.getLastAccessed()); //lastAccessTime
             statement.setLong(7, data.getCreated()); //time created
             statement.setLong(8, data.getCookieSet());//time cookie was set
+            statement.setLong(9, now); //last saved time
+            statement.setLong(10, data.getExpiryTime());
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(data.getAttributeMap());
             byte[] bytes = baos.toByteArray();
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            statement.setBinaryStream(9, bais, bytes.length);//attribute map as blob
+            statement.setBinaryStream(11, bais, bytes.length);//attribute map as blob
             
             statement.executeUpdate();
+            data.setRowId(rowId); //set it on the in-memory data as well as in db
+            data.setLastSaved(now);
             
             if (Log.isDebugEnabled())
                 Log.debug("Stored session "+data);
@@ -600,11 +761,14 @@ public class JDBCSessionManager extends AbstractSessionManager
         PreparedStatement statement = null;
         try
         {              
+            long now = System.currentTimeMillis();
             connection.setAutoCommit(true);
-            statement = connection.prepareStatement(__updateString);     
+            statement = connection.prepareStatement(__updateSession);     
             statement.setString(1, getIdManager().getWorkerName());//my node id
             statement.setLong(2, data.getAccessed());//accessTime
             statement.setLong(3, data.getLastAccessed()); //lastAccessTime
+            statement.setLong(4, now); //last saved time
+            statement.setLong(5, data.getExpiryTime());
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -612,10 +776,11 @@ public class JDBCSessionManager extends AbstractSessionManager
             byte[] bytes = baos.toByteArray();
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             
-            statement.setBinaryStream(4, bais, bytes.length);//attribute map as blob 
-            statement.setString(5, data.getRowId()); //rowId
+            statement.setBinaryStream(6, bais, bytes.length);//attribute map as blob 
+            statement.setString(7, data.getRowId()); //rowId
             statement.executeUpdate();
             
+            data.setLastSaved(now);
             if (Log.isDebugEnabled())
                 Log.debug("Updated session "+data);
         }
@@ -642,7 +807,7 @@ public class JDBCSessionManager extends AbstractSessionManager
         try
         {            
             connection.setAutoCommit(true);
-            statement = connection.prepareStatement(__updateNodeString);
+            statement = connection.prepareStatement(__updateSessionNode);
             statement.setString(1, nodeId);
             statement.setString(2, data.getRowId());
             statement.executeUpdate();
@@ -656,7 +821,38 @@ public class JDBCSessionManager extends AbstractSessionManager
                 connection.close();
         }
     }
-
+    
+    private void updateSessionAccessTime (SessionData data)
+    throws Exception
+    {
+        Connection connection = getConnection();
+        PreparedStatement statement = null;
+        try
+        {            
+            long now = System.currentTimeMillis();
+            connection.setAutoCommit(true);
+            statement = connection.prepareStatement(__updateSessionAccessTime);
+            statement.setString(1, getIdManager().getWorkerName());
+            statement.setLong(2, data.getAccessed());
+            statement.setLong(3, data.getLastAccessed());
+            statement.setLong(4, now);
+            statement.setLong(5, data.getExpiryTime());
+            statement.setString(6, data.getRowId());
+            statement.executeUpdate();
+            data.setLastSaved(now);
+            statement.close();
+            if (Log.isDebugEnabled())
+                Log.debug("Updated access time session id="+data.getId());
+        }
+        finally
+        {
+            if (connection!=null)
+                connection.close();
+        }
+    }
+    
+    
+    
     
     /**
      * Delete a session from the database. Should only be called
@@ -673,7 +869,7 @@ public class JDBCSessionManager extends AbstractSessionManager
         try
         {
             connection.setAutoCommit(true);
-            statement = connection.prepareStatement(__deleteString);
+            statement = connection.prepareStatement(__deleteSession);
             statement.setString(1, data.getRowId());
             statement.executeUpdate();
             if (Log.isDebugEnabled())
@@ -686,39 +882,6 @@ public class JDBCSessionManager extends AbstractSessionManager
         } 
     }
     
-    /**
-     * Set up the table in the database
-     * @throws SQLException
-     */
-    private void prepareTables()
-    throws Exception
-    {
-        Class.forName(_driverClassName);
-        
-        Connection connection = null;
-        try
-        {
-            String tableName = "JettySessions";
-            connection = getConnection();
-            DatabaseMetaData metaData = connection.getMetaData();
-            if (metaData.storesLowerCaseIdentifiers())
-                tableName = tableName.toLowerCase();
-            if (metaData.storesUpperCaseIdentifiers())
-                tableName = tableName.toUpperCase();
-            
-            ResultSet result = metaData.getTables(null, null, tableName, null);
-            if (!result.next())
-            {
-                //table does not exist, so create it
-                connection.createStatement().executeUpdate(__createString);
-            }
-        }
-        finally
-        {
-            if (connection != null)
-                connection.close();
-        }
-    }
     
     
     /**
@@ -729,7 +892,7 @@ public class JDBCSessionManager extends AbstractSessionManager
     private Connection getConnection ()
     throws SQLException
     { 
-        return DriverManager.getConnection(_connectionUrl);
+        return ((JDBCSessionIdManager)getIdManager()).getConnection();
     }
 
     /**
