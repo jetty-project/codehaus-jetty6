@@ -7,6 +7,7 @@
  + JETTY-590 Digest auth domain for root context
  + JETTY-592 expired timeout callback without synchronization
  + JETTY-595 SessionHandler only deals with base request session
+ + JETTY-596 Proxy support in HttpClient
  
 jetty-6.1.10 20 May 2008
  + Use QueuedThreadPool as default

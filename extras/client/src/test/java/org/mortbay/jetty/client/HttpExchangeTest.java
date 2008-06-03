@@ -17,6 +17,7 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -180,6 +181,27 @@ public class HttpExchangeTest extends TestCase
         }
     }
 
+    public void testProxy() throws Exception
+    {
+        try
+        {
+            _httpClient.setProxy(new InetSocketAddress("127.0.0.1",_port));
+
+            HttpExchange.ContentExchange httpExchange=new HttpExchange.ContentExchange();
+            httpExchange.setAddress(new InetSocketAddress("jetty.mortbay.org",8080));
+            httpExchange.setMethod(HttpMethods.GET);
+            httpExchange.setURI("/jetty-6");
+            _httpClient.send(httpExchange);
+            httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
+            String result=httpExchange.getResponseContent();
+            assertEquals("Proxy request: http://jetty.mortbay.org:8080/jetty-6",result.trim());
+        }
+        finally
+        {
+            _httpClient.setProxy(null);
+        }
+    }
+
     public static void copyStream(InputStream in, OutputStream out)
     {
         try
@@ -216,7 +238,11 @@ public class HttpExchangeTest extends TestCase
                 Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
                 base_request.setHandled(true);
                 response.setStatus(200);
-                if (request.getMethod().equalsIgnoreCase("GET"))
+                if (request.getServerName().equals("jetty.mortbay.org"))
+                {
+                    response.getOutputStream().println("Proxy request: "+request.getRequestURL());
+                }
+                else if (request.getMethod().equalsIgnoreCase("GET"))
                 {
                     response.getOutputStream().println("<hello>");
                     for (int i=0; i<100; i++)

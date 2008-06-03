@@ -42,6 +42,7 @@ public class HttpDestination
     private boolean _ssl;
     private int _maxConnections;
     private AtomicInteger _pendingConnections = new AtomicInteger(0);
+    private InetSocketAddress _proxy;
     
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
@@ -263,6 +264,24 @@ public class HttpDestination
         b.append('\n');
         
         return b.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setProxy(InetSocketAddress proxy)
+    {
+        _proxy=proxy;
+    }
+
+    /* ------------------------------------------------------------ */
+    public InetSocketAddress getProxy()
+    {
+        return _proxy;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isProxied()
+    {
+        return _proxy!=null;
     }
     
 }
