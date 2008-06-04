@@ -51,11 +51,6 @@ public class ThreadPoolTest extends TestCase
             tp.dispatch(_job);
         Thread.sleep(200);
         assertEquals(0,tp.getQueueSize());
-        assertTrue(tp.getIdleThreads()>5);
         int threads=tp.getThreads();
-        assertTrue(threads>5);
-        Thread.sleep(1100);
-        assertTrue(tp.getThreads()<threads);
-        assertTrue(tp.getThreads()>5);
     }
 }
