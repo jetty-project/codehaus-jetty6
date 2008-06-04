@@ -1,3 +1,18 @@
+// ========================================================================
+// Copyright 2008 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ========================================================================
+
+
 package org.mortbay.jetty.servlet;
 
 import java.io.ByteArrayInputStream;
@@ -7,14 +22,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Blob;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -23,9 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import javax.sql.DataSource;
 
-import org.mortbay.jetty.servlet.HashSessionManager.Session;
+
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
@@ -37,18 +47,24 @@ import org.mortbay.util.LazyList;
  * Session data is persisted to the JettySessions table:
  * 
  * rowId (unique in cluster: webapp name/path + virtualhost + sessionId)
+ * contextPath (of the context owning the session)
  * sessionId (unique in a context)
  * lastNode (name of node last handled session)
  * accessTime (time in ms session was accessed)
  * lastAccessTime (previous time in ms session was accessed)
  * createTime (time in ms session created)
  * cookieTime (time in ms session cookie created)
+ * lastSavedTime (last time in ms session access times were saved)
+ * expiryTime (time in ms that the session is due to expire)
  * map (attribute map)
+ * 
+ * As an optimisation, to prevent thrashing the database, we do not persist
+ * the accessTime and lastAccessTime every time the session is accessed. Rather,
+ * we write it out every so often. The frequency is controlled by the saveIntervalSec
+ * field.
  */
 public class JDBCSessionManager extends AbstractSessionManager
-{
-    //TODO do we need to persist both the previous access time and the current access time????
-  
+{  
     private static final String __insertSession = "insert into JettySessions (rowId, sessionId, contextPath, lastNode, accessTime, lastAccessTime, createTime, cookieTime, lastSavedTime, expiryTime, map) "+
                                                  " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
@@ -394,6 +410,10 @@ public class JDBCSessionManager extends AbstractSessionManager
      * Check if last node id is my node id, if so, then the session we have
      * in memory cannot be stale. If another node used the session last, then
      * we need to refresh from the db.
+     * 
+     * NOTE: this method will go to the database, so if you only want to check 
+     * for the existence of a Session in memory, use _sessions.get(id) instead.
+     * 
      * @see org.mortbay.jetty.servlet.AbstractSessionManager#getSession(java.lang.String)
      */
     public Session getSession(String idInCluster)
@@ -403,9 +423,7 @@ public class JDBCSessionManager extends AbstractSessionManager
         synchronized (this)
         {        
             try
-            {
-                new Throwable().printStackTrace();
-                
+            {                
                 SessionData data = loadSession(idInCluster, canonicalize(_context.getContextPath()));
                 if (data != null)
                 {
@@ -441,12 +459,22 @@ public class JDBCSessionManager extends AbstractSessionManager
     }
 
    
+    /** 
+     * Get all the sessions as a map of id to Session.
+     * 
+     * @see org.mortbay.jetty.servlet.AbstractSessionManager#getSessionMap()
+     */
     public Map getSessionMap()
     {
        return Collections.unmodifiableMap(_sessions);
     }
 
     
+    /** 
+     * Get the number of sessions.
+     * 
+     * @see org.mortbay.jetty.servlet.AbstractSessionManager#getSessions()
+     */
     public int getSessions()
     {
         int size = 0;
@@ -458,6 +486,11 @@ public class JDBCSessionManager extends AbstractSessionManager
     }
 
 
+    /** 
+     * Start the session manager.
+     * 
+     * @see org.mortbay.jetty.servlet.AbstractSessionManager#doStart()
+     */
     public void doStart() throws Exception
     {
         if (_sessionIdManager==null)
@@ -466,6 +499,8 @@ public class JDBCSessionManager extends AbstractSessionManager
         _sessions = new ConcurrentHashMap();
         super.doStart();
     }
+    
+    
     
     protected void invalidateSessions()
     {
@@ -477,6 +512,12 @@ public class JDBCSessionManager extends AbstractSessionManager
         //any other nodes
     }
 
+    
+    /**
+     * Invalidate a session.
+     * 
+     * @param idInCluster
+     */
     protected void invalidateSession (String idInCluster)
     {
         synchronized (this)
@@ -489,6 +530,12 @@ public class JDBCSessionManager extends AbstractSessionManager
         }
     }
    
+    /** 
+     * Delete an existing session, both from the in-memory map and
+     * the database.
+     * 
+     * @see org.mortbay.jetty.servlet.AbstractSessionManager#removeSession(java.lang.String)
+     */
     protected void removeSession(String idInCluster)
     {
         synchronized (this)
@@ -595,8 +642,7 @@ public class JDBCSessionManager extends AbstractSessionManager
      * @param sessionIds
      */
     protected void expire (List sessionIds)
-    {
-        
+    { 
         //don't attempt to scavenge if we are shutting down
         if (isStopping() || isStopped())
             return;
@@ -822,6 +868,12 @@ public class JDBCSessionManager extends AbstractSessionManager
         }
     }
     
+    /**
+     * Persist the time the session was last accessed.
+     * 
+     * @param data
+     * @throws Exception
+     */
     private void updateSessionAccessTime (SessionData data)
     throws Exception
     {
@@ -911,6 +963,13 @@ public class JDBCSessionManager extends AbstractSessionManager
         return rowId;
     }
     
+    
+    /**
+     * Make an acceptable file name from a context path.
+     * 
+     * @param path
+     * @return
+     */
     private String canonicalize (String path)
     {
         if (path==null)
