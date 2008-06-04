@@ -14,8 +14,8 @@ import org.mortbay.io.Buffers;
  */
 public abstract class AbstractBuffers extends AbstractLifeCycle implements Buffers
 {
-    private int _headerBufferSize=4*1024;
-    private int _requestBufferSize=8*1024;
+    private int _headerBufferSize=6*1024;
+    private int _requestBufferSize=16*1024;
     private int _responseBufferSize=32*1024;
     
     // Use and array of buffers to avoid contention

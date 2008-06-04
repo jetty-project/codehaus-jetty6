@@ -128,7 +128,6 @@ public class AsyncProxyServlet implements Servlet
             final InputStream in=request.getInputStream();
             final OutputStream out=response.getOutputStream();
 
-            
             if (request.isInitial())
             {
                 String uri=request.getRequestURI();
@@ -137,7 +136,6 @@ public class AsyncProxyServlet implements Servlet
 
                 HttpExchange exchange = new HttpExchange()
                 {
-
                     protected void onRequestCommitted() throws IOException
                     {
                     }
@@ -297,9 +295,9 @@ public class AsyncProxyServlet implements Servlet
                 if (hasContent)
                     exchange.setRequestContentSource(in);
 
+                request.suspend();
                 _client.send(exchange);
                 
-                request.suspend();
             }
         } 
     }
@@ -373,31 +371,4 @@ public class AsyncProxyServlet implements Servlet
     }
     
 
-    public static void main(String[] args)
-        throws Exception
-    {
-        // start a test webapp on port 8080
-        Server server = new Server(8080);
-        HandlerCollection handlers = new HandlerCollection();
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        handlers.setHandlers(new Handler[]{contexts,new DefaultHandler()});
-        server.setHandler(handlers);
-        WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath("/test");
-        webapp.setResourceBase("../../../webapps/test");
-        contexts.addHandler(webapp);
-        server.start();
-        
-        // start a proxy server on port 8888
-        Server proxy = new Server();
-        SelectChannelConnector connector = new SelectChannelConnector();
-        // Connector connector = new SocketConnector();
-        connector.setPort(8888);
-        proxy.addConnector(connector);
-        Context context = new Context(proxy,"/",0);
-        context.addServlet(new ServletHolder(new AsyncProxyServlet()), "/");
-        
-        proxy.start();
-        proxy.join();
-    }
 }
