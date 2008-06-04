@@ -17,7 +17,6 @@
     <module>jetty-embedded</module>
     <module>jetty-example-webapp</module>
     <module>jetty-extra-example-webapp</module>
-    <module>jetty-proxy</module>
     <module>jndi-example-webapp</module>
     <!--
     <module>spring-ebj3-example-webapp</module>
