@@ -65,18 +65,12 @@ import org.mortbay.util.LazyList;
  */
 public class JDBCSessionManager extends AbstractSessionManager
 {  
-    private static final String __insertSession = "insert into JettySessions (rowId, sessionId, contextPath, lastNode, accessTime, lastAccessTime, createTime, cookieTime, lastSavedTime, expiryTime, map) "+
-                                                 " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    private static final String __deleteSession = "delete from JettySessions where rowId = ?";
-    
-    private static final String __selectSession = "select * from JettySessions where sessionId = ? and contextPath = ?";
-    
-    private static final String __updateSession = "update JettySessions set lastNode = ?, accessTime = ?, lastAccessTime = ?, lastSavedTime = ?, expiryTime = ?, map = ? where rowId = ?";
-    
-    private static final String __updateSessionNode = "update JettySessions set lastNode = ? where rowId = ?";
-    
-    private static final String __updateSessionAccessTime = "update JettySessions set lastNode = ?, accessTime = ?, lastAccessTime = ?, lastSavedTime = ?, expiryTime = ? where rowId = ?";
+    protected  String __insertSession;  
+    protected  String __deleteSession; 
+    protected  String __selectSession;   
+    protected  String __updateSession;  
+    protected  String __updateSessionNode; 
+    protected  String __updateSessionAccessTime;
     
     private ConcurrentHashMap _sessions;
     protected long _saveIntervalSec = 60; //only persist changes to session access times every 60 secs
@@ -313,7 +307,12 @@ public class JDBCSessionManager extends AbstractSessionManager
             try
             {
                 if (_dirty)
+                {
+                    //TODO iterate over all attributes in the Session and look for
+                    //HttpSessionActivationListeners and call willPassivate and then
+                    //after it is stored call doActivate on them each
                     updateSession(_data);
+                }
                 else if ((_data._accessed - _data._lastSaved) >= getSaveInterval())
                     updateSessionAccessTime(_data);
                 
@@ -495,6 +494,8 @@ public class JDBCSessionManager extends AbstractSessionManager
     {
         if (_sessionIdManager==null)
             throw new IllegalStateException("No session id manager defined");
+        
+        prepareTables();
      
         _sessions = new ConcurrentHashMap();
         super.doStart();
@@ -570,6 +571,9 @@ public class JDBCSessionManager extends AbstractSessionManager
             //then session data will be lost.
             try
             {
+                //TODO iterate over all attributes in the Session and look for
+                //HttpSessionActivationListeners and call willPassivate and then
+                //after it is stored call doActivate on them each
                 storeSession(((JDBCSessionManager.Session)session)._data);
             }
             catch (Exception e)
@@ -687,6 +691,27 @@ public class JDBCSessionManager extends AbstractSessionManager
     }
     
  
+    protected void prepareTables ()
+    {
+        __insertSession = "insert into "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
+                          " (rowId, sessionId, contextPath, lastNode, accessTime, lastAccessTime, createTime, cookieTime, lastSavedTime, expiryTime, map) "+
+                          " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        __deleteSession = "delete from "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
+                          " where rowId = ?";
+
+        __selectSession = "select * from "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
+                          " where sessionId = ? and contextPath = ?";
+
+        __updateSession = "update "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
+                          " set lastNode = ?, accessTime = ?, lastAccessTime = ?, lastSavedTime = ?, expiryTime = ?, map = ? where rowId = ?";
+
+        __updateSessionNode = "update "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
+                              " set lastNode = ? where rowId = ?";
+
+        __updateSessionAccessTime = "update "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
+                                    " set lastNode = ?, accessTime = ?, lastAccessTime = ?, lastSavedTime = ?, expiryTime = ? where rowId = ?";
+    }
     
     /**
      * Load a session from the database
