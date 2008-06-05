@@ -20,6 +20,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,8 +28,10 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
@@ -46,27 +49,29 @@ import org.mortbay.log.Log;
  */
 public class JDBCSessionIdManager extends AbstractSessionIdManager
 {    
-    private static final String __createSessionIdTable = "create table JettySessionIds (id varchar(60), primary key(id))";
-    private static final String __createSessionTable = "create table JettySessions (rowId varchar(60), sessionId varchar(60), "+
-                                                       " contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
-                                                       " lastAccessTime bigint, createTime bigint, cookieTime bigint, "+
-                                                       " lastSavedTime bigint, expiryTime bigint, map blob, primary key(rowId))";
-    
-    private static final String __selectExpiredSessions = "select * from JettySessions where expiryTime >= ? and expiryTime <= ?";
-    private static final String __deleteOldExpiredSessions = "delete from JettySessions where expiryTime >0 and expiryTime <= ?";
-
-    private static final String __insertId = "insert into JettySessionIds (id)  values (?)";
-    private static final String __deleteId = "delete from JettySessionIds where id = ?";
-    private static final String __queryId = "select * from JettySessionIds where id = ?";
-    
-    
     protected HashSet<String> _sessionIds = new HashSet();
     protected String _driverClassName;
     protected String _connectionUrl;
+    protected DataSource _datasource;
+    protected String _jndiName;
+    protected String _sessionIdTable = "JettySessionIds";
+    protected String _sessionTable = "JettySessions";
     protected Timer _timer; //scavenge timer
     protected TimerTask _task; //scavenge task
     protected long _lastScavengeTime;
     protected long _scavengeIntervalSec = 60 * 10; //10mins
+    
+    
+    protected String __createSessionIdTable;
+    protected String __createSessionTable;
+                                            
+    protected String __selectExpiredSessions;
+    protected String __deleteOldExpiredSessions;
+
+    protected String __insertId;
+    protected String __deleteId;
+    protected String __queryId;
+
     
     public JDBCSessionIdManager(Server server)
     {
@@ -79,7 +84,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     }
 
     /**
-     * Configure jdbc connection information
+     * Configure jdbc connection information via a jdbc Driver
      * 
      * @param driverClassName
      * @param connectionUrl
@@ -98,6 +103,16 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     public String getConnectionUrl ()
     {
         return _connectionUrl;
+    }
+    
+    public void setDatasourceName (String jndi)
+    {
+        _jndiName=jndi;
+    }
+    
+    public String getDatasourceName ()
+    {
+        return _jndiName;
     }
    
     
@@ -259,6 +274,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
             Random rand = new Random();
             int variability = rand.nextInt(60); //add variability of up to 1 min
             _scavengeIntervalSec += variability;
+            initializeDatabase();
             prepareTables();        
             super.doStart();
             if (Log.isDebugEnabled()) Log.debug("Scavenging interval = "+_scavengeIntervalSec+" sec");
@@ -306,32 +322,81 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     }
     
     /**
-     * Get a connection from the driver.
+     * Get a connection from the driver or datasource.
+     * 
      * @return
      * @throws SQLException
      */
     protected Connection getConnection ()
     throws SQLException
     {
-        return DriverManager.getConnection(_connectionUrl);
+        if (_datasource != null)
+            return _datasource.getConnection();
+        else
+            return DriverManager.getConnection(_connectionUrl);
     }
+
+    
+    private void initializeDatabase ()
+    throws Exception
+    {
+        if (_jndiName!=null)
+        {
+            InitialContext ic = new InitialContext();
+            _datasource = (DataSource)ic.lookup(_jndiName);
+        }
+        else if (_driverClassName!=null && _connectionUrl!=null)
+        {
+            Class.forName(_driverClassName);
+        }
+        else
+            throw new IllegalStateException("No database configured for sessions");
+    }
+    
+    
     
     /**
      * Set up the tables in the database
      * @throws SQLException
      */
     private void prepareTables()
-    throws Exception
+    throws SQLException
     {
-        Class.forName(_driverClassName);
+        __createSessionIdTable = "create table "+_sessionIdTable+" (id varchar(60), primary key(id))";
+        __createSessionTable = "create table "+_sessionTable+" (rowId varchar(60), sessionId varchar(60), "+
+                               " contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
+                               " lastAccessTime bigint, createTime bigint, cookieTime bigint, "+
+                               " lastSavedTime bigint, expiryTime bigint, map blob, primary key(rowId))";
+
+        __selectExpiredSessions = "select * from "+_sessionTable+" where expiryTime >= ? and expiryTime <= ?";
+        __deleteOldExpiredSessions = "delete from "+_sessionTable+" where expiryTime >0 and expiryTime <= ?";
+
+        __insertId = "insert into "+_sessionIdTable+" (id)  values (?)";
+        __deleteId = "delete from "+_sessionIdTable+" where id = ?";
+        __queryId = "select * from "+_sessionIdTable+" where id = ?";
+
+       
+
         Connection connection = null;
         try
         {
             //make the id table
             connection = getConnection();
             connection.setAutoCommit(true);
-            String tableName = "JettySessionIds";
+            String tableName = _sessionIdTable;
             DatabaseMetaData metaData = connection.getMetaData();
+            
+            String db = metaData.getDatabaseProductName();
+            
+            //TODO do something better here
+            if (db.equalsIgnoreCase ("PostgreSQL"))
+            {
+                __createSessionTable = "create table "+_sessionTable+" (rowId varchar(60), sessionId varchar(60), "+
+                                       " contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
+                                       " lastAccessTime bigint, createTime bigint, cookieTime bigint, "+
+                                       " lastSavedTime bigint, expiryTime bigint, map bytea, primary key(rowId))";
+            }
+            
             if (metaData.storesLowerCaseIdentifiers())
                 tableName = tableName.toLowerCase();
             if (metaData.storesUpperCaseIdentifiers())
@@ -345,7 +410,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
             }
             
             //make the session table
-            tableName = "JettySessions";   
+            tableName = _sessionTable;   
             if (metaData.storesLowerCaseIdentifiers())
                 tableName = tableName.toLowerCase();
             if (metaData.storesUpperCaseIdentifiers())
@@ -356,6 +421,30 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
                 //table does not exist, so create it
                 connection.createStatement().executeUpdate(__createSessionTable);
             }
+            
+            //make some indexes
+            String index1 = "idx_"+_sessionTable+"_expiry";
+            String index2 = "idx_"+_sessionTable+"_session";
+            
+            result = metaData.getIndexInfo(null, null, tableName, false, false);
+            boolean index1Exists = false;
+            boolean index2Exists = false;
+            while (result.next())
+            {
+                String idxName = result.getString("INDEX_NAME");
+                if (index1.equalsIgnoreCase(idxName))
+                    index1Exists = true;
+                else if (index2.equalsIgnoreCase(idxName))
+                    index2Exists = true;
+            }
+            if (!(index1Exists && index2Exists))
+            {
+                Statement statement = connection.createStatement();
+                if (!index1Exists)
+                    statement.executeUpdate("create index "+index1+" on "+_sessionTable+" (expiryTime)");
+                if (!index2Exists)
+                    statement.executeUpdate("create index "+index2+" on "+_sessionTable+" (sessionId, contextPath)");
+            }
         }
         finally
         {
@@ -364,6 +453,12 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         }
     }
     
+    /**
+     * Insert a new used session id into the table.
+     * 
+     * @param id
+     * @throws SQLException
+     */
     private void insert (String id)
     throws SQLException 
     {
@@ -390,6 +485,12 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         }
     }
     
+    /**
+     * Remove a session id from the table.
+     * 
+     * @param id
+     * @throws SQLException
+     */
     private void delete (String id)
     throws SQLException
     {
@@ -410,6 +511,13 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     }
     
     
+    /**
+     * Check if a session id exists.
+     * 
+     * @param id
+     * @return
+     * @throws SQLException
+     */
     private boolean exists (String id)
     throws SQLException
     {
@@ -433,9 +541,19 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         }
     }
     
+    /**
+     * Look for sessions in the database that have expired.
+     * 
+     * We do this in the SessionIdManager and not the SessionManager so
+     * that we only have 1 scavenger, otherwise if there are n SessionManagers
+     * there would be n scavengers, all contending for the database.
+     * 
+     * We look first for sessions that expired in the previous interval, then
+     * for sessions that expired previously - these are old sessions that no
+     * node is managing any more and have become stuck in the database.
+     */
     private void scavenge ()
     {
-        
         Connection connection = null;
         List expiredSessionIds = new ArrayList();
         try
@@ -483,7 +601,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
                 }
             }
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
             Log.warn("Problem selecting expired sessions", e);
         }
