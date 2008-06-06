@@ -263,7 +263,7 @@ public class HttpParser implements Parser
             }
                 
             if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
-                    throw new IOException("FULL");
+                    throw new HttpException(HttpStatus.ORDINAL_413_Request_Entity_Too_Large, "FULL");
             
             if (_endp != null && filled<=0)
             {
@@ -273,8 +273,7 @@ public class HttpParser implements Parser
                     _buffer.compact();
 
                 if (_buffer.space() == 0) 
-                    throw new IOException("FULL "+(_buffer==_body?"body":"head"));
-                
+                    throw new HttpException(HttpStatus.ORDINAL_413_Request_Entity_Too_Large, "FULL "+(_buffer==_body?"body":"head"));                
                 try
                 {
                     if (total_filled<0)
@@ -759,7 +758,7 @@ public class HttpParser implements Parser
         
         // Fill buffer if we can
         if (space == 0) 
-            throw new IOException("FULL "+(_buffer==_body?"body":"head"));
+            throw new HttpException(HttpStatus.ORDINAL_413_Request_Entity_Too_Large, "FULL "+(_buffer==_body?"body":"head"));
         else
         {
             int filled=-1;
