@@ -18,6 +18,7 @@ package org.mortbay.jetty.servlet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Blob;
@@ -743,8 +744,9 @@ public class JDBCSessionManager extends AbstractSessionManager
                data.setLastSaved(result.getLong("lastSavedTime"));
                data.setExpiryTime(result.getLong("expiryTime"));
                data.setCanonicalContext(result.getString("contextPath"));
-               Blob blob = result.getBlob("map");
-               ClassLoadingObjectInputStream ois = new ClassLoadingObjectInputStream(blob.getBinaryStream());
+
+               InputStream is = ((JDBCSessionIdManager)getIdManager())._dbAdaptor.getBlobInputStream(result, "map");
+               ClassLoadingObjectInputStream ois = new ClassLoadingObjectInputStream (is);
                Object o = ois.readObject();
                data.setAttributeMap((ConcurrentHashMap)o);
                ois.close();
@@ -798,6 +800,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(data.getAttributeMap());
             byte[] bytes = baos.toByteArray();
+            
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             statement.setBinaryStream(11, bais, bytes.length);//attribute map as blob
             
