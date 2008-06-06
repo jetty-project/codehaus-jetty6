@@ -120,7 +120,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                             }
 
                             // Tell client to hold messages as a response is likely to be sent.
-                            if (!transport.alwaysResumePoll())
+                            if (!transport.resumePoll())
                                 client.responsePending();
                         }
                     }
@@ -131,7 +131,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
             }
             finally
             {
-                if (transport!=null && client!=null && !transport.alwaysResumePoll())
+                if (transport!=null && client!=null && !transport.resumePoll())
                     client.responded();
                 
                 for (Message message : messages)
@@ -182,7 +182,6 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
             }
         }
 
-
         // Send any messages.
         if (client!=null) 
         { 
@@ -201,13 +200,53 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                         messages = client.takeMessages(); 
                         break;
                 }
+                
+                if (!_asyncDeliver)
+                {
+                    try
+                    {
+                        if (message!=null)
+                            transport.send(message); 
+                        else if (messages!=null)
+                            transport.send(messages); 
+                        
+                        transport.complete();
+                        resp.flushBuffer();
+
+                        if (transport.resumePoll())
+                            client.resume();
+                        
+                        return;
+                    }
+                    catch(Throwable e)
+                    {
+                        // delivery failed!
+                        if (message!=null)
+                            client.returnMessage(message);
+                        else if (messages!=null)
+                            client.returnMessages(messages);
+                            
+                        if (e instanceof ServletException)
+                            throw (ServletException)e;
+                        if (e instanceof IOException)
+                            throw (IOException)e;
+                        if (e instanceof RuntimeException)
+                            throw (RuntimeException)e;
+                        if (e instanceof Error)
+                            throw (Error)e;
+                        if (e instanceof ThreadDeath)
+                            throw (ThreadDeath)e;
+                        throw new ServletException(e);
+                    }
+                }
             }
+            
             if (message!=null)
                 transport.send(message); 
             else if (messages!=null)
                 transport.send(messages); 
             
-            if (transport.alwaysResumePoll())
+            if (transport.resumePoll())
             	client.resume();
         }
         

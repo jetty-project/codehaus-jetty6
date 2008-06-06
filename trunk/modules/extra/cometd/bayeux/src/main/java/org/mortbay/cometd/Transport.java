@@ -35,6 +35,6 @@ public interface Transport
     public void setJSONCommented(boolean commented);
     public boolean isJSONCommented();
     
-    public boolean alwaysResumePoll();
+    public boolean resumePoll();
     
 }

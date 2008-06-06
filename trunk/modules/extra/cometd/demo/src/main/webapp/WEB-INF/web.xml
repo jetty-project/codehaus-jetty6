@@ -28,20 +28,24 @@
       <param-value>0</param-value>
     </init-param>
     <init-param>
+      <param-name>maxInterval</param-name>
+      <param-value>10000</param-value>
+    </init-param>
+    <init-param>
       <param-name>multiFrameInterval</param-name>
-      <param-value>1500</param-value>
+      <param-value>2000</param-value>
     </init-param>
     <init-param>
       <param-name>logLevel</param-name>
       <param-value>0</param-value>
     </init-param>
     <init-param>
-      <param-name>JSONCommented</param-name>
-      <param-value>true</param-value>
+      <param-name>directDeliver</param-name>
+      <param-value>true</param-value> 
     </init-param>
     <init-param>
-      <param-name>alwaysResumePoll</param-name>
-      <param-value>false</param-value> <!-- use true for x-site cometd -->
+      <param-name>asyncDeliver</param-name>
+      <param-value>false</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
