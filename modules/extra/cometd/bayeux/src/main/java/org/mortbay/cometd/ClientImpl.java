@@ -349,6 +349,24 @@ public class ClientImpl implements Client
         }
     }
     
+
+    /* ------------------------------------------------------------ */
+    public void returnMessages(List<Message> messages)
+    {
+        synchronized(this)
+        {
+            switch (LazyList.size(_messageQ))
+            {
+                case 0:
+                    _messageQ=messages;
+                    break;
+                case 1: 
+                default:
+                    throw new IllegalStateException(); // TODO implement
+            }
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
      * @see org.mortbay.cometd.C#takeMessages()
@@ -375,7 +393,23 @@ public class ClientImpl implements Client
             }
         }
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public void returnMessage(Message message)
+    {
+        synchronized(this)
+        {
+            switch (LazyList.size(_messageQ))
+            {
+                case 0:
+                    _messageQ=message;
+                    break;
+                case 1: 
+                default:
+                    throw new IllegalStateException(); // TODO implement
+            }
+        }
+    }
     
     /* ------------------------------------------------------------ */
     public String toString()

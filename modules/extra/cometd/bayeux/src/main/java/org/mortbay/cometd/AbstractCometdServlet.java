@@ -75,11 +75,6 @@ import dojox.cometd.Message;
  * in a comment and will generate JSON wrapped in a comment. This is a defence against
  * Ajax Hijacking.</dd>
  * 
- * <dt>alwaysResumePoll</dt>
- * <dd>If true, then reconnect requests will always
- * be resumed when a message is delivered. This may be needed for some cross domain 
- * transports that need strict ordering of responses.</dd>
- * 
  * <dt>filters</dt>
  * <dd>the location of a JSON file describing {@link DataFilter} instances to be installed</dd>
  * 
@@ -90,7 +85,12 @@ import dojox.cometd.Message;
  * <dd>0=none, 1=info, 2=debug</dd>
  * 
  * <dt>directDeliver</dt>
- * <dd>true if published messages are delivered directly to subscribers (default). If false, a message copy is created with only supported fields</dd>
+ * <dd>true if published messages are delivered directly to subscribers (default). If false, a message copy is created with only supported fields (default true).</dd>
+ * 
+ * <dt>asyncDeliver</dt>
+ * <dd>true if responses should be flushed asynchronously.  This improves performance and reduces the required thread pool size, but increases the risk of
+ * messages being lost if a response is lost due to a transient network failure (default false). </dd>
+ * 
  * 
  * </dl>
  * 
@@ -109,8 +109,8 @@ public abstract class AbstractCometdServlet extends HttpServlet
     public static final String HTTP_CLIENT_ID="BAYEUX_HTTP_CLIENT";
     public final static String BROWSER_ID="BAYEUX_BROWSER";
     
-
     protected AbstractBayeux _bayeux;
+    protected boolean _asyncDeliver=false;
 
     public AbstractBayeux getBayeux()
     {
@@ -202,6 +202,10 @@ public abstract class AbstractCometdServlet extends HttpServlet
                 if (direct!=null)
                     _bayeux.setDirectDeliver(Boolean.parseBoolean(direct));
 
+                String async=getInitParameter("asyncDeliver");
+                if (async!=null)
+                    _asyncDeliver = Boolean.parseBoolean(async);
+                
                 _bayeux.generateAdvice();
             }
         }

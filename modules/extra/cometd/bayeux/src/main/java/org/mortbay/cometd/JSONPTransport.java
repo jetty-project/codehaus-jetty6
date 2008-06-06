@@ -95,7 +95,7 @@ public class JSONPTransport extends AbstractTransport
     }
 
     /* ------------------------------------------------------------ */
-    public boolean alwaysResumePoll()
+    public boolean resumePoll()
     {
         return true;
     }
