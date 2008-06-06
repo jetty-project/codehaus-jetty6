@@ -18,6 +18,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-592 expired timeout callback without synchronization
  + JETTY-595 SessionHandler only deals with base request session
  + JETTY-596 proxy support in HttpClient
+ + JETTY-598 Added more reliable cometd message flush option
 
 jetty-6.1.10 20 May 2008
  + Use QueuedThreadPool as default

@@ -77,7 +77,6 @@ public class CometdDemo
         connector2.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
         server.addConnector(connector2);  
 
-        
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         server.setHandler(contexts);
         
@@ -96,12 +95,13 @@ public class CometdDemo
         // Cometd servlet
         SuspendingCometdServlet cometd_servlet=new SuspendingCometdServlet();
         ServletHolder cometd_holder = new ServletHolder(cometd_servlet);
-        // cometd_holder.setInitParameter("filters","/WEB-INF/filters.json");
+        cometd_holder.setInitParameter("filters","/WEB-INF/filters.json");
         cometd_holder.setInitParameter("timeout","180000");
         cometd_holder.setInitParameter("interval","0");
         cometd_holder.setInitParameter("maxInterval","10000");
         cometd_holder.setInitParameter("multiFrameInterval","1500");
-        cometd_holder.setInitParameter("JSONCommented","false");
+        cometd_holder.setInitParameter("directDeliver","true");
+        cometd_holder.setInitParameter("asyncDeliver","false");
         cometd_holder.setInitParameter("logLevel","1");
         
         context.addServlet(cometd_holder, "/cometd/*");
