@@ -14,6 +14,10 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -62,16 +66,87 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     protected long _scavengeIntervalSec = 60 * 10; //10mins
     
     
-    protected String __createSessionIdTable;
-    protected String __createSessionTable;
+    protected String _createSessionIdTable;
+    protected String _createSessionTable;
                                             
-    protected String __selectExpiredSessions;
-    protected String __deleteOldExpiredSessions;
+    protected String _selectExpiredSessions;
+    protected String _deleteOldExpiredSessions;
 
-    protected String __insertId;
-    protected String __deleteId;
-    protected String __queryId;
+    protected String _insertId;
+    protected String _deleteId;
+    protected String _queryId;
+    
+    protected DatabaseAdaptor _dbAdaptor;
 
+    
+    /**
+     * DatabaseAdaptor
+     *
+     * Handles differences between databases.
+     * 
+     * Postgres uses the getBytes and setBinaryStream methods to access
+     * a "bytea" datatype, which can be up to 1Gb of binary data. MySQL
+     * is happy to use the "blob" type and getBlob() methods instead.
+     * 
+     * TODO if the differences become more major it would be worthwhile
+     * refactoring this class.
+     */
+    public class DatabaseAdaptor 
+    {
+        String _dbName;
+        boolean _isLower;
+        boolean _isUpper;
+        
+        
+        public DatabaseAdaptor (DatabaseMetaData dbMeta)
+        throws SQLException
+        {
+            _dbName = dbMeta.getDatabaseProductName().toLowerCase(); 
+            Log.debug ("Using database "+_dbName);
+            _isLower = dbMeta.storesLowerCaseIdentifiers();
+            _isUpper = dbMeta.storesUpperCaseIdentifiers();
+        }
+        
+        /**
+         * Convert a camel case identifier into either upper or lower
+         * depending on the way the db stores identifiers.
+         * 
+         * @param identifier
+         * @return
+         */
+        public String convertIdentifier (String identifier)
+        {
+            if (_isLower)
+                return identifier.toLowerCase();
+            if (_isUpper)
+                return identifier.toUpperCase();
+            
+            return identifier;
+        }
+        
+        public String getBlobType ()
+        {
+            if (_dbName.startsWith("postgres"))
+                return "bytea";
+            
+            return "blob";
+        }
+        
+        public InputStream getBlobInputStream (ResultSet result, String columnName)
+        throws SQLException
+        {
+            if (_dbName.startsWith("postgres"))
+            {
+                byte[] bytes = result.getBytes(columnName);
+                return new ByteArrayInputStream(bytes);
+            }
+            
+            Blob blob = result.getBlob(columnName);
+            return blob.getBinaryStream();
+        }
+    }
+    
+    
     
     public JDBCSessionIdManager(Server server)
     {
@@ -362,20 +437,13 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     private void prepareTables()
     throws SQLException
     {
-        __createSessionIdTable = "create table "+_sessionIdTable+" (id varchar(60), primary key(id))";
-        __createSessionTable = "create table "+_sessionTable+" (rowId varchar(60), sessionId varchar(60), "+
-                               " contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
-                               " lastAccessTime bigint, createTime bigint, cookieTime bigint, "+
-                               " lastSavedTime bigint, expiryTime bigint, map blob, primary key(rowId))";
+        _createSessionIdTable = "create table "+_sessionIdTable+" (id varchar(60), primary key(id))";
+        _selectExpiredSessions = "select * from "+_sessionTable+" where expiryTime >= ? and expiryTime <= ?";
+        _deleteOldExpiredSessions = "delete from "+_sessionTable+" where expiryTime >0 and expiryTime <= ?";
 
-        __selectExpiredSessions = "select * from "+_sessionTable+" where expiryTime >= ? and expiryTime <= ?";
-        __deleteOldExpiredSessions = "delete from "+_sessionTable+" where expiryTime >0 and expiryTime <= ?";
-
-        __insertId = "insert into "+_sessionIdTable+" (id)  values (?)";
-        __deleteId = "delete from "+_sessionIdTable+" where id = ?";
-        __queryId = "select * from "+_sessionIdTable+" where id = ?";
-
-       
+        _insertId = "insert into "+_sessionIdTable+" (id)  values (?)";
+        _deleteId = "delete from "+_sessionIdTable+" where id = ?";
+        _queryId = "select * from "+_sessionIdTable+" where id = ?";
 
         Connection connection = null;
         try
@@ -383,50 +451,33 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
             //make the id table
             connection = getConnection();
             connection.setAutoCommit(true);
-            String tableName = _sessionIdTable;
             DatabaseMetaData metaData = connection.getMetaData();
-            
-            String db = metaData.getDatabaseProductName();
-            
-            Log.debug ("Using database "+db);
-            
-            //TODO do something better here
-            if (db.toLowerCase().startsWith("postgres"))
-            {
-                Log.debug("Using bytea type for blob column with postgres");
-                
-                __createSessionTable = "create table "+_sessionTable+" (rowId varchar(60), sessionId varchar(60), "+
-                                       " contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
-                                       " lastAccessTime bigint, createTime bigint, cookieTime bigint, "+
-                                       " lastSavedTime bigint, expiryTime bigint, map bytea, primary key(rowId))";
-            }
-            
-            if (metaData.storesLowerCaseIdentifiers())
-                tableName = tableName.toLowerCase();
-            if (metaData.storesUpperCaseIdentifiers())
-                tableName = tableName.toUpperCase();
-            
+            _dbAdaptor = new DatabaseAdaptor(metaData);
+
+            //checking for table existence is case-sensitive, but table creation is not
+            String tableName = _dbAdaptor.convertIdentifier(_sessionIdTable);
             ResultSet result = metaData.getTables(null, null, tableName, null);
             if (!result.next())
             {
                 //table does not exist, so create it
-                connection.createStatement().executeUpdate(__createSessionIdTable);
+                connection.createStatement().executeUpdate(_createSessionIdTable);
             }
             
-            //make the session table
-            tableName = _sessionTable;   
-            if (metaData.storesLowerCaseIdentifiers())
-                tableName = tableName.toLowerCase();
-            if (metaData.storesUpperCaseIdentifiers())
-                tableName = tableName.toUpperCase();
+            //make the session table if necessary
+            tableName = _dbAdaptor.convertIdentifier(_sessionTable);   
             result = metaData.getTables(null, null, tableName, null);
             if (!result.next())
             {
                 //table does not exist, so create it
-                connection.createStatement().executeUpdate(__createSessionTable);
+                String blobType = _dbAdaptor.getBlobType();
+                _createSessionTable = "create table "+_sessionTable+" (rowId varchar(60), sessionId varchar(60), "+
+                                           " contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
+                                           " lastAccessTime bigint, createTime bigint, cookieTime bigint, "+
+                                           " lastSavedTime bigint, expiryTime bigint, map "+blobType+", primary key(rowId))";
+                connection.createStatement().executeUpdate(_createSessionTable);
             }
             
-            //make some indexes
+            //make some indexes on the JettySessions table
             String index1 = "idx_"+_sessionTable+"_expiry";
             String index2 = "idx_"+_sessionTable+"_session";
             
@@ -471,13 +522,13 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         {
             connection = getConnection();
             connection.setAutoCommit(true);            
-            PreparedStatement query = connection.prepareStatement(__queryId);
+            PreparedStatement query = connection.prepareStatement(_queryId);
             query.setString(1, id);
             ResultSet result = query.executeQuery();
             //only insert the id if it isn't in the db already 
             if (!result.next())
             {
-                PreparedStatement statement = connection.prepareStatement(__insertId);
+                PreparedStatement statement = connection.prepareStatement(_insertId);
                 statement.setString(1, id);
                 statement.executeUpdate();
             }
@@ -503,7 +554,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         {
             connection = getConnection();
             connection.setAutoCommit(true);
-            PreparedStatement statement = connection.prepareStatement(__deleteId);
+            PreparedStatement statement = connection.prepareStatement(_deleteId);
             statement.setString(1, id);
             statement.executeUpdate();
         }
@@ -530,7 +581,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         {
             connection = getConnection();
             connection.setAutoCommit(true);
-            PreparedStatement statement = connection.prepareStatement(__queryId);
+            PreparedStatement statement = connection.prepareStatement(_queryId);
             statement.setString(1, id);
             ResultSet result = statement.executeQuery();
             if (result.next())
@@ -568,7 +619,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
                 connection = getConnection();
                 connection.setAutoCommit(true);
                 //"select sessionId from JettySessions where expiryTime > (lastScavengeTime - scanInterval) and expiryTime < lastScavengeTime";
-                PreparedStatement statement = connection.prepareStatement(__selectExpiredSessions);
+                PreparedStatement statement = connection.prepareStatement(_selectExpiredSessions);
                 long lowerBound = (_lastScavengeTime - (_scavengeIntervalSec * 1000));
                 long upperBound = _lastScavengeTime;
                 if (Log.isDebugEnabled()) Log.debug("Searching for sessions expired between "+lowerBound + " and "+upperBound);
@@ -599,7 +650,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
                 if (upperBound > 0)
                 {
                     if (Log.isDebugEnabled()) Log.debug("Deleting old expired sessions expired before "+upperBound);
-                    statement = connection.prepareStatement(__deleteOldExpiredSessions);
+                    statement = connection.prepareStatement(_deleteOldExpiredSessions);
                     statement.setLong(1, upperBound);
                     statement.executeUpdate();
                 }
