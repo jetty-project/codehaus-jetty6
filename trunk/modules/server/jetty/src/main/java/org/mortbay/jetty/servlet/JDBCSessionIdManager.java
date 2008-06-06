@@ -388,9 +388,13 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
             
             String db = metaData.getDatabaseProductName();
             
+            Log.debug ("Using database "+db);
+            
             //TODO do something better here
-            if (db.equalsIgnoreCase ("PostgreSQL"))
+            if (db.toLowerCase().startsWith("postgres"))
             {
+                Log.debug("Using bytea type for blob column with postgres");
+                
                 __createSessionTable = "create table "+_sessionTable+" (rowId varchar(60), sessionId varchar(60), "+
                                        " contextPath varchar(60), lastNode varchar(60), accessTime bigint, "+
                                        " lastAccessTime bigint, createTime bigint, cookieTime bigint, "+
