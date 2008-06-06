@@ -34,7 +34,7 @@ public class HttpConnectionTest extends TestCase
     protected void setUp() throws Exception
     {
         super.setUp();
-        
+	connector.setHeaderBufferSize(1024);
         server.start();
     }
 
@@ -221,7 +221,34 @@ public class HttpConnectionTest extends TestCase
             e.printStackTrace();
             assertTrue(false);
             if (response!=null)
+                 System.err.println(response);
+        }
+    }
+    
+    public void testOversizedBuffer() 
+    {
+        String response = null;
+        connector.reopen();
+        try 
+        {
+            int offset = 0;
+            String cookie = "thisisastringthatshouldreachover1kbytes";
+            for (int i=0;i<100;i++)
+                cookie+="xxxxxxxxxxxx";
+            response = connector.getResponses("GET / HTTP/1.1\n"+
+                "Host: localhost\n" +
+                "Cookie: "+cookie+"\n"+
+                "\015\012"
+             );
+            offset = checkContains(response, offset, "HTTP/1.1 413");
+        } 
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+            if(response != null)
                 System.err.println(response);
+                
         }
     }
     
