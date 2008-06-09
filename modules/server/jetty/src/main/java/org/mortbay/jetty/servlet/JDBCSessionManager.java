@@ -102,6 +102,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             _created=System.currentTimeMillis();
             _accessed = _created;
             _attributes = new ConcurrentHashMap();
+            _lastNode = getIdManager().getWorkerName();
         }
 
         public synchronized String getId ()
@@ -314,7 +315,7 @@ public class JDBCSessionManager extends AbstractSessionManager
                     //after it is stored call doActivate on them each
                     updateSession(_data);
                 }
-                else if ((_data._accessed - _data._lastSaved) >= getSaveInterval())
+                else if ((_data._accessed - _data._lastSaved) >= (getSaveInterval() * 1000))
                     updateSessionAccessTime(_data);
                 
             }
@@ -424,7 +425,26 @@ public class JDBCSessionManager extends AbstractSessionManager
         {        
             try
             {                
-                SessionData data = loadSession(idInCluster, canonicalize(_context.getContextPath()));
+                //check if we need to reload the session - don't do it on every call
+                //to reduce the load on the database. This introduces a window of 
+                //possibility that the node may decide that the session is local to it,
+                //when the session has actually been live on another node, and then
+                //re-migrated to this node. This should be an extremely rare occurrence,
+                //as load-balancers are generally well-behaved and consistently send 
+                //sessions to the same node, changing only iff that node fails.
+                SessionData data = null;
+                long now = System.currentTimeMillis();
+                if (Log.isDebugEnabled()) Log.debug("now="+now+
+                        " lastSaved="+(session==null?0:session._data._lastSaved)+
+                        " interval="+(_saveIntervalSec * 1000)+
+                        " difference="+(now - (session==null?0:session._data._lastSaved)));
+                if (session==null || ((now - session._data._lastSaved) >= (_saveIntervalSec * 1000)))
+                {
+                    data = loadSession(idInCluster, canonicalize(_context.getContextPath()));
+                }
+                else
+                    data = session._data;
+                
                 if (data != null)
                 {
                     if (!data.getLastNode().equals(getIdManager().getWorkerName()) || session==null)
@@ -807,6 +827,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             statement.executeUpdate();
             data.setRowId(rowId); //set it on the in-memory data as well as in db
             data.setLastSaved(now);
+
             
             if (Log.isDebugEnabled())
                 Log.debug("Stored session "+data);
