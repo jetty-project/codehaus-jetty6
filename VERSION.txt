@@ -20,6 +20,20 @@ jetty-7.0-SNAPSHOT
  + JETTY-596 proxy support in HttpClient
  + JETTY-598 Added more reliable cometd message flush option
 
+jetty-6.1.11 6 June 2008
+ + JETTY-336 413 error for full header buffer
+ + JETTY-425 race in stopping SelectManager
+ + JETTY-580 Fixed SSL shutdown
+ + JETTY-581 ContextPath constructor
+ + JETTY-582 final ISO_8859_1
+ + JETTY-584 handle null contextPath
+ + JETTY-588 handle Retry in ServletException
+ + JETTY-590 Digest auth domain for root context
+ + JETTY-592 expired timeout callback without synchronization
+ + JETTY-595 SessionHandler only deals with base request session
+ + JETTY-596 Proxy support in HttpClient
+ + JETTY-598 Added more reliable cometd message flush option
+
 jetty-6.1.10 20 May 2008
  + Use QueuedThreadPool as default
  + JETTY-440 allow file name patterns for jsp compilation for jspc plugin
