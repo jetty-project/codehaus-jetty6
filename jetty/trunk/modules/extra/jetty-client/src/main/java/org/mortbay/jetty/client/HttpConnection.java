@@ -17,16 +17,12 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
-import java.net.URI;
-import java.nio.channels.CancelledKeyException;
-import java.util.Date;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpHeaderValues;
@@ -237,7 +233,7 @@ public class HttpConnection implements Connection
                 else if (!_requestComplete)
                 {
                     _requestComplete=true;
-                    _exchange.onRequestComplete();
+                    _exchange.onRequestComplete();                    
                 }
 
                 // If we are not ended then parse available
@@ -278,6 +274,12 @@ public class HttpConnection implements Connection
                         flushed=-1;
                         if (_exchange!=null)
                         {
+                            if ( _exchange.requiresAuthentication() && !_exchange.authenticationAttempted() )
+                            {
+                                _exchange.onAuthenticationChallenge( _exchange.getAuthenticationType(), _exchange.getAuthenticationDetails() );
+                                _destination.send( _exchange );
+                            }
+
                             if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
                             {
                                 Log.warn("NOT COMPLETE! "+_exchange);
