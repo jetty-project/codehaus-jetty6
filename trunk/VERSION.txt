@@ -1,4 +1,5 @@
 
+
 jetty-7.0-SNAPSHOT
  + JETTY-336 413 error for header buffer full
  + JETTY-425 race in stopping SelectManager
@@ -19,6 +20,8 @@ jetty-7.0-SNAPSHOT
  + JETTY-595 SessionHandler only deals with base request session
  + JETTY-596 proxy support in HttpClient
  + JETTY-598 Added more reliable cometd message flush option
+ + JETTY-605 Added optional threadpool to BayeuxService
+
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer

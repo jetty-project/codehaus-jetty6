@@ -72,7 +72,16 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
      */
     public QueuedThreadPool()
     {
-        _name="btpool"+__id++;
+        _name="qtp"+__id++;
+    }
+    
+    /* ------------------------------------------------------------------- */
+    /* Construct
+     */
+    public QueuedThreadPool(int maxThreads)
+    {
+        this();
+        setMaxThreads(maxThreads);
     }
 
     /* ------------------------------------------------------------ */
