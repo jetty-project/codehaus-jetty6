@@ -17,11 +17,12 @@ package org.mortbay.jetty.client;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.InetSocketAddress;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.Iterator;
+import java.util.HashMap;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
@@ -30,13 +31,13 @@ import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.log.Log;
-import org.mortbay.thread.Timeout;
 import org.mortbay.util.StringUtil;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * VERY rough start to a client API - inpired by javascript XmlHttpRequest.
@@ -59,6 +60,10 @@ public class HttpExchange
 
     InetSocketAddress _address;
     String _method = HttpMethods.GET;
+    String _authenticationType = null;
+    Map _authenticationDetails = null;
+    boolean _requiresAuthenticationChallenge = false;
+    boolean _authenticationAttempted = false;
     Buffer _scheme = HttpSchemes.HTTP_BUFFER;
     int _version = HttpVersions.HTTP_1_1_ORDINAL;
     String _uri;
@@ -395,7 +400,28 @@ public class HttpExchange
     {
         
     }
-    
+
+    // true of the http exchange is in a state that it should be retried
+    public boolean requiresAuthentication()
+    {
+        return _requiresAuthenticationChallenge;
+    }
+
+    public String getAuthenticationType()
+    {
+        return _authenticationType;
+    }
+
+    public Map getAuthenticationDetails()
+    {
+        return _authenticationDetails;
+    }
+
+    public boolean authenticationAttempted()
+    {
+        return _authenticationAttempted;
+    }
+
     /* ------------------------------------------------------------ */
     public String toString()
     {
@@ -416,10 +442,58 @@ public class HttpExchange
 
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
+        // We don't care about the rest of the message, callback to the authentication challenge method and retry connection
+        if ( status == HttpServletResponse.SC_UNAUTHORIZED )
+        {
+            _requiresAuthenticationChallenge = true;          
+        }
     }
 
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
+        int header = HttpHeaders.CACHE.getOrdinal(name);
+        switch (header)
+        {
+            case HttpHeaders.WWW_AUTHENTICATE_ORDINAL:
+
+                if ( value.toString().indexOf(" ") == -1 )
+                {
+                    _authenticationType = value.toString();
+                }
+                else
+                {
+                    StringTokenizer strtok = new StringTokenizer(value.toString(), " ");
+                    _authenticationType = strtok.nextToken().toLowerCase();
+
+                    while (strtok.hasMoreTokens())
+                    {
+                        String hashItem = strtok.nextToken();
+                        String itemName = hashItem.substring(0, hashItem.indexOf("="));
+                        String itemValue = hashItem.substring(hashItem.indexOf("=") + 1, hashItem.length());
+
+                        if (itemValue.startsWith("\""))
+                        {
+                            itemValue = itemValue.substring(1, itemValue.length());
+                        }
+
+                        if (itemValue.endsWith("\""))
+                        {
+                            itemValue = itemValue.substring(0, itemValue.length() - 1);
+                        }
+
+                        if (_authenticationDetails == null)
+                        {
+                            _authenticationDetails = new HashMap();
+                            _authenticationDetails.put(itemName, itemValue);
+                        }
+                        else
+                        {
+                            _authenticationDetails.put(itemName, itemValue);
+                        }
+                    }
+                }
+                break;
+        }
     }
 
     protected void onResponseHeaderComplete() throws IOException
@@ -437,7 +511,7 @@ public class HttpExchange
     protected void onConnectionFailed(Throwable ex)
     {
         System.err.println("CONNECTION FAILED on " + this);
-        // ex.printStackTrace();
+        ex.printStackTrace();
     }
 
     protected void onException(Throwable ex)
@@ -449,6 +523,11 @@ public class HttpExchange
     protected void onExpire()
     {
         System.err.println("EXPIRED " + this);
+    }
+
+    protected void onAuthenticationChallenge( String authenticationType, Map authenticationDetails )
+    {
+        _authenticationAttempted = true;// we are trying authentication this time, if it doesn't work we don't want to retry over and over
     }
 
     /* ------------------------------------------------------------ */
