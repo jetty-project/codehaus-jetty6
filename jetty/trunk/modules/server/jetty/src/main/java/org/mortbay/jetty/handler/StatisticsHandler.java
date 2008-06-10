@@ -33,7 +33,9 @@ public class StatisticsHandler extends HandlerWrapper
     transient long _requestsDurationMin;         // min request duration
     transient long _requestsDurationMax;         // max request duration
     transient long _requestsDurationTotal;       // total request duration
-    transient long _requestsSuspendedDurationTotal;
+    transient long _requestsActiveDurationMin;   // min request active duration
+    transient long _requestsActiveDurationMax;   // max request active duration
+    transient long _requestsActiveDurationTotal; // total request active duration
     
     transient int _requestsActive;
     transient int _requestsActiveMin;            // min number of connections handled simultaneously
@@ -78,19 +80,17 @@ public class StatisticsHandler extends HandlerWrapper
     {
         final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         final Response base_response=(response instanceof Response)?((Response)response):HttpConnection.getCurrentConnection().getResponse();
-        
-        long timestamp=0;
+
+        long timestamp0=base_request.getTimeStamp();
+        long timestamp1=timestamp0;
         try
         {
             synchronized(this)
             {
                 if(base_request.isInitial())
-                {
                     _requests++;
-                    timestamp=base_request.getTimeStamp();
-                }
                 else
-                    timestamp=System.currentTimeMillis();
+                    timestamp1=System.currentTimeMillis();
                 
                 if(base_request.isTimeout())
                     _requestsTimedout++;
@@ -114,19 +114,24 @@ public class StatisticsHandler extends HandlerWrapper
                 if (_requestsActive < _requestsActiveMin)
                     _requestsActiveMin=_requestsActive;
 
-                long duration = System.currentTimeMillis()-timestamp;
-
-                _requestsDurationTotal+=duration;
-                // TODO _requestsSuspendedDurationTotal+=0;
-                
-                if (_requestsDurationMin==0 || duration<_requestsDurationMin)
-                    _requestsDurationMin=duration;
-                if (duration>_requestsDurationMax)
-                    _requestsDurationMax=duration;
+                long duration = System.currentTimeMillis()-timestamp1;
+                _requestsActiveDurationTotal+=duration;
+                if (_requestsActiveDurationMin==0 || duration<_requestsActiveDurationMin)
+                    _requestsActiveDurationMin=duration;
+                if (duration>_requestsActiveDurationMax)
+                    _requestsActiveDurationMax=duration;
 
                 if(!base_request.isSuspended())
                 {
-
+                    // TODO handle completed requests!
+                    
+                    duration = System.currentTimeMillis()-timestamp0;
+                    _requestsDurationTotal+=duration;
+                    if (_requestsDurationMin==0 || duration<_requestsDurationMin)
+                        _requestsDurationMin=duration;
+                    if (duration>_requestsDurationMax)
+                        _requestsDurationMax=duration;
+                    
                     switch(base_response.getStatus()/100)
                     {
                         case 1: _responses1xx++;break;
@@ -135,9 +140,10 @@ public class StatisticsHandler extends HandlerWrapper
                         case 4: _responses4xx++;break;
                         case 5: _responses5xx++;break;
                     }
+                    
+                    _responsesBytesTotal += base_response.getContentCount();
                 }                                            
                 
-                _responsesBytesTotal += base_response.getContentCount();
             }
         }
     }
@@ -282,12 +288,37 @@ public class StatisticsHandler extends HandlerWrapper
     public long getRequestsDurationMax() {return _requestsDurationMax;}
     
     /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the requestsActiveDurationMin.
+     */
+    public long getRequestsActiveDurationMin()
+    {
+        return _requestsActiveDurationMin;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the requestsActiveDurationTotal.
+     */
+    public long getRequestsActiveDurationTotal()
+    {
+        return _requestsActiveDurationTotal;
+    }
+
+    /* ------------------------------------------------------------ */
     /** 
-     * @return Average duration of requests in suspended state in milliseconds 
+     * @return Average duration of request handling in milliseconds 
      * since statsReset() called. Undefined if setStatsOn(false).
      */
-    public long getRequestsSuspendedDurationAve() {return _requests==0?0:(_requestsSuspendedDurationTotal/_requests);}
+    public long getRequestsActiveDurationAve() {return _requests==0?0:(_requestsActiveDurationTotal/_requests);}
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Get maximum duration in milliseconds of request handling
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getRequestsActiveDurationMax() {return _requestsActiveDurationMax;}
+    
     /* ------------------------------------------------------------ */
     /** 
      * @return Total bytes of content sent in responses
