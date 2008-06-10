@@ -1,4 +1,5 @@
  + JETTY-605 Added optional threadpool to BayeuxService
+ + JETTY-606 better writeTo impl for BIO
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
