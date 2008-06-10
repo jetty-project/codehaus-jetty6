@@ -1,3 +1,5 @@
+ + JETTY-605 Added optional threadpool to BayeuxService
+
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
  + JETTY-425 race in stopping SelectManager
