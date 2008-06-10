@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright 2007 Mort Bay Consulting Pty. Ltd.
+// Copyright 2007-2008 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.servlet.ServletContextAttributeListener;
 
 import org.mortbay.cometd.BayeuxService;
 import org.mortbay.log.Log;
+import org.mortbay.thread.QueuedThreadPool;
 
 import dojox.cometd.Bayeux;
 import dojox.cometd.Client;
@@ -92,9 +93,11 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
         public Monitor(Bayeux bayeux)
         {
             super(bayeux,"monitor");
+            setThreadPool(new QueuedThreadPool());
             subscribe("/meta/subscribe","monitorSubscribe");
             subscribe("/meta/subscribe","monitorUnsubscribe");
             subscribe("/meta/*","monitorMeta");
+            // subscribe("/**","monitorVerbose");
         }
         
         public void monitorSubscribe(Client client, Message message)
@@ -109,8 +112,24 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
         
         public void monitorMeta(Client client, Message message)
         {
-            Log.debug(message.getChannel()+" from "+client);
+            if (Log.isDebugEnabled())
+                Log.debug(message.toString());
         }
+        
+        /*
+        public void monitorVerbose(Client client, Message message)
+        {
+            System.err.println(message);
+            try 
+            {
+                Thread.sleep(5000);
+            }
+            catch(Exception e)
+            {
+                Log.warn(e);
+            }
+        }
+        */
     }
     
     public static class ChatService extends BayeuxService

@@ -1,8 +1,25 @@
+// ========================================================================
+// Copyright 2008 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//========================================================================
 package org.mortbay.cometd;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.mortbay.component.LifeCycle;
+import org.mortbay.thread.QueuedThreadPool;
+import org.mortbay.thread.ThreadPool;
 
 import dojox.cometd.Bayeux;
 import dojox.cometd.Channel;
@@ -17,6 +34,9 @@ import dojox.cometd.MessageListener;
  * clients that provide services to remote Bayeux clients.   The class provides
  * a Bayeux {@link Client} and {@link Listener} together with convenience methods to map
  * subscriptions to methods on the derived class and to send responses to those methods.
+ * 
+ * <p>If a {@link #set_threadPool(ThreadPool)} is set, then messages are handled in their 
+ * own threads.
  *
  * @author gregw
  *
@@ -27,6 +47,7 @@ public abstract class BayeuxService
     private Bayeux _bayeux;
     private Client _client;
     private Map<String,Method> _methods = new ConcurrentHashMap<String,Method>();
+    private ThreadPool _threadPool;
     
     /* ------------------------------------------------------------ */
     /** Instantiate the service.
@@ -37,6 +58,21 @@ public abstract class BayeuxService
      */
     public BayeuxService(Bayeux bayeux,String name)
     {
+        this(bayeux,name,0);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Instantiate the service.
+     * Typically the derived constructor will call {@ #subscribe(String, String)} to 
+     * map subscriptions to methods.
+     * @param bayeux The bayeux instance.
+     * @param name The name of the service (used as client ID prefix).
+     * @param maxThreads The size of a ThreadPool to create to handle messages.
+     */
+    public BayeuxService(Bayeux bayeux,String name, int maxThreads)
+    {
+        if (maxThreads>0)
+            setThreadPool(new QueuedThreadPool(maxThreads));
         _name=name;
         _bayeux=bayeux;
         _client=_bayeux.newClient(name);  
@@ -53,6 +89,34 @@ public abstract class BayeuxService
     public Client getClient()
     {
         return _client;
+    }
+
+    /* ------------------------------------------------------------ */
+    public ThreadPool getThreadPool()
+    {
+        return _threadPool;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the threadpool.
+     * If the {@link ThreadPool} is a {@link LifeCycle}, then it is started by this method.
+     * 
+     * @param pool 
+     */
+    public void setThreadPool(ThreadPool pool)
+    {
+        try
+        {
+            if (pool instanceof LifeCycle)
+                if (!((LifeCycle)pool).isStarted())
+                    ((LifeCycle)pool).start();
+        }
+        catch(Exception e)
+        {
+            throw new IllegalStateException(e);
+        }
+        _threadPool = pool;
     }
     
     /* ------------------------------------------------------------ */
@@ -168,16 +232,35 @@ public abstract class BayeuxService
         th.printStackTrace();
     }
 
-    /* ------------------------------------------------------------ */
-    private void deliver(Client fromClient, Client toClient, Map<String, Object> msg)
-    {
-        String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
-        Method method=_methods.get(channel);
-        invoke(method,fromClient,toClient,msg);
-    }
 
     /* ------------------------------------------------------------ */
-    private void invoke(Method method,Client fromClient, Client toClient, Map<String, Object> msg)
+    private void invoke(final Method method,final Client fromClient, final Client toClient, final Message msg)
+    {
+        if (_threadPool==null)
+            doInvoke(method,fromClient,toClient,msg);
+        else
+        {
+            _threadPool.dispatch(new Runnable()
+            {
+                public void run()
+                {
+                    try
+                    {
+                        ((MessageImpl)msg).incRef();
+                        doInvoke(method,fromClient,toClient,msg);
+                    }
+                    finally
+                    {
+                        ((MessageImpl)msg).decRef();
+                    }
+                }   
+            });
+        }
+        
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void doInvoke(Method method,Client fromClient, Client toClient, Message msg)
     {
         String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
         Object data=msg.get(Bayeux.DATA_FIELD);
@@ -223,7 +306,9 @@ public abstract class BayeuxService
     {
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
-            BayeuxService.this.deliver(fromClient,toClient,msg);
+            String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
+            Method method=_methods.get(channel);
+            invoke(method,fromClient,toClient,msg);
         }
     }
 
