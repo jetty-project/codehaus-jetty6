@@ -575,7 +575,7 @@ public abstract class AbstractBuffer implements Buffer
     public void writeTo(OutputStream out)
     	throws IOException
     {
-        byte array[] = array();
+        byte[] array = array();
         
         if (array!=null)
         {
@@ -583,11 +583,16 @@ public abstract class AbstractBuffer implements Buffer
         }
         else
         {
-            // System.err.println(this.getClass()+" OUCH!!!! Abstract writeTo: ? "+getIndex()+"-"+putIndex());
-            
-            // TODO perhaps in buffer?
-            for (int i=_get;i<_put;i++)
-                out.write(peek(i));
+            int len = this.length();
+            byte[] buf=new byte[len>1024?1024:len];
+            int offset=_get;
+            while (len>0)
+            {
+                int l=peek(offset,buf,0,len>buf.length?buf.length:len);
+                out.write(buf,0,l);
+                offset+=l;
+                len-=l;
+            }
         } 
         clear();
     }
@@ -595,17 +600,32 @@ public abstract class AbstractBuffer implements Buffer
     /* ------------------------------------------------------------ */
     public int readFrom(InputStream in,int max) throws IOException
     {
-        // System.err.println(this.getClass()+" OUCH!!!! Abstract readFrom "+max+" "+getIndex()+"-"+putIndex());
-        int len=0;
-        while (space()>0)
+        byte[] array = array();
+        int s=space();
+        if (s>max)
+            s=max;
+
+        if (array!=null)
         {
-            // TODO perhaps buffer
-            int b = in.read();
-            if (b<0)
-                return -1;
-            put((byte)b);
-            len++;
+            int l=in.read(array,_put,s);
+            if (l>0)
+                _put+=l;
+            return l;
         }
-        return len;
+        else
+        {
+            byte[] buf=new byte[s>1024?1024:s];
+            int total=0;
+            while (s>0)
+            {
+                int l=in.read(buf,0,buf.length);
+                if (l<0)
+                    return total>0?total:-1;
+                int p=put(buf,0,l);
+                assert l==p;
+                s-=l;
+            }
+            return total; 
+        }
     }
 }
