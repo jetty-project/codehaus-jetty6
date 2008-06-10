@@ -4,6 +4,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-336 413 error for header buffer full
  + JETTY-425 race in stopping SelectManager
  + JETTY-568 Avoid freeing DirectBuffers. New locking NIO ResourceCache.
+ + JETTY-569 Stats for suspending requests
  + JETTY-576 servlet dtds and xsds not being loaded locally
  + JETTY-572 Unique cometd client ID
  + JETTY-578 OSGI Bundle-RequiredExcutionEnvironment set to J2SE-1.5

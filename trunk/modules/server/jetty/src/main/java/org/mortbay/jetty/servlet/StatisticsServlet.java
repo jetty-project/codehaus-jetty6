@@ -104,11 +104,63 @@ public class StatisticsServlet extends HttpServlet
 
         sb.append("<statistics>\n");
 
-        sb.append("  <requests>").append(_statsHandler.getRequests()).append("</requests>\n");
-        sb.append("  <heapMemoryUsage>").append(_memoryBean.getHeapMemoryUsage().getUsed()).append("</heapMemoryUsage>\n");
-        sb.append("  <nonHeapMemoryUsage>").append(_memoryBean.getNonHeapMemoryUsage().getUsed()).append("</nonHeapMemoryUsage>\n");
-
+        sb.append("  <requests>\n");
+        sb.append("    <statsOnMs>").append(_statsHandler.getStatsOnMs()).append("</statsOnMs>\n");
+        sb.append("    <requests>").append(_statsHandler.getRequests()).append("</requests>\n");
+        sb.append("    <requestsTimedout>").append(_statsHandler.getRequestsTimedout()).append("</requestsTimedout>\n");
+        sb.append("    <requestsResumed>").append(_statsHandler.getRequestsResumed()).append("</requestsResumed>\n");
+        sb.append("    <requestsActive>").append(_statsHandler.getRequestsActive()).append("</requestsActive>\n");
+        sb.append("    <requestsActiveMin>").append(_statsHandler.getRequestsActiveMin()).append("</requestsActiveMin>\n");
+        sb.append("    <requestsActiveMax>").append(_statsHandler.getRequestsActiveMax()).append("</requestsActiveMax>\n");
+        sb.append("    <requestsDurationTotal>").append(_statsHandler.getRequestsDurationTotal()).append("</requestsDurationTotal>\n");
+        sb.append("    <requestsDurationAve>").append(_statsHandler.getRequestsDurationAve()).append("</requestsDurationAve>\n");
+        sb.append("    <requestsDurationMin>").append(_statsHandler.getRequestsDurationMin()).append("</requestsDurationMin>\n");
+        sb.append("    <requestsDurationMax>").append(_statsHandler.getRequestsDurationMax()).append("</requestsDurationMax>\n");
+        sb.append("    <requestsSuspendedDurationAve>").append(_statsHandler.getRequestsSuspendedDurationAve()).append("</requestsSuspendedDurationAve>\n");
+        sb.append("  </requests>\n");
+        
+        sb.append("  <responses>\n");
+        sb.append("    <responses1xx>").append(_statsHandler.getResponses1xx()).append("</responses1xx>\n");
+        sb.append("    <responses2xx>").append(_statsHandler.getResponses2xx()).append("</responses2xx>\n");
+        sb.append("    <responses3xx>").append(_statsHandler.getResponses3xx()).append("</responses3xx>\n");
+        sb.append("    <responses4xx>").append(_statsHandler.getResponses4xx()).append("</responses4xx>\n");
+        sb.append("    <responses5xx>").append(_statsHandler.getResponses5xx()).append("</responses5xx>\n");
+        sb.append("    <responsesBytesTotal>").append(_statsHandler.getResponsesBytesTotal()).append("</responsesBytesTotal>\n");
+        sb.append("  </responses>\n");
+        
+        sb.append("  <connections>\n");
+        for (Connector connector : _connectors)
+        {
+        	sb.append("    <connector>\n");        
+        	sb.append("      <name>").append(connector.getName()).append("</name>\n");
+        	sb.append("      <statsOn>").append(connector.getStatsOn()).append("</statsOn>\n");
+            if (connector.getStatsOn())
+            {
+            	sb.append("    <statsOnMs>").append(connector.getStatsOnMs()).append("</statsOnMs>\n");
+            	sb.append("    <connections>").append(connector.getConnections()).append("</connections>\n");
+            	sb.append("    <connectiosOpen>").append(connector.getConnectionsOpen()).append("</connectionsOpen>\n");
+            	sb.append("    <connectionsOpenMin>").append(connector.getConnectionsOpenMin()).append("</connectionsOpenMin>\n");
+            	sb.append("    <connectionsOpenMax>").append(connector.getConnectionsOpenMax()).append("</connectionsOpenMax>\n");
+            	sb.append("    <connectionsDurationTotal>").append(connector.getConnectionsDurationTotal()).append("</connectionsDurationTotal>\n");
+            	sb.append("    <connectionsDurationAve>").append(connector.getConnectionsDurationAve()).append("</connectionsDurationAve>\n");
+            	sb.append("    <connectionsDurationMin>").append(connector.getConnectionsDurationMin()).append("</connectionsDurationMin>\n");
+            	sb.append("    <connectionsDurationMax>").append(connector.getConnectionsDurationMax()).append("</connectionsDurationMax>\n");
+                sb.append("    <requests>").append(connector.getRequests()).append("</requests>\n");
+                sb.append("    <connectionsRequestsAve>").append(connector.getConnectionsRequestsAve()).append("</connectionsRequestsAve>\n");
+                sb.append("    <connectionsRequestsMin>").append(connector.getConnectionsRequestsMin()).append("</connectionsRequestsMin>\n");
+                sb.append("    <connectionsRequestsMax>").append(connector.getConnectionsRequestsMax()).append("</connectionsRequestsMax>\n");
+            }
+            sb.append("    </connector>\n");
+        }
+        sb.append("  </connections>\n");
+        
+        sb.append("  <memory>\n");
+        sb.append("    <heapMemoryUsage>").append(_memoryBean.getHeapMemoryUsage().getUsed()).append("</heapMemoryUsage>\n");
+        sb.append("    <nonHeapMemoryUsage>").append(_memoryBean.getNonHeapMemoryUsage().getUsed()).append("</nonHeapMemoryUsage>\n");
+        sb.append("  </memory>\n");
+        
         sb.append("</statistics>\n");
+        
         response.setContentType("text/xml");
         PrintWriter pout = null;
         pout = response.getWriter();
@@ -134,12 +186,15 @@ public class StatisticsServlet extends HttpServlet
         sb.append("Average request duration: " + _statsHandler.getRequestsDurationAve()).append("<br />\n");
         sb.append("Min request duration: " + _statsHandler.getRequestsDurationMin()).append("<br />\n");
         sb.append("Max request duration: " + _statsHandler.getRequestsDurationMax()).append("<br />\n");
+        sb.append("Average request suspended duration: " + _statsHandler.getRequestsSuspendedDurationAve()).append("<br />\n");
 
+        sb.append("<h2>Responses:</h2>\n");
         sb.append("1xx responses: " + _statsHandler.getResponses1xx()).append("<br />\n");
         sb.append("2xx responses: " + _statsHandler.getResponses2xx()).append("<br />\n");
         sb.append("3xx responses: " + _statsHandler.getResponses3xx()).append("<br />\n");
         sb.append("4xx responses: " + _statsHandler.getResponses4xx()).append("<br />\n");
         sb.append("5xx responses: " + _statsHandler.getResponses5xx()).append("<br />\n");
+        sb.append("Bytes sent total: " + _statsHandler.getResponsesBytesTotal()).append("<br />\n");
 
         sb.append("<h2>Connections:</h2>\n");
         for (Connector connector : _connectors)
@@ -149,13 +204,15 @@ public class StatisticsServlet extends HttpServlet
             if (connector.getStatsOn())
             {
                 sb.append("Statistics gathering started " +  connector.getStatsOnMs() + "ms ago").append("<br />\n");
-                sb.append("Total requests: " +  connector.getRequests()).append("<br />\n");
                 sb.append("Total connections: " +  connector.getConnections()).append("<br />\n");
                 sb.append("Current connections open: " + connector.getConnectionsOpen());
                 sb.append("Min concurrent connections open: " +  connector.getConnectionsOpenMin()).append("<br />\n");
                 sb.append("Max concurrent connections open: " +  connector.getConnectionsOpenMax()).append("<br />\n");
                 sb.append("Total connections duration: " +  connector.getConnectionsDurationTotal()).append("<br />\n");
                 sb.append("Average connection duration: " +  connector.getConnectionsDurationAve()).append("<br />\n");
+                sb.append("Min connection duration: " +  connector.getConnectionsDurationMin()).append("<br />\n");
+                sb.append("Max connection duration: " +  connector.getConnectionsDurationMax()).append("<br />\n");
+                sb.append("Total requests: " +  connector.getRequests()).append("<br />\n");
                 sb.append("Average requests per connection: " +  connector.getConnectionsRequestsAve()).append("<br />\n");
                 sb.append("Min requests per connection: " +  connector.getConnectionsRequestsMin()).append("<br />\n");
                 sb.append("Max requests per connection: " +  connector.getConnectionsRequestsMax()).append("<br />\n");
