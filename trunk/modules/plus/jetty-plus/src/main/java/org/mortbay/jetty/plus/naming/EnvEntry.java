@@ -68,7 +68,6 @@ public class EnvEntry extends NamingEntry
             InitialContext ic = new InitialContext();
             Context envCtx = (Context)ic.lookup("java:comp/env");
             NamingUtil.bind(envCtx, name, value);
-            System.err.println("Bound java:comp/env/"+name+"="+value);
         }     
     }
     
