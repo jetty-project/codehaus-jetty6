@@ -116,7 +116,9 @@ public class StatisticsServlet extends HttpServlet
         sb.append("    <requestsDurationAve>").append(_statsHandler.getRequestsDurationAve()).append("</requestsDurationAve>\n");
         sb.append("    <requestsDurationMin>").append(_statsHandler.getRequestsDurationMin()).append("</requestsDurationMin>\n");
         sb.append("    <requestsDurationMax>").append(_statsHandler.getRequestsDurationMax()).append("</requestsDurationMax>\n");
-        sb.append("    <requestsSuspendedDurationAve>").append(_statsHandler.getRequestsSuspendedDurationAve()).append("</requestsSuspendedDurationAve>\n");
+        sb.append("    <requestsActiveDurationAve>").append(_statsHandler.getRequestsActiveDurationAve()).append("</requestsActiveDurationAve>\n");
+        sb.append("    <requestsActiveDurationMin>").append(_statsHandler.getRequestsActiveDurationMin()).append("</requestsActiveDurationMin>\n");
+        sb.append("    <requestsActiveDurationMax>").append(_statsHandler.getRequestsActiveDurationMax()).append("</requestsActiveDurationMax>\n");
         sb.append("  </requests>\n");
         
         sb.append("  <responses>\n");
@@ -186,7 +188,9 @@ public class StatisticsServlet extends HttpServlet
         sb.append("Average request duration: " + _statsHandler.getRequestsDurationAve()).append("<br />\n");
         sb.append("Min request duration: " + _statsHandler.getRequestsDurationMin()).append("<br />\n");
         sb.append("Max request duration: " + _statsHandler.getRequestsDurationMax()).append("<br />\n");
-        sb.append("Average request suspended duration: " + _statsHandler.getRequestsSuspendedDurationAve()).append("<br />\n");
+        sb.append("Average request active duration: " + _statsHandler.getRequestsActiveDurationAve()).append("<br />\n");
+        sb.append("Min request active duration: " + _statsHandler.getRequestsActiveDurationMin()).append("<br />\n");
+        sb.append("Max request active duration: " + _statsHandler.getRequestsActiveDurationMax()).append("<br />\n");
 
         sb.append("<h2>Responses:</h2>\n");
         sb.append("1xx responses: " + _statsHandler.getResponses1xx()).append("<br />\n");
