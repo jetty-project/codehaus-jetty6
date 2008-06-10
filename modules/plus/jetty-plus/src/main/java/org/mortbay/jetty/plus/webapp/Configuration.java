@@ -178,13 +178,11 @@ public class Configuration extends AbstractConfiguration
     protected void lockCompEnv ()
     throws Exception
     {
-        System.err.println("Locking java:comp");
         Random random = new Random ();
         _key = new Integer(random.nextInt());
         Context context = new InitialContext();
         Context compCtx = (Context)context.lookup("java:comp");
         compCtx.addToEnvironment("org.mortbay.jndi.lock", _key);
-        System.err.println("java:comp locked");
     }
     
     protected void unlockCompEnv ()
