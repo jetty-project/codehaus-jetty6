@@ -166,11 +166,9 @@ public class EnvConfiguration implements Configuration
         List  list = EnvEntry.lookupGlobalEnvEntries();
         Iterator itor = list.iterator();
         
-        System.err.println("Finding env entries: size="+list.size());
         while (itor.hasNext())
         {
             EnvEntry ee = (EnvEntry)itor.next();
-            System.err.println("configuring env entry "+ee.getJndiName());
             ee.bindToENC(ee.getJndiName());
         }
     }
@@ -182,7 +180,7 @@ public class EnvConfiguration implements Configuration
     public void unbindLocalNamingEntries ()
     throws NamingException
     {
-        //YODO is this necessary??? Why not just cut loose the context at java:comp/env??
+        //TODO is this necessary??? Why not just cut loose the context at java:comp/env??
    
         /*
         List  list = NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_WEBAPP, EnvEntry.class);

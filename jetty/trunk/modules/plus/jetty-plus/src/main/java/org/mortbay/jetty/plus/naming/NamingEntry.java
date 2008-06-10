@@ -151,12 +151,9 @@ public abstract class NamingEntry
         
         if (localName.equals(jndiName) && isLocal())
         {
-            System.err.println("Already bound "+localName+" to java:comp/env with "+absoluteObjectNameString);
-            
+            Log.warn("Already bound "+localName+" to java:comp/env with "+absoluteObjectNameString);
             return; //name already bound to local
         }
-        
-        System.err.println("Binding "+localName+" to java:comp/env to reference "+absoluteObjectNameString);
         
         InitialContext ic = new InitialContext();
         Context env = (Context)ic.lookup("java:comp/env");
@@ -271,14 +268,10 @@ public abstract class NamingEntry
         NamingUtil.bind(context, namingEntryNameString, this);
         Log.debug("Bound "+(isGlobal()?"":"java:")+namingEntryName.addAll(0,contextName));
         
-        System.err.println("Bound NamingEntry: "+(isLocal()?"java:comp/env/":"")+namingEntryNameString+" : "+this);
-        
         //put the Object into JNDI so it can be linked to later  
         Name objectName = parser.parse(getJndiName());
         objectNameString = objectName.toString();
         NamingUtil.bind(context, objectNameString, getObjectToBind());       
-        
-        System.err.println("Bound: "+(isLocal()?"java:comp/env/":"")+objectNameString+" : "+getObjectToBind());
         
         //remember the full name of the bound object so that it can be used in
         //link references later

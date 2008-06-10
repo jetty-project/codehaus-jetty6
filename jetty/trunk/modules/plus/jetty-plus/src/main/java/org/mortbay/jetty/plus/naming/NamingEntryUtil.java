@@ -131,7 +131,6 @@ public class NamingEntryUtil
             }
         }
 
-        System.err.println("Result of looking up "+jndiName+" = "+entry);
         return entry;
     }
 
@@ -155,7 +154,6 @@ public class NamingEntryUtil
         NameParser parser = context.getNameParser("");    
         Name namingEntryName = NamingEntry.makeNamingEntryName(parser, jndiName);
         
-        System.err.println("Looking up name="+namingEntryName.toString());
         return context.lookup(namingEntryName.toString());
     }
     
