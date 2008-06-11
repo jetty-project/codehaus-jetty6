@@ -101,7 +101,16 @@ public class HttpClient extends AbstractBuffers
         HttpDestination destination=getDestination(exchange.getAddress(),ssl);
         destination.send(exchange);
     }
-    
+
+
+    /* ------------------------------------------------------------------------------- */
+    public void send(HttpExchangeWrapper exchangeWrapper) throws IOException, InterruptedException
+    {
+        boolean ssl=HttpSchemes.HTTPS_BUFFER.equalsIgnoreCase(exchangeWrapper.getScheme());        
+        exchangeWrapper.setHttpDestination( getDestination(exchangeWrapper.getAddress(),ssl) );
+        exchangeWrapper.send();
+    }
+
     /* ------------------------------------------------------------ */
     /**
      * @return the threadPool
