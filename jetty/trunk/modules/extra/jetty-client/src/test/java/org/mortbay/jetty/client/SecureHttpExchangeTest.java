@@ -228,14 +228,10 @@ public class SecureHttpExchangeTest extends TestCase
         connector.setPort(0);
         _server.setConnectors(new Connector[]{connector});
 
-        HandlerList handlers = new HandlerList();
-        _server.setHandler(handlers);
-
         UserRealm userRealm = new HashUserRealm("MyRealm", "src/test/resources/realm.properties");
 
         Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-
+        constraint.setName("Need User or Admin");
         constraint.setRoles(new String[]{"user", "admin"});
         constraint.setAuthenticate(true);
 
@@ -244,8 +240,10 @@ public class SecureHttpExchangeTest extends TestCase
         cm.setPathSpec("/*");
 
         SecurityHandler sh = new SecurityHandler();
+        _server.setHandler(sh);
         sh.setUserRealm(userRealm);
         sh.setConstraintMappings(new ConstraintMapping[]{cm});
+        sh.setAuthenticator(new BasicAuthenticator());
 
         Handler testHandler = new AbstractHandler()
         {
@@ -278,8 +276,7 @@ public class SecureHttpExchangeTest extends TestCase
             }
         };
 
-        handlers.addHandler(sh);
-        handlers.addHandler(testHandler);
+        sh.setHandler(testHandler);
         
         _server.start();
         _port = connector.getLocalPort();
