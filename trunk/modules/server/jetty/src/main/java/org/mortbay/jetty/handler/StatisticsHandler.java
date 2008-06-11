@@ -58,7 +58,6 @@ public class StatisticsHandler extends HandlerWrapper
             if (isStarted())
                 _statsStartedAt=System.currentTimeMillis();
             _requests=0;
-            _requestsActiveMax=_requestsActive;
             _responses1xx=0;
             _responses2xx=0;
             _responses3xx=0;
@@ -71,6 +70,10 @@ public class StatisticsHandler extends HandlerWrapper
             _requestsDurationMin=0;
             _requestsDurationMax=0;
             _requestsDurationTotal=0;
+            
+            _requestsActiveDurationMin=0;
+            _requestsActiveDurationMax=0;
+            _requestsActiveDurationTotal=0;
         }
     }
 
