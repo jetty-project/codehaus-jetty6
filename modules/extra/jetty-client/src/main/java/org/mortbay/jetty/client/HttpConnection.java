@@ -274,12 +274,6 @@ public class HttpConnection implements Connection
                         flushed=-1;
                         if (_exchange!=null)
                         {
-                            if ( _exchange.requiresAuthentication() && !_exchange.authenticationAttempted() )
-                            {
-                                _exchange.onAuthenticationChallenge( _exchange.getAuthenticationType(), _exchange.getAuthenticationDetails() );
-                                _destination.send( _exchange );
-                            }
-
                             if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
                             {
                                 Log.warn("NOT COMPLETE! "+_exchange);
