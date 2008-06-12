@@ -297,6 +297,11 @@ public class JDBCSessionManager extends AbstractSessionManager
              super.removeAttribute(name); 
              _dirty=true;
          }
+         
+         protected void cookieSet()
+         {
+             _data.setCookieSet(_data.getAccessed());
+         }
 
         /** 
          * Entry to session.
@@ -741,7 +746,7 @@ public class JDBCSessionManager extends AbstractSessionManager
     {
         __insertSession = "insert into "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
                           " (rowId, sessionId, contextPath, virtualHost, lastNode, accessTime, lastAccessTime, createTime, cookieTime, lastSavedTime, expiryTime, map) "+
-                          " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                          " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         __deleteSession = "delete from "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
                           " where rowId = ?";
