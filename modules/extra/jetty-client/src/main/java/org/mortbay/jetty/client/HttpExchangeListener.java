@@ -5,7 +5,7 @@ import org.mortbay.io.Buffer;
 import java.io.IOException;
 
 
-public interface ExchangeListener
+public interface HttpExchangeListener
 {
 
     public void onRequestCommitted() throws IOException;

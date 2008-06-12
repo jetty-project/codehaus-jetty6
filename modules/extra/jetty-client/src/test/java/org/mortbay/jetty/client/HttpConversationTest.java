@@ -44,7 +44,7 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
  * @author Matthew Purland
  * @author Greg Wilkins
  */
-public class HttpExchangeWrapperTest extends TestCase
+public class HttpConversationTest extends TestCase
 {
     private Server _server;
     private int _port;
@@ -154,7 +154,7 @@ public class HttpExchangeWrapperTest extends TestCase
         httpExchange.setURL("http://localhost:" + _port + "/?i=" + i);
         httpExchange.setMethod(HttpMethods.GET);
 
-        HttpExchangeWrapper wrapper = new HttpExchangeWrapper(httpExchange)
+        HttpConversation wrapper = new HttpConversation(httpExchange)
         {
             public void success()
             {
@@ -198,7 +198,7 @@ public class HttpExchangeWrapperTest extends TestCase
 
     }
 
-  /*
+
     public void testGetWithContentExchangeWithMultipleRealms() throws Exception
     {
         int i = 1;
@@ -207,7 +207,7 @@ public class HttpExchangeWrapperTest extends TestCase
         httpExchange.setURL("http://localhost:" + _port + "/?i=" + i);
         httpExchange.setMethod(HttpMethods.GET);
 
-        HttpExchangeWrapper wrapper = new HttpExchangeWrapper(httpExchange)
+        HttpConversation wrapper = new HttpConversation(httpExchange)
         {
             public void success()
             {
@@ -266,7 +266,7 @@ public class HttpExchangeWrapperTest extends TestCase
         Thread.sleep(10);
 
     }
-   */
+
     public static void copyStream(InputStream in, OutputStream out)
     {
         try
@@ -332,7 +332,7 @@ public class HttpExchangeWrapperTest extends TestCase
                      response.getOutputStream().println("<hello>");
                      for (int i=0; i<100; i++)
                      {
-                         response.getOutputStream().println("  <world>"+i+"</world");
+                         response.getOutputStream().println("  <world>"+i+"</world>");
                          if (i%20==0)
                              response.getOutputStream().flush();
                      }
