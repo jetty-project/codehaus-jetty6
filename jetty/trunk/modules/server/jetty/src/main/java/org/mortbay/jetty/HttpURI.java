@@ -47,10 +47,11 @@ public class HttpURI
     AUTH_OR_PATH=1,
     SCHEME_OR_PATH=2,
     AUTH=4,
-    PORT=5,
-    PATH=6,
-    PARAM=7,
-    QUERY=8;
+    IPV6=5,
+    PORT=6,
+    PATH=7,
+    PARAM=8,
+    QUERY=9;
     
     boolean _partial=false;
     byte[] _raw=__empty;
@@ -125,7 +126,7 @@ public class HttpURI
             char c=(char)(0xff&_raw[i]);
             int s=i++;
             
-            switch (state)
+            state: switch (state)
             {
                 case START:
                 {
@@ -210,65 +211,105 @@ public class HttpURI
                         }
                     }
                     
-                    
-                    if (c==':')
+                    switch (c)
                     {
-                        m=i++;
-                        _authority=m;
-                        _path=m;
-                        c=(char)(0xff&_raw[i]);
-                        if (c=='/')
-                            state=AUTH_OR_PATH;
-                        else 
+                        case ':':
                         {
-                            _host=m;
-                            _port=m;
-                            state=PATH;
+                            m = i++;
+                            _authority = m;
+                            _path = m;
+                            c = (char)(0xff & _raw[i]);
+                            if (c == '/')
+                                state = AUTH_OR_PATH;
+                            else
+                            {
+                                _host = m;
+                                _port = m;
+                                state = PATH;
+                            }
+                            break;
                         }
-                    }
-                    else if (c=='/')
-                    {
-                        state=PATH;
-                    }
-                    else if (c==';')
-                    {
-                        _param=s;
-                        state=PARAM;
-                    }
-                    else if (c=='?')
-                    {
-                        _param=s;
-                        _query=s;
-                        state=QUERY;
-                    }
-                    else if (c=='#')
-                    {
-                        _param=s;
-                        _query=s;
-                        _fragment=s;
-                        break;
+                        
+                        case '/':
+                        {
+                            state = PATH;
+                            break;
+                        }
+                        
+                        case ';':
+                        {
+                            _param = s;
+                            state = PARAM;
+                            break;
+                        }
+                        
+                        case '?':
+                        {
+                            _param = s;
+                            _query = s;
+                            state = QUERY;
+                            break;
+                        }
+                        
+                        case '#':
+                        {
+                            _param = s;
+                            _query = s;
+                            _fragment = s;
+                            break;
+                        }
                     }
                     continue;
                 }
                 
                 case AUTH:
                 {
-                    if (c=='/')
+                    switch (c)
                     {
-                        m=s;
-                        _path=m;
-                        _port=_path;
-                        state=PATH;
+
+                        case '/':
+                        {
+                            m = s;
+                            _path = m;
+                            _port = _path;
+                            state = PATH;
+                            break;
+                        }
+                        case '@':
+                        {
+                            _host = i;
+                            break;
+                        }
+                        case ':':
+                        {
+                            _port = s;
+                            state = PORT;
+                            break;
+                        }
+                        case '[':
+                        {
+                            state = IPV6;
+                            break;
+                        }
                     }
-                    else if (c=='@')
+                    continue;
+                }
+
+                case IPV6:
+                {
+                    switch (c)
                     {
-                        _host=i;
+                        case '/':
+                        {
+                            throw new IllegalArgumentException("No closing ']' for " + StringUtil.toString(_raw,offset,length,URIUtil.__CHARSET));
+                        }
+                        case ']':
+                        {
+                            state = AUTH;
+                            break;
+                        }
                     }
-                    else if (c==':')
-                    {
-                        _port=s;
-                        state=PORT;
-                    }
+
                     continue;
                 }
                 
@@ -287,39 +328,48 @@ public class HttpURI
                 
                 case PATH:
                 {
-                    if (c==';')
+                    switch (c)
                     {
-                        _param=s;
-                        state=PARAM;
-                    }
-                    else if (c=='?')
-                    {
-                        _param=s;
-                        _query=s;
-                        state=QUERY;
-                    }
-                    else if (c=='#')
-                    {
-                        _param=s;
-                        _query=s;
-                        _fragment=s;
-                        break;
+                        case ';':
+                        {
+                            _param = s;
+                            state = PARAM;
+                            break;
+                        }
+                        case '?':
+                        {
+                            _param = s;
+                            _query = s;
+                            state = QUERY;
+                            break;
+                        }
+                        case '#':
+                        {
+                            _param = s;
+                            _query = s;
+                            _fragment = s;
+                            break state;
+                        }
                     }
                     continue;
                 }
                 
                 case PARAM:
                 {
-                    if (c=='?')
+                    switch (c)
                     {
-                        _query=s;
-                        state=QUERY;
-                    }
-                    else if (c=='#')
-                    {
-                        _query=s;
-                        _fragment=s;
-                        break;
+                        case '?':
+                        {
+                            _query = s;
+                            state = QUERY;
+                            break;
+                        }
+                        case '#':
+                        {
+                            _query = s;
+                            _fragment = s;
+                            break state;
+                        }
                     }
                     continue;
                 }
@@ -329,11 +379,10 @@ public class HttpURI
                     if (c=='#')
                     {
                         _fragment=s;
-                        break;
+                        break state;
                     }
                     continue;
                 }
-                
             }
         }
     }

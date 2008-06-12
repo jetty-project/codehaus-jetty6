@@ -112,6 +112,12 @@ public class HttpURITest extends TestCase
        /*32*/ {"/?x=y",null, null, null,null,"/", null,"x=y",null},
        /*33*/ {"/?abc=test",null, null, null,null,"/", null,"abc=test",null},
        /*34*/ {"/#fragment",null, null, null,null,"/", null,null,"fragment"},
+       /*35*/ {"http://192.0.0.1:8080/","http","//192.0.0.1:8080","192.0.0.1","8080","/",null,null,null},
+       /*36*/ {"http://[2001:db8::1]:8080/","http","//[2001:db8::1]:8080","[2001:db8::1]","8080","/",null,null,null},
+       /*37*/ {"http://user@[2001:db8::1]:8080/","http","//user@[2001:db8::1]:8080","[2001:db8::1]","8080","/",null,null,null},
+       /*38*/ {"http://[2001:db8::1]/","http","//[2001:db8::1]","[2001:db8::1]",null,"/",null,null,null},
+       /*39*/ {"//[2001:db8::1]:8080/",null,null,null,null,"//[2001:db8::1]:8080/",null,null,null},
+       /*40*/ {"http://user@[2001:db8::1]:8080/","http","//user@[2001:db8::1]:8080","[2001:db8::1]","8080","/",null,null,null}
     };
     
     
@@ -134,6 +140,21 @@ public class HttpURITest extends TestCase
             assertEquals(path_tests[t][0], uri.toString());
         }
         
+    }
+    
+    public void testInvalidAddress() throws Exception
+    {
+        HttpURI uri = new HttpURI();
+        
+        try
+        {
+            uri.parse("http://[ffff::1:8080/");
+            fail("Invalid URL; no closing ']' -- should throw exception");
+        }
+        catch (IllegalArgumentException e)
+        {
+            assertTrue(true);
+        }
     }
 
 }
