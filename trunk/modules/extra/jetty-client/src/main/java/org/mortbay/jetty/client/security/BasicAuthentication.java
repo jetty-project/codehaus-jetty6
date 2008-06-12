@@ -19,10 +19,7 @@ public class BasicAuthentication implements Authentication
     public void setCredentials( HttpExchange exchange, SecurityRealm realm, Map details ) throws IOException
     {
         String authenticationString = getAuthType() + " " + B64Code.encode( realm.getPrincipal() + ":" + realm.getCredentials(), StringUtil.__ISO_8859_1);
-
-        System.out.println("Auth test - " + authenticationString + " " + realm.getPrincipal() + ":" + realm.getCredentials());
-
-        //  Set a header with a value of 'basic foo' where foo is username:password encoded
-        exchange.setRequestHeader( HttpHeaders.WWW_AUTHENTICATE, authenticationString);
+        
+        exchange.setRequestHeader( HttpHeaders.AUTHORIZATION, authenticationString);
     }
 }

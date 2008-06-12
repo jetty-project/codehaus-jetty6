@@ -163,13 +163,13 @@ public class HttpExchangeWrapperTest extends TestCase
 
             public void failure()
             {
-                //assertTrue(false);
+                assertTrue(false);
             }
 
             public void failure(Throwable t)
             {
                 t.printStackTrace();
-                //assertTrue(false);
+                assertTrue(false);
             }
         };
         wrapper.addAuthentication(new BasicAuthentication());
@@ -193,7 +193,7 @@ public class HttpExchangeWrapperTest extends TestCase
 
         _httpClient.send(wrapper);
                    wrapper.waitForSuccess();
-        //assertTrue( wrapper.waitForSuccess() );
+        assertTrue( wrapper.waitForSuccess() );
         Thread.sleep(10);
 
     }
