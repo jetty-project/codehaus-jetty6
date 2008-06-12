@@ -69,7 +69,7 @@ public class HttpExchange
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
 
-    private ExchangeListener _listener;
+    private HttpExchangeListener _listener;
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -593,7 +593,7 @@ public class HttpExchange
         }
     }
 
-    public void setListener(ExchangeListener listener)
+    public void setListener(HttpExchangeListener listener)
     {
         this._listener = listener;
     }

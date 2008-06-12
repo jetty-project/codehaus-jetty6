@@ -11,7 +11,7 @@ import java.net.InetSocketAddress;
 import java.io.IOException;
 
 
-public class HttpExchangeWrapper implements ExchangeListener
+public class HttpConversation implements HttpExchangeListener
 {
 
     private HttpExchange _exchange; // should we clone _exchange when we detect we need to retry?
@@ -21,9 +21,16 @@ public class HttpExchangeWrapper implements ExchangeListener
     private Map<String,Authentication> _authenticationMap;
     private String _url;
     private String _authenticationType = null;
-    private Map _authenticationDetails;
-    private boolean _requiresAnotherAttempt = false;
+    private Map<String, String> _authenticationDetails;
+    private boolean _continueConversation = false;
+    
+    // 301
+    //private boolean _requiresRedirect = false;
+    
+    // 401 
     private boolean _requiresAuthenticationChallenge = false;
+    
+    
     private int _attempts = 0;
 
 
@@ -32,7 +39,7 @@ public class HttpExchangeWrapper implements ExchangeListener
      * on classname with the ability to register new exchange types
      *
      */
-    public HttpExchangeWrapper( HttpExchange exchange )
+    public HttpConversation( HttpExchange exchange )
     {
         _exchange = exchange;
         _exchange.setListener( this );
@@ -42,17 +49,27 @@ public class HttpExchangeWrapper implements ExchangeListener
     /*-----------*/
     /* Callbacks */ // first pass
 
+    /** 
+     * Callback method indicating the HttpConversation completed successfully. 
+     */
     public void success()
     {
 
     }
 
-    public void failure()
+    /**
+     * Callback method indicating the HttpConversation failed for the specified reason.
+     */
+    public void failure( String reason )
     {
 
     }
 
-    public void failure( Throwable t )
+    /**
+     * Callback method indicating the HttpConversation failed for the specified reason and the given exception.
+     * @param t
+     */
+    public void failure( String reason, Throwable t )
     {
 
     }
@@ -63,12 +80,12 @@ public class HttpExchangeWrapper implements ExchangeListener
     {
         _exchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
 
-        while ( _requiresAnotherAttempt && anotherAttemptPossible() )
+        while ( _continueConversation && anotherAttemptPossible() )
         {
             _exchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
         }
 
-        if ( _requiresAnotherAttempt )
+        if ( _continueConversation )
         {
             return false;
         }
@@ -127,7 +144,7 @@ public class HttpExchangeWrapper implements ExchangeListener
                 }
                 else
                 {
-                    failure( new IOException("Another Attempt Required::Authentication::invalid state::exhausted authentication") );
+                    failure( "Another Attempt Required::Authentication::invalid state::exhausted authentication" );
                 }
             }
             else
@@ -137,26 +154,30 @@ public class HttpExchangeWrapper implements ExchangeListener
         }
     }
 
-    private boolean anotherAttemptPossible()
+    private boolean anotherAttemptPossible() 
     {
-        if ( _realmList.size() >= _attempts )
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+		if (_requiresAuthenticationChallenge) 
+		{
+			if (_realmList.size() >= _attempts) 
+			{
+				return true;
+			} 
+			else 
+			{
+				return false;
+			}
+		}
+		return false;
+	}
 
     public void onException(Throwable ex)
     {
-        failure( ex );
+        failure( ex.getMessage(), ex );
     }
 
     public void onExpire()
     {
-        failure();
+        failure( "Conversation Expired" );
     }
 
     public void onRequestCommitted() throws IOException
@@ -172,11 +193,19 @@ public class HttpExchangeWrapper implements ExchangeListener
     public void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
         System.out.println("Response Status: " + status );
-        if ( status == HttpServletResponse.SC_UNAUTHORIZED )
+        if ( HttpServletResponse.SC_UNAUTHORIZED == status )
         {
-            _requiresAnotherAttempt = true;
+            _continueConversation = true;
             _requiresAuthenticationChallenge = true;
         }
+        /* TODO deal with redirects?
+        else if ( HttpServletResponse.SC_MOVED_PERMANENTLY == status )
+        {
+        	_continueConversation = true;
+        	_requiresRedirect = true;
+        }
+        */
+        
     }
 
     public void onResponseHeader(Buffer name, Buffer value) throws IOException
@@ -240,22 +269,20 @@ public class HttpExchangeWrapper implements ExchangeListener
 
     public void onResponseComplete() throws IOException
     {
-        System.out.println("response completed " + _attempts );
-        if ( _requiresAnotherAttempt && anotherAttemptPossible() ) // If state says we can continue, do so
+        if ( _continueConversation && anotherAttemptPossible() ) // If state says we can continue, do so
         {
-            System.out.println("requires another attempt and making one");
             synchronized ( this )
             {
                 prepareNextAttempt();
-                _requiresAnotherAttempt = false;
+                _continueConversation = false;
                 ++_attempts;                
                 _destination.send(_exchange);
                 return;
             }
         }
-        else if ( _requiresAnotherAttempt ) // we need another attempt, but can't to fail
+        else if ( _continueConversation ) // we need another attempt, but can't to fail
         {
-            failure( new IOException("attempt " + _attempts));
+            failure( "unable to continue conversation" );
         }
         else // we must be successful
         {
@@ -265,7 +292,7 @@ public class HttpExchangeWrapper implements ExchangeListener
 
     public void onConnectionFailed(Throwable ex)
     {
-        failure( ex ); 
+        failure( ex.getMessage(), ex ); 
     }
 
     public String getUrl()
@@ -289,7 +316,7 @@ public class HttpExchangeWrapper implements ExchangeListener
         {
             _realmList = new LinkedList();
         }
-        _realmList.add( realm );
+        _realmList.add(_realmList.size(), realm );
     }
 
     public Map getAuthenticationMap()
