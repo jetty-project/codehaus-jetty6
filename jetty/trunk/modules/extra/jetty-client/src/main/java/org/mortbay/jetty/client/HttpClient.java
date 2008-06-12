@@ -385,7 +385,9 @@ public class HttpClient extends AbstractBuffers
             
             if (destination.isSecure())
             {
-                Socket socket = SSLSocketFactory.getDefault().createSocket(destination.isProxied()?destination.getProxy().getAddress():destination.getAddress().getAddress(),443);
+                InetAddress addy = destination.isProxied()?destination.getProxy().getAddress():destination.getAddress().getAddress();
+                
+                Socket socket = SSLSocketFactory.getDefault().createSocket( addy, 443); // TODO get port from someplace
                 channel.connect( socket.getRemoteSocketAddress() );  
             }
             else
