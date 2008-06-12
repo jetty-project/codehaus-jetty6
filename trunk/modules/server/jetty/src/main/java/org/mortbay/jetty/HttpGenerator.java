@@ -44,7 +44,7 @@ public class HttpGenerator extends AbstractGenerator
     private static byte[] CONNECTION_ = Portable.getBytes("Connection: ");
     private static byte[] CRLF = Portable.getBytes("\015\012");
     private static byte[] TRANSFER_ENCODING_CHUNKED = Portable.getBytes("Transfer-Encoding: chunked\015\012");
-    private static byte[] SERVER = Portable.getBytes("Server: Jetty(6.0.x)\015\012");
+    private static byte[] SERVER = Portable.getBytes("Server: Jetty(7.0.x)\015\012");
 
     // other statics
     private static int CHUNK_SPACE = 12;
