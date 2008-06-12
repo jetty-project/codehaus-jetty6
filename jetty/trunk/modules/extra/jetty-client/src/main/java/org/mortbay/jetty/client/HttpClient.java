@@ -25,7 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.component.LifeCycle;
@@ -39,6 +41,7 @@ import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.security.SslSelectChannelConnector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
@@ -267,6 +270,7 @@ public class HttpClient extends AbstractBuffers
         
         if (_connectorType==CONNECTOR_SELECT_CHANNEL)
         {
+            
             _connector=new SelectConnector();
         }
         else
@@ -321,15 +325,18 @@ public class HttpClient extends AbstractBuffers
         public void startConnection(final HttpDestination destination) throws IOException
         {
             Socket socket=null;
-
+            
             if (destination.isSecure())
             {
-                throw new UnsupportedOperationException("Not implemented");
+                System.out.println("Using Secure Socket");
+                socket = SSLSocketFactory.getDefault().createSocket();                
             }
             else
             {
-                socket= new Socket();
+                System.out.println("Using Regular Socket");
+                socket = SocketFactory.getDefault().createSocket();                
             }
+           
             socket.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
             
             EndPoint endpoint=new SocketEndPoint(socket);
@@ -374,14 +381,22 @@ public class HttpClient extends AbstractBuffers
 
         public void startConnection(HttpDestination destination) throws IOException
         {
+            SocketChannel channel=SocketChannel.open();
+            
             if (destination.isSecure())
             {
-                throw new UnsupportedOperationException("Not implemented");
+                Socket socket = SSLSocketFactory.getDefault().createSocket(destination.isProxied()?destination.getProxy().getAddress():destination.getAddress().getAddress(),443);
+                channel.connect( socket.getRemoteSocketAddress() );  
             }
-            SocketChannel channel=SocketChannel.open();
+            else
+            {
+                channel.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
+                
+            }
+                     
             channel.configureBlocking(false);
-            channel.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
             channel.socket().setSoTimeout(_soTimeout);
+                      
             _selectorManager.register(channel,destination);
         }
 

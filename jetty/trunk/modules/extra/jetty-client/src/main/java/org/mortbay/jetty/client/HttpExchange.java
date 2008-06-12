@@ -166,7 +166,7 @@ public class HttpExchange
             port = "https".equalsIgnoreCase(scheme)?443:80;
 
         setAddress(new InetSocketAddress(uri.getHost(),port));
-
+        
         String completePath = uri.getCompletePath();
         if (completePath != null)
             setURI(completePath);
