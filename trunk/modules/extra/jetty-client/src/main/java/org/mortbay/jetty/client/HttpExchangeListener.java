@@ -1,5 +1,20 @@
 package org.mortbay.jetty.client;
 
+//========================================================================
+//Copyright 2006-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
+
 import org.mortbay.io.Buffer;
 
 import java.io.IOException;
@@ -8,6 +23,8 @@ import java.io.IOException;
 public interface HttpExchangeListener
 {
 
+    // TODO review the methods here, we can probably trim these down on what to expose
+    
     public void onRequestCommitted() throws IOException;
 
 
@@ -19,8 +36,10 @@ public interface HttpExchangeListener
 
     public void onResponseHeader(Buffer name, Buffer value) throws IOException;
 
+    
     public void onResponseHeaderComplete() throws IOException;
 
+    
     public void onResponseContent(Buffer content) throws IOException;
 
 

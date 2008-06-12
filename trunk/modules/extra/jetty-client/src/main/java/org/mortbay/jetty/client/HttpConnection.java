@@ -338,6 +338,7 @@ public class HttpConnection implements Connection
 
             _generator.setVersion(_exchange._version);
             
+            
             String uri=_exchange._uri;
             if (_destination.isProxied() && uri.startsWith("/"))
             {
@@ -345,6 +346,7 @@ public class HttpConnection implements Connection
                 uri=(_destination.isSecure()?HttpSchemes.HTTPS:HttpSchemes.HTTP)+"://"+
                 _destination.getAddress().getHostName()+":"+_destination.getAddress().getPort()+uri;
             }
+            
             _generator.setRequest(_exchange._method,uri);
 
             if (_exchange._version>=HttpVersions.HTTP_1_1_ORDINAL)
@@ -416,7 +418,9 @@ public class HttpConnection implements Connection
         @Override
         public void startRequest(Buffer method, Buffer url, Buffer version) throws IOException
         {
-            throw new IllegalStateException();
+            //System.out.println( method.toString() + "///" + url.toString() + "///" + version.toString() );
+            // TODO validate this is acceptable, the <!DOCTYPE goop was coming out here
+            //throw new IllegalStateException();
         }
 
         @Override
