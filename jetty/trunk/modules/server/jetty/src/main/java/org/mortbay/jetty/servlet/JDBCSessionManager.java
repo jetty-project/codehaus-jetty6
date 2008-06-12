@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
@@ -95,6 +96,7 @@ public class JDBCSessionManager extends AbstractSessionManager
         private String _canonicalContext;
         private long _lastSaved;
         private long _expiryTime;
+        private String _virtualHost;
 
         public SessionData (String sessionId)
         {
@@ -221,6 +223,16 @@ public class JDBCSessionManager extends AbstractSessionManager
             return _expiryTime;
         }
         
+        public synchronized void setVirtualHost (String vhost)
+        {
+            _virtualHost=vhost;
+        }
+        
+        public synchronized String getVirtualHost ()
+        {
+            return _virtualHost;
+        }
+        
         public String toString ()
         {
             return "Session rowId="+_rowId+",id="+_id+",lastNode="+_lastNode+
@@ -254,6 +266,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             _data = new SessionData(_clusterId);
             _data.setMaxIdleMs(_dftMaxIdleSecs*1000);
             _data.setCanonicalContext(canonicalize(_context.getContextPath()));
+            _data.setVirtualHost(getVirtualHost(_context));
             _data.setExpiryTime(_maxIdleMs < 0 ? 0 : (System.currentTimeMillis() + _maxIdleMs));
         }
 
@@ -440,7 +453,7 @@ public class JDBCSessionManager extends AbstractSessionManager
                         " difference="+(now - (session==null?0:session._data._lastSaved)));
                 if (session==null || ((now - session._data._lastSaved) >= (_saveIntervalSec * 1000)))
                 {
-                    data = loadSession(idInCluster, canonicalize(_context.getContextPath()));
+                    data = loadSession(idInCluster, canonicalize(_context.getContextPath()), getVirtualHost(_context));
                 }
                 else
                     data = session._data;
@@ -523,6 +536,18 @@ public class JDBCSessionManager extends AbstractSessionManager
     }
     
     
+    /** 
+     * Stop the session manager.
+     * 
+     * @see org.mortbay.jetty.servlet.AbstractSessionManager#doStop()
+     */
+    public void doStop() throws Exception
+    {
+        _sessions.clear();
+        _sessions = null;
+        
+        super.doStop();
+    } 
     
     protected void invalidateSessions()
     {
@@ -715,14 +740,14 @@ public class JDBCSessionManager extends AbstractSessionManager
     protected void prepareTables ()
     {
         __insertSession = "insert into "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
-                          " (rowId, sessionId, contextPath, lastNode, accessTime, lastAccessTime, createTime, cookieTime, lastSavedTime, expiryTime, map) "+
+                          " (rowId, sessionId, contextPath, virtualHost, lastNode, accessTime, lastAccessTime, createTime, cookieTime, lastSavedTime, expiryTime, map) "+
                           " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         __deleteSession = "delete from "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
                           " where rowId = ?";
 
         __selectSession = "select * from "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
-                          " where sessionId = ? and contextPath = ?";
+                          " where sessionId = ? and contextPath = ? and virtualHost = ?";
 
         __updateSession = "update "+((JDBCSessionIdManager)_sessionIdManager)._sessionTable+
                           " set lastNode = ?, accessTime = ?, lastAccessTime = ?, lastSavedTime = ?, expiryTime = ?, map = ? where rowId = ?";
@@ -740,7 +765,7 @@ public class JDBCSessionManager extends AbstractSessionManager
      * @return
      * @throws Exception
      */
-    protected SessionData loadSession (String id, String canonicalContextPath)
+    protected SessionData loadSession (String id, String canonicalContextPath, String vhost)
     throws Exception
     {
         SessionData data = null;
@@ -751,6 +776,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             statement = connection.prepareStatement(__selectSession);
             statement.setString(1, id);
             statement.setString(2, canonicalContextPath);
+            statement.setString(3, vhost);
             ResultSet result = statement.executeQuery();
             if (result.next())
             {
@@ -764,6 +790,7 @@ public class JDBCSessionManager extends AbstractSessionManager
                data.setLastSaved(result.getLong("lastSavedTime"));
                data.setExpiryTime(result.getLong("expiryTime"));
                data.setCanonicalContext(result.getString("contextPath"));
+               data.setVirtualHost(result.getString("virtualHost"));
 
                InputStream is = ((JDBCSessionIdManager)getIdManager())._dbAdaptor.getBlobInputStream(result, "map");
                ClassLoadingObjectInputStream ois = new ClassLoadingObjectInputStream (is);
@@ -808,13 +835,14 @@ public class JDBCSessionManager extends AbstractSessionManager
             statement.setString(1, rowId); //rowId
             statement.setString(2, data.getId()); //session id
             statement.setString(3, data.getCanonicalContext()); //context path
-            statement.setString(4, getIdManager().getWorkerName());//my node id
-            statement.setLong(5, data.getAccessed());//accessTime
-            statement.setLong(6, data.getLastAccessed()); //lastAccessTime
-            statement.setLong(7, data.getCreated()); //time created
-            statement.setLong(8, data.getCookieSet());//time cookie was set
-            statement.setLong(9, now); //last saved time
-            statement.setLong(10, data.getExpiryTime());
+            statement.setString(4, data.getVirtualHost()); //first vhost
+            statement.setString(5, getIdManager().getWorkerName());//my node id
+            statement.setLong(6, data.getAccessed());//accessTime
+            statement.setLong(7, data.getLastAccessed()); //lastAccessTime
+            statement.setLong(8, data.getCreated()); //time created
+            statement.setLong(9, data.getCookieSet());//time cookie was set
+            statement.setLong(10, now); //last saved time
+            statement.setLong(11, data.getExpiryTime());
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -822,7 +850,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             byte[] bytes = baos.toByteArray();
             
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            statement.setBinaryStream(11, bais, bytes.length);//attribute map as blob
+            statement.setBinaryStream(12, bais, bytes.length);//attribute map as blob
             
             statement.executeUpdate();
             data.setRowId(rowId); //set it on the in-memory data as well as in db
@@ -1006,12 +1034,31 @@ public class JDBCSessionManager extends AbstractSessionManager
     private String calculateRowId (SessionData data)
     {
         String rowId = canonicalize(_context.getContextPath());
-        String[] vhosts = _context.getContextHandler().getVirtualHosts();
-        rowId = rowId + "_" + ((vhosts==null||vhosts[0]==null?"":vhosts[0]));
+        rowId = rowId + "_" + getVirtualHost(_context);
         rowId = rowId+"_"+data.getId();
         return rowId;
     }
     
+    /**
+     * Get the first virtual host for the context.
+     * 
+     * Used to help identify the exact session/contextPath.
+     * 
+     * @return 0.0.0.0 if no virtual host is defined
+     */
+    private String getVirtualHost (ContextHandler.SContext context)
+    {
+        String vhost = "0.0.0.0";
+        
+        if (context==null)
+            return vhost;
+        
+        String [] vhosts = context.getContextHandler().getVirtualHosts();
+        if (vhosts==null || vhosts.length==0 || vhosts[0]==null)
+            return vhost;
+        
+        return vhosts[0];
+    }
     
     /**
      * Make an acceptable file name from a context path.
