@@ -198,7 +198,7 @@ public class HttpConversationTest extends TestCase
 
     }
 
-/*
+
     public void testGetWithContentExchangeWithMultipleRealms() throws Exception
     {
         int i = 1;
@@ -266,7 +266,7 @@ public class HttpConversationTest extends TestCase
         Thread.sleep(10);
 
     }
-*/
+
     public static void copyStream(InputStream in, OutputStream out)
     {
         try

@@ -101,7 +101,7 @@ public class SslConversationTest extends TestCase
     }
       
    
-  /*  
+  
     public void testGetWithContentExchange() throws Exception
     {
 
@@ -158,7 +158,7 @@ public class SslConversationTest extends TestCase
         Thread.sleep(10);
 
     }
-    */
+    
     
     private void startServer() throws Exception
     {
