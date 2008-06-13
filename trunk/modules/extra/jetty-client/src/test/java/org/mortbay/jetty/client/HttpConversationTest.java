@@ -175,7 +175,7 @@ public class HttpConversationTest extends TestCase
         wrapper.addAuthentication(new BasicAuthentication());
         wrapper.addSecurityRealm(new SecurityRealm()
         {
-            public String getName()
+            public String getId()
             {
                 return "test";
             }
@@ -227,7 +227,7 @@ public class HttpConversationTest extends TestCase
         wrapper.addAuthentication(new BasicAuthentication());
         wrapper.addSecurityRealm(new SecurityRealm()
         {
-            public String getName()
+            public String getId()
             {
                 return "test1";
             }
@@ -244,7 +244,7 @@ public class HttpConversationTest extends TestCase
         });
         wrapper.addSecurityRealm(new SecurityRealm()
         {
-            public String getName()
+            public String getId()
             {
                 return "test2";
             }

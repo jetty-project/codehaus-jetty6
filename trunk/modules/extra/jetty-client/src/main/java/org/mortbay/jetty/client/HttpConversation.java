@@ -26,11 +26,24 @@ import java.util.*;
 import java.net.InetSocketAddress;
 import java.io.IOException;
 
-
+/**
+ * Provides a wrapper around an HttpExchange object that implements authentication
+ * and allows for negotiation for the on top of the given Exchange.
+ * 
+ * Multiple authentication mechanisms can be registered with the conversation as well 
+ * as multiple security realms where the credentials exist.  This allows for the conversation
+ * to try multiple authentication options transparently to the calling code.
+ * 
+ * Callbacks are provided for success and failure notification since usage of this class is 
+ * asynchronous. 
+ * 
+ * @author Jesse McConnell <jesse@codehaus.org>
+ *
+ */
 public class HttpConversation implements HttpExchangeListener
 {
 
-    private HttpExchange _exchange; // should we clone _exchange when we detect we need to retry?
+    private HttpExchange _exchange;
 
     private HttpDestination _destination;
     private List<SecurityRealm> _realmList;
