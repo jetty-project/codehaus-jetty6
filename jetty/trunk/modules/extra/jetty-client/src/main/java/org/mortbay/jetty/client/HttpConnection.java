@@ -261,6 +261,8 @@ public class HttpConnection implements Connection
             }
             finally
             {
+                // we need to return the HttpConnection to a state that it can be reused
+                // or closed out
                 if (_parser.isComplete() && _generator.isComplete())
                 {  
                     
@@ -274,11 +276,16 @@ public class HttpConnection implements Connection
                         flushed=-1;
                         if (_exchange!=null)
                         {
-                            if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
-                            {
-                                Log.warn("NOT COMPLETE! "+_exchange);
-                                _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
-                            }
+                            // if the exchange is being replayed the we don't want to much with it
+                            //
+                            // TODO how much do we care if an exchange isn't marked complete?  
+                            // probably a lot since we have wait for complete methods :/
+                            // 
+                            //if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
+                            //{
+                            //    Log.warn("NOT COMPLETE! "+_exchange);
+                            //    _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
+                            //}
                             _exchange=null;
                             
                             if (_pipeline==null)
