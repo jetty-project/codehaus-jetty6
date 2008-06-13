@@ -106,8 +106,8 @@ public class SslConversationTest extends TestCase
     {
 
         HttpExchange.ContentExchange httpExchange = new HttpExchange.ContentExchange();
-        //httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
-        httpExchange.setURL( "https://localhost:" + _port+ "/" );
+        httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
+        //httpExchange.setURL( "https://localhost:" + _port+ "/" );
         //httpExchange.setAddress( new InetSocketAddress( "dav.codehaus.org", 443 ) );
         
         
@@ -124,31 +124,31 @@ public class SslConversationTest extends TestCase
 
             public void failure()
             {
-                //assertTrue(false);
+                assertTrue(false);
             }
 
             public void failure(Throwable t)
             {
                 t.printStackTrace();
-                //assertTrue(false);
+                assertTrue(false);
             }
         };
         wrapper.addAuthentication(new BasicAuthentication());
         wrapper.addSecurityRealm(new SecurityRealm()
         {
-            public String getName()
+            public String getId()
             {
                 return "test";
             }
 
             public String getPrincipal()
             {
-                return "jetty";
+                return "jesse";
             }
 
             public String getCredentials()
             {
-                return "jetty";
+                return "iI*e39a";
             }
         });
 
