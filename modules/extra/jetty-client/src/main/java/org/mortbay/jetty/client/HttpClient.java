@@ -113,11 +113,11 @@ public class HttpClient extends AbstractBuffers
 
 
     /* ------------------------------------------------------------------------------- */
-    public void send(HttpConversation exchangeWrapper) throws IOException, InterruptedException
+    public void send(HttpConversation conversation) throws IOException, InterruptedException
     {
-        boolean ssl=HttpSchemes.HTTPS_BUFFER.equalsIgnoreCase(exchangeWrapper.getScheme());        
-        exchangeWrapper.setHttpDestination( getDestination(exchangeWrapper.getAddress(),ssl) );
-        exchangeWrapper.start();
+        boolean ssl=HttpSchemes.HTTPS_BUFFER.equalsIgnoreCase(conversation.getScheme());        
+        conversation.setHttpDestination( getDestination(conversation.getAddress(),ssl) );
+        conversation.start();
     }
 
     /* ------------------------------------------------------------ */
