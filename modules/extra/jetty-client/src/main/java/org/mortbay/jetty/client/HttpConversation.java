@@ -53,7 +53,8 @@ public class HttpConversation implements HttpExchangeListener
     private ProtocolResolver _protocolResolver = new ProtocolResolver();
           
     private int _attempts = 0;
-
+    private boolean _initialized = false;
+    
     public HttpConversation( )
     {       
     }
@@ -61,15 +62,39 @@ public class HttpConversation implements HttpExchangeListener
     public HttpConversation( HttpExchange exchange )
     {
         _exchange = exchange;
-        // order is important on these listeners, this must come last
-        _exchange.setListeners( new HttpExchangeListener[]{ _networkResolver, _securityResolver, _protocolResolver, this } );     
-    }   
+    }
+    
+    public HttpConversation( HttpDestination destination )
+    {
+        _destination = destination;
+    }
+    
+    public HttpConversation( HttpDestination destination, HttpExchange exchange )
+    {
+        _destination = destination;
+        _exchange = exchange;
+    } 
 
     public void setHttpExchange( HttpExchange exchange )
     {
         _exchange = exchange;
+    }
+    
+    private void initialize() throws IOException
+    {
+        if ( _destination == null )
+        {
+            throw new IOException( "unable to start conversation, no destination set." );
+        }
+        
+        if ( _exchange == null )
+        {
+            throw new IOException( "unable to start conversation, no exchange set." );
+        }
+        
         // order is important on these listeners, this must come last
         _exchange.setListeners( new HttpExchangeListener[]{ _networkResolver, _securityResolver, _protocolResolver, this } );
+        _initialized = true;
     }
     
     /*-----------*/
@@ -205,14 +230,10 @@ public class HttpConversation implements HttpExchangeListener
     {
         synchronized (this)
         {
-            if ( _destination == null )
+ 
+            if ( !_initialized )
             {
-                throw new IOException( "unable to start conversation, no destination set." );
-            }
-            
-            if ( _exchange == null )
-            {
-                throw new IOException( "unable to start conversation, no exchange set." );
+                initialize();
             }
             
             _exchange.setStatus(HttpExchange.STATUS_WAITING_FOR_CONNECTION);
