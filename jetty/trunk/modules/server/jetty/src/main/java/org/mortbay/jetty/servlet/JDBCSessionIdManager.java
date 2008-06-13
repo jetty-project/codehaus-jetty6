@@ -63,7 +63,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     protected Timer _timer; //scavenge timer
     protected TimerTask _task; //scavenge task
     protected long _lastScavengeTime;
-    protected long _scavengeIntervalSec = 60 * 10; //10mins
+    protected long _scavengeIntervalMs = 1000 * 60 * 10; //10mins
     
     
     protected String _createSessionIdTable;
@@ -193,12 +193,42 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     
     public void setScavengeInterval (long sec)
     {
-        _scavengeIntervalSec = sec;
+        if (sec<=0)
+            sec=60;
+
+        long old_period=_scavengeIntervalMs;
+        long period=sec*1000;
+      
+        _scavengeIntervalMs=period;
+        
+        //add a bit of variability into the scavenge time so that not all
+        //nodes with the same scavenge time sync up
+        long tenPercent = _scavengeIntervalMs/10;
+        if ((System.currentTimeMillis()%2) == 0)
+            _scavengeIntervalMs += tenPercent;
+        
+        if (Log.isDebugEnabled()) Log.debug("Scavenging every "+_scavengeIntervalMs+" ms");
+        if (_timer!=null && (period!=old_period || _task==null))
+        {
+            synchronized (this)
+            {
+                if (_task!=null)
+                    _task.cancel();
+                _task = new TimerTask()
+                {
+                    public void run()
+                    {
+                        scavenge();
+                    }   
+                };
+                _timer.schedule(_task,_scavengeIntervalMs,_scavengeIntervalMs);
+            }
+        }  
     }
     
     public long getScavengeInterval ()
     {
-        return _scavengeIntervalSec;
+        return _scavengeIntervalMs/1000;
     }
     
     
@@ -345,31 +375,13 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
     public void doStart()
     {
         try
-        {
-            Random rand = new Random();
-            int variability = rand.nextInt(60); //add variability of up to 1 min
-            _scavengeIntervalSec += variability;
+        {            
             initializeDatabase();
             prepareTables();        
             super.doStart();
-            if (Log.isDebugEnabled()) Log.debug("Scavenging interval = "+_scavengeIntervalSec+" sec");
+            if (Log.isDebugEnabled()) Log.debug("Scavenging interval = "+getScavengeInterval()+" sec");
             _timer=new Timer("JDBCSessionScavenger", true);
-
-            synchronized (this)
-            {
-                if (_task!=null)
-                    _task.cancel();
-                _task = new TimerTask()
-                {
-                    public void run()
-                    {
-                        scavenge();
-                    }   
-                };
-                long scavengeIntervalMs = _scavengeIntervalSec * 1000;
-                _timer.schedule(_task, scavengeIntervalMs, scavengeIntervalMs);
-            }
-
+            setScavengeInterval(getScavengeInterval());
         }
         catch (Exception e)
         {
@@ -620,7 +632,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
                 connection.setAutoCommit(true);
                 //"select sessionId from JettySessions where expiryTime > (lastScavengeTime - scanInterval) and expiryTime < lastScavengeTime";
                 PreparedStatement statement = connection.prepareStatement(_selectExpiredSessions);
-                long lowerBound = (_lastScavengeTime - (_scavengeIntervalSec * 1000));
+                long lowerBound = (_lastScavengeTime - _scavengeIntervalMs);
                 long upperBound = _lastScavengeTime;
                 if (Log.isDebugEnabled()) Log.debug("Searching for sessions expired between "+lowerBound + " and "+upperBound);
                 statement.setLong(1, lowerBound);
@@ -646,7 +658,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
                 }
 
                 //find all sessions that have expired at least a couple of scanIntervals ago and just delete them
-                upperBound = _lastScavengeTime - (2 * (_scavengeIntervalSec * 1000));
+                upperBound = _lastScavengeTime - (2 * _scavengeIntervalMs);
                 if (upperBound > 0)
                 {
                     if (Log.isDebugEnabled()) Log.debug("Deleting old expired sessions expired before "+upperBound);
