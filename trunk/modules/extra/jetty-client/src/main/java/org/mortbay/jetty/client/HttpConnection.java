@@ -280,6 +280,11 @@ public class HttpConnection implements Connection
                             //
                             // TODO how much do we care if an exchange isn't marked complete?  
                             // probably a lot since we have wait for complete methods :/
+                            //
+                            // This resolves the usage scenario with HttpConversation but I believe
+                            // it breaks direct usage with Exchange and client which is probably a bad
+                            // thing unless we make Conversation the only thing that can be passed into
+                            // httpClient.
                             // 
                             //if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
                             //{
