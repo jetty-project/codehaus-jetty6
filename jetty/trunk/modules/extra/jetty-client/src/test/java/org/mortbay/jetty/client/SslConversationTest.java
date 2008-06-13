@@ -106,12 +106,9 @@ public class SslConversationTest extends TestCase
     {
 
         HttpExchange.ContentExchange httpExchange = new HttpExchange.ContentExchange();
-        httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
-        //httpExchange.setURL( "https://localhost:" + _port+ "/" );
-        //httpExchange.setAddress( new InetSocketAddress( "dav.codehaus.org", 443 ) );
+        //httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
+        httpExchange.setURL( "https://localhost:" + _port+ "/" );
         
-        
-        //httpExchange.setURI( "/user/jesse" );
         httpExchange.setVersion( HttpVersions.HTTP_1_1_ORDINAL );
         httpExchange.setMethod(HttpMethods.GET);
 
@@ -133,8 +130,8 @@ public class SslConversationTest extends TestCase
                 assertTrue(false);
             }
         };
-        wrapper.addAuthentication(new BasicAuthentication());
-        wrapper.addSecurityRealm(new SecurityRealm()
+        wrapper.enableAuthentication(new BasicAuthentication());
+        wrapper.enableSecurityRealm(new SecurityRealm()
         {
             public String getId()
             {
@@ -143,12 +140,12 @@ public class SslConversationTest extends TestCase
 
             public String getPrincipal()
             {
-                return "jesse";
+                return "jetty";
             }
 
             public String getCredentials()
             {
-                return "iI*e39a";
+                return "jetty";
             }
         });
 
