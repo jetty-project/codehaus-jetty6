@@ -385,12 +385,20 @@ public class HttpClient extends AbstractBuffers
             
             if (destination.isSecure())
             {
-                System.out.println("using secure socket");
+                System.out.println("using secure socket");  
                 
-                InetAddress addy = destination.isProxied()?destination.getProxy().getAddress():destination.getAddress().getAddress();
+                SocketChannel tempChannel = SocketChannel.open();              
+                Socket normalSocket = tempChannel.socket();
                 
-                Socket socket = SSLSocketFactory.getDefault().createSocket( addy, destination.getAddress().getPort() ); // TODO get port from someplace
-                channel.connect( socket.getRemoteSocketAddress() );  
+                InetSocketAddress addy = destination.isProxied()?destination.getProxy():destination.getAddress();
+                
+                normalSocket.connect( addy, destination.getAddress().getPort() );                    
+                
+                Socket secureSocket = ((SSLSocketFactory)SSLSocketFactory.getDefault()).createSocket( normalSocket, addy.getAddress().getHostAddress(), destination.getAddress().getPort(), true ); 
+                 
+                channel = secureSocket.getChannel();
+                
+                System.out.println("SSLCHANNEL: " + channel );
             }
             else
             {
