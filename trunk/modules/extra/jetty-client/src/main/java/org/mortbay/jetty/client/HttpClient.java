@@ -26,8 +26,14 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.component.LifeCycle;
@@ -328,8 +334,55 @@ public class HttpClient extends AbstractBuffers
             
             if (destination.isSecure())
             {
-                System.out.println("Using Secure Socket");
-                socket = SSLSocketFactory.getDefault().createSocket();                
+                // Create a trust manager that does not validate certificate
+                // chains
+                TrustManager[] trustAllCerts = new TrustManager[]
+                {
+                    new X509TrustManager()
+                    {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers()
+                        {
+                            return null;
+                        }
+
+                        public void checkClientTrusted( java.security.cert.X509Certificate[] certs, String authType )
+                        {
+                        }
+
+                        public void checkServerTrusted( java.security.cert.X509Certificate[] certs, String authType )
+                        {
+                        }
+                    }
+                };
+
+                HostnameVerifier hostnameVerifier = new HostnameVerifier()
+                {
+                    public boolean verify( String urlHostName, SSLSession session )
+                    {
+                        System.out.println( "Warning: URL Host: " + urlHostName + " vs." + session.getPeerHost() );
+                        return true;
+                    }
+                };
+
+                // Install the all-trusting trust manager
+
+                try
+                {
+                    SSLContext sslContext = SSLContext.getInstance( "SSL" );
+
+                    sslContext.init( null, trustAllCerts, new java.security.SecureRandom() );
+                    
+                    socket = sslContext.getSocketFactory().createSocket();
+                    
+                    HttpsURLConnection.setDefaultSSLSocketFactory( sslContext.getSocketFactory() );
+
+                    HttpsURLConnection.setDefaultHostnameVerifier( hostnameVerifier );
+                }
+                catch (Exception e)
+                {
+                    throw new IOException("issue ignoring certs");
+                }
+                //socket = SSLSocketFactory.getDefault().createSocket();                
             }
             else
             {
