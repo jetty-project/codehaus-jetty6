@@ -15,6 +15,7 @@
 package org.mortbay.jetty.client;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,11 +51,13 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
  */
 public class SslConversationTest extends TestCase
 { 
+    private Server _server;
+    private int _port;
     private HttpClient _httpClient;
 
     protected void setUp() throws Exception
     {
-   
+        startServer();
         _httpClient=new HttpClient();
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
         _httpClient.setMaxConnectionsPerAddress(2);
@@ -63,18 +66,19 @@ public class SslConversationTest extends TestCase
 
     protected void tearDown() throws Exception
     {
- 
+        stopServer();
         _httpClient.stop();
     }
+
         
     public void testThis() throws Exception
     {
 
-        Socket socket = SSLSocketFactory.getDefault().createSocket( "dav.codehaus.org", 443 );
+        Socket socket = SSLSocketFactory.getDefault().createSocket( "localhost", _port );
         try
         {
             Writer out = new OutputStreamWriter( socket.getOutputStream(), "ISO-8859-1" );
-            out.write( "GET /user/jesse HTTP/1.1\r\n" );
+            out.write( "GET / HTTP/1.1\r\n" );
             //out.write( "Host: " + "dav.codehaus.org:443\r\n");
             out.write( "Host: " + "dav.codehaus.org\r\n");// + ":" + 443 + "\r\n" );
            // out.write( "Agent: SSL-TEST\r\n" );
@@ -89,6 +93,7 @@ public class SslConversationTest extends TestCase
         }
         finally
         {
+            Thread.sleep( 10 );
             socket.close();
         }
     }
@@ -99,7 +104,13 @@ public class SslConversationTest extends TestCase
     {
 
         HttpExchange.ContentExchange httpExchange = new HttpExchange.ContentExchange();
-        httpExchange.setURL("https://dav.codehaus.org/user/jesse");
+        //httpExchange.setURL("https://dav.codehaus.org/user/jesse");
+        httpExchange.setURL( "https://localhost:" + _port+ "/" );
+        //httpExchange.setAddress( new InetSocketAddress( "dav.codehaus.org", 443 ) );
+        
+        
+        //httpExchange.setURI( "/user/jesse" );
+        httpExchange.setVersion( HttpVersions.HTTP_1_1_ORDINAL );
         httpExchange.setMethod(HttpMethods.GET);
 
         HttpConversation wrapper = new HttpConversation(httpExchange)
@@ -140,11 +151,107 @@ public class SslConversationTest extends TestCase
         });
 
         //_httpClient.setConnectorType( _httpClient.CONNECTOR_SOCKET );
-        httpExchange.addRequestHeader("Host:","dav.codehaus.org:443" );
+        //httpExchange.addRequestHeader("Host:","dav.codehaus.org:443" );
         _httpClient.send(wrapper);
 
         assertTrue( wrapper.waitForSuccess() );
         Thread.sleep(10);
 
     }
+    
+    
+    private void startServer() throws Exception
+    {
+        _server = new Server();
+        _server.setGracefulShutdown(500);
+        SslSelectChannelConnector connector = new SslSelectChannelConnector();
+
+      String keystore = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+"keystore";
+        
+        connector.setPort(0);
+        connector.setKeystore(keystore);
+        connector.setPassword("storepwd");
+        connector.setKeyPassword("keypwd");
+
+        _server.setConnectors(new Connector[]{connector});
+
+        UserRealm userRealm = new HashUserRealm("MyRealm", "src/test/resources/realm.properties");
+
+        Constraint constraint = new Constraint();
+        constraint.setName("Need User or Admin");
+        constraint.setRoles(new String[]{"user", "admin"});
+        constraint.setAuthenticate(true);
+
+        ConstraintMapping cm = new ConstraintMapping();
+        cm.setConstraint(constraint);
+        cm.setPathSpec("/*");
+
+        SecurityHandler sh = new SecurityHandler();
+        _server.setHandler(sh);
+        sh.setUserRealm(userRealm);
+        sh.setConstraintMappings(new ConstraintMapping[]{cm});
+        sh.setAuthenticator(new BasicAuthenticator());
+
+        Handler testHandler = new AbstractHandler()
+        {
+
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+            {
+                System.out.println("passed authentication!");
+                Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+                base_request.setHandled(true);
+                response.setStatus(200);
+                if (request.getServerName().equals("jetty.mortbay.org"))
+                {
+                    response.getOutputStream().println("Proxy request: "+request.getRequestURL());
+                }
+                else if (request.getMethod().equalsIgnoreCase("GET"))
+                {
+                    response.getOutputStream().println("<hello>");
+                    for (int i=0; i<100; i++)
+                    {
+                        response.getOutputStream().println("  <world>"+i+"</world>");
+                        if (i%20==0)
+                            response.getOutputStream().flush();
+                    }
+                    response.getOutputStream().println("</hello>");
+                }
+                else
+                {
+                    copyStream(request.getInputStream(),response.getOutputStream());
+                }
+            }
+        };
+
+        sh.setHandler(testHandler);
+
+        _server.start();
+        _port = connector.getLocalPort();
+    }
+
+
+    public static void copyStream(InputStream in, OutputStream out)
+    {
+        try
+        {
+            byte[] buffer=new byte[1024];
+            int len;
+            while ((len=in.read(buffer))>=0)
+            {
+                out.write(buffer,0,len);
+            }
+        }
+        catch (EofException e)
+        {
+            System.err.println(e);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+   private void stopServer() throws Exception
+   {
+       _server.stop();
+   }
 }
