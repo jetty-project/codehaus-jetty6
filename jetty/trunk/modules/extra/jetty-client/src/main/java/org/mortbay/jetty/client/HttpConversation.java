@@ -248,7 +248,7 @@ public class HttpConversation implements HttpExchangeListener
 
     public void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
-        System.out.println("Header Seen: " + name.toString() + "/" + value.toString() );
+        
     }
 
     public void onResponseHeaderComplete() throws IOException
