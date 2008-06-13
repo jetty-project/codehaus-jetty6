@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Iterator;
@@ -69,8 +71,9 @@ public class HttpExchange
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
 
-    private HttpExchangeListener _listener;
-
+    private HttpExchangeListener[] _listeners = new HttpExchangeListener[0];
+    
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -411,50 +414,66 @@ public class HttpExchange
     // methods to handle response
     protected void onRequestCommitted() throws IOException
     {
-        if ( _listener != null )
-        _listener.onRequestCommitted();
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onRequestCommitted();
+        }
     }
 
     protected void onRequestComplete() throws IOException
     {
-        if ( _listener != null )
-        _listener.onRequestComplete();
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onRequestComplete();
+        }
     }
 
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
-        if ( _listener != null )
-        _listener.onResponseStatus( version, status, reason );
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onResponseStatus( version, status, reason );
+        }
     }
 
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
-        if ( _listener != null )
-        _listener.onResponseHeader( name, value );
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onResponseHeader( name, value );
+        }
     }
 
     protected void onResponseHeaderComplete() throws IOException
     {
-        if ( _listener != null )
-        _listener.onResponseHeaderComplete();
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onResponseHeaderComplete();
+        }
     }
 
     protected void onResponseContent(Buffer content) throws IOException
     {
-        if ( _listener != null )
-        _listener.onResponseContent( content );
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onResponseContent( content );           
+        }
     }
 
     protected void onResponseComplete() throws IOException
     {
-        if ( _listener != null )
-        _listener.onResponseComplete();
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onResponseComplete();
+        }
     }
 
     protected void onConnectionFailed(Throwable ex)
     {
-        if ( _listener != null )
-        _listener.onConnectionFailed( ex );
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onConnectionFailed( ex );
+        }
 
         System.err.println("CONNECTION FAILED on " + this);
         ex.printStackTrace();
@@ -462,8 +481,10 @@ public class HttpExchange
 
     protected void onException(Throwable ex)
     {
-        if ( _listener != null )
-        _listener.onException( ex );
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onException( ex );
+        }
         
         System.err.println("EXCEPTION on " + this);
         ex.printStackTrace();
@@ -471,8 +492,10 @@ public class HttpExchange
 
     protected void onExpire()
     {
-        if ( _listener != null )
-        _listener.onExpire();
+        for ( int i = 0; i < _listeners.length; ++i )
+        {
+            _listeners[ i ].onExpire();
+        }
         
         System.err.println("EXPIRED " + this);
     }
@@ -593,8 +616,8 @@ public class HttpExchange
         }
     }
 
-    public void setListener(HttpExchangeListener listener)
+    public void setListeners(HttpExchangeListener[] listeners)
     {
-        this._listener = listener;
+        _listeners = listeners;
     }
 }

@@ -15,8 +15,11 @@ package org.mortbay.jetty.client;
 //========================================================================
 
 
+import org.mortbay.jetty.client.network.NetworkResolver;
+import org.mortbay.jetty.client.protocol.ProtocolResolver;
 import org.mortbay.jetty.client.security.SecurityRealm;
 import org.mortbay.jetty.client.security.Authentication;
+import org.mortbay.jetty.client.security.SecurityResolver;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.util.StringUtil;
 import org.mortbay.io.Buffer;
@@ -45,42 +48,28 @@ public class HttpConversation implements HttpExchangeListener
 
     private HttpExchange _exchange;
     private HttpDestination _destination;
-       
-    private String _authenticationType = null;
-    private Map<String, String> _authenticationDetails;
-    private Map<String,Authentication> _authenticationMap;
-    private List<SecurityRealm> _realmList;
-    
+    private SecurityResolver _securityResolver = new SecurityResolver();
+    private NetworkResolver _networkResolver = new NetworkResolver();
+    private ProtocolResolver _protocolResolver = new ProtocolResolver();
+          
     private int _attempts = 0;
-    
-    /**
-     * boolean indicating that the conversation needs to be continued to reach a conclusion
-     */
-    private boolean _continueConversation = false;
-    
-    // 301
-    //private boolean _requiresRedirect = false;
-    
-    // 401 
-    private boolean _requiresAuthenticationChallenge = false;
-
 
     public HttpConversation( )
-    {
-        
+    {       
     }
     
     public HttpConversation( HttpExchange exchange )
     {
         _exchange = exchange;
-        _exchange.setListener( this );
-
+        // order is important on these listeners, this must come last
+        _exchange.setListeners( new HttpExchangeListener[]{ _networkResolver, _securityResolver, _protocolResolver, this } );     
     }   
 
     public void setHttpExchange( HttpExchange exchange )
     {
         _exchange = exchange;
-        _exchange.setListener( this );
+        // order is important on these listeners, this must come last
+        _exchange.setListeners( new HttpExchangeListener[]{ _networkResolver, _securityResolver, _protocolResolver, this } );
     }
     
     /*-----------*/
@@ -121,19 +110,60 @@ public class HttpConversation implements HttpExchangeListener
     {
         _exchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
 
-        while ( _continueConversation && anotherAttemptPossible() )
+        while ( continueConversation() )
         {
             _exchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
         }
 
-        if ( _continueConversation )
+        if ( _networkResolver.requiresResolution() || _securityResolver.requiresResolution() || _protocolResolver.requiresResolution() )
         {
-            return false;
+            return false; // we require resolution but are in a state where we can't continue to false
         }
         else
         {
-            return true;
+            return true; // nothing needs resolution, exchange is completed, we are gtg
         }
+    }
+    
+    /**
+     * 
+     */
+    public boolean continueConversation()
+    {
+        if ( _networkResolver.requiresResolution() )
+        {
+            if ( _networkResolver.canResolve() )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        if ( _securityResolver.requiresResolution() )
+        {
+            if ( _securityResolver.canResolve() )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        if ( _protocolResolver.requiresResolution() )
+        {
+            if ( _protocolResolver.canResolve() )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
@@ -191,60 +221,6 @@ public class HttpConversation implements HttpExchangeListener
         }
     }
 
-    /**
-     * prepare the exchange for the next conversational reply
-     * 
-     * @throws IOException
-     */
-    private void prepareNextAttempt() throws IOException
-    {
-        if ( _requiresAuthenticationChallenge )
-        {
-            if ( _authenticationType == null )
-            {
-                throw new IOException( "Another Attempt Required::Authentication::missing type" );
-            }
-            if ( _authenticationMap.containsKey( _authenticationType.toLowerCase() ) )
-            {
-                Authentication auth = _authenticationMap.get( _authenticationType.toLowerCase() );
-
-                if ( _realmList.size() >= _attempts )  // iterate through the authentication possibilities in order
-                {
-                    auth.setCredentials( _exchange, _realmList.get( _attempts - 1 ), _authenticationDetails );
-                }
-                else
-                {
-                    failure( "Another Attempt Required::Authentication::invalid state::exhausted authentication" );
-                }
-            }
-            else
-            {
-                throw new IOException( "Another Attempt Required::Authentication::requires unknown authentication mechanism::" + _authenticationType );
-            }
-        }
-    }
-
-    /**
-     * determines whether or not there are more options for continuing the conversation.
-     * 
-     * @return
-     */
-    private boolean anotherAttemptPossible() 
-    {
-		if (_requiresAuthenticationChallenge) 
-		{
-			if (_realmList.size() >= _attempts) 
-			{
-				return true; // we have more securityRealms that we can attempt to authenticate against
-			} 
-			else 
-			{
-				return false;
-			}
-		}
-		return false;
-	}
-
     public void onException(Throwable ex)
     {
         failure( ex.getMessage(), ex );
@@ -267,40 +243,12 @@ public class HttpConversation implements HttpExchangeListener
 
     public void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
-        System.out.println("Response Status: " + status );
-        if ( HttpServletResponse.SC_UNAUTHORIZED == status )
-        {
-            _continueConversation = true;
-            _requiresAuthenticationChallenge = true;
-        }
-        /* TODO deal with redirects?
-        else if ( HttpServletResponse.SC_MOVED_PERMANENTLY == status )
-        {
-        	_continueConversation = true;
-        	_requiresRedirect = true;
-        }
-        */
         
     }
 
     public void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
         System.out.println("Header Seen: " + name.toString() + "/" + value.toString() );
-
-        int header = HttpHeaders.CACHE.getOrdinal(name);
-        switch (header)
-        {
-            case HttpHeaders.WWW_AUTHENTICATE_ORDINAL:
-                
-                String authString = value.toString();
-                _authenticationType = scrapeAuthenticationType( authString );
-                if ( value.toString().indexOf( "=" ) != -1 ) // there are details to scrape
-                {                    
-                    _authenticationDetails = scrapeAuthenticationDetails( authString );
-                }
-                
-                break;
-        }
     }
 
     public void onResponseHeaderComplete() throws IOException
@@ -315,25 +263,52 @@ public class HttpConversation implements HttpExchangeListener
 
     public void onResponseComplete() throws IOException
     {
-        if ( _continueConversation && anotherAttemptPossible() ) // If state says we can continue, do so
+        if ( _networkResolver.requiresResolution() )
         {
-            synchronized ( this )
+            if ( _networkResolver.canResolve() )
             {
-                prepareNextAttempt();
-                _continueConversation = false;
-                ++_attempts;                
-                _destination.send(_exchange);
+                _networkResolver.attemptResolution( _exchange );
+                ++_attempts;
+                _destination.send( _exchange );                
                 return;
             }
+            else
+            {
+                failure( "Network Resolution Phase" );
+            }
         }
-        else if ( _continueConversation ) // we need another attempt, but can't to fail
+
+        if ( _securityResolver.requiresResolution() )
         {
-            failure( "unable to continue conversation" );
+            if ( _securityResolver.canResolve() )
+            {
+                _securityResolver.attemptResolution( _exchange );
+                ++_attempts;
+                _destination.send( _exchange );
+                return;
+            }
+            else
+            {
+                failure( "Security Resolution Phase" );
+            }
         }
-        else // we must be successful
+
+        if ( _protocolResolver.requiresResolution() && _protocolResolver.canResolve() )
         {
-            success();
+            if ( _protocolResolver.canResolve() )
+            {
+                _protocolResolver.attemptResolution( _exchange );
+                ++_attempts;
+                _destination.send( _exchange );
+                return;
+            }
+            else
+            {
+                failure( "Protocol Resolution Phase" );
+            }
         }
+
+        success();
     }
 
     public void onConnectionFailed(Throwable ex)
@@ -341,87 +316,13 @@ public class HttpConversation implements HttpExchangeListener
         failure( ex.getMessage(), ex ); 
     }
 
-    public List getRealmList()
+    public void enableSecurityRealm( SecurityRealm realm )
     {
-        return _realmList;
-    }
-
-    public void addSecurityRealm(SecurityRealm realm)
-    {
-        if ( _realmList == null )
-        {
-            _realmList = new LinkedList();
-        }
-        _realmList.add(_realmList.size(), realm );
-    }
-
-    public Map getAuthenticationMap()
-    {
-        return _authenticationMap;
-    }
-
-    public void addAuthentication(Authentication authentication)
-    {
-        if ( _authenticationMap == null )
-        {
-            _authenticationMap = new HashMap();
-        }
-        _authenticationMap.put( authentication.getAuthType().toLowerCase(), authentication );
+        _securityResolver.addSecurityRealm( realm );
     }
     
-    /**
-     * scrapes an authentication type from the authString
-     * 
-     * @param authString
-     * @return
-     */
-    protected String scrapeAuthenticationType( String authString )
+    public void enableAuthentication( Authentication authentication )
     {
-        String authType;
-
-        if ( authString.indexOf( " " ) == -1 )
-        {
-            authType = authString.toString();
-        }
-        else
-        {
-            String authResponse = authString.toString();
-            authType = authResponse.substring( 0, authResponse.indexOf( " " ) );
-        }
-        return authType;
+        _securityResolver.addAuthentication( authentication );
     }
-    
-    /**
-     * scrapes a set of authentication details from the authString
-     * 
-     * @param authString
-     * @return
-     */
-    protected Map<String, String> scrapeAuthenticationDetails( String authString )
-    {
-        Map<String, String> authenticationDetails = new HashMap<String, String>();
- 
-        authString = authString.substring( authString.indexOf( " " ) + 1, authString.length() );
-        
-        StringTokenizer strtok = new StringTokenizer( authString, ",");
-        
-        while ( strtok.hasMoreTokens() )
-        {
-            String[] pair = strtok.nextToken().split( "=" );
-            if ( pair.length == 2 )
-            {
-                String itemName = pair[0].trim();
-                String itemValue = pair[1].trim();
-                
-                itemValue = StringUtil.unquote( itemValue );
-                
-                authenticationDetails.put( itemName, itemValue );
-            }
-            else
-            {
-                throw new IllegalArgumentException( "unable to process authentication details" );
-            }      
-        }
-        return authenticationDetails;
-    }  
 }

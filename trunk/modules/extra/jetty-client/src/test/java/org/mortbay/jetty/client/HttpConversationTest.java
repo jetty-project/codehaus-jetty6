@@ -174,9 +174,9 @@ public class HttpConversationTest extends TestCase
                 assertTrue(false);
             }
         };
-        wrapper.addAuthentication(new BasicAuthentication());
-        wrapper.addAuthentication(new DigestAuthentication());
-        wrapper.addSecurityRealm(new SecurityRealm()
+        wrapper.enableAuthentication(new BasicAuthentication());
+        wrapper.enableAuthentication(new DigestAuthentication());
+        wrapper.enableSecurityRealm(new SecurityRealm()
         {
             public String getId()
             {
@@ -227,9 +227,9 @@ public class HttpConversationTest extends TestCase
                 assertTrue(false);
             }
         };
-        wrapper.addAuthentication(new BasicAuthentication());
-        wrapper.addAuthentication(new DigestAuthentication());
-        wrapper.addSecurityRealm(new SecurityRealm()
+        wrapper.enableAuthentication(new BasicAuthentication());
+        wrapper.enableAuthentication(new DigestAuthentication());
+        wrapper.enableSecurityRealm(new SecurityRealm()
         {
             public String getId()
             {
@@ -246,7 +246,7 @@ public class HttpConversationTest extends TestCase
                 return "bad";
             }
         });
-        wrapper.addSecurityRealm(new SecurityRealm()
+        wrapper.enableSecurityRealm(new SecurityRealm()
         {
             public String getId()
             {
@@ -269,25 +269,8 @@ public class HttpConversationTest extends TestCase
         //assertTrue( wrapper.waitForSuccess() );
         Thread.sleep(10);
 
-    }
-    
-    public void testCredentialParsing() throws Exception
-    {
-        HttpConversation conv = new HttpConversation();
-        Buffer value = new ByteArrayBuffer("basic a=b".getBytes());
-        
-        assertEquals( "basic", conv.scrapeAuthenticationType( value.toString() ) );
-        assertEquals( 1, conv.scrapeAuthenticationDetails( value.toString() ).size() );
-
-        value = new ByteArrayBuffer("digest a=boo, c=\"doo\" , egg=foo".getBytes());
-        
-        assertEquals( "digest", conv.scrapeAuthenticationType( value.toString() ) );
-        Map<String,String> testMap = conv.scrapeAuthenticationDetails( value.toString() );
-        assertEquals( 3, testMap.size() );
-        assertEquals( "boo", testMap.get("a") );
-        assertEquals( "doo", testMap.get("c") );
-        assertEquals( "foo", testMap.get("egg") );
-    }
+    } 
+ 
 
     public static void copyStream(InputStream in, OutputStream out)
     {
