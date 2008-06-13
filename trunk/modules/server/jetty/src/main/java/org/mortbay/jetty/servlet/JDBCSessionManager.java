@@ -328,10 +328,11 @@ public class JDBCSessionManager extends AbstractSessionManager
             {
                 if (_dirty)
                 {
-                    //TODO iterate over all attributes in the Session and look for
-                    //HttpSessionActivationListeners and call willPassivate and then
-                    //after it is stored call doActivate on them each
+                    //The session attributes have changed, write to the db, ensuring
+                    //http passivation/activation listeners called
+                    willPassivate();
                     updateSession(_data);
+                    didActivate();
                 }
                 else if ((_data._accessed - _data._lastSaved) >= (getSaveInterval() * 1000))
                     updateSessionAccessTime(_data);
@@ -470,7 +471,7 @@ public class JDBCSessionManager extends AbstractSessionManager
                         //session last used on a different node, or we don't have it in memory
                         session = new Session(data);
                         _sessions.put(idInCluster, session);
-
+                        session.didActivate();
                         //TODO is this the best way to do this? Or do this on the way out using
                         //the _dirty flag?
                         updateSessionNode(data);
@@ -622,10 +623,9 @@ public class JDBCSessionManager extends AbstractSessionManager
             //then session data will be lost.
             try
             {
-                //TODO iterate over all attributes in the Session and look for
-                //HttpSessionActivationListeners and call willPassivate and then
-                //after it is stored call doActivate on them each
+                ((JDBCSessionManager.Session)session).willPassivate();
                 storeSession(((JDBCSessionManager.Session)session)._data);
+                ((JDBCSessionManager.Session)session).didActivate();
             }
             catch (Exception e)
             {
