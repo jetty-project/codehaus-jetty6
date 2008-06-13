@@ -62,12 +62,11 @@ public class HttpConversation implements HttpExchangeListener
     
     private int _attempts = 0;
 
-
-    /*
-     * TODO figure out how the exchange will get populated into the wrapper, maybe we need an exchange factory based
-     * on classname with the ability to register new exchange types
-     *
-     */
+    public HttpConversation( )
+    {
+        // TODO clean this up!!!!!!
+    }
+    
     public HttpConversation( HttpExchange exchange )
     {
         _exchange = exchange;
@@ -245,38 +244,14 @@ public class HttpConversation implements HttpExchangeListener
         switch (header)
         {
             case HttpHeaders.WWW_AUTHENTICATE_ORDINAL:
-
-                if ( value.toString().indexOf(" ") == -1 )
-                {
-                    _authenticationType = value.toString();
-                }
-                else
-                {
                 
-                    String authResponse = value.toString();
-                    
-                    _authenticationType = authResponse.substring( 0, authResponse.indexOf( " " ) ); 
-                    authResponse = authResponse.substring( authResponse.indexOf( " " ) + 1, authResponse.length() );
-
-                    while ( authResponse.indexOf( "=" ) != -1 )
-                    {
-                        String itemName = authResponse.substring( 0, authResponse.indexOf( "=" ) );
-                        authResponse = authResponse.substring( itemName.length() + 2, authResponse.length() ); // wack the ="                        
-                        
-                        String itemValue = authResponse.substring( 0, authResponse.indexOf( "\"" ) );
-                        authResponse = authResponse.substring( itemValue.length() + 1, authResponse.length() );
-                                                                                       
-                        if (_authenticationDetails == null)
-                        {
-                            _authenticationDetails = new HashMap<String,String>();
-                            _authenticationDetails.put(itemName, itemValue);
-                        }
-                        else
-                        {
-                            _authenticationDetails.put(itemName, itemValue);
-                        }
-                    }
+                String authString = value.toString();
+                _authenticationType = scrapeAuthenticationType( authString );
+                if ( value.toString().indexOf( "=" ) != -1 ) // there are details to scrape
+                {                    
+                    _authenticationDetails = scrapeAuthenticationDetails( authString );
                 }
+                
                 break;
         }
     }
@@ -356,4 +331,48 @@ public class HttpConversation implements HttpExchangeListener
         }
         _authenticationMap.put( authentication.getAuthType().toLowerCase(), authentication );
     }
+    
+    public String scrapeAuthenticationType( String authString )
+    {
+        String authType;
+
+        if ( authString.indexOf( " " ) == -1 )
+        {
+            authType = authString.toString();
+        }
+        else
+        {
+            String authResponse = authString.toString();
+            authType = authResponse.substring( 0, authResponse.indexOf( " " ) );
+        }
+        return authType;
+    }
+    
+    public Map<String, String> scrapeAuthenticationDetails( String authString )
+    {
+        Map<String, String> authenticationDetails = new HashMap<String, String>();
+ 
+        authString = authString.substring( authString.indexOf( " " ) + 1, authString.length() );
+        
+        StringTokenizer strtok = new StringTokenizer( authString, ",");
+        
+        while ( strtok.hasMoreTokens() )
+        {
+            String[] pair = strtok.nextToken().split( "=" );
+            if ( pair.length == 2 )
+            {
+                String itemName = pair[0].trim();
+                String itemValue = pair[1].trim();
+                
+                itemValue = StringUtil.unquote( itemValue );
+                
+                authenticationDetails.put( itemName, itemValue );
+            }
+            else
+            {
+                throw new IllegalArgumentException( "unable to process authentication details" );
+            }      
+        }
+        return authenticationDetails;
+    }  
 }
