@@ -18,6 +18,7 @@ package org.mortbay.jetty.client;
 import org.mortbay.jetty.client.security.SecurityRealm;
 import org.mortbay.jetty.client.security.Authentication;
 import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.util.StringUtil;
 import org.mortbay.io.Buffer;
 
 import javax.servlet.http.HttpServletResponse;
@@ -238,28 +239,23 @@ public class HttpConversation implements HttpExchangeListener
                 }
                 else
                 {
-                    StringTokenizer strtok = new StringTokenizer(value.toString(), " ");
-                    _authenticationType = strtok.nextToken().toLowerCase();
+                
+                    String authResponse = value.toString();
+                    
+                    _authenticationType = authResponse.substring( 0, authResponse.indexOf( " " ) ); 
+                    authResponse = authResponse.substring( authResponse.indexOf( " " ) + 1, authResponse.length() );
 
-                    while (strtok.hasMoreTokens())
+                    while ( authResponse.indexOf( "=" ) != -1 )
                     {
-                        String hashItem = strtok.nextToken();
-                        String itemName = hashItem.substring(0, hashItem.indexOf("="));
-                        String itemValue = hashItem.substring(hashItem.indexOf("=") + 1, hashItem.length());
-
-                        if (itemValue.startsWith("\""))
-                        {
-                            itemValue = itemValue.substring(1, itemValue.length());
-                        }
-
-                        if (itemValue.endsWith("\""))
-                        {
-                            itemValue = itemValue.substring(0, itemValue.length() - 1);
-                        }
-
+                        String itemName = authResponse.substring( 0, authResponse.indexOf( "=" ) );
+                        authResponse = authResponse.substring( itemName.length() + 2, authResponse.length() ); // wack the ="                        
+                        
+                        String itemValue = authResponse.substring( 0, authResponse.indexOf( "\"" ) );
+                        authResponse = authResponse.substring( itemValue.length() + 1, authResponse.length() );
+                                                                                       
                         if (_authenticationDetails == null)
                         {
-                            _authenticationDetails = new HashMap();
+                            _authenticationDetails = new HashMap<String,String>();
                             _authenticationDetails.put(itemName, itemValue);
                         }
                         else
