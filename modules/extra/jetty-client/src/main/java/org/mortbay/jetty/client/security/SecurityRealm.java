@@ -14,9 +14,12 @@ package org.mortbay.jetty.client.security;
 //limitations under the License.
 //========================================================================
 
+/**
+ * Simple security realm interface.
+ */
 public interface SecurityRealm
 {
-    public String getName();
+    public String getId();
 
     public String getPrincipal();
 

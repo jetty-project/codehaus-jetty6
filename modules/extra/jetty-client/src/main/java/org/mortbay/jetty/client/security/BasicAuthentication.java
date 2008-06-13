@@ -22,7 +22,11 @@ import org.mortbay.util.StringUtil;
 import java.io.IOException;
 import java.util.Map;
 
-
+/**
+ * Sets authentication headers for BASIC authentication challenges
+ * 
+ * @author jesse
+ */
 public class BasicAuthentication implements Authentication
 {
     public String getAuthType()
@@ -30,6 +34,15 @@ public class BasicAuthentication implements Authentication
         return "basic";
     }
 
+    /**
+     * BASIC authentication is of the form
+     * 
+     * encoded credentials are of the form: username:password
+     * 
+     * http header field is of the form:
+     * Authorization: basic encodedCredentials
+     * 
+     */
     public void setCredentials( HttpExchange exchange, SecurityRealm realm, Map details ) throws IOException
     {
         String authenticationString = getAuthType() + " " + B64Code.encode( realm.getPrincipal() + ":" + realm.getCredentials(), StringUtil.__ISO_8859_1);

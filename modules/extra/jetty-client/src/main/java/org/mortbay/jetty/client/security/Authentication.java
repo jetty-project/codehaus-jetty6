@@ -20,7 +20,9 @@ import org.mortbay.jetty.client.HttpExchange;
 import java.io.IOException;
 import java.util.Map;
 
-
+/**
+ * Simple authentication interface that sets required fields on the exchange.
+ */
 public interface Authentication
 {
     public String getAuthType();

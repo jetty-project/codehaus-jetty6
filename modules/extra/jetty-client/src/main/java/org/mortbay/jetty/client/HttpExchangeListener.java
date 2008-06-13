@@ -19,7 +19,11 @@ import org.mortbay.io.Buffer;
 
 import java.io.IOException;
 
-
+/**
+ * 
+ * @author jesse
+ * 
+ */
 public interface HttpExchangeListener
 {
 
