@@ -59,7 +59,8 @@ public class SslConversationTest extends TestCase
     {
         startServer();
         _httpClient=new HttpClient();
-        _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+        //_httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+        _httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
     }
@@ -74,7 +75,7 @@ public class SslConversationTest extends TestCase
     public void testThis() throws Exception
     {
 
-        Socket socket = SSLSocketFactory.getDefault().createSocket( "localhost", _port );
+        Socket socket = SSLSocketFactory.getDefault().createSocket( "dav.codehaus.org", 443 );
         try
         {
             Writer out = new OutputStreamWriter( socket.getOutputStream(), "ISO-8859-1" );
@@ -104,8 +105,8 @@ public class SslConversationTest extends TestCase
     {
 
         HttpExchange.ContentExchange httpExchange = new HttpExchange.ContentExchange();
-        //httpExchange.setURL("https://dav.codehaus.org/user/jesse");
-        httpExchange.setURL( "https://localhost:" + _port+ "/" );
+        httpExchange.setURL("https://dav.codehaus.org/user/jesse");
+        //httpExchange.setURL( "https://localhost:" + _port+ "/" );
         //httpExchange.setAddress( new InetSocketAddress( "dav.codehaus.org", 443 ) );
         
         
