@@ -44,13 +44,18 @@ public class HttpConversation implements HttpExchangeListener
 {
 
     private HttpExchange _exchange;
-
     private HttpDestination _destination;
-    private List<SecurityRealm> _realmList;
-    private Map<String,Authentication> _authenticationMap;
-    private String _url;
+       
     private String _authenticationType = null;
     private Map<String, String> _authenticationDetails;
+    private Map<String,Authentication> _authenticationMap;
+    private List<SecurityRealm> _realmList;
+    
+    private int _attempts = 0;
+    
+    /**
+     * boolean indicating that the conversation needs to be continued to reach a conclusion
+     */
     private boolean _continueConversation = false;
     
     // 301
@@ -58,13 +63,11 @@ public class HttpConversation implements HttpExchangeListener
     
     // 401 
     private boolean _requiresAuthenticationChallenge = false;
-    
-    
-    private int _attempts = 0;
+
 
     public HttpConversation( )
     {
-        // TODO clean this up!!!!!!
+        
     }
     
     public HttpConversation( HttpExchange exchange )
@@ -74,8 +77,14 @@ public class HttpConversation implements HttpExchangeListener
 
     }   
 
+    public void setHttpExchange( HttpExchange exchange )
+    {
+        _exchange = exchange;
+        _exchange.setListener( this );
+    }
+    
     /*-----------*/
-    /* Callbacks */ // first pass
+    /* Callbacks */
 
     /** 
      * Callback method indicating the HttpConversation completed successfully. 
@@ -101,9 +110,13 @@ public class HttpConversation implements HttpExchangeListener
     {
 
     }
-
+    
     /*-----------*/
 
+    /**
+     * Wait for the return status the exchange and if we need to continue the conversation, we 
+     * have gotten here in a way where we can't continue the conversation so we failed. 
+     */
     public boolean waitForSuccess() throws InterruptedException
     {
         _exchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
@@ -123,39 +136,68 @@ public class HttpConversation implements HttpExchangeListener
         }
     }
 
+    /**
+     * the scheme we will talk with
+     * 
+     * @return
+     */
     public Buffer getScheme()
     {
         return _exchange.getScheme();
     }
 
+    /**
+     * the address we are going to talk to
+     * @return
+     */
     public InetSocketAddress getAddress()
     {
         return _exchange.getAddress();
     }
 
+    /**
+     * We need a destination (someone to talk to) in order to start
+     * 
+     * @param destination
+     */
     public void setHttpDestination( HttpDestination destination )
     {
         _destination = destination;
     }
 
 
-    public void send() throws IOException
+    /**
+     * Starts the conversation off.
+     * 
+     * @throws IOException
+     */
+    public void start() throws IOException
     {
         synchronized (this)
         {
+            if ( _destination == null )
+            {
+                throw new IOException( "unable to start conversation, no destination set." );
+            }
+            
+            if ( _exchange == null )
+            {
+                throw new IOException( "unable to start conversation, no exchange set." );
+            }
+            
             _exchange.setStatus(HttpExchange.STATUS_WAITING_FOR_CONNECTION);
-
-            System.out.println("sending initial attempt");
             _destination.send(_exchange);
-            ++_attempts;
+            ++_attempts;           
         }
-
     }
 
+    /**
+     * prepare the exchange for the next conversational reply
+     * 
+     * @throws IOException
+     */
     private void prepareNextAttempt() throws IOException
     {
-        // TODO need to clean out exchange?
-
         if ( _requiresAuthenticationChallenge )
         {
             if ( _authenticationType == null )
@@ -182,13 +224,18 @@ public class HttpConversation implements HttpExchangeListener
         }
     }
 
+    /**
+     * determines whether or not there are more options for continuing the conversation.
+     * 
+     * @return
+     */
     private boolean anotherAttemptPossible() 
     {
 		if (_requiresAuthenticationChallenge) 
 		{
 			if (_realmList.size() >= _attempts) 
 			{
-				return true;
+				return true; // we have more securityRealms that we can attempt to authenticate against
 			} 
 			else 
 			{
@@ -294,16 +341,6 @@ public class HttpConversation implements HttpExchangeListener
         failure( ex.getMessage(), ex ); 
     }
 
-    public String getUrl()
-    {
-        return _url;
-    }
-
-    public void setUrl(String url)
-    {
-        this._url = url;
-    }
-
     public List getRealmList()
     {
         return _realmList;
@@ -332,7 +369,13 @@ public class HttpConversation implements HttpExchangeListener
         _authenticationMap.put( authentication.getAuthType().toLowerCase(), authentication );
     }
     
-    public String scrapeAuthenticationType( String authString )
+    /**
+     * scrapes an authentication type from the authString
+     * 
+     * @param authString
+     * @return
+     */
+    protected String scrapeAuthenticationType( String authString )
     {
         String authType;
 
@@ -348,7 +391,13 @@ public class HttpConversation implements HttpExchangeListener
         return authType;
     }
     
-    public Map<String, String> scrapeAuthenticationDetails( String authString )
+    /**
+     * scrapes a set of authentication details from the authString
+     * 
+     * @param authString
+     * @return
+     */
+    protected Map<String, String> scrapeAuthenticationDetails( String authString )
     {
         Map<String, String> authenticationDetails = new HashMap<String, String>();
  
