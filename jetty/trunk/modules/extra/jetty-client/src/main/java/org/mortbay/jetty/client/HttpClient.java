@@ -117,7 +117,7 @@ public class HttpClient extends AbstractBuffers
     {
         boolean ssl=HttpSchemes.HTTPS_BUFFER.equalsIgnoreCase(exchangeWrapper.getScheme());        
         exchangeWrapper.setHttpDestination( getDestination(exchangeWrapper.getAddress(),ssl) );
-        exchangeWrapper.send();
+        exchangeWrapper.start();
     }
 
     /* ------------------------------------------------------------ */
