@@ -29,15 +29,15 @@ import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
+import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
@@ -46,11 +46,12 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
+import org.mortbay.jetty.HttpGenerator;
+import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.security.SslSelectChannelConnector;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.security.SslHttpChannelEndPoint;
 import org.mortbay.log.Log;
-import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
@@ -260,10 +261,6 @@ public class HttpClient extends AbstractBuffers
         }
         
         
-        if (_threadPool instanceof BoundedThreadPool)
-        {
-            ((BoundedThreadPool)_threadPool).setName("HttpClient");
-        }
         if (_threadPool instanceof QueuedThreadPool)
         {
             ((QueuedThreadPool)_threadPool).setName("HttpClient");
@@ -365,18 +362,18 @@ public class HttpClient extends AbstractBuffers
                 };
 
                 // Install the all-trusting trust manager
-
                 try
                 {
+                    // TODO real trust manager
                     SSLContext sslContext = SSLContext.getInstance( "SSL" );
-
                     sslContext.init( null, trustAllCerts, new java.security.SecureRandom() );
-                    
                     socket = sslContext.getSocketFactory().createSocket();
                     
+                    // TODO - are these required ????
+                    /*
                     HttpsURLConnection.setDefaultSSLSocketFactory( sslContext.getSocketFactory() );
-
                     HttpsURLConnection.setDefaultHostnameVerifier( hostnameVerifier );
+                    */
                 }
                 catch (Exception e)
                 {
@@ -435,34 +432,9 @@ public class HttpClient extends AbstractBuffers
         public void startConnection(HttpDestination destination) throws IOException
         {
             SocketChannel channel=SocketChannel.open();
-            
-            if (destination.isSecure())
-            {
-                System.out.println("using secure socket");  
-                
-                SocketChannel tempChannel = SocketChannel.open();              
-                Socket normalSocket = tempChannel.socket();
-                
-                InetSocketAddress addy = destination.isProxied()?destination.getProxy():destination.getAddress();
-                
-                normalSocket.connect( addy, destination.getAddress().getPort() );                    
-                
-                Socket secureSocket = ((SSLSocketFactory)SSLSocketFactory.getDefault()).createSocket( normalSocket, addy.getAddress().getHostAddress(), destination.getAddress().getPort(), true ); 
-                 
-                channel = secureSocket.getChannel();
-                
-                System.out.println("SSLCHANNEL: " + channel );
-            }
-            else
-            {
-                System.out.println("using standard socket");
-                channel.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
-                
-            }
-                     
+            channel.connect(destination.isProxied()?destination.getProxy():destination.getAddress());            
             channel.configureBlocking(false);
             channel.socket().setSoTimeout(_soTimeout);
-                      
             _selectorManager.register(channel,destination);
         }
 
@@ -510,7 +482,31 @@ public class HttpClient extends AbstractBuffers
             {
                 // key should have destination at this point (will be replaced by endpoint after this call)
                 HttpDestination dest=(HttpDestination)key.attachment();
-                SelectChannelEndPoint ep=new SelectChannelEndPoint(channel,selectSet,key);
+                
+
+                SelectChannelEndPoint ep=null;
+                
+                if (dest.isSecure())
+                {
+                    if (dest.isProxied())
+                    {
+                        String connect = HttpMethods.CONNECT+" "+dest.getAddress()+HttpVersions.HTTP_1_0+"\r\n\r\n";
+                        // TODO need to send this over channel unencrypted and setup endpoint to ignore the 200 OK response.
+                       
+                        throw new IllegalStateException("Not Implemented");
+                    }
+
+                    SSLEngine engine = null; // TODO have an ssl engine setup with trust manager.
+                    Buffers buffers = null; // TODO need buffers pool with SSL sized buffers (from engine)
+                    if (engine==null)
+                        throw new IllegalStateException("Not Implemented");
+                    ep = new SslHttpChannelEndPoint(buffers,channel,selectSet,key,engine);
+                }
+                else
+                {
+                    ep=new SelectChannelEndPoint(channel,selectSet,key);
+                }
+                
                 HttpConnection connection=(HttpConnection)ep.getConnection();
                 connection.setDestination(dest);
                 dest.onNewConnection(connection);
