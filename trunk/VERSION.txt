@@ -24,6 +24,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-603 Handle IPv6 in HttpURI
  + JETTY-605 Added optional threadpool to BayeuxService
  + JETTY-606 better writeTo impl for BIO
+ + JETTY-609 jetty-client improvements for http conversations
 
 
 jetty-6.1.11 6 June 2008
