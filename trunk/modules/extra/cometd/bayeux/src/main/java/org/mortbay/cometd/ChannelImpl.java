@@ -343,6 +343,14 @@ public class ChannelImpl implements Channel
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public int getSubscriberCount()
+    {
+        synchronized(this)
+        {
+            return _subscribers.length;
+        }
+    }
 
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
