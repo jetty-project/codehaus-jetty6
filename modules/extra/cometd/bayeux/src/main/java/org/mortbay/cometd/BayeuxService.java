@@ -36,8 +36,17 @@ import dojox.cometd.MessageListener;
  * subscriptions to methods on the derived class and to send responses to those methods.
  * 
  * <p>If a {@link #set_threadPool(ThreadPool)} is set, then messages are handled in their 
- * own threads.
+ * own threads.  This is desirable if the handling of a message can take considerable time and 
+ * it is desired not to hold up the delivering thread (typically a HTTP request handling thread).
+ * 
+ * <p>If the BayeuxService is constructed asynchronously (the default), then messages are
+ * delivered unsynchronized and multiple simultaneous calls to handling methods may occur.
+ * 
+ * <p>If the BayeuxService is constructed as a synchronous service, then message delivery
+ * is synchronized on the internal {@link Client} instances used and only a single call will
+ * be made to the handler method (unless a thread pool is used).
  *
+ * @see MessageListener
  * @author gregw
  *
  */
@@ -48,6 +57,7 @@ public abstract class BayeuxService
     private Client _client;
     private Map<String,Method> _methods = new ConcurrentHashMap<String,Method>();
     private ThreadPool _threadPool;
+    private MessageListener _listener;
     
     /* ------------------------------------------------------------ */
     /** Instantiate the service.
@@ -58,7 +68,7 @@ public abstract class BayeuxService
      */
     public BayeuxService(Bayeux bayeux,String name)
     {
-        this(bayeux,name,0);
+        this(bayeux,name,0,false);
     }
 
     /* ------------------------------------------------------------ */
@@ -71,12 +81,29 @@ public abstract class BayeuxService
      */
     public BayeuxService(Bayeux bayeux,String name, int maxThreads)
     {
+        this(bayeux,name,maxThreads,false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Instantiate the service.
+     * Typically the derived constructor will call {@ #subscribe(String, String)} to 
+     * map subscriptions to methods.
+     * @param bayeux The bayeux instance.
+     * @param name The name of the service (used as client ID prefix).
+     * @param maxThreads The size of a ThreadPool to create to handle messages.
+     * @param synchronous True if message delivery will be synchronized on the client.
+     */
+    public BayeuxService(Bayeux bayeux,String name, int maxThreads, boolean synchronous)
+    {
         if (maxThreads>0)
             setThreadPool(new QueuedThreadPool(maxThreads));
         _name=name;
         _bayeux=bayeux;
         _client=_bayeux.newClient(name);  
-        _client.addListener(new Listen());
+        if (synchronous)
+            _client.addListener(_listener=new SyncListen());
+        else
+            _client.addListener(_listener=new AsyncListen());
     }
 
     /* ------------------------------------------------------------ */
@@ -182,12 +209,7 @@ public abstract class BayeuxService
         { 
             final Method m=method;
             Client wild_client=_bayeux.newClient(_name+"-wild");
-            wild_client.addListener(new MessageListener(){
-                public void deliver(Client fromClient, Client toClient, Message msg)
-                {
-                    invoke(m,fromClient,toClient,msg);
-                }
-            });
+            wild_client.addListener(_listener instanceof MessageListener.Asynchronous?new AsyncWildListen(m):new SyncWildListen(m));
             channel.subscribe(wild_client);
         }
         else
@@ -302,7 +324,7 @@ public abstract class BayeuxService
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class Listen implements MessageListener
+    private class AsyncListen implements MessageListener, MessageListener.Asynchronous
     {
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
@@ -311,6 +333,50 @@ public abstract class BayeuxService
             invoke(method,fromClient,toClient,msg);
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class SyncListen implements MessageListener, MessageListener.Synchronous
+    {
+        public void deliver(Client fromClient, Client toClient, Message msg)
+        {
+            String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
+            Method method=_methods.get(channel);
+            invoke(method,fromClient,toClient,msg);
+        }
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class SyncWildListen implements MessageListener, MessageListener.Synchronous
+    {
+        Method _method;
+        public SyncWildListen(Method method)
+        {
+            _method=method;
+        }
+        public void deliver(Client fromClient, Client toClient, Message msg)
+        {
+            invoke(_method,fromClient,toClient,msg);
+        }
+    };
+    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class AsyncWildListen implements MessageListener, MessageListener.Asynchronous
+    {
+        Method _method;
+        public AsyncWildListen(Method method)
+        {
+            _method=method;
+        }
+        public void deliver(Client fromClient, Client toClient, Message msg)
+        {
+            invoke(_method,fromClient,toClient,msg);
+        }
+    };
 
 }
 
