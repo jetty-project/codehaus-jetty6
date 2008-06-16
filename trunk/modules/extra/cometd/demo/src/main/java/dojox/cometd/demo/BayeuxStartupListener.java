@@ -93,7 +93,6 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
         public Monitor(Bayeux bayeux)
         {
             super(bayeux,"monitor");
-            setThreadPool(new QueuedThreadPool());
             subscribe("/meta/subscribe","monitorSubscribe");
             subscribe("/meta/subscribe","monitorUnsubscribe");
             subscribe("/meta/*","monitorMeta");

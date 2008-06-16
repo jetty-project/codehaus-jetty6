@@ -41,11 +41,12 @@ public class ClientImpl implements Client
     private String _type;
     private Object _messageQ=null;
     private int _responsesPending;
-    private ChannelImpl[] _subscriptions=new ChannelImpl[0]; // copy of write
+    private ChannelImpl[] _subscriptions=new ChannelImpl[0]; // copy on write
     private boolean _JSONCommented;
     private Listener _listener;
-    private List<RemoveListener> _rListeners;
-    private List<MessageListener> _mListeners;
+    private RemoveListener[] _rListeners=new RemoveListener[0]; // copy on write
+    private MessageListener[] _syncMListeners=new MessageListener[0]; // copy on write
+    private MessageListener[] _asyncMListeners=new MessageListener[0]; // copy on write
     protected AbstractBayeux _bayeux;
     private String _browserId;
     private int _adviseVersion;
@@ -148,6 +149,7 @@ public class ClientImpl implements Client
     /* ------------------------------------------------------------ */
     protected void doDelivery(Client from, Message message)
     {
+        MessageListener[] alisteners=null;
         synchronized(this)
         {
             ((MessageImpl)message).incRef();
@@ -163,11 +165,16 @@ public class ClientImpl implements Client
             
             if (_batch==0 &&  _responsesPending<1)
                 resume();
-            
-            if (_mListeners!=null)
-                for (MessageListener l:_mListeners)
-                    l.deliver(from,this,message);
+
+            // deliver unsynchronized
+            for (MessageListener l:_syncMListeners)
+                l.deliver(from,this,message);
+            alisteners=_asyncMListeners;
         }
+        
+        // deliver unsynchronized
+        for (MessageListener l:alisteners)
+            l.deliver(from,this,message);
     }
 
 
@@ -510,7 +517,6 @@ public class ClientImpl implements Client
        _adviseVersion=version;
    }
 
-
    /* ------------------------------------------------------------ */
    public void addListener(EventListener listener)
    {
@@ -518,16 +524,14 @@ public class ClientImpl implements Client
        {
            if (listener instanceof MessageListener)
            {
-               if (_mListeners==null)
-                   _mListeners=new ArrayList<MessageListener>();
-               _mListeners.add((MessageListener)listener);
+               if (listener instanceof MessageListener.Synchronous)
+                   _syncMListeners=(MessageListener[])LazyList.addToArray(_syncMListeners,listener,MessageListener.class);
+               else
+                   _asyncMListeners=(MessageListener[])LazyList.addToArray(_asyncMListeners,listener,MessageListener.class);
            }
+               
            if (listener instanceof RemoveListener)
-           {
-               if (_rListeners==null)
-                   _rListeners=new ArrayList<RemoveListener>();
-               _rListeners.add((RemoveListener)listener);
-           }
+               _rListeners=(RemoveListener[])LazyList.addToArray(_rListeners,listener,RemoveListener.class);
        }
    }
 
@@ -538,14 +542,12 @@ public class ClientImpl implements Client
        {
            if (listener instanceof MessageListener)
            {
-               if (_mListeners!=null)
-                   _mListeners.remove((MessageListener)listener);
+               _syncMListeners=(MessageListener[])LazyList.removeFromArray(_syncMListeners,listener);
+               _asyncMListeners=(MessageListener[])LazyList.removeFromArray(_asyncMListeners,listener);
            }
+           
            if (listener instanceof RemoveListener)
-           {
-               if (_rListeners!=null)
-                   _rListeners.remove((RemoveListener)listener);
-           }
+               _rListeners=(RemoveListener[])LazyList.removeFromArray(_rListeners,listener);
        }
    }
 
