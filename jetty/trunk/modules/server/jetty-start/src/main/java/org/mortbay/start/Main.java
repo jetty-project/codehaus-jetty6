@@ -432,6 +432,17 @@ public class Main
                         _classname=cn;
                     }
                 }
+                else if (subject.toLowerCase().endsWith(".path"))
+                {
+                    //classpath (jetty.class.path?) to add to runtime classpath
+                    String cn=expand(subject.substring(0,subject.length()-5));
+                    if (cn!=null&&cn.length()>0)
+                    {
+                        if (_debug)
+                            System.err.println("  PATH="+cn);
+                        _classpath.addClasspath(cn);
+                    }                  
+                }
                 else
                 {
                     // single JAR file
