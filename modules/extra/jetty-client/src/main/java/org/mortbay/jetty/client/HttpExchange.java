@@ -44,6 +44,15 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * VERY rough start to a client API - inpired by javascript XmlHttpRequest.
  * 
+ * HttpExchange can be used in two fashions:
+ * 
+ * 1 - directly with the HttpClient where you create and override any callback methods as needed
+ *     ensuring that you call super.method() in each instance
+ * 2 - as a component in an HttpConversation where that manages the back and forth of a connection
+ *     and the httpExchange contains the state of the exchange in internal variables.
+ *     
+ * TODO refactor these two mechanics apart?
+ * 
  * @author gregw
  * @author Guillaume Nodet
  */
@@ -57,7 +66,7 @@ public class HttpExchange
     public static final int STATUS_PARSING_HEADERS = 5;
     public static final int STATUS_PARSING_CONTENT = 6;
     public static final int STATUS_COMPLETED = 7;
-    public static final int STATUS_EXPIRED = 8;
+    public static final int STATUS_EXPIRED = 8; 
     public static final int STATUS_EXCEPTED = 9;
 
     InetSocketAddress _address;
@@ -70,6 +79,23 @@ public class HttpExchange
     Buffer _requestContent;
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
+    
+    // Exchange State Variables
+    
+    private boolean _isRequestCommitted = false;
+    private boolean _isRequestComplete = false;
+    private Buffer _responseVersion = null;
+    private int _responseStatus = -1;
+    private Buffer _responseReason = null;
+    private Map<Buffer, Buffer> _responseHeaders = new HashMap<Buffer,Buffer>();
+    private boolean _isResponseHeaderComplete = false;
+    private Buffer _responseContentBuffer = null;
+    private boolean _isResponseComplete = false;
+    private boolean _isExcepted = false;
+    private Throwable _exception = null;
+    private boolean _isExpired = false;
+    
+    
 
     private HttpExchangeListener[] _listeners = new HttpExchangeListener[0];
     
@@ -144,6 +170,25 @@ public class HttpExchange
                 Log.warn(e);
             }
         }
+    }
+    
+    /** 
+     * reset the internal state of exchange
+     */
+    public void reset()
+    {
+        _isRequestCommitted = false;
+        _isRequestComplete = false;
+        _responseVersion = null;
+        _responseStatus = -1;
+        _responseReason = null;
+        _responseHeaders = new HashMap<Buffer, Buffer>();
+        _isResponseHeaderComplete = false;
+        _responseContentBuffer = null;
+        _isResponseComplete = false;
+        _isExcepted = false;
+        _exception = null;
+        _isExpired = false;
     }
 
     /* ------------------------------------------------------------ */
@@ -418,6 +463,8 @@ public class HttpExchange
         {
             _listeners[ i ].onRequestCommitted();
         }
+        
+        _isRequestCommitted = true;
     }
 
     protected void onRequestComplete() throws IOException
@@ -426,6 +473,8 @@ public class HttpExchange
         {
             _listeners[ i ].onRequestComplete();
         }
+        
+        _isRequestComplete = true;
     }
 
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
@@ -434,6 +483,10 @@ public class HttpExchange
         {
             _listeners[ i ].onResponseStatus( version, status, reason );
         }
+        
+        _responseVersion = version;
+        _responseStatus = status;
+        _responseReason = reason;
     }
 
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
@@ -442,6 +495,8 @@ public class HttpExchange
         {
             _listeners[ i ].onResponseHeader( name, value );
         }
+        
+        _responseHeaders.put( name, value );
     }
 
     protected void onResponseHeaderComplete() throws IOException
@@ -450,6 +505,8 @@ public class HttpExchange
         {
             _listeners[ i ].onResponseHeaderComplete();
         }
+        
+        _isResponseHeaderComplete = true;
     }
 
     protected void onResponseContent(Buffer content) throws IOException
@@ -458,6 +515,9 @@ public class HttpExchange
         {
             _listeners[ i ].onResponseContent( content );           
         }
+        
+        // TODO THIS IS WRONG, FIXME
+            _responseContentBuffer = content;
     }
 
     protected void onResponseComplete() throws IOException
@@ -466,6 +526,8 @@ public class HttpExchange
         {
             _listeners[ i ].onResponseComplete();
         }
+        
+        _isResponseComplete = true;
     }
 
     protected void onConnectionFailed(Throwable ex)
@@ -476,7 +538,10 @@ public class HttpExchange
         }
 
         System.err.println("CONNECTION FAILED on " + this);
-        ex.printStackTrace();
+        //ex.printStackTrace();
+        
+        _isExcepted = true;
+        _exception = ex;
     }
 
     protected void onException(Throwable ex)
@@ -485,6 +550,9 @@ public class HttpExchange
         {
             _listeners[ i ].onException( ex );
         }
+        
+        _isExcepted = true;
+        _exception = ex;
         
         System.err.println("EXCEPTION on " + this);
         ex.printStackTrace();
@@ -496,6 +564,8 @@ public class HttpExchange
         {
             _listeners[ i ].onExpire();
         }
+        
+        _isExpired = true;
         
         System.err.println("EXPIRED " + this);
     }
@@ -610,6 +680,7 @@ public class HttpExchange
 
         protected void onResponseContent(Buffer content) throws IOException
         {
+            super.onResponseContent( content );
             if (_responseContent == null)
                 _responseContent = new ByteArrayOutputStream(_contentLength);
             content.writeTo(_responseContent);
@@ -620,4 +691,67 @@ public class HttpExchange
     {
         _listeners = listeners;
     }
+
+    public boolean isRequestCommitted()
+    {
+        return _isRequestCommitted;
+    }
+
+    public boolean isRequestComplete()
+    {
+        return _isRequestComplete;
+    }
+
+    public Buffer getResponseVersion()
+    {
+        return _responseVersion;
+    }
+
+    public int getResponseStatus()
+    {
+        return _responseStatus;
+    }
+
+    public Buffer getResponseReason()
+    {
+        return _responseReason;
+    }
+
+    public Map<Buffer, Buffer> getResponseHeaders()
+    {
+        return _responseHeaders;
+    }
+
+    public boolean isResponseHeaderComplete()
+    {
+        return _isResponseHeaderComplete;
+    }  
+
+    public Buffer getResponseContentBuffer()
+    {
+        return _responseContentBuffer;
+    }
+
+    public boolean isResponseComplete()
+    {
+        return _isResponseComplete;
+    }
+
+    public boolean isExcepted()
+    {
+        return _isExcepted;
+    }
+
+    public Throwable getException()
+    {
+        return _exception;
+    }
+
+    public boolean isExpired()
+    {
+        return _isExpired;
+    }
+
+    
+    
 }
