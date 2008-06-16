@@ -46,7 +46,7 @@ import java.io.IOException;
 public class HttpConversation implements HttpExchangeListener
 {
 
-    private HttpExchange _exchange;
+    protected HttpExchange _exchange;
     private HttpDestination _destination;
     private SecurityResolver _securityResolver = new SecurityResolver();
     private NetworkResolver _networkResolver = new NetworkResolver();
@@ -80,6 +80,11 @@ public class HttpConversation implements HttpExchangeListener
         _exchange = exchange;
     }
     
+    public HttpExchange getExchange()
+    {
+        return _exchange;
+    }
+    
     private void initialize() throws IOException
     {
         if ( _destination == null )
@@ -96,6 +101,7 @@ public class HttpConversation implements HttpExchangeListener
         _exchange.setListeners( new HttpExchangeListener[]{ _networkResolver, _securityResolver, _protocolResolver, this } );
         _initialized = true;
     }
+    
     
     /*-----------*/
     /* Callbacks */
@@ -236,10 +242,15 @@ public class HttpConversation implements HttpExchangeListener
                 initialize();
             }
             
-            _exchange.setStatus(HttpExchange.STATUS_WAITING_FOR_CONNECTION);
+            _exchange.setStatus(HttpExchange.STATUS_WAITING_FOR_CONNECTION);            
             _destination.send(_exchange);
             ++_attempts;           
         }
+    }
+    
+    public void cancel()
+    {
+        _exchange.cancel();
     }
 
     public void onException(Throwable ex)
@@ -290,6 +301,7 @@ public class HttpConversation implements HttpExchangeListener
             {
                 _networkResolver.attemptResolution( _exchange );
                 ++_attempts;
+                _exchange.reset();
                 _destination.send( _exchange );                
                 return;
             }
@@ -305,6 +317,7 @@ public class HttpConversation implements HttpExchangeListener
             {
                 _securityResolver.attemptResolution( _exchange );
                 ++_attempts;
+                _exchange.reset();
                 _destination.send( _exchange );
                 return;
             }
@@ -320,6 +333,7 @@ public class HttpConversation implements HttpExchangeListener
             {
                 _protocolResolver.attemptResolution( _exchange );
                 ++_attempts;
+                _exchange.reset();
                 _destination.send( _exchange );
                 return;
             }
@@ -346,4 +360,5 @@ public class HttpConversation implements HttpExchangeListener
     {
         _securityResolver.addAuthentication( authentication );
     }
+
 }
