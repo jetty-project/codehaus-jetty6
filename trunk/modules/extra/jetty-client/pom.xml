@@ -16,7 +16,7 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
-  <build>
+  <build>  
     <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>

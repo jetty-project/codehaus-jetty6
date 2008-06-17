@@ -2,8 +2,6 @@ package org.mortbay.jetty.client.security;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -14,7 +12,6 @@ import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
 import org.mortbay.jetty.client.HttpExchange;
-import org.mortbay.jetty.client.HttpEventListener;
 import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 

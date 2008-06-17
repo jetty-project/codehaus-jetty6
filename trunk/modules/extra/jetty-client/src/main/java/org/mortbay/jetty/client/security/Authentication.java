@@ -15,10 +15,9 @@ package org.mortbay.jetty.client.security;
 //========================================================================
 
 
-import org.mortbay.jetty.client.HttpExchange;
-
 import java.io.IOException;
-import java.util.Map;
+
+import org.mortbay.jetty.client.HttpExchange;
 
 /**
  * Simple authentication interface that sets required fields on the exchange.

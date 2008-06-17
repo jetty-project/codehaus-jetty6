@@ -15,9 +15,9 @@ package org.mortbay.jetty.client;
 //========================================================================
 
 
-import org.mortbay.io.Buffer;
-
 import java.io.IOException;
+
+import org.mortbay.io.Buffer;
 
 /**
  * 
