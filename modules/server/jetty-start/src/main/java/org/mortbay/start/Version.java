@@ -16,7 +16,7 @@ package org.mortbay.start;
 /**
  * Utility class for parsing and comparing version strings.
  * JDK 1.1 compatible.
- * @author Jan Hlavatý
+ * @author Jan Hlavaty
  */
  
 public class Version {
