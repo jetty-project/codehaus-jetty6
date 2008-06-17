@@ -140,7 +140,7 @@ public class StatisticsServlet extends HttpServlet
             {
             	sb.append("    <statsOnMs>").append(connector.getStatsOnMs()).append("</statsOnMs>\n");
             	sb.append("    <connections>").append(connector.getConnections()).append("</connections>\n");
-            	sb.append("    <connectiosOpen>").append(connector.getConnectionsOpen()).append("</connectionsOpen>\n");
+            	sb.append("    <connectionsOpen>").append(connector.getConnectionsOpen()).append("</connectionsOpen>\n");
             	sb.append("    <connectionsOpenMin>").append(connector.getConnectionsOpenMin()).append("</connectionsOpenMin>\n");
             	sb.append("    <connectionsOpenMax>").append(connector.getConnectionsOpenMax()).append("</connectionsOpenMax>\n");
             	sb.append("    <connectionsDurationTotal>").append(connector.getConnectionsDurationTotal()).append("</connectionsDurationTotal>\n");
