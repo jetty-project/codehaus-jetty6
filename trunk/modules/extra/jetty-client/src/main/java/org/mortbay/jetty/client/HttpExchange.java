@@ -85,6 +85,7 @@ public class HttpExchange
     Buffer _requestContent;
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
+    boolean _retryStatus = false;
     
     
     private HttpEventListener _listener = new Listener();
@@ -420,6 +421,16 @@ public class HttpExchange
         return _requestContent;
     }
 
+    public boolean getRetryStatus() 
+    {
+        return _retryStatus;
+    }
+    
+    public void setRetryStatus( boolean retryStatus ) 
+    {
+        _retryStatus = retryStatus;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Cancel this exchange
      * Currently this implementation does nothing.
@@ -485,7 +496,7 @@ public class HttpExchange
     }
 
     protected void onRetry()
-    {
+    {        
     }
     
     private class Listener implements HttpEventListener
@@ -542,6 +553,7 @@ public class HttpExchange
 
         public void onRetry()
         {
+            HttpExchange.this.setRetryStatus( true );
             HttpExchange.this.onRetry();
         }
     }

@@ -15,6 +15,7 @@ import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpEventListenerWrapper;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.client.HttpEventListener;
+import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 
 public class SecurityListener extends HttpEventListenerWrapper
@@ -120,15 +121,18 @@ public class SecurityListener extends HttpEventListenerWrapper
 
                     // TODO don't hard code this bit.
                     String authString = value.toString();
-                    String type = scrapeAuthenticationType( authString );
-                    
+                    String type = scrapeAuthenticationType( authString );                  
 
                     // TODO maybe avoid this map creation
                     Map<String,String> details = scrapeAuthenticationDetails( authString );
                     String pathSpec="/"; // TODO work out the real path spec
                     SecurityRealm realm = _destination.getHttpClient().getRealm( details.get("realm") ); // TODO work our realm correctly 
                     
-                    if ("digest".equalsIgnoreCase(type))
+                    if ( realm == null )
+                    {
+                        Log.warn( "Unknown Security Realm: " + details.get("realm") );
+                    }
+                    else if ("digest".equalsIgnoreCase(type))
                     {
                         _destination.addAuthorization("/",new DigestAuthentication(realm,details));
                         
