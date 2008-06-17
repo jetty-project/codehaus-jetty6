@@ -105,7 +105,7 @@ public class HttpClient extends AbstractBuffers
     private InetSocketAddress _proxy;
     private Set<InetAddress> _noProxy;
 
-    private List<SecurityRealm> _realmList;
+    private Map<String, SecurityRealm> _realmMap;
 
     
     
@@ -178,36 +178,48 @@ public class HttpClient extends AbstractBuffers
     }
 
     /* ------------------------------------------------------------ */
-    public List<SecurityRealm> getRealmList()
+    public Map<String, SecurityRealm> getRealmMap()
     {
-        return _realmList;
+        return _realmMap;
     }
     
     /* ------------------------------------------------------------ */
     public SecurityRealm getRealm(String id)
     {
         // TODO hash lookup
-        if (_realmList!=null)
-            for (SecurityRealm realm : _realmList)
-                if (realm.getId().equals(id))
-                    return realm;
-        return null;
+        if (_realmMap!=null)
+        {
+            return _realmMap.get( id );
+        }
+        else
+        {           
+            return null;
+        }        
     }
 
     /* ------------------------------------------------------------ */
     public void addSecurityRealm(SecurityRealm realm)
     {
-        if ( _realmList == null )
+        if ( _realmMap == null )
         {
-            _realmList = new LinkedList<SecurityRealm>();
+            _realmMap = new HashMap<String, SecurityRealm>();
         }
-        _realmList.add(_realmList.size(), realm );
+        _realmMap.put( realm.getId(), realm );
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void removeSecurityRealm( String id )
+    {
+        if ( _realmMap != null )
+        {
+            _realmMap.remove( id );
+        }        
     }
 
     /* ------------------------------------------------------------ */
     public boolean hasRealms()
     {
-        return _realmList!=null && _realmList.size()>0;
+        return _realmMap!=null && _realmMap.size()>0;
     }
 
 
