@@ -50,15 +50,11 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
  * Functional testing.
  */
 public class SslConversationTest extends TestCase
-{ 
-    public void testNothing()
-    {
-        
-    }
-    /* TODO
+{    
     private Server _server;
     private int _port;
     private HttpClient _httpClient;
+    private SecurityRealm _jettyRealm;
 
     protected void setUp() throws Exception
     {
@@ -68,79 +64,12 @@ public class SslConversationTest extends TestCase
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
-    }
-
-    protected void tearDown() throws Exception
-    {
-        stopServer();
-        _httpClient.stop();
-    }
-
         
-    public void testThis() throws Exception
-    {
-
-        Socket socket = SSLSocketFactory.getDefault().createSocket( "dav.codehaus.org", 443 );
-        //Socket socket = SSLSocketFactory.getDefault().createSocket( "localhost", _port );
-        try
-        {
-            Writer out = new OutputStreamWriter( socket.getOutputStream(), "ISO-8859-1" );
-            out.write( "GET / HTTP/1.1\r\n" );
-            //out.write( "Host: " + "dav.codehaus.org:443\r\n");
-            out.write( "Host: " + "dav.codehaus.org\r\n");// + ":" + 443 + "\r\n" );
-           // out.write( "Agent: SSL-TEST\r\n" );
-            out.write( "\r\n" );
-            out.flush();
-            BufferedReader in = new BufferedReader( new InputStreamReader( socket.getInputStream(), "ISO-8859-1" ) );
-            String line = null;
-            while ( ( line = in.readLine() ) != null )
-            {
-                System.out.println( line );
-            }
-        }
-        finally
-        {
-            Thread.sleep( 10 );
-            socket.close();
-        }
-    }
-      
-   
-  
-    public void testGetWithContentExchange() throws Exception
-    {
-
-        ContentExchange httpExchange = new ContentExchange();
-        //httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
-        httpExchange.setURL( "https://localhost:" + _port+ "/" );
-        
-        httpExchange.setVersion( HttpVersions.HTTP_1_1_ORDINAL );
-        httpExchange.setMethod(HttpMethods.GET);
-
-        HttpConversation wrapper = new HttpConversation(httpExchange)
-        {
-            public void success()
-            {
-                assertTrue(true);
-            }
-
-            public void failure()
-            {
-                assertTrue(false);
-            }
-
-            public void failure(Throwable t)
-            {
-                t.printStackTrace();
-                assertTrue(false);
-            }
-        };
-        wrapper.enableAuthentication(new BasicAuthentication());
-        wrapper.enableSecurityRealm(new SecurityRealm()
+        _jettyRealm = new SecurityRealm()
         {
             public String getId()
             {
-                return "test";
+                return "MyRealm";
             }
 
             public String getPrincipal()
@@ -152,13 +81,34 @@ public class SslConversationTest extends TestCase
             {
                 return "jetty";
             }
-        });
+        };
+    }
 
-        _httpClient.send(wrapper);
+    protected void tearDown() throws Exception
+    {
+        stopServer();
+        _httpClient.stop();
+    }
+      
+   
+    public void testSslGet() throws Exception
+    {
+        _httpClient.addSecurityRealm( _jettyRealm );
+        
+        ContentExchange httpExchange = new ContentExchange();
+        //httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
+        httpExchange.setURL( "https://localhost:" + _port+ "/" );        
+        httpExchange.setMethod(HttpMethods.GET);
 
-        assertTrue( wrapper.waitForSuccess() );
+        _httpClient.send( httpExchange );
+
+        httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
+        
+        assertEquals( HttpServletResponse.SC_OK, httpExchange.getResponseStatus() );
+        
         Thread.sleep(10);
-
+        
+        _httpClient.removeSecurityRealm( "MyRealm" );
     }
     
     
@@ -256,6 +206,4 @@ public class SslConversationTest extends TestCase
    {
        _server.stop();
    }
-   
-   */
 }
