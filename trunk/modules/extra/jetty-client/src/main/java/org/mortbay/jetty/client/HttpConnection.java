@@ -233,7 +233,7 @@ public class HttpConnection implements Connection
                 else if (!_requestComplete)
                 {
                     _requestComplete=true;
-                    _exchange.onRequestComplete();                    
+                    _exchange.getEventListener().onRequestComplete();                    
                 }
 
                 // If we are not ended then parse available
@@ -254,7 +254,7 @@ public class HttpConnection implements Connection
                 {
                     if (_exchange!=null)
                     {
-                        _exchange.onException(e);
+                        _exchange.getEventListener().onException(e);
                         _exchange.setStatus(HttpExchange.STATUS_EXCEPTED);
                     }
                 }
@@ -439,7 +439,7 @@ public class HttpConnection implements Connection
         public void startResponse(Buffer version, int status, Buffer reason) throws IOException
         {
             _http11 = HttpVersions.HTTP_1_1_BUFFER.equals(version);
-            _exchange.onResponseStatus(version, status, reason);
+            _exchange.getEventListener().onResponseStatus(version, status, reason);
             _exchange.setStatus(HttpExchange.STATUS_PARSING_HEADERS);
         }
         
@@ -450,7 +450,7 @@ public class HttpConnection implements Connection
             {
                 _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
             }
-            _exchange.onResponseHeader(name, value);
+            _exchange.getEventListener().onResponseHeader(name, value);
         }
 
         @Override
@@ -462,7 +462,7 @@ public class HttpConnection implements Connection
         @Override
         public void content(Buffer ref) throws IOException
         {
-            _exchange.onResponseContent(ref);
+            _exchange.getEventListener().onResponseContent(ref);
         }
 
         @Override

@@ -25,18 +25,21 @@ import org.mortbay.util.TypeUtil;
 
 public class DigestAuthentication implements Authentication
 {
-    
     private static final String NC = "00000001";
+    SecurityRealm securityRealm;
+    Map details;
     
-    public String getAuthType()
+    public DigestAuthentication(SecurityRealm realm, Map details)
     {
-        return "Digest";
+        this.securityRealm=realm;
+        this.details=details;
     }
+    
 
-    public void setCredentials( HttpExchange exchange, SecurityRealm securityRealm, Map details ) 
+    public void setCredentials( HttpExchange exchange ) 
     throws IOException
     {        
-        StringBuilder buffer = new StringBuilder().append(getAuthType());
+        StringBuilder buffer = new StringBuilder().append("Digest");
         
         buffer.append(" ").append("username").append('=').append('"').append(securityRealm.getPrincipal()).append('"');
         

@@ -4,10 +4,9 @@ import java.io.IOException;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.client.HttpExchange;
-import org.mortbay.jetty.client.HttpExchangeListener;
-import org.mortbay.jetty.client.HttpResolver;
+import org.mortbay.jetty.client.HttpEventListener;
 
-public class NetworkResolver implements HttpResolver, HttpExchangeListener
+public class NetworkResolver implements  HttpEventListener
 {
 
     public void onConnectionFailed( Throwable ex )
@@ -99,6 +98,12 @@ public class NetworkResolver implements HttpResolver, HttpExchangeListener
     {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    public void onRetry()
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }
