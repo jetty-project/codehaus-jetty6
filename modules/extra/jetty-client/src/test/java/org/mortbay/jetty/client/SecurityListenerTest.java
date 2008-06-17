@@ -52,6 +52,7 @@ public class SecurityListenerTest extends TestCase
     private Server _server;
     private int _port;
     private HttpClient _httpClient;
+    private SecurityRealm jettyRealm; 
 
     protected void setUp() throws Exception
     {
@@ -61,7 +62,7 @@ public class SecurityListenerTest extends TestCase
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
         
-        _httpClient.addSecurityRealm( new SecurityRealm()
+        jettyRealm = new SecurityRealm()
         {
             public String getId()
             {
@@ -77,7 +78,7 @@ public class SecurityListenerTest extends TestCase
             {
                 return "jetty";
             }
-        } );
+        };
     }
 
     protected void tearDown() throws Exception
@@ -166,64 +167,9 @@ public class SecurityListenerTest extends TestCase
     {
         int i = 1;
 
-        ContentExchange httpExchange = new ContentExchange()
-        {
-
-            @Override
-            protected void onConnectionFailed( Throwable ex )
-            {
-                ex.printStackTrace();
-                assertFalse( true );
-            }
-
-            @Override
-            protected void onException( Throwable ex )
-            {
-                ex.printStackTrace();
-                assertFalse( true );
-            }
-
-            @Override
-            protected void onExpire()
-            {
-                assertFalse( true );
-            }
-
-            @Override
-            protected void onRequestCommitted()
-                throws IOException
-            {
-                assertTrue("request committed", true );
-            }
-
-            @Override
-            protected void onRequestComplete()
-                throws IOException
-            {
-                assertTrue("request complete", true );
-            }
-
-            @Override
-            protected void onResponseComplete()
-                throws IOException
-            {
-                assertTrue("response complete", true );
-            }
-
-            @Override
-            protected void onResponseHeaderComplete()
-                throws IOException
-            {
-                assertTrue( "response header complete", true );
-            }
-
-            @Override
-            protected void onRetry()
-            {
-                assertTrue( "response retry", true );                
-            }
-            
-        };
+        _httpClient.addSecurityRealm( jettyRealm );
+        
+        ContentExchange httpExchange = new ContentExchange();
         httpExchange.setURL("http://localhost:" + _port + "/?i=" + i);
         httpExchange.setMethod(HttpMethods.GET);
         
@@ -231,78 +177,53 @@ public class SecurityListenerTest extends TestCase
         
         httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );        
         Thread.sleep(10);
+        
+        _httpClient.removeSecurityRealm( jettyRealm.getId() );
     }
-
-/*
-    public void testGetWithContentExchangeWithMultipleRealms() throws Exception
+    
+    
+    public void testDestinationSecurityCaching() throws Exception
     {
-        int i = 1;
-
+        _httpClient.addSecurityRealm( jettyRealm );
+        
         ContentExchange httpExchange = new ContentExchange();
-        httpExchange.setURL("http://localhost:" + _port + "/?i=" + i);
+        httpExchange.setURL("http://localhost:" + _port + "/?i=1");
         httpExchange.setMethod(HttpMethods.GET);
-
-        HttpConversation wrapper = new HttpConversation(httpExchange)
-        {
-            public void success()
-            {
-                assertTrue(true);
-            }
-
-            public void failure()
-            {
-                assertTrue(false);
-            }
-
-            public void failure(Throwable t)
-            {
-                assertTrue(false);
-            }
-        };
-        wrapper.enableAuthentication(new BasicAuthentication());
-        wrapper.enableAuthentication(new DigestAuthentication());
-        wrapper.enableSecurityRealm(new SecurityRealm()
-        {
-            public String getId()
-            {
-                return "test1";
-            }
-
-            public String getPrincipal()
-            {
-                return "jetty";
-            }
-
-            public String getCredentials()
-            {
-                return "bad";
-            }
-        });
-        wrapper.enableSecurityRealm(new SecurityRealm()
-        {
-            public String getId()
-            {
-                return "test2";
-            }
-
-            public String getPrincipal()
-            {
-                return "jetty";
-            }
-
-            public String getCredentials()
-            {
-                return "jetty";
-            }
-        });
-
-        _httpClient.send(wrapper);
-        wrapper.waitForSuccess();
-        //assertTrue( wrapper.waitForSuccess() );
+        
+        _httpClient.send(httpExchange);
+        
+        httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );        
         Thread.sleep(10);
-
-    } 
-*/
+        
+        //boolean retry = false;
+        
+        ContentExchange httpExchange2 = new ContentExchange();
+        
+        httpExchange2.setURL("http://localhost:" + _port + "/?i=2");
+        httpExchange2.setMethod(HttpMethods.GET);
+        
+        _httpClient.send(httpExchange2);
+        
+        httpExchange2.waitForStatus( HttpExchange.STATUS_COMPLETED );
+        
+        assertFalse( "exchange was retried", httpExchange2.getRetryStatus() );
+        
+        _httpClient.removeSecurityRealm( jettyRealm.getId() );
+    }   
+    
+    
+    public void testMissingSecurityRealm() throws Exception
+    {
+        // make sure npe's don't show up when realm is missing from client        
+        ContentExchange httpExchange = new ContentExchange();            
+        httpExchange.setURL("http://localhost:" + _port + "/?i=0");
+        httpExchange.setMethod(HttpMethods.GET);        
+        _httpClient.send(httpExchange);        
+        httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
+        assertEquals( HttpServletResponse.SC_UNAUTHORIZED, httpExchange.getResponseStatus() );
+        
+        Thread.sleep(10);
+    }
 
     public static void copyStream(InputStream in, OutputStream out)
     {
