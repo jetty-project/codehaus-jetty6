@@ -126,7 +126,7 @@ public class SecurityListener extends HttpEventListenerWrapper
                     // TODO maybe avoid this map creation
                     Map<String,String> details = scrapeAuthenticationDetails( authString );
                     String pathSpec="/"; // TODO work out the real path spec
-                    SecurityRealm realm = _destination.getHttpClient().getRealm(details.get("realm")); // TODO work our realm correctly 
+                    SecurityRealm realm = _destination.getHttpClient().getRealm( details.get("realm") ); // TODO work our realm correctly 
                     
                     if ("digest".equalsIgnoreCase(type))
                     {

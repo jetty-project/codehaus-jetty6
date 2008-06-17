@@ -46,15 +46,9 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
  * @author Matthew Purland
  * @author Greg Wilkins
  */
-public class HttpConversationTest extends TestCase
+public class SecurityListenerTest extends TestCase
 {
-    public void testNothing()
-    {
-        
-    }
-    /* TODO
-      
-     
+   
     private Server _server;
     private int _port;
     private HttpClient _httpClient;
@@ -66,6 +60,24 @@ public class HttpConversationTest extends TestCase
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
+        
+        _httpClient.addSecurityRealm( new SecurityRealm()
+        {
+            public String getId()
+            {
+                return "MyRealm";
+            }
+
+            public String getPrincipal()
+            {
+                return "jetty";
+            }
+
+            public String getCredentials()
+            {
+                return "jetty";
+            }
+        } );
     }
 
     protected void tearDown() throws Exception
@@ -154,56 +166,74 @@ public class HttpConversationTest extends TestCase
     {
         int i = 1;
 
-        ContentExchange httpExchange = new ContentExchange();
+        ContentExchange httpExchange = new ContentExchange()
+        {
+
+            @Override
+            protected void onConnectionFailed( Throwable ex )
+            {
+                ex.printStackTrace();
+                assertFalse( true );
+            }
+
+            @Override
+            protected void onException( Throwable ex )
+            {
+                ex.printStackTrace();
+                assertFalse( true );
+            }
+
+            @Override
+            protected void onExpire()
+            {
+                assertFalse( true );
+            }
+
+            @Override
+            protected void onRequestCommitted()
+                throws IOException
+            {
+                assertTrue("request committed", true );
+            }
+
+            @Override
+            protected void onRequestComplete()
+                throws IOException
+            {
+                assertTrue("request complete", true );
+            }
+
+            @Override
+            protected void onResponseComplete()
+                throws IOException
+            {
+                assertTrue("response complete", true );
+            }
+
+            @Override
+            protected void onResponseHeaderComplete()
+                throws IOException
+            {
+                assertTrue( "response header complete", true );
+            }
+
+            @Override
+            protected void onRetry()
+            {
+                assertTrue( "response retry", true );                
+            }
+            
+        };
         httpExchange.setURL("http://localhost:" + _port + "/?i=" + i);
         httpExchange.setMethod(HttpMethods.GET);
-
-        HttpConversation wrapper = new HttpConversation(httpExchange)
-        {
-            public void success()
-            {
-                assertTrue(true);
-            }
-
-            public void failure()
-            {
-                assertTrue(false);
-            }
-
-            public void failure(Throwable t)
-            {
-                t.printStackTrace();
-                assertTrue(false);
-            }
-        };
-        wrapper.enableAuthentication(new BasicAuthentication());
-        wrapper.enableAuthentication(new DigestAuthentication());
-        wrapper.enableSecurityRealm(new SecurityRealm()
-        {
-            public String getId()
-            {
-                return "test";
-            }
-
-            public String getPrincipal()
-            {
-                return "jetty";
-            }
-
-            public String getCredentials()
-            {
-                return "jetty";
-            }
-        });
-
-        _httpClient.send(wrapper);
-        wrapper.waitForSuccess();
-        //assertTrue( wrapper.waitForSuccess() );
+        
+        _httpClient.send(httpExchange);
+        
+        httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );        
         Thread.sleep(10);
-
     }
 
-
+/*
     public void testGetWithContentExchangeWithMultipleRealms() throws Exception
     {
         int i = 1;
@@ -272,7 +302,7 @@ public class HttpConversationTest extends TestCase
         Thread.sleep(10);
 
     } 
- 
+*/
 
     public static void copyStream(InputStream in, OutputStream out)
     {
@@ -319,7 +349,7 @@ public class HttpConversationTest extends TestCase
          _server.setHandler(sh);
          sh.setUserRealm(userRealm);
          sh.setConstraintMappings(new ConstraintMapping[]{cm});
-         sh.setAuthenticator(new DigestAuthenticator());
+         sh.setAuthenticator(new BasicAuthenticator());
 
          Handler testHandler = new AbstractHandler()
          {
@@ -363,5 +393,4 @@ public class HttpConversationTest extends TestCase
     {
         _server.stop();
     }
-    */
 }
