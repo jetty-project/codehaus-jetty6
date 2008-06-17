@@ -83,6 +83,8 @@ public class SecurityListenerTest extends TestCase
                 return "jetty";
             }
         };
+        
+        _httpClient.addSecurityRealm( _jettyRealm );
     }
 
     protected void tearDown() throws Exception
@@ -171,8 +173,6 @@ public class SecurityListenerTest extends TestCase
     {
         int i = 1;
 
-        _httpClient.addSecurityRealm( _jettyRealm );
-        
         ContentExchange httpExchange = new ContentExchange();
         httpExchange.setURL("http://localhost:" + _port + "/?i=" + i);
         httpExchange.setMethod(HttpMethods.GET);
@@ -180,15 +180,13 @@ public class SecurityListenerTest extends TestCase
         _httpClient.send(httpExchange);
         
         httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );        
-        Thread.sleep(10);
+        Thread.sleep(10);      
         
-        _httpClient.removeSecurityRealm( _jettyRealm.getId() );
     }
     
     
     public void testDestinationSecurityCaching() throws Exception
     {
-        _httpClient.addSecurityRealm( _jettyRealm );
         
         ContentExchange httpExchange = new ContentExchange();
         httpExchange.setURL("http://localhost:" + _port + "/?i=1");
@@ -212,22 +210,7 @@ public class SecurityListenerTest extends TestCase
         
         assertFalse( "exchange was retried", httpExchange2.getRetryStatus() );
         
-        _httpClient.removeSecurityRealm( _jettyRealm.getId() );
     }   
-    
-    
-    public void testMissingSecurityRealm() throws Exception
-    {
-        // make sure npe's don't show up when realm is missing from client        
-        ContentExchange httpExchange = new ContentExchange();            
-        httpExchange.setURL("http://localhost:" + _port + "/?i=0");
-        httpExchange.setMethod(HttpMethods.GET);        
-        _httpClient.send(httpExchange);        
-        httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
-        assertEquals( HttpServletResponse.SC_UNAUTHORIZED, httpExchange.getResponseStatus() );
-        
-        Thread.sleep(10);
-    }
 
     public static void copyStream(InputStream in, OutputStream out)
     {
