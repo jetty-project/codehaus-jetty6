@@ -26,6 +26,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-606 better writeTo impl for BIO
  + JETTY-609 jetty-client improvements for http conversations
  + JETTY-610 jetty.class.path not being interpreted
+ + JETTY-611 make general purpose jar scanning mechanism
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer

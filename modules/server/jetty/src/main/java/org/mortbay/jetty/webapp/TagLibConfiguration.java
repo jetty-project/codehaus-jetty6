@@ -128,12 +128,31 @@ public class TagLibConfiguration implements Configuration
             }
         }
         
-        // Get the pattern for noTLDJars
-        String no_TLD_attr = _context.getInitParameter("org.mortbay.jetty.webapp.NoTLDJarPattern");
-        Pattern no_TLD_pattern = no_TLD_attr==null?null:Pattern.compile(no_TLD_attr);
-        
         // Look for tlds in any jars
  
+        //Change to an opt-in style instead:
+        //
+        //org.mortbay.jetty.webapp.WebInfIncludeTLDJarPattern and
+        //org.mortbay.jetty.webapp.ContainerIncludeTLDJarPattern
+        //
+        //When examining jars in WEB-INF/lib:
+        //   if WebInfIncludeTLDJarPattern is null
+        //       examine ALL for tlds
+        //   else
+        //       examine only files matching pattern
+        //
+        //When examining jars in parent loaders:
+        //    If IncludeTLDJarPattern is null
+        //       examine none
+        //    else
+        //       examine only files matching pattern
+        //
+        String tmp = _context.getInitParameter("org.mortbay.jetty.webapp.WebInfIncludeTLDJarPattern");
+        Pattern webInfIncludePattern = (tmp==null?null:Pattern.compile(tmp));
+        
+        tmp = _context.getInitParameter("org.mortbay.jetty.webapp.ContainerIncludeTLDJarPattern");
+        Pattern containerIncludePattern = (tmp==null?null:Pattern.compile(tmp));
+        
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         boolean parent=false;
         
@@ -153,47 +172,46 @@ public class TagLibConfiguration implements Configuration
                             String jar = urls[i].toString();
                             int slash=jar.lastIndexOf('/');
                             jar=jar.substring(slash+1);
-
-                            if (parent && ( 
-                                    (!_context.isParentLoaderPriority() && jars.contains(jar)) || 
-                                    (no_TLD_pattern!=null && no_TLD_pattern.matcher(jar).matches())))
-                                continue;
-                            jars.add(jar);
                             
-                            Log.debug("TLD search of {}",urls[i]);
-                            
-                            InputStream in = _context.newResource(urls[i]).getInputStream();
-                            if (in==null)
-                                continue;
-                            
-                            JarInputStream jar_in = new JarInputStream(in);
-                            try
-                            { 
-                                JarEntry entry = jar_in.getNextJarEntry();
-                                while (entry!=null)
-                                {
-                                    String name = entry.getName();
-                                    if (name.startsWith("META-INF/") && name.toLowerCase().endsWith(".tld"))
-                                    {
-                                        Resource tld=_context.newResource("jar:"+urls[i]+"!/"+name);
-                                        tlds.add(tld);
-                                        Log.debug("TLD found {}",tld);
-                                    }
-                                    entry = jar_in.getNextJarEntry();
-                                }
-                            }
-                            finally
+                            if ((!parent && ((webInfIncludePattern==null) || (webInfIncludePattern.matcher(jar).matches())))
+                                    ||
+                                (parent && (containerIncludePattern!=null && containerIncludePattern.matcher(jar).matches())))
                             {
-                                jar_in.close();
-                            }   
+                                jars.add(jar);
+
+                                Log.debug("TLD search of {}",urls[i]);
+
+                                InputStream in = _context.newResource(urls[i]).getInputStream();
+                                if (in==null)
+                                    continue;
+
+                                JarInputStream jar_in = new JarInputStream(in);
+                                try
+                                { 
+                                    JarEntry entry = jar_in.getNextJarEntry();
+                                    while (entry!=null)
+                                    {
+                                        String name = entry.getName();
+                                        if (name.startsWith("META-INF/") && name.toLowerCase().endsWith(".tld"))
+                                        {
+                                            Resource tld=_context.newResource("jar:"+urls[i]+"!/"+name);
+                                            tlds.add(tld);
+                                            Log.debug("TLD found {}",tld);
+                                        }
+                                        entry = jar_in.getNextJarEntry();
+                                    }
+                                }
+                                finally
+                                {
+                                    jar_in.close();
+                                }   
+                            }
                         }
                     }
                 }
             }
-
             loader=loader.getParent();
-            parent=true;
-            
+            parent=true; 
         }
         
         // Create a TLD parser
