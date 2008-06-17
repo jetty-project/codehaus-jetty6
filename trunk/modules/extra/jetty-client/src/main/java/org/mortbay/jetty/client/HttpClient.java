@@ -48,7 +48,9 @@ import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.client.security.DefaultRealmResolver;
 import org.mortbay.jetty.client.security.SecurityRealm;
+import org.mortbay.jetty.client.security.SecurityRealmResolver;
 import org.mortbay.jetty.security.SslHttpChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.QueuedThreadPool;
@@ -101,7 +103,7 @@ public class HttpClient extends AbstractBuffers
     private InetSocketAddress _proxy;
     private Set<InetAddress> _noProxy;
 
-    private Map<String, SecurityRealm> _realmMap;
+    private SecurityRealmResolver _realmResolver;    
 
     
     
@@ -173,51 +175,26 @@ public class HttpClient extends AbstractBuffers
         return _useDirectBuffers;
     }
 
-    /* ------------------------------------------------------------ */
-    public Map<String, SecurityRealm> getRealmMap()
-    {
-        return _realmMap;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public SecurityRealm getRealm(String id)
-    {
-        // TODO hash lookup
-        if (_realmMap!=null)
-        {
-            return _realmMap.get( id );
-        }
-        else
-        {           
-            return null;
-        }        
-    }
 
     /* ------------------------------------------------------------ */
     public void addSecurityRealm(SecurityRealm realm)
     {
-        if ( _realmMap == null )
+        if ( _realmResolver == null )
         {
-            _realmMap = new HashMap<String, SecurityRealm>();
+            _realmResolver = new DefaultRealmResolver();
         }
-        _realmMap.put( realm.getId(), realm );
+        _realmResolver.addSecurityRealm( realm );
+    }
+
+    public SecurityRealmResolver getSecurityRealmResolver()
+    {
+        return _realmResolver;
     }
     
-    /* ------------------------------------------------------------ */
-    public void removeSecurityRealm( String id )
-    {
-        if ( _realmMap != null )
-        {
-            _realmMap.remove( id );
-        }        
-    }
-
-    /* ------------------------------------------------------------ */
     public boolean hasRealms()
     {
-        return _realmMap!=null && _realmMap.size()>0;
+        return _realmResolver==null?false:true;
     }
-
 
     /* ------------------------------------------------------------ */
     /**

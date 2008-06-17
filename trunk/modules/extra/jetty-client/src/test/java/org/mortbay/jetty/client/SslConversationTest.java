@@ -78,6 +78,8 @@ public class SslConversationTest extends TestCase
                 return "jetty";
             }
         };
+        
+        _httpClient.addSecurityRealm( _jettyRealm );
     }
 
     protected void tearDown() throws Exception
@@ -88,9 +90,7 @@ public class SslConversationTest extends TestCase
       
    
     public void testSslGet() throws Exception
-    {
-        _httpClient.addSecurityRealm( _jettyRealm );
-        
+    {  
         ContentExchange httpExchange = new ContentExchange();
         //httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
         httpExchange.setURL( "https://localhost:" + _port+ "/" );        
@@ -103,8 +103,7 @@ public class SslConversationTest extends TestCase
         assertEquals( HttpServletResponse.SC_OK, httpExchange.getResponseStatus() );
         
         Thread.sleep(10);
-        
-        _httpClient.removeSecurityRealm( "MyRealm" );
+     
     }
     
     
