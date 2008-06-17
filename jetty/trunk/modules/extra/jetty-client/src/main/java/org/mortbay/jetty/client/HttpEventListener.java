@@ -24,7 +24,7 @@ import java.io.IOException;
  * @author jesse
  * 
  */
-public interface HttpExchangeListener
+public interface HttpEventListener
 {
 
     // TODO review the methods here, we can probably trim these down on what to expose
@@ -57,5 +57,8 @@ public interface HttpExchangeListener
 
 
     public void onExpire();
+    
+    public void onRetry();
+    
 
 }
