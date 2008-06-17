@@ -22,14 +22,11 @@ import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
@@ -48,7 +45,6 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
-import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
@@ -154,7 +150,7 @@ public class HttpClient extends AbstractBuffers
             }
             return destination;
         }
-    }
+    } 
 
     /* ------------------------------------------------------------ */
     public void schedule(Timeout.Task task)

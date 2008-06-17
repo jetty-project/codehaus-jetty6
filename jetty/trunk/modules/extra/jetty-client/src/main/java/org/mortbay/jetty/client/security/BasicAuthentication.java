@@ -14,15 +14,14 @@ package org.mortbay.jetty.client.security;
 //limitations under the License.
 //========================================================================
 
+import java.io.IOException;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.security.B64Code;
 import org.mortbay.util.StringUtil;
-
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Sets authentication headers for BASIC authentication challenges

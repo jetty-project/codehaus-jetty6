@@ -17,9 +17,6 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -30,15 +27,22 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.jetty.*;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.EofException;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.security.*;
-import org.mortbay.jetty.client.security.BasicAuthentication;
-import org.mortbay.jetty.client.security.DigestAuthentication;
+import org.mortbay.jetty.HttpMethods;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.SecurityRealm;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.BasicAuthenticator;
+import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.ConstraintMapping;
+import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.UserRealm;
 
 /**
  * Functional testing for HttpExchange.
