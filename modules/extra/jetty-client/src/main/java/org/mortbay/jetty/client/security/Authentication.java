@@ -25,8 +25,5 @@ import java.util.Map;
  */
 public interface Authentication
 {
-    public String getAuthType();
-
-    public void setCredentials( HttpExchange exchange, SecurityRealm realm, Map details ) throws IOException;
-
+    public void setCredentials( HttpExchange exchange) throws IOException;
 }

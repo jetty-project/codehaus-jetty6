@@ -14,6 +14,8 @@ package org.mortbay.jetty.client.security;
 //limitations under the License.
 //========================================================================
 
+import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.security.B64Code;
@@ -29,24 +31,23 @@ import java.util.Map;
  */
 public class BasicAuthentication implements Authentication
 {
-    public String getAuthType()
+    private Buffer _authorization;
+    
+    public BasicAuthentication(SecurityRealm realm) throws IOException
     {
-        return "basic";
+        String authenticationString = "basic " + B64Code.encode( realm.getPrincipal() + ":" + realm.getCredentials(), StringUtil.__ISO_8859_1);
+        _authorization= new ByteArrayBuffer(authenticationString);
     }
-
+    
     /**
      * BASIC authentication is of the form
      * 
      * encoded credentials are of the form: username:password
      * 
-     * http header field is of the form:
-     * Authorization: basic encodedCredentials
      * 
      */
-    public void setCredentials( HttpExchange exchange, SecurityRealm realm, Map details ) throws IOException
+    public void setCredentials( HttpExchange exchange ) throws IOException
     {
-        String authenticationString = getAuthType() + " " + B64Code.encode( realm.getPrincipal() + ":" + realm.getCredentials(), StringUtil.__ISO_8859_1);
-        
-        exchange.setRequestHeader( HttpHeaders.AUTHORIZATION, authenticationString);
+        exchange.setRequestHeader( HttpHeaders.AUTHORIZATION_BUFFER, _authorization);
     }
 }

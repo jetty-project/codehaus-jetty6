@@ -22,6 +22,8 @@ import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,6 +52,7 @@ import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.client.security.SecurityRealm;
 import org.mortbay.jetty.security.SslHttpChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.QueuedThreadPool;
@@ -101,6 +104,9 @@ public class HttpClient extends AbstractBuffers
     private Timeout _timeoutQ = new Timeout();
     private InetSocketAddress _proxy;
     private Set<InetAddress> _noProxy;
+
+    private List<SecurityRealm> _realmList;
+
     
     
     /* ------------------------------------------------------------------------------- */
@@ -110,15 +116,6 @@ public class HttpClient extends AbstractBuffers
         exchange.setStatus(HttpExchange.STATUS_WAITING_FOR_CONNECTION);
         HttpDestination destination=getDestination(exchange.getAddress(),ssl);
         destination.send(exchange);
-    }
-
-
-    /* ------------------------------------------------------------------------------- */
-    public void send(HttpConversation conversation) throws IOException, InterruptedException
-    {
-        boolean ssl=HttpSchemes.HTTPS_BUFFER.equalsIgnoreCase(conversation.getScheme());        
-        conversation.setHttpDestination( getDestination(conversation.getAddress(),ssl) );
-        conversation.start();
     }
 
     /* ------------------------------------------------------------ */
@@ -179,6 +176,40 @@ public class HttpClient extends AbstractBuffers
     {
         return _useDirectBuffers;
     }
+
+    /* ------------------------------------------------------------ */
+    public List<SecurityRealm> getRealmList()
+    {
+        return _realmList;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public SecurityRealm getRealm(String id)
+    {
+        // TODO hash lookup
+        if (_realmList!=null)
+            for (SecurityRealm realm : _realmList)
+                if (realm.getId().equals(id))
+                    return realm;
+        return null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void addSecurityRealm(SecurityRealm realm)
+    {
+        if ( _realmList == null )
+        {
+            _realmList = new LinkedList<SecurityRealm>();
+        }
+        _realmList.add(_realmList.size(), realm );
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean hasRealms()
+    {
+        return _realmList!=null && _realmList.size()>0;
+    }
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -605,6 +636,13 @@ public class HttpClient extends AbstractBuffers
     public void setNoProxy(Set<InetAddress> noProxyAddresses)
     {
         _noProxy = noProxyAddresses;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int maxRetries()
+    {
+        // TODO configurable
+        return 3;
     }
     
     

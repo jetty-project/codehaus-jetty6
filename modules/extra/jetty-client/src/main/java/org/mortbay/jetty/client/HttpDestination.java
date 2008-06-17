@@ -24,8 +24,14 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.servlet.http.Cookie;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.client.security.Authentication;
+import org.mortbay.jetty.client.security.SecurityListener;
+import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 
 /**
@@ -46,6 +52,11 @@ public class HttpDestination
     private ArrayBlockingQueue<Object> _newQueue = new ArrayBlockingQueue<Object>(10,true);
     private int _newConnection=0;
     private InetSocketAddress _proxy;
+    private PathMap _authorizations;
+    private List<Cookie> _cookies;
+    
+    // TODO add a repository of cookies and authenticated credentials
+    
     
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
@@ -87,7 +98,33 @@ public class HttpDestination
     {
         return _ssl;
     }
+    
+    /* ------------------------------------------------------------ */
+    public void addAuthorization(String pathSpec,Authentication authentication)
+    {
+        synchronized (this)
+        {
+            if (_authorizations==null)
+                _authorizations=new PathMap();
+            _authorizations.put(pathSpec,authentication);
+        }
+        
+        // TODO query and remove methods
+    }
 
+    /* ------------------------------------------------------------------------------- */
+    public void addCookie(Cookie cookie)
+    {
+        synchronized (this)
+        {
+            if (_cookies==null)
+                _cookies=new ArrayList<Cookie>();
+            _cookies.add(cookie);
+        }
+        
+        // TODO query, remove and age methods
+    }
+    
     /* ------------------------------------------------------------------------------- */
     public HttpConnection getConnection() throws IOException
     {
@@ -176,7 +213,7 @@ public class HttpDestination
             else if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
-                ex.onConnectionFailed(throwable);
+                ex.getEventListener().onConnectionFailed(throwable);
             }
         }
 
@@ -202,7 +239,7 @@ public class HttpDestination
             if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
-                ex.onException(throwable);
+                ex.getEventListener().onException(throwable);
                 ex.setStatus(HttpExchange.STATUS_EXCEPTED);
             }
         }
@@ -281,6 +318,49 @@ public class HttpDestination
     /* ------------------------------------------------------------ */
     public void send(HttpExchange ex) throws IOException
     {
+        if (_client.hasRealms())
+            ex.setEventListener(new SecurityListener(this,ex));
+
+        doSend(ex);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void resend(HttpExchange ex) throws IOException
+    {
+        ex.getEventListener().onRetry();
+        doSend(ex);
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void doSend(HttpExchange ex) throws IOException
+    {
+        // add cookies
+        // TODO handle max-age etc.
+        if (_cookies!=null)
+        {
+            StringBuilder buf=null;
+            for (Cookie cookie : _cookies)
+            {
+                if (buf==null)
+                    buf=new StringBuilder();
+                else
+                    buf.append("; ");
+                buf.append(cookie.getName()); // TODO quotes
+                buf.append("=");
+                buf.append(cookie.getValue()); // TODO quotes
+            }
+            if (buf!=null)
+                ex.addRequestHeader(HttpHeaders.COOKIE,buf.toString());
+        }
+        
+        // Add any known authorizations
+        if (_authorizations!=null)
+        {
+            Authentication auth= (Authentication)_authorizations.match(ex.getURI());
+            if (auth !=null)
+                ((Authentication)auth).setCredentials(ex);
+        }
+       
         synchronized(this)
         {
             HttpConnection connection=null;

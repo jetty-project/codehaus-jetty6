@@ -14,20 +14,11 @@
 
 package org.mortbay.jetty.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.Iterator;
-import java.util.HashMap;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.HttpFields;
@@ -37,21 +28,36 @@ import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
 
-import javax.servlet.http.HttpServletResponse;
 
 /**
- * VERY rough start to a client API - inpired by javascript XmlHttpRequest.
+ * An HTTP client API that encapsulates Exchange with a HTTP server.
  * 
- * HttpExchange can be used in two fashions:
+ * This object encapsulates:<ul>
+ * <li>The HTTP server. (see {@link #setAddress(InetSocketAddress)} or {@link #setURL(String)})
+ * <li>The HTTP request method, URI and HTTP version (see {@link #setMethod(String)}, {@link #setURI(String)}, and {@link #setVersion(int)}
+ * <li>The Request headers (see {@link #addRequestHeader(String, String)} or {@link #setRequestHeader(String, String)})
+ * <li>The Request content (see {@link #setRequestContent(Buffer)} or {@link #setRequestContentSource(InputStream)})
+ * <li>The status of the exchange (see {@link #getStatus()})
+ * <li>Callbacks to handle state changes (see the onXxx methods such as {@link #onRequestComplete()} or {@link #onResponseComplete()}) 
+ * <li>The ability to intercept callbacks (see {@link #setEventListener(HttpEventListener)}
+ * </ul>
  * 
- * 1 - directly with the HttpClient where you create and override any callback methods as needed
- *     ensuring that you call super.method() in each instance
- * 2 - as a component in an HttpConversation where that manages the back and forth of a connection
- *     and the httpExchange contains the state of the exchange in internal variables.
- *     
- * TODO refactor these two mechanics apart?
+ * The HttpExchange class is intended to be used by a developer wishing to have close asynchronous 
+ * interaction with the the exchange.  Typically a developer will extend the HttpExchange class with a derived
+ * class that implements some or all of the onXxx callbacks.  There are also some predefined HttpExchange subtypes
+ * that can be used as a basis (see {@link ContentExchange} and {@link CachedExchange}.
+ * 
+ * <p>Typically the HttpExchange is passed to a the {@link HttpClient#send(HttpExchange)} method, which in 
+ * turn selects a {@link HttpDestination} and calls it's {@link HttpDestination#send(HttpExchange), which 
+ * then creates or selects a {@link HttpConnection} and calls its {@link HttpConnection#send(HttpExchange).
+ * A developer may wish to directly call send on the destination or connection if they wish to bypass 
+ * some handling provided (eg Cookie handling in the HttpDestination).
+ * 
+ * <p>In some circumstances, the HttpClient or HttpDestination may wish to retry a HttpExchange (eg. failed 
+ * pipeline request, authentication retry or redirection).  In such cases, the HttpClient and/or HttpDestination
+ * may insert their own HttpExchangeListener to intercept and filter the call backs intended for the
+ * HttpExchange.
  * 
  * @author gregw
  * @author Guillaume Nodet
@@ -80,25 +86,8 @@ public class HttpExchange
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
     
-    // Exchange State Variables
     
-    private boolean _isRequestCommitted = false;
-    private boolean _isRequestComplete = false;
-    private Buffer _responseVersion = null;
-    private int _responseStatus = -1;
-    private Buffer _responseReason = null;
-    private Map<Buffer, Buffer> _responseHeaders = new HashMap<Buffer,Buffer>();
-    private boolean _isResponseHeaderComplete = false;
-    private Buffer _responseContentBuffer = null;
-    private boolean _isResponseComplete = false;
-    private boolean _isExcepted = false;
-    private Throwable _exception = null;
-    private boolean _isExpired = false;
-    
-    
-
-    private HttpExchangeListener[] _listeners = new HttpExchangeListener[0];
-    
+    private HttpEventListener _listener = new Listener();
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -145,22 +134,22 @@ public class HttpExchange
                         break;
 
                     case HttpExchange.STATUS_WAITING_FOR_RESPONSE:
-                        onRequestCommitted();
+                        getEventListener().onRequestCommitted();
                         break;
 
                     case STATUS_PARSING_HEADERS:
                         break;
 
                     case STATUS_PARSING_CONTENT:
-                        onResponseHeaderComplete();
+                        getEventListener().onResponseHeaderComplete();
                         break;
 
                     case STATUS_COMPLETED:
-                        onResponseComplete();
+                        getEventListener().onResponseComplete();
                         break;
 
                     case STATUS_EXPIRED:
-                        onExpire();
+                        getEventListener().onExpire();
                         break;
 
                 }
@@ -171,26 +160,19 @@ public class HttpExchange
             }
         }
     }
-    
-    /** 
-     * reset the internal state of exchange
-     */
-    public void reset()
-    {
-        _isRequestCommitted = false;
-        _isRequestComplete = false;
-        _responseVersion = null;
-        _responseStatus = -1;
-        _responseReason = null;
-        _responseHeaders = new HashMap<Buffer, Buffer>();
-        _isResponseHeaderComplete = false;
-        _responseContentBuffer = null;
-        _isResponseComplete = false;
-        _isExcepted = false;
-        _exception = null;
-        _isExpired = false;
-    }
 
+    /* ------------------------------------------------------------ */
+    public HttpEventListener getEventListener()
+    {
+        return _listener;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setEventListener(HttpEventListener listener)
+    {
+        _listener=listener;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param url Including protocol, host and port
@@ -453,305 +435,138 @@ public class HttpExchange
         return "HttpExchange@" + hashCode() + "=" + _method + "//" + _address.getHostName() + ":" + _address.getPort() + _uri + "#" + _status;
     }
 
+    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     // methods to handle response
     protected void onRequestCommitted() throws IOException
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onRequestCommitted();
-        }
-        
-        _isRequestCommitted = true;
     }
 
     protected void onRequestComplete() throws IOException
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onRequestComplete();
-        }
-        
-        _isRequestComplete = true;
     }
 
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onResponseStatus( version, status, reason );
-        }
-        
-        _responseVersion = version;
-        _responseStatus = status;
-        _responseReason = reason;
     }
 
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onResponseHeader( name, value );
-        }
-        
-        _responseHeaders.put( name, value );
     }
 
     protected void onResponseHeaderComplete() throws IOException
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onResponseHeaderComplete();
-        }
-        
-        _isResponseHeaderComplete = true;
     }
 
     protected void onResponseContent(Buffer content) throws IOException
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onResponseContent( content );           
-        }
-        
-        // TODO THIS IS WRONG, FIXME
-            _responseContentBuffer = content;
     }
 
     protected void onResponseComplete() throws IOException
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onResponseComplete();
-        }
-        
-        _isResponseComplete = true;
     }
 
     protected void onConnectionFailed(Throwable ex)
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onConnectionFailed( ex );
-        }
-
-        System.err.println("CONNECTION FAILED on " + this);
-        //ex.printStackTrace();
-        
-        _isExcepted = true;
-        _exception = ex;
+        Log.warn("CONNECTION FAILED on " + this,ex);
     }
 
     protected void onException(Throwable ex)
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onException( ex );
-        }
-        
-        _isExcepted = true;
-        _exception = ex;
-        
-        System.err.println("EXCEPTION on " + this);
-        ex.printStackTrace();
+        Log.warn("EXCEPTION on " + this,ex);
     }
 
     protected void onExpire()
     {
-        for ( int i = 0; i < _listeners.length; ++i )
-        {
-            _listeners[ i ].onExpire();
-        }
-        
-        _isExpired = true;
-        
-        System.err.println("EXPIRED " + this);
+        Log.debug("EXPIRED " + this);
     }
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
+    protected void onRetry()
+    {
+    }
+    
+    private class Listener implements HttpEventListener
+    {
+        public void onConnectionFailed(Throwable ex)
+        {
+            HttpExchange.this.onConnectionFailed(ex);
+        }
+
+        public void onException(Throwable ex)
+        {
+            HttpExchange.this.onException(ex);
+        }
+
+        public void onExpire()
+        {
+            HttpExchange.this.onExpire();
+        }
+
+        public void onRequestCommitted() throws IOException
+        {
+            HttpExchange.this.onRequestCommitted();
+        }
+
+        public void onRequestComplete() throws IOException
+        {
+            HttpExchange.this.onRequestComplete();
+        }
+
+        public void onResponseComplete() throws IOException
+        {
+            HttpExchange.this.onResponseComplete();
+        }
+
+        public void onResponseContent(Buffer content) throws IOException
+        {
+            HttpExchange.this.onResponseContent(content);
+        }
+
+        public void onResponseHeader(Buffer name, Buffer value) throws IOException
+        {
+            HttpExchange.this.onResponseHeader(name,value);
+        }
+
+        public void onResponseHeaderComplete() throws IOException
+        {
+            HttpExchange.this.onResponseHeaderComplete();
+        }
+
+        public void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
+        {
+            HttpExchange.this.onResponseStatus(version,status,reason);
+        }
+
+        public void onRetry()
+        {
+            HttpExchange.this.onRetry();
+        }
+    }
+    
     /**
-     * An exchange that caches response status and fields for later use.
-     * 
-     * @author gregw
+     * @deprecated use {@link org.mortbay.jetty.client.CachedExchange}
      *
      */
-    public static class CachedExchange extends HttpExchange
+    public static class CachedExchange extends org.mortbay.jetty.client.CachedExchange
     {
-        int _responseStatus;
-        HttpFields _responseFields;
-
         public CachedExchange(boolean cacheFields)
         {
-            if (cacheFields)
-                _responseFields = new HttpFields();
+            super(cacheFields);
         }
-
-        /* ------------------------------------------------------------ */
-        public int getResponseStatus()
-        {
-            if (_status < STATUS_PARSING_HEADERS)
-                throw new IllegalStateException("Response not received");
-            return _responseStatus;
-        }
-
-        /* ------------------------------------------------------------ */
-        public HttpFields getResponseFields()
-        {
-            if (_status < STATUS_PARSING_CONTENT)
-                throw new IllegalStateException("Headers not complete");
-            return _responseFields;
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
-        {
-            super.onResponseStatus(version,status,reason);
-            _responseStatus = status;
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void onResponseHeader(Buffer name, Buffer value) throws IOException
-        {
-            super.onResponseHeader(name,value);
-            if (_responseFields != null)
-                _responseFields.add(name,value);
-        }
-
     }
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
     /**
-     * A CachedExchange that retains all content for later use.
+     * @deprecated use {@link org.mortbay.jetty.client.ContentExchange}
      *
      */
-    public static class ContentExchange extends CachedExchange
+    public static class ContentExchange extends org.mortbay.jetty.client.ContentExchange
     {
-        int _contentLength = 1024;
-        String _encoding = "utf-8";
-        ByteArrayOutputStream _responseContent;
-
-        public ContentExchange()
-        {
-            super(false);
-        }
-
-        /* ------------------------------------------------------------ */
-        public String getResponseContent() throws UnsupportedEncodingException
-        {
-            if (_responseContent != null)
-            {
-                return _responseContent.toString(_encoding);
-            }
-            return null;
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void onResponseHeader(Buffer name, Buffer value) throws IOException
-        {
-            super.onResponseHeader(name,value);
-            int header = HttpHeaders.CACHE.getOrdinal(value);
-            switch (header)
-            {
-                case HttpHeaders.CONTENT_LANGUAGE_ORDINAL:
-                    _contentLength = BufferUtil.toInt(value);
-                    break;
-                case HttpHeaders.CONTENT_TYPE_ORDINAL:
-
-                    String mime = StringUtil.asciiToLowerCase(value.toString());
-                    int i = mime.indexOf("charset=");
-                    if (i > 0)
-                    {
-                        mime = mime.substring(i + 8);
-                        i = mime.indexOf(';');
-                        if (i > 0)
-                            mime = mime.substring(0,i);
-                    }
-                    if (mime != null && mime.length() > 0)
-                        _encoding = mime;
-                    break;
-            }
-        }
-
-        protected void onResponseContent(Buffer content) throws IOException
-        {
-            super.onResponseContent( content );
-            if (_responseContent == null)
-                _responseContent = new ByteArrayOutputStream(_contentLength);
-            content.writeTo(_responseContent);
-        }
+        
     }
-
-    public void setListeners(HttpExchangeListener[] listeners)
-    {
-        _listeners = listeners;
-    }
-
-    public boolean isRequestCommitted()
-    {
-        return _isRequestCommitted;
-    }
-
-    public boolean isRequestComplete()
-    {
-        return _isRequestComplete;
-    }
-
-    public Buffer getResponseVersion()
-    {
-        return _responseVersion;
-    }
-
-    public int getResponseStatus()
-    {
-        return _responseStatus;
-    }
-
-    public Buffer getResponseReason()
-    {
-        return _responseReason;
-    }
-
-    public Map<Buffer, Buffer> getResponseHeaders()
-    {
-        return _responseHeaders;
-    }
-
-    public boolean isResponseHeaderComplete()
-    {
-        return _isResponseHeaderComplete;
-    }  
-
-    public Buffer getResponseContentBuffer()
-    {
-        return _responseContentBuffer;
-    }
-
-    public boolean isResponseComplete()
-    {
-        return _isResponseComplete;
-    }
-
-    public boolean isExcepted()
-    {
-        return _isExcepted;
-    }
-
-    public Throwable getException()
-    {
-        return _exception;
-    }
-
-    public boolean isExpired()
-    {
-        return _isExpired;
-    }
-
     
-    
+
+
 }

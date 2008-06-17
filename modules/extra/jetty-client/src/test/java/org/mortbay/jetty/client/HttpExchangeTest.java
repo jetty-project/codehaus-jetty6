@@ -151,7 +151,7 @@ public class HttpExchangeTest extends TestCase
     {
         for (int i=0;i<20;i++)
         {
-            HttpExchange.ContentExchange httpExchange=new HttpExchange.ContentExchange();
+            ContentExchange httpExchange=new ContentExchange();
             httpExchange.setURL("http://localhost:"+_port+"/");
             httpExchange.setMethod(HttpMethods.POST);
             httpExchange.setRequestContent(new ByteArrayBuffer("<hello />"));
@@ -168,7 +168,7 @@ public class HttpExchangeTest extends TestCase
     {
         for (int i=0;i<20;i++)
         {   
-            HttpExchange.ContentExchange httpExchange=new HttpExchange.ContentExchange();
+            ContentExchange httpExchange=new ContentExchange();
             httpExchange.setURL("http://localhost:"+_port+"/?i="+i);
             httpExchange.setMethod(HttpMethods.GET);
             _httpClient.send(httpExchange);
@@ -187,7 +187,7 @@ public class HttpExchangeTest extends TestCase
         {
             _httpClient.setProxy(new InetSocketAddress("127.0.0.1",_port));
 
-            HttpExchange.ContentExchange httpExchange=new HttpExchange.ContentExchange();
+            ContentExchange httpExchange=new ContentExchange();
             httpExchange.setAddress(new InetSocketAddress("jetty.mortbay.org",8080));
             httpExchange.setMethod(HttpMethods.GET);
             httpExchange.setURI("/jetty-6");
