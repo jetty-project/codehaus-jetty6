@@ -1,10 +1,5 @@
 package org.mortbay.jetty.client.security;
 
-import java.util.Map;
-
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-
 import junit.framework.TestCase;
 
 public class SecurityResolverTest extends TestCase
