@@ -52,7 +52,7 @@ public class SecurityListenerTest extends TestCase
     private Server _server;
     private int _port;
     private HttpClient _httpClient;
-    private SecurityRealm jettyRealm; 
+    private SecurityRealm _jettyRealm; 
 
     protected void setUp() throws Exception
     {
@@ -62,7 +62,7 @@ public class SecurityListenerTest extends TestCase
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
         
-        jettyRealm = new SecurityRealm()
+        _jettyRealm = new SecurityRealm()
         {
             public String getId()
             {
@@ -167,7 +167,7 @@ public class SecurityListenerTest extends TestCase
     {
         int i = 1;
 
-        _httpClient.addSecurityRealm( jettyRealm );
+        _httpClient.addSecurityRealm( _jettyRealm );
         
         ContentExchange httpExchange = new ContentExchange();
         httpExchange.setURL("http://localhost:" + _port + "/?i=" + i);
@@ -178,13 +178,13 @@ public class SecurityListenerTest extends TestCase
         httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );        
         Thread.sleep(10);
         
-        _httpClient.removeSecurityRealm( jettyRealm.getId() );
+        _httpClient.removeSecurityRealm( _jettyRealm.getId() );
     }
     
     
     public void testDestinationSecurityCaching() throws Exception
     {
-        _httpClient.addSecurityRealm( jettyRealm );
+        _httpClient.addSecurityRealm( _jettyRealm );
         
         ContentExchange httpExchange = new ContentExchange();
         httpExchange.setURL("http://localhost:" + _port + "/?i=1");
@@ -208,7 +208,7 @@ public class SecurityListenerTest extends TestCase
         
         assertFalse( "exchange was retried", httpExchange2.getRetryStatus() );
         
-        _httpClient.removeSecurityRealm( jettyRealm.getId() );
+        _httpClient.removeSecurityRealm( _jettyRealm.getId() );
     }   
     
     
