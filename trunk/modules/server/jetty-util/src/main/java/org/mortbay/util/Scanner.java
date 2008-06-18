@@ -47,7 +47,8 @@ public class Scanner
     private static int __scannerId=0;
     private int _scanInterval;
     private List _listeners = Collections.synchronizedList(new ArrayList());
-    private Map _prevScan = Collections.EMPTY_MAP;
+    private Map _prevScan = new HashMap();
+    private Map _currentScan = new HashMap();
     private FilenameFilter _filter;
     private List _scanDirs;
     private volatile boolean _running = false;
@@ -55,6 +56,7 @@ public class Scanner
     private Timer _timer;
     private TimerTask _task;
     private boolean _recursive=true;
+    private long _heapSize = 0;
 
     /**
      * Listener
@@ -230,7 +232,8 @@ public class Scanner
         else
         {
             //just register the list of existing files and only report changes
-            _prevScan = scanFiles();
+            scanFiles();
+            _prevScan.putAll(_currentScan);
         }
 
         _timer = newTimer();
@@ -283,31 +286,30 @@ public class Scanner
      */
     public void scan ()
     {
-        Map currentScan = scanFiles();
-        reportDifferences(currentScan, _prevScan);
-        _prevScan = currentScan;     
+        scanFiles();
+        reportDifferences(_currentScan, _prevScan);
+        _prevScan.clear();
+        _prevScan.putAll(_currentScan);
     }
 
     /**
      * Recursively scan all files in the designated directories.
      * @return Map of name of file to last modified time
      */
-    public Map scanFiles ()
+    public void scanFiles ()
     {
         if (_scanDirs==null)
-            return Collections.EMPTY_MAP;
+            return;
         
-        HashMap scanInfo = new HashMap();
+        _currentScan.clear();
         Iterator itor = _scanDirs.iterator();
         while (itor.hasNext())
         {
             File dir = (File)itor.next();
             
             if ((dir != null) && (dir.exists()))
-                scanFile(dir, scanInfo);
+                scanFile(dir, _currentScan);
         }
-        
-        return scanInfo;
     }
 
 
