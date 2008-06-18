@@ -268,6 +268,7 @@ public class JDBCSessionManager extends AbstractSessionManager
             _data.setCanonicalContext(canonicalize(_context.getContextPath()));
             _data.setVirtualHost(getVirtualHost(_context));
             _data.setExpiryTime(_maxIdleMs < 0 ? 0 : (System.currentTimeMillis() + _maxIdleMs));
+            _values=_data.getAttributeMap();
         }
 
         /**
