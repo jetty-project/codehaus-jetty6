@@ -79,7 +79,7 @@ public class SslConversationTest extends TestCase
             }
         };
         
-        _httpClient.addSecurityRealm( _jettyRealm );
+        _httpClient.getSecurityRealmResolver().addSecurityRealm( _jettyRealm );
     }
 
     protected void tearDown() throws Exception
