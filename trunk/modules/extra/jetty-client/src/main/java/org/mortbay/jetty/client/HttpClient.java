@@ -30,6 +30,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -347,57 +348,10 @@ public class HttpClient extends AbstractBuffers
         {
             Socket socket=null;
             
-            if (destination.isSecure())
+            if ( destination.isSecure() )
             {
-                // Create a trust manager that does not validate certificate
-                // chains
-                TrustManager[] trustAllCerts = new TrustManager[]
-                {
-                    new X509TrustManager()
-                    {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers()
-                        {
-                            return null;
-                        }
-
-                        public void checkClientTrusted( java.security.cert.X509Certificate[] certs, String authType )
-                        {
-                        }
-
-                        public void checkServerTrusted( java.security.cert.X509Certificate[] certs, String authType )
-                        {
-                        }
-                    }
-                };
-
-                HostnameVerifier hostnameVerifier = new HostnameVerifier()
-                {
-                    public boolean verify( String urlHostName, SSLSession session )
-                    {
-                        System.out.println( "Warning: URL Host: " + urlHostName + " vs." + session.getPeerHost() );
-                        return true;
-                    }
-                };
-
-                // Install the all-trusting trust manager
-                try
-                {
-                    // TODO real trust manager
-                    SSLContext sslContext = SSLContext.getInstance( "SSL" );
-                    sslContext.init( null, trustAllCerts, new java.security.SecureRandom() );
-                    socket = sslContext.getSocketFactory().createSocket();
-                    
-                    // TODO - are these required ????
-                    /*
-                    HttpsURLConnection.setDefaultSSLSocketFactory( sslContext.getSocketFactory() );
-                    HttpsURLConnection.setDefaultHostnameVerifier( hostnameVerifier );
-                    */
-                }
-                catch (Exception e)
-                {
-                    throw new IOException("issue ignoring certs");
-                }
-                //socket = SSLSocketFactory.getDefault().createSocket();                
+                SSLContext sslContext = getLooseSSLContext();
+                socket = sslContext.getSocketFactory().createSocket();
             }
             else
             {
@@ -447,13 +401,31 @@ public class HttpClient extends AbstractBuffers
             _selectorManager.stop();
         }
 
-        public void startConnection(HttpDestination destination) throws IOException
+        public void startConnection( HttpDestination destination )
+            throws IOException
         {
-            SocketChannel channel=SocketChannel.open();
-            channel.connect(destination.isProxied()?destination.getProxy():destination.getAddress());            
-            channel.configureBlocking(false);
-            channel.socket().setSoTimeout(_soTimeout);
-            _selectorManager.register(channel,destination);
+            SocketChannel channel = SocketChannel.open();
+            /*
+            if ( destination.isSecure() )
+            {
+                channel.connect( destination.isProxied() ? destination.getProxy() : destination.getAddress() );
+                
+                Socket socket = channel.socket();
+
+                InetSocketAddress address = destination.isProxied() ? destination.getProxy() : destination.getAddress();
+
+                Socket ssocket = ( (SSLSocketFactory) SSLSocketFactory.getDefault() ).createSocket( socket, address.getHostName(),
+                                                                                       address.getPort(), false );
+                channel = ssocket.getChannel();
+            }
+            else
+            {
+            */
+            channel.connect( destination.isProxied() ? destination.getProxy() : destination.getAddress() );
+            //}
+            channel.configureBlocking( false );
+            channel.socket().setSoTimeout( _soTimeout );
+            _selectorManager.register( channel, destination );
         }
 
         public void run()
@@ -514,8 +486,18 @@ public class HttpClient extends AbstractBuffers
                         throw new IllegalStateException("Not Implemented");
                     }
 
-                    SSLEngine engine = null; // TODO have an ssl engine setup with trust manager.
-                    Buffers buffers = null; // TODO need buffers pool with SSL sized buffers (from engine)
+                    SSLContext sslContext = getLooseSSLContext();
+                    SSLEngine engine = sslContext.createSSLEngine();
+                    AbstractBuffers buffers = new AbstractBuffers()
+                    {
+                        protected Buffer newBuffer( int size )
+                        {
+                            return new NIOBuffer( size, NIOBuffer.INDIRECT );
+                        }        
+                    }; 
+                    
+                    buffers.setRequestBufferSize( engine.getSession().getPacketBufferSize() );
+                    // TODO need buffers pool with SSL sized buffers (from engine)
                     if (engine==null)
                         throw new IllegalStateException("Not Implemented");
                     ep = new SslHttpChannelEndPoint(buffers,channel,selectSet,key,engine);
@@ -547,6 +529,49 @@ public class HttpClient extends AbstractBuffers
 
     }
 
+    private SSLContext getLooseSSLContext() throws IOException
+    {
+        // Create a trust manager that does not validate certificate
+        // chains
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
+        {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers()
+            {
+                return null;
+            }
+
+            public void checkClientTrusted( java.security.cert.X509Certificate[] certs, String authType )
+            {
+            }
+
+            public void checkServerTrusted( java.security.cert.X509Certificate[] certs, String authType )
+            {
+            }
+        } };
+
+        HostnameVerifier hostnameVerifier = new HostnameVerifier()
+        {
+            public boolean verify( String urlHostName, SSLSession session )
+            {
+                System.out.println( "Warning: URL Host: " + urlHostName + " vs." + session.getPeerHost() );
+                return true;
+            }
+        };
+
+        // Install the all-trusting trust manager
+        try
+        {
+            // TODO real trust manager
+            SSLContext sslContext = SSLContext.getInstance( "SSL" );
+            sslContext.init( null, trustAllCerts, new java.security.SecureRandom() );
+            return sslContext;
+        }
+        catch ( Exception e )
+        {
+            throw new IOException( "issue ignoring certs" );
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return the period in milliseconds a {@link HttpConnection} can be idle for before it is closed.
