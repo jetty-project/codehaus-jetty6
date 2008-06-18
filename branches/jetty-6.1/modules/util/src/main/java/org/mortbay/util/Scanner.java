@@ -104,17 +104,7 @@ public class Scanner
     public synchronized void setScanInterval(int scanInterval)
     {
         this._scanInterval = scanInterval;
-        
-        if (_running)
-        {
-            stop();
-
-            _timer = newTimer();
-            _task = newTimerTask();
-
-            schedule(_timer, _task);
-            _running = true;
-        }
+        schedule();
     }
 
     /**
@@ -195,7 +185,6 @@ public class Scanner
     {
         if (listener == null)
             return;
-
         _listeners.add(listener);   
     }
 
@@ -234,12 +223,7 @@ public class Scanner
             scanFiles();
             _prevScan.putAll(_currentScan);
         }
-
-        _timer = newTimer();
-        _task = newTimerTask();
-
-        schedule(_timer, _task);
-        
+        schedule();
     }
 
     public TimerTask newTimerTask ()
@@ -255,15 +239,21 @@ public class Scanner
         return new Timer(true);
     }
     
-    public void schedule (Timer timer, TimerTask task)
-    {
-        if (timer==null)
-            throw new IllegalArgumentException("Timer is null");
-        if (task==null)
-            throw new IllegalArgumentException("TimerTask is null");
-        
-        if (getScanInterval() > 0)
-            timer.schedule(task, 1000L*getScanInterval(),1000L*getScanInterval());
+    public void schedule ()
+    {  
+        if (_running)
+        {
+            if (_timer!=null)
+                _timer.cancel();
+            if (_task!=null)
+                _task.cancel();
+            if (getScanInterval() > 0)
+            {
+                _timer = newTimer();
+                _task = newTimerTask();
+                _timer.schedule(_task, 1000L*getScanInterval(),1000L*getScanInterval());
+            }
+        }
     }
     /**
      * Stop the scanning.
@@ -273,8 +263,10 @@ public class Scanner
         if (_running)
         {
             _running = false; 
-            _timer.cancel();
-            _task.cancel();
+            if (_timer!=null)
+                _timer.cancel();
+            if (_task!=null)
+                _task.cancel();
             _task=null;
             _timer=null;
         }
