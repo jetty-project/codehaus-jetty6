@@ -8,20 +8,20 @@ import org.mortbay.jetty.client.HttpDestination;
 
 public class DefaultRealmResolver implements SecurityRealmResolver
 {
-    private Map<String, SecurityRealm>_realmList;  
+    private Map<String, SecurityRealm>_realmMap;  
     
     public void addSecurityRealm( SecurityRealm realm )
     {
-        if (_realmList == null)
+        if (_realmMap == null)
         {
-            _realmList = new HashMap<String, SecurityRealm>();
+            _realmMap = new HashMap<String, SecurityRealm>();
         }
-        _realmList.put( realm.getId(), realm );
+        _realmMap.put( realm.getId(), realm );
     }
     
     public SecurityRealm getRealm( String realmName, HttpDestination destination, String path ) throws IOException
     {
-        return _realmList.get( realmName );
+        return _realmMap.get( realmName );
     }
 
 }

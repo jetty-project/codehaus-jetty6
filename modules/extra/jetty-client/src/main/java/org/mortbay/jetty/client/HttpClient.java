@@ -175,22 +175,24 @@ public class HttpClient extends AbstractBuffers
         return _useDirectBuffers;
     }
 
-
     /* ------------------------------------------------------------ */
-    public void addSecurityRealm(SecurityRealm realm)
+    public void setSecurityRealmResolver( SecurityRealmResolver resolver )
     {
-        if ( _realmResolver == null )
-        {
-            _realmResolver = new DefaultRealmResolver();
-        }
-        _realmResolver.addSecurityRealm( realm );
+        _realmResolver = resolver;
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * returns the SecurityRealmResolver registered with the HttpClient or null
+     * 
+     * @return 
+     */
     public SecurityRealmResolver getSecurityRealmResolver()
     {
         return _realmResolver;
     }
     
+    /* ------------------------------------------------------------ */
     public boolean hasRealms()
     {
         return _realmResolver==null?false:true;

@@ -84,7 +84,7 @@ public class SecurityListenerTest extends TestCase
             }
         };
         
-        _httpClient.addSecurityRealm( _jettyRealm );
+        _httpClient.getSecurityRealmResolver().addSecurityRealm( _jettyRealm );
     }
 
     protected void tearDown() throws Exception
