@@ -286,7 +286,14 @@ public class SelectChannelConnector extends AbstractNIOConnector
     /* ------------------------------------------------------------ */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SuspendingEndPoint(channel,selectSet,key);
+        return new SelectChannelEndPoint(channel,selectSet,key)
+        {
+            // TODO remove this hack
+            public boolean isReadyForDispatch()
+            {
+                return super.isReadyForDispatch() && !((HttpConnection)getConnection()).getRequest().isSuspended();
+            }
+        };
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -306,19 +313,5 @@ public class SelectChannelConnector extends AbstractNIOConnector
                 endpoint.getSelectSet().scheduleTimeout(task,timeoutMs);
             }
         };
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    public static class SuspendingEndPoint extends SelectChannelEndPoint
-    {
-        public SuspendingEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key)
-        {
-            super(channel,selectSet,key);
-        }
-
-        public boolean isReadyForDispatch()
-        {
-            return super.isReadyForDispatch() && !((HttpConnection)getConnection()).getRequest().isSuspended();
-        }
     }
 }
