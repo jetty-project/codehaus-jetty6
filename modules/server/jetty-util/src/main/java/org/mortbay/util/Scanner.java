@@ -21,7 +21,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,7 +55,7 @@ public class Scanner
     private Timer _timer;
     private TimerTask _task;
     private boolean _recursive=true;
-    private long _heapSize = 0;
+
 
     /**
      * Listener
