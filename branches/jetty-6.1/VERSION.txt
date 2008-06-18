@@ -2,6 +2,7 @@
  + JETTY-605 Added optional threadpool to BayeuxService
  + JETTY-606 better writeTo impl for BIO
  + JETTY-610 jetty.class.path not being interpreted
+ + JETTY-614 scanner allocated hashmap on every scan
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
