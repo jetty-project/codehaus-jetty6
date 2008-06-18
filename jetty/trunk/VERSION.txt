@@ -27,6 +27,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-609 jetty-client improvements for http conversations
  + JETTY-610 jetty.class.path not being interpreted
  + JETTY-611 make general purpose jar scanning mechanism
+ + JETTY-614 scanner allocates hashmap on every iteration
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
