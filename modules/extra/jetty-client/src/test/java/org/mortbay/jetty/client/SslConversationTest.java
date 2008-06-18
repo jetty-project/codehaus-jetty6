@@ -32,6 +32,7 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.client.security.DefaultRealmResolver;
 import org.mortbay.jetty.client.security.SecurityRealm;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.BasicAuthenticator;
@@ -79,6 +80,7 @@ public class SslConversationTest extends TestCase
             }
         };
         
+        _httpClient.setSecurityRealmResolver( new DefaultRealmResolver() );
         _httpClient.getSecurityRealmResolver().addSecurityRealm( _jettyRealm );
     }
 
