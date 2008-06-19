@@ -6,7 +6,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>jetty-maven-jspc-plugin</artifactId>
+  <artifactId>jetty-jspc-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Jetty Extra :: Maven JSPC Plugin</name>
   <developers>
