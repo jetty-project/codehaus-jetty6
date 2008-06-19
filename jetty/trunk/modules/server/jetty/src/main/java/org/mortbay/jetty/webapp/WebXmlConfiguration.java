@@ -22,6 +22,8 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.regex.Pattern;
 
 import javax.servlet.Servlet;
 import javax.servlet.UnavailableException;
@@ -71,7 +73,9 @@ public class WebXmlConfiguration implements Configuration
     protected boolean _defaultWelcomeFileList;
     protected ServletHandler _servletHandler;
     protected int _version;
-
+    protected boolean _metaDataComplete = false;
+    private URL _webxml;
+    
     public WebXmlConfiguration() throws ClassNotFoundException
     {
         // Get parser
@@ -176,6 +180,11 @@ public class WebXmlConfiguration implements Configuration
     }
 
     /* ------------------------------------------------------------------------------- */
+    /** 
+     * Process webdefaults.xml
+     * 
+     * @see org.mortbay.jetty.webapp.Configuration#configureDefaults()
+     */
     public void configureDefaults() throws Exception
     {
         //cannot configure if the context is already started
@@ -190,12 +199,20 @@ public class WebXmlConfiguration implements Configuration
             Resource dftResource=Resource.newSystemResource(defaultsDescriptor);
             if(dftResource==null)
                 dftResource=_context.newResource(defaultsDescriptor);
-            configure(dftResource.getURL().toString());
+            
+            //don't initialize the version and therefore the metadata from webdefault.xml
+            XmlParser.Node config=null;
+            config=_xmlParser.parse(dftResource.getURL().toString());
+            initialize(config);
             _defaultWelcomeFileList=_welcomeFiles!=null;
         }
     }
 
     /* ------------------------------------------------------------------------------- */
+    /** 
+     * Process web.xml
+     * @see org.mortbay.jetty.webapp.Configuration#configureWebApp()
+     */
     public void configureWebApp() throws Exception
     {
         //cannot configure if the context is already started
@@ -206,9 +223,9 @@ public class WebXmlConfiguration implements Configuration
             return;
         }
 
-        URL webxml=findWebXml();
-        if (webxml!=null)
-            configure(webxml.toString());
+        _webxml=findWebXml();
+        if (_webxml!=null)
+            configure(_webxml.toString());
        
         String overrideDescriptor=getWebAppContext().getOverrideDescriptor();
         if(overrideDescriptor!=null&&overrideDescriptor.length()>0)
@@ -219,6 +236,62 @@ public class WebXmlConfiguration implements Configuration
             _xmlParser.setValidating(false);
             configure(orideResource.getURL().toString());
         }
+        
+        //TODO is this before or after the overrides?
+        configureWebFragments();
+    }
+    
+    
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * Look for any web.xml fragments in META-INF of jars in WEB-INF/lib
+     * @throws Exception
+     */
+    public void configureWebFragments () throws Exception
+    {        
+        Log.debug("metadata-complete "+_metaDataComplete);
+        
+        //if metadata-complete is true in web.xml, do not search for fragments
+        if (_metaDataComplete)
+            return;
+        
+        //either there is no web.xml, or it set metadata-complete to false, so
+        //we need to look for fragments in WEB-INF/lib
+        //Check to see if a specific search pattern has been set.
+        String tmp = (String)_context.getInitParameter("org.mortbay.jetty.webapp.WebXmlFragmentPattern");
+        Pattern webFragPattern = (tmp==null?null:Pattern.compile(tmp));
+      
+        JarScanner fragScanner = new JarScanner ()
+        {
+            public void processEntry(URL jarUrl, JarEntry entry)
+            {
+                try
+                {
+                    String name = entry.getName();
+                    if (name.toLowerCase().equals("meta-inf/web.xml"))
+                    {
+                        Resource webXmlFrag = _context.newResource("jar:"+jarUrl+"!/"+name);
+                        Log.debug("web.xml fragment found {}", webXmlFrag);
+                        //Process web.xml
+                        //web-fragment
+                        // servlet
+                        // servlet-mapping
+                        // filter
+                        // filter-mapping
+                        // listener                        
+                        XmlParser.Node config=null;
+                        config=_xmlParser.parse(webXmlFrag.toString());
+                        initialize(config);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.warn("Problem processing jar entry "+entry, e);
+                }
+            }
+        };
+        fragScanner.setWebAppContext(_context);       
+        fragScanner.scan (webFragPattern, Thread.currentThread().getContextClassLoader(), true, false);
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -250,6 +323,7 @@ public class WebXmlConfiguration implements Configuration
     {
         XmlParser.Node config=null;
         config=_xmlParser.parse(webXml);
+        initializeVersion(config);
         initialize(config);
     }
 
@@ -275,10 +349,39 @@ public class WebXmlConfiguration implements Configuration
 
         // TODO remove classpaths from classloader
     }
-
+    
+    /* ------------------------------------------------------------ */
+    protected void initializeVersion (XmlParser.Node config)
+    {
+        String version=config.getAttribute("version","DTD");
+        if ("2.5".equals(version))
+            _version=25;
+        else if ("2.4".equals(version))
+            _version=24;
+        else if ("3.0".equals(version))
+            _version=30;
+        else if ("DTD".equals(version))
+        {
+            _version=23;
+            String dtd=_xmlParser.getDTD();
+            if (dtd!=null && dtd.indexOf("web-app_2_2")>=0)
+                _version=22;
+        }
+       
+        if (_version < 25)
+            _metaDataComplete = true; //does not apply before 2.5
+        else
+            _metaDataComplete = Boolean.valueOf((String)config.getAttribute("metadata-complete", "false")).booleanValue();
+  
+        Log.debug("Calculated metadatacomplete = "+_metaDataComplete+" with version="+version);
+        
+        _context.setAttribute("metadata-complete", String.valueOf(_metaDataComplete));   
+    }
+    
+    
     /* ------------------------------------------------------------ */
     protected void initialize(XmlParser.Node config) throws ClassNotFoundException,UnavailableException
-    {
+    {  
         _servletHandler = getWebAppContext().getServletHandler();
         // Get any existing servlets and mappings.
         _filters=LazyList.array2List(_servletHandler.getFilters());
@@ -293,19 +396,8 @@ public class WebXmlConfiguration implements Configuration
         _errorPages = getWebAppContext().getErrorHandler() instanceof ErrorPageErrorHandler ?
                         ((ErrorPageErrorHandler)getWebAppContext().getErrorHandler()).getErrorPages():null;
 
-        String version=config.getAttribute("version","DTD");
-        if ("2.5".equals(version))
-            _version=25;
-        else if ("2.4".equals(version))
-            _version=24;
-        else if ("DTD".equals(version))
-        {
-            _version=23;
-            String dtd=_xmlParser.getDTD();
-            if (dtd!=null && dtd.indexOf("web-app_2_2")>=0)
-                _version=22;
-        }
-                        
+     
+        
         Iterator iter=config.iterator();
         XmlParser.Node node=null;
         while(iter.hasNext())
@@ -398,6 +490,8 @@ public class WebXmlConfiguration implements Configuration
             initListener(node);
         else if("distributable".equals(element))
             initDistributable(node);
+        else if("web-fragment".equals(element))
+        {}
         else
         {
             if(Log.isDebugEnabled())
