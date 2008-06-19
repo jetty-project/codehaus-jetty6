@@ -21,7 +21,6 @@ import java.util.Iterator;
 
 import javax.servlet.UnavailableException;
 
-
 import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallback;
@@ -31,10 +30,7 @@ import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.servlet.ServletHandler;
 import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.log.Log;
@@ -53,8 +49,6 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
     protected LifeCycleCallbackCollection _callbacks = new LifeCycleCallbackCollection();
     protected InjectionCollection _injections = new InjectionCollection();
     protected RunAsCollection _runAsCollection = new RunAsCollection();
-    
-    private boolean _metadataComplete = true;
     
     public abstract void bindEnvEntry (String name, Object value) throws Exception;
     
@@ -121,7 +115,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         super.configure(webXml);
         
         //parse classes for annotations, if necessary
-        if (!_metadataComplete)
+        if (!_metaDataComplete)
         {
             if (Log.isDebugEnabled()) Log.debug("Processing annotations");
             parseAnnotations();
@@ -144,11 +138,6 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         //when they lazily instantiate the Filter/Servlet.
         ((ServletHandler)getWebAppContext().getServletHandler()).setInjections(_injections);
         ((ServletHandler)getWebAppContext().getServletHandler()).setCallbacks(_callbacks);
-        
-        //find out if we need to process annotations
-        //  servlet 2.5 web.xml && metadata-complete==false
-        if (_version == 25)
-            _metadataComplete = Boolean.valueOf((String)config.getAttribute("metadata-complete", "false")).booleanValue();
     }
     
     
