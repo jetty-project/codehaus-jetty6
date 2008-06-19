@@ -209,7 +209,6 @@
       <id>all-modules</id>
       <modules>
         <module>modules/contrib</module>
-        <module>modules/website</module>
       </modules>
     </profile>
     <profile>
