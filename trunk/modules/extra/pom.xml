@@ -18,7 +18,7 @@
     <module>jetty-servlet</module>
     <module>jetty-ajp</module>
     <module>jetty-threadpool</module>
-    <module>jetty-maven-jspc-plugin</module>
+    <module>jetty-jspc-maven-plugin</module>
     <module>jetty-maven-plugin</module>
     <module>maven-jetty-plugin</module>
     <module>cometd</module>
