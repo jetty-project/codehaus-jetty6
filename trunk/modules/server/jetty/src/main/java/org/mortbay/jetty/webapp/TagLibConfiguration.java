@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.Servlet;
 
+import org.mortbay.jetty.servlet.Context;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
@@ -53,19 +54,58 @@ import org.mortbay.xml.XmlParser;
  */
 public class TagLibConfiguration implements Configuration
 {
+    public static final String __web_inf_pattern = "org.mortbay.jetty.webapp.WebInfIncludeTLDJarPattern";
+    public static final String __container_pattern = "org.mortbay.jetty.webapp.ContainerIncludeTLDJarPattern";
     WebAppContext _context;
-    
-    /* ------------------------------------------------------------ */
-    public void setWebAppContext(WebAppContext context)
-    {
-        _context=context;
-    }
 
-    /* ------------------------------------------------------------ */
-    public WebAppContext getWebAppContext()
-    {
-        return _context;
-    }
+
+    
+
+     public class TagLibJarScanner extends JarScanner
+     {
+         Set _tlds;
+         
+         public void setTldSet (Set tlds)
+         {
+             _tlds=tlds;
+         }
+         
+         public Set getTldSet ()
+         {
+             return _tlds;
+         }
+
+         public void processEntry(URL jarUrl, JarEntry entry)
+         {            
+             try
+             {
+                 String name = entry.getName();
+                 if (name.startsWith("META-INF/") && name.toLowerCase().endsWith(".tld"))
+                 {
+                     Resource tld=_context.newResource("jar:"+jarUrl+"!/"+name);
+                     _tlds.add(tld);
+                     Log.debug("TLD found {}",tld);
+                 }
+             }
+             catch (Exception e)
+             {
+                 Log.warn("Problem processing jar entry "+entry, e);
+             }
+         }
+     }
+
+     /* ------------------------------------------------------------ */
+     public void setWebAppContext(WebAppContext context)
+     {
+         _context=context;
+     }
+     
+     /* ------------------------------------------------------------ */
+     public WebAppContext getWebAppContext()
+     {
+         return _context;
+     }
+     
 
     /* ------------------------------------------------------------ */
     public void configureClassLoader() throws Exception
@@ -79,7 +119,7 @@ public class TagLibConfiguration implements Configuration
     public void configureDefaults() throws Exception
     {
     }
-
+ 
     
     /* ------------------------------------------------------------ */
     /* 
@@ -87,8 +127,9 @@ public class TagLibConfiguration implements Configuration
      */
     public void configureWebApp() throws Exception
     {   
+        
         Set tlds = new HashSet();
-        Set jars = new HashSet();
+        
         
         // Find tld's from web.xml
         // When the XMLConfigurator (or other configurator) parsed the web.xml,
@@ -129,8 +170,7 @@ public class TagLibConfiguration implements Configuration
         }
         
         // Look for tlds in any jars
- 
-        //Change to an opt-in style instead:
+        //Use an opt-in style:
         //
         //org.mortbay.jetty.webapp.WebInfIncludeTLDJarPattern and
         //org.mortbay.jetty.webapp.ContainerIncludeTLDJarPattern
@@ -147,72 +187,17 @@ public class TagLibConfiguration implements Configuration
         //    else
         //       examine only files matching pattern
         //
-        String tmp = _context.getInitParameter("org.mortbay.jetty.webapp.WebInfIncludeTLDJarPattern");
-        Pattern webInfIncludePattern = (tmp==null?null:Pattern.compile(tmp));
+        String tmp = _context.getInitParameter(__web_inf_pattern);
+        Pattern webInfPattern = (tmp==null?null:Pattern.compile(tmp));
+        tmp = _context.getInitParameter(__container_pattern);
+        Pattern containerPattern = (tmp==null?null:Pattern.compile(tmp));
+
+        TagLibJarScanner tldScanner = new TagLibJarScanner();
+        tldScanner.setTldSet(tlds);
+        tldScanner.setWebAppContext(_context);
+        tldScanner.scan(webInfPattern, Thread.currentThread().getContextClassLoader(), true, false);
+        tldScanner.scan(containerPattern, Thread.currentThread().getContextClassLoader().getParent(), false, true);
         
-        tmp = _context.getInitParameter("org.mortbay.jetty.webapp.ContainerIncludeTLDJarPattern");
-        Pattern containerIncludePattern = (tmp==null?null:Pattern.compile(tmp));
-        
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        boolean parent=false;
-        
-        while (loader!=null)
-        {
-            if (loader instanceof URLClassLoader)
-            {
-                URL[] urls = ((URLClassLoader)loader).getURLs();
-
-                if (urls!=null)
-                {
-                    for (int i=0;i<urls.length;i++)
-                    {   
-                        if (urls[i].toString().toLowerCase().endsWith(".jar"))
-                        {
-
-                            String jar = urls[i].toString();
-                            int slash=jar.lastIndexOf('/');
-                            jar=jar.substring(slash+1);
-                            
-                            if ((!parent && ((webInfIncludePattern==null) || (webInfIncludePattern.matcher(jar).matches())))
-                                    ||
-                                (parent && (containerIncludePattern!=null && containerIncludePattern.matcher(jar).matches())))
-                            {
-                                jars.add(jar);
-
-                                Log.debug("TLD search of {}",urls[i]);
-
-                                InputStream in = _context.newResource(urls[i]).getInputStream();
-                                if (in==null)
-                                    continue;
-
-                                JarInputStream jar_in = new JarInputStream(in);
-                                try
-                                { 
-                                    JarEntry entry = jar_in.getNextJarEntry();
-                                    while (entry!=null)
-                                    {
-                                        String name = entry.getName();
-                                        if (name.startsWith("META-INF/") && name.toLowerCase().endsWith(".tld"))
-                                        {
-                                            Resource tld=_context.newResource("jar:"+urls[i]+"!/"+name);
-                                            tlds.add(tld);
-                                            Log.debug("TLD found {}",tld);
-                                        }
-                                        entry = jar_in.getNextJarEntry();
-                                    }
-                                }
-                                finally
-                                {
-                                    jar_in.close();
-                                }   
-                            }
-                        }
-                    }
-                }
-            }
-            loader=loader.getParent();
-            parent=true; 
-        }
         
         // Create a TLD parser
         XmlParser parser = new XmlParser(false);
@@ -341,6 +326,6 @@ public class TagLibConfiguration implements Configuration
     public void deconfigureWebApp() throws Exception
     {
     }
-    
+
 
 }
