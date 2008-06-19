@@ -6,7 +6,7 @@
   <fileSets>
     <fileSet>
       <directory>${basedir}</directory>
-      <outputDirectory>jetty-maven-jspc-plugin</outputDirectory>
+      <outputDirectory>jetty-jspc-maven-plugin</outputDirectory>
       <includes>
         <include>target/generated-site/**</include>
       </includes>
