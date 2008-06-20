@@ -1,30 +1,21 @@
-
-
 /*
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the "License").  You may not use this file except
- * in compliance with the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * You can obtain a copy of the license at
- * glassfish/bootstrap/legal/CDDLv1.0.txt or
- * https://glassfish.dev.java.net/public/CDDLv1.0.html.
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- * When distributing Covered Code, include this CDDL
- * HEADER in each file and include the License file at
- * glassfish/bootstrap/legal/CDDLv1.0.txt.  If applicable,
- * add the following below this CDDL HEADER, with the
- * fields enclosed by brackets "[]" replaced with your
- * own identifying information: Portions Copyright [yyyy]
- * [name of copyright owner]
- *
- * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
- *
- * Portions Copyright Apache Software Foundation.
- */ 
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package javax.servlet.http;
 
@@ -85,6 +76,8 @@ import javax.servlet.ServletResponse;
  * information on handling multiple threads in a Java program.
  *
  * @author	Various
+ * @version	$Version$
+ *
  */
 
 
@@ -476,10 +469,7 @@ public abstract class HttpServlet extends GenericServlet
     }
     
 
-
-
-
-    private Method[] getAllDeclaredMethods(Class c) {
+    private static Method[] getAllDeclaredMethods(Class c) {
 
         if (c.equals(javax.servlet.http.HttpServlet.class)) {
             return null;
@@ -501,10 +491,6 @@ public abstract class HttpServlet extends GenericServlet
 
 	return thisMethods;
     }
-
-
-
-
 
 
     /**
@@ -831,46 +817,33 @@ public abstract class HttpServlet extends GenericServlet
  * to the HTTP Servlet Response object used to construct this one.
  */
 // file private
-class NoBodyResponse implements HttpServletResponse {
-    private HttpServletResponse		resp;
+class NoBodyResponse extends HttpServletResponseWrapper {
     private NoBodyOutputStream		noBody;
     private PrintWriter			writer;
     private boolean			didSetContentLength;
 
     // file private
     NoBodyResponse(HttpServletResponse r) {
-	resp = r;
+        super(r);
 	noBody = new NoBodyOutputStream();
     }
 
     // file private
     void setContentLength() {
 	if (!didSetContentLength)
-	  resp.setContentLength(noBody.getContentLength());
+	  super.setContentLength(noBody.getContentLength());
     }
 
 
     // SERVLET RESPONSE interface methods
 
     public void setContentLength(int len) {
-	resp.setContentLength(len);
+	super.setContentLength(len);
 	didSetContentLength = true;
     }
 
-    public void setCharacterEncoding(String charset)
-      { resp.setCharacterEncoding(charset); }
-
-    public void setContentType(String type)
-      { resp.setContentType(type); }
-
-    public String getContentType()
-      { return resp.getContentType(); }
-
     public ServletOutputStream getOutputStream() throws IOException
       { return noBody; }
-
-    public String getCharacterEncoding()
-	{ return resp.getCharacterEncoding(); }
 
     public PrintWriter getWriter() throws UnsupportedEncodingException
     {
@@ -882,109 +855,6 @@ class NoBodyResponse implements HttpServletResponse {
 	}
 	return writer;
     }
-
-    public void setBufferSize(int size) throws IllegalStateException
-      { resp.setBufferSize(size); }
-
-    public int getBufferSize()
-      { return resp.getBufferSize(); }
-
-    public void reset() throws IllegalStateException
-      { resp.reset(); }
-      
-      public void resetBuffer() throws IllegalStateException
-      { resp.resetBuffer(); }
-
-    public boolean isCommitted()
-      { return resp.isCommitted(); }
-
-    public void flushBuffer() throws IOException
-      { resp.flushBuffer(); }
-
-    public void setLocale(Locale loc)
-      { resp.setLocale(loc); }
-
-    public Locale getLocale()
-      { return resp.getLocale(); }
-
-
-    // HTTP SERVLET RESPONSE interface methods
-
-    public void addCookie(Cookie cookie)
-      { resp.addCookie(cookie); }
-
-    public boolean containsHeader(String name)
-      { return resp.containsHeader(name); }
-
-    /** @deprecated */
-    public void setStatus(int sc, String sm)
-      { resp.setStatus(sc, sm); }
-
-    public void setStatus(int sc)
-      { resp.setStatus(sc); }
-
-    public void setHeader(String name, String value)
-      { resp.setHeader(name, value); }
-
-    public void setIntHeader(String name, int value)
-      { resp.setIntHeader(name, value); }
-
-    public void setDateHeader(String name, long date)
-      { resp.setDateHeader(name, date); }
-
-    public void sendError(int sc, String msg) throws IOException
-      { resp.sendError(sc, msg); }
-
-    public void sendError(int sc) throws IOException
-      { resp.sendError(sc); }
-
-    public void sendRedirect(String location) throws IOException
-      { resp.sendRedirect(location); }
-    
-    public String encodeURL(String url) 
-      { return resp.encodeURL(url); }
-
-    public String encodeRedirectURL(String url)
-      { return resp.encodeRedirectURL(url); }
-      
-    public void addHeader(String name, String value)
-      { resp.addHeader(name, value); }
-      
-    public void addDateHeader(String name, long value)
-      { resp.addDateHeader(name, value); }
-      
-    public void addIntHeader(String name, int value)
-      { resp.addIntHeader(name, value); }
-      
-      
-      
-
-    /**
-     * @deprecated	As of Version 2.1, replaced by
-     * 			{@link HttpServletResponse#encodeURL}.
-     *
-     */
-     
-     
-    public String encodeUrl(String url) 
-      { return this.encodeURL(url); }
-      
-      
-      
-      
-      
-      
-      
-
-    /**
-     * @deprecated	As of Version 2.1, replaced by
-     *			{@link HttpServletResponse#encodeRedirectURL}.
-     *
-     */
-     
-     
-    public String encodeRedirectUrl(String url)
-      { return this.encodeRedirectURL(url); }
 
     public void disable()
     {
