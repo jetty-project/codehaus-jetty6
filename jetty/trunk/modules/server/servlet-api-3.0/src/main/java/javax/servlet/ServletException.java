@@ -1,29 +1,21 @@
-
-
 /*
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the "License").  You may not use this file except
- * in compliance with the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * You can obtain a copy of the license at
- * glassfish/bootstrap/legal/CDDLv1.0.txt or
- * https://glassfish.dev.java.net/public/CDDLv1.0.html.
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- * When distributing Covered Code, include this CDDL
- * HEADER in each file and include the License file at
- * glassfish/bootstrap/legal/CDDLv1.0.txt.  If applicable,
- * add the following below this CDDL HEADER, with the
- * fields enclosed by brackets "[]" replaced with your
- * own identifying information: Portions Copyright [yyyy]
- * [name of copyright owner]
- *
- * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
- *
- * Portions Copyright Apache Software Foundation.
- */ 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package javax.servlet;
 
@@ -33,29 +25,16 @@ package javax.servlet;
  * encounters difficulty.
  *
  * @author 	Various
+ * @version 	$Version$
  */
-
-
 public class ServletException extends Exception {
-
-    private Throwable rootCause;
-
-
-
-
 
     /**
      * Constructs a new servlet exception.
-     *
      */
-
     public ServletException() {
-	super();
+        super();
     }
-    
-   
-
-    
 
     /**
      * Constructs a new servlet exception with the
@@ -65,23 +44,16 @@ public class ServletException extends Exception {
      * @param message 		a <code>String</code> 
      *				specifying the text of 
      *				the exception message
-     *
      */
-
     public ServletException(String message) {
-	super(message);
+        super(message);
     }
-    
-   
-   
-    
 
     /**
      * Constructs a new servlet exception when the servlet 
      * needs to throw an exception and include a message 
      * about the "root cause" exception that interfered with its 
      * normal operation, including a description message.
-     *
      *
      * @param message 		a <code>String</code> containing 
      *				the text of the exception message
@@ -90,17 +62,10 @@ public class ServletException extends Exception {
      *				that interfered with the servlet's
      *				normal operation, making this servlet
      *				exception necessary
-     *
      */
-    
     public ServletException(String message, Throwable rootCause) {
-	super(message, rootCause);
-	this.rootCause = rootCause;
+        super(message, rootCause);
     }
-
-
-
-
 
     /**
      * Constructs a new servlet exception when the servlet 
@@ -119,33 +84,18 @@ public class ServletException extends Exception {
      * 				that interfered with the servlet's
      *				normal operation, making the servlet exception
      *				necessary
-     *
      */
-
     public ServletException(Throwable rootCause) {
-	super(rootCause);
-	this.rootCause = rootCause;
+        super(rootCause);
     }
-  
-  
- 
- 
-    
+
     /**
      * Returns the exception that caused this servlet exception.
      *
-     *
      * @return			the <code>Throwable</code> 
      *				that caused this servlet exception
-     *
      */
-    
     public Throwable getRootCause() {
-	return rootCause;
+        return getCause();
     }
 }
-
-
-
-
-
