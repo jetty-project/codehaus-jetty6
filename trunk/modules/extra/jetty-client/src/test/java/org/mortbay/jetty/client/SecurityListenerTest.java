@@ -17,7 +17,9 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
@@ -174,40 +176,62 @@ public class SecurityListenerTest extends TestCase
     {
         int i = 1;
 
-        ContentExchange httpExchange = new ContentExchange();
+        final CyclicBarrier barrier = new CyclicBarrier(2);
+        ContentExchange httpExchange = new ContentExchange()
+        {
+            protected void onResponseComplete() throws IOException
+            {
+                super.onResponseComplete();
+                try{barrier.await();}catch(Exception e){}
+            }
+        };
         httpExchange.setURL("http://localhost:" + _port + "/?i=" + i);
         httpExchange.setMethod(HttpMethods.GET);
         
         _httpClient.send(httpExchange);
-        
-        httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );        
-        Thread.sleep(10);      
+         
+        try{barrier.await();}catch(Exception e){}  
         
     }
     
     
     public void testDestinationSecurityCaching() throws Exception
     {
+        final CyclicBarrier barrier = new CyclicBarrier(2);
         
-        ContentExchange httpExchange = new ContentExchange();
+        ContentExchange httpExchange = new ContentExchange()
+        {
+            protected void onResponseComplete() throws IOException
+            {
+                super.onResponseComplete();
+                try{barrier.await();}catch(Exception e){}
+            }
+        };
+        
         httpExchange.setURL("http://localhost:" + _port + "/?i=1");
         httpExchange.setMethod(HttpMethods.GET);
         
         _httpClient.send(httpExchange);
+
+        try{barrier.await();}catch(Exception e){}
         
-        httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );        
-        Thread.sleep(10);
         
-        //boolean retry = false;
-        
-        ContentExchange httpExchange2 = new ContentExchange();
+        barrier.reset();
+        ContentExchange httpExchange2 = new ContentExchange()
+        {
+            protected void onResponseComplete() throws IOException
+            {
+                super.onResponseComplete();
+                try{barrier.await();}catch(Exception e){}
+            }
+        };
         
         httpExchange2.setURL("http://localhost:" + _port + "/?i=2");
         httpExchange2.setMethod(HttpMethods.GET);
         
         _httpClient.send(httpExchange2);
-        
-        httpExchange2.waitForStatus( HttpExchange.STATUS_COMPLETED );
+
+        try{barrier.await();}catch(Exception e){}
         
         assertFalse( "exchange was retried", httpExchange2.getRetryStatus() );
         

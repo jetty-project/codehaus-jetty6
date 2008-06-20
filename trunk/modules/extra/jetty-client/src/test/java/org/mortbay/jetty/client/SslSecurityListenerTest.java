@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -47,18 +49,19 @@ import org.mortbay.jetty.security.UserRealm;
 /**
  * Functional testing.
  */
-public class SslConversationTest extends TestCase
+public class SslSecurityListenerTest extends TestCase
 {
     protected  Server _server;
     protected int _port;
     protected HttpClient _httpClient;
     protected SecurityRealm _jettyRealm;
+    protected int _type = HttpClient.CONNECTOR_SOCKET;
 
     protected void setUp() throws Exception
     {
         startServer();
         _httpClient = new HttpClient();
-        _httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
+        _httpClient.setConnectorType(_type);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
 
@@ -93,20 +96,29 @@ public class SslConversationTest extends TestCase
 
     public void testSslGet() throws Exception
     {
-        ContentExchange httpExchange = new ContentExchange();
+        final CyclicBarrier barrier = new CyclicBarrier(2);
+        
+        ContentExchange httpExchange = new ContentExchange()
+        {
+            protected void onResponseComplete() throws IOException
+            {
+                super.onResponseComplete();
+                try{barrier.await();}catch(Exception e){}
+            }
+        };
+        
         // httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
         httpExchange.setURL("https://localhost:" + _port + "/");
         httpExchange.setMethod(HttpMethods.GET);
         // httpExchange.setRequestHeader("Connection","close");
 
-        System.err.println("sending "+httpExchange);
         _httpClient.send(httpExchange);
-
-        httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
+        
+        barrier.await(10,TimeUnit.SECONDS);
 
         assertEquals(HttpServletResponse.SC_OK,httpExchange.getResponseStatus());
 
-        System.err.println(httpExchange.getResponseContent());
+        // System.err.println(httpExchange.getResponseContent());
         assertTrue(httpExchange.getResponseContent().length()>400);
         
     }

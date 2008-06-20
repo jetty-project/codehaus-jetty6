@@ -247,9 +247,9 @@ public class SocketConnector extends AbstractConnector
                 try{close();}
                 catch(IOException e2){Log.ignore(e2);}
             }
-            catch(Throwable e)
+            catch(Exception e)
             {
-                Log.warn("handle failed",e);
+                Log.warn("handle failed?",e);
                 try{close();}
                 catch(IOException e2){Log.ignore(e2);}
             }
