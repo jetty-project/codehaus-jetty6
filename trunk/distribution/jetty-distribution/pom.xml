@@ -49,7 +49,7 @@
               <connectionUrl>${jetty.scm}</connectionUrl>  
               <skipCheckoutIfExists>true</skipCheckoutIfExists>
               <checkoutDirectory>${basedir}/target/dist</checkoutDirectory>
-              <goals>install</goals>
+              <goals>-Pall-modules install</goals>
             </configuration>
           </execution>
         </executions>
