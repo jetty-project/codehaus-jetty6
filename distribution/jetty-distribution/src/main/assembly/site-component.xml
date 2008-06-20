@@ -9,6 +9,9 @@
       <outputDirectory>jetty-distribution-${version}-site-component</outputDirectory>
       <includes>
         <include>target/site/**</include>
+        <include>README**</include>
+        <include>VERSION**</include>
+        <include>LICENSES/**</include>
       </includes>
     </fileSet>
   </fileSets>
