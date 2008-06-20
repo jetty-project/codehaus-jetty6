@@ -41,27 +41,27 @@ import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.SslSelectChannelConnector;
+import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.security.UserRealm;
 
 /**
  * Functional testing.
  */
 public class SslConversationTest extends TestCase
-{    
-    private Server _server;
-    private int _port;
-    private HttpClient _httpClient;
-    private SecurityRealm _jettyRealm;
+{
+    protected  Server _server;
+    protected int _port;
+    protected HttpClient _httpClient;
+    protected SecurityRealm _jettyRealm;
 
     protected void setUp() throws Exception
     {
         startServer();
-        _httpClient=new HttpClient();
-        //_httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+        _httpClient = new HttpClient();
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
-        
+
         _jettyRealm = new SecurityRealm()
         {
             public String getId()
@@ -79,56 +79,61 @@ public class SslConversationTest extends TestCase
                 return "jetty";
             }
         };
-        
-        _httpClient.setSecurityRealmResolver( new DefaultRealmResolver() );
-        _httpClient.getSecurityRealmResolver().addSecurityRealm( _jettyRealm );
+
+        _httpClient.setSecurityRealmResolver(new DefaultRealmResolver());
+        _httpClient.getSecurityRealmResolver().addSecurityRealm(_jettyRealm);
     }
 
     protected void tearDown() throws Exception
     {
-        stopServer();
         _httpClient.stop();
+        Thread.sleep(100);
+        stopServer();
     }
-      
-   
+
     public void testSslGet() throws Exception
-    {  
+    {
         ContentExchange httpExchange = new ContentExchange();
-        //httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
-        httpExchange.setURL( "https://localhost:" + _port+ "/" );        
+        // httpExchange.setURL("https://dav.codehaus.org/user/jesse/index.html");
+        httpExchange.setURL("https://localhost:" + _port + "/");
         httpExchange.setMethod(HttpMethods.GET);
+        // httpExchange.setRequestHeader("Connection","close");
 
-        _httpClient.send( httpExchange );
+        System.err.println("sending "+httpExchange);
+        _httpClient.send(httpExchange);
 
-        httpExchange.waitForStatus( HttpExchange.STATUS_COMPLETED );
+        httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
+
+        assertEquals(HttpServletResponse.SC_OK,httpExchange.getResponseStatus());
+
+        System.err.println(httpExchange.getResponseContent());
+        assertTrue(httpExchange.getResponseContent().length()>400);
         
-        assertEquals( HttpServletResponse.SC_OK, httpExchange.getResponseStatus() );
-        
-        Thread.sleep(10);
-     
     }
-    
-    
-    private void startServer() throws Exception
+
+    protected void startServer() throws Exception
     {
         _server = new Server();
-        _server.setGracefulShutdown(500);
-        SslSelectChannelConnector connector = new SslSelectChannelConnector();
+        //SslSelectChannelConnector connector = new SslSelectChannelConnector();
+        SslSocketConnector connector = new SslSocketConnector();
 
-      String keystore = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+"keystore";
-        
+        String keystore = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator
+                + "keystore";
+
         connector.setPort(0);
         connector.setKeystore(keystore);
         connector.setPassword("storepwd");
         connector.setKeyPassword("keypwd");
 
-        _server.setConnectors(new Connector[]{connector});
+        _server.setConnectors(new Connector[]
+        { connector });
 
-        UserRealm userRealm = new HashUserRealm("MyRealm", "src/test/resources/realm.properties");
+        UserRealm userRealm = new HashUserRealm("MyRealm","src/test/resources/realm.properties");
 
         Constraint constraint = new Constraint();
         constraint.setName("Need User or Admin");
-        constraint.setRoles(new String[]{"user", "admin"});
+        constraint.setRoles(new String[]
+        { "user", "admin" });
         constraint.setAuthenticate(true);
 
         ConstraintMapping cm = new ConstraintMapping();
@@ -138,7 +143,8 @@ public class SslConversationTest extends TestCase
         SecurityHandler sh = new SecurityHandler();
         _server.setHandler(sh);
         sh.setUserRealm(userRealm);
-        sh.setConstraintMappings(new ConstraintMapping[]{cm});
+        sh.setConstraintMappings(new ConstraintMapping[]
+        { cm });
         sh.setAuthenticator(new BasicAuthenticator());
 
         Handler testHandler = new AbstractHandler()
@@ -146,21 +152,23 @@ public class SslConversationTest extends TestCase
 
             public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
             {
-                System.out.println("passed authentication!");
-                Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+                System.err.println("passed authentication!\n"+((Request)request).getConnection().getRequestFields());
+                
+                Request base_request = (request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
                 base_request.setHandled(true);
                 response.setStatus(200);
+                response.setContentType("text/plain");
                 if (request.getServerName().equals("jetty.mortbay.org"))
                 {
-                    response.getOutputStream().println("Proxy request: "+request.getRequestURL());
+                    response.getOutputStream().println("Proxy request: " + request.getRequestURL());
                 }
                 else if (request.getMethod().equalsIgnoreCase("GET"))
                 {
                     response.getOutputStream().println("<hello>");
-                    for (int i=0; i<100; i++)
+                    for (int i = 0; i < 100; i++)
                     {
-                        response.getOutputStream().println("  <world>"+i+"</world>");
-                        if (i%20==0)
+                        response.getOutputStream().println("  <world>" + i + "</world>");
+                        if (i % 20 == 0)
                             response.getOutputStream().flush();
                     }
                     response.getOutputStream().println("</hello>");
@@ -178,14 +186,13 @@ public class SslConversationTest extends TestCase
         _port = connector.getLocalPort();
     }
 
-
     public static void copyStream(InputStream in, OutputStream out)
     {
         try
         {
-            byte[] buffer=new byte[1024];
+            byte[] buffer = new byte[1024];
             int len;
-            while ((len=in.read(buffer))>=0)
+            while ((len = in.read(buffer)) >= 0)
             {
                 out.write(buffer,0,len);
             }
@@ -199,8 +206,9 @@ public class SslConversationTest extends TestCase
             e.printStackTrace();
         }
     }
-   private void stopServer() throws Exception
-   {
-       _server.stop();
-   }
+
+    private void stopServer() throws Exception
+    {
+        _server.stop();
+    }
 }

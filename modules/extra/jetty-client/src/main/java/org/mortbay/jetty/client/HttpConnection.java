@@ -14,6 +14,7 @@
 
 package org.mortbay.jetty.client;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -24,6 +25,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.SelectChannelEndPoint;
+import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.HttpHeaders;
@@ -276,21 +278,13 @@ public class HttpConnection implements Connection
                         flushed=-1;
                         if (_exchange!=null)
                         {
-                            // if the exchange is being replayed the we don't want to much with it
-                            //
-                            // TODO how much do we care if an exchange isn't marked complete?  
-                            // probably a lot since we have wait for complete methods :/
-                            //
-                            // This resolves the usage scenario with HttpConversation but I believe
-                            // it breaks direct usage with Exchange and client which is probably a bad
-                            // thing unless we make Conversation the only thing that can be passed into
-                            // httpClient.
-                            // 
-                            //if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
-                            //{
-                            //    Log.warn("NOT COMPLETE! "+_exchange);
-                            //    _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
-                            //}
+                            if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
+                            {
+                                Log.warn("NOT COMPLETE! "+_exchange);
+                                // TODO ?????????????
+                                // _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
+                            }
+                            
                             _exchange=null;
                             
                             if (_pipeline==null)
@@ -500,6 +494,12 @@ public class HttpConnection implements Connection
     public void setLast(long last)
     {
         _last=last;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void close() throws IOException
+    {
+        _endp.close();
     }
     
 }
