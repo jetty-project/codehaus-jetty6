@@ -28,6 +28,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-610 jetty.class.path not being interpreted
  + JETTY-611 make general purpose jar scanning mechanism
  + JETTY-612 scan for web.xml fragments
+ + JETTY-613 various distribution related changes
  + JETTY-614 scanner allocates hashmap on every iteration
  + JETTY-615 Replaced CDDL servlet.jar with Apache-2.0 licensed version
 
