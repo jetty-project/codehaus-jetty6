@@ -6,7 +6,7 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${basedir}/..</directory>
+      <directory>${basedir}/target/dist</directory>
       <outputDirectory></outputDirectory>
       <includes>
         <include>README*</include>
