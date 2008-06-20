@@ -5,10 +5,10 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>target</directory>
-      <outputDirectory>jetty-project</outputDirectory>
+      <directory>${basedir}/target/dist-src</directory>
+      <outputDirectory>jetty-distribution-${version}-site-component</outputDirectory>
       <includes>
-        <include>site/**</include>
+        <include>target/site/**</include>
       </includes>
     </fileSet>
   </fileSets>
