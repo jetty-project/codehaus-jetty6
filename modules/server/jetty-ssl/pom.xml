@@ -48,12 +48,6 @@
           </execution>		  
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-	  <argLine>-Djavax.net.debug=all</argLine>
-	</configuration>
-      </plugin>
      </plugins>
   </build>
   <dependencies>

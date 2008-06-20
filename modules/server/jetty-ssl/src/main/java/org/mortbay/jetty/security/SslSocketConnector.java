@@ -621,7 +621,7 @@ public class SslSocketConnector extends SocketConnector
             }
             catch (SSLException e)
             {
-                Log.warn(e); 
+                Log.debug(e); 
                 try{close();}
                 catch(IOException e2){Log.ignore(e2);}
             }

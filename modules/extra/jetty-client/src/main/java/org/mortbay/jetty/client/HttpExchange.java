@@ -29,6 +29,8 @@ import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.log.Log;
 
+import sun.security.action.GetLongAction;
+
 
 /**
  * An HTTP client API that encapsulates Exchange with a HTTP server.
@@ -64,7 +66,7 @@ import org.mortbay.log.Log;
  */
 public class HttpExchange
 {
-    public static final int STATUS_UNKOWN = 0;
+    public static final int STATUS_START = 0;
     public static final int STATUS_WAITING_FOR_CONNECTION = 1;
     public static final int STATUS_WAITING_FOR_COMMIT = 2;
     public static final int STATUS_SENDING_REQUEST = 3;
@@ -80,7 +82,7 @@ public class HttpExchange
     Buffer _scheme = HttpSchemes.HTTP_BUFFER;
     int _version = HttpVersions.HTTP_1_1_ORDINAL;
     String _uri;
-    int _status = STATUS_UNKOWN;
+    int _status = STATUS_START;
     HttpFields _requestFields = new HttpFields();
     Buffer _requestContent;
     InputStream _requestContentSource;
@@ -102,6 +104,9 @@ public class HttpExchange
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated
+     */
     public void waitForStatus(int status) throws InterruptedException
     {
         synchronized (this)
@@ -116,7 +121,7 @@ public class HttpExchange
     /* ------------------------------------------------------------ */
     public void reset() 
     {
-        setStatus(STATUS_UNKOWN);
+        setStatus(STATUS_START);
     }
     
     /* ------------------------------------------------------------ */
