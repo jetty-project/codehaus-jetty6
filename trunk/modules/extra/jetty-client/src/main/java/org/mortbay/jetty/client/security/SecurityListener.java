@@ -153,19 +153,16 @@ public class SecurityListener extends HttpEventListenerWrapper
     }
     
     
-    
-    
     @Override
     public void onResponseComplete() throws IOException
     {
         if (!isDelegating())
         {
-            // TODO
-            
-            
+            _exchange.reset();
             _destination.resend(_exchange);
         }
-        super.onResponseComplete();
+        else
+            super.onResponseComplete();
     }
 
     @Override

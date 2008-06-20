@@ -404,6 +404,8 @@ public class HttpGenerator extends AbstractGenerator
                         break;
 
                     case HttpHeaders.CONNECTION_ORDINAL:
+                        if (_method!=null)
+                            field.put(_header);
                         
                         int connection_value = field.getValueOrdinal();
                         switch (connection_value)
@@ -424,7 +426,7 @@ public class HttpGenerator extends AbstractGenerator
                                                 if (_method==null)
                                                     _close=true;
                                                 keep_alive=false;
-                                                if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
+                                                if (_close && _method==null && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
                                                     _contentLength = HttpTokens.EOF_CONTENT;
                                                 break;
 
@@ -462,7 +464,7 @@ public class HttpGenerator extends AbstractGenerator
                                 close=true;
                                 if (_method==null)
                                     _close=true;
-                                if (_close && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
+                                if (_close && _method==null && _contentLength == HttpTokens.UNKNOWN_CONTENT) 
                                     _contentLength = HttpTokens.EOF_CONTENT;
                                 break;
                             }
@@ -583,34 +585,37 @@ public class HttpGenerator extends AbstractGenerator
             keep_alive=false;
             _close=true;
         }
-                
-        if (_close && (close || _version > HttpVersions.HTTP_1_0_ORDINAL))
+               
+        if (_method==null)
         {
-            _header.put(CONNECTION_CLOSE);
-            if (connection!=null)
+            if (_close && (close || _version > HttpVersions.HTTP_1_0_ORDINAL))
             {
-                _header.setPutIndex(_header.putIndex()-2);
-                _header.put((byte)',');
+                _header.put(CONNECTION_CLOSE);
+                if (connection!=null)
+                {
+                    _header.setPutIndex(_header.putIndex()-2);
+                    _header.put((byte)',');
+                    _header.put(connection.toString().getBytes());
+                    _header.put(CRLF);
+                }
+            }
+            else if (keep_alive)
+            {
+                _header.put(CONNECTION_KEEP_ALIVE);
+                if (connection!=null)
+                {
+                    _header.setPutIndex(_header.putIndex()-2);
+                    _header.put((byte)',');
+                    _header.put(connection.toString().getBytes());
+                    _header.put(CRLF);
+                }
+            }
+            else if (connection!=null)
+            {
+                _header.put(CONNECTION_);
                 _header.put(connection.toString().getBytes());
                 _header.put(CRLF);
             }
-        }
-        else if (keep_alive)
-        {
-            _header.put(CONNECTION_KEEP_ALIVE);
-            if (connection!=null)
-            {
-                _header.setPutIndex(_header.putIndex()-2);
-                _header.put((byte)',');
-                _header.put(connection.toString().getBytes());
-                _header.put(CRLF);
-            }
-        }
-        else if (connection!=null)
-        {
-            _header.put(CONNECTION_);
-            _header.put(connection.toString().getBytes());
-            _header.put(CRLF);
         }
         
         if (!has_server && _status>100 && getSendServerVersion())

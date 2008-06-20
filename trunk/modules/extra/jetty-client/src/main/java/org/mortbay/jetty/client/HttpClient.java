@@ -17,43 +17,27 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.Connection;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.io.nio.SelectChannelEndPoint;
-import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
-import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.client.security.DefaultRealmResolver;
 import org.mortbay.jetty.client.security.SecurityRealm;
 import org.mortbay.jetty.client.security.SecurityRealmResolver;
-import org.mortbay.jetty.security.SslHttpChannelEndPoint;
-import org.mortbay.log.Log;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
@@ -99,7 +83,7 @@ public class HttpClient extends AbstractBuffers
     Connector _connector;
     private long _idleTimeout=20000;
     private long _timeout=320000;
-    private int _soTimeout = 10000;
+    int _soTimeout = 10000;
     private Timeout _timeoutQ = new Timeout();
     private InetSocketAddress _proxy;
     private Set<InetAddress> _noProxy;
@@ -293,11 +277,11 @@ public class HttpClient extends AbstractBuffers
         if (_connectorType==CONNECTOR_SELECT_CHANNEL)
         {
             
-            _connector=new SelectConnector();
+            _connector=new SelectConnector(this);
         }
         else
         {
-            _connector=new SocketConnector();
+            _connector=new SocketConnector(this);
         }
         _connector.start();
         
@@ -330,6 +314,11 @@ public class HttpClient extends AbstractBuffers
         {
             ((LifeCycle)_threadPool).stop();
         }
+        for (HttpDestination destination : _destinations.values())
+        {
+            destination.close();
+        }
+        
         _timeoutQ.cancelAll();
         super.doStop();
     }
@@ -341,195 +330,7 @@ public class HttpClient extends AbstractBuffers
 
     }
 
-    /* ------------------------------------------------------------ */
-    class SocketConnector extends AbstractLifeCycle implements Connector
-    {
-        public void startConnection(final HttpDestination destination) throws IOException
-        {
-            Socket socket=null;
-            
-            if ( destination.isSecure() )
-            {
-                SSLContext sslContext = getLooseSSLContext();
-                socket = sslContext.getSocketFactory().createSocket();
-            }
-            else
-            {
-                System.out.println("Using Regular Socket");
-                socket = SocketFactory.getDefault().createSocket();                
-            }
-           
-            socket.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
-            
-            EndPoint endpoint=new SocketEndPoint(socket);
-            
-            final HttpConnection connection=new HttpConnection(HttpClient.this,endpoint,getHeaderBufferSize(),getRequestBufferSize());
-            connection.setDestination(destination);
-            destination.onNewConnection(connection);
-            getThreadPool().dispatch(new Runnable()
-            {
-                public void run()
-                {
-                    try
-                    {
-                        connection.handle();
-                    }
-                    catch (IOException e)
-                    {
-                        Log.warn(e);
-                        destination.onException(e);
-                    }
-                }
-            });
-                 
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    class SelectConnector extends AbstractLifeCycle implements Connector, Runnable
-    {
-        SelectorManager _selectorManager=new Manager();
-
-        protected void doStart() throws Exception
-        {
-            _selectorManager.start();
-            _threadPool.dispatch(this);
-        }
-
-        protected void doStop() throws Exception
-        {
-            _selectorManager.stop();
-        }
-
-        public void startConnection( HttpDestination destination )
-            throws IOException
-        {
-            SocketChannel channel = SocketChannel.open();
-            /*
-            if ( destination.isSecure() )
-            {
-                channel.connect( destination.isProxied() ? destination.getProxy() : destination.getAddress() );
-                
-                Socket socket = channel.socket();
-
-                InetSocketAddress address = destination.isProxied() ? destination.getProxy() : destination.getAddress();
-
-                Socket ssocket = ( (SSLSocketFactory) SSLSocketFactory.getDefault() ).createSocket( socket, address.getHostName(),
-                                                                                       address.getPort(), false );
-                channel = ssocket.getChannel();
-            }
-            else
-            {
-            */
-            channel.connect( destination.isProxied() ? destination.getProxy() : destination.getAddress() );
-            //}
-            channel.configureBlocking( false );
-            channel.socket().setSoTimeout( _soTimeout );
-            _selectorManager.register( channel, destination );
-        }
-
-        public void run()
-        {
-            while (isRunning())
-            {
-                try
-                {
-                    _selectorManager.doSelect(0);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        class Manager extends SelectorManager
-        {
-            protected SocketChannel acceptChannel(SelectionKey key) throws IOException
-            {
-                throw new IllegalStateException();
-            }
-
-            public boolean dispatch(Runnable task)
-            {
-                return _threadPool.dispatch(task);
-            }
-
-            protected void endPointOpened(SelectChannelEndPoint endpoint)
-            {
-            }
-
-            protected void endPointClosed(SelectChannelEndPoint endpoint)
-            {
-            }
-
-            protected Connection newConnection(SocketChannel channel, SelectChannelEndPoint endpoint)
-            {
-                return new HttpConnection(HttpClient.this,endpoint,getHeaderBufferSize(),getRequestBufferSize());
-            }
-
-            protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
-            {
-                // key should have destination at this point (will be replaced by endpoint after this call)
-                HttpDestination dest=(HttpDestination)key.attachment();
-                
-
-                SelectChannelEndPoint ep=null;
-                
-                if (dest.isSecure())
-                {
-                    if (dest.isProxied())
-                    {
-                        String connect = HttpMethods.CONNECT+" "+dest.getAddress()+HttpVersions.HTTP_1_0+"\r\n\r\n";
-                        // TODO need to send this over channel unencrypted and setup endpoint to ignore the 200 OK response.
-                       
-                        throw new IllegalStateException("Not Implemented");
-                    }
-
-                    SSLContext sslContext = getLooseSSLContext();
-                    SSLEngine engine = sslContext.createSSLEngine();
-                    AbstractBuffers buffers = new AbstractBuffers()
-                    {
-                        protected Buffer newBuffer( int size )
-                        {
-                            return new NIOBuffer( size, NIOBuffer.INDIRECT );
-                        }        
-                    }; 
-                    
-                    buffers.setRequestBufferSize( engine.getSession().getPacketBufferSize() );
-                    // TODO need buffers pool with SSL sized buffers (from engine)
-                    if (engine==null)
-                        throw new IllegalStateException("Not Implemented");
-                    ep = new SslHttpChannelEndPoint(buffers,channel,selectSet,key,engine);
-                }
-                else
-                {
-                    ep=new SelectChannelEndPoint(channel,selectSet,key);
-                }
-                
-                HttpConnection connection=(HttpConnection)ep.getConnection();
-                connection.setDestination(dest);
-                dest.onNewConnection(connection);
-                return ep;
-            }
-
-            /* ------------------------------------------------------------ */
-            /* (non-Javadoc)
-             * @see org.mortbay.io.nio.SelectorManager#connectionFailed(java.nio.channels.SocketChannel, java.lang.Throwable, java.lang.Object)
-             */
-            protected void connectionFailed(SocketChannel channel, Throwable ex, Object attachment)
-            {
-                if (attachment instanceof HttpDestination)
-                    ((HttpDestination)attachment).onConnectionFailed(ex);
-                else
-                    Log.warn(ex);
-            }
-           
-        }
-
-    }
-
-    private SSLContext getLooseSSLContext() throws IOException
+    SSLContext getLooseSSLContext() throws IOException
     {
         // Create a trust manager that does not validate certificate
         // chains

@@ -351,7 +351,7 @@ public abstract class AbstractGenerator implements Generator
     public void setResponse(int status, String reason)
     {
         if (_state != STATE_HEADER) throw new IllegalStateException("STATE!=START");
-
+        _method=null;
         _status = status;
         if (reason!=null)
         {
