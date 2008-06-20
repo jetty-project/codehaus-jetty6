@@ -114,6 +114,12 @@ public class HttpExchange
     }
 
     /* ------------------------------------------------------------ */
+    public void reset() 
+    {
+        setStatus(STATUS_UNKOWN);
+    }
+    
+    /* ------------------------------------------------------------ */
     void setStatus(int status)
     {
         synchronized (this)
@@ -487,6 +493,7 @@ public class HttpExchange
 
     protected void onException(Throwable ex)
     {
+        
         Log.warn("EXCEPTION on " + this,ex);
     }
 

@@ -92,7 +92,7 @@
           <userRealms>
             <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
               <name>Test Realm</name>
-              <config>../../etc/realm.properties</config>
+              <config>../../../etc/realm.properties</config>
             </userRealm>
           </userRealms>
         </configuration>

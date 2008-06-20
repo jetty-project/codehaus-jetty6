@@ -14,6 +14,7 @@
 
 package org.mortbay.jetty.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,6 +38,8 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.SslSelectChannelConnector;
+import org.mortbay.jetty.security.SslSocketConnector;
 
 /**
  * Functional testing for HttpExchange.
@@ -44,17 +47,18 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
  * @author Matthew Purland
  * @author Greg Wilkins
  */
-public class HttpExchangeTest extends TestCase
+public class SslHttpExchangeTest extends TestCase
 {
-    private Server _server;
-    private int _port;
-    private HttpClient _httpClient;
+    protected Server _server;
+    protected int _port;
+    protected HttpClient _httpClient;
 
     protected void setUp() throws Exception
     {
         startServer();
         _httpClient=new HttpClient();
-        _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+        // _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+        _httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
     }
@@ -69,16 +73,23 @@ public class HttpExchangeTest extends TestCase
     {
         sender(1,false);
         Thread.sleep(200);
+        sender(1,true);
+        Thread.sleep(200);
+        
         sender(10,false);
+        Thread.sleep(200);
+        sender(10,true);
+        
         Thread.sleep(200);
         sender(100,false);
         Thread.sleep(200);
         sender(100,true);
-        Thread.sleep(200);
-        sender(1000,false);
+        
         /*
         Thread.sleep(200);
-        sender(10000);
+        sender(1000,false);
+        Thread.sleep(200);
+        sender(1000,true);
         */
     }
 
@@ -87,7 +98,7 @@ public class HttpExchangeTest extends TestCase
      * 
      * @throws IOException
      */
-    public void sender(final int nb,boolean close) throws Exception
+    public void sender(final int nb, boolean close) throws Exception
     {
         final CountDownLatch latch=new CountDownLatch(nb);
         long l0=System.currentTimeMillis();
@@ -119,6 +130,7 @@ public class HttpExchangeTest extends TestCase
                 protected void onResponseContent(Buffer content)
                 {
                     // System.err.println("Response content:" + content);
+                    // System.err.println("Response content "+content.length());
                 }
 
                 protected void onResponseComplete()
@@ -129,7 +141,7 @@ public class HttpExchangeTest extends TestCase
                 
             };
 
-            httpExchange.setURL("http://localhost:"+_port+"/");
+            httpExchange.setURL("https://localhost:"+_port+"/");
             httpExchange.addRequestHeader("arbitrary","value");
             if (close)
                 httpExchange.setRequestHeader("Connection","close");
@@ -157,7 +169,7 @@ public class HttpExchangeTest extends TestCase
         for (int i=0;i<20;i++)
         {
             ContentExchange httpExchange=new ContentExchange();
-            httpExchange.setURL("http://localhost:"+_port+"/");
+            httpExchange.setURL("https://localhost:"+_port+"/");
             httpExchange.setMethod(HttpMethods.POST);
             httpExchange.setRequestContent(new ByteArrayBuffer("<hello />"));
             _httpClient.send(httpExchange);
@@ -174,7 +186,7 @@ public class HttpExchangeTest extends TestCase
         for (int i=0;i<20;i++)
         {   
             ContentExchange httpExchange=new ContentExchange();
-            httpExchange.setURL("http://localhost:"+_port+"/?i="+i);
+            httpExchange.setURL("https://localhost:"+_port+"/?i="+i);
             httpExchange.setMethod(HttpMethods.GET);
             _httpClient.send(httpExchange);
             httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
@@ -186,6 +198,7 @@ public class HttpExchangeTest extends TestCase
         }
     }
 
+    /*
     public void testProxy() throws Exception
     {
         try
@@ -206,6 +219,7 @@ public class HttpExchangeTest extends TestCase
             _httpClient.setProxy(null);
         }
     }
+    */
 
     public static void copyStream(InputStream in, OutputStream out)
     {
@@ -228,13 +242,21 @@ public class HttpExchangeTest extends TestCase
         }
     }
 
-    private void startServer() throws Exception
+    protected void startServer() throws Exception
     {
         _server=new Server();
         _server.setGracefulShutdown(500);
-        Connector connector=new SelectChannelConnector();
-        
+        // SslSelectChannelConnector connector = new SslSelectChannelConnector();
+        SslSocketConnector connector = new SslSocketConnector();
+
+        String keystore = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator
+                + "keystore";
+
         connector.setPort(0);
+        connector.setKeystore(keystore);
+        connector.setPassword("storepwd");
+        connector.setKeyPassword("keypwd");
+        
         _server.setConnectors(new Connector[] { connector });
         _server.setHandler(new AbstractHandler()
         {

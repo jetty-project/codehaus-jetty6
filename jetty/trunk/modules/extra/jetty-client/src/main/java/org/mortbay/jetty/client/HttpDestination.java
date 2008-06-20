@@ -283,6 +283,21 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void returnConnection(HttpConnection connection, boolean close) throws IOException
     {
+        if (close)
+        {
+            try
+            {
+                connection.close();
+            }
+            catch(IOException e)
+            {
+                Log.ignore(e);
+            }
+        }
+        
+        if (!_client.isStarted())
+            return;
+        
         if (!close && connection.getEndPoint().isOpen())
         {
             synchronized (this)
@@ -418,6 +433,18 @@ public class HttpDestination
     public boolean isProxied()
     {
         return _proxy!=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void close() throws IOException
+    {
+        synchronized (this)
+        {
+            for (HttpConnection connection : _connections)
+            {
+                connection.close();
+            }
+        }
     }
     
 }

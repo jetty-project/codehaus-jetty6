@@ -85,9 +85,13 @@ public abstract class SelectorManager extends AbstractLifeCycle
     {
         int s=_set++; 
         s=s%_selectSets;
-        SelectSet set=_selectSet[s];
-        set.addChange(channel,att);
-        set.wakeup();
+        SelectSet[] sets=_selectSet;
+        if (sets!=null)
+        {
+            SelectSet set=sets[s];
+            set.addChange(channel,att);
+            set.wakeup();
+        }
     }
     
     /* ------------------------------------------------------------ */

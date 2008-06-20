@@ -15,7 +15,6 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
-import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
@@ -99,17 +98,15 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     public void close() throws IOException
     {
         _engine.closeOutbound();
-        
         try
         {   
             int tries=0;
             loop: while (isOpen() && !_engine.isOutboundDone() && tries++<100)
             {
-               
                 if (_outNIOBuffer.length()>0)
                 {
                     flush();
-                    Thread.sleep(100); // TODO yuck
+                    Thread.sleep(10); // TODO yuck
                 }
                 
                 switch(_engine.getHandshakeStatus())
@@ -120,7 +117,8 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
                         
                     case NEED_UNWRAP:
                         if(!fill(__EMPTY))
-                            Thread.sleep(100); // TODO yuck
+                            Thread.yield(); 
+                            Thread.sleep(10); // TODO yuck
                         break;
                         
                     case NEED_TASK:
@@ -253,7 +251,9 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
             }
             catch(SSLException e)
             {
-                Log.warn(e);
+                Log.warn(e.toString());
+                Log.debug(e);
+                throw e;
             }
             finally
             {
