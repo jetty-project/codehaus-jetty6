@@ -41,16 +41,16 @@ public class CachedExchange extends HttpExchange
     /* ------------------------------------------------------------ */
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
-        super.onResponseStatus(version,status,reason);
         _responseStatus = status;
+        super.onResponseStatus(version,status,reason);
     }
 
     /* ------------------------------------------------------------ */
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
-        super.onResponseHeader(name,value);
         if (_responseFields != null)
             _responseFields.add(name,value);
+        super.onResponseHeader(name,value);
     }
 
 }

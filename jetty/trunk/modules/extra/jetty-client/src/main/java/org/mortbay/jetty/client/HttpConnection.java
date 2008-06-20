@@ -267,24 +267,17 @@ public class HttpConnection implements Connection
                 // or closed out
                 if (_parser.isComplete() && _generator.isComplete())
                 {  
-                    
                     _destination.getHttpClient().cancel(_timeout);
 
                     synchronized(this)
                     {
                         boolean close=shouldClose();
+                        
                         reset(true);
                         no_progress=0;
                         flushed=-1;
                         if (_exchange!=null)
                         {
-                            if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
-                            {
-                                Log.warn("NOT COMPLETE! "+_exchange);
-                                // TODO ?????????????
-                                // _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
-                            }
-                            
                             _exchange=null;
                             
                             if (_pipeline==null)
@@ -309,7 +302,6 @@ public class HttpConnection implements Connection
                                 send(ex);
                             }
                         }
-          
                     }
                 }
             }

@@ -120,7 +120,6 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
 
                 SSLEngine engine=newSslEngine();
                 ep = new SslHttpChannelEndPoint(_sslBuffers,channel,selectSet,key,engine);
-                System.err.println("New SSL endpoint: "+ep);
             }
             else
             {
