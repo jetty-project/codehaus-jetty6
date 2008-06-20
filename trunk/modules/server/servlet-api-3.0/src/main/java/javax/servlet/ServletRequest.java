@@ -1,29 +1,21 @@
-
-
 /*
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the "License").  You may not use this file except
- * in compliance with the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * You can obtain a copy of the license at
- * glassfish/bootstrap/legal/CDDLv1.0.txt or
- * https://glassfish.dev.java.net/public/CDDLv1.0.html.
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- * When distributing Covered Code, include this CDDL
- * HEADER in each file and include the License file at
- * glassfish/bootstrap/legal/CDDLv1.0.txt.  If applicable,
- * add the following below this CDDL HEADER, with the
- * fields enclosed by brackets "[]" replaced with your
- * own identifying information: Portions Copyright [yyyy]
- * [name of copyright owner]
- *
- * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
- *
- * Portions Copyright Apache Software Foundation.
- */ 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package javax.servlet;
 
@@ -47,6 +39,7 @@ import java.util.Map;
  * provided by {@link javax.servlet.http.HttpServletRequest}.
  * 
  * @author 	Various
+ * @version 	$Version$
  *
  * @see 	javax.servlet.http.HttpServletRequest
  *
@@ -120,19 +113,17 @@ public interface ServletRequest {
 
     public String getCharacterEncoding();
 
-
-    /**
+ /**
      * Overrides the name of the character encoding used in the body of this
      * request. This method must be called prior to reading request parameters
-     * or reading input using getReader(). Otherwise, it has no effect.
+     * or reading input using getReader().
      * 
-     * @param env      <code>String</code> containing the name of
-     *                 the character encoding.
-     * @throws         java.io.UnsupportedEncodingException if this
-     *                 ServletRequest is still in a state where a
-     *                 character encoding may be set, but the specified
-     *                 encoding is invalid
+     *
+     * @param env	a <code>String</code> containing the name of 
+     *			the character encoding.
+     * @throws		java.io.UnsupportedEncodingException if this is not a valid encoding
      */
+
     public void setCharacterEncoding(String env) throws java.io.UnsupportedEncodingException;
 
     
