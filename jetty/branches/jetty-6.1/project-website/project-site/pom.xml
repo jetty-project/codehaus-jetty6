@@ -13,11 +13,12 @@
   <name>Jetty Site</name>
   <version>6.1-SNAPSHOT</version>
   <build>
-    <plugins>
+    <plugins>    
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
+        <!--
           <execution>
             <id>exec-plugin-doc</id>
             <phase>generate-sources</phase>
@@ -48,6 +49,7 @@
               </arguments>
             </configuration>
           </execution>
+          -->         
           <execution>
             <id>exec-site</id>
             <phase>generate-sources</phase>
@@ -68,6 +70,23 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/site-component.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!--
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
@@ -168,6 +187,7 @@
           </execution>
        </executions>
       </plugin>
+      -->
     </plugins>
   </build>
   <reporting/>
