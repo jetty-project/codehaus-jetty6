@@ -954,7 +954,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             }
            
             // reply to connect message
-            Object id=message.getId(); 
+            String id=message.getId(); 
 
             Message reply=newMessage(message);
             
@@ -1001,9 +1001,9 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             Message reply=newMessage(message);
             reply.put(CHANNEL_FIELD,META_DISCONNECT);
             reply.put(SUCCESSFUL_FIELD,Boolean.TRUE);
-            Object id=message.getId(); 
+            String id=message.getId(); 
             if (id!=null)
-                reply.put(ID_FIELD,id.toString());
+                reply.put(ID_FIELD,id);
 
             for (Extension e:_extensions)
                 reply=e.sendMeta(reply);
@@ -1082,9 +1082,9 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             if (isLogDebug())
                 logDebug("handshake.handle: reply="+reply);
 
-            Object id=message.getId();
+            String id=message.getId();
             if (id!=null)
-                reply.put(ID_FIELD,id.toString());
+                reply.put(ID_FIELD,id);
 
             for (Extension e:_extensions)
                 reply=e.sendMeta(reply);
@@ -1111,7 +1111,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
                 return;
             }
             
-            Object id=message.getId();
+            String id=message.getId();
 
             ChannelId cid=getChannelId(channel_id);
             Object data=message.get(Bayeux.DATA_FIELD);
@@ -1119,7 +1119,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             Message reply=newMessage(message);
             reply.put(CHANNEL_FIELD,channel_id);
             if (id!=null)
-                reply.put(ID_FIELD,id.toString());
+                reply.put(ID_FIELD,id);
                 
             if (data!=null&&_securityPolicy.canPublish(client,channel_id,message))
             {
@@ -1137,7 +1137,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
                     _root.doDelivery(cid,client,message);
                 }
                 else
-                    doPublish(cid,client,data,id==null?null:id.toString());
+                    doPublish(cid,client,data,id==null?null:id);
             }
             else
             {
@@ -1256,9 +1256,9 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
                 
             }
 
-            Object id=message.getId(); 
+            String id=message.getId(); 
             if (id!=null)
-                reply.put(ID_FIELD,id.toString());
+                reply.put(ID_FIELD,id);
             for (Extension e:_extensions)
                 reply=e.sendMeta(reply);
             transport.send(reply);
@@ -1298,9 +1298,9 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             else
                 reply.put(SUCCESSFUL_FIELD,Boolean.FALSE);
                 
-            Object id=message.getId(); 
+            String id=message.getId(); 
             if (id!=null)
-                reply.put(ID_FIELD,id.toString());
+                reply.put(ID_FIELD,id);
             for (Extension e:_extensions)
                 reply=e.sendMeta(reply);
             transport.send(reply);
@@ -1322,9 +1322,9 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             reply.put(CHANNEL_FIELD,META_PING);
             reply.put(SUCCESSFUL_FIELD,Boolean.TRUE);
                 
-            Object id=message.getId(); 
+            String id=message.getId(); 
             if (id!=null)
-                reply.put(ID_FIELD,id.toString());
+                reply.put(ID_FIELD,id);
             for (Extension e:_extensions)
                 reply=e.sendMeta(reply);
             transport.send(reply);
