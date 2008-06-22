@@ -286,7 +286,7 @@ public abstract class BayeuxService
     {
         String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
         Object data=msg.get(Bayeux.DATA_FIELD);
-        String id=(String)msg.get(Bayeux.ID_FIELD);
+        String id=msg.getId();
         if (method!=null)
         {
             try
