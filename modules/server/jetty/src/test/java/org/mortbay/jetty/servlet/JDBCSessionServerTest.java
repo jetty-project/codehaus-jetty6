@@ -77,6 +77,5 @@ public class JDBCSessionServerTest extends TestCase
     public void testSessions () throws Exception
     {
         //TODO test session clustering
-        Thread.currentThread().sleep(300000L);
     }
 }
