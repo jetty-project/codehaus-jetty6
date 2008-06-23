@@ -35,6 +35,23 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
+/**
+ * SessionTestServer
+ * 
+ * Base class for common backend to test various session plugin
+ * implementations.
+ * 
+ * The backend runs 2 jetty servers, with 2 contexts each:
+ * 
+ * contextA/session    - dumps and allows create/delete of a session
+ * contextA/dispatch/forward/contextB/session - forwards to contextB
+ * contextB/session - dumps and allows create/delete of a session
+ *
+ * Subclasses should implement the configureEnvironment(), 
+ * configureSessionIdManager(), configureSessionManager1(),
+ * configureSessionManager2() in order to provide the session
+ * management implementations to test.
+ */
 public abstract class SessionTestServer extends Server
 {
     protected SessionIdManager _sessionIdMgr;
@@ -71,6 +88,11 @@ public abstract class SessionTestServer extends Server
     
  
     
+    /**
+     * SessionDumpServlet
+     *
+     * Servlet to dump the contents of the session.
+     */
     public class SessionDumpServlet extends HttpServlet
     {
             int redirectCount=0;
@@ -86,7 +108,6 @@ public abstract class SessionTestServer extends Server
                     HttpServletResponse response) 
             throws ServletException, IOException
             {
-                System.err.println("Responding as context "+request.getServletContext().getContextPath());
                 response.setContentType("text/html");
 
                 HttpSession session = request.getSession(getURI(request).indexOf("new")>0);
@@ -174,13 +195,19 @@ public abstract class SessionTestServer extends Server
                 return uri;
             }
     }
+    /**
+     * SessionForwardedServlet
+     *
+     * Servlet that is target of a dispatch forward.
+     * It will always try and make a new session, and then dump its
+     * contents as html.
+     */
     public class SessionForwardedServlet extends SessionDumpServlet
     {
         
         public void doPost(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException
         {
-            System.err.println("TestServlet doPost");
            handleForm(request, response);
            dump(request, response);
         }
@@ -218,10 +245,17 @@ public abstract class SessionTestServer extends Server
         throws ServletException, IOException
         {
             HttpSession session = request.getSession(true);
-            System.err.println("TestServlet Session = "+session);
             dump(request, response);
         }
     }
+    
+    
+    /**
+     * SessionActionServlet
+     *
+     * Servlet to allow making a new session under user control
+     * by clicking the "New Session" button (ie query params ?Action=New Session)
+     */
     public class SessionActionServlet extends SessionDumpServlet
     {
         protected void handleForm(HttpServletRequest request,
@@ -232,7 +266,6 @@ public abstract class SessionTestServer extends Server
             String name =  request.getParameter("Name");
             String value =  request.getParameter("Value");
 
-            System.err.println("Session in SessionTestServlet = "+session);
             if (action!=null)
             {
                 if(action.equals("New Session"))
@@ -256,7 +289,6 @@ public abstract class SessionTestServer extends Server
                            HttpServletResponse response) 
             throws ServletException, IOException
         {
-            System.err.println("SessiontestSErvlet Responding as context "+getServletContext().getContextPath());
             handleForm(request,response);
             String nextUrl = getURI(request)+"?R="+redirectCount++;
             String encodedUrl=response.encodeRedirectURL(nextUrl);
