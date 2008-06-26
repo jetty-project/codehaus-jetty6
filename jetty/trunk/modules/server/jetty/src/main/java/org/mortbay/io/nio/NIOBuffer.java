@@ -114,13 +114,16 @@ public class NIOBuffer extends AbstractBuffer
     public void poke(int position, byte b)
     {
         if (isReadOnly()) throw new IllegalStateException(__READONLY);
+        if (b < 0) throw new IllegalArgumentException("index<0: " + b + "<0");
+        if (b > capacity())
+                throw new IllegalArgumentException("index>capacity(): " + b + ">" + capacity());
         _buf.put(position,b);
     }
 
     public int poke(int index, Buffer src)
     {
         if (isReadOnly()) throw new IllegalStateException(__READONLY);
-        
+
         byte[] array=src.array();
         if (array!=null)
         {
@@ -165,6 +168,16 @@ public class NIOBuffer extends AbstractBuffer
     public int poke(int index, byte[] b, int offset, int length)
     {
         if (isReadOnly()) throw new IllegalStateException(__READONLY);
+
+        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
+
+        if (index + length > capacity())
+        {
+            length=capacity()-index;
+            if (length<0)
+                throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
+        }
+
         try
         {
             _buf.position(index);
