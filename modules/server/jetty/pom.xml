@@ -87,11 +87,26 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
+        <executions>
+          <execution>
+            <id>artifact-jar</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <archive>
+                <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+              </archive>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-jar</id>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+
       </plugin>
       <!-- always include sources since jetty-xbean makes use of them -->
        <plugin>
@@ -111,7 +126,6 @@
         <configuration>
            <descriptors>
             <descriptor>src/main/assembly/site-component.xml</descriptor>
-            <descriptor>src/main/assembly/test-component.xml</descriptor>
           </descriptors>
         </configuration>
         <executions>
