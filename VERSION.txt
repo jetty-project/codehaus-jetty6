@@ -21,6 +21,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-595 SessionHandler only deals with base request session
  + JETTY-596 proxy support in HttpClient
  + JETTY-598 Added more reliable cometd message flush option
+ + JETTY-599 handle buffers consistently handle invalid index for poke
  + JETTY-603 Handle IPv6 in HttpURI
  + JETTY-605 Added optional threadpool to BayeuxService
  + JETTY-606 better writeTo impl for BIO
