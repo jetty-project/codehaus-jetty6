@@ -1,6 +1,4 @@
-
-
-jetty-7.0-SNAPSHOT
+jetty-7.0.0pre2 - 27 June 2008
  + JETTY-336 413 error for header buffer full
  + JETTY-425 race in stopping SelectManager
  + JETTY-568 Avoid freeing DirectBuffers. New locking NIO ResourceCache.
