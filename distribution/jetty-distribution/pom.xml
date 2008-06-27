@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-project</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0pre2</version>
   </parent>
   <artifactId>jetty-distribution</artifactId>
   <name>Jetty :: Distribution</name>
@@ -99,9 +99,6 @@
     </plugins>
   </build>
   <properties>
-  <!--
     <jetty.scm>scm:svn:http://svn.codehaus.org/jetty/jetty/tags/jetty-${project.version}</jetty.scm>
-    -->
-    <jetty.scm>scm:svn:http://svn.codehaus.org/jetty/jetty/trunk</jetty.scm>
   </properties>
 </project>
