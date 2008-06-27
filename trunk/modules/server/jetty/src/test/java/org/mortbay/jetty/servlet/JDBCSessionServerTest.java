@@ -14,9 +14,8 @@
 
 package org.mortbay.jetty.servlet;
 
-import junit.framework.TestCase;
 
-public class JDBCSessionServerTest extends TestCase
+public class JDBCSessionServerTest extends AbstractSessionTest
 {
     JDBCSessionServer _serverA;
     JDBCSessionServer _serverB;
@@ -55,55 +54,14 @@ public class JDBCSessionServerTest extends TestCase
         }
     }
     
-    public void setUp () throws Exception
+    public SessionTestServer newServer1 ()
     {
-        _serverA = new JDBCSessionServer (8010, "duke");
-        _serverA.start();
-        _serverB = new JDBCSessionServer (8011, "daisy");
-        _serverB.start();
+        return new JDBCSessionServer (Integer.parseInt(__port1), "duke");
     }
     
-    public void tearDown () throws Exception
+    public SessionTestServer newServer2 ()
     {
-        if (_serverA != null)
-            _serverA.stop();
-        if (_serverB != null)
-            _serverB.stop();
-        
-        _serverA=null;
-        _serverB=null;
+        return new JDBCSessionServer (Integer.parseInt(__port2), "daisy");
     }
     
-    public void testSessions () throws Exception
-    {
-        SessionTestClient client1 = new SessionTestClient("http://localhost:8010");
-        SessionTestClient client2 = new SessionTestClient("http://localhost:8011");
-        // confirm that user has no session
-        assertFalse(client1.send("/contextA", null));
-        String cookie1 = client1.newSession("/contextA");
-        assertNotNull(cookie1);
-        System.err.println("cookie1: " + cookie1);
-        
-        // confirm that client2 has the same session attributes as client1
-        assertTrue(client1.setAttribute("/contextA", cookie1, "foo", "bar"));        
-        assertTrue(client2.hasAttribute("/contextA", cookie1, "foo", "bar"));
-        
-        // confirm that /contextA would share same sessionId as /contextB        
-        assertTrue(client1.send("/contextA/dispatch/forward/contextB", cookie1));        
-        assertTrue(client2.send("/contextA/dispatch/forward/contextB", cookie1));
-        assertTrue(client1.send("/contextB", cookie1));
-        
-        String cookie2 = client2.newSession("/contextA");
-        assertNotNull(cookie2);
-        System.err.println("cookie2: " + cookie2);
-        
-        // confirm that client1 has same session attributes as client2
-        assertTrue(client2.setAttribute("/contextA", cookie2, "hello", "world"));
-        assertTrue(client1.hasAttribute("/contextA", cookie2, "hello", "world"));
-                
-        // confirm that /contextA would share same sessionId as /contextB        
-        assertTrue(client1.send("/contextA/dispatch/forward/contextB", cookie2));        
-        assertTrue(client2.send("/contextA/dispatch/forward/contextB", cookie2));
-        assertTrue(client1.send("/contextB", cookie2));
-    }
 }
