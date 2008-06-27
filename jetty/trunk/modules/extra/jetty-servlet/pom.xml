@@ -3,7 +3,7 @@
   <parent>
     <artifactId>modules-extra</artifactId>
     <groupId>org.mortbay.jetty</groupId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0pre2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-servlet</artifactId>

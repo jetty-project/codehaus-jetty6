@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>modules-extra</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0pre2</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>maven-jetty-plugin</artifactId>
-  <version>7.0-SNAPSHOT</version>
+  <version>7.0.0pre2</version>
   <packaging>pom</packaging>
   <name>Jetty Extra :: Maven Jetty Plugin :: Stub</name>
   <distributionManagement>
