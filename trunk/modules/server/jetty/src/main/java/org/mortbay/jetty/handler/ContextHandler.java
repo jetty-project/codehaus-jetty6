@@ -1332,7 +1332,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public String getServerInfo()
         {
-            return "jetty-"+getServer().getVersion();
+            return "jetty/"+getServer().getVersion();
         }
 
         /* ------------------------------------------------------------ */
