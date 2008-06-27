@@ -114,7 +114,7 @@ public class NIOBuffer extends AbstractBuffer
     public void poke(int index, byte b)
     {
         if (isReadOnly()) throw new IllegalStateException(__READONLY);
-        if (index <= 0) throw new IllegalArgumentException("index<=0: " + index + "<=0");
+        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
         if (index > capacity())
                 throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
         _buf.put(index, b);
