@@ -244,7 +244,7 @@ public abstract class SessionTestServer extends Server
                               HttpServletResponse response)
         throws ServletException, IOException
         {
-            handleForm(request, response);
+            request.getSession(true);
             dump(request, response);
         }
     }
