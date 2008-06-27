@@ -33,6 +33,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-613 various distribution related changes
  + JETTY-614 scanner allocates hashmap on every iteration
  + JETTY-615 Replaced CDDL servlet.jar with Apache-2.0 licensed version
+ + JETTY-623 ServletContext.getServerInfo() non compliant
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
