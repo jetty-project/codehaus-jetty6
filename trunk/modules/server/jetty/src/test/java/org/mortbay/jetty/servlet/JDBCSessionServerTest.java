@@ -76,6 +76,41 @@ public class JDBCSessionServerTest extends TestCase
     
     public void testSessions () throws Exception
     {
-        //TODO test session clustering
+        SessionTestClient client1 = new SessionTestClient("http://localhost:8010");
+        SessionTestClient client2 = new SessionTestClient("http://localhost:8011");
+        // confirm that user has no session
+        assertFalse(client1.send("/contextA", null));
+        String cookieA = client1.newSession("/contextA");
+        assertNotNull(cookieA);
+        System.err.println("cookieA: " + cookieA);
+        
+        // confirm that client2 has the same session attributes as client1
+        assertTrue(client1.setAttribute("/contextA", cookieA, "foo", "bar"));        
+        assertTrue(client2.hasAttribute("/contextA", cookieA, "foo", "bar"));
+        
+        /* Forward from contextA to contextB */
+        
+        // confirm that cookieA would not work on /contextB
+        assertFalse(client1.send("/contextA/dispatch/forward/contextB/session", cookieA));        
+        assertFalse(client2.send("/contextA/dispatch/forward/contextB/session", cookieA));
+        
+        /* contextB */
+        
+        // confirm that cookieA would not work on /contextB
+        assertFalse(client1.send("/contextB", cookieA));        
+        assertFalse(client1.hasAttribute("/contextB", cookieA, "foo", "bar"));        
+        assertFalse(client2.hasAttribute("/contextB", cookieA, "foo", "bar"));
+        
+        String cookieB = client2.newSession("/contextB");
+        assertNotNull(cookieB);
+        System.err.println("cookieB: " + cookieB);
+        
+        // confirm that client1 has same session attributes as client2
+        assertTrue(client2.setAttribute("/contextB", cookieB, "hello", "world"));
+        assertTrue(client1.hasAttribute("/contextB", cookieB, "hello", "world"));
+                
+        // confirm that cookieB would not work on /contextA
+        assertFalse(client1.hasAttribute("/contextA", cookieB, "hello", "world"));
+        assertFalse(client2.hasAttribute("/contextA", cookieB, "hello", "world"));
     }
 }
