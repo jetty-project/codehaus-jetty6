@@ -528,7 +528,7 @@ public class HttpConnection implements Connection
                     threadName=Thread.currentThread().getName();
                     Thread.currentThread().setName(threadName+" - "+_uri);
                 }
-                
+
                 if (_request.shouldHandleRequest())
                     _server.handle(this);
                 else
@@ -567,7 +567,6 @@ public class HttpConnection implements Connection
             finally
             {   
                 handling = !_request.unhandling() && _server != null;
-                
                 if (handling)
                     continue;
                 

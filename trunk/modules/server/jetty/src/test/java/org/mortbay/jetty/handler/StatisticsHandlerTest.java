@@ -20,17 +20,12 @@ public class StatisticsHandlerTest extends TestCase
     protected LocalConnector _connector;
 
     private StatisticsHandler _statsHandler;
-    private ContextHandler _contextHandler;
     
     protected void setUp() throws Exception
     {
-        _contextHandler = new ContextHandler("/");
         _statsHandler = new StatisticsHandler();
+        _server.setHandler(_statsHandler);
         
-        _contextHandler.setHandler(_statsHandler);
-        _server.setHandler(_contextHandler);
-
-        _contextHandler.addEventListener(_statsHandler.getEventListener());
         
         _connector = new LocalConnector();
         _server.setConnectors(new Connector[]
@@ -139,17 +134,16 @@ public class StatisticsHandlerTest extends TestCase
         assertEquals(4,_statsHandler.getResponses2xx());
     }
 
-    
-    /*
     public void testComplete() throws Exception
     {
-        int initialDelay = 100;
-        int completeDuration = 300;
+        int initialDelay = 200;
+        int completeDuration = 500;
         
-        process(new CompleteHandler(initialDelay, completeDuration, _server));
         
         synchronized(_server)
         {
+            process(new SuspendCompleteHandler(initialDelay, completeDuration, _server));
+            
             try 
             {
                 _server.wait();
@@ -163,7 +157,6 @@ public class StatisticsHandlerTest extends TestCase
         // fails; twice the expected value
         isApproximately(initialDelay + completeDuration,_statsHandler.getRequestsDurationTotal());
     }
-    */
     
     public void process() throws Exception
     {
@@ -321,12 +314,12 @@ public class StatisticsHandlerTest extends TestCase
 
     }
     
-    private class CompleteHandler extends HandlerWrapper
+    private class SuspendCompleteHandler extends HandlerWrapper
     {
         private long _initialDuration;
         private long _completeDuration;
         private Object _lock;
-        public CompleteHandler(int initialDuration, int completeDuration, Object lock)
+        public SuspendCompleteHandler(int initialDuration, int completeDuration, Object lock)
         {
             _initialDuration = initialDuration;
             _completeDuration = completeDuration;
@@ -354,7 +347,6 @@ public class StatisticsHandlerTest extends TestCase
                         try
                         {
                             Thread.sleep(_completeDuration);
-                            base_request.setContext(StatisticsHandlerTest.this._contextHandler._scontext);
                             base_request.complete();
                             
                             synchronized(_lock)

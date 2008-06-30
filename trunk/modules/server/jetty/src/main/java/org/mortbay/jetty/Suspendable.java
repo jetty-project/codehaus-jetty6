@@ -248,6 +248,10 @@ public class Suspendable
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return true if handling is complete, false if the request should 
+     * be handled again (eg because of a resume)
+     */
     public boolean unhandling()
     {
         synchronized (this)
@@ -265,9 +269,11 @@ public class Suspendable
                     _initial=false;
                     _state=__SUSPENDED;
                     scheduleTimeout(); // could block and change state.
-                    if (_state==__SUSPENDED)
+                    if (_state==__SUSPENDED || _state==__COMPLETING)
                         return true;
-                    // fall through to resuming action
+                    _initial=false;
+                    _state=__HANDLING;
+                    return false; 
 
                 case __RESUMING:
                     _initial=false;

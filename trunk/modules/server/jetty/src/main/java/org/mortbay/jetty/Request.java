@@ -37,6 +37,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
@@ -47,6 +49,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.jetty.security.Authenticator;
@@ -1692,6 +1695,14 @@ public class Request extends Suspendable implements HttpServletRequest
                 timeout=t.longValue();
         }
         suspend(timeout);
+
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void resume()
+    {
+        removeAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
+        super.resume();
     }
     
     /* ------------------------------------------------------------ */
@@ -1704,6 +1715,23 @@ public class Request extends Suspendable implements HttpServletRequest
         finally
         {
             super.complete();
+            
+            Object handlers = getAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
+            if(handlers != null )
+            {
+                for(int i=0;i<LazyList.size(handlers);i++)
+                {
+                    try
+                    {
+                        ((CompleteHandler)LazyList.get(handlers,i)).complete(this);
+                    }
+                    catch(Exception e)
+                    {
+                        Log.warn(e);
+                    }
+                }
+                removeAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
+            }
         }
     }
     
