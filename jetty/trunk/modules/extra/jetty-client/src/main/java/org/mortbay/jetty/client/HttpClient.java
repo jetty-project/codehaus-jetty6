@@ -15,32 +15,31 @@
 package org.mortbay.jetty.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.KeyStoreException;
+import java.security.Security;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
-import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.client.security.DefaultRealmResolver;
-import org.mortbay.jetty.client.security.SecurityRealm;
 import org.mortbay.jetty.client.security.SecurityRealmResolver;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
+import org.mortbay.resource.Resource;
 
 /**
  * Http Client.
@@ -87,6 +86,30 @@ public class HttpClient extends AbstractBuffers
     private Timeout _timeoutQ = new Timeout();
     private InetSocketAddress _proxy;
     private Set<InetAddress> _noProxy;
+    private int _maxRetries = 3;
+    private String _keyStoreLocation;
+    private String _keyStoreType;
+    private String _keyStorePassword;
+    private String _keyManagerAlgorithm = "JKS";
+    private String _keyManagerPassword;
+    private String _trustStoreLocation;
+    private String _trustStoreType;
+    private String _trustStorePassword;
+    private String _trustManagerAlgorithm = "JKS";
+    private String _trustManagerPassword;
+
+    private String _protocol="TLS";
+    private String _algorithm="SunX509"; // cert algorithm
+    private String _provider;
+    private String _secureRandomAlgorithm; // cert algorithm
+    private String _sslKeyManagerFactoryAlgorithm=(Security.getProperty("ssl.KeyManagerFactory.algorithm")==null?"SunX509":Security
+            .getProperty("ssl.KeyManagerFactory.algorithm")); // cert
+                                                                // algorithm
+
+    private String _sslTrustManagerFactoryAlgorithm=(Security.getProperty("ssl.TrustManagerFactory.algorithm")==null?"SunX509":Security
+            .getProperty("ssl.TrustManagerFactory.algorithm")); // cert
+
+
 
     private SecurityRealmResolver _realmResolver;    
 
@@ -330,8 +353,66 @@ public class HttpClient extends AbstractBuffers
 
     }
 
-    SSLContext getLooseSSLContext() throws IOException
+    protected SSLContext getSSLContext() throws IOException
     {
+        if ( _keyStoreLocation ==  null )
+        {            
+            return getLooseSSLContext();
+        }
+        else
+        {
+            return getStrictSSLContext();
+        }
+    }
+
+    protected SSLContext getStrictSSLContext() throws IOException
+    {
+
+        try
+        {
+            if (_trustStoreLocation==null)
+            {
+                _trustStoreLocation=_keyStoreLocation;
+                _trustStoreType=_keyStoreType;
+            }
+
+            KeyManager[] keyManagers=null;
+            InputStream keystoreInputStream = null;
+
+                keystoreInputStream= Resource.newResource(_keyStoreLocation).getInputStream();
+            KeyStore keyStore=KeyStore.getInstance(_keyStoreType);
+            keyStore.load(keystoreInputStream,_keyStorePassword==null?null:_keyStorePassword.toString().toCharArray());
+
+            KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_keyManagerAlgorithm);
+            keyManagerFactory.init(keyStore,_keyManagerPassword==null?null:_keyManagerPassword.toString().toCharArray());
+            keyManagers=keyManagerFactory.getKeyManagers();
+            
+            TrustManager[] trustManagers=null;
+            InputStream truststoreInputStream = null;
+
+                truststoreInputStream = Resource.newResource(_trustStoreLocation).getInputStream();
+            KeyStore trustStore=KeyStore.getInstance(_trustStoreType);
+            trustStore.load(truststoreInputStream,_trustStorePassword==null?null:_trustStorePassword.toString().toCharArray());
+
+            TrustManagerFactory trustManagerFactory=TrustManagerFactory.getInstance(_trustManagerAlgorithm);
+            trustManagerFactory.init(trustStore);
+            trustManagers=trustManagerFactory.getTrustManagers();
+
+            SecureRandom secureRandom=_secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
+            SSLContext context=_provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol,_provider);
+            context.init(keyManagers,trustManagers,secureRandom);
+            return context;
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+            throw new IOException( "error generating ssl context for " + _keyStoreLocation  + " " + e.getMessage() );
+        }
+    }
+
+    protected SSLContext getLooseSSLContext() throws IOException
+    {
+
         // Create a trust manager that does not validate certificate
         // chains
         TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
@@ -454,10 +535,32 @@ public class HttpClient extends AbstractBuffers
     /* ------------------------------------------------------------ */
     public int maxRetries()
     {
-        // TODO configurable
-        return 3;
+        return _maxRetries;
     }
     
-    
+     /* ------------------------------------------------------------ */
+    public void setMaxRetries( int retries )
+    {
+        _maxRetries = retries; 
+    }
 
+    public String getTrustStoreLocation()
+    {
+        return _trustStoreLocation;
+    }
+
+    public void setTrustStoreLocation(String trustStoreLocation)
+    {
+        this._trustStoreLocation = trustStoreLocation;
+    }
+
+    public String getKeyStoreLocation()
+    {
+        return _keyStoreLocation;
+    }
+
+    public void setKeyStoreLocation(String keyStoreLocation)
+    {
+        this._keyStoreLocation = keyStoreLocation;
+    }
 }
