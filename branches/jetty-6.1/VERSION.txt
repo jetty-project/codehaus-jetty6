@@ -1,3 +1,4 @@
+ + JETTY-571 SelectChannelConnector throws Exception on close on Windows
  + JETTY-599 handle buffers consistently handle invalid index for poke
  + JETTY-603 Handle IPv6 in HttpURI
  + JETTY-605 Added optional threadpool to BayeuxService
