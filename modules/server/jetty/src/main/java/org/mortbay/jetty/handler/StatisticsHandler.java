@@ -17,17 +17,15 @@ package org.mortbay.jetty.handler;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
+import org.mortbay.util.LazyList;
 
-public class StatisticsHandler extends HandlerWrapper
+public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
 {
     transient long _statsStartedAt;
     
@@ -52,24 +50,7 @@ public class StatisticsHandler extends HandlerWrapper
     transient int _responses5xx; // Server Error
     
     transient long _responsesBytesTotal;
-    
-    private ServletRequestListener _requestListener;
-
-    public StatisticsHandler()
-    {
-        _requestListener = new RequestListener();
-    }
-    
-    public ServletRequestListener getEventListener()
-    {
-        return _requestListener;
-    }
-    
-    public void setEventListener(ServletRequestListener requestListener)
-    {
-        _requestListener = requestListener; 
-    }
-    
+       
     /* ------------------------------------------------------------ */
     public void statsReset()
     {
@@ -145,11 +126,15 @@ public class StatisticsHandler extends HandlerWrapper
                     _requestsActiveDurationMax=duration;
 
                 
-                if(!base_request.isSuspended())
+                if(base_request.isSuspended())
+                {
+                    Object list = base_request.getAttribute(COMPLETE_HANDLER_ATTR);
+                    base_request.setAttribute(COMPLETE_HANDLER_ATTR, LazyList.add(list, this));
+                }
+                else
                 {
                     duration = System.currentTimeMillis()-timestamp0;                    
                     addRequestsDurationTotal(duration);
-                    System.out.println("timestamp0 (!suspended): " + duration);
                     
                     switch(base_response.getStatus()/100)
                     {
@@ -162,7 +147,6 @@ public class StatisticsHandler extends HandlerWrapper
                     
                     _responsesBytesTotal += base_response.getContentCount();
                 }                                            
-                
             }
         }
     }
@@ -346,57 +330,28 @@ public class StatisticsHandler extends HandlerWrapper
     
     private void addRequestsDurationTotal(long duration) 
     {
-        _requestsDurationTotal+=duration;
-        if (_requestsDurationMin==0 || duration<_requestsDurationMin)
-            _requestsDurationMin=duration;
-        if (duration>_requestsDurationMax)
-            _requestsDurationMax=duration;
+        synchronized(this)
+        {
+            _requestsDurationTotal+=duration;
+            if (_requestsDurationMin==0 || duration<_requestsDurationMin)
+                _requestsDurationMin=duration;
+            if (duration>_requestsDurationMax)
+                _requestsDurationMax=duration;
+        }
     }
 
-    private class RequestListener implements ServletRequestListener
-    {    
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletRequestListener#requestCompleted(javax.servlet.ServletRequestEvent)
-         */
-        public void requestCompleted(ServletRequestEvent rre)
-        {
-            final Request base_request=(rre.getServletRequest() instanceof Request)
-              ?((Request)rre.getServletRequest())
-              :HttpConnection.getCurrentConnection().getRequest();
-            
-            long duration = System.currentTimeMillis()-base_request.getTimeStamp();
-            System.out.println("in requests completed: " + duration);
-            StatisticsHandler.this.addRequestsDurationTotal(duration);
-        }
-
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletRequestListener#requestDestroyed(javax.servlet.ServletRequestEvent)
-         */
-        public void requestDestroyed(ServletRequestEvent sre)
-        {
-        }
-
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletRequestListener#requestInitialized(javax.servlet.ServletRequestEvent)
-         */
-        public void requestInitialized(ServletRequestEvent sre)
-        {
-        }
-
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletRequestListener#requestResumed(javax.servlet.ServletRequestEvent)
-         */
-        public void requestResumed(ServletRequestEvent rre)
-        {
-        }
-
-        /* (non-Javadoc)
-         * @see javax.servlet.ServletRequestListener#requestSuspended(javax.servlet.ServletRequestEvent)
-         */
-        public void requestSuspended(ServletRequestEvent rre)
-        {
-        }
-
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Handle completed requests.
+     * 
+     * @param request
+     *                the request which has just completed
+     */
+    public void complete(Request request)
+    {
+        long duration = System.currentTimeMillis() - request.getTimeStamp();
+        addRequestsDurationTotal(duration);
     }
 
 }

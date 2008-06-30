@@ -82,7 +82,7 @@ import org.mortbay.util.URIUtil;
  * @author gregw
  *
  */
-public class ContextHandler extends HandlerWrapper implements Attributes, Server.Graceful
+public class ContextHandler extends HandlerWrapper implements Attributes, Server.Graceful, CompleteHandler
 {
     private static ThreadLocal __context=new ThreadLocal();
     
@@ -758,7 +758,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                     for(int i=LazyList.size(_requestListeners);i-->0;)
                     {
                         if(request.isSuspended())
+                        {
                             ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestSuspended(event);
+                            
+                            Object list = request.getAttribute("org.mortbay.jetty.handler.CompleteHandlers");
+                            request.setAttribute("org.mortbay.jetty.handler.CompleteHandlers", LazyList.add(list, this));
+                        }
                         else 
                             ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
                     }
@@ -1591,6 +1596,19 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             return host.substring( 0, host.length() -1);
       
             return host;
+    }
+
+    public void complete(Request request)
+    {
+        if (_requestListeners!=null)
+        {
+            ServletRequestEvent event = new ServletRequestEvent(_scontext,request);
+            for(int i=0;i<LazyList.size(_requestListeners);i++)
+            {
+                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestCompleted(event);
+            }
+        }
+        
     }
 
 }
