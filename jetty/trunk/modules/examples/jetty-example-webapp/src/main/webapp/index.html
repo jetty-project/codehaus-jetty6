@@ -30,43 +30,21 @@ This is a test context that serves:
 <li>a <a href="snoop.jsp">Request Dump JSP</a></li>
 <li>a <a href="jsp/">Other JSP Tests</a></li>
 <li>a <a href="dispatch">Dispatcher Servlet</a></li>
-<li>a <a href="rewrite.html">Rewrite Handler</a></li>
 <li>a <a href="cgi-bin/hello.sh">CGI script</a>(unix only)</li>
-<li>a <a href="chat/chat.html">AJAX Chat with continuations</a></li>
 </ul>
 </p>
 
 <p>
 Other contexts:
 <ul>
+<li>a <a href="/cometd/">AJAX Cometd Chat with Bayeux</a></li>
 <li> the <a href="/javadoc/">javadoc</a> </li>
 <li> a demo of the <a href="/test-jndi">JNDI features</a></li>
+<li> a demo of the <a href="/test-jaas">JAAS features</a></li>
 </ul>
 </p>
 
-<p>There are also more test webapps available inside the <code>examples</code> directory of the Jetty distribution for embedded Jetty, JAAS, annotations and more. Note that you will need to build these examples first.
-</p>
-
-<p>
-The features of Jetty 7 are:
-<ul>
-<li>Servlet 3.0</li>
-<li>Totally rearchitected and rebuild, so 10 years of cruft could be removed!</li>
-<li>Improved "dependancy injection" and "inversion of control" design of components</li>
-<li>Improved "interceptor" design of handlers</li>
-<li>Smart split buffer design allows large buffers to only be allocated to active connections.
-The resulting memory savings allow very large buffers to be used, which increases the chance of 
-efficient asynchronous flushing and of avoiding chunking.</li>
-<li>Optional use of NIO Buffering so that efficient direct buffers and memory mapped files can be used.</li> 
-<li>Optional use of NIO non-blocking scheduling so that threads are not allocated per connection.</li> 
-<li>Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be
-sent as sent is a single operation.</li> 
-<li>Continuations for efficient AJAX polling</li>
-<li>java:comp/env naming lookups</li>
-<li>pluggable JTA transaction managers</li>
-</ul>
-</p>
-
+This webapp is deployed in $JETTY_HOME/webapp/test and configured by $JETTY_HOME/contexts/test.xml
 
 </BODY>
 </HTML>

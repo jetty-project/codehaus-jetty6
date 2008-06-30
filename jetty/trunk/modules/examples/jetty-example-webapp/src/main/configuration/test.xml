@@ -19,7 +19,7 @@ detected.
   <!--  + contextPath                                                  -->
   <!--  + war OR resourceBase                                          -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <Set name="contextPath">/test</Set>
+  <Set name="contextPath">/</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/test</Set>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
