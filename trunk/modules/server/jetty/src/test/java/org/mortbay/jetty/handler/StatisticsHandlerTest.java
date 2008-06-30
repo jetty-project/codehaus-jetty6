@@ -20,13 +20,18 @@ public class StatisticsHandlerTest extends TestCase
     protected LocalConnector _connector;
 
     private StatisticsHandler _statsHandler;
-
+    private ContextHandler _contextHandler;
+    
     protected void setUp() throws Exception
     {
+        _contextHandler = new ContextHandler("/");
         _statsHandler = new StatisticsHandler();
-        ;
-        _server.setHandler(_statsHandler);
+        
+        _contextHandler.setHandler(_statsHandler);
+        _server.setHandler(_contextHandler);
 
+        _contextHandler.addEventListener(_statsHandler.getEventListener());
+        
         _connector = new LocalConnector();
         _server.setConnectors(new Connector[]
         { _connector });
@@ -134,6 +139,32 @@ public class StatisticsHandlerTest extends TestCase
         assertEquals(4,_statsHandler.getResponses2xx());
     }
 
+    
+    /*
+    public void testComplete() throws Exception
+    {
+        int initialDelay = 100;
+        int completeDuration = 300;
+        
+        process(new CompleteHandler(initialDelay, completeDuration, _server));
+        
+        synchronized(_server)
+        {
+            try 
+            {
+                _server.wait();
+            }
+            catch(InterruptedException e)
+            {
+            }
+        }
+        
+        isApproximately(initialDelay,_statsHandler.getRequestsActiveDurationTotal());
+        // fails; twice the expected value
+        isApproximately(initialDelay + completeDuration,_statsHandler.getRequestsDurationTotal());
+    }
+    */
+    
     public void process() throws Exception
     {
         process(null);
@@ -288,5 +319,59 @@ public class StatisticsHandlerTest extends TestCase
 
         }
 
+    }
+    
+    private class CompleteHandler extends HandlerWrapper
+    {
+        private long _initialDuration;
+        private long _completeDuration;
+        private Object _lock;
+        public CompleteHandler(int initialDuration, int completeDuration, Object lock)
+        {
+            _initialDuration = initialDuration;
+            _completeDuration = completeDuration;
+            _lock = lock;
+        }
+        
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+        {
+            final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+            
+            if(base_request.isInitial())
+            {
+                try
+                {
+                    Thread.sleep(_initialDuration);
+                } catch (InterruptedException e1)
+                {
+                }
+                
+                base_request.suspend(_completeDuration * 10);
+                
+                (new Thread() {
+                    public void run()
+                    {
+                        try
+                        {
+                            Thread.sleep(_completeDuration);
+                            base_request.setContext(StatisticsHandlerTest.this._contextHandler._scontext);
+                            base_request.complete();
+                            
+                            synchronized(_lock)
+                            {
+                                _lock.notify();
+                            }
+                        }
+                        catch(IOException e)
+                        {
+                        }
+                        catch(InterruptedException e)
+                        {
+                        }
+                    }
+                }).start();
+            }
+        }
+   
     }
 }

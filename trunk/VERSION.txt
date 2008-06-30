@@ -26,6 +26,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-605 Added optional threadpool to BayeuxService
  + JETTY-606 better writeTo impl for BIO
  + JETTY-607 Add GigaSpaces session clustering
+ + JETTY-608 Suspend/Resume/Complete request listeners
  + JETTY-609 jetty-client improvements for http conversations
  + JETTY-610 jetty.class.path not being interpreted
  + JETTY-611 make general purpose jar scanning mechanism

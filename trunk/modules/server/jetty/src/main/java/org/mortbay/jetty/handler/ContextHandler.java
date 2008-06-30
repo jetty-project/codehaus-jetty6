@@ -724,7 +724,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 {
                     event = new ServletRequestEvent(_scontext,request);
                     for(int i=0;i<LazyList.size(_requestListeners);i++)
-                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
+                    {
+                        if(request.isInitial())
+                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
+                        else if(request.isResumed())
+                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestResumed(event);
+                    }
                 }
                 for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
                     base_request.addEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
@@ -751,7 +756,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 if (new_context)
                 {
                     for(int i=LazyList.size(_requestListeners);i-->0;)
-                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
+                    {
+                        if(request.isSuspended())
+                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestSuspended(event);
+                        else 
+                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
+                    }
                     
                     for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
                         base_request.removeEventListener(((EventListener)LazyList.get(_requestAttributeListeners,i)));
@@ -1582,6 +1592,5 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
       
             return host;
     }
-
 
 }
