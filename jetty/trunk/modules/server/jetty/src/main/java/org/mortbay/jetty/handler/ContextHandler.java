@@ -761,8 +761,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                         {
                             ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestSuspended(event);
                             
-                            Object list = request.getAttribute("org.mortbay.jetty.handler.CompleteHandlers");
-                            request.setAttribute("org.mortbay.jetty.handler.CompleteHandlers", LazyList.add(list, this));
+                            Object list = request.getAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
+                            request.setAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR, LazyList.add(list, this));
                         }
                         else 
                             ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
