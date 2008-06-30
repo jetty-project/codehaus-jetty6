@@ -1,6 +1,8 @@
 
-
 jetty-7.0-SNAPSHOT
+ + JETTY-608 Suspend/Resume/Complete request listeners
+
+jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full
  + JETTY-425 race in stopping SelectManager
  + JETTY-568 Avoid freeing DirectBuffers. New locking NIO ResourceCache.
@@ -26,7 +28,6 @@ jetty-7.0-SNAPSHOT
  + JETTY-605 Added optional threadpool to BayeuxService
  + JETTY-606 better writeTo impl for BIO
  + JETTY-607 Add GigaSpaces session clustering
- + JETTY-608 Suspend/Resume/Complete request listeners
  + JETTY-609 jetty-client improvements for http conversations
  + JETTY-610 jetty.class.path not being interpreted
  + JETTY-611 make general purpose jar scanning mechanism
