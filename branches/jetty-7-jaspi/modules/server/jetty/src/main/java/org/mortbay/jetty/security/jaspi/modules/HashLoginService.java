@@ -283,7 +283,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
                 }
                 public String toString()
                 {
-                    return "HashUserRealm$Scanner";
+                    return "HashLoginService$Scanner";
                 }
 
             });
@@ -324,7 +324,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
         KnownUser user;
         synchronized (this)
         {
-            user = (KnownUser)_users.get(nameCallback.getName());
+            user = getKnownUser(nameCallback.getName());
         }
         if (user != null && user.authenticate(passwordCallback.getPassword()))
         {
@@ -332,6 +332,11 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
             return new LoginResult(true, user, user.roles, subject);
         }
         return new LoginResult(false, null, null, null);
+    }
+
+    protected KnownUser getKnownUser(String userName)
+    {
+        return (KnownUser)_users.get(userName);
     }
 
     public void logout(Subject subject) throws AuthException

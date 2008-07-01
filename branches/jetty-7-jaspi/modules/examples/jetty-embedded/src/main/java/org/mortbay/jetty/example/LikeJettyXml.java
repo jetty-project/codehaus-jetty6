@@ -25,9 +25,8 @@ import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
+import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.thread.QueuedThreadPool;
 
 public class LikeJettyXml

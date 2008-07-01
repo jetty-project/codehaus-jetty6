@@ -89,12 +89,12 @@
               </sessionManager>
             </sessionHandler>
           </webAppConfig>
-          <userRealms>
-            <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
+          <loginServices>
+            <loginService implementation="org.mortbay.jetty.security.jaspi.modules.HashLoginService">
               <name>Test Realm</name>
               <config>../../../etc/realm.properties</config>
-            </userRealm>
-          </userRealms>
+            </loginService>
+          </loginServices>
         </configuration>
       </plugin>
       <!-- uncomment to precompile jsps -->
