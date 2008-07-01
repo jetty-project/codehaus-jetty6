@@ -45,6 +45,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.SSORealm;
+import org.mortbay.jetty.security.CrossContextPsuedoSession;
 import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
@@ -64,11 +65,14 @@ public class FormAuthModule extends BaseAuthModule
     //    private String realmName;
     private static final String LOGIN_PAGE_KEY = "org.mortbay.jetty.security.jaspi.modules.LoginPage";
     private static final String ERROR_PAGE_KEY = "org.mortbay.jetty.security.jaspi.modules.ErrorPage";
+    private static final String SSO_SOURCE_KEY = "org.mortbay.jetty.security.jaspi.modules.SsoSource";
 
     private String _formErrorPage;
     private String _formErrorPath;
     private String _formLoginPage;
     private String _formLoginPath;
+
+    private CrossContextPsuedoSession<UserInfo> ssoSource;
 
     public FormAuthModule()
     {
@@ -81,12 +85,21 @@ public class FormAuthModule extends BaseAuthModule
         setErrorPage(errorPage);
     }
 
+    public FormAuthModule(CallbackHandler callbackHandler, LoginService loginService, CrossContextPsuedoSession<UserInfo> ssoSource, String loginPage, String errorPage)
+    {
+        super(callbackHandler, loginService);
+        this.ssoSource = ssoSource;
+        setLoginPage(loginPage);
+        setErrorPage(errorPage);
+    }
+
     @Override
     public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException
     {
         super.initialize(requestPolicy, responsePolicy, handler, options);
         setLoginPage((String) options.get(LOGIN_PAGE_KEY));
         setErrorPage((String) options.get(ERROR_PAGE_KEY));
+        ssoSource = (CrossContextPsuedoSession<UserInfo>) options.get(SSO_SOURCE_KEY);
     }
 
     private void setLoginPage(String path)
@@ -145,14 +158,10 @@ public class FormAuthModule extends BaseAuthModule
 
                 final String username = request.getParameter(__J_USERNAME);
                 final char[] password = request.getParameter(__J_PASSWORD).toCharArray();
-                CallbackHandler loginCallbackHandler = new UserPasswordCallbackHandler(username, password);
-                LoginResult loginResult = loginService.login(clientSubject, loginCallbackHandler);
-                //TODO what should happen if !isMandatory but credentials exist and are wrong?
-                if (loginResult.isSuccess())
+                boolean success = tryLogin(messageInfo, clientSubject, response, session, username, password);
+                if (success)
                 {
-                    callbackHandler.handle(new Callback[]{loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
-                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
-
+                    // Redirect to original request
                     String nuri = (String) session.getAttribute(__J_URI);
                     if (nuri == null || nuri.length() == 0)
                     {
@@ -161,16 +170,8 @@ public class FormAuthModule extends BaseAuthModule
                             nuri = URIUtil.SLASH;
                     }
                     session.removeAttribute(__J_URI); // Remove popped return URI.
-                    FormCredential form_cred = new FormCredential(username, password, loginResult.getCallerPrincipalCallback().getPrincipal());
-
-                    session.setAttribute(__J_AUTHENTICATED, form_cred);
-                    // Sign-on to SSO mechanism
-//                    if (realm instanceof SSORealm)
-//                        ((SSORealm)realm).setSingleSignOn(request,response,form_cred._userPrincipal,new Password(form_cred._jPassword));
-
-                    // Redirect to original request
-                        response.setContentLength(0);
-                        response.sendRedirect(response.encodeRedirectURL(nuri));
+                    response.setContentLength(0);
+                    response.sendRedirect(response.encodeRedirectURL(nuri));
 
                     return AuthStatus.SEND_CONTINUE;
                 }
@@ -197,20 +198,32 @@ public class FormAuthModule extends BaseAuthModule
 
             if (form_cred != null)
             {
-                CallbackHandler loginCallbackHandler = new UserPasswordCallbackHandler(form_cred._jUserName, form_cred._jPassword);
-                LoginResult loginResult = loginService.login(clientSubject, loginCallbackHandler);
-                //TODO what should happen if !isMandatory but credentials exist and are wrong?
-                if (loginResult.isSuccess())
+                boolean success = tryLogin(messageInfo, clientSubject, response, session, form_cred._jUserName, form_cred._jPassword);
+                if (success)
                 {
-                    callbackHandler.handle(new Callback[]{loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
-                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
-
-                    form_cred = new FormCredential(form_cred._jUserName, form_cred._jPassword, loginResult.getCallerPrincipalCallback().getPrincipal());
-
-                    session.setAttribute(__J_AUTHENTICATED, form_cred);
-                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
                     return AuthStatus.SUCCESS;
                 }
+//                CallbackHandler loginCallbackHandler = new UserPasswordCallbackHandler(form_cred._jUserName, form_cred._jPassword);
+//                LoginResult loginResult = loginService.login(clientSubject, loginCallbackHandler);
+//                //TODO what should happen if !isMandatory but credentials exist and are wrong?
+//                if (loginResult.isSuccess())
+//                {
+//                    callbackHandler.handle(new Callback[]{loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
+//                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
+//
+//                    form_cred = new FormCredential(form_cred._jUserName, form_cred._jPassword, loginResult.getCallerPrincipalCallback().getPrincipal());
+//
+//                    session.setAttribute(__J_AUTHENTICATED, form_cred);
+//                    if (ssoSource != null && ssoSource.fetch(request) == null)
+//                    {
+//                        UserInfo userInfo = new UserInfo(form_cred._jUserName, form_cred._jPassword);
+//                        ssoSource.store(userInfo,  response);
+//                    }
+//                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
+//                    return AuthStatus.SUCCESS;
+//                }
+
+
 //                // We have a form credential. Has it been distributed?
 //                if (form_cred._userPrincipal==null)
 //                {
@@ -257,6 +270,18 @@ public class FormAuthModule extends BaseAuthModule
 //                    return form_cred._userPrincipal;
 //                }
             }
+            else if (ssoSource != null)
+            {
+                UserInfo userInfo = ssoSource.fetch(request);
+                if (userInfo != null)
+                {
+                    boolean success = tryLogin(messageInfo, clientSubject, response, session, userInfo.getUserName(), userInfo.getPassword());
+                    if (success)
+                    {
+                        return AuthStatus.SUCCESS;
+                    }
+                }
+            }
 
             // Don't authenticate authform or errorpage
             if (!isMandatory(messageInfo) || isLoginOrErrorPage(uri))
@@ -285,6 +310,31 @@ public class FormAuthModule extends BaseAuthModule
             throw new AuthException(e.getMessage());
         }
 
+    }
+
+    private boolean tryLogin(MessageInfo messageInfo, Subject clientSubject, HttpServletResponse response, HttpSession session, String username, char[] password)
+            throws AuthException, IOException, UnsupportedCallbackException
+    {
+        CallbackHandler loginCallbackHandler = new UserPasswordCallbackHandler(username, password);
+        LoginResult loginResult = loginService.login(clientSubject, loginCallbackHandler);
+        //TODO what should happen if !isMandatory but credentials exist and are wrong?
+        if (loginResult.isSuccess())
+        {
+            callbackHandler.handle(new Callback[]{loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
+            messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
+
+            FormCredential form_cred = new FormCredential(username, password, loginResult.getCallerPrincipalCallback().getPrincipal());
+
+            session.setAttribute(__J_AUTHENTICATED, form_cred);
+            // Sign-on to SSO mechanism
+            if (ssoSource != null)
+            {
+                UserInfo userInfo = new UserInfo(username, password);
+                ssoSource.store(userInfo,  response);
+            }
+
+        }
+        return loginResult.isSuccess();
     }
 
 
