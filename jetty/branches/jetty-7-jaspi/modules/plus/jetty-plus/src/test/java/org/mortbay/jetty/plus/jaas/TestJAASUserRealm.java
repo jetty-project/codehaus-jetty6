@@ -21,14 +21,25 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Arrays;
+import java.util.List;
+import java.security.Principal;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.Subject;
+import javax.security.auth.message.AuthStatus;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -36,11 +47,12 @@ import junit.framework.TestSuite;
 
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.security.jaspi.modules.LoginResult;
 
 
 /* ---------------------------------------------------- */
 /** TestJAASUserRealm
- * <p> Test JAAS in Jetty - relies on the JDBCUserRealm.
+ * <p> Test JAAS in Jetty - relies on the JAASLoginService.
  *
  * <p><h4>Notes</h4>
  * <p>
@@ -191,46 +203,48 @@ public class TestJAASUserRealm extends TestCase
             connection.close();
             
             
-            //create a JAASUserRealm
-            JAASUserRealm realm = new JAASUserRealm ("testRealm");
+            //create a JAASLoginService
+            JAASLoginService loginService = new JAASLoginService("testRealm");
             
-            realm.setLoginModuleName ("ds");
+            loginService.setLoginModuleName ("ds");
+
+            LoginResult loginResult = loginService.login(new Subject(), new UserPasswordCallbackHandler("me", "blah".toCharArray()));
+            assertFalse (loginResult.isSuccess());
             
+            loginResult = loginService.login (new Subject(), new UserPasswordCallbackHandler("me", "me".toCharArray()));
             
-            JAASUserPrincipal userPrincipal = (JAASUserPrincipal)realm.authenticate ("me", "blah",(Request)null);
-            assertNull (userPrincipal);
-            
-            userPrincipal = (JAASUserPrincipal)realm.authenticate ("me", "me", (Request)null);
-            
-            assertNotNull (userPrincipal);
-            assertNotNull (userPrincipal.getName());
+            assertTrue (loginResult.isSuccess());
+            assertNotNull ("CallerPrincipalCallback expected", loginResult.getCallerPrincipalCallback());
+            Principal userPrincipal = loginResult.getCallerPrincipalCallback().getPrincipal();
+            assertNotNull ("principal expected", userPrincipal);
             assertTrue (userPrincipal.getName().equals("me"));
+            List<String> groups = Arrays.asList(loginResult.getGroupPrincipalCallback().getGroups());
+
+            assertTrue (groups.contains("roleA"));
+            assertTrue (groups.contains("roleB"));
+            assertFalse (groups.contains("roleC"));
             
-            assertTrue (userPrincipal.isUserInRole("roleA"));
-            assertTrue (userPrincipal.isUserInRole("roleB"));
-            assertTrue (!userPrincipal.isUserInRole("roleC"));
-            
-            realm.pushRole (userPrincipal, "roleC");
-            assertTrue (userPrincipal.isUserInRole("roleC"));
-            assertTrue (!userPrincipal.isUserInRole("roleA"));
-            assertTrue (!userPrincipal.isUserInRole("roleB"));
-            
-            realm.pushRole (userPrincipal, "roleD");
-            assertTrue (userPrincipal.isUserInRole("roleD"));
-            assertTrue (!userPrincipal.isUserInRole("roleC"));
-            assertTrue (!userPrincipal.isUserInRole("roleA"));
-            assertTrue (!userPrincipal.isUserInRole("roleB"));
-            
-            realm.popRole(userPrincipal);
-            assertTrue (userPrincipal.isUserInRole("roleC"));
-            assertTrue (!userPrincipal.isUserInRole("roleA"));
-            assertTrue (!userPrincipal.isUserInRole("roleB"));
-            
-            realm.popRole(userPrincipal);
-            assertTrue (!userPrincipal.isUserInRole("roleC"));
-            assertTrue (userPrincipal.isUserInRole("roleA"));
-            
-            realm.disassociate(userPrincipal);
+//            loginService.pushRole (userPrincipal, "roleC");
+//            assertTrue (userPrincipal.isUserInRole("roleC"));
+//            assertTrue (!userPrincipal.isUserInRole("roleA"));
+//            assertTrue (!userPrincipal.isUserInRole("roleB"));
+//
+//            loginService.pushRole (userPrincipal, "roleD");
+//            assertTrue (userPrincipal.isUserInRole("roleD"));
+//            assertTrue (!userPrincipal.isUserInRole("roleC"));
+//            assertTrue (!userPrincipal.isUserInRole("roleA"));
+//            assertTrue (!userPrincipal.isUserInRole("roleB"));
+//
+//            loginService.popRole(userPrincipal);
+//            assertTrue (userPrincipal.isUserInRole("roleC"));
+//            assertTrue (!userPrincipal.isUserInRole("roleA"));
+//            assertTrue (!userPrincipal.isUserInRole("roleB"));
+//
+//            loginService.popRole(userPrincipal);
+//            assertTrue (!userPrincipal.isUserInRole("roleC"));
+//            assertTrue (userPrincipal.isUserInRole("roleA"));
+//
+//            loginService.disassociate(userPrincipal);
         }
         finally
         {
@@ -256,23 +270,25 @@ public class TestJAASUserRealm extends TestCase
     public void testItPropertyFile ()
         throws Exception
     {
-        //create a JAASUserRealm
-        JAASUserRealm realm = new JAASUserRealm ("props");
-        realm.setLoginModuleName ("props");
+        //create a JAASLoginService
+        JAASLoginService loginService = new JAASLoginService("props");
+        loginService.setLoginModuleName ("props");
 
-        JAASUserPrincipal userPrincipal = (JAASUserPrincipal)realm.authenticate ("user", "wrong",(Request)null);
-        assertNull (userPrincipal);
-        
-        userPrincipal = (JAASUserPrincipal)realm.authenticate ("user", "user", (Request)null);
+        LoginResult loginResult = loginService.login(new Subject(), new UserPasswordCallbackHandler("user", "wrong".toCharArray()));
+        assertFalse (loginResult.isSuccess());
 
-        assertNotNull (userPrincipal);
-        assertTrue (userPrincipal.getName().equals("user"));
+        loginResult = loginService.login (new Subject(), new UserPasswordCallbackHandler("user", "user".toCharArray()));
 
-        assertTrue (userPrincipal.isUserInRole("pleb"));
-        assertTrue (userPrincipal.isUserInRole("user"));
-        assertTrue (!userPrincipal.isUserInRole("other"));       
-       
-        realm.disassociate (userPrincipal);  
+        assertTrue (loginResult.isSuccess());
+        assertNotNull ("CallerPrincipalCallback expected", loginResult.getCallerPrincipalCallback());
+        Principal userPrincipal = loginResult.getCallerPrincipalCallback().getPrincipal();
+        assertNotNull ("principal expected", userPrincipal);
+        assertEquals (userPrincipal.getName(),"user");
+        List<String> groups = Arrays.asList(loginResult.getGroupPrincipalCallback().getGroups());
+
+        assertTrue (groups.contains("pleb"));
+        assertTrue (groups.contains("user"));
+        assertFalse (groups.contains("other"));
     }
 
     public void tearDown ()
@@ -281,5 +297,32 @@ public class TestJAASUserRealm extends TestCase
        
     }
     
-    
+    //from FormAuthModule
+    private static class UserPasswordCallbackHandler implements CallbackHandler
+    {
+        private final String username;
+        private final char[] password;
+
+        public UserPasswordCallbackHandler(String username, char[] password)
+        {
+            this.username = username;
+            this.password = password;
+        }
+
+        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
+        {
+            for (Callback callback : callbacks)
+            {
+                if (callback instanceof NameCallback)
+                {
+                    ((NameCallback) callback).setName(username);
+                }
+                else if (callback instanceof PasswordCallback)
+                {
+                    ((PasswordCallback) callback).setPassword(password);
+                }
+            }
+        }
+    }
+
 }

@@ -35,6 +35,7 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
+import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
 import org.mortbay.jetty.servlet.SessionHandler;
 
 /**
@@ -42,6 +43,9 @@ import org.mortbay.jetty.servlet.SessionHandler;
  */
 public class ConstraintTest extends TestCase
 {
+
+    private static final String TEST_REALM = "TestRealm";
+
     Server _server = new Server();
     LocalConnector _connector = new LocalConnector();
     ContextHandler _context = new ContextHandler();
@@ -49,100 +53,7 @@ public class ConstraintTest extends TestCase
     ConstraintSecurityHandler _security = new ConstraintSecurityHandler();
     final ServletCallbackHandler callbackHandler = new ServletCallbackHandler();
     LoginService loginService = new HashLoginService("TestLoginService", Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
-    ServerAuthContext authContext = new BasicAuthModule(callbackHandler, loginService, TEST_REALM);
-    private static final String TEST_REALM = "TestRealm";
-//    ServerAuthContext authContext = new ServerAuthContext()
-//    {
-//
-//        private final String _username = "user";
-//        private final Object _credentials = "pass";
-//        public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException
-//        {
-//        }
-//
-//        public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException
-//        {
-//            return null;
-//        }
-//
-//        public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException
-//        {
-//
-//            HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-//            HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
-//            String credentials = request.getHeader(HttpHeaders.AUTHORIZATION);
-//
-//            if (credentials != null)
-//            {
-//                try
-//                {
-//                    if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
-//                    credentials = credentials.substring(credentials.indexOf(' ') + 1);
-//                    credentials = B64Code.decode(credentials, StringUtil.__ISO_8859_1);
-//                    int i = credentials.indexOf(':');
-//                    final String username = credentials.substring(0, i);
-//                    String password = credentials.substring(i + 1);
-//                    if (!_username.equals(username) || !_credentials.equals(password))
-//                    {
-////                        return ((JettyMessageInfo) messageInfo).isMandatory() ? AuthStatus.FAILURE : AuthStatus.SUCCESS;
-//                        //or this????
-//                        return doFail(messageInfo, request, response);
-////                        return AuthStatus.FAILURE;
-//                    }
-//                    callbackHandler.handle(new Callback[]{
-//                            new CallerPrincipalCallback(clientSubject, new Principal()
-//                            {
-//
-//                                public String getName()
-//                                {
-//                                    return username;
-//                                }
-//                            }),
-//                            new GroupPrincipalCallback(clientSubject, new String[]{username})});
-//                    return AuthStatus.SUCCESS;
-//                }
-//                catch (IOException e)
-//                {
-//                    //ignore
-//                }
-//                catch (UnsupportedCallbackException e)
-//                {
-//                    //ignore
-//                }
-//                return AuthStatus.FAILURE;
-//            }
-//            else
-//            {
-//                return doFail(messageInfo, request, response);
-////                return ((JettyMessageInfo) messageInfo).isMandatory() ? AuthStatus.FAILURE : AuthStatus.SUCCESS;
-////                return AuthStatus.FAILURE;
-//            }
-//        }
-//
-//        private AuthStatus doFail(MessageInfo messageInfo, HttpServletRequest request, HttpServletResponse response)
-//        {
-//            if (((JettyMessageInfo) messageInfo).isMandatory())
-//            {
-//                try
-//                {
-//                    response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\""+ TEST_REALM +'"');
-//                    response.sendError(Response.SC_UNAUTHORIZED);
-//                    Request base_request = (request instanceof Request) ? (Request)request: HttpConnection.getCurrentConnection().getRequest();
-////                    base_request.setAuthType(Constraint.__BASIC_AUTH);
-//                    base_request.setHandled(true);
-//                }
-//                catch (IOException e)
-//                {
-//                    //ignore
-//                }
-//                return AuthStatus.FAILURE;
-//            }
-//            return AuthStatus.SUCCESS;
-//        }
-//    };
-
     RequestHandler _handler = new RequestHandler();
-//    UserRealm _realm = new TestUserRealm();
 
     public ConstraintTest(String arg0)
     {
@@ -155,7 +66,6 @@ public class ConstraintTest extends TestCase
         _context.setHandler(_session);
         _session.setHandler(_security);
         _security.setHandler(_handler);
-        _security.setAuthContext(authContext);
         _security.setServletCallbackHandler(callbackHandler);
 
         Constraint constraint0 = new Constraint();
@@ -173,7 +83,6 @@ public class ConstraintTest extends TestCase
         mapping1.setPathSpec("/auth/*");
         mapping1.setConstraint(constraint1);
 
-//        _security.setUserRealm(_realm);
         _security.setConstraintMappings(new ConstraintMapping[]
                 {
                         mapping0, mapping1
@@ -192,7 +101,6 @@ public class ConstraintTest extends TestCase
     {
         super.setUp();
 
-        _server.start();
     }
 
     /*
@@ -208,7 +116,10 @@ public class ConstraintTest extends TestCase
     public void testBasic()
             throws Exception
     {
-//        _security.setAuthenticator(new BasicAuthenticator());
+        ServerAuthContext authContext = new BasicAuthModule(callbackHandler, loginService, TEST_REALM);
+        _security.setAuthContext(authContext);
+        _server.start();
+
         String response;
 
         response = _connector.getResponses("GET /ctx/noauth/info HTTP/1.0\r\n\r\n");
@@ -238,13 +149,13 @@ public class ConstraintTest extends TestCase
 
     }
 
-    public void XXXtestForm()
+    public void testForm()
             throws Exception
     {
-//        FormAuthenticator authenticator = new FormAuthenticator();
-//        authenticator.setErrorPage("/testErrorPage");
-//        authenticator.setLoginPage("/testLoginPage");
-//        _security.setAuthenticator(authenticator);
+        ServerAuthContext authContext = new FormAuthModule(callbackHandler, loginService, "/testLoginPage", "/testErrorPage");
+        _security.setAuthContext(authContext);
+        _server.start();
+
         String response;
 
         _connector.reopen();

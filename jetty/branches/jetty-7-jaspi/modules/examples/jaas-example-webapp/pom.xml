@@ -75,7 +75,7 @@
             </systemProperty>
           </systemProperties>
           <userRealms>
-            <userRealm implementation="org.mortbay.jetty.plus.jaas.JAASUserRealm">
+            <userRealm implementation="org.mortbay.jetty.plus.jaas.JAASLoginService">
               <name>Test JAAS Realm</name>
               <loginModuleName>xyz</loginModuleName>
             </userRealm>

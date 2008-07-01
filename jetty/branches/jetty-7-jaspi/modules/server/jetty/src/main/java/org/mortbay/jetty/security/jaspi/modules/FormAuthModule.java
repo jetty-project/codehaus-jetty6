@@ -43,9 +43,8 @@ import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.security.JettyMessageInfo;
-import org.mortbay.jetty.security.SSORealm;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
+import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;

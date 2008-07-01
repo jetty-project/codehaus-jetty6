@@ -21,17 +21,13 @@
 package org.mortbay.jetty.security;
 
 import java.security.Principal;
-import java.util.Map;
 import java.io.IOException;
 
-import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.AuthException;
-import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
