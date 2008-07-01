@@ -50,7 +50,7 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class FormAuthModule extends BaseAuthModule
 {
@@ -130,10 +130,11 @@ public class FormAuthModule extends BaseAuthModule
     {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
-        HttpSession session = request.getSession(response != null);
-        if (session == null)
-            return null;
+        HttpSession session = request.getSession(isMandatory(messageInfo));
         String uri = request.getPathInfo();
+        //not mandatory and not authenticated
+        if (session == null || isLoginOrErrorPage(uri))
+            return AuthStatus.SUCCESS;
 
         try
         {
@@ -168,11 +169,8 @@ public class FormAuthModule extends BaseAuthModule
 //                        ((SSORealm)realm).setSingleSignOn(request,response,form_cred._userPrincipal,new Password(form_cred._jPassword));
 
                     // Redirect to original request
-                    if (response != null)
-                    {
                         response.setContentLength(0);
                         response.sendRedirect(response.encodeRedirectURL(nuri));
-                    }
 
                     return AuthStatus.SEND_CONTINUE;
                 }
