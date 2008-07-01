@@ -35,11 +35,8 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
 import org.mortbay.jetty.security.Credential;
 import org.mortbay.jetty.security.Password;
-import org.mortbay.jetty.security.SSORealm;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Scanner;
@@ -63,14 +60,10 @@ import org.mortbay.util.Scanner.BulkListener;
  * If DIGEST Authentication is used, the password must be in a recoverable
  * format, either plain text or OBF:.
  *
- * The HashUserRealm also implements SSORealm but provides no implementation
- * of SSORealm. Instead setSSORealm may be used to provide a delegate
- * SSORealm implementation.
- *
  * @see org.mortbay.jetty.security.Password
  * @author Greg Wilkins (gregw)
  */
-public class HashLoginService extends AbstractLifeCycle implements LoginService, SSORealm
+public class HashLoginService extends AbstractLifeCycle implements LoginService
 {
     private static final String[] NO_ROLES = new String[0];
 
@@ -83,7 +76,6 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService,
     private String _config;
     private Resource _configResource;
     protected Map<String, User> _users=new HashMap<String, User>();
-    private SSORealm _ssoRealm;
     private Scanner _scanner;
     private int _refreshInterval=0;//default is not to reload
 
@@ -111,6 +103,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService,
     /** Constructor.
      * @param name Realm name
      * @param config Filename or url of user properties file.
+     * @throws java.io.IOException if user properties file could not be loaded
      */
     public HashLoginService(String name, String config)
         throws IOException
@@ -130,7 +123,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService,
      * an optional comma separated list of role names.
      *
      * @param config Filename or url of user properties file.
-     * @exception java.io.IOException
+     * @exception java.io.IOException if user properties file could not be loaded
      */
     public void setConfig(String config)
         throws IOException
@@ -163,31 +156,28 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService,
             Properties properties = new Properties();
             properties.load(_configResource.getInputStream());
 
-            Iterator iter = properties.entrySet().iterator();
-            while(iter.hasNext())
+            for (Map.Entry<Object, Object> entry : properties.entrySet())
             {
-                Map.Entry entry = (Map.Entry)iter.next();
-
-                String username=entry.getKey().toString().trim();
-                String credentials=entry.getValue().toString().trim();
-                String roles=null;
-                int c=credentials.indexOf(',');
-                if (c>0)
+                String username = ((String) entry.getKey()).trim();
+                String credentials = ((String) entry.getValue()).trim();
+                String roles = null;
+                int c = credentials.indexOf(',');
+                if (c > 0)
                 {
-                    roles=credentials.substring(c+1).trim();
-                    credentials=credentials.substring(0,c).trim();
+                    roles = credentials.substring(c + 1).trim();
+                    credentials = credentials.substring(0, c).trim();
                 }
 
-                if (username!=null && username.length()>0 &&
-                        credentials!=null && credentials.length()>0)
+                if (username != null && username.length() > 0 &&
+                        credentials != null && credentials.length() > 0)
                 {
 
                     String[] roleArray = NO_ROLES;
-                    if(roles!=null && roles.length()>0)
+                    if (roles != null && roles.length() > 0)
                     {
                         roleArray = roles.split(",");
                     }
-                    put(username,new KnownUser(username,new Password(credentials),roleArray));
+                    put(username, new KnownUser(username, new Password(credentials), roleArray));
                 }
             }
         }
@@ -245,51 +235,6 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService,
         out.println(super.toString());
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The SSORealm to delegate single sign on requests to.
-     */
-    public SSORealm getSSORealm()
-    {
-        return _ssoRealm;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the SSORealm.
-     * A SSORealm implementation may be set to enable support for SSO.
-     * @param ssoRealm The SSORealm to delegate single sign on requests to.
-     */
-    public void setSSORealm(SSORealm ssoRealm)
-    {
-        _ssoRealm = ssoRealm;
-    }
-
-    /* ------------------------------------------------------------ */
-    public Credential getSingleSignOn(Request request,Response response)
-    {
-        if (_ssoRealm!=null)
-            return _ssoRealm.getSingleSignOn(request,response);
-        return null;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setSingleSignOn(Request request,Response response,Principal principal,Credential credential)
-    {
-        if (_ssoRealm!=null)
-            _ssoRealm.setSingleSignOn(request,response,principal,credential);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void clearSingleSignOn(String username)
-    {
-        if (_ssoRealm!=null)
-            _ssoRealm.clearSingleSignOn(username);
-    }
-
-
-
-
-
     /**
      * @see org.mortbay.component.AbstractLifeCycle#doStart()
      */
@@ -303,7 +248,7 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService,
         {
             _scanner = new Scanner();
             _scanner.setScanInterval(getRefreshInterval());
-            List dirList = new ArrayList(1);
+            List<File> dirList = new ArrayList<File>(1);
             dirList.add(_configResource.getFile());
             _scanner.setScanDirs(dirList);
             _scanner.setFilenameFilter(new FilenameFilter ()
