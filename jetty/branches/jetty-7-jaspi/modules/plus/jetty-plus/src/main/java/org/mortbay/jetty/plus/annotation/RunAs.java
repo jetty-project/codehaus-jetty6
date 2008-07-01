@@ -15,24 +15,23 @@
 
 package org.mortbay.jetty.plus.annotation;
 
-import javax.servlet.Servlet;
-
+import org.mortbay.jetty.security.AbstractSecurityHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
  * RunAs
- *
+ * <p/>
  * Represents a &lt;run-as&gt; element in web.xml, or a runAs annotation.
  */
 public class RunAs
 {
     private Class _targetClass;
     private String _roleName;
-    
+
     public RunAs()
     {}
-    
-    
+
+
     public void setTargetClass (Class clazz)
     {
         _targetClass=clazz;
@@ -42,23 +41,25 @@ public class RunAs
     {
         return _targetClass;
     }
-    
+
     public void setRoleName (String roleName)
     {
         _roleName = roleName;
     }
-    
+
     public String getRoleName ()
     {
         return _roleName;
     }
-    
-    
-    public void setRunAs (ServletHolder holder)
+
+
+    public void setRunAs (ServletHolder holder, AbstractSecurityHandler securityHandler)
     {
-        if (holder==null)
+        if (holder == null)
+            return;
+        if (securityHandler == null)
             return;
         if (holder.getClassName().equals(_targetClass.getName()))
-            holder.setRunAs(_roleName); 
+            holder.setRunAs(securityHandler.newRunAsToken(_roleName));
     }
 }

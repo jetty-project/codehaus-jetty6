@@ -67,21 +67,23 @@ public class HashSSORealm implements SSORealm
         if (principal!=null && credential!=null)
         {
             // TODO - make this work for non webapps
-            UserRealm realm = ((WebAppContext)(request.getContext().getContextHandler())).getSecurityHandler().getUserRealm();
-            if (realm.reauthenticate(principal))
-            {
-                request.setUserPrincipal(principal);
-                return credential;
-            }
-            else
-            {
-                synchronized(_ssoId2Principal)
-                {
-                    _ssoId2Principal.remove(ssoID);
-                    _ssoPrincipal2Credential.remove(principal);
-                    _ssoUsername2Id.remove(principal.getName());
-                }    
-            }
+            //TODO JASPE commented out
+//            UserRealm realm = ((WebAppContext)(request.getContext().getContextHandler())).getSecurityHandler().getUserRealm();
+//            if (realm.reauthenticate(principal))
+//            {
+//                //jaspi
+////                request.setUserPrincipal(principal);
+//                return credential;
+//            }
+//            else
+//            {
+//                synchronized(_ssoId2Principal)
+//                {
+//                    _ssoId2Principal.remove(ssoID);
+//                    _ssoPrincipal2Credential.remove(principal);
+//                    _ssoUsername2Id.remove(principal.getName());
+//                }
+//            }
         }
         return null;
     }

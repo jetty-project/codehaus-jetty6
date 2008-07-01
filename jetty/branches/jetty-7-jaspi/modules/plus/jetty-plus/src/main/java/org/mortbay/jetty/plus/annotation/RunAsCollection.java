@@ -18,6 +18,7 @@ package org.mortbay.jetty.plus.annotation;
 import java.util.HashMap;
 
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.security.AbstractSecurityHandler;
 import org.mortbay.log.Log;
 
 
@@ -42,7 +43,7 @@ public class RunAsCollection
     }
 
     
-    public void setRunAs (Object o)
+    public void setRunAs(Object o, AbstractSecurityHandler securityHandler)
     {
         if (o==null)
             return;
@@ -56,7 +57,7 @@ public class RunAsCollection
         if (runAs == null)
             return;
 
-        runAs.setRunAs(holder); 
+        runAs.setRunAs(holder, securityHandler); 
     }
 
 }

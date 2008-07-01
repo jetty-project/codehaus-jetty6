@@ -32,14 +32,12 @@ import org.mortbay.jetty.Request;
 public interface UserRealm
 {
     /* ------------------------------------------------------------ */
+    /**
+     * used by authenticators in challenges
+     * @return realm name
+     */
     public String getName();
 
-    /* ------------------------------------------------------------ */
-    /** Get the principal for a username.
-     * This method is not guaranteed to return a Principal for non-authenticated users.
-     */
-    public Principal getPrincipal(String username);
-    
     /* ------------------------------------------------------------ */
     /** Authenticate a users credentials.
      * Implementations of this method may adorn the calling context to
@@ -55,6 +53,7 @@ public interface UserRealm
      * FORM authentication).
      * @return The authenticated UserPrincipal.
      */
+    //jaspi called only from authenticators and tests
     public Principal authenticate(String username,Object credentials,Request request);
 
     /* ------------------------------------------------------------ */
@@ -69,6 +68,7 @@ public interface UserRealm
      *
      * @return True if this user is still authenticated.
      */
+    //jaspi called only from FormAuthenticator and subclasses
     public boolean reauthenticate(Principal user);
     
     /* ------------------------------------------------------------ */
@@ -76,6 +76,7 @@ public interface UserRealm
      * @param role A role name.
      * @return True if the user can act in that role.
      */
+    //jaspi called from Request.isUserInRole and ConstraintSecurityHandler.check
     public boolean isUserInRole(Principal user, String role);
     
     /* ------------------------------------------------------------ */
@@ -87,6 +88,7 @@ public interface UserRealm
      * associated with other contexts.
      * @param user A UserPrincipal allocated from this realm.
      */
+    //jaspi this appears to be a bug check method that should be removed.
     public void disassociate(Principal user);
     
     /* ------------------------------------------------------------ */
@@ -97,6 +99,7 @@ public interface UserRealm
      * @return A new UserPrincipal object that wraps the passed user, but
      * with the added role.
      */
+    //jaspi called from ServletHolder.handle, initServlet, doStop and tests
     public Principal pushRole(Principal user, String role);
 
 
@@ -106,6 +109,7 @@ public interface UserRealm
      * @return The principal without the role.  Most often this will be the
      * original UserPrincipal passed.
      */
+    //jaspi called from ServletHolder.handle, initServlet, doStop and tests
     public Principal popRole(Principal user);
 
     /* ------------------------------------------------------------ */
@@ -113,6 +117,7 @@ public interface UserRealm
      * Called by authentication mechanisms (eg FORM) that can detect logout.
      * @param user A Principal previously returned from this realm
      */
+    //jaspi called from FormAuthenticator.valueUnbound (when session is unbound)
     public void logout(Principal user);
     
 }

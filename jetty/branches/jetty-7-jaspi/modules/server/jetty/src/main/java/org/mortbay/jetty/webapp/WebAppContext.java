@@ -40,7 +40,8 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.AbstractSecurityHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -58,7 +59,7 @@ import org.mortbay.util.URIUtil;
 /** Web Application Context Handler.
  * The WebAppContext handler is an extension of ContextHandler that
  * coordinates the construction and configuration of nested handlers:
- * {@link org.mortbay.jetty.security.SecurityHandler}, {@link org.mortbay.jetty.servlet.SessionHandler}
+ * {@link org.mortbay.jetty.security.ConstraintSecurityHandler}, {@link org.mortbay.jetty.servlet.SessionHandler}
  * and {@link org.mortbay.jetty.servlet.ServletHandler}.
  * The handlers are configured by pluggable configuration classes, with
  * the default being  {@link org.mortbay.jetty.webapp.WebXmlConfiguration} and 
@@ -190,7 +191,6 @@ public class WebAppContext extends Context
      * loaded before any in the web app. Must respect the web.dtd.
      * If null the default defaults file is used. If the empty string, then
      * no defaults file is used.
-     * @param configurations Array of classnames of {@link Configuration} implementations to apply.
      * @param extract If true, extract war files
      * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
      * @exception IOException 
@@ -292,11 +292,11 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     /**
      */
-    public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public WebAppContext(AbstractSecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
         super(null,
               sessionHandler!=null?sessionHandler:new SessionHandler(),
-              securityHandler!=null?securityHandler:new SecurityHandler(),
+              securityHandler!=null?securityHandler:new ConstraintSecurityHandler(),
               servletHandler!=null?servletHandler:new ServletHandler(),
               null);
         

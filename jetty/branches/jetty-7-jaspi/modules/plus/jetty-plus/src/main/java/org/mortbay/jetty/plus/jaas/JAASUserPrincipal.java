@@ -189,6 +189,7 @@ public class JAASUserPrincipal implements Principal
 
     /* ------------------------------------------------ */
     /** Clean out any pushed roles that haven't been popped
+     * jaspi isn't the existence of such roles a serious jetty bug?
      */
     public void disassociate ()
     {

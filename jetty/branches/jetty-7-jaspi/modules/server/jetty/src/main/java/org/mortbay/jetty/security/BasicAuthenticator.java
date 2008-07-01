@@ -68,7 +68,8 @@ public class BasicAuthenticator implements Authenticator
                 else
                 {
                     request.setAuthType(Constraint.__BASIC_AUTH);
-                    request.setUserPrincipal(user);                
+                    //jaspi
+//                    request.setUserPrincipal(user);                
                 }
             }
             catch (Exception e)

@@ -111,7 +111,7 @@ public class FormAuthenticator implements Authenticator
     
     /* ------------------------------------------------------------ */
     /** Perform form authentication.
-     * Called from SecurityHandler.
+     * Called from ConstraintSecurityHandler.
      * @return UserPrincipal if authenticated else null.
      */
     public Principal authenticate(UserRealm realm,
@@ -153,7 +153,8 @@ public class FormAuthenticator implements Authenticator
                 if(Log.isDebugEnabled())Log.debug("Form authentication OK for "+form_cred._jUserName);
                 session.removeAttribute(__J_URI); // Remove popped return URI.
                 request.setAuthType(Constraint.__FORM_AUTH);
-                request.setUserPrincipal(form_cred._userPrincipal);
+                //jaspi
+//                request.setUserPrincipal(form_cred._userPrincipal);
                 session.setAttribute(__J_AUTHENTICATED,form_cred);
 
                 // Sign-on to SSO mechanism
@@ -213,7 +214,8 @@ public class FormAuthenticator implements Authenticator
             {
                 if(Log.isDebugEnabled())Log.debug("FORM Authenticated for "+form_cred._userPrincipal.getName());
                 request.setAuthType(Constraint.__FORM_AUTH);
-                request.setUserPrincipal(form_cred._userPrincipal);
+                //jaspi
+//                request.setUserPrincipal(form_cred._userPrincipal);
                 return form_cred._userPrincipal;
             }
             else
@@ -241,7 +243,7 @@ public class FormAuthenticator implements Authenticator
         
         // Don't authenticate authform or errorpage
         if (isLoginOrErrorPage(pathInContext))
-            return SecurityHandler.__NOBODY;
+            return AbstractSecurityHandler.__NOBODY;
         
         // redirect to login page
         if (response!=null)
@@ -287,7 +289,8 @@ public class FormAuthenticator implements Authenticator
             else
             {
                 Log.warn("AUTH FAILURE: user {}",StringUtil.printable(user));
-                request.setUserPrincipal(null);
+                //jaspi
+//                request.setUserPrincipal(null);
             }
         }
 
@@ -299,7 +302,7 @@ public class FormAuthenticator implements Authenticator
             else
             {
                 Log.warn("AUTH FAILURE: user {}",StringUtil.printable(_jUserName));
-                request.setUserPrincipal(null);
+//                request.setUserPrincipal(null);
             }
         }
         

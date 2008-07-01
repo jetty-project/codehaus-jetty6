@@ -32,7 +32,7 @@ public class Constraint implements Cloneable, Serializable
     public final static String __CERT_AUTH2= "CLIENT-CERT";
 
     /* ------------------------------------------------------------ */
-    public final static int DC_UNSET= -1, DC_NONE= 0, DC_INTEGRAL= 1, DC_CONFIDENTIAL= 2;
+    public final static int DC_UNSET= -1, DC_NONE= 0, DC_INTEGRAL= 1, DC_CONFIDENTIAL= 2, DC_FORBIDDEN=3;
 
     /* ------------------------------------------------------------ */
     public final static String NONE= "NONE";
