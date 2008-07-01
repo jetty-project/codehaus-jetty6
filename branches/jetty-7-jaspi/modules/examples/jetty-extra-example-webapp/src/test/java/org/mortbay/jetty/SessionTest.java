@@ -84,19 +84,19 @@ public class SessionTest extends TestCase
     {
         //TODO jaspi fix the tests -- sessions are not getting invalidated
         // no sessions to start with.
-//        testContains("/test0/session","No Session");
-//        testContains("/test1/session","No Session");
+        testContains("/test0/session","No Session");
+        testContains("/test1/session","No Session");
         
         // create context in context 0
         String id0=getID("/test0/session?Action=New+Session");
         assertTrue(id0!=null);
         assertEquals(id0,getID("/test0/session;jsessionid="+id0));
-//        testContains("/test1/session;jsessionid="+id0,"No Session");
+        testContains("/test1/session;jsessionid="+id0,"No Session");
         
         // test setting value
         testContains("/test0/session;jsessionid="+id0+"?Action=Set&Name=name0&Value=value0","<b>name0:</b> value0<br/>");
         testContains("/test0/session;jsessionid="+id0,"<b>name0:</b> value0<br/>");
-//        testContains("/test1/session;jsessionid="+id0,"No Session");
+        testContains("/test1/session;jsessionid="+id0,"No Session");
         
         // Direct request to context 1 without session ID
         String id1=getID("/test1/session;jsessionid=unknown?Action=New+Session");
@@ -104,8 +104,8 @@ public class SessionTest extends TestCase
         assertFalse(id0.equals(id1));
         assertEquals(id0,getID("/test0/session;jsessionid="+id0));
         assertEquals(id1,getID("/test1/session;jsessionid="+id1));
-//        testContains("/test0/session;jsessionid="+id1,"No Session");
-//        testContains("/test1/session;jsessionid="+id0,"No Session");
+        testContains("/test0/session;jsessionid="+id1,"No Session");
+        testContains("/test1/session;jsessionid="+id0,"No Session");
         
         // test setting value
         testContains("/test1/session;jsessionid="+id1+"?Action=Set&Name=name1&Value=value1","<b>name1:</b> value1<br/>");
@@ -137,8 +137,8 @@ public class SessionTest extends TestCase
         
         // invalidate all via dispatch
         testContains("/test0/dispatch/forwardC/test1/session;jsessionid="+id1+"?Action=Invalidate","No Session");
-//        testContains("/test0/session","No Session");
-//        testContains("/test1/session","No Session");
+        testContains("/test0/session","No Session");
+        testContains("/test1/session","No Session");
         
         // new sessions via dispatch
         id0=getID("/test0/session?Action=New+Session");
@@ -159,8 +159,8 @@ public class SessionTest extends TestCase
 
         // direct invalidate
         testContains("/test1/session;jsessionid="+id1+"?Action=Invalidate","No Session");
-//        testContains("/test0/session","No Session");
-//        testContains("/test1/session","No Session");
+        testContains("/test0/session","No Session");
+        testContains("/test1/session","No Session");
         
     }
     
