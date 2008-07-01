@@ -41,6 +41,7 @@ import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.DigestAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
+import org.mortbay.jetty.security.jaspi.modules.ClientCertAuthModule;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
@@ -1076,7 +1077,8 @@ public class WebXmlConfiguration implements Configuration
             else if (Constraint.__CERT_AUTH.equals(m) ||
                     Constraint.__CERT_AUTH2.equals(m))
             {
-//                authenticator=(Authenticator)Loader.loadClass(WebXmlConfiguration.class,"org.mortbay.jetty.security.ClientCertAuthenticator").newInstance();
+                //TODO figure out how to configure max handshake?
+                serverAuthContext = new ClientCertAuthModule(callbackHandler, loginService);
             }
             else
                 Log.warn("UNKNOWN AUTH METHOD: " + m);
