@@ -69,22 +69,30 @@ public class XmlConfiguration
         if (__parser != null) return;
 
         __parser = new XmlParser();
-        URL configURL = XmlConfiguration.class.getClassLoader().getResource("org/mortbay/xml/configure_6_0.dtd");
-        __parser.redirectEntity("configure.dtd", configURL);
-        __parser.redirectEntity("configure_1_3.dtd", configURL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure.dtd", configURL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure//EN", configURL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_3.dtd", configURL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.3//EN", configURL);
-        __parser.redirectEntity("configure_1_2.dtd", configURL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd", configURL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.2//EN", configURL);
-        __parser.redirectEntity("configure_1_1.dtd", configURL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_1.dtd", configURL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.1//EN", configURL);
-        __parser.redirectEntity("configure_1_0.dtd", configURL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_0.dtd", configURL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.0//EN", configURL);
+        try
+        {
+            URL configURL = Loader.getResource(XmlConfiguration.class, "org/mortbay/xml/configure_6_0.dtd", true);
+            __parser.redirectEntity("configure.dtd", configURL);
+            __parser.redirectEntity("configure_1_3.dtd", configURL);
+            __parser.redirectEntity("http://jetty.mortbay.org/configure.dtd", configURL);
+            __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure//EN", configURL);
+            __parser.redirectEntity("http://jetty.mortbay.org/configure_1_3.dtd", configURL);
+            __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.3//EN", configURL);
+            __parser.redirectEntity("configure_1_2.dtd", configURL);
+            __parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd", configURL);
+            __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.2//EN", configURL);
+            __parser.redirectEntity("configure_1_1.dtd", configURL);
+            __parser.redirectEntity("http://jetty.mortbay.org/configure_1_1.dtd", configURL);
+            __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.1//EN", configURL);
+            __parser.redirectEntity("configure_1_0.dtd", configURL);
+            __parser.redirectEntity("http://jetty.mortbay.org/configure_1_0.dtd", configURL);
+            __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.0//EN", configURL);
+        }
+        catch (ClassNotFoundException e)
+        {
+            Log.warn(e.toString());
+            Log.debug(e);
+        }
     }
 
     /* ------------------------------------------------------------ */

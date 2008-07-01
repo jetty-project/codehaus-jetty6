@@ -2,6 +2,7 @@
 jetty-7.0-SNAPSHOT
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
  + JETTY-608 Suspend/Resume/Complete request listeners
+ + JETTY-626 Null protect reading the dtd resource from classloader
 
 jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full
