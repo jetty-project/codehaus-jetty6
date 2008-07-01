@@ -298,7 +298,7 @@ public class ServletHandler extends AbstractHandler
         final String old_servlet_name=base_request.getServletName();
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
-        final Map old_role_map=base_request.getRoleMap();
+        Map<String, String> old_role_map = null;//jaspi=base_request.getRoleMap();
         
         try
         {
@@ -313,8 +313,14 @@ public class ServletHandler extends AbstractHandler
                 if (entry!=null)
                 {
                     servlet_holder=(ServletHolder)entry.getValue();
+                    //TODO shouldn't these parameters be set in ServletHolder??
+                    //what servlet name should the filters see?
                     base_request.setServletName(servlet_holder.getName());
-                    base_request.setRoleMap(servlet_holder.getRoleMap());
+                    //for this it depends on whether a servlet's role-refs should work in filters.
+                    if (base_request.getUserIdentity() != null)
+                    {
+                        old_role_map = base_request.getUserIdentity().setRoleRefMap(servlet_holder.getRoleMap());
+                    }
                     if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
                     
                     String servlet_path_spec=(String)entry.getKey(); 
@@ -343,6 +349,8 @@ public class ServletHandler extends AbstractHandler
                 if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
                 {
                     base_request.setServletName(servlet_holder.getName());
+                    //TODO added for jaspi == is this correct??
+                    old_role_map = base_request.getUserIdentity().setRoleRefMap(servlet_holder.getRoleMap());
                     chain=getFilterChain(type, null,servlet_holder,request.isInitial());
                 }
             }
@@ -455,7 +463,10 @@ public class ServletHandler extends AbstractHandler
         finally
         {
             base_request.setServletName(old_servlet_name);
-            base_request.setRoleMap(old_role_map);
+            if (old_role_map != null)
+            {
+                base_request.getUserIdentity().setRoleRefMap(old_role_map);
+            }
             if (type!=INCLUDE)
             {
                 base_request.setServletPath(old_servlet_path);
@@ -632,7 +643,7 @@ public class ServletHandler extends AbstractHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @see also newServletHolder(Class)
+     * see also newServletHolder(Class)
      */
     public ServletHolder newServletHolder()
     {
@@ -676,16 +687,14 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /** conveniance method to add a servlet.
-     * @param name
-     * @param className
-     * @param pathSpec
-     * @return The servlet holder.
+     * @param servlet servlet holder to add
+     * @param pathSpec servlet mappings for the servletHolder
      */
     public void addServletWithMapping (ServletHolder servlet,String pathSpec)
     {
         ServletHolder[] holders=getServlets();
         if (holders!=null)
-            holders = (ServletHolder[])holders.clone();
+            holders = holders.clone();
         
         try
         {
@@ -759,9 +768,8 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /** conveniance method to add a filter.
-     * @param name
-     * @param className
-     * @param pathSpec
+     * @param filter  class of filter to create
+     * @param pathSpec filter mappings for filter
      * @param dispatches see {@link FilterMapping#setDispatches(int)}
      * @return The filter holder.
      */
@@ -775,9 +783,8 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /** conveniance method to add a filter.
-     * @param name
-     * @param className
-     * @param pathSpec
+     * @param className of filter
+     * @param pathSpec filter mappings for filter
      * @param dispatches see {@link FilterMapping#setDispatches(int)}
      * @return The filter holder.
      */
@@ -793,11 +800,9 @@ public class ServletHandler extends AbstractHandler
     
     /* ------------------------------------------------------------ */
     /** conveniance method to add a filter.
-     * @param name
-     * @param className
-     * @param pathSpec
+     * @param holder filter holder to add
+     * @param pathSpec filter mappings for filter
      * @param dispatches see {@link FilterMapping#setDispatches(int)}
-     * @return The filter holder.
      */
     public void addFilterWithMapping (FilterHolder holder,String pathSpec,int dispatches)
     {

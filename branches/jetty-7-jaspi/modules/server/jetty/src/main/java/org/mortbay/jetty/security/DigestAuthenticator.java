@@ -122,7 +122,8 @@ public class DigestAuthenticator implements Authenticator
             else    
             {
                 request.setAuthType(Constraint.__DIGEST_AUTH);
-                request.setUserPrincipal(user);                
+                //jaspi
+//                request.setUserPrincipal(user);                
             }
         }
 

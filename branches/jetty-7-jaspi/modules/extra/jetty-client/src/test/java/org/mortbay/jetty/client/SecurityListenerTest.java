@@ -17,7 +17,6 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.EofException;
@@ -40,12 +38,13 @@ import org.mortbay.jetty.client.security.DefaultRealmResolver;
 import org.mortbay.jetty.client.security.SecurityRealm;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.ServletCallbackHandler;
+import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
+import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
+import org.mortbay.jetty.security.jaspi.modules.LoginService;
 
 /**
  * Functional testing for HttpExchange.
@@ -267,8 +266,6 @@ public class SecurityListenerTest extends TestCase
          connector.setPort(0);
          _server.setConnectors(new Connector[]{connector});
 
-         UserRealm userRealm = new HashUserRealm("MyRealm", "src/test/resources/realm.properties");
-
          Constraint constraint = new Constraint();
          constraint.setName("Need User or Admin");
          constraint.setRoles(new String[]{"user", "admin"});
@@ -278,11 +275,14 @@ public class SecurityListenerTest extends TestCase
          cm.setConstraint(constraint);
          cm.setPathSpec("/*");
 
-         SecurityHandler sh = new SecurityHandler();
-         _server.setHandler(sh);
-         sh.setUserRealm(userRealm);
+         LoginService userRealm = new HashLoginService("MyRealm","src/test/resources/realm.properties");
+         ServletCallbackHandler callbackHandler = new ServletCallbackHandler();
+         BasicAuthModule authModule = new BasicAuthModule(callbackHandler, userRealm, "MyRealm");
+         ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
+         sh.setAuthContext(authModule);
+         sh.setServletCallbackHandler(callbackHandler);
          sh.setConstraintMappings(new ConstraintMapping[]{cm});
-         sh.setAuthenticator(new BasicAuthenticator());
+         _server.setHandler(sh);
 
          Handler testHandler = new AbstractHandler()
          {

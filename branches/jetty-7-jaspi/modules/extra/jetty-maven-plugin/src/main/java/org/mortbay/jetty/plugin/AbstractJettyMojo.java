@@ -200,7 +200,7 @@ public abstract class AbstractJettyMojo extends AbstractMojo
     /**
      * @return Returns the realms configured in the pom
      */
-    public abstract Object[] getConfiguredUserRealms();
+    public abstract Object[] getConfiguredLoginServices();
     
     /**
      * @return Returns the connectors configured in the pom
@@ -368,11 +368,11 @@ public abstract class AbstractJettyMojo extends AbstractMojo
 
 
             // set up security realms
-            Object[] configuredRealms = getConfiguredUserRealms();
+            Object[] configuredRealms = getConfiguredLoginServices();
             for (int i = 0; (configuredRealms != null) && i < configuredRealms.length; i++)
                 getLog().debug(configuredRealms[i].getClass().getName() + ": "+ configuredRealms[i].toString());
 
-            plugin.setUserRealms(configuredRealms);
+            plugin.setLoginServices(configuredRealms);
 
             //do any other configuration required by the
             //particular Jetty version

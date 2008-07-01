@@ -94,7 +94,8 @@ public class ClientCertAuthenticator implements Authenticator
         }
         
         request.setAuthType(Constraint.__CERT_AUTH);
-        request.setUserPrincipal(user);                
+        //jaspi
+//        request.setUserPrincipal(user);
         return user;
     }
     

@@ -270,12 +270,13 @@
   </login-config>
 -->
 
+<!--
   <login-config>
     <auth-method>DIGEST</auth-method>
     <realm-name>Test Realm</realm-name>
   </login-config>
+-->
 
-<!--
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>Test Realm</realm-name>
@@ -284,7 +285,6 @@
        <form-error-page>/logonError.html?param=test</form-error-page>
     </form-login-config>
   </login-config>
--->
 
   <jsp-config>
     <taglib>

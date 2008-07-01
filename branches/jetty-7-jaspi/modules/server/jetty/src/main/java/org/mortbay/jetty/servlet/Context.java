@@ -25,7 +25,8 @@ import javax.servlet.ServletContext;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
-import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.jetty.security.AbstractSecurityHandler;
 import org.mortbay.log.Log;
 import org.mortbay.util.URIUtil;
 
@@ -48,7 +49,7 @@ public class Context extends ContextHandler
     public final static int NO_SESSIONS=0;
     public final static int NO_SECURITY=0;
     
-    protected SecurityHandler _securityHandler;
+    protected AbstractSecurityHandler _securityHandler;
     protected ServletHandler _servletHandler;
     protected SessionHandler _sessionHandler;
     
@@ -73,7 +74,7 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     public Context(HandlerContainer parent, String contextPath, int options)
     {
-        this(parent,contextPath,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?new SecurityHandler():null,null,null);
+        this(parent,contextPath,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?new ConstraintSecurityHandler():null,null,null);
     }
     
     /* ------------------------------------------------------------ */
@@ -83,13 +84,13 @@ public class Context extends ContextHandler
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, SessionHandler sessionHandler, AbstractSecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         this(parent,null,sessionHandler,securityHandler,servletHandler,errorHandler);
     }
 
     /* ------------------------------------------------------------ */
-    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler,SecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public Context(HandlerContainer parent, String contextPath, SessionHandler sessionHandler, AbstractSecurityHandler securityHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {   
         super((ContextHandler.SContext)null);
         _scontext = new SContext();
@@ -148,7 +149,7 @@ public class Context extends ContextHandler
     /**
      * @return Returns the securityHandler.
      */
-    public SecurityHandler getSecurityHandler()
+    public AbstractSecurityHandler getSecurityHandler()
     {
         return _securityHandler;
     }
@@ -247,9 +248,9 @@ public class Context extends ContextHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @param securityHandler The {@link SecurityHandler} to set on this context.
+     * @param securityHandler The {@link org.mortbay.jetty.security.ConstraintSecurityHandler} to set on this context.
      */
-    public void setSecurityHandler(SecurityHandler securityHandler)
+    public void setSecurityHandler(ConstraintSecurityHandler securityHandler)
     {
         if(_securityHandler==securityHandler)
             return;

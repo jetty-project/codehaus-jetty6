@@ -27,7 +27,7 @@ import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.plugin.util.PluginLog;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
 
@@ -92,24 +92,24 @@ public class Jetty6PluginServer implements JettyPluginServer
     /**
      * 
      * 
-     * @see org.mortbay.jetty.plugin.JettyPluginServer#setUserRealms(org.mortbay.jetty.plugin.JettyPluginUserRealm[])
+     * @see org.mortbay.jetty.plugin.JettyPluginServer#setLoginServices(java.Object[])
      */
-    public void setUserRealms(Object[] realms) throws Exception
+    public void setLoginServices(Object[] realms) throws Exception
     {
         if (realms == null)
             return;
  
          for (int i=0; i<realms.length;i++)
-             this.server.addUserRealm((UserRealm)realms[i]);
+             this.server.addLoginService((LoginService)realms[i]);
     }
 
     /**
      * 
-     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#getUserRealms()
+     * @see org.mortbay.jetty.plugin.util.JettyPluginServer#getLoginServices()
      */
-    public Object[] getUserRealms()
+    public Object[] getLoginServices()
     {
-        return this.server.getUserRealms();
+        return this.server.getLoginServices();
     }
 
     

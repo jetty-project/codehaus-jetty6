@@ -17,23 +17,11 @@ package org.mortbay.jetty.ajp;
 import java.io.IOException;
 
 import org.mortbay.io.EndPoint;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
-
-import org.mortbay.jetty.deployer.WebAppDeployer;
 
 /**
  * @author Greg Wilkins

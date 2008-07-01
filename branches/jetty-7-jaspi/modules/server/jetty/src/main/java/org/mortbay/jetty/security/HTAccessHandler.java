@@ -46,7 +46,7 @@ import org.mortbay.util.URIUtil;
  * @author Konstantin Metlov
  * 
  */
-public class HTAccessHandler extends SecurityHandler
+public class HTAccessHandler extends ConstraintSecurityHandler
 {
     private Handler protegee;
     private static Logger log=Log.getLogger(HTAccessHandler.class.getName());
@@ -211,7 +211,8 @@ public class HTAccessHandler extends SecurityHandler
                 }
 
                 // set required page
-                if (!ht.checkAuth(user,password,getUserRealm(),base_request))
+                UserRealm userRealm = null;//super.getUserRealm();
+                if (!ht.checkAuth(user,password,userRealm,base_request))
                 {
                     log.debug("Auth Failed",null,null);
                     response.setHeader(HttpHeaders.WWW_AUTHENTICATE,"basic realm="+ht.getName());
@@ -225,7 +226,8 @@ public class HTAccessHandler extends SecurityHandler
                 if (user!=null)
                 {
                     base_request.setAuthType(Constraint.__BASIC_AUTH);
-                    base_request.setUserPrincipal(getPrincipal(user, getUserRealm()));
+                    //todo use an auth plugin
+//                    base_request.setUserPrincipal(getPrincipal(user, getUserRealm()));
                 }
             }
             
@@ -254,13 +256,13 @@ public class HTAccessHandler extends SecurityHandler
      * @param realm
      * @return
      */
-    public Principal getPrincipal (String user, UserRealm realm)
-    {
-        if (realm==null)
-            return new DummyPrincipal(user);
-        
-        return realm.getPrincipal(user);
-    }
+//    public Principal getPrincipal (String user, UserRealm realm)
+//    {
+//        if (realm==null)
+//            return new DummyPrincipal(user);
+//
+//        return realm.getPrincipal(user);
+//    }
     /* ------------------------------------------------------------ */
     /**
      * set functions for the following .xml administration statements.
@@ -498,8 +500,9 @@ public class HTAccessHandler extends SecurityHandler
                 return true;
 
             // Authenticate with realm
-
-            Principal principal=realm==null?null:realm.authenticate(user,pass,request);
+            //TODO fix jaspi
+//            Principal principal=realm==null?null:realm.authenticate(user,pass,request);
+            Principal principal=null;
             if (principal==null)
             {
                 // Have to authenticate the user with the password file

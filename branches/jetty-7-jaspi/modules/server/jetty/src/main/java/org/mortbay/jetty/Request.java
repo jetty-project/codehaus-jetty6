@@ -49,9 +49,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
-import org.mortbay.jetty.security.Authenticator;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.security.UserIdentity;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -65,7 +63,7 @@ import org.mortbay.util.ajax.Continuation;
 /* ------------------------------------------------------------ */
 /** Jetty Request.
  * <p>
- * Implements {@link javax.servlet.HttpServletRequest} from the {@link javax.servlet} package.   
+ * Implements {@link javax.servlet.http.HttpServletRequest} from the {@link javax.servlet.http} package.
  * </p>
  * <p>
  * The standard interface of mostly getters,
@@ -73,18 +71,18 @@ import org.mortbay.util.ajax.Continuation;
  * passed to.  This allows the request object to be as lightweight as possible and not
  * actually implement any significant behaviour. For example<ul>
  * 
- * <li>The {@link getContextPath} method will return null, until the requeset has been 
- * passed to a {@link ContextHandler} which matches the {@link getPathInfo} with a context
- * path and calls {@link setContextPath} as a result.</li>
+ * <li>The {@link Request#getContextPath} method will return null, until the requeset has been
+ * passed to a {@link ContextHandler} which matches the {@link Request#getPathInfo} with a context
+ * path and calls {@link Request#setContextPath} as a result.</li>
  * 
  * <li>the HTTP session methods
  * will all return null sessions until such time as a request has been passed to
  * a {@link org.mortbay.jetty.servlet.SessionHandler} which checks for session cookies
  * and enables the ability to create new sessions.</li>
  * 
- * <li>The {@link getServletPath} method will return null until the request has been
+ * <li>The {@link Request#getServletPath} method will return null until the request has been
  * passed to a {@link org.mortbay.jetty.servlet.ServletHandler} and the pathInfo matched
- * against the servlet URL patterns and {@link setServletPath} called as a result.</li>
+ * against the servlet URL patterns and {@link Request#setServletPath} called as a result.</li>
  * </ul>
  * 
  * A request instance is created for each {@link HttpConnection} accepted by the server 
@@ -101,7 +99,7 @@ public class Request extends Suspendable implements HttpServletRequest
     private static final int __NONE=0, _STREAM=1, __READER=2;
     
     private boolean _handled =false;
-    private Map _roleMap;
+//    private Map _roleMap;
     private EndPoint _endp;
     
     private Attributes _attributes;
@@ -124,7 +122,7 @@ public class Request extends Suspendable implements HttpServletRequest
     private String _servletPath;
     private String _servletName;
     private HttpURI _uri;
-    private Principal _userPrincipal;
+//    private Principal _userPrincipal;
     private MultiMap _parameters;
     private MultiMap _baseParameters;
     private boolean _paramsExtracted;
@@ -141,8 +139,9 @@ public class Request extends Suspendable implements HttpServletRequest
     private Continuation _continuation;
     private Object _requestAttributeListeners;
     private Map _savedNewSessions;
-    private UserRealm _userRealm;
+//    private UserRealm _userRealm;
     private CookieCutter _cookies;
+    private UserIdentity _userIdentity = UserIdentity.UNAUTHENTICATED_IDENTITY;
 
     /* ------------------------------------------------------------ */
     public Request()
@@ -189,7 +188,7 @@ public class Request extends Suspendable implements HttpServletRequest
         _timeStamp=0;
         _timeStampBuffer=null;
         _uri=null;
-        _userPrincipal=null;
+        _userIdentity=UserIdentity.UNAUTHENTICATED_IDENTITY;
         if (_baseParameters!=null)
             _baseParameters.clear();
         _parameters=null;
@@ -949,10 +948,11 @@ public class Request extends Suspendable implements HttpServletRequest
      */
     public Principal getUserPrincipal()
     {
-        if (_userPrincipal != null && _userPrincipal instanceof SecurityHandler.NotChecked)
+        /* JASPI requires that all requests go through authentication before being processed, so this code should never apply
+        if (_userPrincipal != null && _userPrincipal instanceof ConstraintSecurityHandler.NotChecked)
         {
-            SecurityHandler.NotChecked not_checked=(SecurityHandler.NotChecked)_userPrincipal;
-            _userPrincipal = SecurityHandler.__NO_USER;
+            ConstraintSecurityHandler.NotChecked not_checked=(ConstraintSecurityHandler.NotChecked)_userPrincipal;
+            _userPrincipal = ConstraintSecurityHandler.__NO_USER;
             
             Authenticator auth=not_checked.getSecurityHandler().getAuthenticator();
             UserRealm realm=not_checked.getSecurityHandler().getUserRealm();
@@ -970,10 +970,11 @@ public class Request extends Suspendable implements HttpServletRequest
                 }
             }
         }
+        */
         
-        if (_userPrincipal == SecurityHandler.__NO_USER) 
-            return null;
-        return _userPrincipal;
+//        if (_userPrincipal == AbstractSecurityHandler.__NO_USER)
+//            return null;
+        return _userIdentity.getUserPrincipal();
     }
 
     /* ------------------------------------------------------------ */
@@ -1042,19 +1043,20 @@ public class Request extends Suspendable implements HttpServletRequest
      */
     public boolean isUserInRole(String role)
     {
-        if (_roleMap!=null)
-        {
-            String r=(String)_roleMap.get(role);
-            if (r!=null)
-                role=r;
-        }
-
-        Principal principal = getUserPrincipal();
-        
-        if (_userRealm!=null && principal!=null)
-            return _userRealm.isUserInRole(principal, role);
-        
-        return false;
+        return _userIdentity.isUserInRole(role);
+//        if (_roleMap!=null)
+//        {
+//            String r=(String)_roleMap.get(role);
+//            if (r!=null)
+//                role=r;
+//        }
+//
+//        Principal principal = getUserPrincipal();
+//
+//        if (_userRealm!=null && principal!=null)
+//            return _userRealm.isUserInRole(principal, role);
+//
+//        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -1458,12 +1460,17 @@ public class Request extends Suspendable implements HttpServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @param userPrincipal The userPrincipal to set.
-     */
-    public void setUserPrincipal(Principal userPrincipal)
+
+    public UserIdentity getUserIdentity()
     {
-        _userPrincipal = userPrincipal;
+        return _userIdentity;
+    }
+
+    public void setUserIdentity(UserIdentity userIdentity)
+    {
+        if (userIdentity == null)
+            throw new NullPointerException("No UserIdentity");
+        this._userIdentity = userIdentity;
     }
 
     /* ------------------------------------------------------------ */
@@ -1630,24 +1637,6 @@ public class Request extends Suspendable implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the userRealm.
-     */
-    public UserRealm getUserRealm()
-    {
-        return _userRealm;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param userRealm The userRealm to set.
-     */
-    public void setUserRealm(UserRealm userRealm)
-    {
-        _userRealm = userRealm;
-    }
-
-    /* ------------------------------------------------------------ */
     public String getQueryEncoding()
     {
         return _queryEncoding;
@@ -1667,18 +1656,6 @@ public class Request extends Suspendable implements HttpServletRequest
     {
         _queryEncoding=queryEncoding;
         _queryString=null;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setRoleMap(Map map)
-    {
-        _roleMap=map;
-    }
-
-    /* ------------------------------------------------------------ */
-    public Map getRoleMap()
-    {
-        return _roleMap;
     }
 
     /* ------------------------------------------------------------ */

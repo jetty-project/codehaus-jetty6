@@ -34,7 +34,6 @@ import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.URIUtil;
-;
 
 /* ------------------------------------------------------------ */
 /**  Dynamic Servlet Invoker.  

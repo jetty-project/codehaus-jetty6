@@ -22,20 +22,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import junit.framework.TestCase;
-
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.MimeTypes;
-import org.mortbay.jetty.NCSARequestLog;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
+import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.util.IO;
@@ -47,7 +40,6 @@ public class WebAppTest extends TestCase
     Connector connector=new SelectChannelConnector();
     HandlerCollection handlers = new HandlerCollection();
     ContextHandlerCollection contexts = new ContextHandlerCollection();
-    HashUserRealm userRealm = new HashUserRealm();
     RequestLogHandler requestLogHandler = new RequestLogHandler();
     WebAppContext context;
     
@@ -69,10 +61,11 @@ public class WebAppTest extends TestCase
         
         context=new WebAppContext(contexts,dir.getAbsolutePath()+"/webapps/test","/test");
         
-        userRealm.setName("Test Realm");
-        userRealm.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
-        server.setUserRealms(new UserRealm[]{userRealm});
-        
+        HashLoginService loginService = new HashLoginService();
+        loginService.setName("Test Realm");
+        loginService.setConfig(dir.getAbsolutePath()+"/etc/realm.properties");
+        server.setLoginServices(new LoginService[]{loginService});
+
 	File file = File.createTempFile("test",".log");
         NCSARequestLog requestLog = new NCSARequestLog(file.getAbsolutePath());
         

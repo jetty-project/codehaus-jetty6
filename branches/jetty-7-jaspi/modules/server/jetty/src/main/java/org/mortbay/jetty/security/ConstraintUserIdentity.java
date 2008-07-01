@@ -1,0 +1,121 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+package org.mortbay.jetty.security;
+
+import java.security.Principal;
+import java.util.Collections;
+import java.util.Map;
+
+import javax.security.auth.message.callback.CallerPrincipalCallback;
+import javax.security.auth.message.callback.GroupPrincipalCallback;
+
+/**
+ * @version $Rev:$ $Date:$
+ */
+public class ConstraintUserIdentity implements UserIdentity
+{
+    private static final String[] NO_ROLES = new String[] {};
+
+    private final Principal _userPrincipal;
+    private final String[] _roles;
+    private Map<String, String> _roleRefMap = Collections.emptyMap();
+    private RunAsToken _runAsRole;
+
+    public ConstraintUserIdentity(ServletCallbackHandler callbackHandler)
+    {
+        CallerPrincipalCallback principalCallback = callbackHandler.getThreadCallerPrincipalCallback();
+        this._userPrincipal = principalCallback == null? null:principalCallback.getPrincipal();
+        if (_userPrincipal == null)
+        {
+            _roles = NO_ROLES;
+        }
+        else
+        {
+            GroupPrincipalCallback groupPrincipalCallback = callbackHandler.getThreadGroupPrincipalCallback();
+            _roles = groupPrincipalCallback.getGroups();
+        }
+    }
+
+    public ConstraintUserIdentity(Principal userPrincipal, String[] roles)
+    {
+        this._userPrincipal = userPrincipal;
+        this._roles = roles;
+    }
+
+    public ConstraintUserIdentity()
+    {
+        _userPrincipal = null;
+        _roles = NO_ROLES;
+    }
+
+    public Principal getUserPrincipal()
+    {
+        return _userPrincipal;
+    }/* ------------------------------------------------------------ */
+
+    //jaspi called from Request.isUserInRole and ConstraintSecurityHandler.check
+
+    //n.b. run as role does not participate in isUserInRole calculations.  It's only for when this component calls something else.
+    public boolean isUserInRole(String role)
+    {
+        if (role == null)
+        {
+            throw new NullPointerException("role");
+        }
+        String actualRole = _roleRefMap.get(role);
+        if (actualRole == null)
+        {
+            actualRole = role;
+        }
+        for (String userRole: _roles)
+        {
+            if (userRole.equals(actualRole))
+            {
+                return true;
+            }
+        }
+        return false;
+    }/* ------------------------------------------------------------ */
+
+    //jaspi called from ServletHolder.handle, initServlet, doStop and tests
+    public RunAsToken setRunAsRole(RunAsToken newRunAsRole)
+    {
+        RunAsToken oldRunAsRole = _runAsRole;
+        _runAsRole = newRunAsRole;
+        return oldRunAsRole;
+    }
+
+    public Map<String, String> setRoleRefMap(Map<String, String> map)
+    {
+        if (map == null) {
+            throw new NullPointerException("_roleRefMap");
+        }
+        Map<String, String> oldRoleRefMap = _roleRefMap;
+        this._roleRefMap = map;
+        return oldRoleRefMap;
+    }/* ------------------------------------------------------------ */
+
+    //jaspi called from FormAuthenticator.valueUnbound (when session is unbound)
+    //TODO usable???
+    public void logout(Principal user)
+    {
+    }
+}

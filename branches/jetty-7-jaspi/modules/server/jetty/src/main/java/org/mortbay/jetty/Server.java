@@ -31,7 +31,7 @@ import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.log.Log;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
@@ -58,7 +58,7 @@ public class Server extends HandlerWrapper implements Attributes
 
     private ThreadPool _threadPool;
     private Connector[] _connectors;
-    private UserRealm[] _realms;
+    private LoginService[] _loginServices;
     private Container _container=new Container();
     private SessionIdManager _sessionIdManager;
     private boolean _sendServerVersion = true; //send Server: header
@@ -186,10 +186,10 @@ public class Server extends HandlerWrapper implements Attributes
         HttpGenerator.setServerVersion(_version);
         MultiException mex=new MultiException();
       
-        for (int i=0;_realms !=null && i<_realms.length; i++)
+        for (int i=0; _loginServices !=null && i< _loginServices.length; i++)
         {
-            if (_realms[i] instanceof LifeCycle)
-                ((LifeCycle)_realms[i]).start();
+            if (_loginServices[i] instanceof LifeCycle)
+                ((LifeCycle) _loginServices[i]).start();
         }
 
         Iterator itor = _dependentLifeCycles.iterator();
@@ -246,10 +246,10 @@ public class Server extends HandlerWrapper implements Attributes
     {
         MultiException mex=new MultiException();
         
-        for (int i=0;_realms !=null && i<_realms.length; i++)
+        for (int i=0; _loginServices !=null && i< _loginServices.length; i++)
         {
-            if (_realms[i] instanceof LifeCycle)
-                ((LifeCycle)_realms[i]).stop();
+            if (_loginServices[i] instanceof LifeCycle)
+                ((LifeCycle) _loginServices[i]).stop();
         }
         
         if (_graceful>0)
@@ -335,31 +335,31 @@ public class Server extends HandlerWrapper implements Attributes
     /**
      * @return Map of realm name to UserRealm instances.
      */
-    public UserRealm[] getUserRealms()
+    public LoginService[] getLoginServices()
     {
-        return _realms;
+        return _loginServices;
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * @param realms Map of realm name to UserRealm instances.
+     * @param loginServices
      */
-    public void setUserRealms(UserRealm[] realms)
+    public void setLoginServices(LoginService[] loginServices)
     {
-        _container.update(this,_realms,realms, "realm",true);
-        _realms=realms;
+        _container.update(this, _loginServices, loginServices, "loginService",true);
+        _loginServices = loginServices;
     }
     
     /* ------------------------------------------------------------ */
-    public void addUserRealm(UserRealm realm)
+    public void addLoginService(LoginService loginService)
     {
-        setUserRealms((UserRealm[])LazyList.addToArray(getUserRealms(), realm, UserRealm.class));
+        setLoginServices((LoginService[])LazyList.addToArray(getLoginServices(), loginService, LoginService.class));
     }
     
     /* ------------------------------------------------------------ */
-    public void removeUserRealm(UserRealm realm)
+    public void removeLoginService(LoginService loginService)
     {
-        setUserRealms((UserRealm[])LazyList.removeFromArray(getUserRealms(), realm));
+        setLoginServices((LoginService[])LazyList.removeFromArray(getLoginServices(), loginService));
     }
 
     /* ------------------------------------------------------------ */
