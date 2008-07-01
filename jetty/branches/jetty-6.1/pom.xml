@@ -89,6 +89,13 @@
       <organization>Sun Microsystems</organization>
       <organizationUrl>http://www.sun.com</organizationUrl>
     </developer>
+    <developer>
+      <id>dyu</id>
+      <name>David Yu</name>
+      <email>david.yu.ftw@gmail.com</email>
+      <organization>Webtide</organization>
+      <organizationUrl>http://www.webtide.com</organizationUrl>
+    </developer>    
   </developers>
   <licenses>
     <license>
