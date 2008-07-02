@@ -268,9 +268,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
         {
             _setID=acceptorID;
 
-            _idleTimeout = new Timeout();
+            _idleTimeout = new Timeout(this);
             _idleTimeout.setDuration(getMaxIdleTime());
-            _retryTimeout = new Timeout();
+            _retryTimeout = new Timeout(this);
             _retryTimeout.setDuration(0L);
 
             // create a selector;
@@ -566,29 +566,9 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 _selector.selectedKeys().clear();
 
                 // tick over the timers
-                Timeout.Task task=null;
-                synchronized (this)
-                {
-                    task=_idleTimeout.expired();
-                    if (task==null)
-                        task=_retryTimeout.expired();
-                }
-
-                // handle any expired timers
-                while (task!=null)
-                {
-                    task.expire();
-
-                    // get the next timer tasks
-                    synchronized(this)
-                    {
-                        if (_selector==null)
-                            break;
-                        task=_idleTimeout.expired();
-                        if (task==null)
-                            task=_retryTimeout.expired();
-                    }
-                }
+                _idleTimeout.tick(now);
+                _retryTimeout.tick(now);
+                
             }
             catch (CancelledKeyException e)
             {
