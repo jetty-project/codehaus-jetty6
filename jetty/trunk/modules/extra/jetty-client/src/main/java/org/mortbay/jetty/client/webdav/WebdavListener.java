@@ -84,7 +84,7 @@ public class WebdavListener extends HttpEventListenerWrapper
                 }
                 else
                 {
-                    // admit default, webdav won't address issues delegate
+                    // admit defeat but retry because someone else might have 
                     setDelegating( true );
                     super.onResponseComplete();
                 }
@@ -111,13 +111,6 @@ public class WebdavListener extends HttpEventListenerWrapper
         String[] uriCollection = _exchange.getURI().split("/");
         int checkNum = uriCollection.length;
         int rewind = 0;
-        // 0 is empty, last is the filename, rewind the goop in the middle to find resource
-
-        if ( checkExists( uri ) )
-        {
-            System.err.println("WebdavListener:Resoltution: collection exists, unable to proceed");
-            return false;
-        }
 
         String parentUri = URIUtil.parentPath( uri );
         while ( !checkExists( parentUri ) )
@@ -125,8 +118,6 @@ public class WebdavListener extends HttpEventListenerWrapper
             ++rewind;
             parentUri = URIUtil.parentPath( parentUri );
         }
-
-        System.out.println("this uri exists " + parentUri + " and rewound " + rewind + " times");
 
         // confirm webdav is supported for this collection
         if ( checkWebdavSupported() )
@@ -187,7 +178,7 @@ public class WebdavListener extends HttpEventListenerWrapper
         {
             mkcolExchange.waitTilCompletion();
 
-            return mkcolExchange.created();
+            return mkcolExchange.exists();
         }
         catch ( InterruptedException ie )
         {

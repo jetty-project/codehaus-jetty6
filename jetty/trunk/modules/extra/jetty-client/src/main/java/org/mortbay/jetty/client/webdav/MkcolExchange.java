@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class MkcolExchange extends CachedExchange
 {
-    boolean createdSuccessfully = false;
+    boolean exists = false;
     private boolean _isComplete = false;
 
     public MkcolExchange()
@@ -23,15 +23,21 @@ public class MkcolExchange extends CachedExchange
         if ( status == HttpServletResponse.SC_CREATED )
         {
             System.err.println( "MkcolExchange:Status: Successfully created resource" );
-            createdSuccessfully = true;
+            exists = true;
+        }
+
+        if ( status == HttpServletResponse.SC_METHOD_NOT_ALLOWED ) // returned when resource exists
+        {
+            System.err.println( "MkcolExchange:Status: Resource must exist" );
+            exists = true;
         }
 
         super.onResponseStatus(version, status, reason);
     }
 
-    public boolean created()
+    public boolean exists()
     {
-        return createdSuccessfully;
+        return exists;
     }
 
     public void waitTilCompletion() throws InterruptedException
