@@ -272,17 +272,14 @@ public class HttpClient extends AbstractBuffers
             {
                 while (isStarted())
                 {
-                    synchronized(_timeoutQ)
-                    {
-                        _timeoutQ.setNow();
-                        _timeoutQ.tick();
-                    }
+                    _timeoutQ.tick(System.currentTimeMillis());
                     try
                     {
                         Thread.sleep(1000);
                     }
                     catch (InterruptedException e)
                     {
+                        Log.ignore(e);
                     }
                 }
             }
