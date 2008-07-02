@@ -50,6 +50,8 @@ public class OpenRemoteServiceServlet extends HttpServlet {
     private static final String CONTENT_ENCODING_GZIP = "gzip";
     private static final String CONTENT_TYPE_TEXT_PLAIN_UTF8 = "text/plain; charset=utf-8";
     private static final String GENERIC_FAILURE_MSG = "The call failed on the server; see server log for details";
+    private static final String EXPECTED_CONTENT_TYPE = "text/x-gwt-rpc";
+    private static final String EXPECTED_CHARSET = "charset=utf-8";
 
     /**
      * Controls the compression threshold at and below which no compression will
@@ -101,7 +103,7 @@ public class OpenRemoteServiceServlet extends HttpServlet {
         String contentType = request.getContentType();
         boolean contentTypeIsOkay = false;
         // Content-Type must be specified.
-        if (contentType != null) {
+        /*if (contentType != null) {
             // The type must be plain text.
             if (contentType.startsWith("text/plain")) {
                 // And it must be UTF-8 encoded (or unspecified, in which case we assume
@@ -116,6 +118,32 @@ public class OpenRemoteServiceServlet extends HttpServlet {
         if (!contentTypeIsOkay) {
             throw new ServletException(
                     "Content-Type must be 'text/plain' with 'charset=utf-8' (or unspecified charset)");
+        }*/
+        if (contentType != null) {
+            contentType = contentType.toLowerCase();
+            /*
+             * The Content-Type must be text/x-gwt-rpc.
+             * 
+             * NOTE:We use startsWith because some servlet engines, i.e. Tomcat, do
+             * not remove the charset component but others do.
+             */
+            if (contentType.startsWith(EXPECTED_CONTENT_TYPE)) {
+                String characterEncoding = request.getCharacterEncoding();
+                if (characterEncoding != null) {
+                    /*
+                     * TODO: It would seem that we should be able to use equalsIgnoreCase
+                     * here instead of indexOf. Need to be sure that servlet engines
+                     * return a properly parsed character encoding string if we decide to
+                     * make this change.
+                     */
+                    if (characterEncoding.toLowerCase().indexOf(CHARSET_UTF8.toLowerCase()) != -1)
+                        contentTypeIsOkay = true;                    
+                }
+            }
+        }
+        if (!contentTypeIsOkay) {
+            throw new ServletException("Content-Type must be '"
+                    + EXPECTED_CONTENT_TYPE + "' with '" + EXPECTED_CHARSET + "'.");
         }
         InputStream in = request.getInputStream();
         try {
@@ -324,7 +352,7 @@ public class OpenRemoteServiceServlet extends HttpServlet {
         try {
             response.setContentType("text/plain");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(GENERIC_FAILURE_MSG);
+            response.getOutputStream().write(GENERIC_FAILURE_MSG.getBytes());
         } catch (IOException e) {
             getServletContext().log(
                     "respondWithFailure failed while sending the previous failure to the client",
