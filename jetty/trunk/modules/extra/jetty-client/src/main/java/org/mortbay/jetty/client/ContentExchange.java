@@ -1,8 +1,6 @@
 package org.mortbay.jetty.client;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
@@ -19,11 +17,13 @@ public class ContentExchange extends CachedExchange
     String _encoding = "utf-8";
     ByteArrayOutputStream _responseContent;
 
+    File _fileForUpload;
+
     public ContentExchange()
     {
         super(false);
     }
-
+    
     /* ------------------------------------------------------------ */
     public String getResponseContent() throws UnsupportedEncodingException
     {
@@ -67,5 +67,36 @@ public class ContentExchange extends CachedExchange
         if (_responseContent == null)
             _responseContent = new ByteArrayOutputStream(_contentLength);
         content.writeTo(_responseContent);
+    }
+
+    protected void onRetry() throws IOException
+    {
+        if ( _fileForUpload != null )
+        {
+            _requestContent = null;
+            _requestContentSource =  getInputStream();
+        }
+        else
+        {
+            throw new IOException("Unsupported Retry attempt, no registered file for upload.");
+        }
+
+        super.onRetry();
+    }
+
+    private InputStream getInputStream() throws IOException
+    {
+        return new FileInputStream( _fileForUpload );
+    }
+
+    public File getFileForUpload()
+    {
+        return _fileForUpload;
+    }
+
+    public void setFileForUpload(File fileForUpload) throws IOException
+    {
+        this._fileForUpload = fileForUpload;
+        _requestContentSource = getInputStream();
     }
 }

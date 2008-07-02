@@ -87,6 +87,9 @@ public class HttpClient extends AbstractBuffers
     private InetSocketAddress _proxy;
     private Set<InetAddress> _noProxy;
     private int _maxRetries = 3;
+    private boolean _webdavEnabled = false;
+
+    // TODO clean up and add getters/setters to some of this maybe
     private String _keyStoreLocation;
     private String _keyStoreType;
     private String _keyStorePassword;
@@ -105,11 +108,8 @@ public class HttpClient extends AbstractBuffers
     private String _sslKeyManagerFactoryAlgorithm=(Security.getProperty("ssl.KeyManagerFactory.algorithm")==null?"SunX509":Security
             .getProperty("ssl.KeyManagerFactory.algorithm")); // cert
                                                                 // algorithm
-
     private String _sslTrustManagerFactoryAlgorithm=(Security.getProperty("ssl.TrustManagerFactory.algorithm")==null?"SunX509":Security
             .getProperty("ssl.TrustManagerFactory.algorithm")); // cert
-
-
 
     private SecurityRealmResolver _realmResolver;    
 
@@ -160,8 +160,7 @@ public class HttpClient extends AbstractBuffers
             }
             return destination;
         }
-    } 
-
+    }
     /* ------------------------------------------------------------ */
     public void schedule(Timeout.Task task)
     {
@@ -563,4 +562,20 @@ public class HttpClient extends AbstractBuffers
     {
         this._keyStoreLocation = keyStoreLocation;
     }
+
+        public void enableWebdav()
+    {
+        _webdavEnabled = true;
+    }
+
+    public void disableWebdav()
+    {
+        _webdavEnabled = false;
+    }
+
+    public boolean isWebdavEnabled()
+    {
+        return _webdavEnabled;
+    }
+    
 }

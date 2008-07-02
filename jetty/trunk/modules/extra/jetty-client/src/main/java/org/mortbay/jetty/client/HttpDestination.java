@@ -27,6 +27,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.client.security.Authentication;
 import org.mortbay.jetty.client.security.SecurityListener;
+import org.mortbay.jetty.client.webdav.WebdavListener;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 
@@ -329,8 +330,25 @@ public class HttpDestination
     /* ------------------------------------------------------------ */
     public void send(HttpExchange ex) throws IOException
     {
-        if (_client.hasRealms())
-            ex.setEventListener(new SecurityListener(this,ex));
+        /*
+         * check the exchange if we should configure listeners
+         * for this destination
+         */
+        if ( ex.configureListeners() )
+        {
+            if ( _client.isWebdavEnabled() )
+            {
+                ex.setEventListener(new WebdavListener( this, ex ) );
+            }
+
+            // security listener is the first wrapper to get notifications
+            // so it can resolve authentication before other listeners might
+            // be delegated to
+            if ( _client.hasRealms() )
+            {
+                ex.setEventListener(new SecurityListener(this,ex));
+            }
+        }
 
         doSend(ex);
     }
@@ -374,6 +392,8 @@ public class HttpDestination
        
         synchronized(this)
         {
+            System.out.println( "Sending: " + ex.toString() );
+
             HttpConnection connection=null;
             if (_queue.size()>0 || (connection=getIdleConnection())==null || !connection.send(ex))
             {
