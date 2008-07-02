@@ -26,28 +26,28 @@ import org.mortbay.log.Log;
  * <p>
  * The nested class Task should be extended by users of this class to obtain call back notification of 
  * expiries. 
- * <p>
- * This class is synchronized, but the callback to expired is not called within the synchronized scope.
  * 
  * @author gregw
  *
  */
 public class Timeout
 {
-    private final Object _mutex;
+    private Object _lock;
     private long _duration;
     private long _now=System.currentTimeMillis();
     private Task _head=new Task();
 
+    /* ------------------------------------------------------------ */
     public Timeout()
     {
-        _mutex=this;
+        _lock=new Object();
         _head._timeout=this;
     }
-    
-    public Timeout(final Object mutex)
+
+    /* ------------------------------------------------------------ */
+    public Timeout(Object lock)
     {
-        _mutex=mutex==null?this:mutex;
+        _lock=lock;
         _head._timeout=this;
     }
 
@@ -70,54 +70,101 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
-    public void setNow()
+    public long setNow()
     {
-        _now=System.currentTimeMillis();
+        synchronized (_lock)
+        {
+            _now=System.currentTimeMillis();
+            return _now; 
+        }
     }
     
     /* ------------------------------------------------------------ */
     public long getNow()
     {
-        return _now;
+        synchronized (_lock)
+        {
+            return _now;
+        }
     }
 
     /* ------------------------------------------------------------ */
     public void setNow(long now)
     {
-        _now=now;
+        synchronized (_lock)
+        {
+            _now=now;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get an expired tasks.
+     * This is called instead of {@link #tick()} to obtain the next
+     * expired Task, but without calling it's {@link Task#expire()} or
+     * {@link Task#expired()} methods.
+     * 
+     * @returns the next expired task or null.
+     */
+    public Task expired()
+    {
+        synchronized (_lock)
+        {
+            long _expiry = _now-_duration;
+
+            if (_head._next!=_head)
+            {
+                Task task = _head._next;
+                if (task._timestamp>_expiry)
+                    return null;
+
+                task.unlink();
+                task._expired=true;
+                return task;
+            }
+            return null;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public void tick(long now)
+    {
+        long _expiry = -1;
+
+        Task task=null;
+        while (true)
+        {
+            try
+            {
+                synchronized (_lock)
+                {
+                    if (_expiry==-1)
+                    {
+                        if (now!=-1)
+                            _now=now;
+                        _expiry = _now-_duration;
+                    }
+                        
+                    task= _head._next;
+                    if (task==_head || task._timestamp>_expiry)
+                        break;
+                    task.unlink();
+                    task._expired=true;
+                    task.expire();
+                }
+                
+                task.expired();
+            }
+            catch(Throwable th)
+            {
+                Log.warn(Log.EXCEPTION,th);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
     public void tick()
     {
-        long expiry = _now-_duration;
-        
-        while (true)
-        {
-            Task expired=null;
-            synchronized (_mutex)
-            {
-                if (_head._next!=_head && _head._next._timestamp<=expiry)
-                {
-                    expired=_head._next;
-                    expired.unlink();
-                    expired._expired=true;
-                }
-            }
-            if (expired!=null)
-            {
-                try
-                {
-                    expired.expired();
-                }
-                catch(Throwable th)
-                {
-                    Log.warn(Log.EXCEPTION,th);
-                }
-            }
-            else
-                break;
-        }
+        tick(-1);
     }
 
     /* ------------------------------------------------------------ */
@@ -129,18 +176,14 @@ public class Timeout
     /* ------------------------------------------------------------ */
     public void schedule(Task task,long delay)
     {
-        if (task._timeout!=null && task._timeout!=this)
-        {
-            task.cancel();
-        }
-        
-        synchronized (_mutex)
+        synchronized (_lock)
         {
             if (task._timestamp!=0)
             {
                 task.unlink();
                 task._timestamp=0;
             }
+            task._timeout=this;
             task._expired=false;
             task._delay=delay;
             task._timestamp = _now+delay;
@@ -152,7 +195,7 @@ public class Timeout
                     break;
                 last=last._prev;
             }
-            last.setNext(task);
+            last.link(task);
         }
     }
 
@@ -160,17 +203,16 @@ public class Timeout
     /* ------------------------------------------------------------ */
     public void cancelAll()
     {
-        synchronized (_mutex)
+        synchronized (_lock)
         {
             _head._next=_head._prev=_head;
-            // TODO call a cancel callback?
         }
     }
 
     /* ------------------------------------------------------------ */
     public boolean isEmpty()
     {
-        synchronized (_mutex)
+        synchronized (_lock)
         {
             return _head._next==_head;
         }
@@ -179,7 +221,7 @@ public class Timeout
     /* ------------------------------------------------------------ */
     public long getTimeToNext()
     {
-        synchronized (_mutex)
+        synchronized (_lock)
         {
             if (_head._next==_head)
                 return -1;
@@ -191,18 +233,15 @@ public class Timeout
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         buf.append(super.toString());
-
-        synchronized (_mutex)
+        
+        Task task = _head._next;
+        while (task!=_head)
         {
-            Task task = _head._next;
-            while (task!=_head)
-            {
-                buf.append("-->");
-                buf.append(task);
-                task=task._next;
-            }
+            buf.append("-->");
+            buf.append(task);
+            task=task._next;
         }
         
         return buf.toString();
@@ -214,7 +253,7 @@ public class Timeout
     /* ------------------------------------------------------------ */
     /** Task.
      * The base class for scheduled timeouts.  This class should be
-     * extended to implement the {@link #expire()} or {@link #expired()} method, which is called if the
+     * extended to implement the expire() method, which is called if the
      * timeout expires.
      * 
      * @author gregw
@@ -256,23 +295,49 @@ public class Timeout
             _next._prev=_prev;
             _prev._next=_next;
             _next=_prev=this;
-            _timeout=null;
             _expired=false;
         }
 
         /* ------------------------------------------------------------ */
-        private void setNext(Task task)
+        private void link(Task task)
         {
-            if (_timeout==null || 
-                task._timeout!=null && task._timeout!=_timeout ||    
-                task._next!=task)
-                throw new IllegalStateException();
             Task next_next = _next;
             _next._prev=task;
             _next=task;
             _next._next=next_next;
             _next._prev=this;   
-            _next._timeout=_timeout;
+        }
+        
+        /* ------------------------------------------------------------ */
+        /** Schedule the task on the given timeout.
+         * The task exiry will be called after the timeout duration.
+         * @param timer
+         */
+        public void schedule(Timeout timer)
+        {
+            timer.schedule(this);
+        }
+        
+        /* ------------------------------------------------------------ */
+        /** Schedule the task on the given timeout.
+         * The task exiry will be called after the timeout duration.
+         * @param timer
+         */
+        public void schedule(Timeout timer, long delay)
+        {
+            timer.schedule(this,delay);
+        }
+        
+        /* ------------------------------------------------------------ */
+        /** Reschedule the task on the current timeout.
+         * The task timeout is rescheduled as if it had been cancelled and
+         * scheduled on the current timeout.
+         */
+        public void reschedule()
+        {
+            Timeout timeout = _timeout;
+            if (timeout!=null)
+                timeout.schedule(this,_delay);
         }
         
         /* ------------------------------------------------------------ */
@@ -281,9 +346,11 @@ public class Timeout
          */
         public void cancel()
         {
-            if (_timeout!=null)
+            _timestamp=0;
+            Timeout timeout = _timeout;
+            if (timeout!=null)
             {
-                synchronized (_timeout._mutex)
+                synchronized (timeout)
                 {
                     _timestamp=0;
                     unlink();
@@ -295,14 +362,22 @@ public class Timeout
         public boolean isExpired() { return _expired; }
 
         /* ------------------------------------------------------------ */
-        public boolean isScheduled() { return _next!=this; }
+	public boolean isScheduled() { return _next!=this; }
         
+        /* ------------------------------------------------------------ */
+        /** Expire task.
+         * This method is called when the timeout expires. It is called
+         * in the scope of the synchronize block (on this) that sets 
+         * the {@link #isExpired()} state to true.
+         * @see #expired() For an unsynchronized callback.
+         */
+        public void expire(){}
+
         /* ------------------------------------------------------------ */
         /** Expire task.
          * This method is called when the timeout expires. It is called 
          * outside of any synchronization scope and may be delayed. 
          * 
-         * @see #expire() For a synchronized callback.
          */
         public void expired(){}
 

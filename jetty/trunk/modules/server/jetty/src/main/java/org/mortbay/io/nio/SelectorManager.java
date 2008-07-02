@@ -525,9 +525,8 @@ public abstract class SelectorManager extends AbstractLifeCycle
                 _selector.selectedKeys().clear();
 
                 // tick over the timers
-                _idleTimeout.tick();
-                _timeout.tick();
-
+                _idleTimeout.tick(now);
+                _timeout.tick(now);
             }
             catch (CancelledKeyException e)
             {

@@ -30,7 +30,7 @@ public class TimeoutTest extends TestCase
     {
         super.setUp();
         
-        timeout=new Timeout(null);
+        timeout=new Timeout();
         timeout.setDuration(1000000);
         tasks= new Timeout.Task[10]; 
         
