@@ -64,9 +64,8 @@ public class ContinuationBayeux extends AbstractBayeux
         {
             public void run()
             {
-                _timeout.setNow();
-                _now=_timeout.getNow();
-                _timeout.tick();
+                _now=System.currentTimeMillis();
+                _timeout.tick(_now);
             }
         },500L,500L);
     }
