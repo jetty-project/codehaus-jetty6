@@ -3,6 +3,7 @@
  + JETTY-603 Handle IPv6 in HttpURI
  + JETTY-605 Added optional threadpool to BayeuxService
  + JETTY-606 better writeTo impl for BIO
+ + JETTY-607 Add GigaSpaces session clustering
  + JETTY-610 jetty.class.path not being interpreted
  + JETTY-613 website module now generates site-component for jetty-site
  + JETTY-614 scanner allocated hashmap on every scan
