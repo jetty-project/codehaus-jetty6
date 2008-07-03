@@ -48,6 +48,36 @@
           </execution>		  
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+            <configuration>
+              <instructions>
+                <Bundle-SymbolicName>org.mortbay.jetty.security</Bundle-SymbolicName>
+                <Bundle-RequiredExcutionEnvironment>J2SE-1.4</Bundle-RequiredExcutionEnvironment>
+                <Import-Package>*</Import-Package>
+                <Export-Package>org.mortbay.jetty.security;version=${project.version}</Export-Package>
+                <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
+              </instructions>
+            </configuration>
+           </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
+      </plugin>
      </plugins>
   </build>
   <dependencies>
