@@ -42,7 +42,7 @@ public class WebdavListener extends HttpEventListenerWrapper
             super.onResponseStatus(version, status, reason);
         }
         
-        System.err.println("WebdavListener:Response Status: " + status );
+        Log.debug("WebdavListener:Response Status: " + status );
 
         // The dav spec says that CONFLICT should be returned when the parent collection doesn't exist but I am seeing
         // FORBIDDEN returned instead so running with that.
@@ -50,13 +50,13 @@ public class WebdavListener extends HttpEventListenerWrapper
         {
             if ( _webdavEnabled )
             {
-                System.err.println("WebdavListener:Response Status: dav enabled, taking a stab at resolving put issue" );
+                Log.debug("WebdavListener:Response Status: dav enabled, taking a stab at resolving put issue" );
 
                 setDelegating( false ); // stop delegating, we can try and fix this request
             }
             else
             {
-                System.err.println("WebdavListener:Response Status: Webdav Disabled" );
+                Log.debug("WebdavListener:Response Status: Webdav Disabled" );
                 setDelegating( true ); // just make sure we delegate
             }
         }
@@ -95,7 +95,7 @@ public class WebdavListener extends HttpEventListenerWrapper
             }
             catch ( IOException ioe )
             {
-                System.err.println("WebdavListener:Complete:IOException: might not be dealing with dav server, delegate");
+                Log.debug("WebdavListener:Complete:IOException: might not be dealing with dav server, delegate");
                 super.onResponseComplete();
             }
         }
