@@ -42,7 +42,7 @@ class SocketConnector extends AbstractLifeCycle implements HttpClient.Connector
         }
         else
         {
-            System.out.println("Using Regular Socket");
+            Log.debug("Using Regular Socket");
             socket = SocketFactory.getDefault().createSocket();                
         }
        

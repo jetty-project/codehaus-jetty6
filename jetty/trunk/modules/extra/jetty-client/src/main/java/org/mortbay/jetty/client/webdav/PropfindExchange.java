@@ -3,6 +3,7 @@ package org.mortbay.jetty.client.webdav;
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.client.CachedExchange;
 import org.mortbay.jetty.client.HttpExchange;
+import org.mortbay.log.Log;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -18,12 +19,12 @@ public class PropfindExchange extends HttpExchange
     {
         if ( status == HttpServletResponse.SC_OK )
         {
-            System.err.println( "PropfindExchange:Status: Exists" );
+            Log.debug( "PropfindExchange:Status: Exists" );
             _propertyExists = true;
         }
         else
         {
-            System.err.println( "PropfindExchange:Status: Not Exists" );
+            Log.debug( "PropfindExchange:Status: Not Exists" );
         }
 
         super.onResponseStatus(version, status, reason);

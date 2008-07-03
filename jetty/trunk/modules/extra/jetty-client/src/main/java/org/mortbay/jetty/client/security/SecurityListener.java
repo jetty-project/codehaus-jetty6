@@ -90,7 +90,8 @@ public class SecurityListener extends HttpEventListenerWrapper
     public void onResponseStatus( Buffer version, int status, Buffer reason )
         throws IOException
     {
-        System.err.println("SecurityListener:Response Status: " + status );
+        Log.debug("SecurityListener:Response Status: " + status );
+
         if ( status == HttpServletResponse.SC_UNAUTHORIZED && _attempts<_destination.getHttpClient().maxRetries()) 
         {
             // Let's absorb events until we have done some retries
@@ -108,7 +109,7 @@ public class SecurityListener extends HttpEventListenerWrapper
     public void onResponseHeader( Buffer name, Buffer value )
         throws IOException
     {
-        System.err.println( "SecurityListener:Header: " + name.toString() + " / " + value.toString() );
+        Log.debug( "SecurityListener:Header: " + name.toString() + " / " + value.toString() );
         if (!isDelegating())
         {
             int header = HttpHeaders.CACHE.getOrdinal(name);

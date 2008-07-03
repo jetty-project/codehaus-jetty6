@@ -2,6 +2,7 @@ package org.mortbay.jetty.client.webdav;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.client.HttpExchange;
+import org.mortbay.log.Log;
 
 import java.io.IOException;
 
@@ -13,7 +14,7 @@ public class WebdavSupportedExchange extends HttpExchange
 
     protected void onResponseHeader(Buffer name, Buffer value) throws IOException
     {
-        System.err.println("WebdavSupportedExchange:Header:" + name.toString() + " / " + value.toString() );
+        Log.debug("WebdavSupportedExchange:Header:" + name.toString() + " / " + value.toString() );
         if ( "DAV".equals( name.toString() ) )
         {
             if ( value.toString().indexOf( "1" ) >= 0 || value.toString().indexOf( "2" ) >= 0 )
