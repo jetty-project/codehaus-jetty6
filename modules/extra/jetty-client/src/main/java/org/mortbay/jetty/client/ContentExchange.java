@@ -71,12 +71,12 @@ public class ContentExchange extends CachedExchange
 
     protected void onRetry() throws IOException
     {
-        if ( _fileForUpload != null )
+        if ( _fileForUpload != null  )
         {
             _requestContent = null;
             _requestContentSource =  getInputStream();
         }
-        else
+        else if ( _requestContentSource != null )
         {
             throw new IOException("Unsupported Retry attempt, no registered file for upload.");
         }

@@ -2,6 +2,7 @@ package org.mortbay.jetty.client.webdav;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.client.CachedExchange;
+import org.mortbay.log.Log;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,13 +23,13 @@ public class MkcolExchange extends CachedExchange
     {
         if ( status == HttpServletResponse.SC_CREATED )
         {
-            System.err.println( "MkcolExchange:Status: Successfully created resource" );
+            Log.debug( "MkcolExchange:Status: Successfully created resource" );
             exists = true;
         }
 
         if ( status == HttpServletResponse.SC_METHOD_NOT_ALLOWED ) // returned when resource exists
         {
-            System.err.println( "MkcolExchange:Status: Resource must exist" );
+            Log.debug( "MkcolExchange:Status: Resource must exist" );
             exists = true;
         }
 

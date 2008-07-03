@@ -38,6 +38,7 @@ import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
 import org.mortbay.resource.Resource;
+import org.mortbay.log.Log;
 
 /**
  * Http Client.
@@ -465,7 +466,7 @@ public class HttpClient extends AbstractBuffers
         {
             public boolean verify( String urlHostName, SSLSession session )
             {
-                System.out.println( "Warning: URL Host: " + urlHostName + " vs." + session.getPeerHost() );
+                Log.warn( "Warning: URL Host: " + urlHostName + " vs." + session.getPeerHost() );
                 return true;
             }
         };
