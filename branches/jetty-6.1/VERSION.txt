@@ -10,6 +10,7 @@
  + JETTY-623 ServletContext.getServerInfo() non compliant
  + JETTY-626 Null protect reading the dtd resource from classloader
  + JETTY-629 Don't hold timeout lock during expiry call.
+ + JETTY-632 OSGi tags for Jetty client
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
