@@ -37,7 +37,7 @@ class SocketConnector extends AbstractLifeCycle implements HttpClient.Connector
         
         if ( destination.isSecure() )
         {
-            SSLContext sslContext = _httpClient.getLooseSSLContext();
+            SSLContext sslContext = _httpClient.getSSLContext();
             socket = sslContext.getSocketFactory().createSocket();
         }
         else
