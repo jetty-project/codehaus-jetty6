@@ -31,15 +31,17 @@ public class WebdavListener extends HttpEventListenerWrapper
         // We'll only enable webdav if this is a PUT request
         if ( HttpMethods.PUT.equalsIgnoreCase( _exchange.getMethod() ) )
         {
-            if ( _destination.getHttpClient().isWebdavEnabled() )
-            {
-                _webdavEnabled = true;
-            }
+            _webdavEnabled = true;
         }
     }
 
     public void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
     {
+        if ( !_webdavEnabled )
+        {
+            super.onResponseStatus(version, status, reason);
+        }
+        
         System.err.println("WebdavListener:Response Status: " + status );
 
         // The dav spec says that CONFLICT should be returned when the parent collection doesn't exist but I am seeing
@@ -68,6 +70,8 @@ public class WebdavListener extends HttpEventListenerWrapper
 
     public void onResponseComplete() throws IOException
     {
+
+        
         if ( isDelegating() )
         {
             super.onResponseComplete();
