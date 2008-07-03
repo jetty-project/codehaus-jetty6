@@ -19,9 +19,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.KeyStoreException;
@@ -87,18 +85,18 @@ public class HttpClient extends AbstractBuffers
     private InetSocketAddress _proxy;
     private Set<InetAddress> _noProxy;
     private int _maxRetries = 3;
-    private boolean _webdavEnabled = false;
+    private LinkedList<String> _registeredListeners;
 
     // TODO clean up and add getters/setters to some of this maybe
     private String _keyStoreLocation;
-    private String _keyStoreType;
+    private String _keyStoreType="JKS";
     private String _keyStorePassword;
-    private String _keyManagerAlgorithm = "JKS";
+    private String _keyManagerAlgorithm = "SunX509";
     private String _keyManagerPassword;
     private String _trustStoreLocation;
-    private String _trustStoreType;
+    private String _trustStoreType="JKS";
     private String _trustStorePassword;
-    private String _trustManagerAlgorithm = "JKS";
+    private String _trustManagerAlgorithm = "SunX509";
     private String _trustManagerPassword;
 
     private String _protocol="TLS";
@@ -113,7 +111,6 @@ public class HttpClient extends AbstractBuffers
 
     private SecurityRealmResolver _realmResolver;    
 
-    
     
     /* ------------------------------------------------------------------------------- */
     public void send(HttpExchange exchange) throws IOException
@@ -204,6 +201,33 @@ public class HttpClient extends AbstractBuffers
     {
         return _realmResolver==null?false:true;
     }
+
+
+    /**
+     * Registers a listener that can listen to the stream of execution between the client and the
+     * server and influence events.  Sequential calls to the method wrapper sequentially wrap the preceeding
+     * listener in a delegation model.
+     *
+     * NOTE: the SecurityListener is a special listener which doesn't need to be added via this
+     * mechanic, if you register security realms then it will automatically be added as the top listener of the
+     * delegation stack.
+     *
+     * @param listenerClass
+     */
+    public void registerListener( String listenerClass )
+    {
+        if ( _registeredListeners == null )
+        {
+            _registeredListeners = new LinkedList<String>();
+        }
+        _registeredListeners.add( listenerClass );
+    }
+
+    public LinkedList<String> getRegisteredListeners()
+    {
+        return _registeredListeners;
+    }
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -352,6 +376,13 @@ public class HttpClient extends AbstractBuffers
 
     }
 
+    /**
+     * if a keystore location has been provided then client will attempt to use it as the keystore,
+     * otherwise we simply ignore certificates and run with a loose ssl context.
+     *
+     * @return
+     * @throws IOException
+     */
     protected SSLContext getSSLContext() throws IOException
     {
         if ( _keyStoreLocation ==  null )
@@ -378,7 +409,7 @@ public class HttpClient extends AbstractBuffers
             KeyManager[] keyManagers=null;
             InputStream keystoreInputStream = null;
 
-                keystoreInputStream= Resource.newResource(_keyStoreLocation).getInputStream();
+            keystoreInputStream= Resource.newResource(_keyStoreLocation).getInputStream();
             KeyStore keyStore=KeyStore.getInstance(_keyStoreType);
             keyStore.load(keystoreInputStream,_keyStorePassword==null?null:_keyStorePassword.toString().toCharArray());
 
@@ -563,19 +594,24 @@ public class HttpClient extends AbstractBuffers
         this._keyStoreLocation = keyStoreLocation;
     }
 
-        public void enableWebdav()
+
+    public void setKeyStorePassword(String _keyStorePassword)
     {
-        _webdavEnabled = true;
+        this._keyStorePassword = _keyStorePassword;
     }
 
-    public void disableWebdav()
+    public void setKeyManagerPassword(String _keyManagerPassword)
     {
-        _webdavEnabled = false;
+        this._keyManagerPassword = _keyManagerPassword;
     }
 
-    public boolean isWebdavEnabled()
+    public void setTrustStorePassword(String _trustStorePassword)
     {
-        return _webdavEnabled;
+        this._trustStorePassword = _trustStorePassword;
     }
-    
+
+    public void setTrustManagerPassword(String _trustManagerPassword)
+    {
+        this._trustManagerPassword = _trustManagerPassword;
+    }
 }

@@ -17,6 +17,8 @@ public class ExternalKeyStoreAsyncSslHttpExchangeTest extends SslHttpExchangeTes
                 + "keystore";
 
         _httpClient.setKeyStoreLocation( keystore );
+        _httpClient.setKeyStorePassword( "storepwd");
+        _httpClient.setKeyManagerPassword( "keypwd" );
         _httpClient.start();
     }
 
