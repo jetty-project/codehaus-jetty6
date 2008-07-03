@@ -18,7 +18,9 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.lang.reflect.Constructor;
 
 import javax.servlet.http.Cookie;
 
@@ -330,26 +332,36 @@ public class HttpDestination
     /* ------------------------------------------------------------ */
     public void send(HttpExchange ex) throws IOException
     {
-        /*
-         * check the exchange if we should configure listeners
-         * for this destination
-         */
-        if ( ex.configureListeners() )
-        {
-            if ( _client.isWebdavEnabled() )
-            {
-                ex.setEventListener(new WebdavListener( this, ex ) );
-            }
+        LinkedList<String> listeners = _client.getRegisteredListeners();
 
-            // security listener is the first wrapper to get notifications
-            // so it can resolve authentication before other listeners might
-            // be delegated to
-            if ( _client.hasRealms() )
+        if (listeners != null)
+        {
+            // Add registered listeners, fail if we can't load them
+            for (int i = listeners.size(); i > 0; --i)
             {
-                ex.setEventListener(new SecurityListener(this,ex));
+                String listenerClass = listeners.get(i - 1);
+
+                try
+                {
+                    Class listener = Class.forName(listenerClass);
+                    Constructor constructor = listener.getDeclaredConstructor(HttpDestination.class, HttpExchange.class);
+                    HttpEventListener elistener = (HttpEventListener) constructor.newInstance(this, ex);
+                    ex.setEventListener(elistener);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    throw new IOException("Unable to instantiate registered listener for destination: " + listenerClass );
+                }
             }
         }
 
+        // Security is supported by default and should be the first consulted
+        if ( _client.hasRealms() )
+        {
+            ex.setEventListener( new SecurityListener( this, ex ) );
+        }
+        
         doSend(ex);
     }
     
@@ -392,7 +404,7 @@ public class HttpDestination
        
         synchronized(this)
         {
-            System.out.println( "Sending: " + ex.toString() );
+            //System.out.println( "Sending: " + ex.toString() );
 
             HttpConnection connection=null;
             if (_queue.size()>0 || (connection=getIdleConnection())==null || !connection.send(ex))
