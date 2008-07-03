@@ -136,7 +136,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
         {
             if (_sslContext==null)
             {
-                _sslContext = SelectConnector.this._httpClient.getLooseSSLContext();
+                _sslContext = SelectConnector.this._httpClient.getSSLContext();
             }
                 
             SSLEngine sslEngine = _sslContext.createSSLEngine();
