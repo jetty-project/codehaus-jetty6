@@ -305,6 +305,86 @@ public class UrlEncoded extends MultiMap
             }
         }
     }
+
+    /* -------------------------------------------------------------- */
+    /** Decoded parameters to Map.
+     * @param in InputSteam to read
+     * @param map MultiMap to add parameters to
+     * @param maxLength maximum length of content to read 0r -1 for no limit
+     */
+    public static void decode88591To(InputStream in, MultiMap map, int maxLength)
+    throws IOException
+    {
+        synchronized(map)
+        {
+            StringBuffer buffer = new StringBuffer();
+            String key = null;
+            String value = null;
+            
+            int b;
+
+            // TODO cache of parameter names ???
+            int totalLength=0;
+            while ((b=in.read())>=0)
+            {
+                switch ((char) b)
+                {
+                    case '&':
+                        value = buffer.length()==0?"":buffer.toString();
+                        buffer.setLength(0);
+                        if (key != null)
+                        {
+                            map.add(key,value);
+                        }
+                        else if (value!=null&&value.length()>0)
+                        {
+                            map.add(value,"");
+                        }
+                        key = null;
+                        value=null;
+                        break;
+                        
+                    case '=':
+                        if (key!=null)
+                        {
+                            buffer.append((char)b);
+                            break;
+                        }
+                        key = buffer.toString();
+                        buffer.setLength(0);
+                        break;
+                        
+                    case '+':
+                        buffer.append((char)' ');
+                        break;
+                        
+                    case '%':
+                        int dh=in.read();
+                        int dl=in.read();
+                        if (dh<0||dl<0)
+                            break;
+                        buffer.append((char)((TypeUtil.convertHexDigit((byte)dh)<<4) + TypeUtil.convertHexDigit((byte)dl)));
+                        break;
+                    default:
+                        buffer.append((char)b);
+                    break;
+                }
+                if (maxLength>=0 && (++totalLength > maxLength))
+                    throw new IllegalStateException("Form too large");
+            }
+            
+            if (key != null)
+            {
+                value = buffer.length()==0?"":buffer.toString();
+                buffer.setLength(0);
+                map.add(key,value);
+            }
+            else if (buffer.length()>0)
+            {
+                map.add(buffer.toString(), "");
+            }
+        }
+    }
     
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
@@ -408,18 +488,25 @@ public class UrlEncoded extends MultiMap
     public static void decodeTo(InputStream in, MultiMap map, String charset, int maxLength)
     throws IOException
     {
-        if (charset==null || StringUtil.__UTF8.equalsIgnoreCase(charset) || StringUtil.__ISO_8859_1.equalsIgnoreCase(charset))
+        if (charset==null || StringUtil.__ISO_8859_1.equals(charset))
+        {
+            decode88591To(in,map,maxLength);
+            return;
+        }
+
+        if (StringUtil.__UTF8.equalsIgnoreCase(charset))
         {
             decodeUtf8To(in,map,maxLength);
             return;
         }
-        
+
         if (StringUtil.__UTF16.equalsIgnoreCase(charset)) // Should be all 2 byte encodings
         {
             decodeUtf16To(in,map,maxLength);
             return;
         }
         
+
         synchronized(map)
         {
             String key = null;
@@ -429,7 +516,6 @@ public class UrlEncoded extends MultiMap
             int digit=0;
             int digits=0;
             
-            int l=-1;
             int totalLength = 0;
             ByteArrayOutputStream2 output = new ByteArrayOutputStream2();
             
