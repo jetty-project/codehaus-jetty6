@@ -131,16 +131,27 @@ public class URLEncodedTest extends junit.framework.TestCase
     public void testUrlEncodedStream()
     	throws Exception
     {
-        ByteArrayInputStream in = new ByteArrayInputStream (
-                "name0=value+%30&name1=&name2&name3=value+3".getBytes());
-        MultiMap m = new MultiMap();
-        UrlEncoded.decodeTo(in, m, null, -1);
-        System.err.println(m);
-        assertEquals("stream length",4,m.size());
-        assertEquals("stream name0","value 0",m.getString("name0"));
-        assertEquals("stream name1","",m.getString("name1"));
-        assertEquals("stream name2","",m.getString("name2"));
-        assertEquals("stream name3","value 3",m.getString("name3"));
+        String [][] charsets = new String[][]
+        {
+           {StringUtil.__ISO_8859_1,null},
+           {StringUtil.__ISO_8859_1,StringUtil.__ISO_8859_1},
+           {StringUtil.__UTF8,StringUtil.__UTF8},
+           {StringUtil.__UTF16,StringUtil.__UTF16},
+        };
+        
+        for (int i=0;i<charsets.length;i++)
+        {
+            ByteArrayInputStream in = new ByteArrayInputStream("name\n=value+%30&name1=&name2&n\u00e3me3=value+3".getBytes(charsets[i][0]));
+            MultiMap m = new MultiMap();
+            UrlEncoded.decodeTo(in, m, charsets[i][1], -1);
+            System.err.println(m);
+            assertEquals(i+" stream length",4,m.size());
+            assertEquals(i+" stream name\\n","value 0",m.getString("name\n"));
+            assertEquals(i+" stream name1","",m.getString("name1"));
+            assertEquals(i+" stream name2","",m.getString("name2"));
+            assertEquals(i+" stream nãme3","value 3",m.getString("nãme3"));
+        }
+        
         
         if (java.nio.charset.Charset.isSupported("Shift_JIS"))
         {
@@ -153,4 +164,5 @@ public class URLEncodedTest extends junit.framework.TestCase
         else
             assertTrue("Charset Shift_JIS not supported by jvm", true);
     }
+    
 }
