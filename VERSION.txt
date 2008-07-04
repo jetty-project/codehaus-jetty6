@@ -1,5 +1,6 @@
 
 jetty-7.0-SNAPSHOT
+ + JETTY-563 The OpenRemoteServiceServlet provided doesn't work with GWT 1.5. Based on JETTY-482, but now applies to GWT1.5M2+
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
  + JETTY-608 Suspend/Resume/Complete request listeners
  + JETTY-626 Null protect reading the dtd resource from classloader
