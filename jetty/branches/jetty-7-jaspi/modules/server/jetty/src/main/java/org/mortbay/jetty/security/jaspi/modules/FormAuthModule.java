@@ -29,8 +29,6 @@ import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
@@ -132,7 +130,7 @@ public class FormAuthModule extends BaseAuthModule
             _formErrorPage = path;
             _formErrorPath = path;
 
-            if (_formErrorPath != null && _formErrorPath.indexOf('?') > 0)
+            if (_formErrorPath.indexOf('?') > 0)
                 _formErrorPath = _formErrorPath.substring(0, _formErrorPath.indexOf('?'));
         }
     }
@@ -183,7 +181,6 @@ public class FormAuthModule extends BaseAuthModule
                 }
                 else
                 {
-                    if (response != null)
                         response.setContentLength(0);
                     response.sendRedirect(response.encodeRedirectURL
                             (URIUtil.addPaths(request.getContextPath(),
@@ -314,8 +311,8 @@ public class FormAuthModule extends BaseAuthModule
     private boolean tryLogin(MessageInfo messageInfo, Subject clientSubject, HttpServletResponse response, HttpSession session, String username, char[] password)
             throws AuthException, IOException, UnsupportedCallbackException
     {
-        CallbackHandler loginCallbackHandler = new UserPasswordCallbackHandler(username, password);
-        LoginResult loginResult = loginService.login(clientSubject, loginCallbackHandler);
+        LoginCredentials loginCredentials = new UserPasswordLoginCredentials(username, password);
+        LoginResult loginResult = loginService.login(clientSubject, loginCredentials);
         //TODO what should happen if !isMandatory but credentials exist and are wrong?
         if (loginResult.isSuccess())
         {
@@ -399,30 +396,4 @@ public class FormAuthModule extends BaseAuthModule
 
     }
 
-    private static class UserPasswordCallbackHandler implements CallbackHandler
-    {
-        private final String username;
-        private final char[] password;
-
-        public UserPasswordCallbackHandler(String username, char[] password)
-        {
-            this.username = username;
-            this.password = password;
-        }
-
-        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
-        {
-            for (Callback callback : callbacks)
-            {
-                if (callback instanceof NameCallback)
-                {
-                    ((NameCallback) callback).setName(username);
-                }
-                else if (callback instanceof PasswordCallback)
-                {
-                    ((PasswordCallback) callback).setPassword(password);
-                }
-            }
-        }
-    }
 }

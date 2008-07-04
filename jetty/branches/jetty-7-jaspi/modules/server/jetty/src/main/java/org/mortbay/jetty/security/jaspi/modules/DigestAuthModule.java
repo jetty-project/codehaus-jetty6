@@ -27,8 +27,6 @@ import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
@@ -48,7 +46,7 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class DigestAuthModule extends BaseAuthModule
 {
@@ -146,25 +144,8 @@ public class DigestAuthModule extends BaseAuthModule
 
                 if (n > 0)
                 {
-                    CallbackHandler loginCallbackHandler = new CallbackHandler()
-                    {
-
-                        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
-                        {
-                            for (Callback callback: callbacks)
-                            {
-                                if (callback instanceof NameCallback)
-                                {
-                                    ((NameCallback)callback).setName(digest.username);
-                                }
-                                else if (callback instanceof PasswordCallback)
-                                {
-                                    ((PasswordCallback)callback).setPassword(digest.toString().toCharArray());
-                                }
-                            }
-                        }
-                    };
-                    LoginResult loginResult = loginService.login(clientSubject,loginCallbackHandler);
+                    LoginCredentials loginCredentials = new UserPasswordLoginCredentials(digest.username,digest.toString().toCharArray());
+                    LoginResult loginResult = loginService.login(clientSubject, loginCredentials);
                     //TODO what should happen if !isMandatory but credentials exist and are wrong?
                     if (loginResult.isSuccess())
                     {

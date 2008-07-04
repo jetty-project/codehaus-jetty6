@@ -38,7 +38,7 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Response;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public abstract class AbstractSecurityHandler extends HandlerWrapper
 {/* ------------------------------------------------------------ */
@@ -60,7 +60,9 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
         {
             return "No User";
         }
-    };/* ------------------------------------------------------------ */
+    };
+
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** Nobody user.
@@ -154,9 +156,10 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
                 //JASPI 3.8.1
                 boolean isAuthMandatory = isAuthMandatory(base_request, base_response,constraintInfo);
                 //TODO check with greg about whether requirement that these be the request/response passed to the resource(servlet) is realistic (i.e. this requires no wrapping between here and invocation)
+                //TODO we have to get the auth context from the authconfig on each call.
                 MessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
 //                String authContextID = authConfig.getAuthContextID(messageInfo);
-//                ServerAuthContext authContext = authConfig.getAuthContext(authContextID, serviceSubject,authProperties);
+//                ServerAuthContext authContext = authConfig.getAuthContext(authContextID,serviceSubject,authProperties);
                 //JASPI 3.8.2
                 Subject clientSubject = new Subject();
                 AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -189,9 +192,13 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
                             authContext.secureResponse(messageInfo, serviceSubject);
                         }
                     }
+                    //TODO is this a sufficient dissociate call?
+                    base_request.setUserIdentity(UserIdentity.UNAUTHENTICATED_IDENTITY);
                 }
                 //jaspi otherwise the authContext has cconfigured an appropriate reply message that does not need to be secured.
 
+                //jaspi clean up subject ???
+                authContext.cleanSubject(messageInfo, clientSubject);
             }
             else
             {

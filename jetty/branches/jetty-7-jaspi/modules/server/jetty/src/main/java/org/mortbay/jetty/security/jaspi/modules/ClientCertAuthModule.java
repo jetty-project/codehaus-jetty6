@@ -21,31 +21,24 @@
 package org.mortbay.jetty.security.jaspi.modules;
 
 import java.io.IOException;
-import java.util.Map;
 import java.security.Principal;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.JettyMessageInfo;
-import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class ClientCertAuthModule extends BaseAuthModule
 {
@@ -84,25 +77,8 @@ public class ClientCertAuthModule extends BaseAuthModule
             //TODO no idea if this is correct
             final char[] password = B64Code.encode(certs[0].getSignature());
 
-            CallbackHandler loginCallbackHandler = new CallbackHandler()
-            {
-
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
-                {
-                    for (Callback callback: callbacks)
-                    {
-                        if (callback instanceof NameCallback)
-                        {
-                            ((NameCallback)callback).setName(username);
-                        }
-                        else if (callback instanceof PasswordCallback)
-                        {
-                            ((PasswordCallback)callback).setPassword(password);
-                        }
-                    }
-                }
-            };
-            LoginResult loginResult = loginService.login(clientSubject,loginCallbackHandler);
+            LoginCredentials loginCredentials = new UserPasswordLoginCredentials(username, password);
+            LoginResult loginResult = loginService.login(clientSubject, loginCredentials);
             if (loginResult.isSuccess())
             {
                 callbackHandler.handle(new Callback[] {loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});

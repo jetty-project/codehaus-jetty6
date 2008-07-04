@@ -18,10 +18,9 @@ import java.util.Map;
 import java.util.Collections;
 
 /* ------------------------------------------------------------ */
-/** User Realm.
+/** User object that encapsulates user identity and operations such as run-as-role actions, checking isUserInRole and getUserPrincipal.
  *
- * This interface should be specialized to provide specific user
- * lookup and authentication using arbitrary methods.
+ * Some of this functionality was previously in UserRealm detached from the user identity.
  *
  * @author Greg Wilkins (gregw)
  */

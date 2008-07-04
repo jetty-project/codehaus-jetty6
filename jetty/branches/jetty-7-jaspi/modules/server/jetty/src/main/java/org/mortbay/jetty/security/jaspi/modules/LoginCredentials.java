@@ -20,20 +20,12 @@
 
 package org.mortbay.jetty.security.jaspi.modules;
 
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
-
 /**
- * @version $Rev$ $Date$
+ * Marker interface for classes replacing CallbackHandler to supply e.g. username/pw to login services.
+ * @version $Rev:$ $Date:$
  */
-public interface LoginService
+public interface LoginCredentials
 {
-
-    LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException;
-
-    void logout(Subject subject) throws AuthException;
-
-    @Deprecated
-    String getName();
+    //erase passwords or other sensitive info
+    void clear();
 }

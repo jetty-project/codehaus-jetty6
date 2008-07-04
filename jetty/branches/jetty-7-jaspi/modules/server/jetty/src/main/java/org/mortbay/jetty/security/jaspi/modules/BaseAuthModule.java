@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.security.JettyMessageInfo;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
 {
@@ -91,7 +91,7 @@ public class BaseAuthModule implements ServerAuthModule, ServerAuthContext
     protected boolean isMandatory(MessageInfo messageInfo)
     {
         String mandatory = (String) messageInfo.getMap().get(JettyMessageInfo.MANDATORY_KEY);
-        if (mandatory == null) throw new IllegalStateException("no mandatory key");
+        if (mandatory == null) return false;
         return Boolean.valueOf(mandatory);
     }
 }
