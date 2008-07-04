@@ -36,6 +36,7 @@ import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
+import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
 import org.mortbay.jetty.servlet.SessionHandler;
 
 /**
@@ -54,6 +55,7 @@ public class ConstraintTest extends TestCase
     final ServletCallbackHandler callbackHandler = new ServletCallbackHandler();
     LoginService loginService = new HashLoginService("TestLoginService", Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
     RequestHandler _handler = new RequestHandler();
+    private static final String APP_CONTEXT = "localhost /ctx";
 
     public ConstraintTest(String arg0)
     {
@@ -117,7 +119,7 @@ public class ConstraintTest extends TestCase
             throws Exception
     {
         ServerAuthContext authContext = new BasicAuthModule(callbackHandler, loginService, TEST_REALM);
-        _security.setAuthContext(authContext);
+        _security.setAuthConfig(new SimpleAuthConfig(APP_CONTEXT, authContext));
         _server.start();
 
         String response;
@@ -153,7 +155,7 @@ public class ConstraintTest extends TestCase
             throws Exception
     {
         ServerAuthContext authContext = new FormAuthModule(callbackHandler, loginService, "/testLoginPage", "/testErrorPage");
-        _security.setAuthContext(authContext);
+        _security.setAuthConfig(new SimpleAuthConfig(APP_CONTEXT, authContext));
         _server.start();
 
         String response;
