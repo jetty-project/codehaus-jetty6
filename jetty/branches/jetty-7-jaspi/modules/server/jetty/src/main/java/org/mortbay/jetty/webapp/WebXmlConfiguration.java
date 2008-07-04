@@ -26,6 +26,7 @@ import java.util.jar.JarEntry;
 import java.util.regex.Pattern;
 
 import javax.security.auth.message.config.ServerAuthContext;
+import javax.security.auth.message.config.ServerAuthConfig;
 import javax.servlet.Servlet;
 import javax.servlet.UnavailableException;
 
@@ -42,6 +43,7 @@ import org.mortbay.jetty.security.jaspi.modules.DigestAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.ClientCertAuthModule;
+import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
@@ -1082,8 +1084,10 @@ public class WebXmlConfiguration implements Configuration
             }
             else
                 Log.warn("UNKNOWN AUTH METHOD: " + m);
-
-            _securityHandler.setAuthContext(serverAuthContext);
+            //TODO set this to host-name<space>context-root
+            String appContext = null;
+            ServerAuthConfig serverAuthConfig = new SimpleAuthConfig(appContext, serverAuthContext);
+            _securityHandler.setAuthConfig(serverAuthConfig);
             _securityHandler.setServletCallbackHandler(callbackHandler);
             //TODO??
 //            _securityHandler.setServiceSubject(null);

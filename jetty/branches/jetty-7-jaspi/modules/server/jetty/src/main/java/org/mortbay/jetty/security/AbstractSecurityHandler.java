@@ -22,8 +22,10 @@ package org.mortbay.jetty.security;
 
 import java.security.Principal;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.security.auth.message.config.ServerAuthContext;
+import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.AuthException;
@@ -45,10 +47,10 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
 //    private UserRealm _userRealm;
     private NotChecked _notChecked=new NotChecked();
     private boolean _checkWelcomeFiles=false;//jaspi stuff
-//    private ServerAuthConfig authConfig;
+    private ServerAuthConfig authConfig;
     private Subject serviceSubject;
-//    private Map authProperties;
-    private ServerAuthContext authContext;
+    private Map authProperties;
+//    private ServerAuthContext authContext;
     private ServletCallbackHandler servletCallbackHandler;
     public static Principal __NO_USER = new Principal()
     {
@@ -104,10 +106,14 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
         _checkWelcomeFiles=authenticateWelcomeFiles;
     }
     //set jaspi components
-
-    public void setAuthContext(ServerAuthContext authContext)
+    public void setAuthConfig(ServerAuthConfig authConfig)
     {
-        this.authContext = authContext;
+        this.authConfig = authConfig;
+    }
+
+    public void setAuthProperties(Map authProperties)
+    {
+        this.authProperties = authProperties;
     }
 
     public void setServiceSubject(Subject serviceSubject)
@@ -125,7 +131,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
         throws Exception
     {
         super.doStart();
-        if (authContext == null)
+        if (authConfig == null)
             throw new NullPointerException("No auth context configured");
         if (servletCallbackHandler == null)
         throw new NullPointerException("No CallbackHandler configured");
@@ -137,7 +143,6 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
     {
         Request base_request = (request instanceof Request) ? (Request)request: HttpConnection.getCurrentConnection().getRequest();
         Response base_response = (response instanceof Response) ? (Response)response:HttpConnection.getCurrentConnection().getResponse();
-//        UserRealm old_realm = base_request.getUserRealm();
         try
         {
             boolean checkSecurity = dispatch == REQUEST;
@@ -158,47 +163,55 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
                 //TODO check with greg about whether requirement that these be the request/response passed to the resource(servlet) is realistic (i.e. this requires no wrapping between here and invocation)
                 //TODO we have to get the auth context from the authconfig on each call.
                 MessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
-//                String authContextID = authConfig.getAuthContextID(messageInfo);
-//                ServerAuthContext authContext = authConfig.getAuthContext(authContextID,serviceSubject,authProperties);
-                //JASPI 3.8.2
-                Subject clientSubject = new Subject();
-                AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
-                if (authStatus == AuthStatus.SUCCESS) {
-                    //JASPI 3.8.  Supply the UserPrincipal and ClientSubject to the web resource permission check
-                    //JASPI 3.8.4 establish request values
-                    UserIdentity userIdentity = newUserIdentity(servletCallbackHandler, clientSubject);
-                    base_request.setUserIdentity(userIdentity);
-                    if (userIdentity.getUserPrincipal() == null)
-                    {
-                        base_request.setAuthType(null);
-                    }
-                    else
-                    {
-                        //NOTE! we assume jaspi is configured to always provide correct authMethod values
-                        base_request.setAuthType((String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY));
-                    }
-                    if (!checkWebResourcePermissions(pathInContext,base_request,base_response,constraintInfo, userIdentity))
-                    {
-                        return;
-                    }
-                    if (getHandler()!=null)
-                    {
-                        //jaspi 3.8.3 auth processing may wrap messages, use the modified versions
-                        getHandler().handle(pathInContext, (HttpServletRequest) messageInfo.getRequestMessage(), (HttpServletResponse) messageInfo.getResponseMessage(), dispatch);
-                        //TODO set secureResponse = false on error thrown by servlet to jetty
-                        boolean secureResponse = true;
-                        if (secureResponse)
-                        {
-                            authContext.secureResponse(messageInfo, serviceSubject);
-                        }
-                    }
-                    //TODO is this a sufficient dissociate call?
-                    base_request.setUserIdentity(UserIdentity.UNAUTHENTICATED_IDENTITY);
-                }
-                //jaspi otherwise the authContext has cconfigured an appropriate reply message that does not need to be secured.
+                String authContextID = authConfig.getAuthContextID(messageInfo);
+                ServerAuthContext authContext = authConfig.getAuthContext(authContextID,serviceSubject,authProperties);
 
-                //jaspi clean up subject ???
-                authContext.cleanSubject(messageInfo, clientSubject);
+                //JASPI 3.8.2
+                Subject clientSubject= new Subject();
+
+                try
+                {
+                    AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
+                    if (authStatus == AuthStatus.SUCCESS) {
+                        //JASPI 3.8.  Supply the UserPrincipal and ClientSubject to the web resource permission check
+                        //JASPI 3.8.4 establish request values
+                        UserIdentity userIdentity = newUserIdentity(servletCallbackHandler, clientSubject);
+                        base_request.setUserIdentity(userIdentity);
+                        if (userIdentity.getUserPrincipal() == null)
+                        {
+                            base_request.setAuthType(null);
+                        }
+                        else
+                        {
+                            //NOTE! we assume jaspi is configured to always provide correct authMethod values
+                            base_request.setAuthType((String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY));
+                        }
+                        if (!checkWebResourcePermissions(pathInContext,base_request,base_response,constraintInfo, userIdentity))
+                        {
+                            return;
+                        }
+                        if (getHandler()!=null)
+                        {
+                            //jaspi 3.8.3 auth processing may wrap messages, use the modified versions
+                            getHandler().handle(pathInContext, (HttpServletRequest) messageInfo.getRequestMessage(), (HttpServletResponse) messageInfo.getResponseMessage(), dispatch);
+                            //TODO set secureResponse = false on error thrown by servlet to jetty
+                            boolean secureResponse = true;
+                            if (secureResponse)
+                            {
+                                authContext.secureResponse(messageInfo, serviceSubject);
+                            }
+                        }
+                        //TODO is this a sufficient dissociate call?
+                        base_request.setUserIdentity(UserIdentity.UNAUTHENTICATED_IDENTITY);
+                    }
+                    //jaspi otherwise the authContext has cconfigured an appropriate reply message that does not need to be secured.
+                }
+                finally
+                {
+                    //jaspi clean up subject
+                    authContext.cleanSubject(messageInfo, clientSubject);
+                }
+
             }
             else
             {

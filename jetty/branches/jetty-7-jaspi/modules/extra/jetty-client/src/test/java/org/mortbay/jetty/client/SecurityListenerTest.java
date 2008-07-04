@@ -45,6 +45,7 @@ import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
+import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
 
 /**
  * Functional testing for HttpExchange.
@@ -58,7 +59,8 @@ public class SecurityListenerTest extends TestCase
     private Server _server;
     private int _port;
     private HttpClient _httpClient;
-    private SecurityRealm _jettyRealm; 
+    private SecurityRealm _jettyRealm;
+    private static final String APP_CONTEXT = "localhost /";
 
     protected void setUp() throws Exception
     {
@@ -279,7 +281,7 @@ public class SecurityListenerTest extends TestCase
          ServletCallbackHandler callbackHandler = new ServletCallbackHandler();
          BasicAuthModule authModule = new BasicAuthModule(callbackHandler, userRealm, "MyRealm");
          ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-         sh.setAuthContext(authModule);
+         sh.setAuthConfig(new SimpleAuthConfig(APP_CONTEXT, authModule));
          sh.setServletCallbackHandler(callbackHandler);
          sh.setConstraintMappings(new ConstraintMapping[]{cm});
          _server.setHandler(sh);

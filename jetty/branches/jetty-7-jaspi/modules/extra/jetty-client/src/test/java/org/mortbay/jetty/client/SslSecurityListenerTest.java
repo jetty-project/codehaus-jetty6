@@ -44,6 +44,7 @@ import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
+import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
 
 /**
  * Functional testing.
@@ -55,6 +56,7 @@ public class SslSecurityListenerTest extends TestCase
     protected HttpClient _httpClient;
     protected SecurityRealm _jettyRealm;
     protected int _type = HttpClient.CONNECTOR_SOCKET;
+    private static final String APP_CONTEXT = "localhost /";
 
     protected void setUp() throws Exception
     {
@@ -153,7 +155,7 @@ public class SslSecurityListenerTest extends TestCase
         ServletCallbackHandler callbackHandler = new ServletCallbackHandler();
         BasicAuthModule authModule = new BasicAuthModule(callbackHandler, userRealm, "MyRealm");
         ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-        sh.setAuthContext(authModule);
+        sh.setAuthConfig(new SimpleAuthConfig(APP_CONTEXT, authModule));
         sh.setServletCallbackHandler(callbackHandler);
         sh.setConstraintMappings(new ConstraintMapping[]
         { cm });
