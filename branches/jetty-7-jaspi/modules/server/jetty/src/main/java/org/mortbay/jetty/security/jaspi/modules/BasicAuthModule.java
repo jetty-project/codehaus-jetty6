@@ -26,8 +26,6 @@ import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
@@ -37,14 +35,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.log.Log;
-import org.mortbay.util.StringUtil;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class BasicAuthModule extends BaseAuthModule
 {
@@ -78,41 +74,18 @@ public class BasicAuthModule extends BaseAuthModule
 
         try
         {
-            if (credentials!=null )
+            if (credentials != null)
             {
-                    if(Log.isDebugEnabled())Log.debug("Credentials: "+credentials);
-                    credentials = credentials.substring(credentials.indexOf(' ')+1);
-                    credentials = B64Code.decode(credentials, StringUtil.__ISO_8859_1);
-                    int i = credentials.indexOf(':');
-                    final String username = credentials.substring(0,i);
-                    final char[] password = new char[credentials.length() - (i+1)];
-                            credentials.getChars(i+1, credentials.length(), password, 0);//substring(i+1);
-                    CallbackHandler loginCallbackHandler = new CallbackHandler()
-                    {
-
-                        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
-                        {
-                            for (Callback callback: callbacks)
-                            {
-                                if (callback instanceof NameCallback)
-                                {
-                                    ((NameCallback)callback).setName(username);
-                                }
-                                else if (callback instanceof PasswordCallback)
-                                {
-                                    ((PasswordCallback)callback).setPassword(password);
-                                }
-                            }
-                        }
-                    };
-                    LoginResult loginResult = loginService.login(clientSubject,loginCallbackHandler);
-                    //TODO what should happen if !isMandatory but credentials exist and are wrong?
-                    if (loginResult.isSuccess())
-                    {
-                        callbackHandler.handle(new Callback[] {loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
-                        messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
-                        return AuthStatus.SUCCESS;
-                    }
+                if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
+                LoginCredentials loginCredentials = new UserPasswordLoginCredentials(credentials);
+                LoginResult loginResult = loginService.login(clientSubject, loginCredentials);
+                //TODO what should happen if !isMandatory but credentials exist and are wrong?
+                if (loginResult.isSuccess())
+                {
+                    callbackHandler.handle(new Callback[]{loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
+                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
+                    return AuthStatus.SUCCESS;
+                }
 
             }
 
@@ -120,7 +93,7 @@ public class BasicAuthModule extends BaseAuthModule
             {
                 return AuthStatus.SUCCESS;
             }
-            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\""+realmName+'"');
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + realmName + '"');
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return AuthStatus.SEND_CONTINUE;
         }

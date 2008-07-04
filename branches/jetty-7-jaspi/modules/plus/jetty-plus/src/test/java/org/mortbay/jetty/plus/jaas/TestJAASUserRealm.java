@@ -21,33 +21,25 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.io.IOException;
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Properties;
-import java.util.Random;
 import java.util.Arrays;
 import java.util.List;
-import java.security.Principal;
+import java.util.Properties;
+import java.util.Random;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.Subject;
-import javax.security.auth.message.AuthStatus;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.security.jaspi.modules.LoginResult;
+import org.mortbay.jetty.security.jaspi.modules.UserPasswordLoginCredentials;
 
 
 /* ---------------------------------------------------- */
@@ -130,7 +122,7 @@ public class TestJAASUserRealm extends TestCase
         writer.close();
         
         BufferedReader reader = new BufferedReader(new FileReader(configFile));
-        String s = "";
+        String s;
         for (s = reader.readLine(); (s != null); s = reader.readLine())
         {
             System.out.println (s);
@@ -152,7 +144,7 @@ public class TestJAASUserRealm extends TestCase
         EmbeddedDataSource eds = new EmbeddedDataSource();
         
         Context comp = null;
-        Context env = null;
+        Context env;
         try
         {
             //make the java:comp/env
@@ -208,10 +200,10 @@ public class TestJAASUserRealm extends TestCase
             
             loginService.setLoginModuleName ("ds");
 
-            LoginResult loginResult = loginService.login(new Subject(), new UserPasswordCallbackHandler("me", "blah".toCharArray()));
+            LoginResult loginResult = loginService.login(new Subject(), new UserPasswordLoginCredentials("me", "blah".toCharArray()));
             assertFalse (loginResult.isSuccess());
             
-            loginResult = loginService.login (new Subject(), new UserPasswordCallbackHandler("me", "me".toCharArray()));
+            loginResult = loginService.login (new Subject(), new UserPasswordLoginCredentials("me", "me".toCharArray()));
             
             assertTrue (loginResult.isSuccess());
             assertNotNull ("CallerPrincipalCallback expected", loginResult.getCallerPrincipalCallback());
@@ -274,10 +266,10 @@ public class TestJAASUserRealm extends TestCase
         JAASLoginService loginService = new JAASLoginService("props");
         loginService.setLoginModuleName ("props");
 
-        LoginResult loginResult = loginService.login(new Subject(), new UserPasswordCallbackHandler("user", "wrong".toCharArray()));
+        LoginResult loginResult = loginService.login(new Subject(), new UserPasswordLoginCredentials("user", "wrong".toCharArray()));
         assertFalse (loginResult.isSuccess());
 
-        loginResult = loginService.login (new Subject(), new UserPasswordCallbackHandler("user", "user".toCharArray()));
+        loginResult = loginService.login (new Subject(), new UserPasswordLoginCredentials("user", "user".toCharArray()));
 
         assertTrue (loginResult.isSuccess());
         assertNotNull ("CallerPrincipalCallback expected", loginResult.getCallerPrincipalCallback());
@@ -295,34 +287,6 @@ public class TestJAASUserRealm extends TestCase
         throws Exception
     {
        
-    }
-    
-    //from FormAuthModule
-    private static class UserPasswordCallbackHandler implements CallbackHandler
-    {
-        private final String username;
-        private final char[] password;
-
-        public UserPasswordCallbackHandler(String username, char[] password)
-        {
-            this.username = username;
-            this.password = password;
-        }
-
-        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
-        {
-            for (Callback callback : callbacks)
-            {
-                if (callback instanceof NameCallback)
-                {
-                    ((NameCallback) callback).setName(username);
-                }
-                else if (callback instanceof PasswordCallback)
-                {
-                    ((PasswordCallback) callback).setPassword(password);
-                }
-            }
-        }
     }
 
 }

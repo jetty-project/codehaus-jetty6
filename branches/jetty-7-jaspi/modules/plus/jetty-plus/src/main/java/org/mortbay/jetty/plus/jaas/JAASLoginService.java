@@ -15,25 +15,28 @@
 
 package org.mortbay.jetty.plus.jaas;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.LinkedHashSet;
 import java.util.Collection;
-import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-import javax.security.auth.login.LoginContext;
-import javax.security.auth.login.LoginException;
 import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
+import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
+import javax.security.auth.message.AuthException;
 
-import org.mortbay.jetty.security.jaspi.modules.LoginService;
+import org.mortbay.jetty.security.jaspi.modules.LoginCredentials;
 import org.mortbay.jetty.security.jaspi.modules.LoginResult;
+import org.mortbay.jetty.security.jaspi.modules.LoginService;
+import org.mortbay.jetty.security.jaspi.modules.UserPasswordLoginCredentials;
 
 
 /* ---------------------------------------------------- */
@@ -130,14 +133,14 @@ public class JAASLoginService implements LoginService
     
     public void setRoleClassNames (String[] classnames)
     {
-        ArrayList tmp = new ArrayList();
+        ArrayList<String> tmp = new ArrayList<String>();
         
         if (classnames != null)
             tmp.addAll(Arrays.asList(classnames));
          
         if (!tmp.contains(DEFAULT_ROLE_CLASS_NAME))
             tmp.add(DEFAULT_ROLE_CLASS_NAME);
-        roleClassNames = (String[])tmp.toArray(new String[tmp.size()]);
+        roleClassNames = tmp.toArray(new String[tmp.size()]);
     }
 
     public String[] getRoleClassNames()
@@ -145,10 +148,28 @@ public class JAASLoginService implements LoginService
         return roleClassNames;
     }
 
-    public LoginResult login(Subject subject, CallbackHandler callbackHandler) throws AuthException
+    public LoginResult login(Subject subject, final LoginCredentials loginCredentials) throws AuthException
     {
         try
         {
+            CallbackHandler callbackHandler = new CallbackHandler()
+            {
+
+                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
+                {
+                    for (Callback callback: callbacks)
+                    {
+                        if (callback instanceof NameCallback)
+                        {
+                            ((NameCallback)callback).setName(((UserPasswordLoginCredentials)loginCredentials).getUsername());
+                        }
+                        else if (callback instanceof PasswordCallback)
+                        {
+                            ((PasswordCallback)callback).setPassword(((UserPasswordLoginCredentials)loginCredentials).getPassword());
+                        }
+                    }
+                }
+            };
             //set up the login context
             //TODO jaspi requires we provide the Configuration parameter
             LoginContext loginContext = new LoginContext(loginModuleName, subject, callbackHandler);
@@ -207,11 +228,10 @@ public class JAASLoginService implements LoginService
         Collection<String> groups = new LinkedHashSet<String>();
         try
         {
-
-            for (int i=0; i<roleClassNames.length;i++)
+            for (String roleClassName : roleClassNames)
             {
-                Class load_class=Thread.currentThread().getContextClassLoader().loadClass(roleClassNames[i]);
-                Set<Principal> rolesForType = subject.getPrincipals (load_class);
+                Class load_class = Thread.currentThread().getContextClassLoader().loadClass(roleClassName);
+                Set<Principal> rolesForType = subject.getPrincipals(load_class);
                 for (Principal principal : rolesForType)
                 {
                     groups.add(principal.getName());

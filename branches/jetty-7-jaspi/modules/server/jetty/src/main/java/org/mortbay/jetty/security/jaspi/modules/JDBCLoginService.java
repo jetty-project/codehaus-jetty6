@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 
 import org.mortbay.jetty.security.Password;
@@ -203,7 +202,7 @@ public class JDBCLoginService extends HashLoginService
 
     /* ------------------------------------------------------------ */
     @Override
-    public LoginResult login(Subject subject, CallbackHandler callbackHandler) throws AuthException
+    public LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException
     {
         synchronized (this)
         {
@@ -214,7 +213,7 @@ public class JDBCLoginService extends HashLoginService
                 _lastHashPurge = now;
             }
             //TODO JASPI not sure if this should be in sync block.  Was not in JDBCUserRealm
-            return super.login(subject, callbackHandler);
+            return super.login(subject, loginCredentials);
         }
     }
 

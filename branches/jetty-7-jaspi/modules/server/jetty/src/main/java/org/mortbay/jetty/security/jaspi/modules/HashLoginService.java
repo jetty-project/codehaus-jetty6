@@ -21,17 +21,11 @@ import java.io.PrintStream;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 
 import org.mortbay.component.AbstractLifeCycle;
@@ -305,28 +299,14 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
     }
 
     /* ------------------------------------------------------------ */
-    public LoginResult login(Subject subject, CallbackHandler callbackHandler) throws AuthException
+    public LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException
     {
-        NameCallback nameCallback = new NameCallback("name");
-        PasswordCallback passwordCallback = new PasswordCallback("password", true);
-        try
-        {
-            callbackHandler.handle(new Callback[] {nameCallback, passwordCallback});
-        }
-        catch (IOException e)
-        {
-            throw new AuthException(e.getMessage());
-        }
-        catch (UnsupportedCallbackException e)
-        {
-            throw new AuthException(e.getMessage());
-        }
         KnownUser user;
         synchronized (this)
         {
-            user = getKnownUser(nameCallback.getName());
+            user = getKnownUser(((UserPasswordLoginCredentials)loginCredentials).getUsername());
         }
-        if (user != null && user.authenticate(passwordCallback.getPassword()))
+        if (user != null && user.authenticate(((UserPasswordLoginCredentials)loginCredentials).getPassword()))
         {
             subject.getPrincipals().add(user);
             return new LoginResult(true, user, user.roles, subject);
