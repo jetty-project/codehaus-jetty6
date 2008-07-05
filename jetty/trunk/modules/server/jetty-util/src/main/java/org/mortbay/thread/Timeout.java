@@ -350,7 +350,7 @@ public class Timeout
             Timeout timeout = _timeout;
             if (timeout!=null)
             {
-                synchronized (timeout)
+                synchronized (timeout._lock)
                 {
                     _timestamp=0;
                     unlink();
