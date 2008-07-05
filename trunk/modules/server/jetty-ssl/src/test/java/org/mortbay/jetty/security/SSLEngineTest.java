@@ -36,13 +36,13 @@ public class SSLEngineTest extends TestCase
     // ---------------------------------------------
 
     // Useful constants
-    private static final String HELLO_WORLD="Hello world\r\n";
+    private static final String HELLO_WORLD="Hello world. The quick brown fox jumped over the lazy dog. How now brown cow. The rain in spain falls mainly on the plain.\n";
     private static final String JETTY_VERSION=Server.getVersion();
     private static final String PROTOCOL_VERSION="2.0";
 
     /** The request. */
-    private static final String REQUEST0_HEADER="POST / HTTP/1.1\n"+"Host: localhost\n"+"Content-Type: text/xml\n"+"Content-Length: ";
-    private static final String REQUEST1_HEADER="POST / HTTP/1.1\n"+"Host: localhost\n"+"Content-Type: text/xml\n"+"Connection: close\n"+"Content-Length: ";
+    private static final String REQUEST0_HEADER="POST /r0 HTTP/1.1\n"+"Host: localhost\n"+"Content-Type: text/xml\n"+"Content-Length: ";
+    private static final String REQUEST1_HEADER="POST /r1 HTTP/1.1\n"+"Host: localhost\n"+"Content-Type: text/xml\n"+"Connection: close\n"+"Content-Length: ";
     private static final String REQUEST_CONTENT="<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
             +"<requests xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+"        xsi:noNamespaceSchemaLocation=\"commander.xsd\" version=\""
             +PROTOCOL_VERSION+"\">\n"+"</requests>";
@@ -51,8 +51,8 @@ public class SSLEngineTest extends TestCase
     private static final String REQUEST1=REQUEST1_HEADER+REQUEST_CONTENT.getBytes().length+"\n\n"+REQUEST_CONTENT;
 
     /** The expected response. */
-    private static final String RESPONSE0="HTTP/1.1 200 OK\n"+"Content-Length: "+HELLO_WORLD.length()+"\n"+"Server: Jetty("+JETTY_VERSION+")\n"+'\n'+"Hello world\n";
-    private static final String RESPONSE1="HTTP/1.1 200 OK\n"+"Connection: close\n"+"Server: Jetty("+JETTY_VERSION+")\n"+'\n'+"Hello world\n";
+    private static final String RESPONSE0="HTTP/1.1 200 OK\n"+"Content-Length: "+HELLO_WORLD.length()+"\n"+"Server: Jetty("+JETTY_VERSION+")\n"+'\n'+HELLO_WORLD;
+    private static final String RESPONSE1="HTTP/1.1 200 OK\n"+"Connection: close\n"+"Server: Jetty("+JETTY_VERSION+")\n"+'\n'+HELLO_WORLD;
 
     private static final TrustManager[] s_dummyTrustManagers=new TrustManager[]
     { new X509TrustManager()
@@ -73,18 +73,18 @@ public class SSLEngineTest extends TestCase
         }
     } };
 
+    Server server;
+    SslSelectChannelConnector connector;
+    
     // ~ Methods
     // ----------------------------------------------------------------
 
-    /**
-     * Feed the server the entire request at once.
-     * 
-     * @throws Exception
-     */
-    public void testRequest1_jetty_https() throws Exception
+    public void setUp() throws Exception
     {
-        Server server=new Server();
-        SslSelectChannelConnector connector=new SslSelectChannelConnector();
+        super.setUp();
+
+        server=new Server();
+        connector=new SslSelectChannelConnector();
 
         String keystore = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+"keystore";
         
@@ -97,8 +97,25 @@ public class SSLEngineTest extends TestCase
         { connector });
         server.setHandler(new HelloWorldHandler());
         server.start();
+    }
+    
+    
+    public void tearDown() throws Exception
+    {
+        server.stop();
+        super.tearDown();
+    }
+    
+    /**
+     * Feed the server the entire request at once.
+     * 
+     * @throws Exception
+     */
+    public void testRequest1_jetty_https() throws Exception
+    {
+        final int loops=100;
+        final int numConns=1;
 
-        final int numConns=200;
         Socket[] client=new Socket[numConns];
 
         SSLContext ctx=SSLContext.getInstance("SSLv3");
@@ -106,49 +123,52 @@ public class SSLEngineTest extends TestCase
 
         int port=connector.getLocalPort();
 
-        try
+        for (int l=0;l<loops;l++)
         {
-            for (int i=0; i<numConns; ++i)
+            System.err.println(l);
+            try
             {
-                // System.err.println("write:"+i);
-                client[i]=ctx.getSocketFactory().createSocket("localhost",port);
-                OutputStream os=client[i].getOutputStream();
-
-                os.write(REQUEST0.getBytes());
-                os.write(REQUEST0.getBytes());
-                os.flush();
-            }
-
-            for (int i=0; i<numConns; ++i)
-            {
-                // System.err.println("flush:"+i);
-                OutputStream os=client[i].getOutputStream();
-                os.write(REQUEST1.getBytes());
-                os.flush();
-            }
-
-            for (int i=0; i<numConns; ++i)
-            {
-                // System.err.println("read:"+i);
-                // Read the response.
-                String responses=readResponse(client[i]);
-                // Check the response
-                assertEquals(String.format("responses %d",i),RESPONSE0+RESPONSE0+RESPONSE1,responses);
-            }
-        }
-        finally
-        {
-            for (int i=0; i<numConns; ++i)
-            {
-                if (client[i]!=null)
+                for (int i=0; i<numConns; ++i)
                 {
-                    client[i].close();
+                    // System.err.println("write:"+i);
+                    client[i]=ctx.getSocketFactory().createSocket("localhost",port);
+                    OutputStream os=client[i].getOutputStream();
+
+                    os.write(REQUEST0.getBytes());
+                    os.write(REQUEST0.getBytes());
+                    os.flush();
+                }
+
+                for (int i=0; i<numConns; ++i)
+                {
+                    // System.err.println("flush:"+i);
+                    OutputStream os=client[i].getOutputStream();
+                    os.write(REQUEST1.getBytes());
+                    os.flush();
+                }
+
+                for (int i=0; i<numConns; ++i)
+                {
+                    // System.err.println("read:"+i);
+                    // Read the response.
+                    String responses=readResponse(client[i]);
+                    // Check the response
+                    assertEquals(String.format("responses %d %d",l,i),RESPONSE0+RESPONSE0+RESPONSE1,responses);
                 }
             }
-            server.stop();
+            finally
+            {
+                for (int i=0; i<numConns; ++i)
+                {
+                    if (client[i]!=null)
+                    {
+                        client[i].close();
+                    }
+                }
+            }
         }
     }
-
+    
     /**
      * Read entire response from the client. Close the output.
      * 
@@ -194,6 +214,7 @@ public class SSLEngineTest extends TestCase
 
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
         {
+            // System.err.println("HANDLE "+request.getRequestURI());
             PrintWriter out=response.getWriter();
 
             try
