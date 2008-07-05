@@ -40,6 +40,8 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     private NIOBuffer[] _reuseBuffer=new NIOBuffer[2];    
     private ByteBuffer[] _gather=new ByteBuffer[2];
 
+    private boolean _closing=false;
+    
     // ssl
     protected SSLSession _session;
     
@@ -97,18 +99,25 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
+        // TODO - this really should not be done in a loop here - but with async callbacks.
+        
         _engine.closeOutbound();
         try
         {   
             int tries=0;
-            loop: while (isOpen() && !_engine.isOutboundDone() && tries++<100)
-            {
+
+            loop: while (isOpen() && !(_engine.isInboundDone() && _engine.isOutboundDone()))
+            {   
+                // TODO REMOVE loop check
+                if (tries++>100)
+                    throw new IllegalStateException();
+                
                 if (_outNIOBuffer.length()>0)
                 {
                     flush();
-                    Thread.sleep(10); // TODO yuck
+                    Thread.sleep(100); // TODO yuck
                 }
-                
+
                 switch(_engine.getHandshakeStatus())
                 {
                     case FINISHED:
@@ -116,9 +125,19 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
                         break loop;
                         
                     case NEED_UNWRAP:
-                        if(!fill(__EMPTY))
-                            Thread.yield(); 
-                            Thread.sleep(10); // TODO yuck
+                        Buffer buffer =_buffers.getBuffer(_engine.getSession().getApplicationBufferSize());
+                        try
+                        {
+                            ByteBuffer bbuffer = ((NIOBuffer)buffer).getByteBuffer();
+                            int f=fill(bbuffer);
+                            if (f<=0)
+                                break loop;
+                            
+                        }
+                        finally
+                        {
+                            _buffers.returnBuffer(buffer);
+                        }
                         break;
                         
                     case NEED_TASK:
@@ -156,7 +175,6 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
                     }
                 }
             }
-            
         }
         catch(IOException e)
         {
@@ -197,8 +215,15 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
             {
                 fill(bbuf);
 
-                loop: while (_inBuffer.remaining()>0)
+                int tries=0;
+                loop: while (true)
                 {
+                    // TODO REMOVE loop check
+                    if (tries++>100)
+                    {
+                        throw new IllegalStateException();
+                    }
+                    
                     if (_outNIOBuffer.length()>0)
                         flush();
                     
@@ -209,7 +234,7 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
                             break loop;
 
                         case NEED_UNWRAP:
-                            if(!fill(bbuf))
+                            if(fill(bbuf)<=0)
                                 break loop;
                             break;
 
@@ -277,113 +302,103 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
      */
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
     {
-        if (_outNIOBuffer.length()>0)
+        int consumed=0;
+        int available=header.length();
+        if (buffer!=null)
+            available+=buffer.length();
+        SSLEngineResult result;
+        
+        int tries=0;
+        loop: while (true)
         {
-            flush();
-            if (_outNIOBuffer.length()>0)
-                return 0;
-        }
-
-        SSLEngineResult result=null;
-
-        if (header!=null && buffer!=null)
-        {
-            _gather[0]=extractOutputBuffer(header,0);
-            synchronized(_gather[0])
+            // TODO REMOVE loop check
+            if (tries++>100)
             {
-                _gather[0].position(header.getIndex());
-                _gather[0].limit(header.putIndex());
+                throw new IllegalStateException();
+            }
+            
+            if (_outNIOBuffer.length()>0)
+            {
+                flush();
+                
+                // TODO is this too aggressive?
+                if (_outNIOBuffer.length()>0)
+                    return consumed;
+            }
+            
+            switch(_engine.getHandshakeStatus())
+            {
+                case FINISHED:
+                case NOT_HANDSHAKING:
 
-                _gather[1]=extractOutputBuffer(buffer,1);
+                    if (available==0)
+                        break loop;
+                        
+                    int c=(header!=null && buffer!=null)?wrap(header,buffer):wrap(header);
+                    if (c>0)
+                    {
+                        consumed+=c;
+                        available-=c;
+                    }
+                    else if (c<0)
+                    {
+                        return consumed>0?consumed:-1;
+                    }
+                    
+                    break;
 
-                synchronized(_gather[1])
+                case NEED_UNWRAP:
+                    Buffer buf =_buffers.getBuffer(_engine.getSession().getApplicationBufferSize());
+                    try
+                    {
+                        ByteBuffer bbuf = ((NIOBuffer)buf).getByteBuffer();
+                        if (fill(bbuf)<=0)
+                            break loop;
+                    }
+                    finally
+                    {
+                        _buffers.returnBuffer(buf);
+                    }
+                    
+                    break;
+
+                case NEED_TASK:
                 {
-                    _gather[1].position(buffer.getIndex());
-                    _gather[1].limit(buffer.putIndex());
+                    Runnable task;
+                    while ((task=_engine.getDelegatedTask())!=null)
+                        task.run();
+                    break;
+                }
 
+                case NEED_WRAP:
+                {
                     synchronized(_outBuffer)
                     {
-                        int consumed=0;
                         try
                         {
-                            _outNIOBuffer.clear();
-                            _outBuffer.position(0);
-                            _outBuffer.limit(_outBuffer.capacity());
-                            result=_engine.wrap(_gather,_outBuffer);
-                            _outNIOBuffer.setGetIndex(0);
-                            _outNIOBuffer.setPutIndex(result.bytesProduced());
-                            consumed=result.bytesConsumed();
+                            _outNIOBuffer.compact();
+                            int put=_outNIOBuffer.putIndex();
+                            _outBuffer.position();
+                            result=_engine.wrap(__NO_BUFFERS,_outBuffer);
+                            _outNIOBuffer.setPutIndex(put+result.bytesProduced());
                         }
                         finally
                         {
                             _outBuffer.position(0);
-
-                            if (consumed>0 && header!=null)
-                            {
-                                int len=consumed<header.length()?consumed:header.length();
-                                header.skip(len);
-                                consumed-=len;
-                                _gather[0].position(0);
-                                _gather[0].limit(_gather[0].capacity());
-                            }
-                            if (consumed>0 && buffer!=null)
-                            {
-                                int len=consumed<buffer.length()?consumed:buffer.length();
-                                buffer.skip(len);
-                                consumed-=len;
-                                _gather[1].position(0);
-                                _gather[1].limit(_gather[1].capacity());
-                            }
-                            assert consumed==0;
                         }
                     }
+
+                    flush();
+
+                    break;
                 }
             }
         }
-        else
-        {
-            _gather[0]=extractOutputBuffer(header,0);
-            synchronized(_gather[0])
-            {
-                _gather[0].position(header.getIndex());
-                _gather[0].limit(header.putIndex());
-
-                int consumed=0;
-                synchronized(_outBuffer)
-                {
-                    try
-                    {
-                        _outNIOBuffer.clear();
-                        _outBuffer.position(0);
-                        _outBuffer.limit(_outBuffer.capacity());
-                        result=_engine.wrap(_gather[0],_outBuffer);
-                        _outNIOBuffer.setGetIndex(0);
-                        _outNIOBuffer.setPutIndex(result.bytesProduced());
-                        consumed=result.bytesConsumed();
-                    }
-                    finally
-                    {
-                        _outBuffer.position(0);
-
-                        if (consumed>0 && header!=null)
-                        {
-                            int len=consumed<header.length()?consumed:header.length();
-                            header.skip(len);
-                            consumed-=len;
-                            _gather[0].position(0);
-                            _gather[0].limit(_gather[0].capacity());
-                        }
-                        assert consumed==0;
-                    }
-                }
-            }
-        }
-
-        flush();
-
-        return result.bytesConsumed();
+        
+       
+        return consumed;
     }
-
+    
     
     /* ------------------------------------------------------------ */
     public void flush() throws IOException
@@ -414,7 +429,6 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     /* ------------------------------------------------------------ */
     private ByteBuffer extractOutputBuffer(Buffer buffer,int n)
     {
-        ByteBuffer src=null;
         NIOBuffer nBuf=null;
 
         if (buffer.buffer() instanceof NIOBuffer)
@@ -434,7 +448,7 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     }
 
     /* ------------------------------------------------------------ */
-    private boolean fill(ByteBuffer buffer) throws IOException
+    private int fill(ByteBuffer buffer) throws IOException
     {
         int in_len=0;
 
@@ -448,18 +462,15 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
             int len=super.fill(_inNIOBuffer);
             if (len<=0)
             {
-                if (len<0)
-                    _engine.closeInbound();
                 if (len==0 || in_len>0)
                     break;
-                return false;
+                return -1;
             }
             in_len+=len;
         }
         
-
         if (_inNIOBuffer.length()==0)
-            return false;
+            return 0;
 
         SSLEngineResult result;
         try
@@ -474,33 +485,157 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
             _inBuffer.position(0);
             _inBuffer.limit(_inBuffer.capacity());
         }
+        
 
-        if (result != null)
+        switch(result.getStatus())
         {
-            switch(result.getStatus())
+            case BUFFER_OVERFLOW:
+            case BUFFER_UNDERFLOW:
+                Log.warn("unswarp {}",result);
+                
+            case OK:
+                return result.bytesProduced();
+            case CLOSED:
+                return result.bytesProduced()>0?result.bytesProduced():-1;
+
+            default:
+                Log.warn("unwrap "+result);
+            throw new IOException(result.toString());
+        }
+    }
+
+    
+    private int wrap(Buffer header, Buffer buffer) throws IOException
+    {
+        SSLEngineResult result=null;
+        
+        _gather[0]=extractOutputBuffer(header,0);
+        synchronized(_gather[0])
+        {
+            _gather[0].position(header.getIndex());
+            _gather[0].limit(header.putIndex());
+
+            _gather[1]=extractOutputBuffer(buffer,1);
+
+            synchronized(_gather[1])
             {
-                case OK:
-                    break;
-                case CLOSED:
-                    throw new IOException("sslEngine closed");
-                    
-                case BUFFER_OVERFLOW:
-                    Log.debug("unwrap {}",result);
-                    break;
-                    
-                case BUFFER_UNDERFLOW:
-                    Log.debug("unwrap {}",result);
-                    break;
-                    
-                default:
-                    Log.warn("unwrap "+result);
-                throw new IOException(result.toString());
+                _gather[1].position(buffer.getIndex());
+                _gather[1].limit(buffer.putIndex());
+
+                synchronized(_outBuffer)
+                {
+                    int consumed=0;
+                    try
+                    {
+                        _outNIOBuffer.clear();
+                        _outBuffer.position(0);
+                        _outBuffer.limit(_outBuffer.capacity());
+                        
+                        result=_engine.wrap(_gather,_outBuffer);
+                        _outNIOBuffer.setGetIndex(0);
+                        _outNIOBuffer.setPutIndex(result.bytesProduced());
+                        consumed=result.bytesConsumed();
+                    }
+                    finally
+                    {
+                        _outBuffer.position(0);
+
+                        if (consumed>0 && header!=null)
+                        {
+                            int len=consumed<header.length()?consumed:header.length();
+                            header.skip(len);
+                            consumed-=len;
+                            _gather[0].position(0);
+                            _gather[0].limit(_gather[0].capacity());
+                        }
+                        if (consumed>0 && buffer!=null)
+                        {
+                            int len=consumed<buffer.length()?consumed:buffer.length();
+                            buffer.skip(len);
+                            consumed-=len;
+                            _gather[1].position(0);
+                            _gather[1].limit(_gather[1].capacity());
+                        }
+                        assert consumed==0;
+                    }
+                }
             }
         }
         
-        return (result.bytesProduced()+result.bytesConsumed())>0;
+
+        switch(result.getStatus())
+        {
+            case BUFFER_OVERFLOW:
+            case BUFFER_UNDERFLOW:
+                Log.warn("unswarp {}",result);
+                
+            case OK:
+                return result.bytesConsumed();
+            case CLOSED:
+                return result.bytesConsumed()>0?result.bytesConsumed():-1;
+
+            default:
+                Log.warn("wrap "+result);
+            throw new IOException(result.toString());
+        }
+    }
+    
+    private int wrap(Buffer header) throws IOException
+    {
+        SSLEngineResult result=null;
+        _gather[0]=extractOutputBuffer(header,0);
+        synchronized(_gather[0])
+        {
+            _gather[0].position(header.getIndex());
+            _gather[0].limit(header.putIndex());
+
+            int consumed=0;
+            synchronized(_outBuffer)
+            {
+                try
+                {
+                    _outNIOBuffer.clear();
+                    _outBuffer.position(0);
+                    _outBuffer.limit(_outBuffer.capacity());
+                    result=_engine.wrap(_gather[0],_outBuffer);
+                    _outNIOBuffer.setGetIndex(0);
+                    _outNIOBuffer.setPutIndex(result.bytesProduced());
+                    consumed=result.bytesConsumed();
+                }
+                finally
+                {
+                    _outBuffer.position(0);
+
+                    if (consumed>0 && header!=null)
+                    {
+                        int len=consumed<header.length()?consumed:header.length();
+                        header.skip(len);
+                        consumed-=len;
+                        _gather[0].position(0);
+                        _gather[0].limit(_gather[0].capacity());
+                    }
+                    assert consumed==0;
+                }
+            }
+        }
+        switch(result.getStatus())
+        {
+            case BUFFER_OVERFLOW:
+            case BUFFER_UNDERFLOW:
+                Log.warn("unswarp {}",result);
+                
+            case OK:
+                return result.bytesConsumed();
+            case CLOSED:
+                return result.bytesConsumed()>0?result.bytesConsumed():-1;
+
+            default:
+                Log.warn("wrap "+result);
+            throw new IOException(result.toString());
+        }
     }
 
+    
     /* ------------------------------------------------------------ */
     public boolean isBufferingInput()
     {
@@ -510,7 +645,7 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     /* ------------------------------------------------------------ */
     public boolean isBufferingOutput()
     {
-        return _outNIOBuffer.hasContent();
+        return _outNIOBuffer.hasContent() || _closing;
     }
 
     /* ------------------------------------------------------------ */
@@ -524,4 +659,6 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     {
         return _engine;
     }
+    
+    
 }
