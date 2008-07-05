@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -114,7 +115,7 @@ public class SSLEngineTest extends TestCase
     public void testRequest1_jetty_https() throws Exception
     {
         final int loops=100;
-        final int numConns=1;
+        final int numConns=10;
 
         Socket[] client=new Socket[numConns];
 
@@ -182,12 +183,13 @@ public class SSLEngineTest extends TestCase
     private static String readResponse(Socket client) throws IOException
     {
         BufferedReader br=null;
-
+        StringBuilder sb=new StringBuilder(1000);
+        
         try
         {
+            client.setSoTimeout(5000);
             br=new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-            StringBuilder sb=new StringBuilder(1000);
             String line;
 
             while ((line=br.readLine())!=null)
@@ -195,8 +197,10 @@ public class SSLEngineTest extends TestCase
                 sb.append(line);
                 sb.append('\n');
             }
-
-            return sb.toString();
+        }
+        catch(SocketTimeoutException e)
+        {
+            System.err.println("Test timedout: "+e.toString());
         }
         finally
         {
@@ -205,6 +209,7 @@ public class SSLEngineTest extends TestCase
                 br.close();
             }
         }
+        return sb.toString();
     }
 
     private static class HelloWorldHandler extends AbstractHandler
