@@ -134,6 +134,11 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
                                 break loop;
                             
                         }
+                        catch(Exception e)
+                        {
+                            Log.warn("FIX THIS!: "+e.toString());
+                            Log.debug(e);
+                        }
                         finally
                         {
                             _buffers.returnBuffer(buffer);
