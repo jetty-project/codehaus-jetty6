@@ -149,7 +149,7 @@ public class URLEncodedTest extends junit.framework.TestCase
             assertEquals(i+" stream name\\n","value 0",m.getString("name\n"));
             assertEquals(i+" stream name1","",m.getString("name1"));
             assertEquals(i+" stream name2","",m.getString("name2"));
-            assertEquals(i+" stream nãme3","value 3",m.getString("nãme3"));
+            assertEquals(i+" stream n\u00e3me3","value 3",m.getString("n\u00e3me3"));
         }
         
         
