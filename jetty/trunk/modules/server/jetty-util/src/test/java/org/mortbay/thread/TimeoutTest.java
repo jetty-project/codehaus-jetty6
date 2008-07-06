@@ -129,4 +129,86 @@ public class TimeoutTest extends TestCase
         assertEquals("delay", true, task.isExpired());
     }
 
+    /* ------------------------------------------------------------ */
+    public void testStress() throws Exception
+    {
+        final int LOOP=100;
+        final boolean[] running = {true};
+        final int[] count = {0};
+
+        Thread ticker = new Thread()
+        {
+            public void run()
+            {
+                while (running[0])
+                {
+                    try
+                    {
+                        Thread.sleep(90);
+                        timeout.tick(System.currentTimeMillis());
+                    }
+                    catch(Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        ticker.start();
+
+        for (int i=0;i<LOOP;i++)
+        {
+            Thread th = new Thread()
+            { 
+                public void run()
+                {
+                    Timeout.Task task = new Timeout.Task()
+                    {
+                        public void expired()
+                        {       
+                            synchronized(count)
+                            {
+                                count[0]++;
+                            }
+                        }
+                    };
+                    
+                    long period = 100 + this.hashCode() % 400;
+                    int loops = 10+this.hashCode() % 100;
+                    
+                    int loop=0;
+                    while (running[0])
+                    {
+                        try
+                        {
+                            timeout.schedule(task,period);
+                            if (loop++==loops)
+                            {
+                                timeout.schedule(task,period);
+                                Thread.sleep(600);
+                            }
+                            else
+                            {
+                                timeout.schedule(task,period);
+                                Thread.sleep(100);
+                            }
+                            task.cancel();
+                        }
+                        catch(Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
+            th.start();
+        }
+        
+        Thread.sleep(5000);
+        running[0]=false;
+        Thread.sleep(1000);
+        timeout.tick();
+        
+        assertEquals(LOOP,count[0]);
+    }
 }
