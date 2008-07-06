@@ -98,6 +98,7 @@ public class SSLEngineTest extends TestCase
         { connector });
         server.setHandler(new HelloWorldHandler());
         server.start();
+        Thread.sleep(100);
     }
     
     
@@ -114,7 +115,7 @@ public class SSLEngineTest extends TestCase
      */
     public void testRequest1_jetty_https() throws Exception
     {
-        final int loops=100;
+        final int loops=10;
         final int numConns=10;
 
         Socket[] client=new Socket[numConns];
