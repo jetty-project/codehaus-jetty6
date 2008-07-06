@@ -703,6 +703,12 @@ public class Server extends HandlerWrapper implements Attributes
     {
         _graceful=timeoutMS;
     }
+    
+    public String toString()
+    {
+        return this.getClass().getName()+"@"+Integer.toHexString(hashCode());
+    }
+
 
     /* ------------------------------------------------------------ */
     /* A component that can be gracefully shutdown.
