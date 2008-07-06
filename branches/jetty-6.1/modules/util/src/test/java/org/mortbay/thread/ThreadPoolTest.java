@@ -45,7 +45,8 @@ public class ThreadPoolTest extends TestCase
         tp.setThreadsPriority(Thread.NORM_PRIORITY-1);
         
         tp.start();
-        
+        Thread.sleep(500);
+     
         assertEquals(5,tp.getThreads());
         assertEquals(5,tp.getIdleThreads());
         tp.dispatch(_job);
@@ -70,7 +71,7 @@ public class ThreadPoolTest extends TestCase
         
         int threads=tp.getThreads();
         assertTrue(threads>5);
-        Thread.sleep(1100);
+        Thread.sleep(1500);
         assertTrue(tp.getThreads()<threads);
     }
 }
