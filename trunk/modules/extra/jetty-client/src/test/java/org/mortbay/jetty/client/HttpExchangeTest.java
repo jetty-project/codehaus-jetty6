@@ -59,10 +59,12 @@ public class HttpExchangeTest extends TestCase
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
+        Thread.sleep(100);
     }
 
     protected void tearDown() throws Exception
     {
+        Thread.sleep(100);
         stopServer();
         _httpClient.stop();
     }
@@ -174,8 +176,6 @@ public class HttpExchangeTest extends TestCase
             httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             assertEquals("i="+i,"<hello />",result);
-            
-            Thread.sleep(5);
         }
     }
 
