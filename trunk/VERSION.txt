@@ -1,4 +1,3 @@
-
 jetty-7.0-SNAPSHOT
  + JETTY-563 JETTY-482 OpenRemoteServiceServlet for GWT1.5M2+
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
