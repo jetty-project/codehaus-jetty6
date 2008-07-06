@@ -11,7 +11,16 @@ public class ThreadPoolTest extends TestCase
     {
         public void run()
         {
-            long t = System.currentTimeMillis()%1000;
+            try 
+            {
+                Thread.sleep(100);
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            
+            long t = System.currentTimeMillis()%10000;
             long r=t;
             for (int i=0;i<t;i++)
                 r+=i;
@@ -37,28 +46,30 @@ public class ThreadPoolTest extends TestCase
         tp.start();
         
         assertEquals(5,tp.getThreads());
-
-	/* TODO Find a none timer based way to test this.
-	 * or at least less fragile timers
-        Thread.sleep(200);
         assertEquals(5,tp.getIdleThreads());
         tp.dispatch(_job);
-        Thread.sleep(200);
         tp.dispatch(_job);
-        Thread.sleep(200);
+        assertEquals(5,tp.getThreads());
+        assertEquals(3,tp.getIdleThreads());
+        Thread.sleep(500);
         assertEquals(5,tp.getThreads());
         assertEquals(5,tp.getIdleThreads());
         
-        for (int i=0;i<1000;i++)
+        for (int i=0;i<100;i++)
             tp.dispatch(_job);
-        Thread.sleep(200);
+
+        
+        assertTrue(tp.getQueueSize()>10);
+        assertTrue(tp.getIdleThreads()<=1);
+
+        Thread.sleep(2000);
+
         assertEquals(0,tp.getQueueSize());
         assertTrue(tp.getIdleThreads()>5);
+        
         int threads=tp.getThreads();
         assertTrue(threads>5);
         Thread.sleep(1100);
         assertTrue(tp.getThreads()<threads);
-        assertTrue(tp.getThreads()>5);
-	*/
     }
 }
