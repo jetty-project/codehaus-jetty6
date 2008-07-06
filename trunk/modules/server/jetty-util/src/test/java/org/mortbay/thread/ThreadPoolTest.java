@@ -35,16 +35,17 @@ public class ThreadPoolTest extends TestCase
     
     
     public void testQueuedThreadPool() throws Exception
-    {
+    {        
         QueuedThreadPool tp= new QueuedThreadPool();
         tp.setMinThreads(5);
         tp.setMaxThreads(10);
         tp.setMaxIdleTimeMs(1000);
         tp.setSpawnOrShrinkAt(2);
         tp.setThreadsPriority(Thread.NORM_PRIORITY-1);
-        
+
         tp.start();
-        
+        Thread.sleep(500);
+
         assertEquals(5,tp.getThreads());
         assertEquals(5,tp.getIdleThreads());
         tp.dispatch(_job);
@@ -54,11 +55,11 @@ public class ThreadPoolTest extends TestCase
         Thread.sleep(500);
         assertEquals(5,tp.getThreads());
         assertEquals(5,tp.getIdleThreads());
-        
+
         for (int i=0;i<100;i++)
             tp.dispatch(_job);
 
-        
+
         assertTrue(tp.getQueueSize()>10);
         assertTrue(tp.getIdleThreads()<=1);
 
@@ -66,10 +67,10 @@ public class ThreadPoolTest extends TestCase
 
         assertEquals(0,tp.getQueueSize());
         assertTrue(tp.getIdleThreads()>5);
-        
+
         int threads=tp.getThreads();
         assertTrue(threads>5);
-        Thread.sleep(1100);
+        Thread.sleep(1500);
         assertTrue(tp.getThreads()<threads);
     }
 }
