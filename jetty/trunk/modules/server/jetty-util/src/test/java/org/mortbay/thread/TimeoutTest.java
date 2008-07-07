@@ -136,6 +136,7 @@ public class TimeoutTest extends TestCase
         final boolean[] running = {true};
         final int[] count = {0,0,0};
 
+        timeout.setNow(System.currentTimeMillis());
         timeout.setDuration(100);
         
         // Start a ticker thread that will tick over the timer frequently.
@@ -194,10 +195,10 @@ public class TimeoutTest extends TestCase
                     };
                     
                     // this thread will loop and each loop with schedule a 
-                    // task with a delay between 0 and 100ms on top of the timeouts 100ms duration
+                    // task with a delay between 200 and 300ms on top of the timeouts 100ms duration
                     // mostly this thread will then wait 50ms and cancel the task
-                    // But once it will wait 500ms and the task will expire
-                    long delay = this.hashCode() % 100;
+                    // But once it will wait 1000ms and the task will expire
+                    long delay = 200+this.hashCode() % 100;
                     int once = (int)( 10+(System.currentTimeMillis() % 50));
                     System.err.println(l+" "+delay+" "+once);
                     
@@ -211,12 +212,12 @@ public class TimeoutTest extends TestCase
                             long wait=50;
                             if (loop++==once)
                             { 
-                                // THIS loop is the one time we wait 500ms
+                                // THIS loop is the one time we wait 1000ms
                                 synchronized(count)
                                 {
                                     count[1]++;
                                 }
-                                wait=500;
+                                wait=1000;
                             }
                             
                             // do the wait
