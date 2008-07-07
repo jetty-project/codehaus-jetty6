@@ -152,7 +152,7 @@ public class TimeoutTest extends TestCase
                         // have no funny optimisation issues.
                         synchronized (lock)
                         {
-                            lock.wait(40);
+                            lock.wait(60);
                         }
                         timeout.tick(System.currentTimeMillis());
                     }
@@ -195,10 +195,10 @@ public class TimeoutTest extends TestCase
                     };
                     
                     // this thread will loop and each loop with schedule a 
-                    // task with a delay between 200 and 300ms on top of the timeouts 100ms duration
+                    // task with a delay between 250 and 350ms on top of the timeouts 100ms duration
                     // mostly this thread will then wait 50ms and cancel the task
                     // But once it will wait 1000ms and the task will expire
-                    long delay = 200+this.hashCode() % 100;
+                    long delay = 250+this.hashCode() % 100;
                     int once = (int)( 10+(System.currentTimeMillis() % 50));
                     // System.err.println(l+" "+delay+" "+once);
                     
