@@ -132,11 +132,12 @@ public class TimeoutTest extends TestCase
     /* ------------------------------------------------------------ */
     public void testStress() throws Exception
     {
-        timeout.setDuration(0);
         final int LOOP=500;
         final boolean[] running = {true};
         final int[] count = {0,0,0};
 
+        timeout.setDuration(100);
+        
         // Start a ticker thread that will tick over the timer frequently.
         Thread ticker = new Thread()
         {
@@ -193,10 +194,10 @@ public class TimeoutTest extends TestCase
                     };
                     
                     // this thread will loop and each loop with schedule a 
-                    // task with a delay between 100 and 200ms
+                    // task with a delay between 0 and 100ms on top of the timeouts 100ms duration
                     // mostly this thread will then wait 50ms and cancel the task
                     // But once it will wait 500ms and the task will expire
-                    long delay = 100 + (this.hashCode() % 100);
+                    long delay = this.hashCode() % 100;
                     int once = (int)( 10+(System.currentTimeMillis() % 50));
                     System.err.println(l+" "+delay+" "+once);
                     
@@ -244,8 +245,6 @@ public class TimeoutTest extends TestCase
             running[0]=false;
         }
         // give some time for test to stop
-        Thread.sleep(1000);
-        timeout.tick(System.currentTimeMillis());
         Thread.sleep(1000);
         timeout.tick(System.currentTimeMillis());
         
