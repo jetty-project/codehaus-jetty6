@@ -104,6 +104,7 @@ public class SSLEngineTest extends TestCase
     
     public void tearDown() throws Exception
     {
+        Thread.sleep(2000);
         server.stop();
         super.tearDown();
     }
@@ -125,49 +126,58 @@ public class SSLEngineTest extends TestCase
 
         int port=connector.getLocalPort();
 
-        for (int l=0;l<loops;l++)
+        try
         {
-            System.err.println(l);
-            try
+            for (int l=0;l<loops;l++)
             {
-                for (int i=0; i<numConns; ++i)
+                System.err.println(l);
+                try
                 {
-                    // System.err.println("write:"+i);
-                    client[i]=ctx.getSocketFactory().createSocket("localhost",port);
-                    OutputStream os=client[i].getOutputStream();
-
-                    os.write(REQUEST0.getBytes());
-                    os.write(REQUEST0.getBytes());
-                    os.flush();
-                }
-
-                for (int i=0; i<numConns; ++i)
-                {
-                    // System.err.println("flush:"+i);
-                    OutputStream os=client[i].getOutputStream();
-                    os.write(REQUEST1.getBytes());
-                    os.flush();
-                }
-
-                for (int i=0; i<numConns; ++i)
-                {
-                    // System.err.println("read:"+i);
-                    // Read the response.
-                    String responses=readResponse(client[i]);
-                    // Check the response
-                    assertEquals(String.format("responses %d %d",l,i),RESPONSE0+RESPONSE0+RESPONSE1,responses);
-                }
-            }
-            finally
-            {
-                for (int i=0; i<numConns; ++i)
-                {
-                    if (client[i]!=null)
+                    for (int i=0; i<numConns; ++i)
                     {
-                        client[i].close();
+                        // System.err.println("write:"+i);
+                        client[i]=ctx.getSocketFactory().createSocket("localhost",port);
+                        OutputStream os=client[i].getOutputStream();
+
+                        os.write(REQUEST0.getBytes());
+                        os.write(REQUEST0.getBytes());
+                        os.flush();
+                    }
+
+                    for (int i=0; i<numConns; ++i)
+                    {
+                        // System.err.println("flush:"+i);
+                        OutputStream os=client[i].getOutputStream();
+                        os.write(REQUEST1.getBytes());
+                        os.flush();
+                    }
+
+                    for (int i=0; i<numConns; ++i)
+                    {
+                        // System.err.println("read:"+i);
+                        // Read the response.
+                        String responses=readResponse(client[i]);
+                        // Check the response
+                        assertEquals(String.format("responses %d %d",l,i),RESPONSE0+RESPONSE0+RESPONSE1,responses);
                     }
                 }
+                finally
+                {
+                    for (int i=0; i<numConns; ++i)
+                    {
+                        if (client[i]!=null)
+                        {
+                            client[i].close();
+                        }
+                    }
+
+
+                }
             }
+        }
+        finally
+        {
+            System.err.println("END OF TEST");
         }
     }
     
