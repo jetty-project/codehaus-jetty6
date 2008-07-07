@@ -113,10 +113,10 @@ public class SSLEngineTest extends TestCase
      * 
      * @throws Exception
      */
-    public void testRequest1_jetty_https() throws Exception
+    public void testRequestJettyHttps() throws Exception
     {
-        final int loops=10;
-        final int numConns=10;
+        final int loops=100;
+        final int numConns=100;
 
         Socket[] client=new Socket[numConns];
 
