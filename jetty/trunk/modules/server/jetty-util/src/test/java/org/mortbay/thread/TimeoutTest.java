@@ -19,6 +19,7 @@ import junit.framework.TestCase;
 
 public class TimeoutTest extends TestCase
 {
+    Object lock = new Object();
     Timeout timeout = new Timeout(null);
     Timeout.Task[] tasks;
 
@@ -30,7 +31,7 @@ public class TimeoutTest extends TestCase
     {
         super.setUp();
         
-        timeout=new Timeout();
+        timeout=new Timeout(lock);
         timeout.setDuration(1000000);
         tasks= new Timeout.Task[10]; 
         
@@ -132,10 +133,11 @@ public class TimeoutTest extends TestCase
     /* ------------------------------------------------------------ */
     public void testStress() throws Exception
     {
-        final int LOOP=100;
+        final int LOOP=500;
         final boolean[] running = {true};
-        final int[] count = {0};
+        final int[] count = {0,0,0};
 
+        // Start a ticker thread that will tick over the timer frequently.
         Thread ticker = new Thread()
         {
             public void run()
@@ -144,7 +146,12 @@ public class TimeoutTest extends TestCase
                 {
                     try
                     {
-                        Thread.sleep(90);
+                        // use lock.wait so we have a memory barrier and
+                        // have no funny optimisation issues.
+                        synchronized (lock)
+                        {
+                            lock.wait(40);
+                        }
                         timeout.tick(System.currentTimeMillis());
                     }
                     catch(Exception e)
@@ -156,42 +163,68 @@ public class TimeoutTest extends TestCase
         };
         ticker.start();
 
+        // start lots of test threads
         for (int i=0;i<LOOP;i++)
         {
+            final int l =i;
+            
+            // 
             Thread th = new Thread()
             { 
                 public void run()
                 {
+                    // count how many threads were started (should == LOOP)
+                    synchronized(count)
+                    {
+                        count[0]++;
+                    }
+                    
+                    // create a task for this thread
                     Timeout.Task task = new Timeout.Task()
                     {
                         public void expired()
                         {       
+                            // count the number of expires
                             synchronized(count)
                             {
-                                count[0]++;
+                                count[2]++;
                             }
                         }
                     };
                     
-                    long period = 100 + this.hashCode() % 400;
-                    int loops = 10+this.hashCode() % 100;
+                    // this thread will loop and each loop with schedule a 
+                    // task with a delay between 100 and 200ms
+                    // mostly this thread will then wait 50ms and cancel the task
+                    // But once it will wait 500ms and the task will expire
+                    long delay = 100 + (this.hashCode() % 100);
+                    int once = (int)( 10+(System.currentTimeMillis() % 50));
+                    System.err.println(l+" "+delay+" "+once);
                     
+                    // do the looping until we are stopped
                     int loop=0;
                     while (running[0])
                     {
                         try
                         {
-                            timeout.schedule(task,period);
-                            if (loop++==loops)
-                            {
-                                timeout.schedule(task,period);
-                                Thread.sleep(600);
+                            timeout.schedule(task,delay);
+                            long wait=50;
+                            if (loop++==once)
+                            { 
+                                // THIS loop is the one time we wait 500ms
+                                synchronized(count)
+                                {
+                                    count[1]++;
+                                }
+                                wait=500;
                             }
-                            else
+                            
+                            // do the wait
+                            synchronized (lock)
                             {
-                                timeout.schedule(task,period);
-                                Thread.sleep(100);
+                                lock.wait(wait);
                             }
+                            
+                            // cancel task (which may have expired)
                             task.cancel();
                         }
                         catch(Exception e)
@@ -204,11 +237,21 @@ public class TimeoutTest extends TestCase
             th.start();
         }
         
+        // run test for 5s
         Thread.sleep(5000);
-        running[0]=false;
+        synchronized (lock)
+        {
+            running[0]=false;
+        }
+        // give some time for test to stop
         Thread.sleep(1000);
-        timeout.tick();
+        timeout.tick(System.currentTimeMillis());
+        Thread.sleep(1000);
+        timeout.tick(System.currentTimeMillis());
         
-        assertEquals(LOOP,count[0]);
+        // check the counts
+        assertEquals("count threads", LOOP,count[0]);
+        assertEquals("count once waits",LOOP,count[1]);
+        assertEquals("count expires",LOOP,count[2]);
     }
 }
