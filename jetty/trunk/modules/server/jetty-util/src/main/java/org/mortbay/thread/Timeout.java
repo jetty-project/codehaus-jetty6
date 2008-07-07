@@ -21,7 +21,7 @@ import org.mortbay.log.Log;
 /* ------------------------------------------------------------ */
 /** Timeout queue.
  * This class implements a timeout queue for timers that are at least as likely to be cancelled as they are to expire.
- * Unlike the util timeout class, the duration of the timouts is shared by all scheduled tasks and if the duration 
+ * Unlike the util timeout class, the duration of the timeouts is shared by all scheduled tasks and if the duration 
  * is changed, this affects all scheduled tasks.
  * <p>
  * The nested class Task should be extended by users of this class to obtain call back notification of 
@@ -174,6 +174,10 @@ public class Timeout
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @param task
+     * @param delay A delay in addition to the default duration of the timeout
+     */
     public void schedule(Task task,long delay)
     {
         synchronized (_lock)

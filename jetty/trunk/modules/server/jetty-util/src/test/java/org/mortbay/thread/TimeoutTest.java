@@ -32,7 +32,6 @@ public class TimeoutTest extends TestCase
         super.setUp();
         
         timeout=new Timeout(lock);
-        timeout.setDuration(1000000);
         tasks= new Timeout.Task[10]; 
         
         for (int i=0;i<tasks.length;i++)
@@ -133,6 +132,7 @@ public class TimeoutTest extends TestCase
     /* ------------------------------------------------------------ */
     public void testStress() throws Exception
     {
+        timeout.setDuration(0);
         final int LOOP=500;
         final boolean[] running = {true};
         final int[] count = {0,0,0};
