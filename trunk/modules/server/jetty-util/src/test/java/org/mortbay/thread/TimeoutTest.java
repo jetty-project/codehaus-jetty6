@@ -200,7 +200,7 @@ public class TimeoutTest extends TestCase
                     // But once it will wait 1000ms and the task will expire
                     long delay = 200+this.hashCode() % 100;
                     int once = (int)( 10+(System.currentTimeMillis() % 50));
-                    System.err.println(l+" "+delay+" "+once);
+                    // System.err.println(l+" "+delay+" "+once);
                     
                     // do the looping until we are stopped
                     int loop=0;
