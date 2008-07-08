@@ -350,14 +350,13 @@ public class Timeout
          */
         public void cancel()
         {
-            _timestamp=0;
             Timeout timeout = _timeout;
             if (timeout!=null)
             {
                 synchronized (timeout._lock)
                 {
-                    _timestamp=0;
                     unlink();
+                    _timestamp=0;
                 }
             }
         }
