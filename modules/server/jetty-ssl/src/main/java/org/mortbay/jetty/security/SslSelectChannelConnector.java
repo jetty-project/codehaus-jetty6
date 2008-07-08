@@ -225,7 +225,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         super.customize(endpoint,request);
         request.setScheme(HttpSchemes.HTTPS);
         
-        SslHttpChannelEndPoint sslHttpChannelEndpoint=(SslHttpChannelEndPoint)endpoint;
+        SslSelectChannelEndPoint sslHttpChannelEndpoint=(SslSelectChannelEndPoint)endpoint;
         
         SSLEngine sslEngine=sslHttpChannelEndpoint.getSSLEngine();
 
@@ -495,7 +495,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     /* ------------------------------------------------------------------------------- */
     protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
     {
-        return new SslHttpChannelEndPoint(this,channel,selectSet,key,createSSLEngine())
+        return new SslSelectChannelEndPoint(this,channel,selectSet,key,createSSLEngine())
         {
             // TODO remove this hack
             public boolean isReadyForDispatch()
