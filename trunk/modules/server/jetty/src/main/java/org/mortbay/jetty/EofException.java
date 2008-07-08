@@ -29,6 +29,7 @@ public class EofException extends EOFException
     
     public EofException(Throwable th)
     {
-        initCause(th);
+        if (th!=null)
+            initCause(th);
     }
 }

@@ -265,6 +265,8 @@ public class HttpParser implements Parser
             if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
                     throw new HttpException(HttpStatus.ORDINAL_413_Request_Entity_Too_Large, "FULL");
             
+            IOException ioex=null;
+            
             if (_endp != null && filled<=0)
             {
                 // Compress buffer if handling _content buffer
@@ -284,9 +286,9 @@ public class HttpParser implements Parser
                 }
                 catch(IOException e)
                 {
+                    ioex=e;
                     Log.debug(e);
-                    reset(true);
-                    throw (e instanceof EofException) ? e:new EofException(e);
+                    filled=-1;
                 }
             }
 
@@ -299,7 +301,7 @@ public class HttpParser implements Parser
                     return total_filled;
                 }
                 reset(true);
-                throw new EofException();
+                throw new EofException(ioex);
             }
             length=_buffer.length();
         }
