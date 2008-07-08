@@ -86,10 +86,10 @@ public class HttpExchangeTest extends TestCase
         Thread.sleep(200);
 
         
-        sender(20,true);
+        sender(50,true);
         Thread.sleep(200);
         
-        sender(20,false);
+        sender(50,false);
         Thread.sleep(200);
         
     }
@@ -99,49 +99,48 @@ public class HttpExchangeTest extends TestCase
      * 
      * @throws IOException
      */
-    public void sender(final int nb,boolean close) throws Exception
+    public void sender(final int nb,final boolean close) throws Exception
     {
         final CountDownLatch latch=new CountDownLatch(nb);
         long l0=System.currentTimeMillis();
         for (int i=0; i<nb; i++)
         {
             final int n=i;
-            if (n%1000==0)
-            {
-                Thread.sleep(200);
-            }
             
             HttpExchange httpExchange=new HttpExchange()
             {
+                int len=0;
                 protected void onRequestCommitted()
                 {
-                    System.err.println("Request committed");
+                    System.err.println(n+" Request committed: "+close);
                 }
 
                 protected void onResponseStatus(Buffer version, int status, Buffer reason)
                 {
-                    System.err.println("Response Status: " + version+" "+status+" "+reason);
+                    System.err.println(n+" Response Status: " + version+" "+status+" "+reason);
                 }
 
                 protected void onResponseHeader(Buffer name, Buffer value)
                 {
-                    System.err.println("Response header: " + name + " = " + value);
+                    System.err.println(n+" Response header: " + name + " = " + value);
                 }
 
                 protected void onResponseContent(Buffer content)
                 {
-                    System.err.println("Response content:" + content.length());
+                    len+=content.length();
+                    System.err.println(n+" Response content:" + content.length());
                 }
 
                 protected void onResponseComplete()
                 {
-                    System.err.println("Response completed "+n);
-                    latch.countDown();
+                    System.err.println(n+" Response completed "+len);
+                    if (len==2009)
+                        latch.countDown();
                 }
                 
             };
 
-            httpExchange.setURL(_scheme+"localhost:"+_port+"/");
+            httpExchange.setURL(_scheme+"localhost:"+_port+"/"+n);
             httpExchange.addRequestHeader("arbitrary","value");
             if (close)
                 httpExchange.setRequestHeader("Connection","close");
@@ -270,7 +269,7 @@ public class HttpExchangeTest extends TestCase
                     }
                     else if (request.getMethod().equalsIgnoreCase("GET"))
                     {
-                        System.err.println("HANDLING Hello");
+                        System.err.println("HANDLING Hello "+request.getRequestURI());
                         response.getOutputStream().println("<hello>");
                         for (; i<100; i++)
                         {
