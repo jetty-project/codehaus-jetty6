@@ -24,7 +24,7 @@ import org.mortbay.log.Log;
  * @author Nik Gonzalez <ngonzalez@exist.com>
  * @author Greg Wilkins <gregw@mortbay.com>
  */
-public class SslHttpChannelEndPoint extends SelectChannelEndPoint
+public class SslSelectChannelEndPoint extends SelectChannelEndPoint
 {
     private static final ByteBuffer[] __NO_BUFFERS={};
     private static final ByteBuffer __EMPTY=ByteBuffer.allocate(0);
@@ -46,7 +46,7 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     protected SSLSession _session;
     
     /* ------------------------------------------------------------ */
-    public SslHttpChannelEndPoint(Buffers buffers,SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
+    public SslSelectChannelEndPoint(Buffers buffers,SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
             throws SSLException, IOException
     {
         super(channel,selectSet,key);
