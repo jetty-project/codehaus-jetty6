@@ -89,8 +89,9 @@ public class SslSecurityListenerTest extends TestCase
 
     protected void tearDown() throws Exception
     {
+        Thread.sleep(1000);
         _httpClient.stop();
-        Thread.sleep(100);
+        Thread.sleep(1000);
         stopServer();
     }
 
