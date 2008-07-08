@@ -20,7 +20,7 @@ import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpVersions;
-import org.mortbay.jetty.security.SslHttpChannelEndPoint;
+import org.mortbay.jetty.security.SslSelectChannelEndPoint;
 import org.mortbay.log.Log;
 
 class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector, Runnable
@@ -119,7 +119,7 @@ class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector,
                 }
 
                 SSLEngine engine=newSslEngine();
-                ep = new SslHttpChannelEndPoint(_sslBuffers,channel,selectSet,key,engine);
+                ep = new SslSelectChannelEndPoint(_sslBuffers,channel,selectSet,key,engine);
             }
             else
             {
