@@ -64,9 +64,10 @@ public class HttpExchangeTest extends TestCase
 
     protected void tearDown() throws Exception
     {
-        Thread.sleep(100);
-        stopServer();
+        Thread.sleep(1000);
         _httpClient.stop();
+        Thread.sleep(1000);
+        stopServer();
     }
 
     public void testPerf() throws Exception
