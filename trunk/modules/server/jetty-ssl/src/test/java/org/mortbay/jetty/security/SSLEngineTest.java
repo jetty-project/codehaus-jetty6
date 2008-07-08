@@ -130,7 +130,7 @@ public class SSLEngineTest extends TestCase
         {
             for (int l=0;l<loops;l++)
             {
-                System.err.println(l);
+                System.err.print('.');
                 try
                 {
                     for (int i=0; i<numConns; ++i)
@@ -177,7 +177,7 @@ public class SSLEngineTest extends TestCase
         }
         finally
         {
-            System.err.println("END OF TEST");
+            System.err.println();
         }
     }
     
