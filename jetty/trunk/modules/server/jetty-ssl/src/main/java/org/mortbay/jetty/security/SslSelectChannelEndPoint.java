@@ -645,7 +645,6 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
         }
     }
 
-    
     /* ------------------------------------------------------------ */
     public boolean isBufferingInput()
     {
