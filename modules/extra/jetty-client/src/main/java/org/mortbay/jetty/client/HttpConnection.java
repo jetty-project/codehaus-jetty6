@@ -160,7 +160,7 @@ public class HttpConnection implements Connection
         int flushed=0;
         
         
-        while (_endp.isOpen())
+        while (_endp.isBufferingInput() || _endp.isOpen())
         {
             synchronized(this)
             {

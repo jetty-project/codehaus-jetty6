@@ -140,6 +140,10 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
                                 break loop;
                             
                         }
+                        catch(SSLException e)
+                        {
+                            Log.ignore(e);
+                        }
                         finally
                         {
                             _buffers.returnBuffer(buffer);
@@ -665,6 +669,5 @@ public class SslHttpChannelEndPoint extends SelectChannelEndPoint
     {
         return _engine;
     }
-    
     
 }
