@@ -168,8 +168,6 @@ public class TimeoutTest extends TestCase
         // start lots of test threads
         for (int i=0;i<LOOP;i++)
         {
-            final int l =i;
-            
             // 
             Thread th = new Thread()
             { 
@@ -195,12 +193,12 @@ public class TimeoutTest extends TestCase
                     };
                     
                     // this thread will loop and each loop with schedule a 
-                    // task with a delay between 250 and 350ms on top of the timeouts duration
-                    // mostly this thread will then wait 50ms and cancel the task
-                    // But once it will wait 1000ms and the task will expire
-                    long delay = 250+this.hashCode() % 100;
+                    // task with a delay  on top of the timeouts duration
+                    // mostly this thread will then cancel the task
+                    // But once it will wait and the task will expire
+                    
+                    
                     int once = (int)( 10+(System.currentTimeMillis() % 50));
-                    // System.err.println(l+" "+delay+" "+once);
                     
                     // do the looping until we are stopped
                     int loop=0;
@@ -208,8 +206,8 @@ public class TimeoutTest extends TestCase
                     {
                         try
                         {
-                            timeout.schedule(task,delay);
-                            long wait=50;
+                            long delay=1000;
+                            long wait=100-once;
                             if (loop++==once)
                             { 
                                 // THIS loop is the one time we wait 1000ms
@@ -217,8 +215,11 @@ public class TimeoutTest extends TestCase
                                 {
                                     count[1]++;
                                 }
-                                wait=2000;
+                                delay=200;
+                                wait=1000;
                             }
+                            
+                            timeout.schedule(task,delay);
                             
                             // do the wait
                             synchronized (lock)
@@ -240,13 +241,13 @@ public class TimeoutTest extends TestCase
         }
         
         // run test for 5s
-        Thread.sleep(5000);
+        Thread.sleep(8000);
         synchronized (lock)
         {
             running[0]=false;
         }
         // give some time for test to stop
-        Thread.sleep(1000);
+        Thread.sleep(4000);
         timeout.tick(System.currentTimeMillis());
         
         // check the counts
