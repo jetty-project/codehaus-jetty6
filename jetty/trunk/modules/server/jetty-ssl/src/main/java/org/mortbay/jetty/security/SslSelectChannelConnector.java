@@ -226,6 +226,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         request.setScheme(HttpSchemes.HTTPS);
         
         SslHttpChannelEndPoint sslHttpChannelEndpoint=(SslHttpChannelEndPoint)endpoint;
+        
         SSLEngine sslEngine=sslHttpChannelEndpoint.getSSLEngine();
 
         try
@@ -264,11 +265,6 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     /* ------------------------------------------------------------ */
     public SslSelectChannelConnector()
     {
-        // Buffer sizes should be from SSL session, but not known at this stage.
-        // size should be 16k, but appears to need 16k+1 byte? Giving it 16k+2k
-        // just
-        // to be safe. TODO investigate
-        
     }
 
     /**
