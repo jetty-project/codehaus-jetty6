@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;

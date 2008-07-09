@@ -15,30 +15,9 @@
 package org.mortbay.jetty.client;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.TestCase;
-
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.EofException;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.SslSelectChannelConnector;
 import org.mortbay.jetty.security.SslSocketConnector;
 
 /**

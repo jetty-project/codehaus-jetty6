@@ -16,7 +16,6 @@ package org.mortbay.jetty.servlet;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

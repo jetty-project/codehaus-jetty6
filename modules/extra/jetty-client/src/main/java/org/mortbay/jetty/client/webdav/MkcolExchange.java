@@ -1,11 +1,12 @@
 package org.mortbay.jetty.client.webdav;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.client.CachedExchange;
 import org.mortbay.log.Log;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 
 public class MkcolExchange extends CachedExchange

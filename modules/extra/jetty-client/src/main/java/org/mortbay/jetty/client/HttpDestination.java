@@ -14,13 +14,12 @@ package org.mortbay.jetty.client;
 //========================================================================
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.lang.reflect.Constructor;
 
 import javax.servlet.http.Cookie;
 
@@ -29,7 +28,6 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.client.security.Authentication;
 import org.mortbay.jetty.client.security.SecurityListener;
-import org.mortbay.jetty.client.webdav.WebdavListener;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 

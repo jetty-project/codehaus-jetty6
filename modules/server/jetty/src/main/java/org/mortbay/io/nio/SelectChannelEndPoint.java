@@ -6,8 +6,6 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-import javax.net.ssl.SSLException;
-
 import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Connection;

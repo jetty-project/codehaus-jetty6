@@ -19,13 +19,22 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.*;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.security.KeyStoreException;
 import java.security.Security;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
-import javax.net.ssl.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
@@ -34,11 +43,11 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.client.security.SecurityRealmResolver;
+import org.mortbay.log.Log;
+import org.mortbay.resource.Resource;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
-import org.mortbay.resource.Resource;
-import org.mortbay.log.Log;
 
 /**
  * Http Client.
