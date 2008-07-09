@@ -286,8 +286,8 @@ public class HttpParser implements Parser
                 }
                 catch(IOException e)
                 {
-                    ioex=e;
                     Log.debug(e);
+                    ioex=e;
                     filled=-1;
                 }
             }
@@ -296,6 +296,14 @@ public class HttpParser implements Parser
             {
                 if ( _state == STATE_EOF_CONTENT)
                 {
+                    if (_buffer.length()>0)
+                    {
+                        // TODO should we do this here or fall down to main loop?
+                        Buffer chunk=_buffer.get(_buffer.length());
+                        _contentPosition += chunk.length();
+                        _contentView.update(chunk);
+                        _handler.content(chunk); // May recurse here 
+                    }
                     _state=STATE_END;
                     _handler.messageComplete(_contentPosition);
                     return total_filled;

@@ -74,24 +74,22 @@ public class HttpExchangeTest extends TestCase
     {   
         sender(1,true);
         Thread.sleep(200);
-        
+
         sender(1,false);
         Thread.sleep(200);
-
         
         sender(10,true);
         Thread.sleep(200);
         
         sender(10,false);
         Thread.sleep(200);
-
         
-        sender(50,true);
+        sender(100,true);
         Thread.sleep(200);
         
-        sender(50,false);
+        sender(100,false);
         Thread.sleep(200);
-        
+       
     }
 
     /**
@@ -112,28 +110,28 @@ public class HttpExchangeTest extends TestCase
                 int len=0;
                 protected void onRequestCommitted()
                 {
-                    System.err.println(n+" Request committed: "+close);
+                    // System.err.println(n+" Request committed: "+close);
                 }
 
                 protected void onResponseStatus(Buffer version, int status, Buffer reason)
                 {
-                    System.err.println(n+" Response Status: " + version+" "+status+" "+reason);
+                    // System.err.println(n+" Response Status: " + version+" "+status+" "+reason);
                 }
 
                 protected void onResponseHeader(Buffer name, Buffer value)
                 {
-                    System.err.println(n+" Response header: " + name + " = " + value);
+                    // System.err.println(n+" Response header: " + name + " = " + value);
                 }
 
                 protected void onResponseContent(Buffer content)
                 {
                     len+=content.length();
-                    System.err.println(n+" Response content:" + content.length());
+                    // System.err.println(n+" Response content:" + content.length());
                 }
 
                 protected void onResponseComplete()
                 {
-                    System.err.println(n+" Response completed "+len);
+                    // System.err.println(n+" Response completed "+len);
                     if (len==2009)
                         latch.countDown();
                 }
@@ -147,7 +145,7 @@ public class HttpExchangeTest extends TestCase
             
             _httpClient.send(httpExchange);
         }
-        
+        latch.await(2,TimeUnit.SECONDS);
         long last=latch.getCount();
         while(last>0)
         {
@@ -158,7 +156,8 @@ public class HttpExchangeTest extends TestCase
                 break;
             last=next;
         }
-        System.err.println("missed "+latch.getCount()+" sent "+(System.currentTimeMillis()-l0)/1000 + "s ago.");
+        while(last>0)
+            System.err.println("missed "+latch.getCount()+" sent "+(System.currentTimeMillis()-l0)/1000 + "s ago.");
         assertEquals("nb="+nb+" close="+close,0,latch.getCount());
         long l1=System.currentTimeMillis();
     }
@@ -264,12 +263,12 @@ public class HttpExchangeTest extends TestCase
                     response.setStatus(200);
                     if (request.getServerName().equals("jetty.mortbay.org"))
                     {
-                        System.err.println("HANDLING Proxy");
+                        // System.err.println("HANDLING Proxy");
                         response.getOutputStream().println("Proxy request: "+request.getRequestURL());
                     }
                     else if (request.getMethod().equalsIgnoreCase("GET"))
                     {
-                        System.err.println("HANDLING Hello "+request.getRequestURI());
+                        // System.err.println("HANDLING Hello "+request.getRequestURI());
                         response.getOutputStream().println("<hello>");
                         for (; i<100; i++)
                         {
@@ -281,7 +280,7 @@ public class HttpExchangeTest extends TestCase
                     }
                     else
                     {
-                        System.err.println("HANDLING "+request.getMethod());
+                        // System.err.println("HANDLING "+request.getMethod());
                         copyStream(request.getInputStream(),response.getOutputStream());
                     }
                 }
@@ -297,7 +296,7 @@ public class HttpExchangeTest extends TestCase
                 }
                 finally
                 {
-                    System.err.println("HANDLED "+i);
+                    // System.err.println("HANDLED "+i);
                 }
             }
         });
