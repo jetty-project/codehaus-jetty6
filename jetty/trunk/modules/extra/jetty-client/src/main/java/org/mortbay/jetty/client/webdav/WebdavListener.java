@@ -1,14 +1,17 @@
 package org.mortbay.jetty.client.webdav;
 
-import org.mortbay.jetty.client.*;
-import org.mortbay.jetty.client.security.SecurityListener;
-import org.mortbay.jetty.HttpMethods;
-import org.mortbay.io.Buffer;
-import org.mortbay.log.Log;
-import org.mortbay.util.URIUtil;
+import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.mortbay.io.Buffer;
+import org.mortbay.jetty.HttpMethods;
+import org.mortbay.jetty.client.HttpDestination;
+import org.mortbay.jetty.client.HttpEventListenerWrapper;
+import org.mortbay.jetty.client.HttpExchange;
+import org.mortbay.jetty.client.security.SecurityListener;
+import org.mortbay.log.Log;
+import org.mortbay.util.URIUtil;
 
 /**
  * 

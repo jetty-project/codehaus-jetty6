@@ -5,7 +5,6 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.Server;

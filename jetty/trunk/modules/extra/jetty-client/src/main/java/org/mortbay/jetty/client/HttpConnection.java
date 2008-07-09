@@ -14,7 +14,6 @@
 
 package org.mortbay.jetty.client;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -25,13 +24,13 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.SelectChannelEndPoint;
-import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.security.SslSelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 
@@ -66,6 +65,8 @@ public class HttpConnection implements Connection
         System.err.println("generator="+_generator);
         System.err.println("parser="+_parser.getState()+" "+_parser.isMoreInBuffer());
         System.err.println("exchange="+_exchange);
+        if (_endp instanceof SslSelectChannelEndPoint)
+            ((SslSelectChannelEndPoint)_endp).dump();
     }
 
     Timeout.Task _timeout= new Timeout.Task()

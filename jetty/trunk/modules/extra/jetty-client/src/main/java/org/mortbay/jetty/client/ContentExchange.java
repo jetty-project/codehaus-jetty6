@@ -1,6 +1,11 @@
 package org.mortbay.jetty.client;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;

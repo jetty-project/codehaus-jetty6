@@ -13,7 +13,6 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.ResourceCache;
-import org.mortbay.jetty.ResourceCache.Content;
 import org.mortbay.jetty.nio.NIOConnector;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;

@@ -59,42 +59,23 @@ public class HttpExchangeTest extends TestCase
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
-        Thread.sleep(1000);
     }
 
     protected void tearDown() throws Exception
     {
-        Thread.sleep(1000);
         _httpClient.stop();
-        Thread.sleep(1000);
+        Thread.sleep(500);
         stopServer();
     }
 
     public void testPerf() throws Exception
     {   
-        /*
         sender(1,true);
-        Thread.sleep(200);
-
         sender(1,false);
-        Thread.sleep(200);
-        
         sender(10,true);
-        Thread.sleep(200);
-        
         sender(10,false);
-        Thread.sleep(200);
-        
-        */
         sender(100,true);
-        Thread.sleep(200);
-        
-        /*
-        
         sender(100,false);
-        Thread.sleep(200);
-        */
-     
     }
 
     /**
