@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.jetty.HttpOnlyCookie;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.SessionManager;

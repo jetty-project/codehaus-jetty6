@@ -14,16 +14,16 @@
 
 package org.mortbay.jetty.client;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.*;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.HttpMethods;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.DefaultRealmResolver;
 import org.mortbay.jetty.client.security.SecurityRealm;
-import org.mortbay.resource.FileResource;
-
-import java.net.URL;
-import java.io.FileInputStream;
-import java.io.File;
 
 /**
  * Functional testing for HttpExchange.
