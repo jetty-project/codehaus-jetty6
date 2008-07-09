@@ -1,3 +1,4 @@
+ + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
  + JETTY-563 The OpenRemoteServiceServlet provided doesn't work with GWT 1.5. Based on JETTY-482, but now applies to GWT1.5M2+
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
  + JETTY-599 handle buffers consistently handle invalid index for poke
