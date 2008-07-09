@@ -59,7 +59,7 @@ public class HttpExchangeTest extends TestCase
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
-        Thread.sleep(500);
+        Thread.sleep(1000);
     }
 
     protected void tearDown() throws Exception
@@ -72,6 +72,7 @@ public class HttpExchangeTest extends TestCase
 
     public void testPerf() throws Exception
     {   
+        /*
         sender(1,true);
         Thread.sleep(200);
 
@@ -84,12 +85,16 @@ public class HttpExchangeTest extends TestCase
         sender(10,false);
         Thread.sleep(200);
         
+        */
         sender(100,true);
         Thread.sleep(200);
         
+        /*
+        
         sender(100,false);
         Thread.sleep(200);
-       
+        */
+     
     }
 
     /**
@@ -100,27 +105,41 @@ public class HttpExchangeTest extends TestCase
     public void sender(final int nb,final boolean close) throws Exception
     {
         final CountDownLatch latch=new CountDownLatch(nb);
-        long l0=System.currentTimeMillis();
+        HttpExchange[] httpExchange = new HttpExchange[nb];
         for (int i=0; i<nb; i++)
         {
             final int n=i;
             
-            HttpExchange httpExchange=new HttpExchange()
+            httpExchange[n]=new HttpExchange()
             {
+                String result="pending";
                 int len=0;
                 protected void onRequestCommitted()
                 {
+                    result="committed";
                     // System.err.println(n+" Request committed: "+close);
+                }
+
+                protected void onRequestComplete() throws IOException
+                {
+                    result="sent";
                 }
 
                 protected void onResponseStatus(Buffer version, int status, Buffer reason)
                 {
+                    result="status";
                     // System.err.println(n+" Response Status: " + version+" "+status+" "+reason);
                 }
 
                 protected void onResponseHeader(Buffer name, Buffer value)
                 {
                     // System.err.println(n+" Response header: " + name + " = " + value);
+                }
+
+                protected void onResponseHeaderComplete() throws IOException
+                {
+                    result="content";
+                    super.onResponseHeaderComplete();
                 }
 
                 protected void onResponseContent(Buffer content)
@@ -131,21 +150,52 @@ public class HttpExchangeTest extends TestCase
 
                 protected void onResponseComplete()
                 {
+                    result="complete";
                     // System.err.println(n+" Response completed "+len);
                     if (len==2009)
                         latch.countDown();
+                    else
+                        System.err.println(n+" ONLY "+len);
+                }
+
+                protected void onConnectionFailed(Throwable ex)
+                {
+                    result="failed";
+                    System.err.println(n+" FAILED "+ex);
+                    super.onConnectionFailed(ex);
+                }
+
+                protected void onException(Throwable ex)
+                {
+                    result="excepted";
+                    System.err.println(n+" EXCEPTED "+ex);
+                    super.onException(ex);
+                }
+
+                protected void onExpire()
+                {
+                    result="expired";
+                    System.err.println(n+" EXPIRED "+len);
+                    super.onExpire();
                 }
                 
+                public String toString()
+                {
+                    return n+" "+result+" "+len;
+                }
             };
 
-            httpExchange.setURL(_scheme+"localhost:"+_port+"/"+n);
-            httpExchange.addRequestHeader("arbitrary","value");
+            httpExchange[n].setURL(_scheme+"localhost:"+_port+"/"+n);
+            httpExchange[n].addRequestHeader("arbitrary","value");
             if (close)
-                httpExchange.setRequestHeader("Connection","close");
+                httpExchange[n].setRequestHeader("Connection","close");
             
-            _httpClient.send(httpExchange);
+            _httpClient.send(httpExchange[n]);
         }
-        latch.await(2,TimeUnit.SECONDS);
+
+        latch.await(100,TimeUnit.MILLISECONDS);
+        if (latch.getCount()>0)
+            latch.await(2,TimeUnit.SECONDS);
         long last=latch.getCount();
         if (last>0)
         {
@@ -158,10 +208,17 @@ public class HttpExchangeTest extends TestCase
                     break;
                 last=next;
             }
-            System.err.println("missed "+latch.getCount());
+            System.err.println("missed "+latch.getCount()); 
+            if (last>0)
+            {
+                _httpClient.dump();
+                System.err.println("--");
+                for (Object o : httpExchange)
+                    System.err.println(o);
+                
+            }
         }
         assertEquals("nb="+nb+" close="+close,0,latch.getCount());
-        long l1=System.currentTimeMillis();
     }
 
     public void testPostWithContentExchange() throws Exception

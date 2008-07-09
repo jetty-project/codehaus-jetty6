@@ -56,6 +56,23 @@ public class HttpDestination
     
     // TODO add a repository of cookies and authenticated credentials
     
+
+
+    public void dump() throws IOException
+    {
+        synchronized (this)
+        {
+            System.err.println(this);
+            System.err.println("connections="+_connections.size());
+            System.err.println("idle="+_idle.size());
+            System.err.println("pending="+_pendingConnections);
+            for (HttpConnection c : _connections)
+            {
+                if (!c.isIdle())
+                    c.dump();
+            }
+        }
+    }
     
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
