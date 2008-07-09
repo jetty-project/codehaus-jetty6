@@ -171,7 +171,7 @@
     </dependency>
   </dependencies>
   <properties>
-     <glassfish.version.tag>SJSAS-9_1-B58G-FCS-08_Sept_2007</glassfish.version.tag>
+     <glassfish.version.tag>SJSAS-9_1_02-B04-11_Apr_2008</glassfish.version.tag>
      <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
   </properties>
 </project>
