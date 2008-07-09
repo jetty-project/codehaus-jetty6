@@ -9,6 +9,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
@@ -307,29 +308,27 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
      */
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
     {
+        // StringBuilder h = new StringBuilder(500);
+        
         int consumed=0;
         int available=header.length();
         if (buffer!=null)
             available+=buffer.length();
         SSLEngineResult result;
         
-        int tries=0;
+        // int tries=0;
         loop: while (true)
         {
             // TODO REMOVE loop check
-            if (tries++>100)
-            {
-                throw new IllegalStateException();
-            }
+            // if (tries++>100)
+            //    throw new IllegalStateException();
+            
+            // h.append(tries).append(' ').append(_outNIOBuffer.length()).append('\n');
             
             if (_outNIOBuffer.length()>0)
-            {
                 flush();
-                
-                // TODO is this too aggressive?
-                if (_outNIOBuffer.length()>0)
-                    return consumed;
-            }
+
+            // h.append(_engine.getHandshakeStatus()).append('\n');
             
             switch(_engine.getHandshakeStatus())
             {
@@ -347,7 +346,9 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                     }
                     else if (c<0)
                     {
-                        return consumed>0?consumed:-1;
+                        if (consumed==0)
+                            consumed=-1;
+                        break loop;
                     }
                     
                     break;
@@ -357,8 +358,13 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                     try
                     {
                         ByteBuffer bbuf = ((NIOBuffer)buf).getByteBuffer();
-                        if (fill(bbuf)<=0)
+                        int fill = fill(bbuf);
+                        // h.append("fill=").append(fill).append('\n');
+                        if (fill<=0 && _engine.getHandshakeStatus()==HandshakeStatus.NEED_UNWRAP)
+                        {
+                            // h.append("break").append('\n');
                             break loop;
+                        }
                     }
                     finally
                     {
@@ -385,6 +391,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                             int put=_outNIOBuffer.putIndex();
                             _outBuffer.position();
                             result=_engine.wrap(__NO_BUFFERS,_outBuffer);
+                            // h.append(result).append('\n');
                             _outNIOBuffer.setPutIndex(put+result.bytesProduced());
                         }
                         finally
@@ -400,6 +407,8 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
             }
         }
         
+        // if (consumed<=0)
+        //     System.err.println("0 CONSUMED "+this.toString()+"\n"+h.toString());
        
         return consumed;
     }

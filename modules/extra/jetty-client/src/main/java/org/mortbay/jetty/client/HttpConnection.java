@@ -57,7 +57,16 @@ public class HttpConnection implements Connection
     /* The current exchange waiting for a response */
     HttpExchange _exchange;  
     HttpExchange _pipeline;
-    
+
+
+
+    public void dump() throws IOException
+    {
+        System.err.println("endp="+_endp+" "+_endp.isBufferingInput()+" "+_endp.isBufferingOutput());
+        System.err.println("generator="+_generator);
+        System.err.println("parser="+_parser.getState()+" "+_parser.isMoreInBuffer());
+        System.err.println("exchange="+_exchange);
+    }
 
     Timeout.Task _timeout= new Timeout.Task()
     {
@@ -157,8 +166,7 @@ public class HttpConnection implements Connection
     public void handle() throws IOException
     {
         int no_progress=0;
-        int flushed=0;
-        
+        long flushed=0;
         
         while (_endp.isBufferingInput() || _endp.isOpen())
         {
@@ -209,8 +217,8 @@ public class HttpConnection implements Connection
                     {
                         if (_exchange==null)
                             continue;
-                        io=_generator.flush();
-                        flushed+=io;
+                        flushed=_generator.flush();
+                        io+=flushed;
                     }
                     
                     if (!_generator.isComplete())
@@ -247,7 +255,7 @@ public class HttpConnection implements Connection
 
                 if (io>0)
                     no_progress=0;
-                else if (no_progress++>=2 && !_endp.isBlocking())
+                else if (no_progress++>=2 && !_endp.isBlocking())   // TODO maybe no retries is best here?
                     return;
             }
             catch (IOException e)
