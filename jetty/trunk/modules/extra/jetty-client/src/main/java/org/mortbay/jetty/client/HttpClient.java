@@ -113,6 +113,15 @@ public class HttpClient extends AbstractBuffers
     private SecurityRealmResolver _realmResolver;    
 
     
+    public void dump() throws IOException
+    {
+        for (Map.Entry<InetSocketAddress, HttpDestination> entry: _destinations.entrySet())
+        {
+            System.err.println("\n"+entry.getKey()+":");
+            entry.getValue().dump();
+        }
+    }
+    
     /* ------------------------------------------------------------------------------- */
     public void send(HttpExchange exchange) throws IOException
     {

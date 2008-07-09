@@ -746,15 +746,14 @@ public class HttpGenerator extends AbstractGenerator
                     }
                 }
                 
+                
                 // If we failed to flush anything twice in a row break
-                if (len <= 0)
-                {
-                    if (last_len <= 0) 
-                        break Flushing;
-                    break;
-                }
+                if (len > 0)
+                    total+=len;
+                else if (last_len <= 0) 
+                    break Flushing;
+          
                 last_len = len;
-                total+=len;
             }
             
             return total;
@@ -872,5 +871,18 @@ public class HttpGenerator extends AbstractGenerator
 
     }
 
-
+    public int getBytesBuffered()
+    {
+        return(_header==null?0:_header.length())+
+        (_buffer==null?0:_buffer.length())+
+        (_content==null?0:_content.length());
+    }
+    
+    public String toString()
+    {
+        return "HttpGenerator s="+_state+
+        " h="+(_header==null?"null":_header.length())+
+        " b="+(_buffer==null?"null":_buffer.length())+
+        " c="+(_content==null?"null":_content.length());
+    }
 }
