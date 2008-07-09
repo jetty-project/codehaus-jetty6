@@ -12,7 +12,24 @@
   <url>http://www.cometd.com</url>
   <build>
     <defaultGoal>install</defaultGoal>
-    <plugins>
+    <plugins>     
+      <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-war-plugin</artifactId>
+       <configuration>          
+         <dependentWarExcludes>WEB-INF/web.xml</dependentWarExcludes>
+         <overlays>
+            <overlay></overlay>
+            <overlay>
+              <groupId>org.dojotoolkit.java</groupId>
+              <artifactId>dojo</artifactId>
+              <excludes>
+                <exclude>META-INF/**</exclude>
+              </excludes>
+            </overlay>
+         </overlays>
+       </configuration>
+      </plugin>
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
@@ -38,7 +55,15 @@
       <artifactId>jetty-ssl</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
+    </dependency> 
+    <dependency>
+      <groupId>org.dojotoolkit.java</groupId>
+      <artifactId>dojo</artifactId>
+      <version>1.2-SNAPSHOT</version>
+      <type>war</type>
+      <scope>runtime</scope>
     </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

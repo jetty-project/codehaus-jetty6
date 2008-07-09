@@ -22,6 +22,38 @@
       <name>The Academic Free License, v. 2.1</name>
     </license>
   </licenses>
+  
+  <repositories>
+    <repository>
+      <id>dojo</id>
+      <name>Dojo Maven2 Repository</name>
+      <url>http://download.dojotoolkit.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <layout>default</layout>
+    </repository>
+    <repository>
+      <id>dojoSnapshots</id>
+      <name>Dojo Maven2 Snapshot Repository</name>
+      <url>http://download.dojotoolkit.org/maven2-snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>warn</checksumPolicy>
+      </snapshots>
+      <layout>default</layout>
+    </repository>
+  </repositories>
+        
   <build>
   </build>
   <dependencyManagement>
