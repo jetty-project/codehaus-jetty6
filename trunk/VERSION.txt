@@ -1,4 +1,5 @@
 jetty-7.0-SNAPSHOT
+ + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
  + JETTY-182 Support setting explicit system classpath for jasper Jsr199JavaCompiler
  + JETTY-563 JETTY-482 OpenRemoteServiceServlet for GWT1.5M2+
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
