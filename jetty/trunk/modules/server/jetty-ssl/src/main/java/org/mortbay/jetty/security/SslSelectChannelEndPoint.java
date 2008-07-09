@@ -227,9 +227,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                 {
                     // TODO REMOVE loop check
                     if (tries++>100)
-                    {
                         throw new IllegalStateException();
-                    }
 
                     if (_outNIOBuffer.length()>0)
                         flush();
@@ -435,33 +433,36 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
     /* ------------------------------------------------------------ */
     private int fill(ByteBuffer buffer) throws IOException
     {
-        int in_len=0;
-
         if (_inNIOBuffer.hasContent())
             _inNIOBuffer.compact();
         else 
             _inNIOBuffer.clear();
 
-        while (_inNIOBuffer.space()>0)
+        while (_inNIOBuffer.space()>0 && super.isOpen())
         {
-            int len=super.fill(_inNIOBuffer);
-            
-            if (len<=0)
+            try
             {
-                if (len==0 || in_len>0)
+                int len=super.fill(_inNIOBuffer);
+                if (len<0)
+                {
+                    if (_inNIOBuffer.length()==0)
+                        return -1;
+                }
+                else if (len==0)
                     break;
-                return -1;
             }
-            in_len+=len;
+            catch(IOException e)
+            {
+                if (_inNIOBuffer.length()==0)
+                    throw e;
+                break;
+            }
         }
         
         if (_inNIOBuffer.length()==0)
-            return 0;
+            return super.isOpen()?0:-1;
 
         SSLEngineResult result;
-        int p = _inNIOBuffer.getIndex();
-        int l = _inNIOBuffer.putIndex();
-        
         try
         {
             _inBuffer.position(_inNIOBuffer.getIndex());
