@@ -147,17 +147,19 @@ public class HttpExchangeTest extends TestCase
         }
         latch.await(2,TimeUnit.SECONDS);
         long last=latch.getCount();
-        while(last>0)
+        if (last>0)
         {
-            System.err.println("waiting for "+last+" sent "+(System.currentTimeMillis()-l0)/1000 + "s ago ...");
-            latch.await(5,TimeUnit.SECONDS);
-            long next=latch.getCount();
-            if (last==next)
-                break;
-            last=next;
+            while(last>0)
+            {
+                System.err.println("waiting for "+last);
+                latch.await(5,TimeUnit.SECONDS);
+                long next=latch.getCount();
+                if (last==next)
+                    break;
+                last=next;
+            }
+            System.err.println("missed "+latch.getCount());
         }
-        while(last>0)
-            System.err.println("missed "+latch.getCount()+" sent "+(System.currentTimeMillis()-l0)/1000 + "s ago.");
         assertEquals("nb="+nb+" close="+close,0,latch.getCount());
         long l1=System.currentTimeMillis();
     }
