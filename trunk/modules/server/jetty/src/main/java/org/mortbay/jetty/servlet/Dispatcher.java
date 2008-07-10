@@ -338,6 +338,9 @@ public class Dispatcher implements RequestDispatcher
                 if (key.equals(__FORWARD_CONTEXT_PATH)) return _contextPath;
                 if (key.equals(__FORWARD_QUERY_STRING)) return _query;
             }
+            
+            if (key.startsWith(__INCLUDE_PREFIX) || key.equals(__INCLUDE_JETTY) )
+                return null;
 
             if (key.equals(__FORWARD_JETTY)) 
                 return Boolean.TRUE;
@@ -463,8 +466,7 @@ public class Dispatcher implements RequestDispatcher
             while(e.hasMoreElements())
             {
                 String name=(String)e.nextElement();
-                if (!name.startsWith(__INCLUDE_PREFIX) &&
-                    !name.startsWith(__FORWARD_PREFIX))
+                if (!name.startsWith(__INCLUDE_PREFIX))
                     set.add(name);
             }
             
