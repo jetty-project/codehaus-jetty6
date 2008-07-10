@@ -92,21 +92,22 @@
             <id>artifact-jar</id>
             <goals>
               <goal>jar</goal>
+              <phase>jar</phase>
             </goals>
-            <configuration>
-              <archive>
-                <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-              </archive>
-            </configuration>
           </execution>
           <execution>
             <id>test-jar</id>
             <goals>
               <goal>test-jar</goal>
+              <phase>test-jar</phase>
             </goals>
           </execution>
         </executions>
-
+        <configuration>
+          <archive>
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
       </plugin>
       <!-- always include sources since jetty-xbean makes use of them -->
        <plugin>
