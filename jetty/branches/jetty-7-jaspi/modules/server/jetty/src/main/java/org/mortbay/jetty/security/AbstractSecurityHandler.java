@@ -20,24 +20,24 @@
 
 package org.mortbay.jetty.security;
 
-import java.security.Principal;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Map;
 
-import javax.security.auth.message.config.ServerAuthContext;
-import javax.security.auth.message.config.ServerAuthConfig;
-import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.AuthException;
 import javax.security.auth.Subject;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.AuthStatus;
+import javax.security.auth.message.MessageInfo;
+import javax.security.auth.message.config.ServerAuthConfig;
+import javax.security.auth.message.config.ServerAuthContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 
-import org.mortbay.jetty.handler.HandlerWrapper;
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
+import org.mortbay.jetty.handler.HandlerWrapper;
 
 /**
  * @version $Rev$ $Date$
@@ -45,12 +45,12 @@ import org.mortbay.jetty.Response;
 public abstract class AbstractSecurityHandler extends HandlerWrapper
 {/* ------------------------------------------------------------ */
 //    private UserRealm _userRealm;
-    private NotChecked _notChecked=new NotChecked();
-    private boolean _checkWelcomeFiles=false;//jaspi stuff
+    private NotChecked _notChecked = new NotChecked();
+    private boolean _checkWelcomeFiles = false;//jaspi stuff
     private ServerAuthConfig authConfig;
     private Subject serviceSubject;
     private Map authProperties;
-//    private ServerAuthContext authContext;
+    //    private ServerAuthContext authContext;
     private ServletCallbackHandler servletCallbackHandler;
     public static Principal __NO_USER = new Principal()
     {
@@ -58,6 +58,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
         {
             return null;
         }
+
         public String toString()
         {
             return "No User";
@@ -67,7 +68,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    /** Nobody user.
+    /**
+     * Nobody user.
      * The Nobody UserPrincipal is used to indicate a partial state of
      * authentication. A request with a Nobody UserPrincipal will be allowed
      * past all authentication constraints - but will not be considered an
@@ -103,8 +105,9 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
      */
     public void setCheckWelcomeFiles(boolean authenticateWelcomeFiles)
     {
-        _checkWelcomeFiles=authenticateWelcomeFiles;
+        _checkWelcomeFiles = authenticateWelcomeFiles;
     }
+
     //set jaspi components
     public void setAuthConfig(ServerAuthConfig authConfig)
     {
@@ -128,51 +131,58 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
 
     /* ------------------------------------------------------------ */
     public void doStart()
-        throws Exception
+            throws Exception
     {
         super.doStart();
         if (authConfig == null)
-            throw new NullPointerException("No auth context configured");
+            throw new NullPointerException("No auth configuration configured");
         if (servletCallbackHandler == null)
-        throw new NullPointerException("No CallbackHandler configured");
+            throw new NullPointerException("No CallbackHandler configured");
     }/* ------------------------------------------------------------ */
+
     /*
-     * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
-     */
+    * @see org.mortbay.jetty.Handler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+    */
     public void handle(String pathInContext, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
-        Request base_request = (request instanceof Request) ? (Request)request: HttpConnection.getCurrentConnection().getRequest();
-        Response base_response = (response instanceof Response) ? (Response)response:HttpConnection.getCurrentConnection().getResponse();
+        Request base_request = (request instanceof Request) ? (Request) request : HttpConnection.getCurrentConnection().getRequest();
+        Response base_response = (response instanceof Response) ? (Response) response : HttpConnection.getCurrentConnection().getResponse();
         try
         {
             boolean checkSecurity = dispatch == REQUEST;
-            if (dispatch == FORWARD && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome")!=null)
+            if (dispatch == FORWARD && _checkWelcomeFiles && request.getAttribute("org.mortbay.jetty.welcome") != null)
             {
                 request.removeAttribute("org.mortbay.jetty.welcome");
                 checkSecurity = true;
             }
             if (checkSecurity)
             {
-                Object constraintInfo = prepareConstraintInfo(pathInContext,base_request);
-                if (!checkUserDataPermissions(pathInContext,base_request,base_response,constraintInfo))
+                Object constraintInfo = prepareConstraintInfo(pathInContext, base_request);
+                if (!checkUserDataPermissions(pathInContext, base_request, base_response, constraintInfo))
                 {
+                    if (!base_request.isHandled())
+                    {
+                        response.sendError(Response.SC_FORBIDDEN);
+                        base_request.setHandled(true);
+                    }
                     return;
                 }
                 //JASPI 3.8.1
-                boolean isAuthMandatory = isAuthMandatory(base_request, base_response,constraintInfo);
+                boolean isAuthMandatory = isAuthMandatory(base_request, base_response, constraintInfo);
                 //TODO check with greg about whether requirement that these be the request/response passed to the resource(servlet) is realistic (i.e. this requires no wrapping between here and invocation)
                 //TODO we have to get the auth context from the authconfig on each call.
                 MessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
                 String authContextID = authConfig.getAuthContextID(messageInfo);
-                ServerAuthContext authContext = authConfig.getAuthContext(authContextID,serviceSubject,authProperties);
+                ServerAuthContext authContext = authConfig.getAuthContext(authContextID, serviceSubject, authProperties);
 
                 //JASPI 3.8.2
-                Subject clientSubject= new Subject();
+                Subject clientSubject = new Subject();
 
                 try
                 {
                     AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
-                    if (authStatus == AuthStatus.SUCCESS) {
+                    if (authStatus == AuthStatus.SUCCESS)
+                    {
                         //JASPI 3.8.  Supply the UserPrincipal and ClientSubject to the web resource permission check
                         //JASPI 3.8.4 establish request values
                         UserIdentity userIdentity = newUserIdentity(servletCallbackHandler, clientSubject);
@@ -186,11 +196,13 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
                             //NOTE! we assume jaspi is configured to always provide correct authMethod values
                             base_request.setAuthType((String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY));
                         }
-                        if (!checkWebResourcePermissions(pathInContext,base_request,base_response,constraintInfo, userIdentity))
+                        if (!checkWebResourcePermissions(pathInContext, base_request, base_response, constraintInfo, userIdentity))
                         {
+                            response.sendError(Response.SC_FORBIDDEN,"User not in required role");
+                            base_request.setHandled(true);
                             return;
                         }
-                        if (getHandler()!=null)
+                        if (getHandler() != null)
                         {
                             //jaspi 3.8.3 auth processing may wrap messages, use the modified versions
                             getHandler().handle(pathInContext, (HttpServletRequest) messageInfo.getRequestMessage(), (HttpServletResponse) messageInfo.getResponseMessage(), dispatch);
@@ -205,6 +217,22 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
                         base_request.setUserIdentity(UserIdentity.UNAUTHENTICATED_IDENTITY);
                     }
                     //jaspi otherwise the authContext has cconfigured an appropriate reply message that does not need to be secured.
+                    else
+                    {
+                        base_request.setHandled(true);
+                    }
+                }
+                catch (RuntimeException e) {
+                    throw e;
+                }
+                catch (IOException e) {
+                    throw e;
+                }
+                catch (ServletException e) {
+                    throw e;
+                }
+                catch (Error e) {
+                    throw e;
                 }
                 finally
                 {
@@ -231,7 +259,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
 //                }
 //            }
 
-            //jaspi what dispatch does this have???
+                //jaspi what dispatch does this have???
 //            if (_authenticator instanceof FormAuthenticator && target.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
 //            {
 //                _authenticator.authenticate(getUserRealm(),target,base_request,base_response);
@@ -239,10 +267,10 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
 //                return;
 //            }
 
-            if (getHandler()!=null)
-            {
-                getHandler().handle(pathInContext, request, response, dispatch);
-            }
+                if (getHandler() != null)
+                {
+                    getHandler().handle(pathInContext, request, response, dispatch);
+                }
             }
         }
         catch (AuthException e)
@@ -286,10 +314,12 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
         {
             return null;
         }
+
         public String toString()
         {
             return "NOT CHECKED";
         }
+
         public AbstractSecurityHandler getSecurityHandler()
         {
             return AbstractSecurityHandler.this;

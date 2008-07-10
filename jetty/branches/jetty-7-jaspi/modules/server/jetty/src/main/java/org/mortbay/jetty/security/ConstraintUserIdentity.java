@@ -27,8 +27,10 @@ import java.util.Map;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
 
+import org.mortbay.jetty.servlet.ServletHolder;
+
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class ConstraintUserIdentity implements UserIdentity
 {
@@ -36,7 +38,7 @@ public class ConstraintUserIdentity implements UserIdentity
 
     private final Principal _userPrincipal;
     private final String[] _roles;
-    private Map<String, String> _roleRefMap = Collections.emptyMap();
+    private ServletHolder servletHolder;
     private RunAsToken _runAsRole;
 
     public ConstraintUserIdentity(ServletCallbackHandler callbackHandler)
@@ -80,7 +82,7 @@ public class ConstraintUserIdentity implements UserIdentity
         {
             throw new NullPointerException("role");
         }
-        String actualRole = _roleRefMap.get(role);
+        String actualRole = getRoleRefMap().get(role);
         if (actualRole == null)
         {
             actualRole = role;
@@ -103,19 +105,25 @@ public class ConstraintUserIdentity implements UserIdentity
         return oldRunAsRole;
     }
 
-    public Map<String, String> setRoleRefMap(Map<String, String> map)
+    public ServletHolder setServletHolder(ServletHolder newServletHolder)
     {
-        if (map == null) {
-            throw new NullPointerException("_roleRefMap");
-        }
-        Map<String, String> oldRoleRefMap = _roleRefMap;
-        this._roleRefMap = map;
-        return oldRoleRefMap;
-    }/* ------------------------------------------------------------ */
+        ServletHolder oldServletHolder = servletHolder;
+        this.servletHolder = newServletHolder;
+        return oldServletHolder;
+    }
 
     //jaspi called from FormAuthenticator.valueUnbound (when session is unbound)
     //TODO usable???
     public void logout(Principal user)
     {
+    }
+
+    public Map<String, String> getRoleRefMap()
+    {
+        if (servletHolder == null)
+        {
+            return ServletHolder.NO_MAPPED_ROLES;
+        }
+        return servletHolder.getRoleMap();
     }
 }

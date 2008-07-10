@@ -62,7 +62,7 @@ public class ServletHolder extends Holder
     private transient Config _config;
     private transient long _unavailable;
     private transient UnavailableException _unavailableEx;
-    private static final Map<String,String> NO_MAPPED_ROLES = Collections.<String, String>emptyMap();
+    public static final Map<String,String> NO_MAPPED_ROLES = Collections.emptyMap();
 
     /* ---------------------------------------------------------------- */
     /** Constructor .

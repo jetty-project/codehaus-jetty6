@@ -17,6 +17,8 @@ import java.security.Principal;
 import java.util.Map;
 import java.util.Collections;
 
+import org.mortbay.jetty.servlet.ServletHolder;
+
 /* ------------------------------------------------------------ */
 /** User object that encapsulates user identity and operations such as run-as-role actions, checking isUserInRole and getUserPrincipal.
  *
@@ -50,11 +52,10 @@ public interface UserIdentity
      *
      * Note: should not return null.
      *
-     * @param map servlet role name to application role name (role-ref) map
-     * @return preexisting role-ref map (so it can be reset on exit from the servlet).
+     * @param servletHolder new servlet holder
+     * @return previous servlet holder (so it can be reset on exit from the servlet).
      */
-    Map<String, String> setRoleRefMap(Map<String, String> map);
-
+    ServletHolder setServletHolder(ServletHolder servletHolder);
 
     /* ------------------------------------------------------------ */
     /** logout a user Principal.
@@ -67,8 +68,6 @@ public interface UserIdentity
 
     public static final UserIdentity UNAUTHENTICATED_IDENTITY = new UserIdentity()
     {
-        private final Map<String, String> ROLE_REFS = Collections.emptyMap();
-
         public Principal getUserPrincipal()
         {
             return null;
@@ -86,10 +85,10 @@ public interface UserIdentity
             return null;
         }
 
-        public Map<String, String> setRoleRefMap(Map<String, String> map)
+        public ServletHolder setServletHolder(ServletHolder servletHolder)
         {
-            return ROLE_REFS;
-        }/* ------------------------------------------------------------ */
+            return null;
+        }
 
         //jaspi called from FormAuthenticator.valueUnbound (when session is unbound)
         //TODO usable???
