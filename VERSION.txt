@@ -3,6 +3,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-182 Support setting explicit system classpath for jasper Jsr199JavaCompiler
  + JETTY-502 forward of an include should hide include attributes
  + JETTY-563 JETTY-482 OpenRemoteServiceServlet for GWT1.5M2+
+ + JETTY-564 Consider optionally importing org.apache.jasper.servlet
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
  + JETTY-608 Suspend/Resume/Complete request listeners
  + JETTY-626 Null protect reading the dtd resource from classloader
