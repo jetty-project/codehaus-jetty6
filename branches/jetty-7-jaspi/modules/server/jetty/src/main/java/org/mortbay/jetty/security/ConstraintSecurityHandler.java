@@ -208,7 +208,6 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
         int dataConstraint = ((ConstraintInfo)constraintInfo).getDataConstraint();
         if (dataConstraint == Constraint.DC_FORBIDDEN)
         {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return false;
         }
         if (dataConstraint > Constraint.DC_NONE)
@@ -234,10 +233,12 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
                             url += "?" + request.getQueryString();
                         response.setContentLength(0);
                         response.sendRedirect(url);
+                        request.setHandled(true);
                     }
                     else
-                        response.sendError(Response.SC_FORBIDDEN,null);
-                    return false;
+                    {
+                        return false;
+                    }
                 case Constraint.DC_CONFIDENTIAL :
                     if (connector.isConfidential(request))
                         return true;
@@ -256,13 +257,13 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
 
                         response.setContentLength(0);
                         response.sendRedirect(url);
+                        request.setHandled(true);
                     }
                     else
-                        response.sendError(Response.SC_FORBIDDEN,null);
-                    return false;
-
+                    {
+                        return false;
+                    }
                 default :
-                    response.sendError(Response.SC_FORBIDDEN,null);
                     return false;
             }
         }
@@ -289,7 +290,6 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
                 return true;
             }
         }
-        response.sendError(Response.SC_FORBIDDEN,"User not in required role");
         return false;
     }
 

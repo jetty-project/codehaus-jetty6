@@ -41,6 +41,7 @@ import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.security.UserIdentity;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.log.Log;
@@ -298,8 +299,9 @@ public class ServletHandler extends AbstractHandler
         final String old_servlet_name=base_request.getServletName();
         final String old_servlet_path=base_request.getServletPath();
         final String old_path_info=base_request.getPathInfo();
-        Map<String, String> old_role_map = null;//jaspi=base_request.getRoleMap();
-        
+        ServletHolder old_servlet_holder = null;
+
+        final UserIdentity user_identity = base_request.getUserIdentity() ==null? UserIdentity.UNAUTHENTICATED_IDENTITY: base_request.getUserIdentity();
         try
         {
             ServletHolder servlet_holder=null;
@@ -317,9 +319,9 @@ public class ServletHandler extends AbstractHandler
                     //what servlet name should the filters see?
                     base_request.setServletName(servlet_holder.getName());
                     //for this it depends on whether a servlet's role-refs should work in filters.
-                    if (base_request.getUserIdentity() != null)
+                    if (user_identity != null)
                     {
-                        old_role_map = base_request.getUserIdentity().setRoleRefMap(servlet_holder.getRoleMap());
+                        old_servlet_holder = user_identity.setServletHolder(servlet_holder);
                     }
                     if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
                     
@@ -346,12 +348,15 @@ public class ServletHandler extends AbstractHandler
             {
                 // look for a servlet by name!
                 servlet_holder=(ServletHolder)_servletNameMap.get(target);
-                if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+                if (servlet_holder!=null)
                 {
                     base_request.setServletName(servlet_holder.getName());
                     //TODO added for jaspi == is this correct??
-                    old_role_map = base_request.getUserIdentity().setRoleRefMap(servlet_holder.getRoleMap());
-                    chain=getFilterChain(type, null,servlet_holder,request.isInitial());
+                    old_servlet_holder = user_identity.setServletHolder(servlet_holder);
+                    if (_filterMappings!=null && _filterMappings.length>0)
+                    {
+                        chain=getFilterChain(type, null,servlet_holder,request.isInitial());
+                    }
                 }
             }
 
@@ -463,9 +468,9 @@ public class ServletHandler extends AbstractHandler
         finally
         {
             base_request.setServletName(old_servlet_name);
-            if (old_role_map != null)
+            if (user_identity != null)
             {
-                base_request.getUserIdentity().setRoleRefMap(old_role_map);
+                user_identity.setServletHolder(old_servlet_holder);
             }
             if (type!=INCLUDE)
             {
