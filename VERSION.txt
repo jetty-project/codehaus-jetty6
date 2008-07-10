@@ -10,6 +10,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-629 Don't hold timeout lock during expiry call.
  + JETTY-632 OSGi tags for Jetty client
  + JETTY-633 Default form encoding 8859_1 rather than utf-8
+ + JETTY-636 Separate lifeycle of jsp build
 
 jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full

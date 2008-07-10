@@ -1,7 +1,7 @@
-Index: DataSourceWrapper.java
+Index: org/apache/taglibs/standard/tag/common/sql/DataSourceWrapper.java
 ===================================================================
---- DataSourceWrapper.java	(revision 5)
-+++ DataSourceWrapper.java	(working copy)
+--- org/apache/taglibs/standard/tag/common/sql/DataSourceWrapper.java	(revision 5)
++++ org/apache/taglibs/standard/tag/common/sql/DataSourceWrapper.java	(working copy)
 @@ -132,6 +132,19 @@
      public synchronized void setLogWriter(PrintWriter out) throws SQLException {
          throw new SQLException(Resources.getMessage("NOT_SUPPORTED"));

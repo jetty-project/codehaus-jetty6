@@ -1,7 +1,7 @@
-Index: EmbeddedServletOptions.java
+Index: org/apache/jasper/EmbeddedServletOptions.java
 ===================================================================
---- EmbeddedServletOptions.java	(revision 4)
-+++ EmbeddedServletOptions.java	(working copy)
+--- org/apache/jasper/EmbeddedServletOptions.java	(revision 4)
++++ org/apache/jasper/EmbeddedServletOptions.java	(working copy)
 @@ -533,8 +533,8 @@
          // START PWC 1.2 6311155
          String sysClassPath = config.getInitParameter(
