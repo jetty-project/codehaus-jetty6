@@ -18,6 +18,7 @@ package dojox.cometd.demo;
 import java.io.File;
 import java.util.Set;
 
+import org.cometd.Message;
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.cometd.ClientImpl;
 import org.mortbay.cometd.SuspendingCometdServlet;
@@ -33,7 +34,6 @@ import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
-import dojox.cometd.Message;
 
 
 /* ------------------------------------------------------------ */

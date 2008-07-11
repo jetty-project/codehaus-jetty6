@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <artifactId>cometd</artifactId>
     <groupId>org.mortbay.jetty</groupId>
+    <artifactId>cometd-project</artifactId>
     <version>7.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
@@ -9,7 +9,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>cometd-demo</artifactId>
   <packaging>war</packaging>
-  <name>cometd demo</name>
+  <name>Cometd :: Jetty :: Demo</name>
   <url>http://www.cometd.com</url>
 
   <build>
@@ -24,7 +24,7 @@
             <overlay></overlay>
             <overlay>
               <groupId>org.cometd.dojox</groupId>
-              <artifactId>examples</artifactId>
+              <artifactId>cometd-examples</artifactId>
               <excludes>
                 <exclude>META-INF/**</exclude>
               </excludes>
@@ -50,14 +50,14 @@
   <dependencies>
     <dependency>
       <groupId>org.cometd.dojox</groupId>
-      <artifactId>examples</artifactId>
+      <artifactId>cometd-examples</artifactId>
       <version>${cometd-version}</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>cometd-bayeux</artifactId>
+      <artifactId>cometd-jetty</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
