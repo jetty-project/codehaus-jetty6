@@ -481,6 +481,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         catch(IllegalArgumentException e)
         {
             Log.warn(Log.EXCEPTION,e);
+            if(!response.isCommitted())
+                response.sendError(500, e.getMessage());
         }
         finally
         {
@@ -541,17 +543,32 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     protected boolean passConditionalHeaders(HttpServletRequest request,HttpServletResponse response, Resource resource, HttpContent content)
     throws IOException
     {
-        if (!request.getMethod().equals(HttpMethods.HEAD) )
+        try
         {
-            String ifms=request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
-            if (ifms!=null)
+            if (!request.getMethod().equals(HttpMethods.HEAD) )
             {
-                if (content!=null)
+                String ifms=request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
+                if (ifms!=null)
                 {
-                    Buffer mdlm=content.getLastModified();
-                    if (mdlm!=null)
+                    if (content!=null)
                     {
-                        if (ifms.equals(mdlm.toString()))
+                        Buffer mdlm=content.getLastModified();
+                        if (mdlm!=null)
+                        {
+                            if (ifms.equals(mdlm.toString()))
+                            {
+                                response.reset();
+                                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                                response.flushBuffer();
+                                return false;
+                            }
+                        }
+                    }
+                        
+                    long ifmsl=request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
+                    if (ifmsl!=-1)
+                    {
+                        if (resource.lastModified()/1000 <= ifmsl/1000)
                         {
                             response.reset();
                             response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
@@ -560,32 +577,26 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                         }
                     }
                 }
-                    
-                long ifmsl=request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
-                if (ifmsl!=-1)
+
+                // Parse the if[un]modified dates and compare to resource
+                long date=request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
+                
+                if (date!=-1)
                 {
-                    if (resource.lastModified()/1000 <= ifmsl/1000)
+                    if (resource.lastModified()/1000 > date/1000)
                     {
-                        response.reset();
-                        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                        response.flushBuffer();
+                        response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
                         return false;
                     }
                 }
+                
             }
-
-            // Parse the if[un]modified dates and compare to resource
-            long date=request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
-            
-            if (date!=-1)
-            {
-                if (resource.lastModified()/1000 > date/1000)
-                {
-                    response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
-                    return false;
-                }
-            }
-            
+        }
+        catch(IllegalArgumentException iae)
+        {
+            if(!response.isCommitted())
+                response.sendError(400, iae.getMessage());
+            throw iae;
         }
         return true;
     }
