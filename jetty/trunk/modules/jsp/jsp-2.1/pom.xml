@@ -204,7 +204,8 @@
     </dependency>
   </dependencies>
   <properties>
-     <glassfish-version-tag>SJSAS-9_1_02-B04-11_Apr_2008</glassfish-version-tag>
+     <!-- matches glassfish version SJSAS-9_1_02-B04-11_Apr_2008 -->
+     <glassfish-version-tag>2008.04.11-SNAPSHOT</glassfish-version-tag>
      <eclipse-compiler-version>3.1.1</eclipse-compiler-version>
   </properties>
 </project>
