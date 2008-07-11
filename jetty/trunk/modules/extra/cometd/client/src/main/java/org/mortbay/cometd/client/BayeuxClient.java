@@ -27,6 +27,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.Cookie;
 
+import org.cometd.Bayeux;
+import org.cometd.Client;
+import org.cometd.Listener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
+import org.cometd.RemoveListener;
 import org.mortbay.cometd.MessageImpl;
 import org.mortbay.cometd.MessagePool;
 import org.mortbay.io.Buffer;
@@ -41,12 +47,6 @@ import org.mortbay.log.Log;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Client;
-import dojox.cometd.Listener;
-import dojox.cometd.RemoveListener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
 
 /* ------------------------------------------------------------ */
 /** Bayeux protocol Client.
@@ -135,7 +135,7 @@ public class BayeuxClient extends MessagePool implements Client
     /* ------------------------------------------------------------ */
     /** (non-Javadoc)
      * @deprecated use {@link #deliver(Client, String, Object, String)}
-     * @see dojox.cometd.Client#deliver(dojox.cometd.Client, java.util.Map)
+     * @see org.cometd.Client#deliver(org.cometd.Client, java.util.Map)
      */
     public void deliver(Client from, Message message)
     {

@@ -19,15 +19,15 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.List;
 
+import org.cometd.Bayeux;
+import org.cometd.Client;
+import org.cometd.Extension;
+import org.cometd.Listener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
+import org.cometd.RemoveListener;
 import org.mortbay.util.LazyList;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Client;
-import dojox.cometd.Extension;
-import dojox.cometd.Listener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
-import dojox.cometd.RemoveListener;
 
 
 /* ------------------------------------------------------------ */
@@ -91,7 +91,7 @@ public class ClientImpl implements Client
     /* ------------------------------------------------------------ */
     /**
      * @deprecated use {@link Channel#publish(Client, Object, String)}
-     * @see dojox.cometd.Client#publish(java.lang.String, java.lang.Object, java.lang.String)
+     * @see org.cometd.Client#publish(java.lang.String, java.lang.Object, java.lang.String)
      */
     public void publish(String toChannel, Object data, String msgId)
     {
@@ -101,7 +101,7 @@ public class ClientImpl implements Client
     /* ------------------------------------------------------------ */
     /** 
      * @deprecated use {@link Channel#subscribe(Client)}
-     * @see dojox.cometd.Client#subscribe(java.lang.String)
+     * @see org.cometd.Client#subscribe(java.lang.String)
      */
     public void subscribe(String toChannel)
     {
@@ -111,7 +111,7 @@ public class ClientImpl implements Client
     /* ------------------------------------------------------------ */
     /** 
      * @deprecated use {@link Channel#unsubscribe(Client)}
-     * @see dojox.cometd.Client#unsubscribe(java.lang.String)
+     * @see org.cometd.Client#unsubscribe(java.lang.String)
      */
     public void unsubscribe(String toChannel)
     {

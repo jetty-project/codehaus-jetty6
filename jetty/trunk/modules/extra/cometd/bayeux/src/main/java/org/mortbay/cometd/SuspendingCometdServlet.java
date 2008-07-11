@@ -26,8 +26,8 @@ import org.mortbay.cometd.ClientImpl;
 import org.mortbay.cometd.MessageImpl;
 import org.mortbay.cometd.Transport;
 
-import dojox.cometd.Extension;
-import dojox.cometd.Message;
+import org.cometd.Extension;
+import org.cometd.Message;
 
 public class SuspendingCometdServlet extends AbstractCometdServlet
 {

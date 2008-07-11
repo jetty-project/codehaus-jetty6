@@ -7,16 +7,16 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.cometd.Bayeux;
+import org.cometd.Client;
+import org.cometd.Listener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Client;
-import dojox.cometd.Listener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
 
 public class BayeuxLoadGenerator
 {
