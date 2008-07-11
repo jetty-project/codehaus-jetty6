@@ -230,24 +230,73 @@ public class Dispatcher implements RequestDispatcher
                 {
                     MultiMap parameters=new MultiMap();
                     UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
+                 
+                    boolean rewrite_old_query = false;
+
+                    if( old_params == null )
+                    {
+                        base_request.getParameterNames();    // force parameters to be evaluated
+                        old_params = base_request.getParameters();
+                    }
                     
                     if (old_params!=null && old_params.size()>0)
                     {
-                        // Merge parameters.
+                        // Merge parameters; new parameters of the same name take precedence.
                         Iterator iter = old_params.entrySet().iterator();
                         while (iter.hasNext())
                         {
                             Map.Entry entry = (Map.Entry)iter.next();
                             String name=(String)entry.getKey();
-                            Object values=entry.getValue();
-                            for (int i=0;i<LazyList.size(values);i++)
-                                parameters.add(name, LazyList.get(values, i));
+                            
+                            if (parameters.containsKey(name))
+                            {
+                                rewrite_old_query = true;
+                            }
+                            else
+                            {
+                                Object values=entry.getValue();
+                                for (int i=0;i<LazyList.size(values);i++)
+                                {
+                                    parameters.add(name, LazyList.get(values, i));
+                                }
+                            }
                         }
                     }
                     
-                    if (old_query!=null && old_query.length()>0)
-                        query=query+"&"+old_query;
-                    
+                    if (old_query != null && old_query.length()>0)
+                    {
+                        if ( rewrite_old_query )
+                        {
+                            StringBuilder overridden_query_string = new StringBuilder();
+                            MultiMap overridden_old_query = new MultiMap();
+                            UrlEncoded.decodeTo(old_query,overridden_old_query,request.getCharacterEncoding());
+    
+                            MultiMap overridden_new_query = new MultiMap(); 
+                            UrlEncoded.decodeTo(query,overridden_new_query,request.getCharacterEncoding());
+
+                            Iterator iter = overridden_old_query.entrySet().iterator();
+                            while (iter.hasNext())
+                            {
+                                Map.Entry entry = (Map.Entry)iter.next();
+                                String name=(String)entry.getKey();
+                                if(!overridden_new_query.containsKey(name))
+                                {
+                                    Object values=entry.getValue();
+                                    for (int i=0;i<LazyList.size(values);i++)
+                                    {
+                                        overridden_query_string.append("&"+name+"="+LazyList.get(values, i));
+                                    }
+                                }
+                            }
+                            
+                            query = query + overridden_query_string;
+                        }
+                        else 
+                        {
+                            query=query+"&"+old_query;
+                        }
+                   }
+
                     base_request.setParameters(parameters);
                     base_request.setQueryString(query);
                 }
