@@ -19,16 +19,17 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 
+import org.cometd.Bayeux;
+import org.cometd.Client;
+import org.cometd.Listener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
+import org.cometd.RemoveListener;
 import org.mortbay.cometd.BayeuxService;
 import org.mortbay.log.Log;
 import org.mortbay.thread.QueuedThreadPool;
+import org.mortbay.cometd.ext.TimesyncExtension;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Client;
-import dojox.cometd.Listener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
-import dojox.cometd.RemoveListener;
 
 import java.util.Map;
 import java.util.Set;
@@ -45,10 +46,9 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
             if (!bayeux.hasChannel("/service/echo"))
             {
                 new EchoRPC(bayeux);
-                /* Demo off
                 new Monitor(bayeux);
                 new ChatService(bayeux);
-                */
+		bayeux.addExtension(new TimesyncExtension());
             }
         }
     }
@@ -94,7 +94,7 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
         {
             super(bayeux,"monitor");
             subscribe("/meta/subscribe","monitorSubscribe");
-            subscribe("/meta/subscribe","monitorUnsubscribe");
+            subscribe("/meta/unsubscribe","monitorUnsubscribe");
             subscribe("/meta/*","monitorMeta");
             // subscribe("/**","monitorVerbose");
         }
@@ -162,9 +162,10 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
                     public void removed(String clientId, boolean timeout)
                     {
                         members.remove(username);
+                        Log.info("members: "+members);
                     }
                 });
-                
+                Log.info("Members: "+members);
                 send(joiner,channel,members,id);
             }
         }
