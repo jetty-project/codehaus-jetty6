@@ -48,7 +48,7 @@ public class DispatcherTest extends TestCase
             "Content-Length: 0\r\n"+
             "\r\n";
 
-        String responses = _connector.getResponses("GET /context/ForwardServlet?do=assertforward HTTP/1.1\n" + "Host: localhost\n\n");
+        String responses = _connector.getResponses("GET /context/ForwardServlet?do=assertforward&do=more&test=1 HTTP/1.1\n" + "Host: localhost\n\n");
         
         assertEquals(expected, responses);        
     }
@@ -63,7 +63,7 @@ public class DispatcherTest extends TestCase
             "Content-Length: 0\r\n"+
             "\r\n";
 
-        String responses = _connector.getResponses("GET /context/IncludeServlet?do=assertinclude HTTP/1.1\n" + "Host: localhost\n\n");
+        String responses = _connector.getResponses("GET /context/IncludeServlet?do=assertinclude&do=more&test=1 HTTP/1.1\n" + "Host: localhost\n\n");
         
         assertEquals(expected, responses);         
     }
@@ -114,7 +114,7 @@ public class DispatcherTest extends TestCase
             else if(request.getParameter("do").equals("assertincludeforward"))
                 dispatcher = getServletContext().getRequestDispatcher("/AssertIncludeForwardServlet/assertpath?do=end");
             else if(request.getParameter("do").equals("assertforward"))
-                dispatcher = getServletContext().getRequestDispatcher("/AssertForwardServlet?do=end");
+                dispatcher = getServletContext().getRequestDispatcher("/AssertForwardServlet?do=end&do=the");
             dispatcher.forward(request, response);
         }       
     }
@@ -130,7 +130,7 @@ public class DispatcherTest extends TestCase
             else if(request.getParameter("do").equals("assertforwardinclude"))
                 dispatcher = getServletContext().getRequestDispatcher("/AssertForwardIncludeServlet/assertpath?do=end");
             else if(request.getParameter("do").equals("assertinclude"))
-                dispatcher = getServletContext().getRequestDispatcher("/AssertIncludeServlet?do=end");
+                dispatcher = getServletContext().getRequestDispatcher("/AssertIncludeServlet?do=end&do=the");
             dispatcher.include(request, response);
         }       
     }
@@ -144,7 +144,7 @@ public class DispatcherTest extends TestCase
             assertEquals( "/context", request.getAttribute(Dispatcher.__FORWARD_CONTEXT_PATH) );
             assertEquals( "/ForwardServlet", request.getAttribute(Dispatcher.__FORWARD_SERVLET_PATH));
             assertEquals( null, request.getAttribute(Dispatcher.__FORWARD_PATH_INFO));
-            assertEquals( "do=assertforward", request.getAttribute(Dispatcher.__FORWARD_QUERY_STRING) );
+            assertEquals( "do=assertforward&do=more&test=1", request.getAttribute(Dispatcher.__FORWARD_QUERY_STRING) );
 
             
             List expectedAttributeNames = Arrays.asList(new String[] {
@@ -157,7 +157,7 @@ public class DispatcherTest extends TestCase
             
             assertEquals(null, request.getPathInfo());
             assertEquals(null, request.getPathTranslated());
-            assertEquals("do=end&do=assertforward", request.getQueryString());
+            assertEquals("do=end&do=the&test=1", request.getQueryString());
             assertEquals("/context/AssertForwardServlet", request.getRequestURI());
             assertEquals("/context", request.getContextPath());
             assertEquals("/AssertForwardServlet", request.getServletPath());
@@ -177,7 +177,7 @@ public class DispatcherTest extends TestCase
             assertEquals( "/context", request.getAttribute(Dispatcher.__INCLUDE_CONTEXT_PATH) );
             assertEquals( "/AssertIncludeServlet", request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH));
             assertEquals( null, request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO));
-            assertEquals( "do=end", request.getAttribute(Dispatcher.__INCLUDE_QUERY_STRING));    
+            assertEquals( "do=end&do=the", request.getAttribute(Dispatcher.__INCLUDE_QUERY_STRING));    
             
             List expectedAttributeNames = Arrays.asList(new String[] {
                 Dispatcher.__INCLUDE_REQUEST_URI, Dispatcher.__INCLUDE_CONTEXT_PATH, 
@@ -185,11 +185,12 @@ public class DispatcherTest extends TestCase
             });
             List requestAttributeNames = Collections.list(request.getAttributeNames());
             assertTrue(requestAttributeNames.containsAll(expectedAttributeNames));
+
             
             
             assertEquals(null, request.getPathInfo());
             assertEquals(null, request.getPathTranslated());
-            assertEquals("do=assertinclude", request.getQueryString());
+            assertEquals("do=assertinclude&do=more&test=1", request.getQueryString());
             assertEquals("/context/IncludeServlet", request.getRequestURI());
             assertEquals("/context", request.getContextPath());
             assertEquals("/IncludeServlet", request.getServletPath());
@@ -233,7 +234,7 @@ public class DispatcherTest extends TestCase
             
             assertEquals("/includepath", request.getPathInfo());
             assertEquals(null, request.getPathTranslated());
-            assertEquals("do=assertforwardinclude&do=include", request.getQueryString());
+            assertEquals("do=assertforwardinclude", request.getQueryString());
             assertEquals("/context/IncludeServlet/includepath", request.getRequestURI());
             assertEquals("/context", request.getContextPath());
             assertEquals("/IncludeServlet", request.getServletPath());
@@ -273,7 +274,7 @@ public class DispatcherTest extends TestCase
             
             assertEquals("/assertpath", request.getPathInfo());
             assertEquals(null, request.getPathTranslated()); 
-            assertEquals("do=end&do=forward", request.getQueryString());
+            assertEquals("do=end", request.getQueryString());
             assertEquals("/context/AssertIncludeForwardServlet/assertpath", request.getRequestURI());
             assertEquals("/context", request.getContextPath());
             assertEquals("/AssertIncludeForwardServlet", request.getServletPath());
