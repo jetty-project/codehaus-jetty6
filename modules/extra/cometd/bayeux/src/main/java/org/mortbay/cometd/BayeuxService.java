@@ -17,16 +17,16 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.cometd.Bayeux;
+import org.cometd.Channel;
+import org.cometd.Client;
+import org.cometd.Listener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Channel;
-import dojox.cometd.Client;
-import dojox.cometd.Listener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
 
 /* ------------------------------------------------------------ */
 /** Abstract Bayeux Service class.

@@ -20,13 +20,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.cometd.Channel;
+import org.cometd.Client;
+import org.cometd.DataFilter;
 import org.mortbay.cometd.ClientImpl;
 import org.mortbay.log.Log;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Channel;
-import dojox.cometd.Client;
-import dojox.cometd.DataFilter;
 
 /** JSON DataFilter
  * This {@link DataFilter} walks an Object as if it was a call to {@link JSON#toString(Object)} and 

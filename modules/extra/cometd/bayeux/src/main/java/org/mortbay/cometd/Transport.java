@@ -19,7 +19,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import dojox.cometd.Message;
+import org.cometd.Message;
+
 
 public interface Transport 
 {

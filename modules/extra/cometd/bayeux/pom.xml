@@ -1,20 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.mortbay.jetty</groupId>
-    <artifactId>cometd</artifactId>
+    <artifactId>cometd-project</artifactId>
     <version>7.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>cometd-bayeux</artifactId>
+  <artifactId>cometd-jetty</artifactId>
   <packaging>jar</packaging>
-  <name>Cometd :: Bayeux</name>
+  <name>Cometd :: Jetty :: Servlet</name>
   <url>http://www.cometd.com</url>
   
   <dependencies>
     <dependency>
       <groupId>org.cometd.java</groupId>
-      <artifactId>api</artifactId>
+      <artifactId>cometd-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>

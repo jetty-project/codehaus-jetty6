@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.cometd.Channel;
+import org.cometd.Client;
+import org.cometd.DataFilter;
+import org.cometd.Message;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
-import dojox.cometd.Channel;
-import dojox.cometd.Client;
-import dojox.cometd.DataFilter;
-import dojox.cometd.Message;
 
 /* ------------------------------------------------------------ */
 /** A Bayuex Channel
