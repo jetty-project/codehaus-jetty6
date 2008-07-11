@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.cometd.Bayeux;
+import org.cometd.Message;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Message;
 
 public class MessageImpl extends HashMap<String, Object> implements Message, org.mortbay.util.ajax.JSON.Generator
 {

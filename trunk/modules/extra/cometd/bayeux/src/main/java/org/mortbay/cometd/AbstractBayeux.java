@@ -31,15 +31,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.cometd.Bayeux;
+import org.cometd.Channel;
+import org.cometd.Client;
+import org.cometd.DataFilter;
+import org.cometd.Extension;
+import org.cometd.Message;
+import org.cometd.SecurityPolicy;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Channel;
-import dojox.cometd.Client;
-import dojox.cometd.DataFilter;
-import dojox.cometd.Extension;
-import dojox.cometd.Message;
-import dojox.cometd.SecurityPolicy;
 
 /* ------------------------------------------------------------ */
 /**
@@ -422,7 +422,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /**
      * @deprecated use {@link #newClient(String)}
      */
-    public Client newClient(String idPrefix,dojox.cometd.Listener listener)
+    public Client newClient(String idPrefix,org.cometd.Listener listener)
     {
         ClientImpl client = new ClientImpl(this,idPrefix);
         client.setListener(listener);
@@ -518,7 +518,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     /** (non-Javadoc)
      * @deprecated use {@link Client#deliver(Client, Message)}
-     * @see dojox.cometd.Bayeux#deliver(dojox.cometd.Client, dojox.cometd.Client, java.lang.String, dojox.cometd.Message)
+     * @see org.cometd.Bayeux#deliver(org.cometd.Client, org.cometd.Client, java.lang.String, org.cometd.Message)
      */
     public void deliver(Client fromClient,Client toClient, String toChannel, Message message)
     {

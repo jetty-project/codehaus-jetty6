@@ -6,12 +6,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.cometd.Bayeux;
+import org.cometd.Message;
 import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Message;
 
 public class MessagePool 
 {

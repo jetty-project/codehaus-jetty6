@@ -1,7 +1,8 @@
 package org.mortbay.cometd;
 
+import org.cometd.Message;
+
 import junit.framework.TestCase;
-import dojox.cometd.Message;
 
 public class MessagePoolTest extends TestCase
 {

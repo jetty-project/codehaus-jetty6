@@ -21,6 +21,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.cometd.Extension;
+import org.cometd.Message;
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.cometd.AbstractCometdServlet;
 import org.mortbay.cometd.ClientImpl;
@@ -29,8 +31,6 @@ import org.mortbay.cometd.Transport;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
-import dojox.cometd.Extension;
-import dojox.cometd.Message;
 
 /* ------------------------------------------------------------ */
 /**

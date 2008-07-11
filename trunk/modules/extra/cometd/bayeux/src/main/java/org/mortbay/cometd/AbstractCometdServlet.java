@@ -28,13 +28,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.cometd.Bayeux;
+import org.cometd.DataFilter;
+import org.cometd.Message;
 import org.mortbay.cometd.filter.JSONDataFilter;
 import org.mortbay.log.Log;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.DataFilter;
-import dojox.cometd.Message;
 
 /**
  * Cometd Filter Servlet implementing the {@link AbstractBayeux} protocol.
