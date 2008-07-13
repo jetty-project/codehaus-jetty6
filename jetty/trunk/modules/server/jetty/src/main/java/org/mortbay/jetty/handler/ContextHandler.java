@@ -728,7 +728,17 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                         if(request.isInitial())
                             ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
                         else if(request.isResumed())
-                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestResumed(event);
+                        {
+                            try
+                            {
+                                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestResumed(event); 
+                            }
+                            catch(AbstractMethodError e)
+                            {
+                                Log.warn(LazyList.get(_requestListeners,i)+": "+e);
+                                Log.debug(e);
+                            }
+                        }
                     }
                 }
                 for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
@@ -759,10 +769,18 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                     {
                         if(request.isSuspended())
                         {
-                            ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestSuspended(event);
-                            
-                            Object list = request.getAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
-                            request.setAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR, LazyList.add(list, this));
+                            try
+                            {
+                                ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestSuspended(event);
+
+                                Object list = request.getAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
+                                request.setAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR, LazyList.add(list, this));
+                            }
+                            catch(AbstractMethodError e)
+                            {
+                                Log.warn(LazyList.get(_requestListeners,i)+": "+e);
+                                Log.debug(e);
+                            }
                         }
                         else 
                             ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
