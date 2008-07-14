@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
+  <parent>
     <groupId>org.mortbay.jetty.example</groupId>
     <artifactId>jetty-examples-parent</artifactId>
     <version>7.0-SNAPSHOT</version>
@@ -11,7 +11,7 @@
   <version>7.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <properties>  	
-	<jsf-version>1.2_07</jsf-version>
+	<jsf-version>1.2_08SR-SNAPSHOT</jsf-version>
   </properties>   
   <build>
     <finalName>async-jsf-example-webapp</finalName>
@@ -61,6 +61,20 @@
     </dependency>
   </dependencies>  
   <repositories>
+    <repository>
+      <id>JsfSuspendResumeSnapshot</id>
+      <name>JSF Suspend Resume Snapshot Repository</name>
+      <url>http://jetty.mortbay.org/maven2/snapshot</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <layout>default</layout>
+    </repository>
     <repository>
       <id>java.net</id>
       <url>https://maven-repository.dev.java.net/nonav/repository</url>

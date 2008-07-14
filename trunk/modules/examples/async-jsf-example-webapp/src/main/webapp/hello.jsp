@@ -1,4 +1,27 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<%
+
+if (request.isInitial() || request.getAttribute("async.jsf.demo")==null)
+{
+    System.err.println("suspending");
+    request.setAttribute("async.jsf.demo",Boolean.TRUE);
+    
+    request.suspend(30000);
+    
+    // Need to disable response as JSF does not know about suspend (yet)
+    response.disable();
+    
+    // simulate a callback to resume
+    final ServletRequest r = request;
+    new Thread(){
+        public void run() { try { Thread.sleep(5000); }catch(Exception e){}; r.resume();}
+    }.start();
+    
+    return;
+}
+System.err.println("redispatched");
+
+%>
 <html>
   <head>
     <title>JSF Demo</title>
