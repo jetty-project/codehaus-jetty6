@@ -26,21 +26,14 @@ public class StatisticsHandlerTest extends TestCase
         _statsHandler = new StatisticsHandler();
         _server.setHandler(_statsHandler);
         
-        
         _connector = new LocalConnector();
-        _server.setConnectors(new Connector[]
-        { _connector });
+        _server.setConnectors(new Connector[]{ _connector });
         _server.start();
 
     }
 
     protected void tearDown() throws Exception
     {
-        // synchronized(_lock)
-        // {
-        // _lock.notifyAll();
-        // }
-
         _server.stop();
     }
 
@@ -126,12 +119,13 @@ public class StatisticsHandlerTest extends TestCase
         process();
         assertEquals(1,_statsHandler.getResponses2xx());
 
-        // one for the suspend, one for the resume
+        // don't count the suspend.
         process(new ResumeHandler());
-        assertEquals(3,_statsHandler.getResponses2xx());
+        assertEquals(2,_statsHandler.getResponses2xx());
 
         process(new SuspendHandler(1));
-        assertEquals(4,_statsHandler.getResponses2xx());
+        assertEquals(3,_statsHandler.getResponses2xx());
+        
     }
 
     public void testComplete() throws Exception
