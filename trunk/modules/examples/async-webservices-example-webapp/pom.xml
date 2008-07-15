@@ -131,9 +131,8 @@
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api-3.0</artifactId>
-      <version>${project.version}</version>
-      <!--<scope>provided</scope> -->
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
     </dependency>
      <dependency>
       <groupId>log4j</groupId>

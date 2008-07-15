@@ -43,7 +43,6 @@
               <tasks>
                 <delete includeemptydirs="true">
                   <fileset dir="../../../lib/" includes="${project.artifactId}-${project.version}.${project.packaging}" />
-                  <fileset dir="../../../lib/" includes="servlet-api-3.0.jar" />
                   <fileset dir="../../../etc/" includes="webdefault.xml" />
                 </delete>
               </tasks>
@@ -176,8 +175,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api-3.0</artifactId>
-      <version>${project.version}</version>
+      <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>

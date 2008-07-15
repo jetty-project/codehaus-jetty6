@@ -244,11 +244,8 @@ public class Request extends Suspendable implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public void setHandled(boolean h)
     {
-        if (h&& !shouldComplete())
-            new Throwable().printStackTrace();
         _handled=h;
     }
-    
     
     /* ------------------------------------------------------------ */
     /* 
