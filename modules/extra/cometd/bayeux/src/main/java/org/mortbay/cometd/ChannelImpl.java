@@ -203,6 +203,7 @@ public class ChannelImpl implements Channel
     }
 
     /* ------------------------------------------------------------ */
+    @Override
     public String toString()
     {
         return _id.toString();

@@ -104,6 +104,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#clear()
      */
+    @Override
     public void clear()
     {
         _json=null;
@@ -135,6 +136,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#put(java.lang.Object, java.lang.Object)
      */
+    @Override
     public Object put(String key, Object value)
     {
         _json=null;
@@ -153,6 +155,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#putAll(java.util.Map)
      */
+    @Override
     public void putAll(Map<? extends String, ? extends Object> m)
     {
         _json=null;
@@ -167,6 +170,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#remove(java.lang.Object)
      */
+    @Override
     public Object remove(Object key)
     {
         _json=null;
@@ -183,6 +187,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#entrySet()
      */
+    @Override
     public Set<java.util.Map.Entry<String, Object>> entrySet()
     {
         return Collections.unmodifiableSet(super.entrySet());
@@ -192,6 +197,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#keySet()
      */
+    @Override
     public Set<String> keySet()
     {
         return Collections.unmodifiableSet(super.keySet());

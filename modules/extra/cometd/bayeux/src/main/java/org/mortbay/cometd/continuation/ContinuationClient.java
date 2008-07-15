@@ -46,11 +46,13 @@ public class ContinuationClient extends ClientImpl
         {
             _timeout=new Timeout.Task()
             {
-                public void expired()
+                @Override
+				public void expired()
                 {
                     remove(true);
                 }
-                public String toString()
+                @Override
+				public String toString()
                 {
                     return "T-"+ContinuationClient.this.toString();
                 }
@@ -106,7 +108,8 @@ public class ContinuationClient extends ClientImpl
     }
 
     /* ------------------------------------------------------------ */
-    public void resume()
+    @Override
+	public void resume()
     {
         Timeout.Task task=null;
         synchronized (this)
@@ -124,6 +127,7 @@ public class ContinuationClient extends ClientImpl
     }
 
     /* ------------------------------------------------------------ */
+    @Override
     public boolean isLocal()
     {
         return false;
@@ -156,6 +160,7 @@ public class ContinuationClient extends ClientImpl
     /* (non-Javadoc)
      * @see org.mortbay.cometd.ClientImpl#remove(boolean)
      */
+    @Override
     public void remove(boolean wasTimeout) 
     {
         Timeout.Task task=null;

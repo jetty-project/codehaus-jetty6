@@ -118,7 +118,8 @@ public abstract class AbstractCometdServlet extends HttpServlet
     }
     
     protected abstract AbstractBayeux newBayeux();
-    
+
+    @Override
     public void init() throws ServletException
     {
         synchronized (AbstractCometdServlet.class)
@@ -213,6 +214,7 @@ public abstract class AbstractCometdServlet extends HttpServlet
         getServletContext().setAttribute(Bayeux.DOJOX_COMETD_BAYEUX,_bayeux);
     }
 
+    @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
         if (_bayeux.isRequestAvailable())

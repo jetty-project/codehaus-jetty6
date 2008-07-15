@@ -119,39 +119,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @deprecated user {@link Channel#addFilter}
-     * @param channels
-     *            A {@link ChannelId}
-     * @param filter
-     *            The filter instance to apply to new channels matching the
-     *            pattern
-     */
-    public void addFilter(String channels, DataFilter filter)
-    {
-        synchronized (this)
-        {
-            ChannelImpl channel = (ChannelImpl)getChannel(channels,true);
-            channel.addDataFilter(filter);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @deprecated user {@link Channel#removeFilter}
-     * @see dojox.cometd.Bayeux#removeFilter(java.lang.String, dojox.cometd.DataFilter)
-     */
-    public void removeFilter(String channels, DataFilter filter)
-    {
-        synchronized (this)
-        {
-            ChannelImpl channel = (ChannelImpl)getChannel(channels,false);
-            if (channel!=null)
-                channel.removeDataFilter(filter);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
     public void addExtension(Extension ext)
     {
         _extensions.add(ext);
@@ -419,17 +386,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @deprecated use {@link #newClient(String)}
-     */
-    public Client newClient(String idPrefix,org.cometd.Listener listener)
-    {
-        ClientImpl client = new ClientImpl(this,idPrefix);
-        client.setListener(listener);
-        return client;
-    }
-
-    /* ------------------------------------------------------------ */
     public abstract ClientImpl newRemoteClient();
 
     /* ------------------------------------------------------------ */
@@ -504,31 +460,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         _root.doDelivery(to,from,msg);
         ((MessageImpl)msg).decRef();
     }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated use {@link Channel#publish(Client, Object, String)}
-     */
-    public void publish(Client fromClient, String toChannelId, Object data, String msgId)
-    {
-        doPublish(getChannelId(toChannelId),fromClient,data,msgId);
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /** (non-Javadoc)
-     * @deprecated use {@link Client#deliver(Client, Message)}
-     * @see org.cometd.Bayeux#deliver(org.cometd.Client, org.cometd.Client, java.lang.String, org.cometd.Message)
-     */
-    public void deliver(Client fromClient,Client toClient, String toChannel, Message message)
-    {
-        if (toChannel!=null)
-            message.put(Bayeux.CHANNEL_FIELD,toChannel);
-
-        if (toClient!=null)
-            toClient.deliver(fromClient,message);
-    }
-    
 
     /* ------------------------------------------------------------ */
     public boolean removeChannel(ChannelId channelId)
@@ -674,30 +605,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     {
         _request.set(request);
     }
-    
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @deprecated use {@link Channel#subscribe(Client)}
-     * @see dojox.cometd.Bayeux#subscribe(java.lang.String, dojox.cometd.Client)
-     */
-    public void subscribe(String toChannel, Client subscriber)
-    {
-        ChannelImpl channel = (ChannelImpl)getChannel(toChannel,true);
-        if (channel!=null)
-            channel.subscribe(subscriber);
-    }
-
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @deprecated use {@link Channel#subscribe(Client)}
-     */
-    public void unsubscribe(String toChannel, Client subscriber)
-    {
-        ChannelImpl channel = (ChannelImpl)getChannel(toChannel);
-        if (channel!=null)
-            channel.unsubscribe(subscriber);
-    }
-
     
     /* ------------------------------------------------------------ */
     /**
@@ -895,11 +802,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     {
         protected String _metaChannel=META_CONNECT;
 
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_CONNECT_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {      
             if (client==null)
@@ -981,11 +890,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class DisconnectHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_DISCONNECT_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             if (client==null)
@@ -1025,11 +936,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class HandshakeHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_HANDSHAKE_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             if (client!=null)
@@ -1096,11 +1009,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class PublishHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return null;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             String channel_id=message.getChannel();
@@ -1155,11 +1070,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class MetaPublishHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return null;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             String channel_id=message.getChannel();
@@ -1181,11 +1098,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class SubscribeHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_SUBSCRIBE_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             if (client==null)
@@ -1269,11 +1188,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class UnsubscribeHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_UNSUBSCRIBE_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             if (client==null)
@@ -1311,11 +1232,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class PingHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_PING_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             Message reply=newMessage(message);
@@ -1345,6 +1268,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         /* (non-Javadoc)
          * @see org.mortbay.cometd.ChannelImpl#addChild(org.mortbay.cometd.ChannelImpl)
          */
+        @Override
         public void addChild(ChannelImpl channel)
         {
             super.addChild(channel);
@@ -1352,6 +1276,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         }
 
         /* ------------------------------------------------------------ */
+        @Override
         public void subscribe(Client client)
         {
             if (client.isLocal())
