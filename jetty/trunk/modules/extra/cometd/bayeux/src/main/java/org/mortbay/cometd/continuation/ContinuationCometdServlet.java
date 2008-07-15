@@ -40,19 +40,22 @@ import org.mortbay.util.ajax.ContinuationSupport;
 public class ContinuationCometdServlet extends AbstractCometdServlet
 {
     /* ------------------------------------------------------------ */
-    protected AbstractBayeux newBayeux()
+    @Override
+	protected AbstractBayeux newBayeux()
     {
         return new ContinuationBayeux();
     }
 
     /* ------------------------------------------------------------ */
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    @Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
         doPost(req,resp);
     }
 
     /* ------------------------------------------------------------ */
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    @Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
         // Look for an existing client and protect from context restarts
         Object clientObj=req.getAttribute(CLIENT_ATTR);
