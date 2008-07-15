@@ -54,7 +54,7 @@
                 <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
                 <excludeTransitive>true</excludeTransitive>
                 <excludeGroupIds>org.eclipse.jdt,ant</excludeGroupIds>
-                <excludeArtifactIds>jsp-api-2.1,jetty-util,servlet-api-3.0</excludeArtifactIds>
+                <excludeArtifactIds>jsp-api-2.1,jetty-util,servlet-api</excludeArtifactIds>
                 <excludes>org/apache/jasper/servlet/JspCServletContext.java</excludes>
                 <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
               </configuration>
@@ -194,8 +194,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api-3.0</artifactId>
-      <version>${project.version}</version>
+      <artifactId>servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
