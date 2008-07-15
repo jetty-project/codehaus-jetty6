@@ -107,6 +107,7 @@ public class JSONPTransport extends AbstractTransport
     }
 
     /* ------------------------------------------------------------ */
+    @Override
     public String toString()
     {
         return "JSONPTransport[jsonp="+this._jsonp+"]";

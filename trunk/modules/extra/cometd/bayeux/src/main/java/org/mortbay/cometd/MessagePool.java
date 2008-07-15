@@ -192,6 +192,7 @@ public class MessagePool
     /* ------------------------------------------------------------ */
     private JSON _json = new JSON()
     {
+        @Override
         protected String toString(char[] buffer, int offset, int length)
         {
             Map.Entry entry = _valueStrings.getEntry(buffer,offset,length);
@@ -206,11 +207,13 @@ public class MessagePool
     /* ------------------------------------------------------------ */
     private JSON _msgJSON = new JSON()
     {
+        @Override
         protected Map newMap()
         {
             return newMessage();
         }
 
+        @Override
         protected String toString(char[] buffer, int offset, int length)
         {
             Map.Entry entry = _fieldStrings.getEntry(buffer,offset,length);
@@ -219,7 +222,8 @@ public class MessagePool
             String s= new String(buffer,offset,length);
             return s;
         }
-        
+
+        @Override
         protected JSON contextFor(String field)
         {
             return _json;
@@ -230,21 +234,25 @@ public class MessagePool
     /* ------------------------------------------------------------ */
     private JSON _batchJSON = new JSON()
     {
+        @Override
         protected Map newMap()
         {
             return newMessage();
         }
-        
+
+        @Override
         protected Object[] newArray(int size)
         {
             return new Message[size]; // todo recycle
         }
-        
+
+        @Override
         protected JSON contextFor(String field)
         {
             return _json;
         }
 
+        @Override
         protected JSON contextForArray()
         {
             return _msgJSON;
