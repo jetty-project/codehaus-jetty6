@@ -24,9 +24,9 @@
       <resource>
         <directory>target/generated-sources</directory>
         <includes>
-          <includes>**/*.properties</includes>
-          <includes>**/*.xml</includes>
-          <includes>**/*.tld</includes>
+          <include>**/*.properties</include>
+          <include>**/*.xml</include>
+          <include>**/*.tld</include>
         </includes>
       </resource>
     </resources>
