@@ -34,8 +34,8 @@ import org.mortbay.log.Log;
  */
 public class InjectionCollection
 {
-    private HashMap fieldInjectionsMap = new HashMap();//map of classname to field injections
-    private HashMap methodInjectionsMap = new HashMap();//map of classname to method injections
+    private HashMap<Class<?>, List<Injection>> fieldInjectionsMap = new HashMap<Class<?>, List<Injection>>();//map of classname to field injections
+    private HashMap<Class<?>, List<Injection>> methodInjectionsMap = new HashMap<Class<?>, List<Injection>>();//map of classname to method injections
     
     
     public void add (Injection injection)
@@ -45,56 +45,60 @@ public class InjectionCollection
         
         if (Log.isDebugEnabled())
             Log.debug("Adding injection for class="+injection.getTargetClass()+ " on a "+injection.getTarget());
-        Map injectionsMap = null;
+        Map<Class<?>, List<Injection>> injectionsMap = null;
         if (injection.getTarget() instanceof Field)
             injectionsMap = fieldInjectionsMap;
         if (injection.getTarget() instanceof Method)
             injectionsMap = methodInjectionsMap;
         
-        List injections = (List)injectionsMap.get(injection.getTargetClass());
+        List<Injection> injections = (List<Injection>)injectionsMap.get(injection.getTargetClass());
         if (injections==null)
         {
-            injections = new ArrayList();
+            injections = new ArrayList<Injection>();
             injectionsMap.put(injection.getTargetClass(), injections);
         }
         
         injections.add(injection);
     }
 
-    public List getFieldInjections (Class clazz)
+    public List<Injection> getFieldInjections (Class<?> clazz)
     {
         if (clazz==null)
             return null;
-        List list = (List)fieldInjectionsMap.get(clazz);
-        return (list==null?Collections.EMPTY_LIST:list);
+        List<Injection> list = (List<Injection>)fieldInjectionsMap.get(clazz);
+        if (list == null)
+            list = Collections.emptyList();
+        return list;
     }
     
-    public List getMethodInjections (Class clazz)
+    public List<Injection>  getMethodInjections (Class<?> clazz)
     {
         if (clazz==null)
             return null;
-        List list = (List)methodInjectionsMap.get(clazz);
-        return (list==null?Collections.EMPTY_LIST:list);
+        List<Injection> list = (List<Injection>)methodInjectionsMap.get(clazz);
+        if (list == null)
+            list = Collections.emptyList();
+        return list;
     }
  
-    public List getInjections (Class clazz)
+    public List<Injection>  getInjections (Class<?> clazz)
     {
         if (clazz==null)
             return null;
         
-        List results = new ArrayList();
+        List<Injection>  results = new ArrayList<Injection> ();
         results.addAll(getFieldInjections(clazz));
         results.addAll(getMethodInjections(clazz));
         return results;
     }
     
-    public Injection getInjection (Class clazz, Member member)
+    public Injection getInjection (Class<?> clazz, Member member)
     {
         if (clazz==null)
             return null;
         if (member==null)
             return null;
-        Map map = null;
+        Map<Class<?>, List<Injection>> map = null;
         if (member instanceof Field)
             map = fieldInjectionsMap;
         else if (member instanceof Method)
@@ -103,7 +107,7 @@ public class InjectionCollection
         if (map==null)
             return null;
         
-        List injections = (List)map.get(clazz);
+        List<Injection>  injections = (List<Injection>)map.get(clazz);
         Injection injection = null;
         for (int i=0;injections!=null && i<injections.size() && injection==null;i++)
         {
@@ -120,15 +124,23 @@ public class InjectionCollection
     {
         if (injectable==null)
             return;
-
-        //Do field injections
-        List list = getFieldInjections(injectable.getClass());
-        for (int i=0; list!=null && i<list.size();i++)        
-            ((Injection)list.get(i)).inject(injectable);
         
-        //Do method injections
-        list = getMethodInjections(injectable.getClass());
-        for (int i=0; list!=null && i<list.size();i++)
-            ((Injection)list.get(i)).inject(injectable);
+        //Get all injections pertinent to the Object by
+        //looking at it's class hierarchy
+        Class<?> clazz = injectable.getClass();
+        while (clazz != null)
+        {
+            //Do field injections
+            List<Injection> injections = getFieldInjections(clazz);
+            for (Injection i : injections)
+                i.inject(injectable);
+
+            //Do method injections
+            injections = getMethodInjections(clazz);
+            for (Injection i : injections)
+                i.inject(injectable);
+            
+            clazz = clazz.getSuperclass();
+        }
     }
 }

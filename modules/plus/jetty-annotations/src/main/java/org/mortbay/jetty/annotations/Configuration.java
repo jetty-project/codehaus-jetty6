@@ -15,7 +15,9 @@
 
 package org.mortbay.jetty.annotations;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 import org.mortbay.jetty.servlet.FilterHolder;
@@ -40,13 +42,18 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
      */
     public void parseAnnotations() throws Exception
     {
-        //look thru _servlets
+        //TODO - future is to look thru all jars in the classloader context
+        
+        //Replicate servlet spec < 3.0 behaviour
+        List<String> classNames = new ArrayList();
+        
+  
+        //look thru _servlets      
         Iterator itor = LazyList.iterator(_servlets);
         while (itor.hasNext())
         {
             ServletHolder holder = (ServletHolder)itor.next();
-            Class servlet = getWebAppContext().loadClass(holder.getClassName());
-            AnnotationParser.parseAnnotations(servlet, _runAsCollection,  _injections, _callbacks);
+            classNames.add(holder.getClassName());
         }
         
         //look thru _filters
@@ -54,8 +61,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
         while (itor.hasNext())
         {
             FilterHolder holder = (FilterHolder)itor.next();
-            Class filter = getWebAppContext().loadClass(holder.getClassName());
-            AnnotationParser.parseAnnotations(filter, null, _injections, _callbacks);
+            classNames.add(holder.getClassName());
         }
         
         //look thru _listeners
@@ -63,7 +69,11 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
         while (itor.hasNext())
         {
             Object listener = itor.next();
-            AnnotationParser.parseAnnotations(listener.getClass(), null, _injections, _callbacks);
+            classNames.add(listener.getClass().getName());
         }
+        
+        AnnotationFinder finder = new AnnotationFinder (getWebAppContext().getClassLoader(), classNames);
+        AnnotationProcessor processor = new AnnotationProcessor(finder, _runAsCollection, _injections, _callbacks);
+        processor.process();
     }
 }

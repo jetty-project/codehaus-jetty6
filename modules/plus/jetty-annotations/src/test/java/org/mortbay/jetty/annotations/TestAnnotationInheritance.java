@@ -17,13 +17,16 @@ package org.mortbay.jetty.annotations;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import org.mortbay.jetty.annotations.resources.ResourceA;
 import org.mortbay.jetty.annotations.resources.ResourceB;
+import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
@@ -39,22 +42,32 @@ import junit.framework.TestCase;
  */
 public class TestAnnotationInheritance extends TestCase
 {
+    List<String> classNames = new ArrayList<String>();
+    
+   
+    public void tearDown ()
+    {
+        classNames.clear();
+    }
     
     public void testInheritance ()
     throws Exception
     {        
         NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
-        
-        AnnotationParser processor = new AnnotationParser();
-        AnnotationCollection collection = processor.processClass(ClassB.class);
-        
-        List classes = collection.getClasses();
+        classNames.add(ClassA.class.getName());
+        classNames.add(ClassB.class.getName());
+        AnnotationFinder finder = new AnnotationFinder(Thread.currentThread().getContextClassLoader(), classNames);    
+       
+        List<Class<?>> classes = finder.getClassesForAnnotation(Sample.class);
         assertEquals(2, classes.size());
         
         //check methods
-        List methods = collection.getMethods();
+        //List methods = collection.getMethods();
+        List<Method> methods = finder.getMethodsForAnnotation(Sample.class);
+        
         assertTrue(methods!=null);
         assertFalse(methods.isEmpty());
+        /*
         assertEquals(methods.size(), 4);
         Method m = ClassB.class.getDeclaredMethod("a", new Class[] {});       
         assertTrue(methods.indexOf(m) >= 0);
@@ -82,9 +95,11 @@ public class TestAnnotationInheritance extends TestCase
         Field f = ClassA.class.getDeclaredField("m");
         assertTrue(fields.indexOf(f) >= 0);
         
-     
+      */
         NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
     }
+    
+    
     
     
     public void testResourceAnnotations ()
@@ -98,20 +113,24 @@ public class TestAnnotationInheritance extends TestCase
         org.mortbay.jetty.plus.naming.EnvEntry resourceB = new org.mortbay.jetty.plus.naming.EnvEntry("resB", new Integer(2000));
         
         NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
+        classNames.add(ResourceA.class.getName());
+        classNames.add(ResourceB.class.getName());
+        AnnotationFinder finder = new AnnotationFinder(Thread.currentThread().getContextClassLoader(), classNames);
+       
+        List<Class<?>> annotatedClasses = finder.getClassesForAnnotation(Resource.class);      
+        List<Method> annotatedMethods = finder.getMethodsForAnnotation(Resource.class);
+        List<Field>  annotatedFields = finder.getFieldsForAnnotation(Resource.class);
+        assertNotNull(annotatedClasses);
+        assertEquals(0, annotatedClasses.size());
+        assertEquals(3, annotatedMethods.size());
+        assertEquals(6, annotatedFields.size());
         
-        AnnotationParser processor = new AnnotationParser();
-        processor.processClass(ResourceB.class);
         InjectionCollection injections = new InjectionCollection();
         LifeCycleCallbackCollection callbacks = new LifeCycleCallbackCollection();
         RunAsCollection runAses = new RunAsCollection();
-       
-        AnnotationCollection collection = processor.processClass(ResourceB.class); 
-        assertEquals(1, collection.getClasses().size());
-        assertEquals(3, collection.getMethods().size());
-        assertEquals(6, collection.getFields().size());
-        
+        AnnotationProcessor processor = new AnnotationProcessor(finder, runAses, injections, callbacks);
         //process with all the specific annotations turned into injections, callbacks etc
-        processor.parseAnnotations(ResourceB.class, runAses, injections, callbacks);
+        processor.process();
         
         //processing classA should give us these jndi name bindings:
         // java:comp/env/myf
@@ -130,10 +149,10 @@ public class TestAnnotationInheritance extends TestCase
         assertEquals(resourceB.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceB/f"));
         assertEquals(resourceB.getObjectToBind(), env.lookup("org.mortbay.jetty.annotations.resources.ResourceA/n"));
         
-        //we should have these Injections
+        //we should have Injections
         assertNotNull(injections);
         
-        List fieldInjections = injections.getFieldInjections(ResourceB.class);
+        List<Injection> fieldInjections = injections.getFieldInjections(ResourceB.class);
         assertNotNull(fieldInjections);
         
         Iterator itor = fieldInjections.iterator();
@@ -142,15 +161,50 @@ public class TestAnnotationInheritance extends TestCase
         {
             System.err.println(itor.next());
         }
-        assertEquals(5, fieldInjections.size());
+        //only 1 field injection because the other has no Resource mapping
+        assertEquals(1, fieldInjections.size());
         
-        List methodInjections = injections.getMethodInjections(ResourceB.class);
+        fieldInjections = injections.getFieldInjections(ResourceA.class);
+        assertNotNull(fieldInjections);
+        assertEquals(4, fieldInjections.size());
+        
+        
+        List<Injection> methodInjections = injections.getMethodInjections(ResourceB.class);
         itor = methodInjections.iterator();
         System.err.println("Method injections:");
         while (itor.hasNext())
             System.err.println(itor.next());
+        
+        assertNotNull(methodInjections);
+        assertEquals(0, methodInjections.size());
+        
+        methodInjections = injections.getMethodInjections(ResourceA.class);
         assertNotNull(methodInjections);
         assertEquals(3, methodInjections.size());
+        
+        //test injection
+        ResourceB binst = new ResourceB();
+        injections.inject(binst);
+        
+        //check injected values
+        Field f = ResourceB.class.getDeclaredField ("f");
+        f.setAccessible(true);
+        assertEquals(resourceB.getObjectToBind() , f.get(binst));
+        
+        //@Resource(mappedName="resA") //test the default naming scheme but using a mapped name from the environment
+        f = ResourceA.class.getDeclaredField("g"); 
+        f.setAccessible(true);
+        assertEquals(resourceA.getObjectToBind(), f.get(binst));
+        
+        //@Resource(name="resA") //test using the given name as the name from the environment
+        f = ResourceA.class.getDeclaredField("j");
+        f.setAccessible(true);
+        assertEquals(resourceA.getObjectToBind(), f.get(binst));
+        
+        //@Resource(mappedName="resB") //test using the default name on an inherited field
+        f = ResourceA.class.getDeclaredField("n"); 
+        f.setAccessible(true);
+        assertEquals(resourceB.getObjectToBind(), f.get(binst));
     }
 
 }

@@ -449,8 +449,7 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         {
             _runAsCollection.setRunAs(holders[i]);
         }
-        
-        
+               
         EventListener[] listeners = getWebAppContext().getEventListeners();
         for (int i=0;i<listeners.length;i++)
         {
