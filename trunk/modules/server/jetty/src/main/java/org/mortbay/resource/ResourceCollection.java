@@ -41,14 +41,14 @@ public class ResourceCollection extends Resource
     public ResourceCollection(Resource[] resources)
     {
         if(resources.length==0)
-            throw new IllegalArgumentException("arg *resources* must not be one or more resources.");
+            throw new IllegalArgumentException("arg *resources* must be one or more resources.");
         _resources = resources;
     }
     
     public ResourceCollection(String[] resources)
     {
         if(resources.length==0)
-            throw new IllegalArgumentException("arg *resources* must not be one or more resources.");
+            throw new IllegalArgumentException("arg *resources* must be one or more resources.");
         _resources = new Resource[resources.length];
         try
         {
@@ -66,7 +66,7 @@ public class ResourceCollection extends Resource
         StringTokenizer tokenizer = new StringTokenizer(csvResources, ",;");
         int len = tokenizer.countTokens();
         if(len==0)
-            throw new IllegalArgumentException("arg *resources* must not be one or more resources.");
+            throw new IllegalArgumentException("arg *resources* must be one or more resources.");
         _resources = new Resource[len];
         try
         {            
