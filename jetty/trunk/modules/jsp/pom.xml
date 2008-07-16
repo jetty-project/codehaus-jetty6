@@ -10,6 +10,6 @@
   <name>Jetty :: JSP Modules</name>
   <packaging>pom</packaging>
   <modules>
-    <module>jsp-2.1</module>
+    <module>jsp-2.1-jetty</module>
   </modules>
 </project>
