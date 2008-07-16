@@ -32,30 +32,34 @@ public class ClassA
     private Integer k;
 
 
+    public static class Foo
+    {
+        
+    }
     
     @Sample(7)
     private Integer m;
     
     @Sample(2)
-    public void a ()
+    public void a (Integer[] x)
     {
         System.err.println("ClassA.public");
     }
     
     @Sample(3)
-    protected void b()
+    protected void b(Foo[] f)
     {
         System.err.println("ClassA.protected");
     }
     
     @Sample(4)
-    void c()
+    void c(int[] x)
     {
         System.err.println("ClassA.package");
     }
 
     @Sample(5)
-    private void d()
+    private void d(int x, String y)
     {
         System.err.println("ClassA.private");
     }
