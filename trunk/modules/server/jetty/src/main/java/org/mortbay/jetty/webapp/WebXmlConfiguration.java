@@ -15,6 +15,7 @@ package org.mortbay.jetty.webapp;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -644,6 +645,26 @@ public class WebXmlConfiguration implements Configuration
             {
                 Loader.loadClass(this.getClass(), servlet_class);
                 _hasJSP=true;
+
+                //inject a jetty-jasper log bridge
+                try
+                {
+                    Class jspLogFactoryClass = Loader.loadClass(this.getClass(), "com.sun.org.apache.commons.logging.LogFactory");
+                    Class jspLogClass = Loader.loadClass(this.getClass(), "com.sun.org.apache.commons.logging.Log");
+                    try
+                    {
+                        Method setLogImplMethod = jspLogFactoryClass.getDeclaredMethod("setLogImplClassName", new Class[]{String.class});
+                        setLogImplMethod.invoke(null, new Object[]{"com.sun.org.apache.commons.logging.impl.JettyLog"});
+                    }
+                    catch (Exception e)
+                    {
+                        Log.warn(e);
+                    }
+                }
+                catch (ClassNotFoundException e)
+                {
+                    Log.ignore(e);
+                }
             }
             catch(ClassNotFoundException e)
             {
