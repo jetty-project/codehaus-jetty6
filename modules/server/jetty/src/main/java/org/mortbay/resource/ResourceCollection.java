@@ -38,17 +38,53 @@ public class ResourceCollection extends Resource
     
     private Resource[] _resources;
     
+    public ResourceCollection()
+    {
+        
+    }
+    
     public ResourceCollection(Resource[] resources)
     {
-        if(resources.length==0)
-            throw new IllegalArgumentException("arg *resources* must be one or more resources.");
-        _resources = resources;
+        setResources(resources);
     }
     
     public ResourceCollection(String[] resources)
     {
+        setResources(resources);
+    }
+    
+    public ResourceCollection(String csvResources)
+    {
+        setResources(csvResources);
+    }
+    
+    /**
+     * 
+     * @param resources Resource array
+     */
+    public void setResources(Resource[] resources)
+    {
+        if(_resources!=null)
+            throw new IllegalStateException("*resources* already set.");
+        
         if(resources.length==0)
             throw new IllegalArgumentException("arg *resources* must be one or more resources.");
+        
+        _resources = resources;
+    }
+    
+    /**
+     * 
+     * @param resources String array
+     */
+    public void setResources(String[] resources)
+    {
+        if(_resources!=null)
+            throw new IllegalStateException("*resources* already set.");
+        
+        if(resources.length==0)
+            throw new IllegalArgumentException("arg *resources* must be one or more resources.");
+        
         _resources = new Resource[resources.length];
         try
         {
@@ -61,12 +97,20 @@ public class ResourceCollection extends Resource
         }
     }
     
-    public ResourceCollection(String csvResources)
+    /**
+     * 
+     * @param csvResources Comma separated values
+     */
+    public void setResources(String csvResources)
     {
+        if(_resources!=null)
+            throw new IllegalStateException("*resources* already set.");
+        
         StringTokenizer tokenizer = new StringTokenizer(csvResources, ",;");
         int len = tokenizer.countTokens();
         if(len==0)
             throw new IllegalArgumentException("arg *resources* must be one or more resources.");
+        
         _resources = new Resource[len];
         try
         {            
@@ -76,9 +120,13 @@ public class ResourceCollection extends Resource
         catch(Exception e)
         {
             throw new RuntimeException(e);
-        }        
+        }
     }
     
+    /**
+     * 
+     * @return the resource array
+     */
     public Resource[] getResources()
     {
         return _resources;
