@@ -47,6 +47,22 @@ public class ResourceCollectionTest extends TestCase
             System.err.println(s);        
     }
     
+    public void testMergedDir() throws Exception
+    {
+        ResourceCollection rc = new ResourceCollection(new String[]{
+                "src/test/resources/org/mortbay/resource/one/",
+                "src/test/resources/org/mortbay/resource/two/",
+                "src/test/resources/org/mortbay/resource/three/"
+        });
+        
+        Resource r = rc.addPath("dir");
+        assertTrue(r instanceof ResourceCollection);
+        rc=(ResourceCollection)r;
+        assertEquals("1 - one", getContent(rc, "1.txt"));
+        assertEquals("2 - two", getContent(rc, "2.txt"));
+        assertEquals("3 - three", getContent(rc, "3.txt"));  
+    }
+    
     static String getContent(ResourceCollection rc, String path) throws Exception
     {
         StringBuilder buffer = new StringBuilder();
