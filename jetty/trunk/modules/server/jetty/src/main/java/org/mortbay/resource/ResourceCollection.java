@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
@@ -67,10 +68,18 @@ public class ResourceCollection extends Resource
         if(_resources!=null)
             throw new IllegalStateException("*resources* already set.");
         
+        if(resources==null)
+            throw new IllegalArgumentException("*resources* must not be null.");
+        
         if(resources.length==0)
             throw new IllegalArgumentException("arg *resources* must be one or more resources.");
         
         _resources = resources;
+        for(Resource r : _resources)
+        {
+            if(!r.isDirectory())
+                throw new IllegalArgumentException(r + " is not a directory");
+        }
     }
     
     /**
@@ -82,6 +91,9 @@ public class ResourceCollection extends Resource
         if(_resources!=null)
             throw new IllegalStateException("*resources* already set.");
         
+        if(resources==null)
+            throw new IllegalArgumentException("*resources* must not be null.");
+        
         if(resources.length==0)
             throw new IllegalArgumentException("arg *resources* must be one or more resources.");
         
@@ -89,7 +101,11 @@ public class ResourceCollection extends Resource
         try
         {
             for(int i=0; i<resources.length; i++)
+            {
                 _resources[i] = Resource.newResource(resources[i]);
+                if(!_resources[i].isDirectory())
+                    throw new IllegalArgumentException(_resources[i] + " is not a directory");
+            }
         }
         catch(Exception e)
         {
@@ -106,6 +122,9 @@ public class ResourceCollection extends Resource
         if(_resources!=null)
             throw new IllegalStateException("*resources* already set.");
         
+        if(csvResources==null)
+            throw new IllegalArgumentException("*csvResources* must not be null.");
+        
         StringTokenizer tokenizer = new StringTokenizer(csvResources, ",;");
         int len = tokenizer.countTokens();
         if(len==0)
@@ -115,7 +134,11 @@ public class ResourceCollection extends Resource
         try
         {            
             for(int i=0; tokenizer.hasMoreTokens(); i++)
+            {
                 _resources[i] = Resource.newResource(tokenizer.nextToken().trim());
+                if(!_resources[i].isDirectory())
+                    throw new IllegalArgumentException(_resources[i] + " is not a directory");
+            }
         }
         catch(Exception e)
         {
@@ -137,67 +160,130 @@ public class ResourceCollection extends Resource
      * @return The contained resource (found first) in the collection of resources
      */
     public Resource addPath(String path) throws IOException, MalformedURLException
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
+        Object resource = findResource(path);        
+        
+        if(resource==null)
+            return null;
+        
+        if(resource instanceof Resource)
+            return (Resource)resource;
+        
+        ArrayList<Resource> resources = (ArrayList<Resource>)resource;
+        return new ResourceCollection(resources.toArray(new Resource[resources.size()]));
+    }
+    
+    /**
+     * 
+     * @param path
+     * @return the resource(file) if found, returns a list of resource dirs if its a dir, else null.
+     * @throws IOException
+     * @throws MalformedURLException
+     */
+    protected Object findResource(String path) throws IOException, MalformedURLException
     {        
+        ArrayList<Resource> resources = null;
         Resource mainLookup = _resources[0].addPath(path);
-        if(mainLookup==null || !mainLookup.exists())
+        if(mainLookup!=null && mainLookup.exists())
         {
-            for(int i=1; i<_resources.length; i++)
+            if(!mainLookup.isDirectory())
+                return mainLookup;
+            
+            resources = new ArrayList<Resource>();
+            resources.add(mainLookup);
+        }        
+         
+        for(int i=1; i<_resources.length; i++)
+        {
+            Resource r = _resources[i].addPath(path);            
+            if(r!=null && r.exists())
             {
-                Resource r = _resources[i].addPath(path);
-                if(r!=null && r.exists())
+                if(!r.isDirectory())
                     return r;
-            }
+                
+                if(resources==null)
+                    resources = new ArrayList<Resource>();
+                
+                resources.add(r);           
+            }            
         }
-        return mainLookup;
+        return resources!=null ? resources : mainLookup;
     }
     
     public boolean delete() throws SecurityException
-    {        
-        return _resources[0].delete();
+    {
+        throw new UnsupportedOperationException();
     }
     
     public boolean exists()
-    {        
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return _resources[0].exists();
     }
     
     public File getFile() throws IOException
-    {        
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return  _resources[0].getFile();
     }
     
     public InputStream getInputStream() throws IOException
-    {        
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return _resources[0].getInputStream();
     }
     
     public String getName()
-    {        
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return _resources[0].getName();
     }
     
     public OutputStream getOutputStream() throws IOException, SecurityException
-    {        
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return _resources[0].getOutputStream();
     }
     
     public URL getURL()
-    {        
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return _resources[0].getURL();
     }
     
     public boolean isDirectory()
     {
-        return _resources[0].isDirectory();
+        return true;
     }
     
     public long lastModified()
-    {        
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return _resources[0].lastModified();
     }
     
     public long length()
-    {        
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return _resources[0].length();
     }    
     
@@ -206,6 +292,9 @@ public class ResourceCollection extends Resource
      */    
     public String[] list()
     {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         HashSet<String> set = new HashSet<String>();
         for(Resource r : _resources)
         {
@@ -216,13 +305,17 @@ public class ResourceCollection extends Resource
     }
     
     public void release()
-    {        
-        _resources[0].release();
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
+        for(Resource r : _resources)
+            r.release();
     }
     
     public boolean renameTo(Resource dest) throws SecurityException
-    {        
-        return _resources[0].renameTo(dest);
+    {
+        throw new UnsupportedOperationException();
     }
 
 }
