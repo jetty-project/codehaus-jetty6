@@ -220,6 +220,9 @@ public class ResourceCollection extends Resource
     
     public boolean exists()
     {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return true;
     }
     
@@ -295,6 +298,9 @@ public class ResourceCollection extends Resource
     
     public boolean isDirectory()
     {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
         return true;
     }
     
@@ -303,12 +309,7 @@ public class ResourceCollection extends Resource
         if(_resources==null)
             throw new IllegalStateException("*resources* not set.");
         
-        for(Resource r : _resources)
-        {
-            if(r.exists())
-                return r.lastModified();
-        }
-        return 0;
+        return _resources[0].lastModified();
     }
     
     public long length()
@@ -316,12 +317,7 @@ public class ResourceCollection extends Resource
         if(_resources==null)
             throw new IllegalStateException("*resources* not set.");
         
-        for(Resource r : _resources)
-        {
-            if(r.exists())
-                return r.length();
-        }
-        return 0;
+        return _resources[0].length();
     }    
     
     /**
