@@ -164,20 +164,43 @@ public class ResourceCollection extends Resource
         if(_resources==null)
             throw new IllegalStateException("*resources* not set.");
         
-        Object resource = findResource(path);        
-        
-        if(resource==null)
-            return null;
-        
-        if(resource instanceof Resource)
-            return (Resource)resource;
-        
-        ArrayList<Resource> resources = (ArrayList<Resource>)resource;
-        return new ResourceCollection(resources.toArray(new Resource[resources.size()]));
+        Resource resource=null;
+        ArrayList<Resource> resources = null;
+        int i=0;
+        for(; i<_resources.length; i++)
+        {
+            resource = _resources[i].addPath(path);  
+            if (resource.exists())
+            {
+                if (resource.isDirectory())
+                    break;       
+                return resource;
+            }
+        }  
+
+        for(i++; i<_resources.length; i++)
+        {
+            Resource r = _resources[i].addPath(path); 
+            if (r.exists() && r.isDirectory())
+            {
+                if (resource!=null)
+                {
+                    resources = new ArrayList<Resource>();
+                    resources.add(resource);
+                    resource=null;
+                }
+                resources.add(r);
+            }
+        }
+
+        if (resource!=null)
+            return resource;
+        if (resources!=null)
+            return new ResourceCollection(resources.toArray(new Resource[resources.size()]));
+        return null;
     }
     
     /**
-     * 
      * @param path
      * @return the resource(file) if found, returns a list of resource dirs if its a dir, else null.
      * @throws IOException
@@ -185,32 +208,40 @@ public class ResourceCollection extends Resource
      */
     protected Object findResource(String path) throws IOException, MalformedURLException
     {        
+        Resource resource=null;
         ArrayList<Resource> resources = null;
-        Resource mainLookup = _resources[0].addPath(path);
-        if(mainLookup!=null && mainLookup.exists())
+        int i=0;
+        for(; i<_resources.length; i++)
         {
-            if(!mainLookup.isDirectory())
-                return mainLookup;
-            
-            resources = new ArrayList<Resource>();
-            resources.add(mainLookup);
-        }        
-         
-        for(int i=1; i<_resources.length; i++)
-        {
-            Resource r = _resources[i].addPath(path);            
-            if(r!=null && r.exists())
+            resource = _resources[i].addPath(path);  
+            if (resource.exists())
             {
-                if(!r.isDirectory())
-                    return r;
-                
-                if(resources==null)
+                if (resource.isDirectory())
+                    break;
+               
+                return resource;
+            }
+        }  
+
+        for(i++; i<_resources.length; i++)
+        {
+            Resource r = _resources[i].addPath(path); 
+            if (r.exists() && r.isDirectory())
+            {
+                if (resource!=null)
+                {
                     resources = new ArrayList<Resource>();
-                
-                resources.add(r);           
-            }            
+                    resources.add(resource);
+                }
+                resources.add(r);
+            }
         }
-        return resources!=null ? resources : mainLookup;
+        
+        if (resource!=null)
+            return resource;
+        if (resources!=null)
+            return resources;
+        return null;
     }
     
     public boolean delete() throws SecurityException
@@ -309,15 +340,18 @@ public class ResourceCollection extends Resource
         if(_resources==null)
             throw new IllegalStateException("*resources* not set.");
         
-        return _resources[0].lastModified();
+        for(Resource r : _resources)
+        {
+            long lm = r.lastModified();
+            if (lm!=-1)
+                return lm;
+        }
+        return -1;
     }
     
     public long length()
     {
-        if(_resources==null)
-            throw new IllegalStateException("*resources* not set.");
-        
-        return _resources[0].length();
+        return -1;
     }    
     
     /**
