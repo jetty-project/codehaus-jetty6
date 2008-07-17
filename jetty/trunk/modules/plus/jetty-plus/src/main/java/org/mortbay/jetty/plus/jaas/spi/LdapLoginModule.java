@@ -15,9 +15,6 @@ package org.mortbay.jetty.plus.jaas.spi;
 // ========================================================================
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -45,11 +42,9 @@ import org.mortbay.jetty.plus.jaas.callback.ObjectCallback;
 import org.mortbay.jetty.security.Credential;
 import org.mortbay.log.Log;
 
-
 /**
- * 
  * A LdapLoginModule for use with JAAS setups
- * 
+ * <p/>
  * The jvm should be started with the following parameter:
  * <br><br>
  * <code>
@@ -59,11 +54,11 @@ import org.mortbay.log.Log;
  * and an example of the ldap-loginModule.conf would be:
  * <br><br>
  * <pre>
- * ldaploginmodule {  
+ * ldaploginmodule {
  *    org.mortbay.jetty.plus.jaas.spi.LdapLoginModule required
  *    debug="true"
  *    contextFactory="com.sun.jndi.ldap.LdapCtxFactory"
- *    hostname="ldap-directory_host"
+ *    hostname="ldap.example.com"
  *    port="389"
  *    bindDn="cn=Directory Manager"
  *    bindPassword="directory"
@@ -74,15 +69,16 @@ import org.mortbay.log.Log;
  *    userIdAttribute="uid"
  *    userPasswordAttribute="userPassword"
  *    userObjectClass="inetOrgPerson"
- *    roleBaseDn="ou=groups,dc=alcatel"
+ *    roleBaseDn="ou=groups,dc=example,dc=com"
  *    roleNameAttribute="cn"
  *    roleMemberAttribute="uniqueMember"
  *    roleObjectClass="groupOfUniqueNames";
- *    }; 
- *  </pre>   
+ *    };
+ *  </pre>
  *
  * @author Jesse McConnell <jesse@codehaus.org>
  * @author Frederic Nizery <frederic.nizery@alcatel-lucent.fr>
+ * @author Trygve Laugstol <trygvis@codehaus.org>
  */
 public class LdapLoginModule extends AbstractLoginModule
 {
@@ -163,6 +159,8 @@ public class LdapLoginModule extends AbstractLoginModule
      */
     private String _roleNameAttribute = "roleName";
 
+    private boolean _debug;
+
     /**
      * if the getUserInfo can pull a password off of the user then
      * password comparison is an option for authn, to force binding
@@ -171,8 +169,6 @@ public class LdapLoginModule extends AbstractLoginModule
     private boolean _forceBindingLogin = false;
 
     private DirContext _rootContext;
-
-
 
     /**
      * get the available information about the user
@@ -189,6 +185,12 @@ public class LdapLoginModule extends AbstractLoginModule
     public UserInfo getUserInfo(String username) throws Exception
     {
         String pwdCredential = getUserCredentials(username);
+
+        if (pwdCredential == null)
+        {
+            return null;
+        }
+
         pwdCredential = convertCredentialLdapToJetty(pwdCredential);
 
         //String md5Credential = Credential.MD5.digest("foo");
@@ -199,7 +201,6 @@ public class LdapLoginModule extends AbstractLoginModule
 
         return new UserInfo(username, credential, roles);
     }
-
 
     protected String doRFC2254Encoding(String inputString)
     {
@@ -232,7 +233,6 @@ public class LdapLoginModule extends AbstractLoginModule
         return buf.toString();
     }
 
-
     /**
      * attempts to get the users credentials from the users context
      * <p/>
@@ -244,13 +244,10 @@ public class LdapLoginModule extends AbstractLoginModule
      */
     private String getUserCredentials(String username) throws LoginException
     {
-
         String ldapCredential = null;
 
         SearchControls ctls = new SearchControls();
-
         ctls.setCountLimit(1);
-
         ctls.setDerefLinkFlag(true);
         ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
@@ -265,31 +262,28 @@ public class LdapLoginModule extends AbstractLoginModule
 
             Log.debug("Found user?: " + results.hasMoreElements());
 
-            if (results.hasMoreElements())
-            {
-                SearchResult result = results.nextElement();
-
-                Attributes attributes = result.getAttributes();
-
-                Attribute attribute = attributes.get(_userPasswordAttribute);
-                if (attribute != null)
-                {
-                    try
-                    {
-                        byte[] value = (byte[]) attribute.get();
-
-                        ldapCredential = new String(value);
-                    }
-                    catch (NamingException e)
-                    {
-                        Log.debug("no password available under attribute: " + _userPasswordAttribute);
-                    }
-
-                }
-            }
-            else
+            if (!results.hasMoreElements())
             {
                 throw new LoginException("User not found.");
+            }
+
+            SearchResult result = findUser(username);
+
+            Attributes attributes = result.getAttributes();
+
+            Attribute attribute = attributes.get(_userPasswordAttribute);
+            if (attribute != null)
+            {
+                try
+                {
+                    byte[] value = (byte[]) attribute.get();
+
+                    ldapCredential = new String(value);
+                }
+                catch (NamingException e)
+                {
+                    Log.debug("no password available under attribute: " + _userPasswordAttribute);
+                }
             }
         }
         catch (NamingException e)
@@ -311,7 +305,7 @@ public class LdapLoginModule extends AbstractLoginModule
      * @return
      * @throws LoginException
      */
-    private List getUserRoles(String username) throws LoginException
+    private List getUserRoles(String username) throws LoginException, NamingException
     {
         ArrayList roleList = new ArrayList();
 
@@ -320,42 +314,37 @@ public class LdapLoginModule extends AbstractLoginModule
         ctls.setDerefLinkFlag(true);
         ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-        if (_roleBaseDn != null)
+        if (_roleBaseDn == null)
         {
-            String userDn = _userRdnAttribute + "=" + username + "," + _userBaseDn;
-            String filter = "(&(objectClass=" + _roleObjectClass + ")(" + _roleMemberAttribute + "=" + userDn + "))";
-            //filter  = doRFC2254Encoding(filter)
-            try
+            return roleList;
+        }
+
+        String userDn = _userRdnAttribute + "=" + username + "," + _userBaseDn;
+        String filter = "(&(objectClass=" + _roleObjectClass + ")(" + _roleMemberAttribute + "=" + userDn + "))";
+        //filter  = doRFC2254Encoding(filter)
+        NamingEnumeration results = _rootContext.search(_roleBaseDn, filter, ctls);
+
+        Log.debug("Found user roles?: " + results.hasMoreElements());
+
+        while (results.hasMoreElements())
+        {
+            SearchResult result = (SearchResult) results.nextElement();
+
+            Attributes attributes = result.getAttributes();
+
+            if (attributes != null)
             {
-                NamingEnumeration<SearchResult> results = _rootContext.search(_roleBaseDn, filter, ctls);
+                Attribute roleAttribute = attributes.get(_roleNameAttribute);
 
-                Log.debug("Found user roles?: " + results.hasMoreElements());
-
-                while (results.hasMoreElements())
+                if (roleAttribute != null)
                 {
-                    SearchResult result = results.nextElement();
-
-                    Attributes attributes = result.getAttributes();
-
-                    if (attributes != null)
+                    NamingEnumeration roles = roleAttribute.getAll();
+                    while (roles.hasMore())
                     {
-                        Attribute roleAttribute = attributes.get(_roleNameAttribute);
-
-                        if (roleAttribute != null)
-                        {
-                            NamingEnumeration roles = roleAttribute.getAll();
-                            while (roles.hasMore())
-                            {
-                                String roleName = (String) roles.next();
-                                roleList.add(roleName);
-                            }
-                        }
+                        String roleName = (String) roles.next();
+                        roleList.add(roleName);
                     }
                 }
-            }
-            catch (NamingException e)
-            {
-                throw new LoginException("error obtaining roles for " + username);
             }
         }
 
@@ -388,33 +377,34 @@ public class LdapLoginModule extends AbstractLoginModule
             String webUserName = ((NameCallback) callbacks[0]).getName();
             Object webCredential = ((ObjectCallback) callbacks[1]).getObject();
 
-            if ((webUserName == null) || (webCredential == null))
+            if (webUserName == null || webCredential == null)
             {
                 setAuthenticated(false);
                 return isAuthenticated();
             }
 
-            UserInfo userInfo = getUserInfo(webUserName);
-
-            setCurrentUser(new JAASUserInfo(userInfo));
-
-            // if the userInfo query didn't pick up a password then opt for bindingLogin
-            if (userInfo.getCredential() == null || _forceBindingLogin)
+            if (_forceBindingLogin)
             {
                 return bindingLogin(webUserName, webCredential);
             }
-            else
-            {             
-                if (webCredential instanceof String)
-                {
-                    return credentialLogin(Credential.getCredential((String) webCredential));
-                }
-                else
-                {
-                    return credentialLogin(webCredential);
-                }
+
+            // This sets read and the credential
+            UserInfo userInfo = getUserInfo(webUserName);
+
+            if (userInfo == null)
+            {
+                setAuthenticated(false);
+                return false;
             }
 
+            setCurrentUser(new JAASUserInfo(userInfo));
+
+            if (webCredential instanceof String)
+            {
+                return credentialLogin(Credential.getCredential((String) webCredential));
+            }
+
+            return credentialLogin(webCredential);
         }
         catch (UnsupportedCallbackException e)
         {
@@ -422,10 +412,18 @@ public class LdapLoginModule extends AbstractLoginModule
         }
         catch (IOException e)
         {
+            if (_debug)
+            {
+                e.printStackTrace();
+            }
             throw new LoginException("IO Error performing login.");
         }
         catch (Exception e)
         {
+            if (_debug)
+            {
+                e.printStackTrace();
+            }
             throw new LoginException("Error obtaining user info.");
         }
     }
@@ -437,7 +435,6 @@ public class LdapLoginModule extends AbstractLoginModule
      * @return
      * @throws LoginException
      */
-
     protected boolean credentialLogin(Object webCredential) throws LoginException
     {
         setAuthenticated(getCurrentUser().checkCredential(webCredential));
@@ -447,21 +444,55 @@ public class LdapLoginModule extends AbstractLoginModule
     /**
      * binding authentication check
      * This methode of authentication works only if the user branch of the DIT (ldap tree)
-     * has an ACI (acces controle instruction) that allow the access to any user or at least
+     * has an ACI (acces control instruction) that allow the access to any user or at least
      * for the user that logs in.
-     * 
+     *
      * @param username
      * @param password
      * @return
      * @throws LoginException
      */
-    
-    protected boolean bindingLogin(String username, Object password) throws LoginException
+    protected boolean bindingLogin(String username, Object password) throws LoginException, NamingException
+    {
+        SearchResult searchResult = findUser(username);
+
+        String userDn = searchResult.getNameInNamespace();
+
+        Log.info("Attempting authentication: + " + userDn);
+
+        Hashtable environment = getEnvironment();
+        environment.put(Context.SECURITY_PRINCIPAL, userDn);
+        environment.put(Context.SECURITY_CREDENTIALS, password);
+
+        try
+        {
+            new InitialDirContext(environment);
+        }
+        catch (AuthenticationException e)
+        {
+            Log.info("Authentication failed for: " + userDn);
+            throw new LoginException();
+        }
+        catch (NamingException ne)
+        {
+            throw new LoginException("Context binding failure.");
+        }
+
+        List roles = getUserRoles(username);
+
+        UserInfo userInfo = new UserInfo(username, null, roles);
+
+        setCurrentUser(new JAASUserInfo(userInfo));
+
+        setAuthenticated(true);
+
+        return true;
+    }
+
+    private SearchResult findUser(String username) throws NamingException, LoginException
     {
         SearchControls ctls = new SearchControls();
-
         ctls.setCountLimit(1);
-
         ctls.setDerefLinkFlag(true);
         ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
@@ -469,54 +500,16 @@ public class LdapLoginModule extends AbstractLoginModule
 
         Log.info("Searching for users with filter: \'" + filter + "\'" + " from base dn: " + _userBaseDn);
 
-        try
+        NamingEnumeration results = _rootContext.search(_userBaseDn, filter, ctls);
+
+        Log.info("Found user?: " + results.hasMoreElements());
+
+        if (!results.hasMoreElements())
         {
-
-            NamingEnumeration<SearchResult> results = _rootContext.search(_userBaseDn, filter, ctls);
-
-            Log.info("Found user?: " + results.hasMoreElements());
-
-            if (results.hasMoreElements())
-            {
-                SearchResult result = results.nextElement();
-
-                String userDn = result.getNameInNamespace();
-
-                Log.info("Attempting Authenication: + " + userDn);
-
-                Hashtable environment = getEnvironment();
-                environment.put(Context.SECURITY_PRINCIPAL, userDn);
-                environment.put(Context.SECURITY_CREDENTIALS, password);
-
-                try
-                {
-                    DirContext userContext = new InitialDirContext( environment );
-
-                }
-                catch (AuthenticationException e)
-                {
-                    Log.info("Authentication failed for: " + userDn);
-                    throw new LoginException();
-                }
-            catch (NamingException ne)
-        {
-            throw new LoginException("Context binding failure.");
-        }
-               
-                setAuthenticated(true);
-
-                return true;
-            }
-            else
-            {
-                throw new LoginException("User not found.");
-            }
-        }
-        catch (NamingException e)
-        {
-            throw new LoginException("Context binding failure.");
+            throw new LoginException("User not found.");
         }
 
+        return (SearchResult) results.nextElement();
     }
 
 
@@ -553,38 +546,14 @@ public class LdapLoginModule extends AbstractLoginModule
             _forceBindingLogin = Boolean.parseBoolean((String) options.get("forceBindingLogin"));
         }
 
-        if (options.containsKey("userObjectClass"))
-        {
-            _userObjectClass = (String) options.get("userObjectClass");
-        }
-
-        if (options.containsKey("userRdnAttribute"))
-        {
-            _userRdnAttribute = (String) options.get("userRdnAttribute");
-        }
-
-        if (options.containsKey("userIdAttribute"))
-        {
-            _userIdAttribute = (String) options.get("userIdAttribute");
-        }
-
-        if (options.containsKey("userPasswordAttribute"))
-        {
-            _userPasswordAttribute = (String) options.get("userPasswordAttribute");
-        }
-
-        if (options.containsKey("roleObjectClass"))
-        {
-            _roleObjectClass = (String) options.get("roleObjectClass");
-        }
-        if (options.containsKey("roleMemberAttribute"))
-        {
-            _roleMemberAttribute = (String) options.get("roleMemberAttribute");
-        }
-        if (options.containsKey("roleNameAttribute"))
-        {
-            _roleNameAttribute = (String) options.get("roleNameAttribute");
-        }
+        _userObjectClass = getOption(options, "userObjectClass", _userObjectClass);
+        _userRdnAttribute = getOption(options, "userRdnAttribute", _userRdnAttribute);
+        _userIdAttribute = getOption(options, "userIdAttribute", _userIdAttribute);
+        _userPasswordAttribute = getOption(options, "userPasswordAttribute", _userPasswordAttribute);
+        _roleObjectClass = getOption(options, "roleObjectClass", _roleObjectClass);
+        _roleMemberAttribute = getOption(options, "roleMemberAttribute", _roleMemberAttribute);
+        _roleNameAttribute = getOption(options, "roleNameAttribute", _roleNameAttribute);
+        _debug = Boolean.parseBoolean(String.valueOf(getOption(options, "debug", Boolean.toString(_debug))));
 
         try
         {
@@ -594,7 +563,18 @@ public class LdapLoginModule extends AbstractLoginModule
         {
             throw new IllegalStateException("Unable to establish root context", ex);
         }
+    }
 
+    private String getOption(Map options, String key, String defaultValue)
+    {
+        Object value = options.get(key);
+
+        if (value == null)
+        {
+            return defaultValue;
+        }
+
+        return (String) value;
     }
 
     /**
@@ -638,67 +618,38 @@ public class LdapLoginModule extends AbstractLoginModule
         return env;
     }
 
-    public static String convertCredentialJettyToLdap( String encryptedPassword )
+    public static String convertCredentialJettyToLdap(String encryptedPassword)
     {
-        if ( encryptedPassword.toUpperCase().startsWith( "MD5:" ) )
+        if ("MD5:".startsWith(encryptedPassword.toUpperCase()))
         {
-            String epwd = encryptedPassword.substring( "MD5:".length(), encryptedPassword.length() );
-            return "{MD5}" + epwd;
+            return "{MD5}" + encryptedPassword.substring("MD5:".length(), encryptedPassword.length());
         }
-        else if ( encryptedPassword.toUpperCase().startsWith( "CRYPT:" ) )
+
+        if ("CRYPT:".startsWith(encryptedPassword.toUpperCase()))
         {
-            String epwd = encryptedPassword.substring( "CRYPT:".length(), encryptedPassword.length() );
-            return "{CRYPT}" + epwd;
+            return "{CRYPT}" + encryptedPassword.substring("CRYPT:".length(), encryptedPassword.length());
         }
-        else
+
+        return encryptedPassword;
+    }
+
+    public static String convertCredentialLdapToJetty(String encryptedPassword)
+    {
+        if (encryptedPassword == null)
         {
             return encryptedPassword;
         }
-    }
 
-    public static String convertCredentialLdapToJetty( String encryptedPassword )
-    {
-        if ( encryptedPassword.toUpperCase().startsWith( "{MD5}" ) )
+        if ("{MD5}".startsWith(encryptedPassword.toUpperCase()))
         {
-            String epwd = encryptedPassword.substring( "{MD5}".length(), encryptedPassword.length() );
-            return "MD5:" + epwd;
+            return "MD5:" + encryptedPassword.substring("{MD5}".length(), encryptedPassword.length());
         }
-        else if ( encryptedPassword.toUpperCase().startsWith( "{CRYPT}" ) )
-        {
-            String epwd = encryptedPassword.substring( "{CRYPT}".length(), encryptedPassword.length() );
-            return "CRYPT:" + epwd;
-        }
-        else
-        {
-            return encryptedPassword;
-        }
-    }
 
-    public static byte[] digestMD5(String pwd) throws LoginException
-    {
-        MessageDigest md;
+        if ("{CRYPT}".startsWith(encryptedPassword.toUpperCase()))
+        {
+            return "CRYPT:" + encryptedPassword.substring("{CRYPT}".length(), encryptedPassword.length());
+        }
 
-        byte[] barray;
-        try
-        {
-            md = MessageDigest.getInstance("MD5");
-            barray = pwd.getBytes("ISO-8859-1");//todo try w/ UTF8
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new LoginException();
-        }
-        catch (NoSuchAlgorithmException e1)
-        {
-            throw new LoginException();
-        }
-        for (int i = 0; i < barray.length; i++)
-        {
-            md.update(barray[i]);
-        }
-        String mdString = md.toString();
-
-        return md.digest();
-
+        return encryptedPassword;
     }
 }

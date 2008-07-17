@@ -44,16 +44,13 @@ public class LdapLoginModuleTest extends PlexusTestCase
 
         System.out.println( "DN Suffix: " + suffix );
 
-         apacheDs.startServer();
+        apacheDs.startServer();
 
         makeUsers();
-
     }
 
-
-
-    protected void tearDown() throws Exception {
-
+    protected void tearDown() throws Exception
+    {
         InitialDirContext context = apacheDs.getAdminContext();
 
         context.unbind( createDn( "jesse" ) );
@@ -62,7 +59,6 @@ public class LdapLoginModuleTest extends PlexusTestCase
 
         super.tearDown();
     }
-
 
     public void testBindingAuth() throws Exception
     {
@@ -76,7 +72,7 @@ public class LdapLoginModuleTest extends PlexusTestCase
         options.put( "bindPassword", "secret" );
         options.put( "userBaseDn", "dc=jetty,dc=mortbay,dc=org" );
         options.put( "forceBindingLogin", "true" );
-
+        options.put( "debug", "true" );
 
         lm.initialize( null, null, null, options );
 
@@ -111,11 +107,10 @@ public class LdapLoginModuleTest extends PlexusTestCase
         String cn = "jesse";
         bindUserObject( context, cn, createDn( cn ) );
         assertExist( context, createDn( cn ), "cn", cn );
-
     }
 
     private void bindUserObject(DirContext context, String cn, String dn)
-            throws Exception
+        throws Exception
     {
         Attributes attributes = new BasicAttributes(true);
         BasicAttribute objectClass = new BasicAttribute("objectClass");
@@ -139,7 +134,6 @@ public class LdapLoginModuleTest extends PlexusTestCase
         attributes.put("givenName", "foo");
         context.createSubcontext( dn, attributes );
     }
-
 
     private String doStuff( String hpwd )
     {
@@ -167,8 +161,7 @@ public class LdapLoginModuleTest extends PlexusTestCase
             }
         }
 
-        String b64 = new String( Base64.encode( bpwd ) );
-        return b64;
+        return new String( Base64.encode( bpwd ) );
     }
 
     private String createDn( String cn )
@@ -199,7 +192,5 @@ public class LdapLoginModuleTest extends PlexusTestCase
         Attributes attrs = result.getAttributes();
         Attribute testAttr = attrs.get( attribute );
         assertEquals( value, testAttr.get() );
-
     }
-   
 }
