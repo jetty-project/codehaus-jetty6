@@ -15,6 +15,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-635 Correctly merge request parameters when doing forward
  + JETTY-636 Separate lifeycle of jsp build
  + JETTY-637 empty date headers throw IllegalArgumentException
+ + JETTY-642 NPE in LdapLoginModule
 
 jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full
