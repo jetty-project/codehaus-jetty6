@@ -564,6 +564,7 @@ public class WebAppContext extends Context
 
     /* ------------------------------------------------------------ */
     /**
+     * @see #setServerClasses(String[])
      * @return Returns the serverClasses.
      */
     public String[] getServerClasses()
@@ -574,6 +575,7 @@ public class WebAppContext extends Context
     
     /* ------------------------------------------------------------ */
     /**
+     * @see #setSystemClasses(String[])
      * @return Returns the systemClasses.
      */
     public String[] getSystemClasses()
@@ -1093,7 +1095,18 @@ public class WebAppContext extends Context
     }
 
     /* ------------------------------------------------------------ */
-    /**
+    /** 
+     * Set the server classes patterns.
+     * <p>
+     * Server classes/packages are classes used to implement the server and are hidden
+     * from the context.  If the context needs to load these classes, it must have its
+     * own copy of them in WEB-INF/lib or WEB-INF/classes. 
+     * A class pattern is a string of one of the forms:<dl>
+     * <dt>org.package.Classname</dt><dd>Match a specific class</dd>
+     * <dt>org.package.</dt><dd>Match a specific package hierarchy</dd>
+     * <dt>-org.package.Classname</dt><dd>Exclude a specific class</dd>
+     * <dt>-org.package.</dt><dd>Exclude a specific package hierarchy</dd>
+     * </dl>
      * @param serverClasses The serverClasses to set.
      */
     public void setServerClasses(String[] serverClasses) 
@@ -1103,6 +1116,17 @@ public class WebAppContext extends Context
     
     /* ------------------------------------------------------------ */
     /**
+     * Set the system classes patterns.
+     * <p>
+     * System classes/packages are classes provided by the JVM and that
+     * cannot be replaced by classes of the same name from WEB-INF,
+     * regardless of the value of {@link #setParentLoaderPriority(boolean)}.
+     * A class pattern is a string of one of the forms:<dl>
+     * <dt>org.package.Classname</dt><dd>Match a specific class</dd>
+     * <dt>org.package.</dt><dd>Match a specific package hierarchy</dd>
+     * <dt>-org.package.Classname</dt><dd>Exclude a specific class</dd>
+     * <dt>-org.package.</dt><dd>Exclude a specific package hierarchy</dd>
+     * </dl>
      * @param systemClasses The systemClasses to set.
      */
     public void setSystemClasses(String[] systemClasses)
