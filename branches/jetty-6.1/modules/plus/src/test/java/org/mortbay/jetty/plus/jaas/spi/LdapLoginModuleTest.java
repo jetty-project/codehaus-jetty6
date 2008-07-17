@@ -14,25 +14,29 @@
 
 package org.mortbay.jetty.plus.jaas.spi;
 
+import org.apache.directory.shared.ldap.util.Base64;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.apacheds.ApacheDs;
 import org.mortbay.jetty.security.Credential;
-import org.apache.directory.shared.ldap.util.Base64;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.*;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Iterator;
 
 public class LdapLoginModuleTest extends PlexusTestCase
 {
-
     private ApacheDs apacheDs;
 
     private String suffix;
-
 
     protected void setUp()
         throws Exception
@@ -45,16 +49,13 @@ public class LdapLoginModuleTest extends PlexusTestCase
 
         System.out.println( "DN Suffix: " + suffix );
 
-         apacheDs.startServer();
+        apacheDs.startServer();
 
         makeUsers();
-
     }
 
-
-
-    protected void tearDown() throws Exception {
-
+    protected void tearDown() throws Exception
+    {
         InitialDirContext context = apacheDs.getAdminContext();
 
         context.unbind( createDn( "jesse" ) );
@@ -63,7 +64,6 @@ public class LdapLoginModuleTest extends PlexusTestCase
 
         super.tearDown();
     }
-
 
     public void testBindingAuth() throws Exception
     {
@@ -77,7 +77,7 @@ public class LdapLoginModuleTest extends PlexusTestCase
         options.put( "bindPassword", "secret" );
         options.put( "userBaseDn", "dc=jetty,dc=mortbay,dc=org" );
         options.put( "forceBindingLogin", "true" );
-
+        options.put( "debug", "true" );
 
         lm.initialize( null, null, null, options );
 
@@ -112,11 +112,10 @@ public class LdapLoginModuleTest extends PlexusTestCase
         String cn = "jesse";
         bindUserObject( context, cn, createDn( cn ) );
         assertExist( context, createDn( cn ), "cn", cn );
-
     }
 
     private void bindUserObject(DirContext context, String cn, String dn)
-            throws Exception
+        throws Exception
     {
         Attributes attributes = new BasicAttributes(true);
         BasicAttribute objectClass = new BasicAttribute("objectClass");
@@ -140,7 +139,6 @@ public class LdapLoginModuleTest extends PlexusTestCase
         attributes.put("givenName", "foo");
         context.createSubcontext( dn, attributes );
     }
-
 
     private String doStuff( String hpwd )
     {
@@ -170,8 +168,7 @@ public class LdapLoginModuleTest extends PlexusTestCase
             }
         }
 
-        String b64 = new String( Base64.encode( bpwd ) );
-        return b64;
+        return new String( Base64.encode( bpwd ) );
     }
 
     private String createDn( String cn )
@@ -202,7 +199,5 @@ public class LdapLoginModuleTest extends PlexusTestCase
         Attributes attrs = result.getAttributes();
         Attribute testAttr = attrs.get( attribute );
         assertEquals( value, testAttr.get() );
-
     }
-   
 }
