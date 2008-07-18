@@ -148,6 +148,18 @@ public abstract class BayeuxService
     }
     
     /* ------------------------------------------------------------ */
+    public boolean isSeeOwnPublishes()
+    {
+        return _seeOwn;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setSeeOwnPublishes(boolean own)
+    {
+        _seeOwn = own;
+    }
+
+    /* ------------------------------------------------------------ */
     /** Subscribe to a channel.
      * Subscribe to channel and map a method to handle received messages.
      * The method must have a unique name and one of the following signatures:<ul>
@@ -210,7 +222,7 @@ public abstract class BayeuxService
         { 
             final Method m=method;
             Client wild_client=_bayeux.newClient(_name+"-wild");
-            wild_client.addListener(_listener instanceof MessageListener.Asynchronous?new AsyncWildListen(m):new SyncWildListen(m));
+            wild_client.addListener(_listener instanceof MessageListener.Asynchronous?new AsyncWildListen(wild_client,m):new SyncWildListen(wild_client,m));
             channel.subscribe(wild_client);
         }
         else
@@ -358,14 +370,17 @@ public abstract class BayeuxService
     /* ------------------------------------------------------------ */
     private class SyncWildListen implements MessageListener, MessageListener.Synchronous
     {
+        Client _client;
         Method _method;
-        public SyncWildListen(Method method)
+        
+        public SyncWildListen(Client client,Method method)
         {
+            _client=client;
             _method=method;
         }
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
-            if (!_seeOwn && fromClient==getClient())
+            if (!_seeOwn && fromClient==_client)
                 return;
             invoke(_method,fromClient,toClient,msg);
         }
@@ -376,14 +391,16 @@ public abstract class BayeuxService
     /* ------------------------------------------------------------ */
     private class AsyncWildListen implements MessageListener, MessageListener.Asynchronous
     {
+        Client _client;
         Method _method;
-        public AsyncWildListen(Method method)
+        public AsyncWildListen(Client client,Method method)
         {
+            _client=client;
             _method=method;
         }
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
-            if (!_seeOwn && fromClient==getClient())
+            if (!_seeOwn && fromClient==_client)
                 return;
             invoke(_method,fromClient,toClient,msg);
         }
