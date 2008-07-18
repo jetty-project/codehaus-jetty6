@@ -232,7 +232,7 @@ public class WebAppClassLoader extends URLClassLoader
     {
         URL url= null;
         boolean tried_parent= false;
-        if (_context.isParentLoaderPriority() || isSystemPath(name))
+        if (_context.isParentLoaderPriority() || _context.isSystemClass(name))
         {
             tried_parent= true;
             
@@ -252,7 +252,7 @@ public class WebAppClassLoader extends URLClassLoader
             }
         }
 
-        if (url == null && !tried_parent && !isServerPath(name) )
+        if (url == null && !tried_parent && !_context.isServerClass(name) )
         {
             if (_parent!=null)
                 url= _parent.getResource(name);
@@ -263,72 +263,6 @@ public class WebAppClassLoader extends URLClassLoader
                 Log.debug("getResource("+name+")=" + url);
 
         return url;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public boolean isServerPath(String name)
-    {
-        name=name.replace('/','.');
-        while(name.startsWith("."))
-            name=name.substring(1);
-
-        String[] server_classes = _context.getServerClasses();
-        if (server_classes!=null)
-        {
-            for (int i=0;i<server_classes.length;i++)
-            {
-                boolean result=true;
-                String c=server_classes[i];
-                if (c.startsWith("-"))
-                {
-                    c=c.substring(1); // TODO cache
-                    result=false;
-                }
-                
-                if (c.endsWith("."))
-                {
-                    if (name.startsWith(c))
-                        return result;
-                }
-                else if (name.equals(c))
-                    return result;
-            }
-        }
-        return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isSystemPath(String name)
-    {
-        name=name.replace('/','.');
-        while(name.startsWith("."))
-            name=name.substring(1);
-        String[] system_classes = _context.getSystemClasses();
-        if (system_classes!=null)
-        {
-            for (int i=0;i<system_classes.length;i++)
-            {
-                boolean result=true;
-                String c=system_classes[i];
-                
-                if (c.startsWith("-"))
-                {
-                    c=c.substring(1); // TODO cache
-                    result=false;
-                }
-                
-                if (c.endsWith("."))
-                {
-                    if (name.startsWith(c))
-                        return result;
-                }
-                else if (name.equals(c))
-                    return result;
-            }
-        }
-        
-        return false;
-        
     }
 
     /* ------------------------------------------------------------ */
@@ -346,7 +280,7 @@ public class WebAppClassLoader extends URLClassLoader
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
         
-        if (c == null && _parent!=null && (_context.isParentLoaderPriority() || isSystemPath(name)) )
+        if (c == null && _parent!=null && (_context.isParentLoaderPriority() || _context.isSystemClass(name)) )
         {
             tried_parent= true;
             try
@@ -373,7 +307,7 @@ public class WebAppClassLoader extends URLClassLoader
             }
         }
 
-        if (c == null && _parent!=null && !tried_parent && !isServerPath(name) )
+        if (c == null && _parent!=null && !tried_parent && !_context.isServerClass(name) )
             c= _parent.loadClass(name);
 
         if (c == null)
