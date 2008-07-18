@@ -1153,7 +1153,8 @@ public class ServletHandler extends AbstractHandler
             StringBuilder b = new StringBuilder();
             for (int i=0; i<LazyList.size(_chain);i++)
             {
-                b.append(LazyList.get(_chain, i).toString());
+                Object o=LazyList.get(_chain, i);
+                b.append(o.toString());
                 b.append("->");
             }
             b.append(_servletHolder);
