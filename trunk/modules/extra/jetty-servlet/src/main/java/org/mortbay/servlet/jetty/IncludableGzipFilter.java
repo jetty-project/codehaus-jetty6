@@ -5,12 +5,12 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
 import org.mortbay.servlet.GzipFilter;
+
 
 /* ------------------------------------------------------------ */
 /** Includable GZip Filter.
- * This extension to the {@link GzipFilter} that uses Jetty APIs to allow
+ * This extension to the {@link GzipFilter} that uses Jetty features to allow
  * headers to be set during calls to 
  * {@link javax.servlet.RequestDispatcher#include(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}.
  * This allows the gzip filter to function correct during includes and to make a decision to gzip or not
@@ -50,9 +50,12 @@ public class IncludableGzipFilter extends GzipFilter
 
         protected boolean setContentEncodingGzip()
         {
-            HttpConnection connection = HttpConnection.getCurrentConnection();
-            connection.getResponseFields().put("Content-Encoding", "gzip");
-            return true;
+            if (_request.getAttribute("javax.servlet.include.request_uri")!=null)
+                _response.setHeader("org.mortbay.jetty.include.Content-Encoding", "gzip");
+            else
+                _response.setHeader("Content-Encoding", "gzip");
+                
+            return _response.containsHeader("Content-Encoding");
         }
         
     }
