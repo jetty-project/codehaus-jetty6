@@ -48,7 +48,7 @@ import org.mortbay.util.LazyList;
  * <li> RewriteRegexRule - rewrites the requested URI using regular expression for pattern matching. </li>
  * <li> MsieSslRule - disables the keep alive on SSL for IE5 and IE6. </li>
  * <li> LegacyRule - the old version of rewrite. </li>
- * <li> SchemeHeaderRule - set the scheme according to the headers present. </li>
+ * <li> ForwardedSchemeHeaderRule - set the scheme according to the headers present. </li>
  * </ul>
  * 
  * Here is a typical jetty.xml configuration would be: <pre>
