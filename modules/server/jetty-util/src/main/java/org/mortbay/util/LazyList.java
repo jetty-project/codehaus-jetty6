@@ -25,12 +25,17 @@ import java.util.ListIterator;
 
 /* ------------------------------------------------------------ */
 /** Lazy List creation.
- * A List helper class that attempts to avoid unneccessary List
+ * A List helper class that attempts to avoid unnecessary List
  * creation.   If a method needs to create a List to return, but it is
  * expected that this will either be empty or frequently contain a
  * single item, then using LazyList will avoid additional object
  * creations by using Collections.EMPTY_LIST or
  * Collections.singletonList where possible.
+ * <p>
+ * LazyList works by passing an opaque representation of the list in
+ * and out of all the LazyList methods.  This opaque object is either
+ * null for an empty list, an Object for a list with a single entry
+ * or an ArrayList for a list of items.
  *
  * <p><h4>Usage</h4>
  * <pre>
@@ -70,7 +75,7 @@ public class LazyList
         {
             if (item instanceof List || item==null)
             {
-                List l = new ArrayList();
+                List<Object> l = new ArrayList<Object>();
                 l.add(item);
                 return l;
             }
@@ -80,11 +85,11 @@ public class LazyList
 
         if (list instanceof List)
         {
-            ((List)list).add(item);
+            ((List<Object>)list).add(item);
             return list;
         }
 
-        List l=new ArrayList();
+        List<Object> l=new ArrayList<Object>();
         l.add(list);
         l.add(item);
         return l;    
@@ -103,7 +108,7 @@ public class LazyList
         {
             if (index>0 || item instanceof List || item==null)
             {
-                List l = new ArrayList();
+                List<Object> l = new ArrayList<Object>();
                 l.add(index,item);
                 return l;
             }
@@ -112,11 +117,11 @@ public class LazyList
 
         if (list instanceof List)
         {
-            ((List)list).add(index,item);
+            ((List<Object>)list).add(index,item);
             return list;
         }
 
-        List l=new ArrayList();
+        List<Object> l=new ArrayList<Object>();
         l.add(list);
         l.add(index,item);
         return l;    
@@ -128,9 +133,9 @@ public class LazyList
      * @param collection The Collection whose contents should be added.
      * @return The lazylist created or added to.
      */
-    public static Object addCollection(Object list, Collection collection)
+    public static Object addCollection(Object list, Collection<?> collection)
     {
-        Iterator i=collection.iterator();
+        Iterator<?> i=collection.iterator();
         while(i.hasNext())
             list=LazyList.add(list,i.next());
         return list;
@@ -156,17 +161,17 @@ public class LazyList
     public static Object ensureSize(Object list, int initialSize)
     {
         if (list==null)
-            return new ArrayList(initialSize);
+            return new ArrayList<Object>(initialSize);
         if (list instanceof ArrayList)
         {
-            ArrayList ol=(ArrayList)list;
+            ArrayList<?> ol=(ArrayList<?>)list;
             if (ol.size()>initialSize)
                 return ol;
-            ArrayList nl = new ArrayList(initialSize);
+            ArrayList<Object> nl = new ArrayList<Object>(initialSize);
             nl.addAll(ol);
             return nl;
         }
-        List l= new ArrayList(initialSize);
+        List<Object> l= new ArrayList<Object>(initialSize);
         l.add(list);
         return l;    
     }
@@ -179,7 +184,7 @@ public class LazyList
 
         if (list instanceof List)
         {
-            List l = (List)list;
+            List<?> l = (List<?>)list;
             l.remove(o);
             if (l.size()==0)
                 return null;
@@ -199,7 +204,7 @@ public class LazyList
 
         if (list instanceof List)
         {
-            List l = (List)list;
+            List<?> l = (List<?>)list;
             l.remove(i);
             if (l.size()==0)
                 return null;
@@ -220,7 +225,7 @@ public class LazyList
      * @return The List of added items, which may be an EMPTY_LIST
      * or a SingletonList.
      */
-    public static List getList(Object list)
+    public static List<Object> getList(Object list)
     {
         return getList(list,false);
     }
@@ -235,16 +240,14 @@ public class LazyList
      * @return The List of added items, which may be null, an EMPTY_LIST
      * or a SingletonList.
      */
-    public static List getList(Object list, boolean nullForEmpty)
+    public static List<Object> getList(Object list, boolean nullForEmpty)
     {
         if (list==null)
             return nullForEmpty?null:Collections.EMPTY_LIST;
         if (list instanceof List)
-            return (List)list;
+            return (List<Object>)list;
         
-        List l = new ArrayList(1);
-        l.add(list);
-        return l;
+        return Collections.singletonList(list);
     }
 
     
@@ -256,7 +259,7 @@ public class LazyList
         
         if (list instanceof List)
         {
-            List l = (List)list;
+            List<?> l = (List<?>)list;
             String[] a = new String[l.size()];
             for (int i=l.size();i-->0;)
             {
@@ -278,7 +281,7 @@ public class LazyList
         
         if (list instanceof List)
         {
-            List l = (List)list;
+            List<?> l = (List<?>)list;
             if (aClass.isPrimitive())
             {
                 Object a = Array.newInstance(aClass,l.size());
@@ -305,7 +308,7 @@ public class LazyList
         if (list==null)
             return 0;
         if (list instanceof List)
-            return ((List)list).size();
+            return ((List<?>)list).size();
         return 1;
     }
     
@@ -321,7 +324,7 @@ public class LazyList
             throw new IndexOutOfBoundsException();
         
         if (list instanceof List)
-            return ((List)list).get(i);
+            return ((List<?>)list).get(i);
 
         if (i==0)
             return list;
@@ -336,7 +339,7 @@ public class LazyList
             return false;
         
         if (list instanceof List)
-            return ((List)list).contains(item);
+            return ((List<?>)list).contains(item);
 
         return list.equals(item);
     }
@@ -348,7 +351,7 @@ public class LazyList
         if (list==null)
             return null;
         if (list instanceof List)
-            return new ArrayList((List)list);
+            return new ArrayList<Object>((List<?>)list);
         return list;
     }
     
@@ -358,27 +361,35 @@ public class LazyList
         if (list==null)
             return "[]";
         if (list instanceof List)
-            return ((List)list).toString();
+            return list.toString();
         return "["+list+"]";
     }
 
     /* ------------------------------------------------------------ */
-    public static Iterator iterator(Object list)
+    public static Iterator<Object> iterator(Object list)
     {
         if (list==null)
-            return Collections.EMPTY_LIST.iterator();
+        {
+            Iterator<Object> i =Collections.emptyList().iterator();
+            return i;
+        }
         if (list instanceof List)
-            return ((List)list).iterator();
+        {
+            return ((List<Object>)list).iterator();
+        }
         return getList(list).iterator();
     }
     
     /* ------------------------------------------------------------ */
-    public static ListIterator listIterator(Object list)
+    public static ListIterator<Object> listIterator(Object list)
     {
         if (list==null)
-            return Collections.EMPTY_LIST.listIterator();
+        {
+            ListIterator<Object> i =Collections.emptyList().listIterator();
+            return i;
+        }
         if (list instanceof List)
-            return ((List)list).listIterator();
+            return ((List<Object>)list).listIterator();
         return getList(list).listIterator();
     }
 
@@ -387,11 +398,11 @@ public class LazyList
      * @param array Any array of object
      * @return A new <i>modifiable</i> list initialised with the elements from <code>array</code>.
      */
-    public static List array2List(Object[] array)
+    public static List<Object> array2List(Object[] array)
     {	
         if (array==null || array.length==0)
-            return new ArrayList();
-        return new ArrayList(Arrays.asList(array));
+            return new ArrayList<Object>();
+        return new ArrayList<Object>(Arrays.asList(array));
     }
 
     /* ------------------------------------------------------------ */
@@ -413,7 +424,7 @@ public class LazyList
         }
         else
         {
-            Class c = array.getClass().getComponentType();
+            Class<?> c = array.getClass().getComponentType();
             Object[] na = (Object[])Array.newInstance(c, Array.getLength(array)+1);
             System.arraycopy(array, 0, na, 0, array.length);
             na[array.length]=item;
@@ -430,7 +441,7 @@ public class LazyList
         {
             if (item.equals(array[i]))
             {
-                Class c = array==null?item.getClass():array.getClass().getComponentType();
+                Class<?> c = array==null?item.getClass():array.getClass().getComponentType();
                 Object[] na = (Object[])Array.newInstance(c, Array.getLength(array)-1);
                 if (i>0)
                     System.arraycopy(array, 0, na, 0, i);
