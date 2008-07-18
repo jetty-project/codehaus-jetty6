@@ -58,6 +58,7 @@ public abstract class BayeuxService
     private Map<String,Method> _methods = new ConcurrentHashMap<String,Method>();
     private ThreadPool _threadPool;
     private MessageListener _listener;
+    private boolean _seeOwn=false;
     
     /* ------------------------------------------------------------ */
     /** Instantiate the service.
@@ -251,6 +252,7 @@ public abstract class BayeuxService
      */
     protected void exception(Client fromClient, Client toClient, Map<String, Object> msg,Throwable th)
     {
+        System.err.println(msg);
         th.printStackTrace();
     }
 
@@ -278,7 +280,6 @@ public abstract class BayeuxService
                 }   
             });
         }
-        
     }
     
     /* ------------------------------------------------------------ */
@@ -313,10 +314,12 @@ public abstract class BayeuxService
             }
             catch (Exception e)
             {
+                System.err.println(method);
                 exception(fromClient,toClient,msg,e);
             }
             catch (Error e)
             {
+                System.err.println(method);
                 exception(fromClient,toClient,msg,e);
             }
         }
@@ -328,6 +331,8 @@ public abstract class BayeuxService
     {
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
+            if (!_seeOwn && fromClient==getClient())
+                return;
             String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
             Method method=_methods.get(channel);
             invoke(method,fromClient,toClient,msg);
@@ -340,6 +345,8 @@ public abstract class BayeuxService
     {
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
+            if (!_seeOwn && fromClient==getClient())
+                return;
             String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
             Method method=_methods.get(channel);
             invoke(method,fromClient,toClient,msg);
@@ -358,6 +365,8 @@ public abstract class BayeuxService
         }
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
+            if (!_seeOwn && fromClient==getClient())
+                return;
             invoke(_method,fromClient,toClient,msg);
         }
     };
@@ -374,6 +383,8 @@ public abstract class BayeuxService
         }
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
+            if (!_seeOwn && fromClient==getClient())
+                return;
             invoke(_method,fromClient,toClient,msg);
         }
     };
