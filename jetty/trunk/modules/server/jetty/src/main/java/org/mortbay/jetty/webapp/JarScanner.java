@@ -26,6 +26,7 @@ import java.util.jar.JarInputStream;
 import java.util.regex.Pattern;
 
 import org.mortbay.log.Log;
+import org.mortbay.resource.Resource;
 
 /**
  * JarScannerConfiguration
@@ -43,21 +44,6 @@ public abstract class JarScanner
 {
 
     public abstract void processEntry (URL jarUrl, JarEntry entry);
-
-    WebAppContext _context;
-
-
-    /* ------------------------------------------------------------ */
-    public void setWebAppContext(WebAppContext context)
-    {
-        _context=context;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public WebAppContext getWebAppContext()
-    {
-        return _context;
-    }
     
     
     /**
@@ -96,9 +82,12 @@ public abstract class JarScanner
     throws Exception
     {
         String[] patterns = (pattern==null?null:pattern.pattern().split(","));
+
         List<Pattern> subPatterns = new ArrayList<Pattern>();
         for (int i=0; patterns!=null && i<patterns.length;i++)
             subPatterns.add(Pattern.compile(patterns[i]));
+        if (subPatterns.isEmpty())
+            subPatterns.add(pattern);
         
         
         while (loader!=null)
@@ -157,8 +146,8 @@ public abstract class JarScanner
     throws Exception
     {
         Log.debug("Search of {}",url);
-
-        InputStream in = _context.newResource(url).getInputStream();
+        
+        InputStream in = Resource.newResource(url).getInputStream();
         if (in==null)
             return;
 

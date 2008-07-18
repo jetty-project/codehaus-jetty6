@@ -190,7 +190,6 @@ public class TagLibConfiguration implements Configuration
 
         TagLibJarScanner tldScanner = new TagLibJarScanner();
         tldScanner.setTldSet(tlds);
-        tldScanner.setWebAppContext(_context);
         tldScanner.scan(webInfPattern, Thread.currentThread().getContextClassLoader(), true, false);
         tldScanner.scan(containerPattern, Thread.currentThread().getContextClassLoader().getParent(), false, true);
         
