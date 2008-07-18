@@ -14,15 +14,13 @@
 
 package org.mortbay.cometd;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EventListener;
 import java.util.List;
 
 import org.cometd.Bayeux;
 import org.cometd.Client;
 import org.cometd.Extension;
-import org.cometd.Listener;
+import org.cometd.ClientListener;
 import org.cometd.Message;
 import org.cometd.MessageListener;
 import org.cometd.RemoveListener;
@@ -43,7 +41,6 @@ public class ClientImpl implements Client
     private int _responsesPending;
     private ChannelImpl[] _subscriptions=new ChannelImpl[0]; // copy on write
     private boolean _JSONCommented;
-    private Listener _listener;
     private RemoveListener[] _rListeners=new RemoveListener[0]; // copy on write
     private MessageListener[] _syncMListeners=new MessageListener[0]; // copy on write
     private MessageListener[] _asyncMListeners=new MessageListener[0]; // copy on write
@@ -248,25 +245,6 @@ public class ClientImpl implements Client
     }
 
     /* ------------------------------------------------------------ */
-    public void setListener(Listener listener)
-    {
-        synchronized(this)
-        {
-            if (_listener!=null)
-                removeListener(_listener);
-            _listener=listener;
-            if (_listener!=null)
-                addListener(_listener);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public Listener getListener()
-    {
-        return _listener;
-    }
-
-    /* ------------------------------------------------------------ */
     /*
      * @return the number of messages queued
      */
@@ -279,9 +257,6 @@ public class ClientImpl implements Client
     }
     
     /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see org.mortbay.cometd.C#takeMessages()
-     */
     public List<Message> takeMessages()
     {
         synchronized(this)
@@ -320,9 +295,6 @@ public class ClientImpl implements Client
     }
     
     /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see org.mortbay.cometd.C#takeMessages()
-     */
     public Message takeMessage()
     {
         synchronized(this)
@@ -465,7 +437,7 @@ public class ClientImpl implements Client
     }
 
     /* ------------------------------------------------------------ */
-    public void addListener(EventListener listener)
+    public void addListener(ClientListener listener)
     {
     	synchronized(this)
     	{
@@ -483,7 +455,7 @@ public class ClientImpl implements Client
     }
 
     /* ------------------------------------------------------------ */
-    public void removeListener(EventListener listener)
+    public void removeListener(ClientListener listener)
     {
     	synchronized(this)
     	{
