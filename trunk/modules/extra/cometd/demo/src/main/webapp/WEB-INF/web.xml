@@ -8,7 +8,7 @@
   
   <listener>
     <listener-class>
-     	dojox.cometd.demo.BayeuxStartupListener
+     	org.cometd.demo.BayeuxServicesListener
     </listener-class>
   </listener>
   

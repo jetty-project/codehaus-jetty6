@@ -12,32 +12,21 @@
 // limitations under the License.
 //========================================================================
 
-package dojox.cometd.demo;
+package org.cometd.demo;
 
 
-import javax.servlet.ServletContext;
+
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 
 import org.cometd.Bayeux;
 import org.cometd.Client;
-import org.cometd.Listener;
 import org.cometd.Message;
-import org.cometd.MessageListener;
-import org.cometd.RemoveListener;
 import org.mortbay.cometd.BayeuxService;
-import org.mortbay.log.Log;
-import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.cometd.ext.TimesyncExtension;
+import org.mortbay.log.Log;
 
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-
-public class BayeuxStartupListener implements ServletContextAttributeListener
+public class BayeuxServicesListener implements ServletContextAttributeListener
 {
     public void initialize(Bayeux bayeux)
     {
@@ -129,45 +118,5 @@ public class BayeuxStartupListener implements ServletContextAttributeListener
             }
         }
         */
-    }
-    
-    public static class ChatService extends BayeuxService
-    {
-        ConcurrentMap<String,Set<String>> _members = new ConcurrentHashMap<String,Set<String>>();
-        
-        public ChatService(Bayeux bayeux)
-        {
-            super(bayeux,"chat");
-            subscribe("/chat/**","trackMembers");
-        }
-        
-        public void trackMembers(Client joiner,String channel,Map<String,Object> data,String id)
-        {
-            if (Boolean.TRUE.equals(data.get("join")))
-            {
-                Set<String> m = _members.get(channel);
-                if (m==null)
-                {
-                    Set<String> new_list=new CopyOnWriteArraySet<String>();
-                    m=_members.putIfAbsent(channel,new_list);
-                    if (m==null)
-                        m=new_list;
-                }
-                
-                final Set<String> members=m;
-                final String username=(String)data.get("user");
-                
-                members.add(username);
-                joiner.addListener(new RemoveListener(){
-                    public void removed(String clientId, boolean timeout)
-                    {
-                        members.remove(username);
-                        Log.info("members: "+members);
-                    }
-                });
-                Log.info("Members: "+members);
-                send(joiner,channel,members,id);
-            }
-        }
     }
 }
