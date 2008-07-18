@@ -44,7 +44,22 @@ public class TestAnnotationFinder extends TestCase
         long start = System.currentTimeMillis();
         
         String[] classNames = new String[]{"org.mortbay.jetty.annotations.ClassA"};
-        AnnotationFinder finder = new AnnotationFinder(Thread.currentThread().getContextClassLoader(), classNames);
+        AnnotationFinder finder = new AnnotationFinder();
+        
+        finder.find(classNames, new ClassNameResolver () 
+        {
+
+            public boolean isExcluded(String name)
+            {
+                return false;
+            }
+
+            public boolean shouldOverride(String name)
+            {
+                return false;
+            }
+            
+        });
         long end = System.currentTimeMillis();
         
         System.err.println("Time to parse class: "+((end-start)));

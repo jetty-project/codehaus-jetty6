@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +54,7 @@ import org.objectweb.asm.commons.EmptyVisitor;
 public class AnnotationFinder
 {
     private Map<String,ParsedClass> parsedClasses = new HashMap<String, ParsedClass>();
-    private ClassLoader _loader;
-    
+   
     
     public static String normalize (String name)
     {
@@ -347,7 +347,7 @@ public class AnnotationFinder
         }  
         
         public AnnotationVisitor visitAnnotation(String desc, boolean visible)
-        {
+        { 
             this.pclass.fields.add(this);
             return addAnnotation(desc);
         }
@@ -423,20 +423,59 @@ public class AnnotationFinder
         }
     }
     
+ 
+   
     
-    /**
-     * Constructor
-     * 
-     * Parse classes from the given classloader, optionally visiting parent loaders.
-     * If a jarNamePattern is provided, then only jar files from the classloader
-     * matching that pattern will have their classes loaded.
-     * 
-     * @param loader
-     * @param visitParents
-     * @param jarNamePattern
-     * @throws Exception
-     */
-    public AnnotationFinder(ClassLoader loader, boolean visitParents, String jarNamePattern)
+    
+    
+    public void find (String className, ClassNameResolver resolver) 
+    throws Exception
+    {
+        if (className == null)
+            return;
+        
+        if (!resolver.isExcluded(className))
+        {
+            if ((parsedClasses.get(className) == null) || (resolver.shouldOverride(className)))
+            {
+                className = className.replace('.', '/')+".class";
+                URL resource = Loader.getResource(this.getClass(), className, false);
+                if (resource!= null)
+                    scanClass(resource.openStream());
+            }
+        }
+    }
+    
+    public void find (String[] classNames, ClassNameResolver resolver)
+    throws Exception
+    {
+        if (classNames == null)
+            return;
+        
+        find(Arrays.asList(classNames), resolver); 
+    }
+    
+    public void find (List<String> classNames, ClassNameResolver resolver)
+    throws Exception
+    {
+        for (String s:classNames)
+        {
+            if (!resolver.isExcluded(s))
+            {
+                if ((parsedClasses.get(s) == null) || (resolver.shouldOverride(s)))
+                {                
+                    s = s.replace('.', '/')+".class";
+                    URL resource = Loader.getResource(this.getClass(), s, false);
+                    if (resource!= null)
+                        scanClass(resource.openStream());
+                }
+            }
+        }
+    }
+    
+    
+    
+    public void find (ClassLoader loader, boolean visitParents, String jarNamePattern, boolean nullInclusive, final ClassNameResolver resolver)
     throws Exception
     {
         if (loader==null)
@@ -445,7 +484,6 @@ public class AnnotationFinder
         if (!(loader instanceof URLClassLoader))
             return; //can't extract classes?
        
-        _loader=loader;
         JarScanner scanner = new JarScanner()
         {
             public void processEntry(URL jarUrl, JarEntry entry)
@@ -453,10 +491,17 @@ public class AnnotationFinder
                 try
                 {
                     String name = entry.getName();
-                    if (name.toLowerCase().endsWith(".class") && !excludeClass(name.substring(0,name.length()-6)))
+                    if (name.toLowerCase().endsWith(".class"))
                     {
-                        Resource clazz = Resource.newResource("jar:"+jarUrl+"!/"+name);
-                        scanClass(clazz.getInputStream());
+                        String shortName =  name.replace('/', '.').substring(0,name.length()-6);
+                        if (!resolver.isExcluded(shortName))
+                        {
+                            if ((parsedClasses.get(shortName) == null) || (resolver.shouldOverride(shortName)))
+                            {
+                                Resource clazz = Resource.newResource("jar:"+jarUrl+"!/"+name);                     
+                                scanClass(clazz.getInputStream());
+                            }
+                        }
                     }
                 }
                 catch (Exception e)
@@ -470,52 +515,9 @@ public class AnnotationFinder
         if (jarNamePattern!=null)
             pattern = Pattern.compile(jarNamePattern);
         
-        scanner.scan(pattern, _loader, true, visitParents);
-    }
-
-    /**
-     * Constructor.
-     * 
-     * Parse a single class.
-     * 
-     * @param className
-     * @throws IOException
-     */
-    public AnnotationFinder(ClassLoader loader, String className)
-    throws IOException
-    {
-        if (className==null)
-            return;
-        
-        _loader=loader;
-        scanClass(loader.getResourceAsStream(className.replace('.', '/')+".class"));      
+        scanner.scan(pattern, loader, nullInclusive, visitParents);
     }
     
-    public AnnotationFinder(ClassLoader loader, String[] classNames)
-    throws IOException
-    {
-        if (classNames==null)
-            return;
-        _loader=loader;
-        for (String s:classNames)
-        {
-            scanClass(loader.getResourceAsStream(s.replace('.', '/')+".class"));
-        }
-    }
-    
-    public AnnotationFinder (ClassLoader loader, List<String> classNames)
-    throws IOException
-    {
-        if (classNames==null)
-            return;
-        
-        _loader=loader;
-        
-        for (String s:classNames)
-        {
-            scanClass(loader.getResourceAsStream(s.replace('.', '/')+".class"));
-        }
-    }
     
     /** Exclude class by name
      * Instances of {@link AnnotationFinder} can implement this method to exclude
@@ -523,107 +525,86 @@ public class AnnotationFinder
      * @param name
      * @return
      */
-    protected boolean excludeClass(String name)
+    protected boolean excludeClass (String name)
     {
         return false;
     }
     
+
+
     public List<Class<?>> getClassesForAnnotation(Class<?> annotationClass)
     throws Exception
     {
-        ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(_loader);
-        try
+        List<Class<?>> classes = new ArrayList<Class<?>>();
+        for (Map.Entry<String, ParsedClass> e: parsedClasses.entrySet())
         {
-            List<Class<?>> classes = new ArrayList<Class<?>>();
-            for (Map.Entry<String, ParsedClass> e: parsedClasses.entrySet())
+            ParsedClass pc = e.getValue();
+            Map<String, Map<String,Object>> annotations = pc.getAnnotations();
+            for (String key:annotations.keySet())
             {
-                ParsedClass pc = e.getValue();
-                Map<String, Map<String,Object>> annotations = pc.getAnnotations();
-                for (String key:annotations.keySet())
+                if (key.equals(annotationClass.getName()))
                 {
-                    if (key.equals(annotationClass.getName()))
-                    {
-                        classes.add(pc.toClass());
-                    }
+                    classes.add(pc.toClass());
                 }
-            }           
-            return classes;
-        }
-        finally
-        {
-            Thread.currentThread().setContextClassLoader(oldLoader);
-        }
+            }
+        }           
+        return classes;
+
     }
-    
-    
-    
+
+
+
     public List<Method>  getMethodsForAnnotation (Class<?> annotationClass)
     throws Exception
     {
-        ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(_loader);
-        try
+
+        List<Method> methods = new ArrayList<Method>();
+
+        for (Map.Entry<String, ParsedClass> e: parsedClasses.entrySet())
         {
-            List<Method> methods = new ArrayList<Method>();
-            
-            for (Map.Entry<String, ParsedClass> e: parsedClasses.entrySet())
+            ParsedClass pc = e.getValue();
+
+            List<ParsedMethod> pmethods = pc.getMethods();
+            for (ParsedMethod p:pmethods)
             {
-                ParsedClass pc = e.getValue();
-                
-                List<ParsedMethod> pmethods = pc.getMethods();
-                for (ParsedMethod p:pmethods)
+                for (String key:p.getAnnotations().keySet())
                 {
-                    for (String key:p.getAnnotations().keySet())
+                    if (key.equals(annotationClass.getName()))
                     {
-                        if (key.equals(annotationClass.getName()))
-                        {
-                            methods.add(p.toMethod());
-                        }
+                        methods.add(p.toMethod());
                     }
                 }
-            }           
-            return methods;
-        }
-        finally
-        {
-            Thread.currentThread().setContextClassLoader(oldLoader);
-        }
+            }
+        }           
+        return methods;
+
     }
-    
-    
+
+
     public List<Field> getFieldsForAnnotation (Class<?> annotation)
     throws Exception
     {
-        ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(_loader);
-        try
+
+        List<Field> fields = new ArrayList<Field>();
+        for (Map.Entry<String, ParsedClass> e: parsedClasses.entrySet())
         {
-            List<Field> fields = new ArrayList<Field>();
-            for (Map.Entry<String, ParsedClass> e: parsedClasses.entrySet())
+            ParsedClass pc = e.getValue();
+
+            List<ParsedField> pfields = pc.getFields();
+            for (ParsedField f:pfields)
             {
-                ParsedClass pc = e.getValue();
-                
-                List<ParsedField> pfields = pc.getFields();
-                for (ParsedField f:pfields)
+                for (String key:f.getAnnotations().keySet())
                 {
-                    for (String key:f.getAnnotations().keySet())
+                    if (key.equals(annotation.getName()))
                     {
-                        if (key.equals(annotation.getName()))
-                        {
-                            fields.add(f.toField());
-                        }
+                        fields.add(f.toField());
                     }
                 }
-            }           
-            return fields;
-        }
-        finally
-        {
-            Thread.currentThread().setContextClassLoader(oldLoader);
-        }
+            }
+        }           
+        return fields;
     }
-    
+
 
     public String toString ()
     {

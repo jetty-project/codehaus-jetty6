@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.webapp.WebAppClassLoader;
+import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 /**
@@ -31,6 +33,10 @@ import org.mortbay.util.LazyList;
  */
 public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
 {
+    public static final String __web_inf_pattern = "org.mortbay.jetty.webapp.WebInfIncludeAnnotationJarPattern";
+    public static final String __container_pattern = "org.mortbay.jetty.webapp.ContainerIncludeAnnotationJarPattern";
+                                                      
+    
     
     public Configuration () throws ClassNotFoundException
     {
@@ -42,12 +48,27 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
      */
     public void parseAnnotations() throws Exception
     {
-        //TODO - future is to look thru all jars in the classloader context
-        
-        //Replicate servlet spec < 3.0 behaviour
-        List<String> classNames = new ArrayList();
-        
-  
+        /*
+         * TODO Need to also take account of hidden classes on system classpath that should never
+         * contribute annotations to a webapp (system and server classes):
+         * 
+         * --- when scanning system classpath:
+         *   + system classes : should always be scanned (subject to pattern)
+         *   + server classes : always ignored
+         *   
+         * --- when scanning webapp classpath:
+         *   + system classes : always ignored
+         *   + server classes : always scanned
+         * 
+         * 
+         * If same class is found in both container and in context then need to use
+         * webappcontext parentloaderpriority to work out which one contributes the
+         * annotation.
+         */
+       
+        //Scan classes from webapp specifically mentioned in web.xml
+        List<String> classNames = new ArrayList<String>();
+         
         //look thru _servlets      
         Iterator itor = LazyList.iterator(_servlets);
         while (itor.hasNext())
@@ -72,7 +93,70 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
             classNames.add(listener.getClass().getName());
         }
         
-        AnnotationFinder finder = new AnnotationFinder (getWebAppContext().getClassLoader(), classNames);
+        AnnotationFinder finder = new AnnotationFinder();
+
+        //if no pattern for the container path is defined, then by default scan NOTHING
+        Log.debug("Scanning system jars");
+        finder.find(getWebAppContext().getClassLoader().getParent(), true, getWebAppContext().getInitParameter(__container_pattern), false, 
+                new ClassNameResolver ()
+                {
+                    public boolean isExcluded (String name)
+                    {
+                        if (getWebAppContext().isSystemClass(name)) return false;
+                        if (getWebAppContext().isServerClass(name)) return true;
+                        return false;
+                    }
+
+                    public boolean shouldOverride (String name)
+                    { 
+                        //looking at system classpath
+                        if (getWebAppContext().isParentLoaderPriority())
+                            return true;
+                        return false;
+                    }
+                });
+
+        Log.debug("Scanning WEB-INF/lib jars");
+        //if no pattern for web-inf/lib is defined, then by default scan everything in it
+        finder.find (getWebAppContext().getClassLoader(), false, getWebAppContext().getInitParameter(__web_inf_pattern), true,
+                new ClassNameResolver()
+                {
+                    public boolean isExcluded (String name)
+                    {    
+                        if (getWebAppContext().isSystemClass(name)) return true;
+                        if (getWebAppContext().isServerClass(name)) return false;
+                        return false;
+                    }
+
+                    public boolean shouldOverride (String name)
+                    {
+                        //looking at webapp classpath, found already-parsed class of same name - did it come from system or duplicate in webapp?
+                        if (getWebAppContext().isParentLoaderPriority())
+                            return false;
+                        return true;
+                    }
+                });
+
+        Log.debug("Scanning classes from web.xml");
+        finder.find(classNames, 
+                new ClassNameResolver()
+                {
+                    public boolean isExcluded (String name)
+                    {
+                        if (getWebAppContext().isSystemClass(name)) return true;
+                        if (getWebAppContext().isServerClass(name)) return false;
+                        return false;
+                    }
+
+                    public boolean shouldOverride (String name)
+                    {
+                        //looking at webapp classpath, found already-parsed class of same name - did it come from system or duplicate in webapp?
+                        if (getWebAppContext().isParentLoaderPriority())
+                            return false;
+                        return true;
+                    }
+                });
+        
         AnnotationProcessor processor = new AnnotationProcessor(finder, _runAsCollection, _injections, _callbacks);
         processor.process();
     }
