@@ -53,6 +53,13 @@ public class Response implements HttpServletResponse
         NONE=0,
         STREAM=1,
         WRITER=2;
+    
+    /**
+     * If a header name starts with this string,  the header (stripped of the prefix)
+     * can be set during include using only {@link #setHeader(String, String)} or
+     * {@link #addHeader(String, String)}.
+     */
+    public static String SET_INCLUDE_HEADER_PREFIX = "org.mortbay.jetty.include.";
 
     private static PrintWriter __nullPrintWriter;
     private static ServletOutputStream __nullServletOut;
@@ -436,7 +443,14 @@ public class Response implements HttpServletResponse
      */
     public void setHeader(String name, String value)
     {
-        if (!_connection.isIncluding()&& !_disabled)
+        if (_connection.isIncluding())
+        {
+            if (name.startsWith(SET_INCLUDE_HEADER_PREFIX))
+                name=name.substring(SET_INCLUDE_HEADER_PREFIX.length());
+            else
+                return;
+        }
+        if (!_disabled)
         {
             _connection.getResponseFields().put(name, value);
             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
@@ -474,7 +488,15 @@ public class Response implements HttpServletResponse
      */
     public void addHeader(String name, String value)
     {
-        if (!_connection.isIncluding()&& !_disabled)
+        if (_connection.isIncluding())
+        {
+            if (name.startsWith(SET_INCLUDE_HEADER_PREFIX))
+                name=name.substring(SET_INCLUDE_HEADER_PREFIX.length());
+            else
+                return;
+        }
+        
+        if (!_disabled)
         {
             _connection.getResponseFields().add(name, value);
             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
