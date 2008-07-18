@@ -100,11 +100,10 @@ public abstract class BayeuxService
             setThreadPool(new QueuedThreadPool(maxThreads));
         _name=name;
         _bayeux=bayeux;
-        _client=_bayeux.newClient(name);  
-        if (synchronous)
-            _client.addListener(_listener=new SyncListen());
-        else
-            _client.addListener(_listener=new AsyncListen());
+        _client=_bayeux.newClient(name); 
+        _listener=(synchronous)?new SyncListen():new  AsyncListen();
+        _client.addListener(_listener);
+        
     }
 
     /* ------------------------------------------------------------ */
