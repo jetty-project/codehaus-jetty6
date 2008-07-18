@@ -8,6 +8,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-564 Consider optionally importing org.apache.jasper.servlet
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
  + JETTY-608 Suspend/Resume/Complete request listeners
+ + JETTY-621 Improved LazyList javadoc
  + JETTY-626 Null protect reading the dtd resource from classloader
  + JETTY-629 Don't hold timeout lock during expiry call.
  + JETTY-632 OSGi tags for Jetty client
