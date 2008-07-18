@@ -35,7 +35,7 @@ import java.util.ListIterator;
  * LazyList works by passing an opaque representation of the list in
  * and out of all the LazyList methods.  This opaque object is either
  * null for an empty list, an Object for a list with a single entry
- * or an ArrayList for a list of items.
+ * or an ArrayList<Object> for a list of items.
  *
  * <p><h4>Usage</h4>
  * <pre>
@@ -69,7 +69,8 @@ public class LazyList
      * @param item The item to add.
      * @return The lazylist created or added to.
      */
-    public static Object add(Object list, Object item)
+    @SuppressWarnings("unchecked")
+    public static<E> Object add(Object list, E item)
     {
         if (list==null)
         {
@@ -102,6 +103,7 @@ public class LazyList
      * @param item The item to add.
      * @return The lazylist created or added to.
      */
+    @SuppressWarnings("unchecked")
     public static Object add(Object list, int index, Object item)
     {
         if (list==null)
@@ -225,7 +227,7 @@ public class LazyList
      * @return The List of added items, which may be an EMPTY_LIST
      * or a SingletonList.
      */
-    public static List<Object> getList(Object list)
+    public static<E> List<E> getList(Object list)
     {
         return getList(list,false);
     }
@@ -240,14 +242,19 @@ public class LazyList
      * @return The List of added items, which may be null, an EMPTY_LIST
      * or a SingletonList.
      */
-    public static List<Object> getList(Object list, boolean nullForEmpty)
+    @SuppressWarnings("unchecked")
+    public static<E> List<E> getList(Object list, boolean nullForEmpty)
     {
         if (list==null)
-            return nullForEmpty?null:Collections.EMPTY_LIST;
+        {
+            if (nullForEmpty)
+                return null;
+            return Collections.emptyList();
+        }
         if (list instanceof List)
-            return (List<Object>)list;
+            return (List<E>)list;
         
-        return Collections.singletonList(list);
+        return (List<E>)Collections.singletonList(list);
     }
 
     
@@ -274,7 +281,12 @@ public class LazyList
     }
 
     /* ------------------------------------------------------------ */
-    public static Object toArray(Object list,Class aClass)
+    /** Convert a lazylist to an array
+     * @param list The list to convert
+     * @param aClass The class of the array, which may be a primitive type
+     * @return
+     */
+    public static Object toArray(Object list,Class<?> aClass)
     {
         if (list==null)
             return (Object[])Array.newInstance(aClass,0);
@@ -295,7 +307,7 @@ public class LazyList
         
         Object a = Array.newInstance(aClass,1);
         Array.set(a,0,list);
-        return a;
+        return (Object[])a;
     }
 
     /* ------------------------------------------------------------ */
@@ -318,16 +330,17 @@ public class LazyList
      * @param i int index
      * @return the item from the list.
      */
-    public static Object get(Object list, int i)
+    @SuppressWarnings("unchecked")
+    public static <E> E get(Object list, int i)
     {
         if (list==null)
             throw new IndexOutOfBoundsException();
-        
+       
         if (list instanceof List)
-            return ((List<?>)list).get(i);
+            return (E)((List<?>)list).get(i);
 
         if (i==0)
-            return list;
+            return (E)list;
         
         throw new IndexOutOfBoundsException();
     }
@@ -366,31 +379,36 @@ public class LazyList
     }
 
     /* ------------------------------------------------------------ */
-    public static Iterator<Object> iterator(Object list)
+    @SuppressWarnings("unchecked")
+    public static<E> Iterator<E> iterator(Object list)
     {
         if (list==null)
         {
-            Iterator<Object> i =Collections.emptyList().iterator();
-            return i;
+            List<E> empty=Collections.emptyList();
+            return empty.iterator();
         }
         if (list instanceof List)
         {
-            return ((List<Object>)list).iterator();
+            return ((List<E>)list).iterator();
         }
-        return getList(list).iterator();
+        List<E> l=getList(list);
+        return l.iterator();
     }
     
     /* ------------------------------------------------------------ */
-    public static ListIterator<Object> listIterator(Object list)
+    @SuppressWarnings("unchecked")
+    public static<E> ListIterator<E> listIterator(Object list)
     {
         if (list==null)
         {
-            ListIterator<Object> i =Collections.emptyList().listIterator();
-            return i;
+            List<E> empty=Collections.emptyList();
+            return empty.listIterator();
         }
         if (list instanceof List)
-            return ((List<Object>)list).listIterator();
-        return getList(list).listIterator();
+            return ((List<E>)list).listIterator();
+
+        List<E> l=getList(list);
+        return l.listIterator();
     }
 
     /* ------------------------------------------------------------ */
@@ -398,11 +416,11 @@ public class LazyList
      * @param array Any array of object
      * @return A new <i>modifiable</i> list initialised with the elements from <code>array</code>.
      */
-    public static List<Object> array2List(Object[] array)
+    public static<E> List<E> array2List(E[] array)
     {	
         if (array==null || array.length==0)
-            return new ArrayList<Object>();
-        return new ArrayList<Object>(Arrays.asList(array));
+            return new ArrayList<E>();
+        return new ArrayList<E>(Arrays.asList(array));
     }
 
     /* ------------------------------------------------------------ */
@@ -412,12 +430,13 @@ public class LazyList
      * @param type The type of the array (in case of null array)
      * @return new array with contents of array plus item
      */
-    public static Object[] addToArray(Object[] array, Object item, Class type)
+    @SuppressWarnings("unchecked")
+    public static Object[] addToArray(Object[] array, Object item, Class<?> type)
     {
         if (array==null)
         {
             if (type==null && item!=null)
-                type= item.getClass();
+                type= (Class<Object>)item.getClass();
             Object[] na = (Object[])Array.newInstance(type, 1);
             na[0]=item;
             return na;
@@ -433,7 +452,8 @@ public class LazyList
     }
 
     /* ------------------------------------------------------------ */
-    public static Object[] removeFromArray(Object[] array, Object item)
+    @SuppressWarnings("unchecked")
+    public static Object removeFromArray(Object[] array, Object item)
     {
         if (item==null || array==null)
             return array;
