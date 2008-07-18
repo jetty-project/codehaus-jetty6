@@ -111,34 +111,19 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         setConfig(config);
         Loader.loadClass(this.getClass(),_jdbcDriver).newInstance();
         connectDatabase();
-    }
-    
-    public String getName()
-    {
-        return super.getName();
-    }
-    
-    public void setName(String name)
-    {
-        super.setName(name);
-    }
-    public String getConfig()
-    {
-        return super.getConfig();    
-    }
+    }    
+
     /* ------------------------------------------------------------ */
     /** Load JDBC connection configuration from properties file.
-     *
-     * @param config Filename or url of user properties file.
+     *     
      * @exception IOException 
      */
-    public void setConfig(String config)
+    protected void loadConfig()
         throws IOException
-    {
-        super.setConfig(config);
+    {        
         Properties properties = new Properties();
-        Resource resource=Resource.newResource(config);
-        properties.load(resource.getInputStream());
+        
+        properties.load(getConfigResource().getInputStream());
         
         _jdbcDriver = properties.getProperty("jdbcdriver");
         _url = properties.getProperty("url");

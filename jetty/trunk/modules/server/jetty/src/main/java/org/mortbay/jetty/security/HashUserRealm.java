@@ -110,6 +110,11 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
     {
         return _config;
     }
+    
+    public Resource getConfigResource()
+    {
+        return _configResource;
+    }
 
     /* ------------------------------------------------------------ */
     /** Load realm users from properties file.
@@ -139,7 +144,7 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
         return _refreshInterval;
     }
     
-    public void loadConfig () 
+    protected void loadConfig () 
     throws IOException
     {
         synchronized (this)
