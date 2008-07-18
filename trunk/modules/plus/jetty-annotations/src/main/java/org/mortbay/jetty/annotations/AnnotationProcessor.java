@@ -225,6 +225,7 @@ public class AnnotationProcessor
 
         for (Method m: methods)
         {
+            System.err.println("METHOD :"+m.getName());
             /*
              * Commons Annotations Spec 2.3
              * " The Resource annotation is used to declare a reference to a resource.
@@ -324,6 +325,7 @@ public class AnnotationProcessor
         List<Field> fields = _finder.getFieldsForAnnotation(Resource.class);
         for (Field f: fields)
         {
+            System.err.println("FIELD :"+f.getName());
             Resource resource = (Resource)f.getAnnotation(Resource.class);
             if (resource == null)
                 continue;

@@ -291,7 +291,7 @@ public class WebXmlConfiguration implements Configuration
                 }
             }
         };
-        fragScanner.setWebAppContext(_context);       
+       
         fragScanner.scan (webFragPattern, Thread.currentThread().getContextClassLoader(), true, false);
     }
 

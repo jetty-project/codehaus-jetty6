@@ -56,7 +56,20 @@ public class TestAnnotationInheritance extends TestCase
         NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
         classNames.add(ClassA.class.getName());
         classNames.add(ClassB.class.getName());
-        AnnotationFinder finder = new AnnotationFinder(Thread.currentThread().getContextClassLoader(), classNames);    
+        
+        AnnotationFinder finder = new AnnotationFinder();
+        finder.find(classNames, new ClassNameResolver () 
+        {
+            public boolean isExcluded(String name)
+            {
+                return false;
+            }
+
+            public boolean shouldOverride(String name)
+            {
+                return false;
+            }       
+        });    
        
         List<Class<?>> classes = finder.getClassesForAnnotation(Sample.class);
         assertEquals(2, classes.size());
@@ -100,6 +113,38 @@ public class TestAnnotationInheritance extends TestCase
     }
     
     
+    public void testExclusions()
+    throws Exception
+    {
+        AnnotationFinder finder = new AnnotationFinder();
+        finder.find(ClassA.class.getName(), new ClassNameResolver()
+        {
+            public boolean isExcluded(String name)
+            {
+                return true;
+            }
+
+            public boolean shouldOverride(String name)
+            {
+                return false;
+            }       
+        });
+        assertTrue(finder.getClassesForAnnotation(Sample.class).isEmpty());
+        
+        finder.find (ClassA.class.getName(), new ClassNameResolver()
+        {
+            public boolean isExcluded(String name)
+            {
+                return false;
+            }
+
+            public boolean shouldOverride(String name)
+            {
+                return false;
+            }        
+        });
+        assertEquals(1, finder.getClassesForAnnotation(Sample.class).size());
+    }
     
     
     public void testResourceAnnotations ()
@@ -115,7 +160,19 @@ public class TestAnnotationInheritance extends TestCase
         NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
         classNames.add(ResourceA.class.getName());
         classNames.add(ResourceB.class.getName());
-        AnnotationFinder finder = new AnnotationFinder(Thread.currentThread().getContextClassLoader(), classNames);
+        AnnotationFinder finder = new AnnotationFinder();
+        finder.find(classNames, new ClassNameResolver()
+        {
+            public boolean isExcluded(String name)
+            {
+                return false;
+            }
+
+            public boolean shouldOverride(String name)
+            {
+                return false;
+            }       
+        });
        
         List<Class<?>> annotatedClasses = finder.getClassesForAnnotation(Resource.class);      
         List<Method> annotatedMethods = finder.getMethodsForAnnotation(Resource.class);
