@@ -597,6 +597,75 @@ public class WebAppContext extends Context
         return _systemClasses;
     }
     
+
+    
+    /* ------------------------------------------------------------ */
+    public boolean isServerClass(String name)
+    {
+        name=name.replace('/','.');
+        while(name.startsWith("."))
+            name=name.substring(1);
+
+        String[] server_classes = getServerClasses();
+        if (server_classes!=null)
+        {
+            for (int i=0;i<server_classes.length;i++)
+            {
+                boolean result=true;
+                String c=server_classes[i];
+                if (c.startsWith("-"))
+                {
+                    c=c.substring(1); // TODO cache
+                    result=false;
+                }
+                
+                if (c.endsWith("."))
+                {
+                    if (name.startsWith(c))
+                        return result;
+                }
+                else if (name.equals(c))
+                    return result;
+            }
+        }
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isSystemClass(String name)
+    {
+        name=name.replace('/','.');
+        while(name.startsWith("."))
+            name=name.substring(1);
+        String[] system_classes = getSystemClasses();
+        if (system_classes!=null)
+        {
+            for (int i=0;i<system_classes.length;i++)
+            {
+                boolean result=true;
+                String c=system_classes[i];
+                
+                if (c.startsWith("-"))
+                {
+                    c=c.substring(1); // TODO cache
+                    result=false;
+                }
+                
+                if (c.endsWith("."))
+                {
+                    if (name.startsWith(c))
+                        return result;
+                }
+                else if (name.equals(c))
+                    return result;
+            }
+        }
+        
+        return false;
+        
+    }
+
+    
     /* ------------------------------------------------------------ */
     /**
      * Get a temporary directory in which to unpack the war etc etc.
