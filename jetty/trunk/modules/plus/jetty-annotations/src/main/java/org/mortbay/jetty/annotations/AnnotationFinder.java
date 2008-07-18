@@ -453,7 +453,7 @@ public class AnnotationFinder
                 try
                 {
                     String name = entry.getName();
-                    if (name.toLowerCase().endsWith(".class"))
+                    if (name.toLowerCase().endsWith(".class") && !excludeClass(name.substring(0,name.length()-6)))
                     {
                         Resource clazz = Resource.newResource("jar:"+jarUrl+"!/"+name);
                         scanClass(clazz.getInputStream());
@@ -515,6 +515,17 @@ public class AnnotationFinder
         {
             scanClass(loader.getResourceAsStream(s.replace('.', '/')+".class"));
         }
+    }
+    
+    /** Exclude class by name
+     * Instances of {@link AnnotationFinder} can implement this method to exclude
+     * classes by name.
+     * @param name
+     * @return
+     */
+    protected boolean excludeClass(String name)
+    {
+        return false;
     }
     
     public List<Class<?>> getClassesForAnnotation(Class<?> annotationClass)

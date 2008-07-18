@@ -252,7 +252,7 @@ public class WebAppClassLoader extends URLClassLoader
             }
         }
 
-        if (url == null && !tried_parent)
+        if (url == null && !tried_parent && !isServerPath(name) )
         {
             if (_parent!=null)
                 url= _parent.getResource(name);
@@ -332,15 +332,17 @@ public class WebAppClassLoader extends URLClassLoader
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized Class loadClass(String name) throws ClassNotFoundException
+    @Override
+    public synchronized Class<?> loadClass(String name) throws ClassNotFoundException
     {
         return loadClass(name, false);
     }
 
     /* ------------------------------------------------------------ */
-    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException
+    @Override
+    protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
     {
-        Class c= findLoadedClass(name);
+        Class<?> c= findLoadedClass(name);
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
         

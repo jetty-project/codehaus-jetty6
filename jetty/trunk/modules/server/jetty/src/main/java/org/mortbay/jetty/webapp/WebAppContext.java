@@ -92,8 +92,22 @@ public class WebAppContext extends Context
     private boolean _logUrlOnStart =false;
     private boolean _parentLoaderPriority= Boolean.getBoolean("org.mortbay.jetty.webapp.parentLoaderPriority");
     private PermissionCollection _permissions;
-    private String[] _systemClasses = {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c.", "org.apache.commons.logging.", "org.apache.log4j."};
-    private String[] _serverClasses = {"-org.mortbay.jetty.plus.jaas.", "org.mortbay.jetty.", "org.slf4j."}; // TODO hide all mortbay classes
+    private String[] _systemClasses = {
+            "java.",
+            "javax.servlet.",
+            "javax.xml.",
+            "org.xml.",
+            "org.w3c.", 
+            "org.apache.commons.logging.", 
+            "org.apache.log4j.",
+            "org.mortbay.util.ajax.Continuation",
+            "org.mortbay.jetty.plus.jaas.",
+            "org.mortbay.naming."
+            };
+    private String[] _serverClasses = {
+            "org.mortbay.", 
+            "org.slf4j."
+            }; 
     private File _tmpDir;
     private boolean _isExistingTmpDir;
     private String _war;
