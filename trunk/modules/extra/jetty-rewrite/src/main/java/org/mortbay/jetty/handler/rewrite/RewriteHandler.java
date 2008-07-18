@@ -48,24 +48,25 @@ import org.mortbay.util.LazyList;
  * <li> RewriteRegexRule - rewrites the requested URI using regular expression for pattern matching. </li>
  * <li> MsieSslRule - disables the keep alive on SSL for IE5 and IE6. </li>
  * <li> LegacyRule - the old version of rewrite. </li>
+ * <li> SchemeHeaderRule - set the scheme according to the headers present. </li>
  * </ul>
  * 
  * Here is a typical jetty.xml configuration would be: <pre>
  * 
  *   &lt;Set name="handler"&gt;
- *     &lt;New id="Handlers" class="org.mortbay.jetty.handler.RewriteHandler"&gt;
+ *     &lt;New id="Handlers" class="org.mortbay.jetty.handler.rewrite.RewriteHandler"&gt;
  *       &lt;Set name="rules"&gt;
- *         &lt;Array type="org.mortbay.jetty.handler.rules.Rule"&gt;
+ *         &lt;Array type="org.mortbay.jetty.handler.rewrite.Rule"&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="rewrite" class="org.mortbay.jetty.handler.rules.RewritePatternRule"&gt;
+ *             &lt;New id="rewrite" class="org.mortbay.jetty.handler.rewrite.RewritePatternRule"&gt;
  *               &lt;Set name="pattern"&gt;/*&lt;/Set&gt;
  *               &lt;Set name="replacement"&gt;/test&lt;/Set&gt;
  *             &lt;/New&gt;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="response" class="org.mortbay.jetty.handler.rules.ResponsePatternRule"&gt;
+ *             &lt;New id="response" class="org.mortbay.jetty.handler.rewrite.ResponsePatternRule"&gt;
  *               &lt;Set name="pattern"&gt;/session/&lt;/Set&gt;
  *               &lt;Set name="code"&gt;400&lt;/Set&gt;
  *               &lt;Set name="reason"&gt;Setting error code 400&lt;/Set&gt;
@@ -73,7 +74,7 @@ import org.mortbay.util.LazyList;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="header" class="org.mortbay.jetty.handler.rules.HeaderPatternRule"&gt;
+ *             &lt;New id="header" class="org.mortbay.jetty.handler.rewrite.HeaderPatternRule"&gt;
  *               &lt;Set name="pattern"&gt;*.jsp&lt;/Set&gt;
  *               &lt;Set name="name"&gt;server&lt;/Set&gt;
  *               &lt;Set name="value"&gt;dexter webserver&lt;/Set&gt;
@@ -81,7 +82,7 @@ import org.mortbay.util.LazyList;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="header" class="org.mortbay.jetty.handler.rules.HeaderPatternRule"&gt;
+ *             &lt;New id="header" class="org.mortbay.jetty.handler.rewrite.HeaderPatternRule"&gt;
  *               &lt;Set name="pattern"&gt;*.jsp&lt;/Set&gt;
  *               &lt;Set name="name"&gt;title&lt;/Set&gt;
  *               &lt;Set name="value"&gt;driven header purpose&lt;/Set&gt;
@@ -89,19 +90,27 @@ import org.mortbay.util.LazyList;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="redirect" class="org.mortbay.jetty.handler.rules.RedirectPatternRule"&gt;
+ *             &lt;New id="redirect" class="org.mortbay.jetty.handler.rewrite.RedirectPatternRule"&gt;
  *               &lt;Set name="pattern"&gt;/test/dispatch&lt;/Set&gt;
  *               &lt;Set name="location"&gt;http://jetty.mortbay.org&lt;/Set&gt;
  *             &lt;/New&gt;
  *           &lt;/Item&gt;
  *
  *           &lt;Item&gt; 
- *             &lt;New id="regexRewrite" class="org.mortbay.jetty.handler.rules.RewriteRegexRule"&gt;
+ *             &lt;New id="regexRewrite" class="org.mortbay.jetty.handler.rewrite.RewriteRegexRule"&gt;
  *               &lt;Set name="regex"&gt;/test-jaas/$&lt;/Set&gt;
  *               &lt;Set name="replacement"&gt;/demo&lt;/Set&gt;
  *             &lt;/New&gt;
  *           &lt;/Item&gt;
- *
+ *           
+ *           &lt;Item&gt; 
+ *             &lt;New id="forwardedHttps" class="org.mortbay.jetty.handler.rewrite.ForwardedSchemeHeaderRule"&gt;
+ *               &lt;Set name="header"&gt;X-Forwarded-Scheme&lt;/Set&gt;
+ *               &lt;Set name="headerValue"&gt;https&lt;/Set&gt;
+ *               &lt;Set name="scheme"&gt;https&lt;/Set&gt;
+ *             &lt;/New&gt;
+ *           &lt;/Item&gt;
+ *           
  *         &lt;/Array&gt;
  *       &lt;/Set&gt;
  *
