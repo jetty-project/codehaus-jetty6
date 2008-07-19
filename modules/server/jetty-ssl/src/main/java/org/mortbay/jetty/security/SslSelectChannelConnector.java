@@ -519,6 +519,7 @@ public class SslSelectChannelConnector extends SelectChannelConnector
         try
         {
             engine=_context.createSSLEngine();
+            engine.setUseClientMode(false);
             
             if (_wantClientAuth)
                 engine.setWantClientAuth(_wantClientAuth);
