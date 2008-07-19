@@ -58,7 +58,6 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
         
         // ssl
         _engine=engine;
-        _engine.setUseClientMode(false);
         _session=engine.getSession();
 
         // TODO pool buffers and use only when needed.
