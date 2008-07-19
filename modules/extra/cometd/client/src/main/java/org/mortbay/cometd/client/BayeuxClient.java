@@ -30,6 +30,7 @@ import javax.servlet.http.Cookie;
 import org.cometd.Bayeux;
 import org.cometd.Client;
 import org.cometd.Listener;
+import org.cometd.ClientListener;
 import org.cometd.Message;
 import org.cometd.MessageListener;
 import org.cometd.RemoveListener;
@@ -732,7 +733,7 @@ public class BayeuxClient extends MessagePool implements Client
         }
     }
 
-    public void addListener(EventListener listener)
+    public void addListener(ClientListener listener)
     {
         synchronized(_inQ)
         {
@@ -751,7 +752,7 @@ public class BayeuxClient extends MessagePool implements Client
         }
     }
 
-    public void removeListener(EventListener listener)
+    public void removeListener(ClientListener listener)
     {
         synchronized(_inQ)
         {
