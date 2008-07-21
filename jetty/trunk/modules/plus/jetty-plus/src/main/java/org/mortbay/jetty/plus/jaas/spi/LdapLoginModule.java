@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -147,7 +146,7 @@ public class LdapLoginModule extends AbstractLoginModule
     /**
      * object class of roles
      */
-    private String _roleObjectClass = "groupofuniquenames";
+    private String _roleObjectClass = "groupOfUniqueNames";
 
     /**
      * name of the attribute that a username would be under a role class
@@ -197,7 +196,7 @@ public class LdapLoginModule extends AbstractLoginModule
         //byte[] ba = digestMD5("foo");
         //System.out.println(md5Credential + "  " + ba );
         Credential credential = Credential.getCredential(pwdCredential);
-        List roles = getUserRoles(username);
+        List roles = getUserRoles(_rootContext, username);
 
         return new UserInfo(username, credential, roles);
     }
@@ -251,14 +250,14 @@ public class LdapLoginModule extends AbstractLoginModule
         ctls.setDerefLinkFlag(true);
         ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-        String filter = "(&(objectClass=" + _userObjectClass + ")(" + _userIdAttribute + "=" + username + "))";
+        String filter = "(&(objectClass={0})({1}={2}))";
 
         Log.debug("Searching for users with filter: \'" + filter + "\'" + " from base dn: " + _userBaseDn);
 
         try
         {
-
-            NamingEnumeration<SearchResult> results = _rootContext.search(_userBaseDn, filter, ctls);
+            Object[] filterArguments = {_userObjectClass, _userIdAttribute, username};
+            NamingEnumeration results = _rootContext.search(_userBaseDn, filter, filterArguments, ctls);
 
             Log.debug("Found user?: " + results.hasMoreElements());
 
@@ -301,28 +300,34 @@ public class LdapLoginModule extends AbstractLoginModule
      * <p/>
      * NOTE: this is not an user authenticated operation
      *
+     * @param dirContext
      * @param username
      * @return
      * @throws LoginException
      */
-    private List getUserRoles(String username) throws LoginException, NamingException
+    private List getUserRoles(DirContext dirContext, String username) throws LoginException, NamingException
+    {
+        String userDn = _userRdnAttribute + "=" + username + "," + _userBaseDn;
+
+        return getUserRolesByDn(dirContext, userDn);
+    }
+
+    private List getUserRolesByDn(DirContext dirContext, String userDn) throws LoginException, NamingException
     {
         ArrayList roleList = new ArrayList();
 
-        SearchControls ctls = new SearchControls();
-
-        ctls.setDerefLinkFlag(true);
-        ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-        if (_roleBaseDn == null)
+        if (dirContext == null || _roleBaseDn == null || _roleMemberAttribute == null || _roleObjectClass == null)
         {
             return roleList;
         }
 
-        String userDn = _userRdnAttribute + "=" + username + "," + _userBaseDn;
-        String filter = "(&(objectClass=" + _roleObjectClass + ")(" + _roleMemberAttribute + "=" + userDn + "))";
-        //filter  = doRFC2254Encoding(filter)
-        NamingEnumeration results = _rootContext.search(_roleBaseDn, filter, ctls);
+        SearchControls ctls = new SearchControls();
+        ctls.setDerefLinkFlag(true);
+        ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+        String filter = "(&(objectClass={0})({1}={2}))";
+        Object[] filterArguments = {_roleObjectClass, _roleMemberAttribute, userDn};
+        NamingEnumeration results = dirContext.search(_roleBaseDn, filter, filterArguments, ctls);
 
         Log.debug("Found user roles?: " + results.hasMoreElements());
 
@@ -332,19 +337,22 @@ public class LdapLoginModule extends AbstractLoginModule
 
             Attributes attributes = result.getAttributes();
 
-            if (attributes != null)
+            if (attributes == null)
             {
-                Attribute roleAttribute = attributes.get(_roleNameAttribute);
+                continue;
+            }
 
-                if (roleAttribute != null)
-                {
-                    NamingEnumeration roles = roleAttribute.getAll();
-                    while (roles.hasMore())
-                    {
-                        String roleName = (String) roles.next();
-                        roleList.add(roleName);
-                    }
-                }
+            Attribute roleAttribute = attributes.get(_roleNameAttribute);
+
+            if (roleAttribute == null)
+            {
+                continue;
+            }
+
+            NamingEnumeration roles = roleAttribute.getAll();
+            while (roles.hasMore())
+            {
+                roleList.add(roles.next());
             }
         }
 
@@ -458,27 +466,14 @@ public class LdapLoginModule extends AbstractLoginModule
 
         String userDn = searchResult.getNameInNamespace();
 
-        Log.info("Attempting authentication: + " + userDn);
+        Log.info("Attempting authentication: " + userDn);
 
         Hashtable environment = getEnvironment();
         environment.put(Context.SECURITY_PRINCIPAL, userDn);
         environment.put(Context.SECURITY_CREDENTIALS, password);
 
-        try
-        {
-            new InitialDirContext(environment);
-        }
-        catch (AuthenticationException e)
-        {
-            Log.info("Authentication failed for: " + userDn);
-            throw new LoginException();
-        }
-        catch (NamingException ne)
-        {
-            throw new LoginException("Context binding failure.");
-        }
-
-        List roles = getUserRoles(username);
+        DirContext dirContext = new InitialDirContext(environment);
+        List roles = getUserRolesByDn(dirContext, userDn);
 
         UserInfo userInfo = new UserInfo(username, null, roles);
 
@@ -496,11 +491,16 @@ public class LdapLoginModule extends AbstractLoginModule
         ctls.setDerefLinkFlag(true);
         ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-        String filter = "(&(objectClass=" + _userObjectClass + ")(" + _userIdAttribute + "=" + username + "))";
+        String filter = "(&(objectClass={0})({1}={2}))";
 
         Log.info("Searching for users with filter: \'" + filter + "\'" + " from base dn: " + _userBaseDn);
 
-        NamingEnumeration results = _rootContext.search(_userBaseDn, filter, ctls);
+        Object[] filterArguments = new Object[]{
+            _userObjectClass,
+            _userIdAttribute,
+            username
+        };
+        NamingEnumeration results = _rootContext.search(_userBaseDn, filter, filterArguments, ctls);
 
         Log.info("Found user?: " + results.hasMoreElements());
 

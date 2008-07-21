@@ -17,13 +17,18 @@ package org.mortbay.jetty.plus.jaas.spi;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.apacheds.ApacheDs;
 import org.mortbay.jetty.security.Credential;
+import org.mortbay.jetty.plus.jaas.JAASRole;
+import org.mortbay.jetty.plus.jaas.callback.DefaultCallbackHandler;
 import org.apache.directory.shared.ldap.util.Base64;
+import org.apache.directory.shared.ldap.exception.LdapNameNotFoundException;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
+import javax.security.auth.Subject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class LdapLoginModuleTest extends PlexusTestCase
 {
@@ -53,7 +58,8 @@ public class LdapLoginModuleTest extends PlexusTestCase
     {
         InitialDirContext context = apacheDs.getAdminContext();
 
-        context.unbind( createDn( "jesse" ) );
+        unbind(context, createDn( "ldap-admin" ) );
+        unbind(context, createDn( "jesse" ) );
 
         apacheDs.stopServer();
 
@@ -71,12 +77,25 @@ public class LdapLoginModuleTest extends PlexusTestCase
         options.put( "bindDn", "uid=admin,ou=system" );
         options.put( "bindPassword", "secret" );
         options.put( "userBaseDn", "dc=jetty,dc=mortbay,dc=org" );
+        options.put( "roleBaseDn", "dc=jetty,dc=mortbay,dc=org" );
+        options.put( "roleNameAttribute", "cn" );
         options.put( "forceBindingLogin", "true" );
         options.put( "debug", "true" );
 
-        lm.initialize( null, null, null, options );
+        Subject subject = new Subject();
+        DefaultCallbackHandler callbackHandler = new DefaultCallbackHandler();
+        callbackHandler.setUserName("jesse");
+        callbackHandler.setCredential("foo");
+        lm.initialize( subject, callbackHandler, null, options );
 
         assertTrue( lm.bindingLogin( "jesse", "foo" ) );
+
+        assertTrue( lm.login() );
+        assertTrue( lm.commit() );
+
+        Set roles = subject.getPrincipals(JAASRole.class);
+        assertEquals(1, roles.size());
+        assertTrue(roles.contains(new JAASRole("ldap-admin")));
     }
     /*
     public void testCredentialAuth() throws Exception
@@ -100,16 +119,24 @@ public class LdapLoginModuleTest extends PlexusTestCase
         assertTrue( lm.credentialLogin( info, "foo" ) );
     }
     */
+
+    // -----------------------------------------------------------------------
+    // Private
+    // -----------------------------------------------------------------------
+
     private void makeUsers() throws Exception
     {
         InitialDirContext context = apacheDs.getAdminContext();
 
-        String cn = "jesse";
-        bindUserObject( context, cn, createDn( cn ) );
-        assertExist( context, createDn( cn ), "cn", cn );
+        unbind(context, createDn("ldap-admin"));
+        unbind(context, createDn( "jesse" ) );
+
+        String jesse = bindUserObject( context, "jesse" );
+        bindGroupObject( context, "ldap-admin", jesse );
+        assertExist( context, "cn", "jesse" );
     }
 
-    private void bindUserObject(DirContext context, String cn, String dn)
+    private String bindUserObject(DirContext context, String cn)
         throws Exception
     {
         Attributes attributes = new BasicAttributes(true);
@@ -132,7 +159,22 @@ public class LdapLoginModuleTest extends PlexusTestCase
         attributes.put("userPassword", "{MD5}" + doStuff(pwd) );
         //attributes.put( "userPassword", "foo");
         attributes.put("givenName", "foo");
-        context.createSubcontext( dn, attributes );
+        String dn = createDn(cn);
+        context.createSubcontext(dn, attributes );
+        return dn;
+    }
+
+    private void bindGroupObject(DirContext context, String cn, String initialMember)
+        throws Exception
+    {
+        Attributes attributes = new BasicAttributes(true);
+        BasicAttribute objectClass = new BasicAttribute("objectClass");
+        objectClass.add("top");
+        objectClass.add("groupOfUniqueNames");
+        attributes.put(objectClass);
+        attributes.put("cn", cn);
+        attributes.put("uniqueMember", initialMember);
+        context.createSubcontext( createDn( cn ), attributes );
     }
 
     private String doStuff( String hpwd )
@@ -169,7 +211,7 @@ public class LdapLoginModuleTest extends PlexusTestCase
         return "cn=" + cn + "," + suffix;
     }
 
-    private void assertExist( DirContext context, String dn, String attribute, String value ) throws NamingException
+    private void assertExist( DirContext context, String attribute, String value ) throws NamingException
     {
         SearchControls ctls = new SearchControls();
 
@@ -192,5 +234,13 @@ public class LdapLoginModuleTest extends PlexusTestCase
         Attributes attrs = result.getAttributes();
         Attribute testAttr = attrs.get( attribute );
         assertEquals( value, testAttr.get() );
+    }
+
+    private void unbind(InitialDirContext context, String dn) throws NamingException {
+        try {
+            context.unbind(dn);
+        } catch (LdapNameNotFoundException e) {
+            // ignore
+        }
     }
 }
