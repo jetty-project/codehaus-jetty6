@@ -61,7 +61,19 @@ public class ResourceHandler extends AbstractHandler
     public ResourceHandler()
     {
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public MimeTypes getMimeTypes()
+    {
+        return _mimeTypes;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setMimeTypes(MimeTypes mimeTypes)
+    {
+        _mimeTypes = mimeTypes;
+    }
+
     /* ------------------------------------------------------------ */
     public void doStart()
     throws Exception
