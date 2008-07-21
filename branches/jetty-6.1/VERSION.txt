@@ -22,6 +22,7 @@
  + JETTY-635 Correctly merge request parameters when doing forward
  + JETTY-637 empty date headers throw IllegalArgumentException
  + JETTY-642 NPE in LdapLoginModule
+ + JETTY-644 LdapLoginModule uses proper filters when searching
  + JETTY-651 Release resources during destroy
 
 jetty-6.1.11 6 June 2008
