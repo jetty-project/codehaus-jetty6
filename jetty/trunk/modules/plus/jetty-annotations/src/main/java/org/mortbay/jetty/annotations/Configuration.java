@@ -19,10 +19,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
@@ -157,7 +155,13 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
                     }
                 });
         
-        AnnotationProcessor processor = new AnnotationProcessor(finder, _runAsCollection, _injections, _callbacks);
+        AnnotationProcessor processor = new AnnotationProcessor(finder, _runAsCollection, _injections, _callbacks, 
+                LazyList.getList(_servlets), LazyList.getList(_filters), LazyList.getList(_listeners), 
+                LazyList.getList(_servletMappings), LazyList.getList(_filterMappings));
         processor.process();
+        _servlets = processor.getServlets();
+        _filters = processor.getFilters();
+        _servletMappings = processor.getServletMappings();
+        _filterMappings = processor.getFilterMappings();
     }
 }

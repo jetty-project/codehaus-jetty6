@@ -18,10 +18,12 @@ package org.mortbay.jetty.annotations;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.annotation.Resources;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import org.mortbay.jetty.annotations.resources.ResourceA;
@@ -174,6 +176,10 @@ public class TestAnnotationInheritance extends TestCase
             }       
         });
        
+        List<Class<?>> resourcesClasses = finder.getClassesForAnnotation(Resources.class);
+        assertNotNull(resourcesClasses);
+        assertEquals(1, resourcesClasses.size());
+        
         List<Class<?>> annotatedClasses = finder.getClassesForAnnotation(Resource.class);      
         List<Method> annotatedMethods = finder.getMethodsForAnnotation(Resource.class);
         List<Field>  annotatedFields = finder.getFieldsForAnnotation(Resource.class);
@@ -185,7 +191,8 @@ public class TestAnnotationInheritance extends TestCase
         InjectionCollection injections = new InjectionCollection();
         LifeCycleCallbackCollection callbacks = new LifeCycleCallbackCollection();
         RunAsCollection runAses = new RunAsCollection();
-        AnnotationProcessor processor = new AnnotationProcessor(finder, runAses, injections, callbacks);
+        AnnotationProcessor processor = new AnnotationProcessor(finder, runAses, injections, callbacks, 
+                Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         //process with all the specific annotations turned into injections, callbacks etc
         processor.process();
         
