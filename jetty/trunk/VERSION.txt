@@ -19,6 +19,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-637 empty date headers throw IllegalArgumentException
  + JETTY-642 NPE in LdapLoginModule
  + JETTY-645 Do not provide jetty-util to the webapps
+ + JETTY-651 Release resources during destroy
 
 jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full
