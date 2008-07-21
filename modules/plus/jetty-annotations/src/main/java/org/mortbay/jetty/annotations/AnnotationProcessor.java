@@ -18,7 +18,10 @@ package org.mortbay.jetty.annotations;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -26,16 +29,24 @@ import javax.annotation.Resource;
 import javax.annotation.Resources;
 import javax.annotation.security.RunAs;
 import javax.naming.NamingException;
-import javax.servlet.Servlet;
+import javax.servlet.DispatcherType;
+import javax.servlet.http.annotation.InitParam;
 
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
+import org.mortbay.jetty.servlet.Dispatcher;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterMapping;
+import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
+import org.mortbay.util.LazyList;
 
 public class AnnotationProcessor
 {
@@ -44,46 +55,177 @@ public class AnnotationProcessor
     RunAsCollection _runAs;
     InjectionCollection _injections;
     LifeCycleCallbackCollection _callbacks;
+    List _servlets;
+    List _filters;
+    List _listeners;
+    List _servletMappings;
+    List _filterMappings;
+    Map _pojoInstances = new HashMap();
+    
     private static Class[] __envEntryTypes = 
         new Class[] {String.class, Character.class, Integer.class, Boolean.class, Double.class, Byte.class, Short.class, Long.class, Float.class};
    
-    public AnnotationProcessor(AnnotationFinder finder, RunAsCollection runAs, InjectionCollection injections, LifeCycleCallbackCollection callbacks)
+    public AnnotationProcessor(AnnotationFinder finder, RunAsCollection runAs, InjectionCollection injections, LifeCycleCallbackCollection callbacks,
+            List servlets, List filters, List listeners, List servletMappings, List filterMappings)
     {
         _finder=finder;
         _runAs=runAs;
         _injections=injections;
         _callbacks=callbacks;
+        _servlets=servlets;
+        _filters=filters;
+        _listeners=listeners;
+        _servletMappings=servletMappings;
+        _filterMappings=filterMappings;
     }
     
     
     public void process ()
     throws Exception
     { 
+        processServlets();
+        processFilters();
+        processListeners();
         processRunAsAnnotations();
         processLifeCycleCallbackAnnotations();
         processResourcesAnnotations();
         processResourceAnnotations();
     }
     
+    public void processServlets ()
+    throws Exception
+    {
+        //@Servlet(urlMappings=String[], description=String, icon=String, loadOnStartup=int, name=String, initParams=InitParams[])
+        for (Class clazz:_finder.getClassesForAnnotation(javax.servlet.http.annotation.Servlet.class))
+        {
+            javax.servlet.http.annotation.Servlet annotation = (javax.servlet.http.annotation.Servlet)clazz.getAnnotation(javax.servlet.http.annotation.Servlet.class);
+            PojoServlet servlet = new PojoServlet(getPojoInstanceFor(clazz));
+            ServletHolder holder = new ServletHolder(servlet);
+            holder.setName((annotation.name().equals("")?clazz.getName():annotation.name()));
+            holder.setInitOrder(annotation.loadOnStartup());
+            LazyList.add(_servlets, holder);
+            
+            for (InitParam ip:annotation.initParams())
+            {
+                holder.setInitParameter(ip.name(), ip.value());
+            }
+            if (annotation.urlMappings().length > 0)
+            {
+                ArrayList paths = new ArrayList();
+                ServletMapping mapping = new ServletMapping();
+                mapping.setServletName(holder.getName());
+                for (String s:annotation.urlMappings())
+                {    
+                    paths.add(normalizePattern(s)); 
+                }
+                mapping.setPathSpecs((String[])paths.toArray(new String[paths.size()]));
+                LazyList.add(_servletMappings,mapping);
+            }
+        } 
+    }
+    
+    public void processFilters ()
+    throws Exception
+    {
+        //@ServletFilter(description=String, filterName=String, displayName=String, icon=String,initParams=InitParam[], filterMapping=FilterMapping)
+        for (Class clazz:_finder.getClassesForAnnotation(javax.servlet.http.annotation.ServletFilter.class))
+        {
+            javax.servlet.http.annotation.ServletFilter annotation = (javax.servlet.http.annotation.ServletFilter)clazz.getAnnotation(javax.servlet.http.annotation.ServletFilter.class);
+            PojoFilter filter = new PojoFilter(getPojoInstanceFor(clazz));
+
+            FilterHolder holder = new FilterHolder(filter);
+            holder.setName((annotation.filterName().equals("")?clazz.getName():annotation.filterName()));
+            holder.setDisplayName(annotation.displayName());
+            LazyList.add(_filters, holder);
+            
+            for (InitParam ip:annotation.initParams())
+            {
+                holder.setInitParameter(ip.name(), ip.value());
+            }
+            
+            if (annotation.filterMapping() != null)
+            {
+                FilterMapping mapping = new FilterMapping();
+                mapping.setFilterName(holder.getName());
+                ArrayList paths = new ArrayList();
+                for (String s:annotation.filterMapping().urlPattern())
+                {
+                    paths.add(normalizePattern(s));
+                }
+                mapping.setPathSpecs((String[])paths.toArray(new String[paths.size()]));
+                ArrayList names = new ArrayList();
+                for (String s:annotation.filterMapping().servletNames())
+                {
+                    names.add(s);
+                }
+                mapping.setServletNames((String[])names.toArray(new String[names.size()]));
+                
+                int dispatcher=Handler.DEFAULT;                
+                for (DispatcherType d:annotation.filterMapping().dispatcherTypes())
+                {
+                   dispatcher = dispatcher|Dispatcher.type(d);            
+                }
+                mapping.setDispatches(dispatcher);
+                LazyList.add(_filterMappings,mapping);
+            }
+        }        
+    }
+    
+
+    
+    public void processListeners ()
+    throws Exception
+    {
+        //@ServletContextListener(description=String)
+        for (Class clazz:_finder.getClassesForAnnotation(javax.servlet.http.annotation.ServletContextListener.class))
+        { 
+            PojoContextListener listener = new PojoContextListener(getPojoInstanceFor(clazz));
+            LazyList.add(_listeners, listener);
+        }
+    }
+    
+    
+    public List getServlets ()
+    {
+        return _servlets;
+    }
+    
+    public List getServletMappings ()
+    {
+        return _servletMappings;
+    }
+    
+    public List getFilters ()
+    {
+        return _filters;
+    }
+    
+    public List getFilterMappings ()
+    {
+        return _filterMappings;
+    }
+    
+    public List getListeners()
+    {
+        return _listeners;
+    }
+   
+    
     public void processRunAsAnnotations ()
     throws Exception
     {
         for (Class clazz:_finder.getClassesForAnnotation(RunAs.class))
         {
-            //if this implements javax.servlet.Servlet check for run-as
-            if (Servlet.class.isAssignableFrom(clazz))
-            { 
-                RunAs runAs = (RunAs)clazz.getAnnotation(RunAs.class);
-                if (runAs != null)
+            RunAs runAs = (RunAs)clazz.getAnnotation(RunAs.class);
+            if (runAs != null)
+            {
+                String role = runAs.value();
+                if (role != null)
                 {
-                    String role = runAs.value();
-                    if (role != null)
-                    {
-                        org.mortbay.jetty.plus.annotation.RunAs ra = new org.mortbay.jetty.plus.annotation.RunAs();
-                        ra.setTargetClass(clazz);
-                        ra.setRoleName(role);
-                        _runAs.add(ra);
-                    }
+                    org.mortbay.jetty.plus.annotation.RunAs ra = new org.mortbay.jetty.plus.annotation.RunAs();
+                    ra.setTargetClass(clazz);
+                    ra.setRoleName(role);
+                    _runAs.add(ra);
                 }
             }
         } 
@@ -395,6 +537,17 @@ public class AnnotationProcessor
         }
     }
 
+    private Object getPojoInstanceFor (Class clazz) 
+    throws InstantiationException, IllegalAccessException
+    {
+        Object instance = _pojoInstances.get(clazz);
+        if (instance == null)
+        {
+            instance = clazz.newInstance();
+            _pojoInstances.put(clazz, instance);
+        }
+        return instance;
+    }
 
     private static boolean isEnvEntryType (Class type)
     {
@@ -404,5 +557,12 @@ public class AnnotationProcessor
             result = (type.equals(__envEntryTypes[i]));
         }
         return result;
+    }
+    
+    protected static String normalizePattern(String p)
+    {
+        if (p!=null && p.length()>0 && !p.startsWith("/") && !p.startsWith("*"))
+            return "/"+p;
+        return p;
     }
 }
