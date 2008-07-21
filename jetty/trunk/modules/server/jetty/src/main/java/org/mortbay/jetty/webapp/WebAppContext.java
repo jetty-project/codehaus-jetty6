@@ -112,6 +112,7 @@ public class WebAppContext extends Context
     private boolean _isExistingTmpDir;
     private String _war;
     private String _extraClasspath;
+    private Throwable _unavailableException;
     
     
     private transient Map _resourceAliases;
@@ -316,6 +317,16 @@ public class WebAppContext extends Context
         
         setErrorHandler(errorHandler!=null?errorHandler:new ErrorPageErrorHandler());
     }    
+
+    /* ------------------------------------------------------------ */
+    /** Get an exception that caused the webapp to be unavailable
+     * @return A throwable if the webapp is unavailable or null
+     */
+    public Throwable getUnavailableException()
+    {
+        return _unavailableException;
+    }
+
     
     /* ------------------------------------------------------------ */
     /** Set Resource Alias.
@@ -468,6 +479,7 @@ public class WebAppContext extends Context
         {
             //start up of the webapp context failed, make sure it is not started
             Log.warn("Failed startup of context "+this, e);
+            _unavailableException=e;
             _unavailable = true;
         }
     }
@@ -525,6 +537,7 @@ public class WebAppContext extends Context
                 setClassLoader(null);
             
             _unavailable = false;
+            _unavailableException=null;
         }
     }
     
@@ -1410,5 +1423,4 @@ public class WebAppContext extends Context
         canonicalName.append(hash);
         return canonicalName.toString();
     }
-
 }
