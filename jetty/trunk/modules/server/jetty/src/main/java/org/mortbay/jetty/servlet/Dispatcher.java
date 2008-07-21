@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -81,6 +82,19 @@ public class Dispatcher implements RequestDispatcher
         throw new IllegalArgumentException(type);
     }
 
+    
+    public static int type (DispatcherType type)
+    {
+        if (type.equals(DispatcherType.REQUEST))
+            return Handler.REQUEST;
+        if (type.equals(DispatcherType.FORWARD))
+            return Handler.FORWARD;
+        if (type.equals(DispatcherType.INCLUDE))
+            return Handler.INCLUDE;
+        if (type.equals(DispatcherType.ERROR))
+            return Handler.ERROR;
+        throw new IllegalArgumentException(type.toString());
+    }
 
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
