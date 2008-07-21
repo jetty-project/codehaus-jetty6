@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.mortbay.component.AbstractLifeCycle;
@@ -118,6 +119,11 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             synchronized(this)
             {
                 _cache.clear();
+                for (Iterator it = _cache.entrySet().iterator(); it.hasNext();) 
+                {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    ((Content)entry.getValue()).invalidate();;
+                }
                 _cachedSize=0;
                 _cachedFiles=0;
                 _mostRecentlyUsed=null;
@@ -462,6 +468,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 
                 _prev=null;
                 _next=null;
+                if (_resource!=null)
+                    _resource.release();
                 _resource=null;
                 
             }
