@@ -26,6 +26,8 @@ import javax.annotation.Resource;
 import javax.annotation.Resources;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.mortbay.jetty.annotations.resources.ResourceA;
 import org.mortbay.jetty.annotations.resources.ResourceB;
 import org.mortbay.jetty.plus.annotation.Injection;
@@ -47,9 +49,12 @@ public class TestAnnotationInheritance extends TestCase
     List<String> classNames = new ArrayList<String>();
     
    
-    public void tearDown ()
+    public void tearDown () throws Exception
     {
         classNames.clear();
+        InitialContext ic = new InitialContext();
+        Context comp = (Context)ic.lookup("java:comp");
+        comp.destroySubcontext("env");
     }
     
     public void testInheritance ()
@@ -82,35 +87,7 @@ public class TestAnnotationInheritance extends TestCase
         
         assertTrue(methods!=null);
         assertFalse(methods.isEmpty());
-        /*
-        assertEquals(methods.size(), 4);
-        Method m = ClassB.class.getDeclaredMethod("a", new Class[] {});       
-        assertTrue(methods.indexOf(m) >= 0);
-        Sample s = (Sample)m.getAnnotation(Sample.class);
-        assertEquals(51, s.value());
-        m = ClassA.class.getDeclaredMethod("a", new Class[] {});
-        assertTrue(methods.indexOf(m) < 0); //check overridden public scope superclass method not in there
         
-        m = ClassA.class.getDeclaredMethod("b", new Class[] {});
-        assertTrue(methods.indexOf(m) >= 0);      
-        
-        m = ClassB.class.getDeclaredMethod("c", new Class[] {});
-        assertTrue(methods.indexOf(m) >= 0);
-        m = ClassA.class.getDeclaredMethod("c", new Class[] {});
-        assertTrue(methods.indexOf(m) < 0); //check overridden superclass package scope method not in there
-        
-        m = ClassA.class.getDeclaredMethod("d", new Class[] {});
-        assertTrue(methods.indexOf(m) >= 0);
-        
-        //check fields
-        List fields = collection.getFields();
-        assertFalse(fields.isEmpty());
-        assertEquals(1, fields.size());
-        
-        Field f = ClassA.class.getDeclaredField("m");
-        assertTrue(fields.indexOf(f) >= 0);
-        
-      */
         NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
     }
     
