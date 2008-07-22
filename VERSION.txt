@@ -19,6 +19,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-635 Correctly merge request parameters when doing forward
  + JETTY-636 Separate lifeycle of jsp build
  + JETTY-637 empty date headers throw IllegalArgumentException
+ + JETTY-641 JDBC Realm purge cache problem
  + JETTY-642 NPE in LdapLoginModule
  + JETTY-644 LdapLoginModule uses proper filters when searching
  + JETTY-645 Do not provide jetty-util to the webapps
