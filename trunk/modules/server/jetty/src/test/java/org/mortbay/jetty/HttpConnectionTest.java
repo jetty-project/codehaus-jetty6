@@ -252,7 +252,59 @@ public class HttpConnectionTest extends TestCase
         }
     }
     
-    
+    public void testAsterisk()
+    {
+        String response = null;
+
+        try 
+        {
+            int offset=0;
+            
+            offset=0; connector.reopen();
+            response=connector.getResponses("OPTIONS * HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"*");
+            
+            // to prevent the DumpHandler from picking this up and returning 200 OK
+            server.setHandler(null);
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET * HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 404 Not Found");
+
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET ** HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 400 Bad Request");
+        } 
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+            if (response!=null)
+                 System.err.println(response);
+        }
+
+    }
     
     private int checkContains(String s,int offset,String c)
     {
