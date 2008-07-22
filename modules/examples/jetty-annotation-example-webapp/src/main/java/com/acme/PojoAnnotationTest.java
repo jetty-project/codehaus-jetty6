@@ -50,17 +50,16 @@ public class PojoAnnotationTest
         response.getWriter().println("<p>Acting like a Servlet.</p>");
         boolean result = (request.getMethod().equalsIgnoreCase("GET") || request.getMethod().equalsIgnoreCase("POST"));
         response.getWriter().println("<p>Method = "+request.getMethod()+(result?" PASS":" FAIL")+"</p>");
-        String initParam = request.getServletContext().getInitParameter("x");
-        result = (initParam != null && initParam.equals("y"));
-        response.getWriter().println("<p>InitParam x = "+initParam+(result?" PASS":" FAIL")+"</p>");
+      
         result = (maxAmount != null && maxAmount.doubleValue() == 55.0);
         response.getWriter().println("<p>Resource injection maxAmount = "+maxAmount+(result?" PASS":" FAIL")+"</p>");
         result = request.isUserInRole("special");
         response.getWriter().println("<p>RunAs userIsInRole special = "+result+"</p>");
         response.getWriter().println("<p>PostConstruct called "+postConstruct+"</p>");
-        response.getWriter().println("<p>PreDestroy called "+preDestroy+"</p>");
+        response.getWriter().println("<p>PreDestroy called "+!preDestroy+"</p>");
        
         /*
+         * TODO Make a pojo Filter
         HttpSession session = request.getSession(true);
         Boolean filterResult = (Boolean)session.getAttribute("filterResult");
         result = (filterResult != null && filterResult.booleanValue());
