@@ -51,7 +51,8 @@ public class HttpURI
     PORT=6,
     PATH=7,
     PARAM=8,
-    QUERY=9;
+    QUERY=9,
+    ASTERISK=10;
     
     boolean _partial=false;
     byte[] _raw=__empty;
@@ -156,6 +157,11 @@ public class HttpURI
                         _query=s;
                         _fragment=s;
                         break;
+                    }
+                    else if (c=='*')
+                    {
+                    	_path=s;
+                    	state=ASTERISK;
                     }
                     else
                         throw new IllegalArgumentException(StringUtil.toString(_raw,offset,length,URIUtil.__CHARSET));
@@ -382,6 +388,11 @@ public class HttpURI
                         break state;
                     }
                     continue;
+                }
+                
+                case ASTERISK:
+                {
+                    throw new IllegalArgumentException("only '*'");
                 }
             }
         }
