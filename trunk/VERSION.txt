@@ -23,6 +23,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-642 NPE in LdapLoginModule
  + JETTY-644 LdapLoginModule uses proper filters when searching
  + JETTY-645 Do not provide jetty-util to the webapps
+ + JETTY-647 suspended POSTs with binary data do too many resumes
  + JETTY-651 Release resources during destroy
  + JETTY-653 Upgrade jta api specs to more recent version
 
