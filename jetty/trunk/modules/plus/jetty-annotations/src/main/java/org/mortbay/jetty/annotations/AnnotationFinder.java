@@ -26,6 +26,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
@@ -254,9 +255,50 @@ public class AnnotationFinder
             return methods;
         }
         
+        public ParsedMethod getMethod(String name, String paramString)
+        {
+            Iterator<ParsedMethod> itor = methods.iterator();
+            ParsedMethod method = null;
+            while (itor.hasNext() && method==null)
+            {
+                ParsedMethod m = itor.next();
+                if (m.matches(name, paramString))
+                    method = m;
+            }
+            
+            return method;
+        }
+        
+        public void addMethod (ParsedMethod m)
+        {
+            if (getMethod(m.methodName, m.paramString)!= null)
+                return;
+            methods.add(m);
+        }
+        
         public List<ParsedField> getFields()
         {
             return fields;
+        }
+        
+        public ParsedField getField(String name)
+        {
+            Iterator<ParsedField> itor = fields.iterator();
+            ParsedField field = null;
+            while (itor.hasNext() && field==null)
+            {
+                ParsedField f = itor.next();
+                if (f.matches(name))
+                    field=f;
+            }
+            return field;
+        }
+        
+        public void addField (ParsedField f)
+        {
+            if (getField(f.fieldName) != null)
+                return;
+            fields.add(f);
         }
         
         public String toString ()
@@ -302,7 +344,7 @@ public class AnnotationFinder
         
         public AnnotationVisitor visitAnnotation(String desc, boolean visible)
         {
-            this.pclass.methods.add(this);
+            this.pclass.addMethod(this);
             return addAnnotation(desc);
         }
         
@@ -320,6 +362,17 @@ public class AnnotationFinder
             }
             
             return method;
+        }
+        
+        public boolean matches (String name, String paramString)
+        {
+            if (!methodName.equals(name))
+                return false;
+            
+            if (this.paramString!=null && this.paramString.equals(paramString))
+                return true;
+            
+            return (this.paramString == paramString);
         }
         
         public String toString ()
@@ -348,7 +401,7 @@ public class AnnotationFinder
         
         public AnnotationVisitor visitAnnotation(String desc, boolean visible)
         { 
-            this.pclass.fields.add(this);
+            this.pclass.addField(this);
             return addAnnotation(desc);
         }
         
@@ -360,6 +413,15 @@ public class AnnotationFinder
                 field=this.pclass.toClass().getDeclaredField(fieldName);
             }
             return field;
+        }
+        
+        
+        public boolean matches (String name)
+        {
+            if (fieldName.equals(name))
+                return true;
+            
+            return false;
         }
         
         public String toString ()
@@ -392,7 +454,16 @@ public class AnnotationFinder
 
         public AnnotationVisitor visitAnnotation (String desc, boolean visible)
         {  
-            parsedClasses.put(pclass.getClassName(), pclass);
+            System.err.println("VISITING CLASS "+pclass.getClassName()+"FOR ANNOTATION "+desc);
+            if (!parsedClasses.containsKey(pclass.getClassName()))
+            {
+                System.err.println("ADDING PARSED CLASS "+pclass.getClassName()+" instance = "+pclass.hashCode());
+                    parsedClasses.put(pclass.getClassName(), pclass);
+            }
+            else
+                System.err.println("PARSED CLASS "+pclass.getClassName()+" ALREADY EXISTS");
+            
+            System.err.println("ADDING annotation "+desc +" to instance "+pclass.hashCode());
             return pclass.addAnnotation(desc);
         }
 
@@ -404,8 +475,10 @@ public class AnnotationFinder
         {   
             if (!parsedClasses.values().contains(pclass))
                 parsedClasses.put(pclass.getClassName(),pclass);
-            
-            ParsedMethod method = new ParsedMethod(pclass, name, desc);
+
+            ParsedMethod method = pclass.getMethod(name, desc);
+            if (method==null)
+                method = new ParsedMethod(pclass, name, desc);
             return method;
         }
 
@@ -418,7 +491,9 @@ public class AnnotationFinder
             if (!parsedClasses.values().contains(pclass))
                 parsedClasses.put(pclass.getClassName(),pclass);
             
-            ParsedField field = new ParsedField(pclass, name);
+            ParsedField field = pclass.getField(name);
+            if (field==null)
+                field = new ParsedField(pclass, name);
             return field;
         }
     }
@@ -438,6 +513,7 @@ public class AnnotationFinder
         {
             if ((parsedClasses.get(className) == null) || (resolver.shouldOverride(className)))
             {
+                parsedClasses.remove(className);
                 className = className.replace('.', '/')+".class";
                 URL resource = Loader.getResource(this.getClass(), className, false);
                 if (resource!= null)
@@ -464,6 +540,7 @@ public class AnnotationFinder
             {
                 if ((parsedClasses.get(s) == null) || (resolver.shouldOverride(s)))
                 {                
+                    parsedClasses.remove(s);
                     s = s.replace('.', '/')+".class";
                     URL resource = Loader.getResource(this.getClass(), s, false);
                     if (resource!= null)
@@ -473,6 +550,40 @@ public class AnnotationFinder
         }
     }
     
+    public void find (Resource dir, ClassNameResolver resolver)
+    throws Exception
+    {
+        if (!dir.isDirectory() || !dir.exists())
+            return;
+        
+        
+        String[] files=dir.list();
+        for (int f=0;files!=null && f<files.length;f++)
+        {
+            try 
+            {
+                Resource res = dir.addPath(files[f]);
+                if (res.isDirectory())
+                    find(res, resolver);
+                String name = res.getName();
+                if (name.endsWith(".class"))
+                {
+                    if (!resolver.isExcluded(name))
+                    {
+                        if ((parsedClasses.get(name) == null) || (resolver.shouldOverride(name)))
+                        {
+                            parsedClasses.remove(name);
+                            scanClass(res.getURL().openStream());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.warn(Log.EXCEPTION,ex);
+            }
+        }
+    }
     
     
     public void find (ClassLoader loader, boolean visitParents, String jarNamePattern, boolean nullInclusive, final ClassNameResolver resolver)
@@ -498,6 +609,7 @@ public class AnnotationFinder
                         {
                             if ((parsedClasses.get(shortName) == null) || (resolver.shouldOverride(shortName)))
                             {
+                                parsedClasses.remove(shortName);
                                 Resource clazz = Resource.newResource("jar:"+jarUrl+"!/"+name);                     
                                 scanClass(clazz.getInputStream());
                             }
@@ -571,6 +683,7 @@ public class AnnotationFinder
                 {
                     if (key.equals(annotationClass.getName()))
                     {
+                        System.err.println("ADDING METHOD "+p.pclass.className+", "+p.methodName+", "+p.paramString);
                         methods.add(p.toMethod());
                     }
                 }

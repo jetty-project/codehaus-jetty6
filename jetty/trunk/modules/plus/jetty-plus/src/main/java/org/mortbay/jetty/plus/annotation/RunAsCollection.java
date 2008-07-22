@@ -43,6 +43,7 @@ public class RunAsCollection
 
     
     public void setRunAs (Object o)
+    throws ServletException
     {
         if (o==null)
             return;

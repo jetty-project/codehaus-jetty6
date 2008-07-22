@@ -96,24 +96,8 @@
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <excludeGroupIds>org.mortbay.jetty</excludeGroupIds>
-              <!-- artifactItems>
-                <artifactItem>
-                  <groupId>org.apache.geronimo.specs</groupId>
-                  <artifactId>geronimo-annotation_1.0_spec</artifactId>
-                  <version>1.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>asm</groupId>
-                  <artifactId>asm</artifactId>
-                  <version>3.1</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>asm</groupId>
-                  <artifactId>asm-commons</artifactId>
-                  <version>3.1</version>
-                </artifactItem>
-              </artifactItems -->
+              <excludeGroupIds>javax.mail,javax.activation,junit</excludeGroupIds>
+              <excludeArtifactIds>jetty-util,jetty,jetty-jndi,jetty-plus,servlet-api</excludeArtifactIds>
               <outputDirectory>../../../lib/annotations</outputDirectory>
             </configuration>
           </execution>
@@ -126,6 +110,11 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-annotation-spec</artifactId>
+      <version>3.0.pre0</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>

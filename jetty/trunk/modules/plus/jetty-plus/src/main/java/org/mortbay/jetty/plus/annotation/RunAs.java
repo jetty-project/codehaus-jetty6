@@ -16,6 +16,7 @@
 package org.mortbay.jetty.plus.annotation;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 
 import org.mortbay.jetty.servlet.ServletHolder;
 
@@ -55,10 +56,17 @@ public class RunAs
     
     
     public void setRunAs (ServletHolder holder)
+    throws ServletException
     {
         if (holder==null)
             return;
-        if (holder.getClassName().equals(_targetClass.getName()))
+        String className = holder.getClassName();
+        if ("org.mortbay.jetty.annotations.PojoServlet".equals(className))
+            className = holder.getServlet().getClass().getName();
+        
+        if (className.equals(_targetClass.getName()))
             holder.setRunAs(_roleName); 
     }
+    
+   
 }

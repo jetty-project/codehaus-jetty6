@@ -51,38 +51,62 @@ public class PojoServlet extends HttpServlet
     {
         _deleteMethodName = name;
     }
-    
+    public String getDeleteMethodName ()
+    {
+        return _deleteMethodName;
+    }
     public void setPutMethodName (String name)
     {
         _putMethodName = name;
     }
-    
+    public String getPutMethodName ()
+    {
+        return _putMethodName;
+    }
     public void setHeadMethodName (String name)
     {
         _headMethodName = name;
     }
-    
+
+    public String getHeadMethodName ()
+    {
+        return _headMethodName;
+    }
     public void setPostMethodName (String name)
     {
+        System.err.println("POST METHOD NAME SET "+name);
         _postMethodName = name;
+    }
+    public String getPostMethodName ()
+    {
+        return _postMethodName;
     }
     
     public void setGetMethodName (String name)
     {
         _getMethodName = name;
     }
+    public String getGetMethodName ()
+    {
+        return _getMethodName;
+    }
     
-
+  
     public void init() throws ServletException
     {
         
         try
         {
-            _getMethod = _pojo.getClass().getDeclaredMethod(_getMethodName, __params);
-            _postMethod = _pojo.getClass().getDeclaredMethod(_postMethodName, __params);
-            _headMethod = _pojo.getClass().getDeclaredMethod(_headMethodName, __params);
-            _putMethod = _pojo.getClass().getDeclaredMethod(_putMethodName, __params);
-           _deleteMethod = _pojo.getClass().getDeclaredMethod(_deleteMethodName, __params);          
+            if (_getMethodName != null)
+                _getMethod = _pojo.getClass().getDeclaredMethod(_getMethodName, __params);
+            if (_postMethodName != null)
+                _postMethod = _pojo.getClass().getDeclaredMethod(_postMethodName, __params);
+            if (_headMethodName != null)
+                _headMethod = _pojo.getClass().getDeclaredMethod(_headMethodName, __params);
+            if (_putMethodName != null)
+                _putMethod = _pojo.getClass().getDeclaredMethod(_putMethodName, __params);
+            if (_deleteMethodName != null)
+                _deleteMethod = _pojo.getClass().getDeclaredMethod(_deleteMethodName, __params);          
         }
         catch (NoSuchMethodException e)
         {
