@@ -21,20 +21,21 @@ import java.util.Map;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
 
+import junit.framework.TestCase;
 
 import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallback;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
+import org.mortbay.jetty.plus.annotation.PojoFilter;
+import org.mortbay.jetty.plus.annotation.PojoServlet;
+import org.mortbay.jetty.plus.annotation.RunAs;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
-
-import junit.framework.TestCase;
 
 public class ServletAnnotationTest extends TestCase
 { 
@@ -80,8 +81,7 @@ public class ServletAnnotationTest extends TestCase
             }
             
         });
-        
-        System.err.println(finder.toString());
+  
         
         RunAsCollection runAs = new RunAsCollection();
         InjectionCollection injections = new InjectionCollection();
@@ -123,6 +123,22 @@ public class ServletAnnotationTest extends TestCase
         List<Injection> fieldInjections = injections.getFieldInjections(ClassC.class);
         assertNotNull(fieldInjections);
         assertEquals(1, fieldInjections.size());  
+        
+        RunAs ra = runAs.getRunAs(sholder);
+        assertNotNull(ra);
+        assertEquals("admin", ra.getRoleName());
+        
+        List predestroys = callbacks.getPreDestroyCallbacks(sholder.getServlet());
+        assertNotNull(predestroys);
+        assertEquals(1, predestroys.size());
+        LifeCycleCallback cb = (LifeCycleCallback)predestroys.get(0);
+        assertTrue(cb.getTarget().equals(ClassC.class.getDeclaredMethod("pre", new Class[]{})));
+        
+        List postconstructs = callbacks.getPostConstructCallbacks(sholder.getServlet());
+        assertNotNull(postconstructs);
+        assertEquals(1, postconstructs.size());
+        cb = (LifeCycleCallback)postconstructs.get(0);
+        assertTrue(cb.getTarget().equals(ClassC.class.getDeclaredMethod("post", new Class[]{})));
     }
 
 }

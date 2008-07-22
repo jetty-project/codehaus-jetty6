@@ -106,7 +106,7 @@ public class InjectionCollection
         
         if (map==null)
             return null;
-        
+
         List<Injection>  injections = (List<Injection>)map.get(clazz);
         Injection injection = null;
         for (int i=0;injections!=null && i<injections.size() && injection==null;i++)
@@ -128,6 +128,15 @@ public class InjectionCollection
         //Get all injections pertinent to the Object by
         //looking at it's class hierarchy
         Class<?> clazz = injectable.getClass();
+        
+        
+        if (injectable instanceof PojoWrapper)
+        { 
+            injectable = ((PojoWrapper)injectable).getPojo();
+            clazz = injectable.getClass();
+        }
+      
+        
         while (clazz != null)
         {
             //Do field injections

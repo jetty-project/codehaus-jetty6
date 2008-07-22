@@ -17,6 +17,8 @@ package org.mortbay.jetty.plus.annotation;
 
 import java.util.HashMap;
 
+import javax.servlet.ServletException;
+
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.log.Log;
 
@@ -41,6 +43,20 @@ public class RunAsCollection
         _runAsMap.put(runAs.getTargetClass().getName(), runAs);
     }
 
+    public RunAs getRunAs (Object o)
+    throws ServletException
+    {
+        if (o==null)
+            return null;
+        
+        if (!(o instanceof ServletHolder))
+            return null;
+
+        ServletHolder holder = (ServletHolder)o;
+
+        String className = RunAs.getServletClassNameForHolder(holder);
+        return (RunAs)_runAsMap.get(className);
+    }
     
     public void setRunAs (Object o)
     throws ServletException
@@ -53,7 +69,8 @@ public class RunAsCollection
 
         ServletHolder holder = (ServletHolder)o;
 
-        RunAs runAs = (RunAs)_runAsMap.get(holder.getClassName());
+        String className = RunAs.getServletClassNameForHolder(holder);
+        RunAs runAs = (RunAs)_runAsMap.get(className);
         if (runAs == null)
             return;
 
