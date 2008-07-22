@@ -21,6 +21,7 @@
  + JETTY-633 Default form encoding 8859_1 rather than utf-8
  + JETTY-635 Correctly merge request parameters when doing forward
  + JETTY-637 empty date headers throw IllegalArgumentException
+ + JETTY-641 JDBC Realm purge cache problem
  + JETTY-642 NPE in LdapLoginModule
  + JETTY-644 LdapLoginModule uses proper filters when searching
  + JETTY-651 Release resources during destroy

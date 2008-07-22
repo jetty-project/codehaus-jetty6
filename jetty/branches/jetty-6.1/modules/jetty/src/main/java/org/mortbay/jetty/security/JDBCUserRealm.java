@@ -139,7 +139,9 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         _userRoleTable = properties.getProperty("userroletable");
         _userRoleTableUserKey = properties.getProperty("userroletableuserkey");
         _userRoleTableRoleKey = properties.getProperty("userroletablerolekey");
-        _cacheTime = new Integer(properties.getProperty("cachetime")).intValue();
+        // default cachetime = 30s
+        String cachetime = properties.getProperty("cachetime");
+        _cacheTime = cachetime!=null ? new Integer(cachetime).intValue() : 30;
         
         if (_jdbcDriver == null || _jdbcDriver.equals("")
             || _url == null || _url.equals("")
@@ -214,7 +216,18 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         return super.authenticate(username, credentials, request);
     }
     
-    
+    /* ------------------------------------------------------------ */
+    /** Check if a user is in a role.
+     * @param user The user, which must be from this realm 
+     * @param roleName 
+     * @return True if the user can act in the role.
+     */
+    public synchronized boolean isUserInRole(Principal user, String roleName)
+    {
+        if(super.getPrincipal(user.getName())==null)
+            loadUser(user.getName());
+        return super.isUserInRole(user, roleName);
+    }
     
 
 
