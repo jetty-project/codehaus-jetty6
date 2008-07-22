@@ -40,6 +40,13 @@ import org.mortbay.jetty.servlet.ServletMapping;
 public class ServletAnnotationTest extends TestCase
 { 
    
+    public void tearDown()
+    throws Exception
+    {
+        InitialContext ic = new InitialContext();
+        Context comp = (Context)ic.lookup("java:comp");
+        comp.destroySubcontext("env");
+    }
     
     public void testAnnotations() throws Exception
     {
