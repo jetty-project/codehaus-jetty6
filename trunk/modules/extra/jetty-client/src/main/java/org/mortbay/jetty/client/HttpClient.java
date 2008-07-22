@@ -82,7 +82,7 @@ public class HttpClient extends AbstractBuffers
     public static final int CONNECTOR_SOCKET=0;
     public static final int CONNECTOR_SELECT_CHANNEL=2;
 
-    private int _connectorType=CONNECTOR_SOCKET;
+    private int _connectorType=CONNECTOR_SELECT_CHANNEL;
     private boolean _useDirectBuffers=true;
     private int _maxConnectionsPerAddress=32;
     private Map<InetSocketAddress, HttpDestination> _destinations=new HashMap<InetSocketAddress, HttpDestination>();
@@ -325,14 +325,10 @@ public class HttpClient extends AbstractBuffers
             QueuedThreadPool pool = new QueuedThreadPool();
             pool.setMaxThreads(16);
             pool.setDaemon(true);
+            pool.setName("HttpClient");
             _threadPool=pool;
         }
         
-        
-        if (_threadPool instanceof QueuedThreadPool)
-        {
-            ((QueuedThreadPool)_threadPool).setName("HttpClient");
-        }
         if (_threadPool instanceof LifeCycle)
         {
             ((LifeCycle)_threadPool).start();
