@@ -164,7 +164,7 @@ public class AnnotationTest extends HttpServlet
             response.setContentType("text/html");
             ServletOutputStream out = response.getOutputStream();
             out.println("<html>");
-            out.println("<h1>Jetty6 Annotation Results</h1>");
+            out.println("<h1>Jetty Annotation Results</h1>");
             out.println("<body>");
             
             out.println("<h2>@PostConstruct Callback</h2>");
