@@ -24,6 +24,7 @@
  + JETTY-641 JDBC Realm purge cache problem
  + JETTY-642 NPE in LdapLoginModule
  + JETTY-644 LdapLoginModule uses proper filters when searching
+ + JETTY-647 suspended POSTs with binary data do too many resumes
  + JETTY-651 Release resources during destroy
 
 jetty-6.1.11 6 June 2008
