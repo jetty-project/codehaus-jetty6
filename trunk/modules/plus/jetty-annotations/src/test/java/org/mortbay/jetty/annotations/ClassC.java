@@ -16,6 +16,9 @@ package org.mortbay.jetty.annotations;
 
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import javax.annotation.security.RunAs;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
@@ -26,8 +29,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.annotation.FilterMapping;
 import javax.servlet.http.annotation.InitParam;
 import javax.servlet.http.annotation.Servlet;
-import javax.servlet.http.annotation.POST;
-import javax.servlet.http.annotation.GET;
+import javax.servlet.http.annotation.jaxrs.POST;
+import javax.servlet.http.annotation.jaxrs.GET;
 import javax.servlet.http.annotation.ServletFilter;
 
 
@@ -36,6 +39,20 @@ import javax.servlet.http.annotation.ServletFilter;
 @RunAs("admin")
 public class ClassC
 {
+    @Resource (mappedName="foo")
+    private Double foo;
+    
+    @PreDestroy
+    public void pre ()
+    {
+        
+    }
+    
+    @PostConstruct
+    public void post()
+    {
+        
+    }
     
     @GET()
     @POST()

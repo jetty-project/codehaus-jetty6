@@ -18,8 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
 
+
+import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
+import org.mortbay.jetty.plus.annotation.LifeCycleCallback;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.servlet.FilterHolder;
@@ -35,6 +42,19 @@ public class ServletAnnotationTest extends TestCase
     
     public void testAnnotations() throws Exception
     {
+        InitialContext ic = new InitialContext();
+        Context comp = (Context)ic.lookup("java:comp");
+        Context env = null;
+        try
+        {
+            env = (Context)comp.lookup("env");
+        }
+        catch (NameNotFoundException e)
+        {
+            env = comp.createSubcontext("env");
+        }
+          
+        org.mortbay.jetty.plus.naming.EnvEntry foo = new org.mortbay.jetty.plus.naming.EnvEntry("foo", new Double(1000.00));
         List servlets = new ArrayList();
         List filters = new ArrayList();
         List listeners = new ArrayList();
@@ -56,23 +76,37 @@ public class ServletAnnotationTest extends TestCase
 
             public boolean shouldOverride(String name)
             {
-                return false;
+                return true;
             }
             
         });
         
-        AnnotationProcessor processor = new AnnotationProcessor (finder, new RunAsCollection(), new InjectionCollection(), new LifeCycleCallbackCollection(), 
+        System.err.println(finder.toString());
+        
+        RunAsCollection runAs = new RunAsCollection();
+        InjectionCollection injections = new InjectionCollection();
+        LifeCycleCallbackCollection callbacks = new LifeCycleCallbackCollection();
+        
+        AnnotationProcessor processor = new AnnotationProcessor (finder, runAs, injections, callbacks, 
                 servlets, filters, listeners, servletMappings, filterMappings);
         processor.process();
+        
+        
         assertEquals(1, servlets.size());
         ServletHolder sholder = (ServletHolder)servlets.get(0);
         assertEquals("CServlet", sholder.getName());
+        assertTrue(sholder.getServlet() instanceof PojoServlet);
+        PojoServlet ps  = (PojoServlet)sholder.getServlet();
+        assertEquals("anything", ps.getGetMethodName());
+        assertEquals("anything", ps.getPostMethodName());
         Map sinitparams = sholder.getInitParameters();
         assertEquals(1, sinitparams.size());
         assertTrue(sinitparams.containsKey("x"));
         assertTrue(sinitparams.containsValue("y"));
         assertEquals(1, filters.size());
         FilterHolder fholder = (FilterHolder)filters.get(0);
+        assertTrue(fholder.getFilter() instanceof PojoFilter);
+        
         Map finitparams = fholder.getInitParameters();
         assertEquals(1, finitparams.size());
         assertTrue(finitparams.containsKey("a"));
@@ -86,6 +120,9 @@ public class ServletAnnotationTest extends TestCase
         assertEquals("CFilter", fmap.getFilterName());
         assertEquals(1, fmap.getPathSpecs().length);
         
+        List<Injection> fieldInjections = injections.getFieldInjections(ClassC.class);
+        assertNotNull(fieldInjections);
+        assertEquals(1, fieldInjections.size());  
     }
 
 }
