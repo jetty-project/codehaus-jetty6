@@ -379,7 +379,7 @@ public abstract class BayeuxService
         }
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
-            if (!_seeOwn && fromClient==_client)
+            if (!_seeOwn && (fromClient==_client || fromClient==getClient()))
                 return;
             invoke(_method,fromClient,toClient,msg);
         }
@@ -399,7 +399,7 @@ public abstract class BayeuxService
         }
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
-            if (!_seeOwn && fromClient==_client)
+            if (!_seeOwn && (fromClient==_client || fromClient==getClient()))
                 return;
             invoke(_method,fromClient,toClient,msg);
         }
