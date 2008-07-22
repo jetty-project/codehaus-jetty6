@@ -13,14 +13,14 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.annotations;
+package org.mortbay.jetty.plus.annotation;
 
 import java.lang.reflect.Method;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-public class PojoContextListener implements ServletContextListener
+public class PojoContextListener implements ServletContextListener, PojoWrapper
 {
     private Object _pojo;
     private Method _contextDestroyedMethod;
@@ -43,6 +43,11 @@ public class PojoContextListener implements ServletContextListener
         {
             throw new IllegalStateException (e.getLocalizedMessage());   
         }
+    }
+    
+    public Object getPojo()
+    {
+        return _pojo;
     }
 
     public void contextDestroyed(ServletContextEvent event)

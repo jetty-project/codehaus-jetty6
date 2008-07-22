@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.annotations;
+package org.mortbay.jetty.plus.annotation;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -28,7 +28,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class PojoFilter implements Filter
+public class PojoFilter implements Filter, PojoWrapper
 {
     private Object _pojo;
     private Method _doFilterMethod;
@@ -51,7 +51,12 @@ public class PojoFilter implements Filter
         }
 
     }
-
+    
+    public Object getPojo()
+    {
+        return _pojo;
+    }
+    
     public void destroy()
     {
        //TODO???? Should try to find a destroy method on the pojo?

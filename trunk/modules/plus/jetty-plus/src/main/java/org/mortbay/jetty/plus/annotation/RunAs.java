@@ -60,13 +60,18 @@ public class RunAs
     {
         if (holder==null)
             return;
-        String className = holder.getClassName();
-        if ("org.mortbay.jetty.annotations.PojoServlet".equals(className))
-            className = holder.getServlet().getClass().getName();
-        
+        String className = getServletClassNameForHolder(holder);
+
         if (className.equals(_targetClass.getName()))
             holder.setRunAs(_roleName); 
     }
     
+    public static String getServletClassNameForHolder (ServletHolder holder)
+    throws ServletException
+    {
+        if (PojoServlet.class.getName().equals(holder.getClassName()))
+            return ((PojoWrapper)holder.getServlet()).getPojo().getClass().getName();
+        return holder.getClassName();
+    }
    
 }

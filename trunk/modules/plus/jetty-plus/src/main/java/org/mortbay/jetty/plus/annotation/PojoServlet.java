@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.annotations;
+package org.mortbay.jetty.plus.annotation;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class PojoServlet extends HttpServlet
+public class PojoServlet extends HttpServlet implements PojoWrapper
 {
     private Object _pojo;
     private String _deleteMethodName;
@@ -47,6 +47,10 @@ public class PojoServlet extends HttpServlet
         _pojo=pojo;    
     }
 
+    public Object getPojo()
+    {
+        return _pojo;
+    }
     public void setDeleteMethodName (String name)
     {
         _deleteMethodName = name;
@@ -74,7 +78,6 @@ public class PojoServlet extends HttpServlet
     }
     public void setPostMethodName (String name)
     {
-        System.err.println("POST METHOD NAME SET "+name);
         _postMethodName = name;
     }
     public String getPostMethodName ()
