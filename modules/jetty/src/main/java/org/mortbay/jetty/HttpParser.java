@@ -646,6 +646,11 @@ public class HttpParser implements Parser
                     _contentView.update(chunk);
                     _handler.content(chunk); // May recurse here 
                     
+                    if(_contentPosition == _contentLength)
+                    {
+                        _state=STATE_END;
+                        _handler.messageComplete(_contentPosition);
+                    }
                     // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
                 }
@@ -894,6 +899,12 @@ public class HttpParser implements Parser
         return "state=" + _state + " length=" + _length + " buf=" + buf.hashCode();
     }
 
+    /* ------------------------------------------------------------------------------- */
+    public String toString()
+    {
+        return "state=" + _state + " length=" + _length + " len=" + _contentLength;
+    }    
+    
     /* ------------------------------------------------------------ */
     public Buffer getHeaderBuffer()
     {
