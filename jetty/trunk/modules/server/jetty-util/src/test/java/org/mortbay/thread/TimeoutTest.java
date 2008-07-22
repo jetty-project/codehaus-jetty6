@@ -152,8 +152,9 @@ public class TimeoutTest extends TestCase
                         // have no funny optimisation issues.
                         synchronized (lock)
                         {
-                            lock.wait(60);
+                            lock.wait(30);
                         }
+                        Thread.sleep(30);
                         timeout.tick(System.currentTimeMillis());
                     }
                     catch(Exception e)
@@ -222,10 +223,7 @@ public class TimeoutTest extends TestCase
                             timeout.schedule(task,delay);
                             
                             // do the wait
-                            synchronized (lock)
-                            {
-                                lock.wait(wait);
-                            }
+                            Thread.sleep(wait);
                             
                             // cancel task (which may have expired)
                             task.cancel();
