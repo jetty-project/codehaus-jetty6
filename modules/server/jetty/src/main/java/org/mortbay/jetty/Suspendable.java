@@ -452,6 +452,7 @@ public class Suspendable
             _state=(_state==__SUSPENDED||_state==__IDLE)?__IDLE:__HANDLING;
             _resumed = false;
             _initial = true;
+            _timeout = false;
             cancelTimeout();
         }
     }
