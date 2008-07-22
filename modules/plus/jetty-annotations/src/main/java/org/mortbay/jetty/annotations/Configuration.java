@@ -16,11 +16,14 @@
 package org.mortbay.jetty.annotations;
 
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 
 import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
@@ -64,33 +67,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
          * annotation.
          */
        
-        //Scan classes from webapp specifically mentioned in web.xml
-        List<String> classNames = new ArrayList<String>();
-         
-        //look thru _servlets      
-        Iterator itor = LazyList.iterator(_servlets);
-        while (itor.hasNext())
-        {
-            ServletHolder holder = (ServletHolder)itor.next();
-            classNames.add(holder.getClassName());
-        }
-        
-        //look thru _filters
-        itor = LazyList.iterator(_filters);
-        while (itor.hasNext())
-        {
-            FilterHolder holder = (FilterHolder)itor.next();
-            classNames.add(holder.getClassName());
-        }
-        
-        //look thru _listeners
-        itor = LazyList.iterator(_listeners);
-        while (itor.hasNext())
-        {
-            Object listener = itor.next();
-            classNames.add(listener.getClass().getName());
-        }
-        
+       
         AnnotationFinder finder = new AnnotationFinder();
 
         //if no pattern for the container path is defined, then by default scan NOTHING
@@ -133,10 +110,10 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
                             return false;
                         return true;
                     }
-                });
-
-        Log.debug("Scanning classes from web.xml");
-        finder.find(classNames, 
+                });       
+        
+        Log.debug("Scanning classes in WEB-INF/classes");
+        finder.find(_context.getWebInf().addPath("classes/"), 
                 new ClassNameResolver()
                 {
                     public boolean isExcluded (String name)
@@ -163,5 +140,11 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
         _filters = processor.getFilters();
         _servletMappings = processor.getServletMappings();
         _filterMappings = processor.getFilterMappings();
+        _listeners = processor.getListeners();
+        _servletHandler.setFilters((FilterHolder[])LazyList.toArray(_filters,FilterHolder.class));
+        _servletHandler.setFilterMappings((FilterMapping[])LazyList.toArray(_filterMappings,FilterMapping.class));
+        _servletHandler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
+        _servletHandler.setServletMappings((ServletMapping[])LazyList.toArray(_servletMappings,ServletMapping.class));
+        getWebAppContext().setEventListeners((EventListener[])LazyList.toArray(_listeners,EventListener.class));
     }
 }

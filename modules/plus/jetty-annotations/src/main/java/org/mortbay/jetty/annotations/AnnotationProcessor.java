@@ -31,6 +31,11 @@ import javax.annotation.security.RunAs;
 import javax.naming.NamingException;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.annotation.InitParam;
+import javax.servlet.http.annotation.jaxrs.DELETE;
+import javax.servlet.http.annotation.jaxrs.GET;
+import javax.servlet.http.annotation.jaxrs.HEAD;
+import javax.servlet.http.annotation.jaxrs.POST;
+import javax.servlet.http.annotation.jaxrs.PUT;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.plus.annotation.Injection;
@@ -98,8 +103,44 @@ public class AnnotationProcessor
         //@Servlet(urlMappings=String[], description=String, icon=String, loadOnStartup=int, name=String, initParams=InitParams[])
         for (Class clazz:_finder.getClassesForAnnotation(javax.servlet.http.annotation.Servlet.class))
         {
+            System.err.println("LOOKING AT SERVLET "+clazz.getName());
             javax.servlet.http.annotation.Servlet annotation = (javax.servlet.http.annotation.Servlet)clazz.getAnnotation(javax.servlet.http.annotation.Servlet.class);
             PojoServlet servlet = new PojoServlet(getPojoInstanceFor(clazz));
+            
+            List<Method> methods = _finder.getMethodsForAnnotation(GET.class);
+            if (methods.size() > 1)
+                throw new IllegalStateException ("More than one GET annotation on "+clazz.getName());           
+            else if (methods.size() == 1)
+                servlet.setGetMethodName(methods.get(0).getName());
+            
+            System.err.println("GET METHOD "+methods.size());
+            
+            methods = _finder.getMethodsForAnnotation(POST.class);
+            if (methods.size() > 1)
+                throw new IllegalStateException ("More than one POST annotation on "+clazz.getName());
+            else if (methods.size() == 1)
+                servlet.setPostMethodName(methods.get(0).getName());
+            
+            System.err.println("POST METHOD "+methods.size());
+            
+            methods = _finder.getMethodsForAnnotation(PUT.class);
+            if (methods.size() > 1)
+                throw new IllegalStateException ("More than one PUT annotation on "+clazz.getName());
+            else if (methods.size() == 1)
+                servlet.setPutMethodName(methods.get(0).getName());
+            
+            methods = _finder.getMethodsForAnnotation(DELETE.class);
+            if (methods.size() > 1)
+                throw new IllegalStateException ("More than one DELETE annotation on "+clazz.getName());
+            else if (methods.size() == 1)
+                servlet.setDeleteMethodName(methods.get(0).getName());
+            
+            methods = _finder.getMethodsForAnnotation(HEAD.class);
+            if (methods.size() > 1)
+                throw new IllegalStateException ("More than one HEAD annotation on "+clazz.getName());
+            else if (methods.size() == 1)
+                servlet.setHeadMethodName(methods.get(0).getName());
+            
             ServletHolder holder = new ServletHolder(servlet);
             holder.setName((annotation.name().equals("")?clazz.getName():annotation.name()));
             holder.setInitOrder(annotation.loadOnStartup());
@@ -109,6 +150,7 @@ public class AnnotationProcessor
             {
                 holder.setInitParameter(ip.name(), ip.value());
             }
+            
             if (annotation.urlMappings().length > 0)
             {
                 ArrayList paths = new ArrayList();
@@ -130,6 +172,7 @@ public class AnnotationProcessor
         //@ServletFilter(description=String, filterName=String, displayName=String, icon=String,initParams=InitParam[], filterMapping=FilterMapping)
         for (Class clazz:_finder.getClassesForAnnotation(javax.servlet.http.annotation.ServletFilter.class))
         {
+            System.err.println("LOOKING AT FILTER "+clazz.getName());
             javax.servlet.http.annotation.ServletFilter annotation = (javax.servlet.http.annotation.ServletFilter)clazz.getAnnotation(javax.servlet.http.annotation.ServletFilter.class);
             PojoFilter filter = new PojoFilter(getPojoInstanceFor(clazz));
 
@@ -222,6 +265,7 @@ public class AnnotationProcessor
                 String role = runAs.value();
                 if (role != null)
                 {
+                    System.err.println("ADDING NEW RUNAS with ROLE "+role);
                     org.mortbay.jetty.plus.annotation.RunAs ra = new org.mortbay.jetty.plus.annotation.RunAs();
                     ra.setTargetClass(clazz);
                     ra.setRoleName(role);
@@ -255,6 +299,7 @@ public class AnnotationProcessor
             if (Modifier.isStatic(m.getModifiers()))
                 throw new IllegalStateException(m+" is static");
 
+            System.err.println("ADDING POSTCONSTRUCT CALLBACK FOR "+m.getDeclaringClass().getName()+"."+m.getName());
             PostConstructCallback callback = new PostConstructCallback();
             callback.setTargetClass(m.getDeclaringClass());
             callback.setTarget(m);
@@ -277,7 +322,7 @@ public class AnnotationProcessor
                 throw new IllegalStateException(m+" throws checked exceptions");
             if (Modifier.isStatic(m.getModifiers()))
                 throw new IllegalStateException(m+" is static");
-
+            System.err.println("ADDING PREDESTROY CALLBACK FOR "+m.getDeclaringClass().getName()+"."+m.getName());
             PreDestroyCallback callback = new PreDestroyCallback(); 
             callback.setTargetClass(m.getDeclaringClass());
             callback.setTarget(m);
@@ -339,6 +384,7 @@ public class AnnotationProcessor
         List<Class<?>> classes = _finder.getClassesForAnnotation(Resource.class);
         for (Class<?> clazz:classes)
         {
+            System.err.println("PROCESSING RESOURCE on CLASS "+clazz.getName());
             //Handle Resource annotation - add namespace entries
             Resource resource = (Resource)clazz.getAnnotation(Resource.class);
             if (resource == null)

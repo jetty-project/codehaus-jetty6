@@ -24,6 +24,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-644 LdapLoginModule uses proper filters when searching
  + JETTY-645 Do not provide jetty-util to the webapps
  + JETTY-651 Release resources during destroy
+ + JETTY-653 Upgrade jta api specs to more recent version
 
 jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full
