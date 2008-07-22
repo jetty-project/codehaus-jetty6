@@ -26,6 +26,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-647 suspended POSTs with binary data do too many resumes
  + JETTY-651 Release resources during destroy
  + JETTY-653 Upgrade jta api specs to more recent version
+ + JETTY-654 Allow Cometd Bayeux object to be JMX manageable
  + JETTY-655 Support parsing application/x-www-form-urlencoded parameters via http PUT
 
 jetty-7.0.0pre2 - 30 June 2008

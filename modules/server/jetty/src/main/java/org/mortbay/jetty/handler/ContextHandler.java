@@ -71,11 +71,11 @@ import org.mortbay.util.URIUtil;
  * This handler wraps a call to handle by setting the context and
  * servlet path, plus setting the context classloader.
  * 
- * Note. Because of http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4425695
- * directly replacing war or jar files in a context is not supported.
- * You should use classes instead of jars if they will change, or deploy
- * a packed war file that gets extracted on deployment.
- * 
+ * <p>
+ * If the context init parameter "org.mortbay.jetty.servlet.ManagedAttributes"
+ * is set to a coma separated list of names, then they are treated as context
+ * attribute names, which if set as attributes are passed to the servers Container
+ * so that they may be managed with JMX.
  * 
  * @org.apache.xbean.XBean description="Creates a basic HTTP context"
  *
@@ -84,7 +84,8 @@ import org.mortbay.util.URIUtil;
  */
 public class ContextHandler extends HandlerWrapper implements Attributes, Server.Graceful, CompleteHandler
 {
-    private static ThreadLocal __context=new ThreadLocal();
+    private static ThreadLocal<SContext> __context=new ThreadLocal<SContext>();
+    public static final String MANAGED_ATTRIBUTES = "org.mortbay.jetty.servlet.ManagedAttributes";
     
     /* ------------------------------------------------------------ */
     /** Get the current ServletContext implementation.
@@ -95,25 +96,25 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      */
     public static SContext getCurrentContext()
     {
-        SContext context = (SContext)__context.get();
+        SContext context = __context.get();
         return context;
     }
 
     protected SContext _scontext;
     
-    private Attributes _attributes;
-    private Attributes _contextAttributes;
+    private AttributesMap _attributes;
+    private AttributesMap _contextAttributes;
     private ClassLoader _classLoader;
     private String _contextPath="/";
-    private Map _initParams;
+    private Map<String,String> _initParams;
     private String _displayName;
     private Resource _baseResource;  
     private MimeTypes _mimeTypes;
-    private Map _localeEncodingMap;
+    private Map<String,String> _localeEncodingMap;
     private String[] _welcomeFiles;
     private ErrorHandler _errorHandler;
     private String[] _vhosts;
-    private Set _connectors;
+    private Set<String> _connectors;
     private EventListener[] _eventListeners;
     private Logger _logger;
     private boolean _shutdown;
@@ -126,6 +127,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private Object _contextAttributeListeners;
     private Object _requestListeners;
     private Object _requestAttributeListeners;
+    private Set<String> _managedAttributes;
     
     /* ------------------------------------------------------------ */
     /**
@@ -136,7 +138,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         super();
         _scontext=new SContext();
         _attributes=new AttributesMap();
-        _initParams=new HashMap();
+        _initParams=new HashMap<String,String>();
     }
     
     /* ------------------------------------------------------------ */
@@ -148,7 +150,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         super();
         _scontext=context;
         _attributes=new AttributesMap();
-        _initParams=new HashMap();
+        _initParams=new HashMap<String,String>();
     }
     
     /* ------------------------------------------------------------ */
@@ -211,7 +213,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         }
         else
             super.setServer(server); 
-        
     }
 
     /* ------------------------------------------------------------ */
@@ -299,7 +300,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         if (connectors==null || connectors.length==0)
             _connectors=null;
         else
-            _connectors= new HashSet(Arrays.asList(connectors));
+            _connectors= new HashSet<String>(Arrays.asList(connectors));
     }
     
     /* ------------------------------------------------------------ */
@@ -315,6 +316,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /* 
      * @see javax.servlet.ServletContext#getAttributeNames()
      */
+    @SuppressWarnings("unchecked")
     public Enumeration getAttributeNames()
     {
         return AttributesMap.getAttributeNamesCopy(_attributes);
@@ -395,6 +397,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /* 
      * @see javax.servlet.ServletContext#getInitParameterNames()
      */
+    @SuppressWarnings("unchecked")
     public Enumeration getInitParameterNames()
     {
         return Collections.enumeration(_initParams.keySet());
@@ -404,7 +407,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /**
      * @return Returns the initParams.
      */
-    public Map getInitParams()
+    public Map<String,String> getInitParams()
     {
         return _initParams;
     }
@@ -490,10 +493,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         _logger=Log.getLogger(getDisplayName()==null?getContextPath():getDisplayName());
         ClassLoader old_classloader=null;
         Thread current_thread=null;
-        Object old_context=null;
+        SContext old_context=null;
+
         _contextAttributes=new AttributesMap();
         try
         {
+            
             // Set the classloader
             if (_classLoader!=null)
             {
@@ -514,6 +519,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             
             startContext();
             
+           
         }
         finally
         {
@@ -545,6 +551,23 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 ((ServletContextListener)LazyList.get(_contextListeners, i)).contextInitialized(event);
             }
         }
+
+        String managedAttributes = _initParams.get(MANAGED_ATTRIBUTES);
+        if (managedAttributes!=null)
+        {
+            _managedAttributes=new HashSet<String>();
+            String[] attributes = managedAttributes.toString().split(",");
+            for (String s : attributes)
+                _managedAttributes.add(s);
+
+            Enumeration e = _scontext.getAttributeNames();
+            while(e.hasMoreElements())
+            {
+                String name = (String)e.nextElement();
+                Object value = _scontext.getAttribute(name);
+                setManagedAttribute(name,value);
+            }
+        }       
     }
     
     /* ------------------------------------------------------------ */
@@ -556,7 +579,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         ClassLoader old_classloader=null;
         Thread current_thread=null;
 
-        Object old_context=__context.get();
+        SContext old_context=__context.get();
         __context.set(_scontext);
         try
         {
@@ -582,6 +605,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
 
             if (_errorHandler!=null)
                 _errorHandler.stop();
+            
+            Enumeration e = _scontext.getAttributeNames();
+            while(e.hasMoreElements())
+            {
+                String name = (String)e.nextElement();
+                setManagedAttribute(name,null);
+            }
         }
         finally
         {
@@ -829,6 +859,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      */
     public void removeAttribute(String name)
     {
+        setManagedAttribute(name,null);
         _attributes.removeAttribute(name);
     }
 
@@ -841,6 +872,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      */
     public void setAttribute(String name, Object value)
     {
+        setManagedAttribute(name,value);
         _attributes.setAttribute(name,value);
     }
     
@@ -850,13 +882,53 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      */
     public void setAttributes(Attributes attributes)
     {
-        _attributes = attributes;
+        if (attributes instanceof AttributesMap)
+        {
+            _attributes = (AttributesMap)attributes;
+            Enumeration e = _attributes.getAttributeNames();
+            while (e.hasMoreElements())
+            {
+                String name = (String)e.nextElement();
+                setManagedAttribute(name,attributes.getAttribute(name));
+            }
+        }
+        else
+        {
+            _attributes=new AttributesMap();
+            Enumeration e = attributes.getAttributeNames();
+            while (e.hasMoreElements())
+            {
+                String name = (String)e.nextElement();
+                Object value=attributes.getAttribute(name);
+                setManagedAttribute(name,value);
+                _attributes.setAttribute(name,value);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
     public void clearAttributes()
     {
+        Enumeration e = _attributes.getAttributeNames();
+        while (e.hasMoreElements())
+        {
+            String name = (String)e.nextElement();
+            setManagedAttribute(name,null);
+        }
         _attributes.clearAttributes();
+    }
+
+    /* ------------------------------------------------------------ */
+    private void setManagedAttribute(String name, Object value)
+    {   
+        if (_managedAttributes!=null && _managedAttributes.contains(name))
+        {
+            Object o =_scontext.getAttribute(name);
+            if (o!=null)
+                getServer().getContainer().removeBean(o);
+            if (value!=null)
+                getServer().getContainer().addBean(value);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -890,11 +962,11 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /**
      * @param initParams The initParams to set.
      */
-    public void setInitParams(Map initParams)
+    public void setInitParams(Map<String,String> initParams)
     {
         if (initParams == null)
             return;
-        _initParams = new HashMap(initParams);
+        _initParams = new HashMap<String,String>(initParams);
     }
     
     /* ------------------------------------------------------------ */
@@ -1071,7 +1143,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized Class loadClass(String className)
+    public synchronized Class<?> loadClass(String className)
         throws ClassNotFoundException
     {
         if (className==null)
@@ -1088,7 +1160,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     public void addLocaleEncoding(String locale,String encoding)
     {
         if (_localeEncodingMap==null)
-            _localeEncodingMap=new HashMap();
+            _localeEncodingMap=new HashMap<String,String>();
         _localeEncodingMap.put(locale, encoding);
     }
     
@@ -1170,7 +1242,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     /* ------------------------------------------------------------ */
     /* 
      */
-    public Set getResourcePaths(String path)
+    public Set<String> getResourcePaths(String path)
     {           
         try
         {
@@ -1185,7 +1257,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 String[] l=resource.list();
                 if (l!=null)
                 {
-                    HashSet set = new HashSet();
+                    HashSet<String> set = new HashSet<String>();
                     for(int i=0;i<l.length;i++)
                         set.add(path+l[i]);
                     return set;
@@ -1196,7 +1268,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         {
             Log.ignore(e);
         }
-        return Collections.EMPTY_SET;
+        return Collections.emptySet();
     }
 
     
@@ -1365,7 +1437,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public String getServerInfo()
         {
-            return "jetty/"+getServer().getVersion();
+            return "jetty/"+Server.getVersion();
         }
 
         /* ------------------------------------------------------------ */
@@ -1381,6 +1453,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         /* 
          * @see javax.servlet.ServletContext#getServletNames()
          */
+        @SuppressWarnings("unchecked")
         public Enumeration getServletNames()
         {
             return Collections.enumeration(Collections.EMPTY_LIST);
@@ -1390,6 +1463,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         /* 
          * @see javax.servlet.ServletContext#getServlets()
          */
+        @SuppressWarnings("unchecked")
         public Enumeration getServlets()
         {
             return Collections.enumeration(Collections.EMPTY_LIST);
@@ -1435,6 +1509,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         /* 
          * @see javax.servlet.ServletContext#getInitParameterNames()
          */
+        @SuppressWarnings("unchecked")
         public Enumeration getInitParameterNames()
         {
             return ContextHandler.this.getInitParameterNames();
@@ -1456,16 +1531,17 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
         /* 
          * @see javax.servlet.ServletContext#getAttributeNames()
          */
+        @SuppressWarnings("unchecked")
         public synchronized Enumeration getAttributeNames()
         {
-            HashSet set = new HashSet();
+            HashSet<String> set = new HashSet<String>();
             if (_contextAttributes!=null)
             {
-            	Enumeration e = _contextAttributes.getAttributeNames();
+            	Enumeration<String> e = _contextAttributes.getAttributeNames();
             	while(e.hasMoreElements())
             		set.add(e.nextElement());
             }
-            Enumeration e = ContextHandler.this.getAttributeNames();
+            Enumeration<String> e = _attributes.getAttributeNames();
             while(e.hasMoreElements())
                 set.add(e.nextElement());
             
@@ -1478,13 +1554,15 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public synchronized void setAttribute(String name, Object value)
         {
+            
             if (_contextAttributes==null)
             {
             	// Set it on the handler
             	ContextHandler.this.setAttribute(name, value);
                 return;
             }
-            
+
+            setManagedAttribute(name,value);
             Object old_value=_contextAttributes==null?null:_contextAttributes.getAttribute(name);
             
             if (value==null)
@@ -1517,10 +1595,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public synchronized void removeAttribute(String name)
         {
+            setManagedAttribute(name,null);
+            
             if (_contextAttributes==null)
             {
             	// Set it on the handler
-            	ContextHandler.this.removeAttribute(name);
+            	_attributes.removeAttribute(name);
                 return;
             }
             
