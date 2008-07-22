@@ -247,8 +247,9 @@ public class TimeoutTest extends TestCase
             running[0]=false;
         }
         // give some time for test to stop
-        Thread.sleep(4000);
+        Thread.sleep(2000);
         timeout.tick(System.currentTimeMillis());
+        Thread.sleep(1000);
         
         // check the counts
         assertEquals("count threads", LOOP,count[0]);
