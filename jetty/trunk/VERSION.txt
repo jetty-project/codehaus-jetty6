@@ -29,6 +29,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-653 Upgrade jta api specs to more recent version
  + JETTY-654 Allow Cometd Bayeux object to be JMX manageable
  + JETTY-655 Support parsing application/x-www-form-urlencoded parameters via http PUT
+ + JETTY-656 HttpClient defaults to async mode
 
 jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full
