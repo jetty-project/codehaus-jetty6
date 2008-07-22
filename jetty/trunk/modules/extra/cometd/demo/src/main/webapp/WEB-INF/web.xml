@@ -6,6 +6,11 @@
    version="2.5"> 
   <display-name>Cometd Test WebApp</display-name>
   
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.ManagedAttributes</param-name>
+    <param-value>org.cometd.bayeux,dojox.cometd.bayeux</param-value>
+  </context-param>
+  
   <listener>
     <listener-class>
      	org.cometd.demo.BayeuxServicesListener
