@@ -41,6 +41,9 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
+import org.mortbay.jetty.plus.annotation.PojoContextListener;
+import org.mortbay.jetty.plus.annotation.PojoFilter;
+import org.mortbay.jetty.plus.annotation.PojoServlet;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
@@ -53,6 +56,13 @@ import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
 import org.mortbay.util.LazyList;
 
+
+
+/**
+ * AnnotationProcessor
+ *
+ * Act on the annotations discovered in the webapp.
+ */
 public class AnnotationProcessor
 {
     AnnotationFinder _finder;
@@ -103,7 +113,6 @@ public class AnnotationProcessor
         //@Servlet(urlMappings=String[], description=String, icon=String, loadOnStartup=int, name=String, initParams=InitParams[])
         for (Class clazz:_finder.getClassesForAnnotation(javax.servlet.http.annotation.Servlet.class))
         {
-            System.err.println("LOOKING AT SERVLET "+clazz.getName());
             javax.servlet.http.annotation.Servlet annotation = (javax.servlet.http.annotation.Servlet)clazz.getAnnotation(javax.servlet.http.annotation.Servlet.class);
             PojoServlet servlet = new PojoServlet(getPojoInstanceFor(clazz));
             
@@ -112,16 +121,12 @@ public class AnnotationProcessor
                 throw new IllegalStateException ("More than one GET annotation on "+clazz.getName());           
             else if (methods.size() == 1)
                 servlet.setGetMethodName(methods.get(0).getName());
-            
-            System.err.println("GET METHOD "+methods.size());
-            
+           
             methods = _finder.getMethodsForAnnotation(POST.class);
             if (methods.size() > 1)
                 throw new IllegalStateException ("More than one POST annotation on "+clazz.getName());
             else if (methods.size() == 1)
                 servlet.setPostMethodName(methods.get(0).getName());
-            
-            System.err.println("POST METHOD "+methods.size());
             
             methods = _finder.getMethodsForAnnotation(PUT.class);
             if (methods.size() > 1)
@@ -172,7 +177,6 @@ public class AnnotationProcessor
         //@ServletFilter(description=String, filterName=String, displayName=String, icon=String,initParams=InitParam[], filterMapping=FilterMapping)
         for (Class clazz:_finder.getClassesForAnnotation(javax.servlet.http.annotation.ServletFilter.class))
         {
-            System.err.println("LOOKING AT FILTER "+clazz.getName());
             javax.servlet.http.annotation.ServletFilter annotation = (javax.servlet.http.annotation.ServletFilter)clazz.getAnnotation(javax.servlet.http.annotation.ServletFilter.class);
             PojoFilter filter = new PojoFilter(getPojoInstanceFor(clazz));
 
@@ -265,7 +269,6 @@ public class AnnotationProcessor
                 String role = runAs.value();
                 if (role != null)
                 {
-                    System.err.println("ADDING NEW RUNAS with ROLE "+role);
                     org.mortbay.jetty.plus.annotation.RunAs ra = new org.mortbay.jetty.plus.annotation.RunAs();
                     ra.setTargetClass(clazz);
                     ra.setRoleName(role);
@@ -299,7 +302,6 @@ public class AnnotationProcessor
             if (Modifier.isStatic(m.getModifiers()))
                 throw new IllegalStateException(m+" is static");
 
-            System.err.println("ADDING POSTCONSTRUCT CALLBACK FOR "+m.getDeclaringClass().getName()+"."+m.getName());
             PostConstructCallback callback = new PostConstructCallback();
             callback.setTargetClass(m.getDeclaringClass());
             callback.setTarget(m);
@@ -322,7 +324,7 @@ public class AnnotationProcessor
                 throw new IllegalStateException(m+" throws checked exceptions");
             if (Modifier.isStatic(m.getModifiers()))
                 throw new IllegalStateException(m+" is static");
-            System.err.println("ADDING PREDESTROY CALLBACK FOR "+m.getDeclaringClass().getName()+"."+m.getName());
+           
             PreDestroyCallback callback = new PreDestroyCallback(); 
             callback.setTargetClass(m.getDeclaringClass());
             callback.setTarget(m);
@@ -384,7 +386,6 @@ public class AnnotationProcessor
         List<Class<?>> classes = _finder.getClassesForAnnotation(Resource.class);
         for (Class<?> clazz:classes)
         {
-            System.err.println("PROCESSING RESOURCE on CLASS "+clazz.getName());
             //Handle Resource annotation - add namespace entries
             Resource resource = (Resource)clazz.getAnnotation(Resource.class);
             if (resource == null)
@@ -413,7 +414,6 @@ public class AnnotationProcessor
 
         for (Method m: methods)
         {
-            System.err.println("METHOD :"+m.getName());
             /*
              * Commons Annotations Spec 2.3
              * " The Resource annotation is used to declare a reference to a resource.
@@ -513,7 +513,6 @@ public class AnnotationProcessor
         List<Field> fields = _finder.getFieldsForAnnotation(Resource.class);
         for (Field f: fields)
         {
-            System.err.println("FIELD :"+f.getName());
             Resource resource = (Resource)f.getAnnotation(Resource.class);
             if (resource == null)
                 continue;

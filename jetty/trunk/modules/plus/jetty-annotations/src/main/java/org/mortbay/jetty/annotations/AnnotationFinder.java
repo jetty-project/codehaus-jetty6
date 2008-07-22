@@ -17,7 +17,6 @@ package org.mortbay.jetty.annotations;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -48,7 +47,7 @@ import org.objectweb.asm.commons.EmptyVisitor;
  * AnnotationFinder
  *
  *
- *
+ * Scans class sources using asm to find annotations.
  *
  *
  */
@@ -454,16 +453,9 @@ public class AnnotationFinder
 
         public AnnotationVisitor visitAnnotation (String desc, boolean visible)
         {  
-            System.err.println("VISITING CLASS "+pclass.getClassName()+"FOR ANNOTATION "+desc);
             if (!parsedClasses.containsKey(pclass.getClassName()))
-            {
-                System.err.println("ADDING PARSED CLASS "+pclass.getClassName()+" instance = "+pclass.hashCode());
-                    parsedClasses.put(pclass.getClassName(), pclass);
-            }
-            else
-                System.err.println("PARSED CLASS "+pclass.getClassName()+" ALREADY EXISTS");
-            
-            System.err.println("ADDING annotation "+desc +" to instance "+pclass.hashCode());
+                parsedClasses.put(pclass.getClassName(), pclass);
+
             return pclass.addAnnotation(desc);
         }
 
@@ -683,7 +675,6 @@ public class AnnotationFinder
                 {
                     if (key.equals(annotationClass.getName()))
                     {
-                        System.err.println("ADDING METHOD "+p.pclass.className+", "+p.methodName+", "+p.paramString);
                         methods.add(p.toMethod());
                     }
                 }
