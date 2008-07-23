@@ -6,6 +6,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-381 JETTY-622 Multiple Web Application Source Directory
  + JETTY-442 Accessors for mimeType on ResourceHandler
  + JETTY-502 forward of an include should hide include attributes
+ + JETTY-562 RewriteHandler support for virtual hosts
  + JETTY-563 JETTY-482 OpenRemoteServiceServlet for GWT1.5M2+
  + JETTY-564 Consider optionally importing org.apache.jasper.servlet
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
