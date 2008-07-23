@@ -132,39 +132,36 @@ public class HttpURI
                 case START:
                 {
                     m=s;
-                    if (c=='/')
+                    switch(c)
                     {
-                        state=AUTH_OR_PATH;
+                        case '/':
+                            state=AUTH_OR_PATH;
+                            break;
+                        case ';':
+                            _param=s;
+                            state=PARAM;
+                            break;
+                        case '?':
+                            _param=s;
+                            _query=s;
+                            state=QUERY;
+                            break;
+                        case '#':
+                            _param=s;
+                            _query=s;
+                            _fragment=s;
+                            break;
+                        case '*':
+                            _path=s;
+                            state=ASTERISK;
+                            break;
+                            
+                        default:
+                            if (Character.isLetterOrDigit(c))
+                                state=SCHEME_OR_PATH;
+                            else
+                                throw new IllegalArgumentException(StringUtil.toString(_raw,offset,length,URIUtil.__CHARSET));
                     }
-                    else if (Character.isLetterOrDigit(c))
-                    {
-                        state=SCHEME_OR_PATH;
-                    }
-                    else if (c==';')
-                    {
-                        _param=s;
-                        state=PARAM;
-                    }
-                    else if (c=='?')
-                    {
-                        _param=s;
-                        _query=s;
-                        state=QUERY;
-                    }
-                    else if (c=='#')
-                    {
-                        _param=s;
-                        _query=s;
-                        _fragment=s;
-                        break;
-                    }
-                    else if (c=='*')
-                    {
-                    	_path=s;
-                    	state=ASTERISK;
-                    }
-                    else
-                        throw new IllegalArgumentException(StringUtil.toString(_raw,offset,length,URIUtil.__CHARSET));
                     
                     continue;
                 }

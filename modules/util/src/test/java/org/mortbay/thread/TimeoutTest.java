@@ -19,7 +19,8 @@ import junit.framework.TestCase;
 
 public class TimeoutTest extends TestCase
 {
-    Timeout timeout = new Timeout();
+    Object lock = new Object();
+    Timeout timeout = new Timeout(null);
     Timeout.Task[] tasks;
 
     /* ------------------------------------------------------------ */
@@ -30,8 +31,7 @@ public class TimeoutTest extends TestCase
     {
         super.setUp();
         
-        timeout=new Timeout();
-        timeout.setDuration(1000000);
+        timeout=new Timeout(lock);
         tasks= new Timeout.Task[10]; 
         
         for (int i=0;i<tasks.length;i++)
@@ -89,8 +89,7 @@ public class TimeoutTest extends TestCase
     {
         timeout.setDuration(200);
         timeout.setNow(1350);
-        tasks[2].reschedule();
-        
+        timeout.schedule(tasks[2]);
         
         timeout.setNow(1500);
         timeout.tick();
@@ -112,44 +111,21 @@ public class TimeoutTest extends TestCase
     public void testDelay()
     {
         Timeout.Task task = new Timeout.Task();
-        timeout.cancelAll();
-        timeout.setDuration(200);
-
-        timeout.setNow(100);
-        timeout.schedule(task);
-        assertEquals("delay", false, task.isExpired());
-        timeout.setNow(200);
-        timeout.tick();
-        assertEquals("delay", false, task.isExpired());
-        timeout.setNow(400);
-        timeout.tick();
-        assertEquals("delay", true, task.isExpired());
-        
-
-
-        timeout.setNow(500);
-        timeout.schedule(task, 100);
-        
-        timeout.setNow(550);
-        timeout.tick();
-        assertEquals("delay", false, task.isExpired());
-        
-        timeout.setNow(650);
-        timeout.tick();
-        assertEquals("delay", true, task.isExpired());
-        
-        
 
         timeout.setNow(1100);
         timeout.schedule(task, 300);
+        timeout.setDuration(200);
         
-        timeout.setNow(1350);
+        timeout.setNow(1300);
         timeout.tick();
         assertEquals("delay", false, task.isExpired());
         
-        timeout.setNow(1450);
+        timeout.setNow(1500);
+        timeout.tick();
+        assertEquals("delay", false, task.isExpired());
+        
+        timeout.setNow(1700);
         timeout.tick();
         assertEquals("delay", true, task.isExpired());
     }
-
 }
