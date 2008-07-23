@@ -15,29 +15,36 @@
 package org.mortbay.jetty.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import org.mortbay.component.AbstractLifeCycle;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.Connection;
-import org.mortbay.io.EndPoint;
-import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
-import org.mortbay.io.nio.SelectChannelEndPoint;
-import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.client.security.SecurityRealmResolver;
 import org.mortbay.log.Log;
+import org.mortbay.resource.Resource;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
@@ -83,11 +90,46 @@ public class HttpClient extends AbstractBuffers
     Connector _connector;
     private long _idleTimeout=20000;
     private long _timeout=320000;
-    private int _soTimeout = 10000;
+    int _soTimeout = 10000;
     private Timeout _timeoutQ = new Timeout();
     private InetSocketAddress _proxy;
     private Set<InetAddress> _noProxy;
+    private int _maxRetries = 3;
+    private LinkedList<String> _registeredListeners;
+
+    // TODO clean up and add getters/setters to some of this maybe
+    private String _keyStoreLocation;
+    private String _keyStoreType="JKS";
+    private String _keyStorePassword;
+    private String _keyManagerAlgorithm = "SunX509";
+    private String _keyManagerPassword;
+    private String _trustStoreLocation;
+    private String _trustStoreType="JKS";
+    private String _trustStorePassword;
+    private String _trustManagerAlgorithm = "SunX509";
+    private String _trustManagerPassword;
+
+    private String _protocol="TLS";
+    private String _algorithm="SunX509"; // cert algorithm
+    private String _provider;
+    private String _secureRandomAlgorithm; // cert algorithm
+    private String _sslKeyManagerFactoryAlgorithm=(Security.getProperty("ssl.KeyManagerFactory.algorithm")==null?"SunX509":Security
+            .getProperty("ssl.KeyManagerFactory.algorithm")); // cert
+                                                                // algorithm
+    private String _sslTrustManagerFactoryAlgorithm=(Security.getProperty("ssl.TrustManagerFactory.algorithm")==null?"SunX509":Security
+            .getProperty("ssl.TrustManagerFactory.algorithm")); // cert
+
+    private SecurityRealmResolver _realmResolver;    
+
     
+    public void dump() throws IOException
+    {
+        for (Map.Entry<InetSocketAddress, HttpDestination> entry: _destinations.entrySet())
+        {
+            System.err.println("\n"+entry.getKey()+":");
+            entry.getValue().dump();
+        }
+    }
     
     /* ------------------------------------------------------------------------------- */
     public void send(HttpExchange exchange) throws IOException
@@ -97,7 +139,7 @@ public class HttpClient extends AbstractBuffers
         HttpDestination destination=getDestination(exchange.getAddress(),ssl);
         destination.send(exchange);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return the threadPool
@@ -135,23 +177,16 @@ public class HttpClient extends AbstractBuffers
             return destination;
         }
     }
-
     /* ------------------------------------------------------------ */
     public void schedule(Timeout.Task task)
     {
-        synchronized(_timeoutQ)
-        {
-           _timeoutQ.schedule(task); 
-        }
+        _timeoutQ.schedule(task); 
     }
 
     /* ------------------------------------------------------------ */
     public void cancel(Timeout.Task task)
     {
-        synchronized(_timeoutQ)
-        {
-            task.cancel();
-        }
+        task.cancel();
     }
     
     /* ------------------------------------------------------------ */
@@ -162,6 +197,56 @@ public class HttpClient extends AbstractBuffers
     {
         return _useDirectBuffers;
     }
+
+    /* ------------------------------------------------------------ */
+    public void setSecurityRealmResolver( SecurityRealmResolver resolver )
+    {
+        _realmResolver = resolver;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * returns the SecurityRealmResolver registered with the HttpClient or null
+     * 
+     * @return 
+     */
+    public SecurityRealmResolver getSecurityRealmResolver()
+    {
+        return _realmResolver;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean hasRealms()
+    {
+        return _realmResolver==null?false:true;
+    }
+
+
+    /**
+     * Registers a listener that can listen to the stream of execution between the client and the
+     * server and influence events.  Sequential calls to the method wrapper sequentially wrap the preceeding
+     * listener in a delegation model.
+     *
+     * NOTE: the SecurityListener is a special listener which doesn't need to be added via this
+     * mechanic, if you register security realms then it will automatically be added as the top listener of the
+     * delegation stack.
+     *
+     * @param listenerClass
+     */
+    public void registerListener( String listenerClass )
+    {
+        if ( _registeredListeners == null )
+        {
+            _registeredListeners = new LinkedList<String>();
+        }
+        _registeredListeners.add( listenerClass );
+    }
+
+    public LinkedList<String> getRegisteredListeners()
+    {
+        return _registeredListeners;
+    }
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -240,7 +325,7 @@ public class HttpClient extends AbstractBuffers
             QueuedThreadPool pool = new QueuedThreadPool();
             pool.setMaxThreads(16);
             pool.setDaemon(true);
-            pool.setName("HttpClient@"+this.hashCode());
+            pool.setName("HttpClient");
             _threadPool=pool;
         }
         
@@ -252,11 +337,12 @@ public class HttpClient extends AbstractBuffers
         
         if (_connectorType==CONNECTOR_SELECT_CHANNEL)
         {
-            _connector=new SelectConnector();
+            
+            _connector=new SelectConnector(this);
         }
         else
         {
-            _connector=new SocketConnector();
+            _connector=new SocketConnector(this);
         }
         _connector.start();
         
@@ -265,14 +351,14 @@ public class HttpClient extends AbstractBuffers
             {
                 while (isStarted())
                 {
-                    _timeoutQ.tick(System.currentTimeMillis());
+                    _timeoutQ.setNow();
+                    _timeoutQ.tick();
                     try
                     {
                         Thread.sleep(1000);
                     }
                     catch (InterruptedException e)
                     {
-                        Log.ignore(e);
                     }
                 }
             }
@@ -289,6 +375,11 @@ public class HttpClient extends AbstractBuffers
         {
             ((LifeCycle)_threadPool).stop();
         }
+        for (HttpDestination destination : _destinations.values())
+        {
+            destination.close();
+        }
+        
         _timeoutQ.cancelAll();
         super.doStop();
     }
@@ -300,143 +391,114 @@ public class HttpClient extends AbstractBuffers
 
     }
 
-    /* ------------------------------------------------------------ */
-    class SocketConnector extends AbstractLifeCycle implements Connector
+    /**
+     * if a keystore location has been provided then client will attempt to use it as the keystore,
+     * otherwise we simply ignore certificates and run with a loose ssl context.
+     *
+     * @return
+     * @throws IOException
+     */
+    protected SSLContext getSSLContext() throws IOException
     {
-        public void startConnection(final HttpDestination destination) throws IOException
+        if ( _keyStoreLocation ==  null )
+        {            
+            return getLooseSSLContext();
+        }
+        else
         {
-            Socket socket=null;
-
-            if (destination.isSecure())
-            {
-                throw new UnsupportedOperationException("Not implemented");
-            }
-            else
-            {
-                socket= new Socket();
-            }
-            socket.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
-            
-            EndPoint endpoint=new SocketEndPoint(socket);
-            
-            final HttpConnection connection=new HttpConnection(HttpClient.this,endpoint,getHeaderBufferSize(),getRequestBufferSize());
-            connection.setDestination(destination);
-            destination.onNewConnection(connection);
-            getThreadPool().dispatch(new Runnable()
-            {
-                public void run()
-                {
-                    try
-                    {
-                        connection.handle();
-                    }
-                    catch (IOException e)
-                    {
-                        Log.warn(e);
-                        destination.onException(e);
-                    }
-                }
-            });
-                 
+            return getStrictSSLContext();
         }
     }
 
-    /* ------------------------------------------------------------ */
-    class SelectConnector extends AbstractLifeCycle implements Connector, Runnable
+    protected SSLContext getStrictSSLContext() throws IOException
     {
-        SelectorManager _selectorManager=new Manager();
 
-        protected void doStart() throws Exception
+        try
         {
-            _selectorManager.start();
-            _threadPool.dispatch(this);
-        }
+            if (_trustStoreLocation==null)
+            {
+                _trustStoreLocation=_keyStoreLocation;
+                _trustStoreType=_keyStoreType;
+            }
 
-        protected void doStop() throws Exception
+            KeyManager[] keyManagers=null;
+            InputStream keystoreInputStream = null;
+
+            keystoreInputStream= Resource.newResource(_keyStoreLocation).getInputStream();
+            KeyStore keyStore=KeyStore.getInstance(_keyStoreType);
+            keyStore.load(keystoreInputStream,_keyStorePassword==null?null:_keyStorePassword.toString().toCharArray());
+
+            KeyManagerFactory keyManagerFactory=KeyManagerFactory.getInstance(_keyManagerAlgorithm);
+            keyManagerFactory.init(keyStore,_keyManagerPassword==null?null:_keyManagerPassword.toString().toCharArray());
+            keyManagers=keyManagerFactory.getKeyManagers();
+            
+            TrustManager[] trustManagers=null;
+            InputStream truststoreInputStream = null;
+
+                truststoreInputStream = Resource.newResource(_trustStoreLocation).getInputStream();
+            KeyStore trustStore=KeyStore.getInstance(_trustStoreType);
+            trustStore.load(truststoreInputStream,_trustStorePassword==null?null:_trustStorePassword.toString().toCharArray());
+
+            TrustManagerFactory trustManagerFactory=TrustManagerFactory.getInstance(_trustManagerAlgorithm);
+            trustManagerFactory.init(trustStore);
+            trustManagers=trustManagerFactory.getTrustManagers();
+
+            SecureRandom secureRandom=_secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
+            SSLContext context=_provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol,_provider);
+            context.init(keyManagers,trustManagers,secureRandom);
+            return context;
+        }
+        catch ( Exception e )
         {
-            _selectorManager.stop();
+            e.printStackTrace();
+            throw new IOException( "error generating ssl context for " + _keyStoreLocation  + " " + e.getMessage() );
         }
-
-        public void startConnection(HttpDestination destination) throws IOException
-        {
-            if (destination.isSecure())
-            {
-                throw new UnsupportedOperationException("Not implemented");
-            }
-            SocketChannel channel=SocketChannel.open();
-            channel.configureBlocking(false);
-            channel.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
-            channel.socket().setSoTimeout(_soTimeout);
-            _selectorManager.register(channel,destination);
-        }
-
-        public void run()
-        {
-            while (isRunning())
-            {
-                try
-                {
-                    _selectorManager.doSelect(0);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        class Manager extends SelectorManager
-        {
-            protected SocketChannel acceptChannel(SelectionKey key) throws IOException
-            {
-                throw new IllegalStateException();
-            }
-
-            public boolean dispatch(Runnable task) throws IOException
-            {
-                return _threadPool.dispatch(task);
-            }
-
-            protected void endPointOpened(SelectChannelEndPoint endpoint)
-            {
-            }
-
-            protected void endPointClosed(SelectChannelEndPoint endpoint)
-            {
-            }
-
-            protected Connection newConnection(SocketChannel channel, SelectChannelEndPoint endpoint)
-            {
-                return new HttpConnection(HttpClient.this,endpoint,getHeaderBufferSize(),getRequestBufferSize());
-            }
-
-            protected SelectChannelEndPoint newEndPoint(SocketChannel channel, SelectSet selectSet, SelectionKey key) throws IOException
-            {
-                // key should have destination at this point (will be replaced by endpoint after this call)
-                HttpDestination dest=(HttpDestination)key.attachment();
-                SelectChannelEndPoint ep=new SelectChannelEndPoint(channel,selectSet,key);
-                HttpConnection connection=(HttpConnection)ep.getConnection();
-                connection.setDestination(dest);
-                dest.onNewConnection(connection);
-                return ep;
-            }
-
-            /* ------------------------------------------------------------ */
-            /* (non-Javadoc)
-             * @see org.mortbay.io.nio.SelectorManager#connectionFailed(java.nio.channels.SocketChannel, java.lang.Throwable, java.lang.Object)
-             */
-            protected void connectionFailed(SocketChannel channel, Throwable ex, Object attachment)
-            {
-                if (attachment instanceof HttpDestination)
-                    ((HttpDestination)attachment).onConnectionFailed(ex);
-                else
-                    Log.warn(ex);
-            }
-           
-        }
-
     }
 
+    protected SSLContext getLooseSSLContext() throws IOException
+    {
+
+        // Create a trust manager that does not validate certificate
+        // chains
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
+        {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers()
+            {
+                return null;
+            }
+
+            public void checkClientTrusted( java.security.cert.X509Certificate[] certs, String authType )
+            {
+            }
+
+            public void checkServerTrusted( java.security.cert.X509Certificate[] certs, String authType )
+            {
+            }
+        } };
+
+        HostnameVerifier hostnameVerifier = new HostnameVerifier()
+        {
+            public boolean verify( String urlHostName, SSLSession session )
+            {
+                Log.warn( "Warning: URL Host: " + urlHostName + " vs." + session.getPeerHost() );
+                return true;
+            }
+        };
+
+        // Install the all-trusting trust manager
+        try
+        {
+            // TODO real trust manager
+            SSLContext sslContext = SSLContext.getInstance( "SSL" );
+            sslContext.init( null, trustAllCerts, new java.security.SecureRandom() );
+            return sslContext;
+        }
+        catch ( Exception e )
+        {
+            throw new IOException( "issue ignoring certs" );
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return the period in milliseconds a {@link HttpConnection} can be idle for before it is closed.
@@ -514,7 +576,57 @@ public class HttpClient extends AbstractBuffers
     {
         _noProxy = noProxyAddresses;
     }
-    
-    
 
+    /* ------------------------------------------------------------ */
+    public int maxRetries()
+    {
+        return _maxRetries;
+    }
+    
+     /* ------------------------------------------------------------ */
+    public void setMaxRetries( int retries )
+    {
+        _maxRetries = retries; 
+    }
+
+    public String getTrustStoreLocation()
+    {
+        return _trustStoreLocation;
+    }
+
+    public void setTrustStoreLocation(String trustStoreLocation)
+    {
+        this._trustStoreLocation = trustStoreLocation;
+    }
+
+    public String getKeyStoreLocation()
+    {
+        return _keyStoreLocation;
+    }
+
+    public void setKeyStoreLocation(String keyStoreLocation)
+    {
+        this._keyStoreLocation = keyStoreLocation;
+    }
+
+
+    public void setKeyStorePassword(String _keyStorePassword)
+    {
+        this._keyStorePassword = _keyStorePassword;
+    }
+
+    public void setKeyManagerPassword(String _keyManagerPassword)
+    {
+        this._keyManagerPassword = _keyManagerPassword;
+    }
+
+    public void setTrustStorePassword(String _trustStorePassword)
+    {
+        this._trustStorePassword = _trustStorePassword;
+    }
+
+    public void setTrustManagerPassword(String _trustManagerPassword)
+    {
+        this._trustManagerPassword = _trustManagerPassword;
+    }
 }

@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -47,9 +46,11 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
  */
 public class HttpExchangeTest extends TestCase
 {
-    private Server _server;
-    private int _port;
-    private HttpClient _httpClient;
+    protected String _scheme = "http://";
+    protected Server _server;
+    protected int _port;
+    protected HttpClient _httpClient;
+    protected Connector _connector;
 
     protected void setUp() throws Exception
     {
@@ -62,21 +63,19 @@ public class HttpExchangeTest extends TestCase
 
     protected void tearDown() throws Exception
     {
-        stopServer();
         _httpClient.stop();
+        Thread.sleep(500);
+        stopServer();
     }
 
-    public void xtestPerf() throws Exception
-    {
-        sender(1);
-        Thread.sleep(200);
-        sender(10);
-        Thread.sleep(200);
-        sender(100);
-        Thread.sleep(200);
-        sender(1000);
-        Thread.sleep(200);
-        sender(10000);
+    public void testPerf() throws Exception
+    {   
+        sender(1,true);
+        sender(1,false);
+        sender(10,true);
+        sender(10,false);
+        sender(100,true);
+        sender(100,false);
     }
 
     /**
@@ -84,92 +83,146 @@ public class HttpExchangeTest extends TestCase
      * 
      * @throws IOException
      */
-    public void sender(final int nb) throws Exception
+    public void sender(final int nb,final boolean close) throws Exception
     {
         final CountDownLatch latch=new CountDownLatch(nb);
-        long l0=System.currentTimeMillis();
+        HttpExchange[] httpExchange = new HttpExchange[nb];
         for (int i=0; i<nb; i++)
         {
             final int n=i;
-            if (n%1000==0)
-            {
-                Thread.sleep(200);
-            }
             
-            HttpExchange httpExchange=new HttpExchange()
+            httpExchange[n]=new HttpExchange()
             {
+                String result="pending";
+                int len=0;
                 protected void onRequestCommitted()
                 {
-                    // System.err.println("Request committed");
+                    result="committed";
+                    // System.err.println(n+" Request committed: "+close);
+                }
+
+                protected void onRequestComplete() throws IOException
+                {
+                    result="sent";
                 }
 
                 protected void onResponseStatus(Buffer version, int status, Buffer reason)
                 {
-                    // System.err.println("Response Status: " + version+" "+status+" "+reason);
+                    result="status";
+                    // System.err.println(n+" Response Status: " + version+" "+status+" "+reason);
                 }
 
                 protected void onResponseHeader(Buffer name, Buffer value)
                 {
-                    // System.err.println("Response header: " + name + " = " + value);
+                    // System.err.println(n+" Response header: " + name + " = " + value);
+                }
+
+                protected void onResponseHeaderComplete() throws IOException
+                {
+                    result="content";
+                    super.onResponseHeaderComplete();
                 }
 
                 protected void onResponseContent(Buffer content)
                 {
-                    // System.err.println("Response content:" + content);
+                    len+=content.length();
+                    // System.err.println(n+" Response content:" + content.length());
                 }
 
                 protected void onResponseComplete()
                 {
-                    // System.err.println("Response completed "+n);
-                    latch.countDown();
+                    result="complete";
+                    // System.err.println(n+" Response completed "+len);
+                    if (len==2009)
+                        latch.countDown();
+                    else
+                        System.err.println(n+" ONLY "+len);
+                }
+
+                protected void onConnectionFailed(Throwable ex)
+                {
+                    result="failed";
+                    System.err.println(n+" FAILED "+ex);
+                    super.onConnectionFailed(ex);
+                }
+
+                protected void onException(Throwable ex)
+                {
+                    result="excepted";
+                    System.err.println(n+" EXCEPTED "+ex);
+                    super.onException(ex);
+                }
+
+                protected void onExpire()
+                {
+                    result="expired";
+                    System.err.println(n+" EXPIRED "+len);
+                    super.onExpire();
                 }
                 
+                public String toString()
+                {
+                    return n+" "+result+" "+len;
+                }
             };
 
-            httpExchange.setURL("http://localhost:"+_port+"/");
-            httpExchange.addRequestHeader("arbitrary","value");
+            httpExchange[n].setURL(_scheme+"localhost:"+_port+"/"+n);
+            httpExchange[n].addRequestHeader("arbitrary","value");
+            if (close)
+                httpExchange[n].setRequestHeader("Connection","close");
             
-            _httpClient.send(httpExchange);
+            _httpClient.send(httpExchange[n]);
         }
-        
+
+        latch.await(100,TimeUnit.MILLISECONDS);
+        if (latch.getCount()>0)
+            latch.await(2,TimeUnit.SECONDS);
         long last=latch.getCount();
-        while(last>0)
+        if (last>0)
         {
-            // System.err.println("waiting for "+last+" sent "+(System.currentTimeMillis()-l0)/1000 + "s ago ...");
-            latch.await(5,TimeUnit.SECONDS);
-            long next=latch.getCount();
-            if (last==next)
-                break;
-            last=next;
+            while(last>0)
+            {
+                System.err.println("waiting for "+last);
+                latch.await(5,TimeUnit.SECONDS);
+                long next=latch.getCount();
+                if (last==next)
+                    break;
+                last=next;
+            }
+            System.err.println("missed "+latch.getCount()); 
+            if (last>0)
+            {
+                _httpClient.dump();
+                System.err.println("--");
+                for (Object o : httpExchange)
+                    System.err.println(o);
+                
+            }
         }
-        // System.err.println("missed "+latch.getCount()+" sent "+(System.currentTimeMillis()-l0)/1000 + "s ago.");
-        assertEquals(0,latch.getCount());
-        long l1=System.currentTimeMillis();
+        assertEquals("nb="+nb+" close="+close,0,latch.getCount());
     }
 
     public void testPostWithContentExchange() throws Exception
     {
-        for (int i=0;i<20;i++)
+        for (int i=0;i<200;i++)
         {
-            HttpExchange.ContentExchange httpExchange=new HttpExchange.ContentExchange();
-            httpExchange.setURL("http://localhost:"+_port+"/");
+            ContentExchange httpExchange=new ContentExchange();
+            httpExchange.setURL(_scheme+"localhost:"+_port+"/");
             httpExchange.setMethod(HttpMethods.POST);
             httpExchange.setRequestContent(new ByteArrayBuffer("<hello />"));
             _httpClient.send(httpExchange);
             httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             assertEquals("i="+i,"<hello />",result);
-            
-            Thread.sleep(5);
         }
     }
 
     public void testGetWithContentExchange() throws Exception
     {
-        for (int i=0;i<20;i++)
+        for (int i=0;i<200;i++)
         {   
-            HttpExchange.ContentExchange httpExchange=new HttpExchange.ContentExchange();
-            httpExchange.setURL("http://localhost:"+_port+"/?i="+i);
+            ContentExchange httpExchange=new ContentExchange();
+            httpExchange.setURL(_scheme+"localhost:"+_port+"/?i="+i);
             httpExchange.setMethod(HttpMethods.GET);
             _httpClient.send(httpExchange);
             httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
@@ -183,11 +236,13 @@ public class HttpExchangeTest extends TestCase
 
     public void testProxy() throws Exception
     {
+        if (_scheme.equals("https://"))
+            return;
         try
         {
             _httpClient.setProxy(new InetSocketAddress("127.0.0.1",_port));
 
-            HttpExchange.ContentExchange httpExchange=new HttpExchange.ContentExchange();
+            ContentExchange httpExchange=new ContentExchange();
             httpExchange.setAddress(new InetSocketAddress("jetty.mortbay.org",8080));
             httpExchange.setMethod(HttpMethods.GET);
             httpExchange.setURI("/jetty-6");
@@ -223,44 +278,70 @@ public class HttpExchangeTest extends TestCase
         }
     }
 
-    private void startServer() throws Exception
+    protected void newServer() throws Exception
     {
         _server=new Server();
         _server.setGracefulShutdown(500);
-        Connector connector=new SelectChannelConnector();
+        _connector=new SelectChannelConnector();
         
-        connector.setPort(0);
-        _server.setConnectors(new Connector[] { connector });
+        _connector.setPort(0);
+        _server.setConnectors(new Connector[] { _connector });   
+    }
+    
+    protected void startServer() throws Exception
+    {
+        newServer();
         _server.setHandler(new AbstractHandler()
         {
             public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
-            {
-                Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-                base_request.setHandled(true);
-                response.setStatus(200);
-                if (request.getServerName().equals("jetty.mortbay.org"))
+            { 
+                int i=0;
+                try
                 {
-                    response.getOutputStream().println("Proxy request: "+request.getRequestURL());
-                }
-                else if (request.getMethod().equalsIgnoreCase("GET"))
-                {
-                    response.getOutputStream().println("<hello>");
-                    for (int i=0; i<100; i++)
+                    Request base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+                    base_request.setHandled(true);
+                    response.setStatus(200);
+                    if (request.getServerName().equals("jetty.mortbay.org"))
                     {
-                        response.getOutputStream().println("  <world>"+i+"</world");
-                        if (i%20==0)
-                            response.getOutputStream().flush();
+                        // System.err.println("HANDLING Proxy");
+                        response.getOutputStream().println("Proxy request: "+request.getRequestURL());
                     }
-                    response.getOutputStream().println("</hello>");
+                    else if (request.getMethod().equalsIgnoreCase("GET"))
+                    {
+                        // System.err.println("HANDLING Hello "+request.getRequestURI());
+                        response.getOutputStream().println("<hello>");
+                        for (; i<100; i++)
+                        {
+                            response.getOutputStream().println("  <world>"+i+"</world");
+                            if (i%20==0)
+                                response.getOutputStream().flush();
+                        }
+                        response.getOutputStream().println("</hello>");
+                    }
+                    else
+                    {
+                        // System.err.println("HANDLING "+request.getMethod());
+                        copyStream(request.getInputStream(),response.getOutputStream());
+                    }
                 }
-                else
+                catch(IOException e)
                 {
-                    copyStream(request.getInputStream(),response.getOutputStream());
+                    e.printStackTrace();
+                    throw e;
+                }
+                catch(Throwable e)
+                {
+                    e.printStackTrace();
+                    throw new ServletException(e);
+                }
+                finally
+                {
+                    // System.err.println("HANDLED "+i);
                 }
             }
         });
         _server.start();
-        _port=connector.getLocalPort();
+        _port=_connector.getLocalPort();
     }
 
     private void stopServer() throws Exception
