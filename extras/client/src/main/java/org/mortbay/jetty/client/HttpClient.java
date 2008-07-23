@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.net.ssl.SSLSocket;
-
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.io.Buffer;
@@ -39,9 +37,8 @@ import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.log.Log;
-import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.thread.Timeout;
 
@@ -78,7 +75,7 @@ public class HttpClient extends AbstractBuffers
     public static final int CONNECTOR_SOCKET=0;
     public static final int CONNECTOR_SELECT_CHANNEL=2;
 
-    private int _connectorType=CONNECTOR_SOCKET;
+    private int _connectorType=CONNECTOR_SELECT_CHANNEL;
     private boolean _useDirectBuffers=true;
     private int _maxConnectionsPerAddress=32;
     private Map<InetSocketAddress, HttpDestination> _destinations=new HashMap<InetSocketAddress, HttpDestination>();
@@ -240,17 +237,13 @@ public class HttpClient extends AbstractBuffers
         
         if(_threadPool==null)
         {
-            BoundedThreadPool pool = new BoundedThreadPool();
+            QueuedThreadPool pool = new QueuedThreadPool();
             pool.setMaxThreads(16);
             pool.setDaemon(true);
+            pool.setName("HttpClient@"+this.hashCode());
             _threadPool=pool;
         }
         
-        
-        if (_threadPool instanceof BoundedThreadPool)
-        {
-            ((BoundedThreadPool)_threadPool).setName("HttpClient");
-        }
         if (_threadPool instanceof LifeCycle)
         {
             ((LifeCycle)_threadPool).start();
