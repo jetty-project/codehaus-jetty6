@@ -351,9 +351,13 @@ public class SelectChannelConnector extends AbstractNIOConnector
 
         public void close() throws IOException
         {
-            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
-            if (continuation != null && continuation.isPending())
-                continuation.reset();
+            Connection con=getConnection();
+            if (con instanceof HttpConnection)
+            {
+                RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+                if (continuation != null && continuation.isPending())
+                    continuation.reset();
+            }
 
             super.close();
         }
@@ -361,20 +365,25 @@ public class SelectChannelConnector extends AbstractNIOConnector
         /* ------------------------------------------------------------ */
         public void undispatch()
         {
-            RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
-
-            if (continuation != null)
+            Connection con=getConnection();
+            if (con instanceof HttpConnection)
             {
-                // We have a continuation
-                Log.debug("continuation {}", continuation);
-                if (continuation.undispatch())
+                RetryContinuation continuation = (RetryContinuation) ((HttpConnection)getConnection()).getRequest().getContinuation();
+
+                if (continuation != null)
+                {
+                    // We have a continuation
+                    Log.debug("continuation {}", continuation);
+                    if (continuation.undispatch())
+                        super.undispatch();
+                }
+                else
+                {
                     super.undispatch();
+                }
             }
             else
-            {
                 super.undispatch();
-            }
-               
         }
     }
 
