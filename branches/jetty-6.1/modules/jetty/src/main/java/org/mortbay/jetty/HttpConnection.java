@@ -60,7 +60,6 @@ public class HttpConnection implements Connection
     private boolean _handling;
     private boolean _destroy;
     
-    
     protected Connector _connector;
     protected EndPoint _endp;
     protected Server _server;
@@ -356,9 +355,7 @@ public class HttpConnection implements Connection
                 synchronized(this)
                 {
                     if (_handling)
-                    {
                         throw new IllegalStateException(); // TODO delete this check
-                    }
                     _handling=true;
                 }
                 
