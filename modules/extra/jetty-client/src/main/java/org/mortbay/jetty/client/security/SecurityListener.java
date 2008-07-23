@@ -1,3 +1,17 @@
+//========================================================================
+//Copyright 2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty.client.security;
 
 import java.io.IOException;
@@ -15,6 +29,13 @@ import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 
+
+/**
+ * SecurityListener
+ * 
+ * Allow for insertion of security dialog when performing an
+ * HttpExchange.
+ */
 public class SecurityListener extends HttpEventListenerWrapper
 {
     private HttpDestination _destination;
@@ -90,7 +111,8 @@ public class SecurityListener extends HttpEventListenerWrapper
     public void onResponseStatus( Buffer version, int status, Buffer reason )
         throws IOException
     {
-        Log.debug("SecurityListener:Response Status: " + status );
+        if (Log.isDebugEnabled())
+            Log.debug("SecurityListener:Response Status: " + status );
 
         if ( status == HttpServletResponse.SC_UNAUTHORIZED && _attempts<_destination.getHttpClient().maxRetries()) 
         {
@@ -109,7 +131,8 @@ public class SecurityListener extends HttpEventListenerWrapper
     public void onResponseHeader( Buffer name, Buffer value )
         throws IOException
     {
-        Log.debug( "SecurityListener:Header: " + name.toString() + " / " + value.toString() );
+        if (Log.isDebugEnabled())
+            Log.debug( "SecurityListener:Header: " + name.toString() + " / " + value.toString() );
         if (!isDelegating())
         {
             int header = HttpHeaders.CACHE.getOrdinal(name);

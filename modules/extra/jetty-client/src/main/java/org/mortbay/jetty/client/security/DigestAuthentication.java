@@ -1,5 +1,3 @@
-package org.mortbay.jetty.client.security;
-
 //========================================================================
 //Copyright 2006-2008 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
@@ -13,6 +11,9 @@ package org.mortbay.jetty.client.security;
 //See the License for the specific language governing permissions and
 //limitations under the License.
 //========================================================================
+
+package org.mortbay.jetty.client.security;
+
 
 import java.io.IOException;
 import java.security.MessageDigest;
