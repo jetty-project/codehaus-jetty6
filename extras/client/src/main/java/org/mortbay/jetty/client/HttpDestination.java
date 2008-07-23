@@ -1,4 +1,3 @@
-package org.mortbay.jetty.client;
 //========================================================================
 //Copyright 2006-2007 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
@@ -12,19 +11,25 @@ package org.mortbay.jetty.client;
 //See the License for the specific language governing permissions and
 //limitations under the License.
 //========================================================================
+package org.mortbay.jetty.client;
+
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ArrayBlockingQueue;
+
+import javax.servlet.http.Cookie;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.client.security.Authentication;
+import org.mortbay.jetty.client.security.SecurityListener;
+import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
 
 /**
@@ -41,8 +46,32 @@ public class HttpDestination
     private HttpClient _client;
     private boolean _ssl;
     private int _maxConnections;
-    private AtomicInteger _pendingConnections = new AtomicInteger(0);
+    private int _pendingConnections=0;
+    private ArrayBlockingQueue<Object> _newQueue = new ArrayBlockingQueue<Object>(10,true);
+    private int _newConnection=0;
     private InetSocketAddress _proxy;
+    private PathMap _authorizations;
+    private List<Cookie> _cookies;
+    
+    // TODO add a repository of cookies and authenticated credentials
+    
+
+
+    public void dump() throws IOException
+    {
+        synchronized (this)
+        {
+            System.err.println(this);
+            System.err.println("connections="+_connections.size());
+            System.err.println("idle="+_idle.size());
+            System.err.println("pending="+_pendingConnections);
+            for (HttpConnection c : _connections)
+            {
+                if (!c.isIdle())
+                    c.dump();
+            }
+        }
+    }
     
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
@@ -84,7 +113,62 @@ public class HttpDestination
     {
         return _ssl;
     }
+    
+    /* ------------------------------------------------------------ */
+    public void addAuthorization(String pathSpec,Authentication authentication)
+    {
+        synchronized (this)
+        {
+            if (_authorizations==null)
+                _authorizations=new PathMap();
+            _authorizations.put(pathSpec,authentication);
+        }
+        
+        // TODO query and remove methods
+    }
 
+    /* ------------------------------------------------------------------------------- */
+    public void addCookie(Cookie cookie)
+    {
+        synchronized (this)
+        {
+            if (_cookies==null)
+                _cookies=new ArrayList<Cookie>();
+            _cookies.add(cookie);
+        }
+        
+        // TODO query, remove and age methods
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public HttpConnection getConnection() throws IOException
+    {
+        HttpConnection connection = getIdleConnection();
+
+        while (connection==null)
+        {
+            synchronized(this)
+            {
+                _newConnection++;
+                startNewConnection();
+            }
+
+            try
+            {
+                Object o =_newQueue.take();
+                if (o instanceof HttpConnection)
+                    connection=(HttpConnection)o;
+                else
+                    throw (IOException)o;
+            }
+            catch (InterruptedException e)
+            {
+                Log.ignore(e);
+            }
+        }
+        return connection;
+    }
+    
     /* ------------------------------------------------------------------------------- */
     public HttpConnection getIdleConnection() throws IOException
     {
@@ -92,22 +176,7 @@ public class HttpDestination
         {
             long now = System.currentTimeMillis();
             long idleTimeout=_client.getIdleTimeout();
-
-            // remove any really old connections
-            while (_idle.size() > 0)
-            {
-                HttpConnection connection = _idle.get(0);
-                long last = connection.getLast();
-                if (!connection.getEndPoint().isOpen() ||((now-last)>=idleTimeout) )
-                {
-                    _idle.remove(0);
-                    _connections.remove(connection);
-                    connection.getEndPoint().close();
-                }
-                else 
-                    break;
-            }
-            
+ 
             // Find an idle connection
             while (_idle.size() > 0)
             {
@@ -131,25 +200,47 @@ public class HttpDestination
     {
         try
         {
-            _pendingConnections.incrementAndGet();
+            synchronized (this)
+            {
+                _pendingConnections++;
+            }
             _client._connector.startConnection(this);
         }
         catch(Exception e)
         {
-            onException(e);
+            onConnectionFailed(e);
         }
     }
 
     /* ------------------------------------------------------------------------------- */
     public void onConnectionFailed(Throwable throwable)
     {
-        _pendingConnections.decrementAndGet();
+        Throwable connect_failure=null;
+        
         synchronized (this)
         {
-            if (_queue.size()>0)
+            _pendingConnections--;
+            if (_newConnection>0)
+            {
+                connect_failure=throwable;
+                _newConnection--;
+            }
+            else if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
-                ex.onConnectionFailed(throwable);
+                ex.getEventListener().onConnectionFailed(throwable);
+            }
+        }
+
+        if(connect_failure!=null)
+        {
+            try
+            {
+                _newQueue.put(connect_failure);
+            }
+            catch (InterruptedException e)
+            {
+                Log.ignore(e);
             }
         }
     }
@@ -157,13 +248,13 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void onException(Throwable throwable)
     {
-        _pendingConnections.decrementAndGet();
         synchronized (this)
         {
+            _pendingConnections--;
             if (_queue.size()>0)
             {
                 HttpExchange ex=_queue.removeFirst();
-                ex.onException(throwable);
+                ex.getEventListener().onException(throwable);
                 ex.setStatus(HttpExchange.STATUS_EXCEPTED);
             }
         }
@@ -172,11 +263,19 @@ public class HttpDestination
     /* ------------------------------------------------------------------------------- */
     public void onNewConnection(HttpConnection connection) throws IOException
     {
-        _pendingConnections.decrementAndGet();
+        HttpConnection q_connection=null;
+        
         synchronized (this)
         {
+            _pendingConnections--;
             _connections.add(connection);
-            if (_queue.size()==0)
+            
+            if (_newConnection>0)
+            {
+                q_connection=connection;
+                _newConnection--;
+            }
+            else if (_queue.size()==0)
             {
                 _idle.add(connection);
             }
@@ -186,11 +285,38 @@ public class HttpDestination
                 connection.send(ex);
             }
         }
+
+        if (q_connection!=null)
+        {
+            try
+            {
+                _newQueue.put(q_connection);
+            }
+            catch (InterruptedException e)
+            {
+                Log.ignore(e);
+            }
+        }
     }
 
     /* ------------------------------------------------------------------------------- */
     public void returnConnection(HttpConnection connection, boolean close) throws IOException
     {
+        if (close)
+        {
+            try
+            {
+                connection.close();
+            }
+            catch(IOException e)
+            {
+                Log.ignore(e);
+            }
+        }
+        
+        if (!_client.isStarted())
+            return;
+        
         if (!close && connection.getEndPoint().isOpen())
         {
             synchronized (this)
@@ -205,6 +331,7 @@ public class HttpDestination
                     HttpExchange ex=_queue.removeFirst();
                     connection.send(ex);
                 }
+                this.notifyAll();
             }
         }
         else 
@@ -221,13 +348,85 @@ public class HttpDestination
     /* ------------------------------------------------------------ */
     public void send(HttpExchange ex) throws IOException
     {
+        LinkedList<String> listeners = _client.getRegisteredListeners();
+
+        if (listeners != null)
+        {
+            // Add registered listeners, fail if we can't load them
+            for (int i = listeners.size(); i > 0; --i)
+            {
+                String listenerClass = listeners.get(i - 1);
+
+                try
+                {
+                    Class listener = Class.forName(listenerClass);
+                    Constructor constructor = listener.getDeclaredConstructor(HttpDestination.class, HttpExchange.class);
+                    HttpEventListener elistener = (HttpEventListener) constructor.newInstance(this, ex);
+                    ex.setEventListener(elistener);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    throw new IOException("Unable to instantiate registered listener for destination: " + listenerClass );
+                }
+            }
+        }
+
+        // Security is supported by default and should be the first consulted
+        if ( _client.hasRealms() )
+        {
+            ex.setEventListener( new SecurityListener( this, ex ) );
+        }
+        
+        doSend(ex);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void resend(HttpExchange ex) throws IOException
+    {
+        ex.getEventListener().onRetry();
+        doSend(ex);
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void doSend(HttpExchange ex) throws IOException
+    {
+        // add cookies
+        // TODO handle max-age etc.
+        if (_cookies!=null)
+        {
+            StringBuilder buf=null;
+            for (Cookie cookie : _cookies)
+            {
+                if (buf==null)
+                    buf=new StringBuilder();
+                else
+                    buf.append("; ");
+                buf.append(cookie.getName()); // TODO quotes
+                buf.append("=");
+                buf.append(cookie.getValue()); // TODO quotes
+            }
+            if (buf!=null)
+                ex.addRequestHeader(HttpHeaders.COOKIE,buf.toString());
+        }
+        
+        // Add any known authorizations
+        if (_authorizations!=null)
+        {
+            Authentication auth= (Authentication)_authorizations.match(ex.getURI());
+            if (auth !=null)
+                ((Authentication)auth).setCredentials(ex);
+        }
+       
         synchronized(this)
         {
+            //System.out.println( "Sending: " + ex.toString() );
+
             HttpConnection connection=null;
             if (_queue.size()>0 || (connection=getIdleConnection())==null || !connection.send(ex))
             {
                 _queue.add(ex);
-                if (_connections.size()+_pendingConnections.get() <_maxConnections)
+                if (_connections.size()+_pendingConnections <_maxConnections)
                 {
                      startNewConnection();
                 }
@@ -282,6 +481,18 @@ public class HttpDestination
     public boolean isProxied()
     {
         return _proxy!=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void close() throws IOException
+    {
+        synchronized (this)
+        {
+            for (HttpConnection connection : _connections)
+            {
+                connection.close();
+            }
+        }
     }
     
 }

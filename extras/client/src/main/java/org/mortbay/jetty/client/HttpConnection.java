@@ -17,16 +17,12 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
-import java.net.URI;
-import java.nio.channels.CancelledKeyException;
-import java.util.Date;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Connection;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.io.nio.SelectChannelEndPoint;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.HttpHeaderValues;
@@ -34,6 +30,7 @@ import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.security.SslHttpChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 
@@ -43,7 +40,7 @@ import org.mortbay.thread.Timeout;
  * @author Greg Wilkins
  * @author Guillaume Nodet
  */
-class HttpConnection implements Connection
+public class HttpConnection implements Connection
 {
     HttpDestination _destination;
     EndPoint _endp;
@@ -55,6 +52,22 @@ class HttpConnection implements Connection
     long _last;
     boolean _requestComplete;
     
+
+    /* The current exchange waiting for a response */
+    HttpExchange _exchange;  
+    HttpExchange _pipeline;
+
+
+
+    public void dump() throws IOException
+    {
+        System.err.println("endp="+_endp+" "+_endp.isBufferingInput()+" "+_endp.isBufferingOutput());
+        System.err.println("generator="+_generator);
+        System.err.println("parser="+_parser.getState()+" "+_parser.isMoreInBuffer());
+        System.err.println("exchange="+_exchange);
+        if (_endp instanceof SslHttpChannelEndPoint)
+            ((SslHttpChannelEndPoint)_endp).dump();
+    }
 
     Timeout.Task _timeout= new Timeout.Task()
     {
@@ -95,10 +108,6 @@ class HttpConnection implements Connection
 
     };
 
-
-    /* The current exchange waiting for a response */
-    HttpExchange _exchange;  
-    
     
     /* ------------------------------------------------------------ */
     HttpConnection(Buffers buffers,EndPoint endp,int hbs,int cbs)
@@ -126,7 +135,12 @@ class HttpConnection implements Connection
         synchronized(this)
         {
             if (_exchange!=null)
-                throw new IllegalStateException(this+" PIPELINED!!!  _exchange="+_exchange);
+            {
+                if (_pipeline!=null)
+                    throw new IllegalStateException(this+" PIPELINED!!!  _exchange="+_exchange);
+                _pipeline=ex;
+                return true;
+            }
 
             if (!_endp.isOpen())
                 return false;
@@ -153,10 +167,9 @@ class HttpConnection implements Connection
     public void handle() throws IOException
     {
         int no_progress=0;
-        int flushed=0;
+        long flushed=0;
         
-        
-        while (_endp.isOpen())
+        while (_endp.isBufferingInput() || _endp.isOpen())
         {
             synchronized(this)
             {
@@ -205,8 +218,8 @@ class HttpConnection implements Connection
                     {
                         if (_exchange==null)
                             continue;
-                        io=_generator.flush();
-                        flushed+=io;
+                        flushed=_generator.flush();
+                        io+=flushed;
                     }
                     
                     if (!_generator.isComplete())
@@ -231,7 +244,7 @@ class HttpConnection implements Connection
                 else if (!_requestComplete)
                 {
                     _requestComplete=true;
-                    _exchange.onRequestComplete();
+                    _exchange.getEventListener().onRequestComplete();                    
                 }
 
                 // If we are not ended then parse available
@@ -243,7 +256,7 @@ class HttpConnection implements Connection
 
                 if (io>0)
                     no_progress=0;
-                else if (no_progress++>=2 && !_endp.isBlocking())
+                else if (no_progress++>=2 && !_endp.isBlocking())   // TODO maybe no retries is best here?
                     return;
             }
             catch (IOException e)
@@ -252,37 +265,52 @@ class HttpConnection implements Connection
                 {
                     if (_exchange!=null)
                     {
-                        _exchange.onException(e);
+                        _exchange.getEventListener().onException(e);
                         _exchange.setStatus(HttpExchange.STATUS_EXCEPTED);
                     }
                 }
             }
             finally
             {
+                // we need to return the HttpConnection to a state that it can be reused
+                // or closed out
                 if (_parser.isComplete() && _generator.isComplete())
                 {  
-                    
                     _destination.getHttpClient().cancel(_timeout);
 
                     synchronized(this)
                     {
                         boolean close=shouldClose();
+                        
                         reset(true);
                         no_progress=0;
                         flushed=-1;
                         if (_exchange!=null)
                         {
-                            if (_exchange.getStatus()!=HttpExchange.STATUS_COMPLETED)
-                            {
-                                Log.warn("NOT COMPLETE! "+_exchange);
-                                _exchange.setStatus(HttpExchange.STATUS_COMPLETED);
-                            }
                             _exchange=null;
-                            _destination.returnConnection(this, close); 
-                            if (close)
-                                return;
+                            
+                            if (_pipeline==null)
+                            {
+                                _destination.returnConnection(this, close); 
+                                if (close)
+                                    return;
+                            }
+                            else
+                            {
+                                if (close)
+                                {
+                                    _destination.returnConnection(this, close); 
+                                    _destination.send(_pipeline);
+                                    _pipeline=null;
+                                    return;
+                                }
+                                
+                                HttpExchange ex=_pipeline;
+                                _pipeline=null;
+                                
+                                send(ex);
+                            }
                         }
-          
                     }
                 }
             }
@@ -317,6 +345,7 @@ class HttpConnection implements Connection
 
             _generator.setVersion(_exchange._version);
             
+            
             String uri=_exchange._uri;
             if (_destination.isProxied() && uri.startsWith("/"))
             {
@@ -324,6 +353,7 @@ class HttpConnection implements Connection
                 uri=(_destination.isSecure()?HttpSchemes.HTTPS:HttpSchemes.HTTP)+"://"+
                 _destination.getAddress().getHostName()+":"+_destination.getAddress().getPort()+uri;
             }
+            
             _generator.setRequest(_exchange._method,uri);
 
             if (_exchange._version>=HttpVersions.HTTP_1_1_ORDINAL)
@@ -395,14 +425,16 @@ class HttpConnection implements Connection
         @Override
         public void startRequest(Buffer method, Buffer url, Buffer version) throws IOException
         {
-            throw new IllegalStateException();
+            //System.out.println( method.toString() + "///" + url.toString() + "///" + version.toString() );
+            // TODO validate this is acceptable, the <!DOCTYPE goop was coming out here
+            //throw new IllegalStateException();
         }
 
         @Override
         public void startResponse(Buffer version, int status, Buffer reason) throws IOException
         {
             _http11 = HttpVersions.HTTP_1_1_BUFFER.equals(version);
-            _exchange.onResponseStatus(version, status, reason);
+            _exchange.getEventListener().onResponseStatus(version, status, reason);
             _exchange.setStatus(HttpExchange.STATUS_PARSING_HEADERS);
         }
         
@@ -413,7 +445,7 @@ class HttpConnection implements Connection
             {
                 _connectionHeader = HttpHeaderValues.CACHE.lookup(value);
             }
-            _exchange.onResponseHeader(name, value);
+            _exchange.getEventListener().onResponseHeader(name, value);
         }
 
         @Override
@@ -425,7 +457,7 @@ class HttpConnection implements Connection
         @Override
         public void content(Buffer ref) throws IOException
         {
-            _exchange.onResponseContent(ref);
+            _exchange.getEventListener().onResponseContent(ref);
         }
 
         @Override
@@ -463,6 +495,12 @@ class HttpConnection implements Connection
     public void setLast(long last)
     {
         _last=last;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void close() throws IOException
+    {
+        _endp.close();
     }
     
 }
