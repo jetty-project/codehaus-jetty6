@@ -50,6 +50,15 @@ import org.mortbay.util.LazyList;
  * <li> LegacyRule - the old version of rewrite. </li>
  * <li> ForwardedSchemeHeaderRule - set the scheme according to the headers present. </li>
  * </ul>
+ *
+ * <p> The rules can be grouped into rule containers (class RuleContainerRule), and will only 
+ * be applied if the request matches the conditions for their container
+ * (e.g., by virtual host name)
+ *
+ * Here are a list of rule containers:
+ * <ul>
+ * <li> VirtualHostRuleContainerRule - checks whether the request matches one of a set of virtual host names.</li>
+ * </ul>
  * 
  * Here is a typical jetty.xml configuration would be: <pre>
  * 
@@ -111,6 +120,31 @@ import org.mortbay.util.LazyList;
  *             &lt;/New&gt;
  *           &lt;/Item&gt;
  *           
+ *           &lt;Item&gt;
+ *             &lt;New id="virtualHost" class="org.mortbay.jetty.handler.rewrite.VirtualHostRuleContainer"&gt;
+ *
+ *               &lt;Set name="virtualHosts"&gt;
+ *                 &lt;Array type="java.lang.String"&gt;
+ *                   &lt;Item&gt;mortbay.com&lt;/Item&gt;
+ *                   &lt;Item&gt;www.mortbay.com&lt;/Item&gt;
+ *                   &lt;Item&gt;mortbay.org&lt;/Item&gt;
+ *                   &lt;Item&gt;www.mortbay.org&lt;/Item&gt;
+ *                 &lt;/Array&gt;
+ *               &lt;/Set&gt;
+ *
+ *               &lt;Call name="addRule"&gt;
+ *                 &lt;Arg&gt;
+ *                   &lt;New class="org.mortbay.jetty.handler.rewrite.CookiePatternRule"&gt;
+ *                     &lt;Set name="pattern"&gt;/*&lt;/Set&gt;
+ *                     &lt;Set name="name"&gt;CookiePatternRule&lt;/Set&gt;
+ *                     &lt;Set name="value"&gt;1&lt;/Set&gt;
+ *                   &lt;/New&gt;
+ *                 &lt;/Arg&gt;
+ *               &lt;/Call&gt;
+ *    
+ *             &lt;/New&gt;
+ *           &lt;/      Item&gt;
+ * 
  *         &lt;/Array&gt;
  *       &lt;/Set&gt;
  *
@@ -139,27 +173,14 @@ import org.mortbay.util.LazyList;
  */
 public class RewriteHandler extends HandlerWrapper
 {
-    private Rule[] _rules;
     
-
-    private String _originalPathAttribute;
-    private boolean _rewriteRequestURI=true;
-    private boolean _rewritePathInfo=true;
+    private RuleContainer _rules;
     
-   
-    private LegacyRule _legacy;
-
     /* ------------------------------------------------------------ */
-    private LegacyRule getLegacyRule()
+    public RewriteHandler()
     {
-        if (_legacy==null)
-        {
-            _legacy= new LegacyRule();
-            addRule(_legacy);
-        }
-        return _legacy;
+        _rules = new RuleContainer();
     }
-    
 
     /* ------------------------------------------------------------ */
     /**
@@ -170,7 +191,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public void setLegacyRule(LegacyRule legacyRule)
     {
-        _legacy = legacyRule;
+        _rules.setLegacyRule(legacyRule);
     }
 
     /* ------------------------------------------------------------ */
@@ -180,7 +201,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public Rule[] getRules()
     {
-        return _rules;
+        return _rules.getRules();
     }
 
     /* ------------------------------------------------------------ */
@@ -190,16 +211,17 @@ public class RewriteHandler extends HandlerWrapper
      */
     public void setRules(Rule[] rules)
     {
-        if (_legacy==null)
-            _rules = rules;
-        else
-        {
-            _rules=null;
-            addRule(_legacy);
-            if (rules!=null)
-                for (Rule rule:rules)
-                    addRule(rule);
-        }
+        _rules.setRules(rules);
+    }
+
+    /*------------------------------------------------------------ */
+    /**
+     * Assigns the rules to process.
+     * @param rules a {@link RuleContainer} containing other rules to process
+     */
+    public void setRules(RuleContainer rules)
+    {
+        _rules = rules;
     }
 
     /* ------------------------------------------------------------ */
@@ -209,7 +231,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public void addRule(Rule rule)
     {
-        _rules = (Rule[])LazyList.addToArray(_rules,rule,Rule.class);
+        _rules.addRule(rule);
     }
    
 
@@ -220,7 +242,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public boolean isRewriteRequestURI()
     {
-        return _rewriteRequestURI;
+        return _rules.isRewriteRequestURI();
     }
 
     /* ------------------------------------------------------------ */
@@ -230,7 +252,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public void setRewriteRequestURI(boolean rewriteRequestURI)
     {
-        _rewriteRequestURI=rewriteRequestURI;
+        _rules.setRewriteRequestURI(rewriteRequestURI);
     }
 
     /* ------------------------------------------------------------ */
@@ -240,7 +262,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public boolean isRewritePathInfo()
     {
-        return _rewritePathInfo;
+        return _rules.isRewritePathInfo();
     }
 
     /* ------------------------------------------------------------ */
@@ -250,7 +272,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public void setRewritePathInfo(boolean rewritePathInfo)
     {
-        _rewritePathInfo=rewritePathInfo;
+        _rules.setRewritePathInfo(rewritePathInfo);
     }
 
     /* ------------------------------------------------------------ */
@@ -260,7 +282,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public String getOriginalPathAttribute()
     {
-        return _originalPathAttribute;
+        return _rules.getOriginalPathAttribute();
     }
 
     /* ------------------------------------------------------------ */
@@ -268,9 +290,9 @@ public class RewriteHandler extends HandlerWrapper
      * @param originalPathAttribte If non null, this string will be used
      * as the attribute name to store the original request path.
      */
-    public void setOriginalPathAttribute(String originalPathAttribte)
+    public void setOriginalPathAttribute(String originalPathAttribute)
     {
-        _originalPathAttribute=originalPathAttribte;
+        _rules.setOriginalPathAttribute(originalPathAttribute);
     }
 
 
@@ -280,7 +302,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public PathMap getRewrite()
     {
-        return getLegacyRule().getRewrite();
+        return _rules.getRewrite();
     }
 
     /* ------------------------------------------------------------ */
@@ -289,7 +311,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public void setRewrite(PathMap rewrite)
     {
-        getLegacyRule().setRewrite(rewrite);
+        _rules.setRewrite(rewrite);
     }
 
     /* ------------------------------------------------------------ */
@@ -298,7 +320,7 @@ public class RewriteHandler extends HandlerWrapper
      */
     public void addRewriteRule(String pattern, String prefix)
     {
-        getLegacyRule().addRewriteRule(pattern,prefix);
+        _rules.addRewriteRule(pattern,prefix);
     }
     
     /* ------------------------------------------------------------ */
@@ -308,53 +330,11 @@ public class RewriteHandler extends HandlerWrapper
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         if (isStarted())
-        {
-            boolean handled=false;
-                
-            boolean original_set=_originalPathAttribute==null;
-                
-            for (int i = 0, len= _rules.length; i < len; i++)
-            {
-                Rule rule = _rules[i];
-               
-                String applied=rule.matchAndApply(target,request, response);
-                if (applied!=null)
-                {       
-                    Log.debug("applied {}",rule);
-                    if (!target.equals(applied))
-                    { 
-                        Log.debug("rewrote {} to {}",target,applied);
-                        if (!original_set)
-                        {
-                            original_set=true;
-                            request.setAttribute(_originalPathAttribute, target);
-                        }     
-                        
-                        if (_rewriteRequestURI)
-                            ((Request)request).setRequestURI(applied);
-
-                        if (_rewritePathInfo)
-                            ((Request)request).setPathInfo(applied);
-
-                        target=applied;
-                    }
-                    
-                    if (rule.isHandling())
-                    {
-                        Log.debug("handling {}",rule);
-                        handled=true;
-                        (request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest()).setHandled(true);
-                    }
-
-                    if (rule.isTerminating())
-                    {
-                        Log.debug("terminating {}",rule);
-                        break;
-                    }
-                }
-            }
+        { 
+            String returned = _rules.matchAndApply(target, request, response);
+            target = (returned == null) ? target : returned;
             
-            if (!handled)
+            if (!_rules.isHandled())
             {
                 super.handle(target, request, response, dispatch);
             }

@@ -76,22 +76,23 @@
       <!-- ==========================================================  -->
       <!-- RewriteHandler Sample Configuration                         -->
       <!-- ==========================================================  -->
-      <New id="Handlers" class="org.mortbay.jetty.handler.RewriteHandler">
+      <New id="Handlers" class="org.mortbay.jetty.handler.rewrite.RewriteHandler">
 
+        <Set name="originalPathAttribute">requestedPath</Set>
+        <Set name="rewriteRequestURI">true</Set>
+        
         <Set name="rules">
-          <Array type="org.mortbay.jetty.handler.rules.Rule">
+          <Array type="org.mortbay.jetty.handler.rewrite.Rule">
 
             <Item>
-              <New id="" class="org.mortbay.jetty.handler.rules.RewritePatternRule">
+              <New id="" class="org.mortbay.jetty.handler.rewrite.RewritePatternRule">
                 <Set name="pattern">/*</Set>
                 <Set name="replacement">/test</Set>
-                <Set name="originalPathAttribute">requestedPath</Set>
-                <Set name="requestUri">true</Set>
               </New>
             </Item>
             
             <Item>
-              <New id="response" class="org.mortbay.jetty.handler.rules.ResponsePatternRule">
+              <New id="response" class="org.mortbay.jetty.handler.rewrite.ResponsePatternRule">
                 <Set name="pattern">/session/</Set>
                 <Set name="code">401</Set>
                 <Set name="reason">Setting error code 401</Set>
@@ -99,7 +100,7 @@
             </Item>
 
             <Item>
-              <New id="header" class="org.mortbay.jetty.handler.rules.HeaderPatternRule">
+              <New id="header" class="org.mortbay.jetty.handler.rewrite.HeaderPatternRule">
                 <Set name="pattern">*.jsp</Set>
                 <Set name="name">Server</Set>
                 <Set name="value">dexter webserver</Set>
@@ -107,7 +108,7 @@
             </Item>
 
             <Item>
-              <New id="header" class="org.mortbay.jetty.handler.rules.HeaderPatternRule">
+              <New id="header" class="org.mortbay.jetty.handler.rewrite.HeaderPatternRule">
                 <Set name="pattern">*.jsp</Set>
                 <Set name="name">title</Set>
                 <Set name="value">driven header purpose</Set>
@@ -115,19 +116,52 @@
             </Item>
 
             <Item>
-              <New id="redirect" class="org.mortbay.jetty.handler.rules.RedirectPatternRule">
+              <New id="redirect" class="org.mortbay.jetty.handler.rewrite.RedirectPatternRule">
                 <Set name="pattern">/test/dispatch</Set>
                 <Set name="location">http://jetty.mortbay.org</Set>
               </New>
             </Item>
 
             <Item>
-              <New id="regexRewrite" class="org.mortbay.jetty.handler.rules.RewriteRegexRule">
+              <New id="regexRewrite" class="org.mortbay.jetty.handler.rewrite.RewriteRegexRule">
                 <Set name="regex">/test-jaas/$</Set>
                 <Set name="replacement">/demo</Set>
               </New>
             </Item>
+            
+            <Item>
+              <New id="forwardedHttps" class="org.mortbay.jetty.handler.rewrite.ForwardedSchemeHeaderRule">
+                <Set name="header">X-Forwarded-Scheme</Set>
+                <Set name="headerValue">https</Set>
+                <Set name="scheme">https</Set>
+              </New>
+            </Item>
 
+            <Item>
+              <New id="virtualHost" class="org.mortbay.jetty.handler.rewrite.VirtualHostRuleContainer">
+
+                <Set name="virtualHosts">
+                  <Array type="java.lang.String">
+                    <Item>mortbay.com</Item>
+                    <Item>www.mortbay.com</Item>
+                    <Item>mortbay.org</Item>
+                    <Item>www.mortbay.org</Item>
+                  </Array>
+                </Set>
+
+                <Call name="addRule">
+                  <Arg>
+                    <New class="org.mortbay.jetty.handler.rewrite.CookiePatternRule">
+                      <Set name="pattern">/*</Set>
+                      <Set name="name">CookiePatternRule</Set>
+                      <Set name="value">1</Set>
+                    </New>
+                  </Arg>
+                </Call>
+     
+             </New>
+           </Item>
+ 
           </Array>
         </Set>
 
