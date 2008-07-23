@@ -14,39 +14,57 @@
 
 package org.mortbay.jetty.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.InetSocketAddress;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.log.Log;
-import org.mortbay.thread.Timeout;
-import org.mortbay.util.StringUtil;
+
 
 /**
- * VERY rough start to a client API - inpired by javascript XmlHttpRequest.
+ * An HTTP client API that encapsulates Exchange with a HTTP server.
+ * 
+ * This object encapsulates:<ul>
+ * <li>The HTTP server. (see {@link #setAddress(InetSocketAddress)} or {@link #setURL(String)})
+ * <li>The HTTP request method, URI and HTTP version (see {@link #setMethod(String)}, {@link #setURI(String)}, and {@link #setVersion(int)}
+ * <li>The Request headers (see {@link #addRequestHeader(String, String)} or {@link #setRequestHeader(String, String)})
+ * <li>The Request content (see {@link #setRequestContent(Buffer)} or {@link #setRequestContentSource(InputStream)})
+ * <li>The status of the exchange (see {@link #getStatus()})
+ * <li>Callbacks to handle state changes (see the onXxx methods such as {@link #onRequestComplete()} or {@link #onResponseComplete()}) 
+ * <li>The ability to intercept callbacks (see {@link #setEventListener(HttpEventListener)}
+ * </ul>
+ * 
+ * The HttpExchange class is intended to be used by a developer wishing to have close asynchronous 
+ * interaction with the the exchange.  Typically a developer will extend the HttpExchange class with a derived
+ * class that implements some or all of the onXxx callbacks.  There are also some predefined HttpExchange subtypes
+ * that can be used as a basis (see {@link ContentExchange} and {@link CachedExchange}.
+ * 
+ * <p>Typically the HttpExchange is passed to a the {@link HttpClient#send(HttpExchange)} method, which in 
+ * turn selects a {@link HttpDestination} and calls it's {@link HttpDestination#send(HttpExchange), which 
+ * then creates or selects a {@link HttpConnection} and calls its {@link HttpConnection#send(HttpExchange).
+ * A developer may wish to directly call send on the destination or connection if they wish to bypass 
+ * some handling provided (eg Cookie handling in the HttpDestination).
+ * 
+ * <p>In some circumstances, the HttpClient or HttpDestination may wish to retry a HttpExchange (eg. failed 
+ * pipeline request, authentication retry or redirection).  In such cases, the HttpClient and/or HttpDestination
+ * may insert their own HttpExchangeListener to intercept and filter the call backs intended for the
+ * HttpExchange.
  * 
  * @author gregw
  * @author Guillaume Nodet
  */
 public class HttpExchange
 {
-    public static final int STATUS_UNKOWN = 0;
+    public static final int STATUS_START = 0;
     public static final int STATUS_WAITING_FOR_CONNECTION = 1;
     public static final int STATUS_WAITING_FOR_COMMIT = 2;
     public static final int STATUS_SENDING_REQUEST = 3;
@@ -54,7 +72,7 @@ public class HttpExchange
     public static final int STATUS_PARSING_HEADERS = 5;
     public static final int STATUS_PARSING_CONTENT = 6;
     public static final int STATUS_COMPLETED = 7;
-    public static final int STATUS_EXPIRED = 8;
+    public static final int STATUS_EXPIRED = 8; 
     public static final int STATUS_EXCEPTED = 9;
 
     InetSocketAddress _address;
@@ -62,12 +80,22 @@ public class HttpExchange
     Buffer _scheme = HttpSchemes.HTTP_BUFFER;
     int _version = HttpVersions.HTTP_1_1_ORDINAL;
     String _uri;
-    int _status = STATUS_UNKOWN;
+    int _status = STATUS_START;
     HttpFields _requestFields = new HttpFields();
     Buffer _requestContent;
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
+    boolean _retryStatus = false;
 
+    /**
+     * boolean controlling if the exchange will have listeners autoconfigured by
+     * the destination
+     */
+    boolean _configureListeners = true;
+    
+    
+    private HttpEventListener _listener = new Listener();
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -80,6 +108,9 @@ public class HttpExchange
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated
+     */
     public void waitForStatus(int status) throws InterruptedException
     {
         synchronized (this)
@@ -91,6 +122,12 @@ public class HttpExchange
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public void reset() 
+    {
+        setStatus(STATUS_START);
+    }
+    
     /* ------------------------------------------------------------ */
     void setStatus(int status)
     {
@@ -113,22 +150,22 @@ public class HttpExchange
                         break;
 
                     case HttpExchange.STATUS_WAITING_FOR_RESPONSE:
-                        onRequestCommitted();
+                        getEventListener().onRequestCommitted();
                         break;
 
                     case STATUS_PARSING_HEADERS:
                         break;
 
                     case STATUS_PARSING_CONTENT:
-                        onResponseHeaderComplete();
+                        getEventListener().onResponseHeaderComplete();
                         break;
 
                     case STATUS_COMPLETED:
-                        onResponseComplete();
+                        getEventListener().onResponseComplete();
                         break;
 
                     case STATUS_EXPIRED:
-                        onExpire();
+                        getEventListener().onExpire();
                         break;
 
                 }
@@ -141,8 +178,20 @@ public class HttpExchange
     }
 
     /* ------------------------------------------------------------ */
+    public HttpEventListener getEventListener()
+    {
+        return _listener;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setEventListener(HttpEventListener listener)
+    {
+        _listener=listener;
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
-     * @param url
+     * @param url Including protocol, host and port
      */
     public void setURL(String url)
     {
@@ -163,7 +212,7 @@ public class HttpExchange
             port = "https".equalsIgnoreCase(scheme)?443:80;
 
         setAddress(new InetSocketAddress(uri.getHost(),port));
-
+        
         String completePath = uri.getCompletePath();
         if (completePath != null)
             setURI(completePath);
@@ -343,7 +392,7 @@ public class HttpExchange
 
     /* ------------------------------------------------------------ */
     /**
-     * @param requestContent
+     * @param in
      */
     public void setRequestContentSource(InputStream in)
     {
@@ -387,6 +436,16 @@ public class HttpExchange
         return _requestContent;
     }
 
+    public boolean getRetryStatus() 
+    {
+        return _retryStatus;
+    }
+    
+    public void setRetryStatus( boolean retryStatus ) 
+    {
+        _retryStatus = retryStatus;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Cancel this exchange
      * Currently this implementation does nothing.
@@ -395,12 +454,14 @@ public class HttpExchange
     {
         
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString()
     {
         return "HttpExchange@" + hashCode() + "=" + _method + "//" + _address.getHostName() + ":" + _address.getPort() + _uri + "#" + _status;
     }
+
+    
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -436,125 +497,127 @@ public class HttpExchange
 
     protected void onConnectionFailed(Throwable ex)
     {
-        System.err.println("CONNECTION FAILED on " + this);
-        // ex.printStackTrace();
+        Log.warn("CONNECTION FAILED on " + this,ex);
     }
 
     protected void onException(Throwable ex)
     {
-        System.err.println("EXCEPTION on " + this);
-        ex.printStackTrace();
+        
+        Log.warn("EXCEPTION on " + this,ex);
     }
 
     protected void onExpire()
     {
-        System.err.println("EXPIRED " + this);
+        Log.debug("EXPIRED " + this);
     }
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static class CachedExchange extends HttpExchange
-    {
-        int _responseStatus;
-        HttpFields _responseFields;
+    protected void onRetry() throws IOException
+    {}
 
+    /**
+     * true of the exchange should have listeners configured for it by the destination
+     *
+     * false if this is being managed elsewhere
+     * 
+     * @return
+     */
+    public boolean configureListeners()
+    {
+        return _configureListeners;
+    }
+
+    public void setConfigureListeners(boolean autoConfigure )
+    {
+        this._configureListeners = autoConfigure;
+    }
+
+    private class Listener implements HttpEventListener
+    {
+        public void onConnectionFailed(Throwable ex)
+        {
+            HttpExchange.this.onConnectionFailed(ex);
+        }
+
+        public void onException(Throwable ex)
+        {
+            HttpExchange.this.onException(ex);
+        }
+
+        public void onExpire()
+        {
+            HttpExchange.this.onExpire();
+        }
+
+        public void onRequestCommitted() throws IOException
+        {
+            HttpExchange.this.onRequestCommitted();
+        }
+
+        public void onRequestComplete() throws IOException
+        {
+            HttpExchange.this.onRequestComplete();
+        }
+
+        public void onResponseComplete() throws IOException
+        {
+            HttpExchange.this.onResponseComplete();
+        }
+
+        public void onResponseContent(Buffer content) throws IOException
+        {
+            HttpExchange.this.onResponseContent(content);
+        }
+
+        public void onResponseHeader(Buffer name, Buffer value) throws IOException
+        {
+            HttpExchange.this.onResponseHeader(name,value);
+        }
+
+        public void onResponseHeaderComplete() throws IOException
+        {
+            HttpExchange.this.onResponseHeaderComplete();
+        }
+
+        public void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
+        {
+            HttpExchange.this.onResponseStatus(version,status,reason);
+        }
+
+        public void onRetry()
+        {
+            HttpExchange.this.setRetryStatus( true );
+            try
+            {
+                HttpExchange.this.onRetry();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+    }
+    
+    /**
+     * @deprecated use {@link org.mortbay.jetty.client.CachedExchange}
+     *
+     */
+    public static class CachedExchange extends org.mortbay.jetty.client.CachedExchange
+    {
         public CachedExchange(boolean cacheFields)
         {
-            if (cacheFields)
-                _responseFields = new HttpFields();
+            super(cacheFields);
         }
-
-        /* ------------------------------------------------------------ */
-        public int getResponseStatus()
-        {
-            if (_status < STATUS_PARSING_HEADERS)
-                throw new IllegalStateException("Response not received");
-            return _responseStatus;
-        }
-
-        /* ------------------------------------------------------------ */
-        public HttpFields getResponseFields()
-        {
-            if (_status < STATUS_PARSING_CONTENT)
-                throw new IllegalStateException("Headers not complete");
-            return _responseFields;
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
-        {
-            super.onResponseStatus(version,status,reason);
-            _responseStatus = status;
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void onResponseHeader(Buffer name, Buffer value) throws IOException
-        {
-            super.onResponseHeader(name,value);
-            if (_responseFields != null)
-                _responseFields.add(name,value);
-        }
-
     }
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static class ContentExchange extends CachedExchange
+    /**
+     * @deprecated use {@link org.mortbay.jetty.client.ContentExchange}
+     *
+     */
+    public static class ContentExchange extends org.mortbay.jetty.client.ContentExchange
     {
-        int _contentLength = 1024;
-        String _encoding = "utf-8";
-        ByteArrayOutputStream _responseContent;
-
-        public ContentExchange()
-        {
-            super(false);
-        }
-
-        /* ------------------------------------------------------------ */
-        public String getResponseContent() throws UnsupportedEncodingException
-        {
-            if (_responseContent != null)
-            {
-                return _responseContent.toString(_encoding);
-            }
-            return null;
-        }
-
-        /* ------------------------------------------------------------ */
-        protected void onResponseHeader(Buffer name, Buffer value) throws IOException
-        {
-            super.onResponseHeader(name,value);
-            int header = HttpHeaders.CACHE.getOrdinal(value);
-            switch (header)
-            {
-                case HttpHeaders.CONTENT_LANGUAGE_ORDINAL:
-                    _contentLength = BufferUtil.toInt(value);
-                    break;
-                case HttpHeaders.CONTENT_TYPE_ORDINAL:
-
-                    String mime = StringUtil.asciiToLowerCase(value.toString());
-                    int i = mime.indexOf("charset=");
-                    if (i > 0)
-                    {
-                        mime = mime.substring(i + 8);
-                        i = mime.indexOf(';');
-                        if (i > 0)
-                            mime = mime.substring(0,i);
-                    }
-                    if (mime != null && mime.length() > 0)
-                        _encoding = mime;
-                    break;
-            }
-        }
-
-        protected void onResponseContent(Buffer content) throws IOException
-        {
-            if (_responseContent == null)
-                _responseContent = new ByteArrayOutputStream(_contentLength);
-            content.writeTo(_responseContent);
-        }
+        
     }
+    
+
 
 }
