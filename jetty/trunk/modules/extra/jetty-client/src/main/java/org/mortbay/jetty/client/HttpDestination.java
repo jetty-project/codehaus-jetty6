@@ -1,4 +1,3 @@
-package org.mortbay.jetty.client;
 //========================================================================
 //Copyright 2006-2007 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
@@ -12,6 +11,8 @@ package org.mortbay.jetty.client;
 //See the License for the specific language governing permissions and
 //limitations under the License.
 //========================================================================
+package org.mortbay.jetty.client;
+
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
