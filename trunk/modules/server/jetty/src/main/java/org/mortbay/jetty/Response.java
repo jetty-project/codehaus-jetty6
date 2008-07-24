@@ -284,6 +284,7 @@ public class Response implements HttpServletResponse
             }
             else
             {
+                setHeader(HttpHeaders.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
                 setContentType(MimeTypes.TEXT_HTML_8859_1);
                 ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
                 if (message != null)
