@@ -86,6 +86,15 @@ public class ServletHolder extends Holder
     {
         super(servlet);
     }
+
+    /* ---------------------------------------------------------------- */
+    /**
+     * @return The unavailable exception or null if not unavailable
+     */
+    public UnavailableException getUnavailableException()
+    {
+        return _unavailableEx;
+    }
     
     /* ------------------------------------------------------------ */
     public synchronized void setServlet(Servlet servlet)
@@ -249,23 +258,17 @@ public class ServletHolder extends Holder
 
         if (_extInstance || _initOnStartup)
         {
-            if (_servlet==null)
-                _servlet=(Servlet)newInstance();
             try
             {
-                initServlet(_servlet,_config);
+                initServlet();
             }
-            catch(Throwable e)
+            catch(Exception e)
             {
-                _servlet=null;
-                _config=null;
-                if (e instanceof Exception)
-                    throw (Exception) e;
-                else if (e instanceof Error)
-                    throw (Error)e;
+                if (_servletHandler.isStartWithUnavailable())
+                    Log.ignore(e);
                 else
-                    throw new ServletException(e);
-            } 
+                    throw e;
+            }
         }  
     }
 
@@ -331,37 +334,10 @@ public class ServletHolder extends Holder
             _unavailable=0;
             _unavailableEx=null;
         }
-        
-        try
-        {   
-            if (_servlet==null)
-            {
-                _servlet=(Servlet)newInstance();
-                if (_config==null)
-                	_config=new Config();
-                initServlet(_servlet,_config);
-            }
-        
-            return _servlet;
-        }
-        catch(UnavailableException e)
-        {
-            _servlet=null;
-            _config=null;
-            return makeUnavailable(e);
-        }
-        catch(ServletException e)
-        {
-            _servlet=null;
-            _config=null;
-            throw e;
-        }
-        catch(Throwable e)
-        {
-            _servlet=null;
-            _config=null;
-            throw new ServletException("init",e);
-        }    
+
+        if (_servlet==null)
+            initServlet();
+        return _servlet;
     }
 
     /* ------------------------------------------------------------ */
@@ -399,9 +375,13 @@ public class ServletHolder extends Holder
     }
     
     /* ------------------------------------------------------------ */
-    private Servlet makeUnavailable(UnavailableException e) 
-      throws UnavailableException 
+    private void makeUnavailable(UnavailableException e) 
     {
+        if (_unavailableEx==e && _unavailable!=0)
+            return;
+
+        _servletHandler.getServletContext().log("unavailable",e);
+        
         _unavailableEx=e;
         _unavailable=-1;
         if (e.isPermanent())   
@@ -413,27 +393,62 @@ public class ServletHolder extends Holder
             else
                 _unavailable=System.currentTimeMillis()+5000; // TODO configure
         }
-        
-        throw _unavailableEx;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void makeUnavailable(Throwable e) 
+    {
+        if (e instanceof UnavailableException)
+            makeUnavailable((UnavailableException)e);
+        else
+        {
+            _servletHandler.getServletContext().log("unavailable",e);
+            _unavailableEx=new UnavailableException(e.toString(),-1);
+            _unavailable=-1;
+        }
     }
 
     /* ------------------------------------------------------------ */
-    private void initServlet(Servlet servlet, ServletConfig config) 
+    private void initServlet() 
     	throws ServletException
     {
         Principal user=null;
         try
         {
+            if (_servlet==null)
+                _servlet=(Servlet)newInstance();
+            if (_config==null)
+                _config=new Config();
+            
             //handle any cusomizations of the servlet, such as @postConstruct
-            _servlet = getServletHandler().customizeServlet(servlet);
+            if (!(_servlet instanceof SingleThreadedWrapper))
+                _servlet = getServletHandler().customizeServlet(_servlet);
             
             // Handle run as
             if (_runAs!=null && _realm!=null)
                 user=_realm.pushRole(null,_runAs);
-            servlet.init(config);
+            
+            _servlet.init(_config);
+        }
+        catch (UnavailableException e)
+        {
+            makeUnavailable(e);
+            _servlet=null;
+            _config=null;
+            throw e;
+        }
+        catch (ServletException e)
+        {
+            makeUnavailable(e.getCause());
+            _servlet=null;
+            _config=null;
+            throw e;
         }
         catch (Exception e)
         {
+            makeUnavailable(e);
+            _servlet=null;
+            _config=null;
             throw new ServletException(e);
         }
         finally
@@ -460,7 +475,7 @@ public class ServletHolder extends Holder
         synchronized(this)
         {
             if (_unavailable!=0 || !_initOnStartup)
-            servlet=getServlet();
+                servlet=getServlet();
             if (servlet==null)
                 throw new UnavailableException("Could not instantiate "+_class);
         }
@@ -490,6 +505,7 @@ public class ServletHolder extends Holder
         catch(UnavailableException e)
         {
             makeUnavailable(e);
+            throw _unavailableEx;
         }
         finally
         {
@@ -572,14 +588,15 @@ public class ServletHolder extends Holder
                     try
                     {
                         Servlet s = (Servlet) newInstance();
+                        s = getServletHandler().customizeServlet(s);
                         s.init(config);
                         _stack.push(s);
                     }
-                    catch(IllegalAccessException e)
+                    catch (ServletException e)
                     {
-                        throw new ServletException(e);
+                        throw e;
                     }
-                    catch (InstantiationException e)
+                    catch (Exception e)
                     {
                         throw new ServletException(e);
                     }
@@ -599,13 +616,18 @@ public class ServletHolder extends Holder
                     try
                     {
                         s = (Servlet) newInstance();
+                        s = getServletHandler().customizeServlet(s);
                         s.init(_config);
                     }
-                    catch(IllegalAccessException e)
+                    catch (ServletException e)
                     {
-                        throw new ServletException(e);
+                        throw e;
                     }
-                    catch (InstantiationException e)
+                    catch (IOException e)
+                    {
+                        throw e;
+                    }
+                    catch (Exception e)
                     {
                         throw new ServletException(e);
                     }
