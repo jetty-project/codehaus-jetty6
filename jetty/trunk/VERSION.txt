@@ -24,6 +24,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-642 NPE in LdapLoginModule
  + JETTY-644 LdapLoginModule uses proper filters when searching
  + JETTY-645 Do not provide jetty-util to the webapps
+ + JETTY-646 Should set Cache-Control header when sending errors to avoid caching
  + JETTY-647 suspended POSTs with binary data do too many resumes
  + JETTY-650 Parse "*" URI for HTTP OPTIONS request
  + JETTY-651 Release resources during destroy
