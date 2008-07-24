@@ -84,6 +84,7 @@ public class ServletHandler extends AbstractHandler
     private FilterMapping[] _filterMappings;
     private boolean _filterChainsCached=true;
     private int _maxFilterChainsCacheSize=1000;
+    private boolean _startWithUnavailable=true;
     
     private ServletHolder[] _servlets;
     private ServletMapping[] _servletMappings;
@@ -385,14 +386,22 @@ public class ServletHandler extends AbstractHandler
                     throw (ServletException)e;
             }
             
+            
+            // unwrap cause
             Throwable th=e;
-            if (th instanceof ServletException)
+            if (th instanceof UnavailableException)
+            {
+                Log.debug(th); 
+            }
+            else if (th instanceof ServletException)
             {
                 Log.debug(th);
                 Throwable cause=((ServletException)th).getRootCause();
                 if (cause!=th && cause!=null)
                     th=cause;
             }
+            
+            // hnndle or log exception
             if (th instanceof RetryRequest)
             {
                 base_request.setHandled(false);
@@ -400,20 +409,18 @@ public class ServletHandler extends AbstractHandler
             }
             else if (th instanceof HttpException)
                 throw (HttpException)th;
-            else if (th instanceof UnavailableException)
+            else if (Log.isDebugEnabled())
+            {
+                Log.warn(request.getRequestURI(), th); 
+                Log.debug(request.toString()); 
+            }
+            else if (th instanceof IOException || th instanceof UnavailableException)
             {
                 Log.warn(request.getRequestURI()+": "+th);
-                Log.debug(th); 
-            }
-            else if (Log.isDebugEnabled() || !( th instanceof java.io.IOException))
-            { 
-                Log.warn(request.getRequestURI(), th); 
-                if(Log.isDebugEnabled())
-                    Log.debug(request.toString()); 
             }
             else
             {
-                Log.warn(request.getRequestURI()+": "+th);
+                Log.warn(request.getRequestURI(),th);
             }
             
             // TODO httpResponse.getHttpConnection().forceClose();
@@ -572,6 +579,26 @@ public class ServletHandler extends AbstractHandler
         }
         return true;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param start True if this handler will start with unavailable servlets
+     */
+    public void setStartWithUnavailable(boolean start)
+    {
+        _startWithUnavailable=start;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return True if this handler will start with unavailable servlets
+     */
+    public boolean isStartWithUnavailable()
+    {
+        return _startWithUnavailable;
+    }
+    
+    
     
     /* ------------------------------------------------------------ */
     /** Initialize filters and load-on-startup servlets.
