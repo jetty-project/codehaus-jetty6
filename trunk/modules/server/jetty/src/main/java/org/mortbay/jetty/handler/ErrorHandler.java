@@ -46,11 +46,11 @@ public class ErrorHandler extends AbstractHandler
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
     {
-        HttpConnection.getCurrentConnection().getRequest().setHandled(true);
-        response.setContentType(MimeTypes.TEXT_HTML_8859_1);
-        ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(4096);
         HttpConnection connection = HttpConnection.getCurrentConnection();
+        connection.getRequest().setHandled(true);
+        response.setContentType(MimeTypes.TEXT_HTML_8859_1);        
         response.setHeader(HttpHeaders.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
+        ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(4096);
         handleErrorPage(request, writer, connection.getResponse().getStatus(), connection.getResponse().getReason());
         writer.flush();
         response.setContentLength(writer.size());
