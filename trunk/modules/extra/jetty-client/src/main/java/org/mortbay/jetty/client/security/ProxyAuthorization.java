@@ -25,22 +25,22 @@ import org.mortbay.jetty.security.B64Code;
 import org.mortbay.util.StringUtil;
 
 /**
- * Sets authentication headers for BASIC authentication challenges
+ * Sets proxy authentication headers for BASIC authentication challenges
  * 
  * @author jesse
  */
-public class ProxyAuthentication implements Authentication
+public class ProxyAuthorization implements Authorization
 {
     private Buffer _authorization;
     
-    public ProxyAuthentication(String username,String password) throws IOException
+    public ProxyAuthorization(String username,String password) throws IOException
     {
         String authenticationString = "basic " + B64Code.encode( username + ":" + password, StringUtil.__ISO_8859_1);
         _authorization= new ByteArrayBuffer(authenticationString);
     }
     
     /**
-     * BASIC authentication is of the form
+     * BASIC proxy authentication is of the form
      * 
      * encoded credentials are of the form: username:password
      * 
