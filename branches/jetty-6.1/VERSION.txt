@@ -6,6 +6,7 @@
  + JETTY-563 GWT OpenRemoteServiceServlet GWT1.5M2+
  + JETTY-564 Consider optionally importing org.apache.jasper.servlet
  + JETTY-571 SelectChannelConnector throws Exception on close on Windows
+ + JETTY-596 Proxy authorization support in HttpClient
  + JETTY-599 handle buffers consistently handle invalid index for poke
  + JETTY-603 Handle IPv6 in HttpURI
  + JETTY-605 Added optional threadpool to BayeuxService
