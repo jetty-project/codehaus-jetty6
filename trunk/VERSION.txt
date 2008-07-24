@@ -2,7 +2,7 @@ jetty-7.0-SNAPSHOT
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
  + JETTY-30  Externalize servlet-api to own project
  + JETTY-182 Support setting explicit system classpath for jasper Jsr199JavaCompiler
- + JETTY-319 Get unavailable exception
+ + JETTY-319 Get unavailable exception and added startWithUnavailable option 
  + JETTY-381 JETTY-622 Multiple Web Application Source Directory
  + JETTY-442 Accessors for mimeType on ResourceHandler
  + JETTY-502 forward of an include should hide include attributes
