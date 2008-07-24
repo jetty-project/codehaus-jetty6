@@ -24,7 +24,7 @@
       <resource>
         <directory>target/generated-sources/main/resources</directory>
         <includes>
-          <includes>**/**</includes>
+          <include>**/**</include>
         </includes>
       </resource>
     </resources>
