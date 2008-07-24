@@ -31,6 +31,7 @@ import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.jetty.security.SslSelectChannelEndPoint;
+import org.mortbay.jetty.client.security.Authentication;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 
@@ -352,6 +353,9 @@ public class HttpConnection implements Connection
                 // TODO suppress port 80 or 443
                 uri=(_destination.isSecure()?HttpSchemes.HTTPS:HttpSchemes.HTTP)+"://"+
                 _destination.getAddress().getHostName()+":"+_destination.getAddress().getPort()+uri;
+                Authentication auth = _destination.getProxyAuthentication();
+                if (auth!=null)
+                    auth.setCredentials(_exchange);
             }
             
             _generator.setRequest(_exchange._method,uri);

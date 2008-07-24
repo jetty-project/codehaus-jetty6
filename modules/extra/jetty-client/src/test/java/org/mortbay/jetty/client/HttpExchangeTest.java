@@ -32,11 +32,14 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.client.security.ProxyAuthentication;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.util.StringUtil;
 
 /**
  * Functional testing for HttpExchange.
@@ -241,6 +244,7 @@ public class HttpExchangeTest extends TestCase
         try
         {
             _httpClient.setProxy(new InetSocketAddress("127.0.0.1",_port));
+            _httpClient.setProxyAuthentication(new ProxyAuthentication("user","password"));
 
             ContentExchange httpExchange=new ContentExchange();
             httpExchange.setAddress(new InetSocketAddress("jetty.mortbay.org",8080));
@@ -249,7 +253,9 @@ public class HttpExchangeTest extends TestCase
             _httpClient.send(httpExchange);
             httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
-            assertEquals("Proxy request: http://jetty.mortbay.org:8080/jetty-6",result.trim());
+            result=result.trim();
+            assertTrue(result.startsWith("Proxy request: http://jetty.mortbay.org:8080/jetty-6"));
+            assertTrue(result.endsWith("basic dXNlcjpwYXNzd29yZA=="));
         }
         finally
         {
@@ -305,6 +311,7 @@ public class HttpExchangeTest extends TestCase
                     {
                         // System.err.println("HANDLING Proxy");
                         response.getOutputStream().println("Proxy request: "+request.getRequestURL());
+                        response.getOutputStream().println(request.getHeader(HttpHeaders.PROXY_AUTHORIZATION));
                     }
                     else if (request.getMethod().equalsIgnoreCase("GET"))
                     {

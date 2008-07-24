@@ -50,10 +50,9 @@ public class HttpDestination
     private ArrayBlockingQueue<Object> _newQueue = new ArrayBlockingQueue<Object>(10,true);
     private int _newConnection=0;
     private InetSocketAddress _proxy;
+    private Authentication _proxyAuthentication;
     private PathMap _authorizations;
     private List<Cookie> _cookies;
-    
-    // TODO add a repository of cookies and authenticated credentials
     
 
 
@@ -476,7 +475,19 @@ public class HttpDestination
     {
         return _proxy;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public Authentication getProxyAuthentication()
+    {
+        return _proxyAuthentication;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setProxyAuthentication(Authentication authentication)
+    {
+        _proxyAuthentication = authentication;
+    }
+
     /* ------------------------------------------------------------ */
     public boolean isProxied()
     {
