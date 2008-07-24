@@ -44,6 +44,12 @@ public class ContentExchange extends CachedExchange
     }
     
     /* ------------------------------------------------------------ */
+    public ContentExchange(boolean cacheFields)
+    {
+        super(cacheFields);
+    }    
+    
+    /* ------------------------------------------------------------ */
     public String getResponseContent() throws UnsupportedEncodingException
     {
         if (_responseContent != null)
