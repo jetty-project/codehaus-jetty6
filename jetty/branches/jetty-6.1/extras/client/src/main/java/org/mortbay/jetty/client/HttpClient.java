@@ -42,6 +42,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.client.security.Authentication;
 import org.mortbay.jetty.client.security.SecurityRealmResolver;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
@@ -93,6 +94,7 @@ public class HttpClient extends AbstractBuffers
     int _soTimeout = 10000;
     private Timeout _timeoutQ = new Timeout();
     private InetSocketAddress _proxy;
+    private Authentication _proxyAuthentication;
     private Set<InetAddress> _noProxy;
     private int _maxRetries = 3;
     private LinkedList<String> _registeredListeners;
@@ -107,17 +109,10 @@ public class HttpClient extends AbstractBuffers
     private String _trustStoreType="JKS";
     private String _trustStorePassword;
     private String _trustManagerAlgorithm = "SunX509";
-    private String _trustManagerPassword;
 
     private String _protocol="TLS";
-    private String _algorithm="SunX509"; // cert algorithm
     private String _provider;
-    private String _secureRandomAlgorithm; // cert algorithm
-    private String _sslKeyManagerFactoryAlgorithm=(Security.getProperty("ssl.KeyManagerFactory.algorithm")==null?"SunX509":Security
-            .getProperty("ssl.KeyManagerFactory.algorithm")); // cert
-                                                                // algorithm
-    private String _sslTrustManagerFactoryAlgorithm=(Security.getProperty("ssl.TrustManagerFactory.algorithm")==null?"SunX509":Security
-            .getProperty("ssl.TrustManagerFactory.algorithm")); // cert
+    private String _secureRandomAlgorithm; 
 
     private SecurityRealmResolver _realmResolver;    
 
@@ -171,7 +166,11 @@ public class HttpClient extends AbstractBuffers
             {
                 destination=new HttpDestination(this,remote,ssl,_maxConnectionsPerAddress);
                 if (_proxy!=null && (_noProxy==null || !_noProxy.contains(remote.getAddress())))
+                {
                     destination.setProxy(_proxy);
+                    if (_proxyAuthentication!=null)
+                        destination.setProxyAuthentication(_proxyAuthentication);
+                }
                 _destinations.put(remote,destination);
             }
             return destination;
@@ -560,6 +559,18 @@ public class HttpClient extends AbstractBuffers
     }
 
     /* ------------------------------------------------------------ */
+    public Authentication getProxyAuthentication()
+    {
+        return _proxyAuthentication;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setProxyAuthentication(Authentication authentication)
+    {
+        _proxyAuthentication = authentication;
+    }
+
+    /* ------------------------------------------------------------ */
     public boolean isProxied()
     {
         return this._proxy!=null;
@@ -609,7 +620,6 @@ public class HttpClient extends AbstractBuffers
         this._keyStoreLocation = keyStoreLocation;
     }
 
-
     public void setKeyStorePassword(String _keyStorePassword)
     {
         this._keyStorePassword = _keyStorePassword;
@@ -623,10 +633,5 @@ public class HttpClient extends AbstractBuffers
     public void setTrustStorePassword(String _trustStorePassword)
     {
         this._trustStorePassword = _trustStorePassword;
-    }
-
-    public void setTrustManagerPassword(String _trustManagerPassword)
-    {
-        this._trustManagerPassword = _trustManagerPassword;
     }
 }
