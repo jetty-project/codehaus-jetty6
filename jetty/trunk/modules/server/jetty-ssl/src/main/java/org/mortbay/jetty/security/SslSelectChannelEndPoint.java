@@ -48,6 +48,17 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
     
     // TODO get rid of this
     // StringBuilder h = new StringBuilder(500);
+    /*
+    class H 
+    {
+        H append(Object o)
+        {
+            System.err.print(o);
+            return this;
+        }
+    };
+    H h = new H();
+    */
     
     /* ------------------------------------------------------------ */
     public SslSelectChannelEndPoint(Buffers buffers,SocketChannel channel, SelectorManager.SelectSet selectSet, SelectionKey key, SSLEngine engine)
@@ -299,7 +310,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                                             _closing=true;
                                     }
                                     
-                                    // h.append("wrap ").append(result).append('\n');
+                                    // h.append("wrap ").append(_result).append('\n');
                                     _outNIOBuffer.setPutIndex(put+_result.bytesProduced());
                                 }
                                 finally
@@ -437,7 +448,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                                 case CLOSED:
                                     _closing=true;
                             }
-                            // h.append("wrap=").append(result).append('\n');
+                            // h.append("wrap=").append(_result).append('\n');
                             _outNIOBuffer.setPutIndex(put+_result.bytesProduced());
                         }
                         finally
@@ -525,7 +536,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
             _inBuffer.limit(_inNIOBuffer.putIndex());
             _result=null;
             _result=_engine.unwrap(_inBuffer,buffer);
-            // h.append("unwrap=").append(result).append('\n');
+            // h.append("unwrap=").append(_result).append('\n');
             _inNIOBuffer.skip(_result.bytesConsumed());
         }
         finally
@@ -603,7 +614,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
 
                         _result=null;
                         _result=_engine.wrap(_gather,_outBuffer);
-                        // h.append("wrap2=").append(result).append('\n');
+                        // h.append("wrap2=").append(_result).append('\n');
                         _outNIOBuffer.setGetIndex(0);
                         _outNIOBuffer.setPutIndex(_result.bytesProduced());
                         consumed=_result.bytesConsumed();
@@ -672,7 +683,7 @@ public class SslSelectChannelEndPoint extends SelectChannelEndPoint
                     _outBuffer.limit(_outBuffer.capacity());
                     _result=null;
                     _result=_engine.wrap(_gather[0],_outBuffer);
-                    // h.append("wrap1=").append(result).append('\n');
+                    // h.append("wrap1=").append(_result).append('\n');
                     _outNIOBuffer.setGetIndex(0);
                     _outNIOBuffer.setPutIndex(_result.bytesProduced());
                     consumed=_result.bytesConsumed();
