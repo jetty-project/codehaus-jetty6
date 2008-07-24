@@ -36,7 +36,7 @@ import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.client.security.ProxyAuthentication;
+import org.mortbay.jetty.client.security.ProxyAuthorization;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.util.StringUtil;
@@ -244,7 +244,7 @@ public class HttpExchangeTest extends TestCase
         try
         {
             _httpClient.setProxy(new InetSocketAddress("127.0.0.1",_port));
-            _httpClient.setProxyAuthentication(new ProxyAuthentication("user","password"));
+            _httpClient.setProxyAuthentication(new ProxyAuthorization("user","password"));
 
             ContentExchange httpExchange=new ContentExchange();
             httpExchange.setAddress(new InetSocketAddress("jetty.mortbay.org",8080));

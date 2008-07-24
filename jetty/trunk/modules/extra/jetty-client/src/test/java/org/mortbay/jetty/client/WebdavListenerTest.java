@@ -22,8 +22,9 @@ import junit.framework.TestCase;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.client.security.DefaultRealmResolver;
-import org.mortbay.jetty.client.security.SecurityRealm;
+import org.mortbay.jetty.client.security.HashRealmResolver;
+import org.mortbay.jetty.client.security.Realm;
+import org.mortbay.jetty.client.security.SimpleRealmResolver;
 
 /**
  * Functional testing for HttpExchange.
@@ -52,10 +53,8 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
         _httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
         _httpClient.setMaxConnectionsPerAddress(4);
 
-        _httpClient.setSecurityRealmResolver( new DefaultRealmResolver());
-
-        _httpClient.getSecurityRealmResolver().addSecurityRealm(
-                new SecurityRealm(){
+        _httpClient.setRealmResolver( new SimpleRealmResolver (
+                new Realm(){
                     public String getId()
                     {
                         return _username + "'s webspace";  //To change body of implemented methods use File | Settings | File Templates.
@@ -71,7 +70,7 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
                         return _password;  //To change body of implemented methods use File | Settings | File Templates.
                     }
                 }
-        );
+        ));
 
         //_httpClient.enableWebdav();
         _httpClient.start();

@@ -20,22 +20,23 @@ import java.util.Map;
 
 import org.mortbay.jetty.client.HttpDestination;
 
-public class DefaultRealmResolver implements SecurityRealmResolver
+/**
+ * Simple Realm Resolver.
+ * <p> A Realm Resolver that wraps a single realm.
+ * @author gregw
+ *
+ */
+public class SimpleRealmResolver implements RealmResolver
 {
-    private Map<String, SecurityRealm>_realmMap;  
+    private Realm _realm;
     
-    public void addSecurityRealm( SecurityRealm realm )
+    public SimpleRealmResolver( Realm realm )
     {
-        if (_realmMap == null)
-        {
-            _realmMap = new HashMap<String, SecurityRealm>();
-        }
-        _realmMap.put( realm.getId(), realm );
+        _realm=realm;
     }
     
-    public SecurityRealm getRealm( String realmName, HttpDestination destination, String path ) throws IOException
+    public Realm getRealm( String realmName, HttpDestination destination, String path ) throws IOException
     {
-        return _realmMap.get( realmName );
+        return _realm;
     }
-
 }
