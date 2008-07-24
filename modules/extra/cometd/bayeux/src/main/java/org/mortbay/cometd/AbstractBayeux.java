@@ -657,7 +657,16 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         _root.getChannels(channels);
         return channels;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public int getChannelCount()
+    {
+        return _root.getChannelCount();
+    }
+    
     /* ------------------------------------------------------------ */
     public Collection<Client> getClients()
     {
@@ -668,9 +677,21 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
 
     /* ------------------------------------------------------------ */
-    public boolean hasClient(String clientId)
+    /**
+     * @return
+     */
+    public int getClientCount()
     {
         synchronized(this)
+        {
+            return _clients.size();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean hasClient(String clientId)
+    {
+        synchronized(this)      
         {
             if (clientId==null)
                 return false;
