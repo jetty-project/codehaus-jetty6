@@ -34,8 +34,8 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.client.security.DefaultRealmResolver;
-import org.mortbay.jetty.client.security.SecurityRealm;
+import org.mortbay.jetty.client.security.HashRealmResolver;
+import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.Constraint;
@@ -53,7 +53,7 @@ public class SslSecurityListenerTest extends TestCase
     protected  Server _server;
     protected int _port;
     protected HttpClient _httpClient;
-    protected SecurityRealm _jettyRealm;
+    protected Realm _jettyRealm;
     protected int _type = HttpClient.CONNECTOR_SOCKET;
 
     protected void setUp() throws Exception
@@ -64,7 +64,7 @@ public class SslSecurityListenerTest extends TestCase
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
 
-        _jettyRealm = new SecurityRealm()
+        _jettyRealm = new Realm()
         {
             public String getId()
             {
@@ -82,8 +82,9 @@ public class SslSecurityListenerTest extends TestCase
             }
         };
 
-        _httpClient.setSecurityRealmResolver(new DefaultRealmResolver());
-        _httpClient.getSecurityRealmResolver().addSecurityRealm(_jettyRealm);
+        HashRealmResolver resolver = new HashRealmResolver();
+        resolver.addSecurityRealm(_jettyRealm);
+        _httpClient.setRealmResolver(resolver);
     }
 
     protected void tearDown() throws Exception

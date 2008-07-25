@@ -14,15 +14,28 @@
 
 package org.mortbay.jetty.client.security;
 
-/**
- * Simple security realm interface.
- */
-public interface SecurityRealm
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.mortbay.jetty.client.HttpDestination;
+
+public class HashRealmResolver implements RealmResolver
 {
-    public String getId();
-
-    public String getPrincipal();
-
-    public String getCredentials();
+    private Map<String, Realm>_realmMap;  
+    
+    public void addSecurityRealm( Realm realm )
+    {
+        if (_realmMap == null)
+        {
+            _realmMap = new HashMap<String, Realm>();
+        }
+        _realmMap.put( realm.getId(), realm );
+    }
+    
+    public Realm getRealm( String realmName, HttpDestination destination, String path ) throws IOException
+    {
+        return _realmMap.get( realmName );
+    }
 
 }
