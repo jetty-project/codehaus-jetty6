@@ -35,6 +35,7 @@
  + JETTY-656 HttpClient defaults to async mode
  + JETTY-657 Backport jetty-7 sslengine
  + JETTY-659 ContentExchange and missing headers in HttpClient
+ + JETTY-660 Backported QoSFilter
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
