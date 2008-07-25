@@ -18,117 +18,125 @@ import javax.servlet.http.HttpSession;
 
 import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.ajax.Continuation;
+import org.mortbay.util.ajax.ContinuationSupport;
 
 /**
- * Quality of Service Filter.
- * This filter limits the number of active requests to the number set by the "maxRequests" init parameter (default 10).
- * If more requests are received, they are suspended and placed on priority queues.  Priorities are determined by 
- * the {@link #getPriority(ServletRequest)} method and are a value between 0 and the value given by the "maxPriority" 
- * init parameter (default 10), with higher values having higher priority.
+ * Quality of Service Filter. This filter limits the number of active requests
+ * to the number set by the "maxRequests" init parameter (default 10). If more
+ * requests are received, they are suspended and placed on priority queues.
+ * Priorities are determined by the {@link #getPriority(ServletRequest)} method
+ * and are a value between 0 and the value given by the "maxPriority" init
+ * parameter (default 10), with higher values having higher priority.
  * <p>
- * The maxRequest limit is policed by a {@link Semaphore} and the filter will wait a short while attempting to acquire
- * the semaphore. This wait is controlled by the "waitMs" init parameter and allows the expense of a suspend to be
- * avoided if the semaphore is shortly available.
+ * The maxRequest limit is policed by a {@link Semaphore} and the filter will
+ * wait a short while attempting to acquire the semaphore. This wait is
+ * controlled by the "waitMs" init parameter and allows the expense of a suspend
+ * to be avoided if the semaphore is shortly available.
  * 
  * @author gregw
- *
+ * 
  */
 public class QoSFilter implements Filter
 {
-    final static int __DEFAULT_MAX_PRIORITY=10;
-    final static int __DEFAULT_PASSES=10;
-    final static int __DEFAULT_WAIT_MS=50;
-    final static long __DEFAULT_TIMEOUT_MS=30000L;
-    
+    final static int __DEFAULT_MAX_PRIORITY = 10;
+    final static int __DEFAULT_PASSES = 10;
+    final static int __DEFAULT_WAIT_MS = 50;
+    final static long __DEFAULT_TIMEOUT_MS = 30000L;
+
     ServletContext _context;
     long _waitMs;
     long _timeoutMs;
     Semaphore _passes;
-    Queue[] _queue;
-    String _suspended="QoSFilter@"+this.hashCode();
+    Queue<Continuation>[] _queue;
+    String _suspended = "QoSFilter@" + this.hashCode();
     String _continuation = "org.mortbay.jetty.ajax.Continuation";
-    
-    public void init(FilterConfig filterConfig) 
+
+    public void init(FilterConfig filterConfig)
     {
-        _context=filterConfig.getServletContext();
-        
-        int max_priority=__DEFAULT_MAX_PRIORITY;
-        if (filterConfig.getInitParameter("maxPriority")!=null)
-            max_priority=Integer.parseInt(filterConfig.getInitParameter("maxPriority"));
-        _queue=new Queue[max_priority+1];
-        for (int p=0;p<_queue.length;p++)
-            _queue[p]=new ArrayQueue();
-        
-        int passes=__DEFAULT_PASSES;
-        if (filterConfig.getInitParameter("maxRequests")!=null)
-            passes=Integer.parseInt(filterConfig.getInitParameter("maxRequests"));
-        _passes=new Semaphore(passes,true);
-        
+        _context = filterConfig.getServletContext();
+
+        int max_priority = __DEFAULT_MAX_PRIORITY;
+        if (filterConfig.getInitParameter("maxPriority") != null)
+            max_priority = Integer.parseInt(filterConfig.getInitParameter("maxPriority"));
+        _queue = new Queue[max_priority + 1];
+        for (int p = 0; p < _queue.length; p++)
+            _queue[p] = new ArrayQueue<Continuation>();
+
+        int passes = __DEFAULT_PASSES;
+        if (filterConfig.getInitParameter("maxRequests") != null)
+            passes = Integer.parseInt(filterConfig.getInitParameter("maxRequests"));
+        _passes = new Semaphore(passes,true);
+
         long wait = __DEFAULT_WAIT_MS;
-        if (filterConfig.getInitParameter("waitMs")!=null)
-            wait=Integer.parseInt(filterConfig.getInitParameter("waitMs"));
-        _waitMs=wait;
-    
+        if (filterConfig.getInitParameter("waitMs") != null)
+            wait = Integer.parseInt(filterConfig.getInitParameter("waitMs"));
+        _waitMs = wait;
+
         long timeout = __DEFAULT_TIMEOUT_MS;
-        if(filterConfig.getInitParameter("timeoutMs")!=null)
-        	timeout=Integer.parseInt(filterConfig.getInitParameter("timeoutMs"));
-        _timeoutMs=timeout;
+        if (filterConfig.getInitParameter("timeoutMs") != null)
+            timeout = Integer.parseInt(filterConfig.getInitParameter("timeoutMs"));
+        _timeoutMs = timeout;
     }
-    
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
-    throws IOException, ServletException
+
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
     {
-    	Continuation continuation = getContinuation(request);
-    	
-        boolean accepted=false;
+        
+        boolean accepted = false;
         try
         {
-        	if (request.getAttribute(_suspended)==null)
-        	{
-        		accepted=_passes.tryAcquire(_waitMs,TimeUnit.MILLISECONDS);
+            Boolean suspended = (Boolean)request.getAttribute(_suspended);
+            if (suspended == null)
+            {
+                accepted = _passes.tryAcquire(_waitMs,TimeUnit.MILLISECONDS);
 
-        		if (accepted)
+                if (accepted)
                 {
                     request.setAttribute(_suspended,Boolean.FALSE);
                 }
                 else
                 {
-                    request.setAttribute(_suspended,Boolean.TRUE);
-                    ((Continuation)request.getAttribute(_continuation)).suspend(_timeoutMs);
+                    Continuation continuation =  ContinuationSupport.getContinuation((HttpServletRequest)request,_queue);
                     int priority = getPriority(request);
-                    _queue[priority].add(request);
-                    return;
+                    suspended=Boolean.TRUE;
+                    request.setAttribute(_suspended,suspended);
+                    synchronized (_queue)
+                    {
+                        _queue[priority].add(continuation);
+                        continuation.suspend(_timeoutMs);
+                        // may fall through here if waiting continuation
+                    }
                 }
-
-        	}
-        	else
-        	{
-                Boolean suspended=(Boolean)request.getAttribute(_suspended);
-                
-                if (suspended.booleanValue())
+            }
+             
+            if (suspended.booleanValue())
+            {
+                request.setAttribute(_suspended,Boolean.FALSE);
+                Continuation continuation =  ContinuationSupport.getContinuation((HttpServletRequest)request,_queue);
+                if (continuation.isResumed())
                 {
-                    request.setAttribute(_suspended,Boolean.FALSE);
-	                if (continuation.isResumed())
-	                {
-	                    _passes.acquire();
-	                    accepted=true;
-	                }
-	                else 
-	                	accepted = _passes.tryAcquire(_waitMs,TimeUnit.MILLISECONDS);
-	                   
-	                if (accepted)
-	                    chain.doFilter(request,response);
-	                else
-	                    ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-	            }
+                    _passes.acquire();
+                    accepted = true;
+                }
                 else
                 {
-                	_passes.acquire();
-                    accepted=true;
+                    // Timeout! try 1 more time.
+                    accepted = _passes.tryAcquire(_waitMs,TimeUnit.MILLISECONDS);
                 }
-        	}
-        }    
-        catch(InterruptedException e)
+            }
+            else if (!accepted)
+            {
+                // pass through resume of previously accepted request
+                _passes.acquire();
+                accepted = true;
+            }
+
+            if (accepted)
+                chain.doFilter(request,response);
+            else
+                ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            
+        }
+        catch (InterruptedException e)
         {
             _context.log("QoS",e);
             ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
@@ -137,13 +145,16 @@ public class QoSFilter implements Filter
         {
             if (accepted)
             {
-                for (int p=_queue.length;p-->0;)
+                synchronized (_queue)
                 {
-                    ServletRequest r=(ServletRequest)_queue[p].poll();
-                    if (r!=null && r.getAttribute(_continuation)!=null)
+                    for (int p = _queue.length; p-- > 0;)
                     {
-                        ((Continuation)r.getAttribute(_continuation)).resume();
-                        break;
+                        Continuation continuation = _queue[p].poll();
+                        if (continuation != null)
+                        {
+                            continuation.resume();
+                            break;
+                        }
                     }
                 }
                 _passes.release();
@@ -157,25 +168,21 @@ public class QoSFilter implements Filter
      */
     protected int getPriority(ServletRequest request)
     {
-    	HttpServletRequest base_request = (HttpServletRequest)request;
-        if (base_request.getUserPrincipal() != null )
+        HttpServletRequest base_request = (HttpServletRequest)request;
+        if (base_request.getUserPrincipal() != null)
             return 2;
-        else 
+        else
         {
             HttpSession session = base_request.getSession(false);
-            if (session!=null && !session.isNew()) 
+            if (session != null && !session.isNew())
                 return 1;
             else
                 return 0;
         }
     }
 
-    private Continuation getContinuation(ServletRequest request)
+    public void destroy()
     {
-        return (Continuation) request.getAttribute("org.mortbay.jetty.ajax.Continuation");
     }
 
-    public void destroy(){}
-
 }
-
