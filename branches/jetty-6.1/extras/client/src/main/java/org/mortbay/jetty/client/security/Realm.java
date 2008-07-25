@@ -1,5 +1,5 @@
 //========================================================================
-//Copyright 2008 Mort Bay Consulting Pty. Ltd.
+//Copyright 2006-2008 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
 
 package org.mortbay.jetty.client.security;
 
-
-
-import java.io.IOException;
-
-import org.mortbay.jetty.client.HttpExchange;
-
 /**
- * Simple authentication interface that sets required fields on the exchange.
+ * Simple security realm interface.
  */
-public interface Authentication
+public interface Realm
 {
-    public void setCredentials( HttpExchange exchange) throws IOException;
+    public String getId();
+
+    public String getPrincipal();
+
+    public String getCredentials();
+
 }
