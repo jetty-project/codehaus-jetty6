@@ -12,7 +12,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.mortbay.util.ArrayQueue;
 
@@ -152,7 +154,17 @@ public class QoSFilter implements Filter
      */
     protected int getPriority(ServletRequest request)
     {
-        return 0;
+        HttpServletRequest base_request = (HttpServletRequest)request;
+        if (base_request.getUserPrincipal() != null )
+            return 2;
+        else 
+        {
+            HttpSession session = base_request.getSession(false);
+            if (session!=null && !session.isNew()) 
+                return 1;
+            else
+                return 0;
+        }
     }
 
 
