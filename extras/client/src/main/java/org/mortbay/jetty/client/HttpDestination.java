@@ -27,7 +27,7 @@ import javax.servlet.http.Cookie;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.client.security.Authentication;
+import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.SecurityListener;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
@@ -50,7 +50,7 @@ public class HttpDestination
     private ArrayBlockingQueue<Object> _newQueue = new ArrayBlockingQueue<Object>(10,true);
     private int _newConnection=0;
     private InetSocketAddress _proxy;
-    private Authentication _proxyAuthentication;
+    private Authorization _proxyAuthentication;
     private PathMap _authorizations;
     private List<Cookie> _cookies;
     
@@ -114,13 +114,13 @@ public class HttpDestination
     }
     
     /* ------------------------------------------------------------ */
-    public void addAuthorization(String pathSpec,Authentication authentication)
+    public void addAuthorization(String pathSpec,Authorization authorization)
     {
         synchronized (this)
         {
             if (_authorizations==null)
                 _authorizations=new PathMap();
-            _authorizations.put(pathSpec,authentication);
+            _authorizations.put(pathSpec,authorization);
         }
         
         // TODO query and remove methods
@@ -412,9 +412,9 @@ public class HttpDestination
         // Add any known authorizations
         if (_authorizations!=null)
         {
-            Authentication auth= (Authentication)_authorizations.match(ex.getURI());
+            Authorization auth= (Authorization)_authorizations.match(ex.getURI());
             if (auth !=null)
-                ((Authentication)auth).setCredentials(ex);
+                ((Authorization)auth).setCredentials(ex);
         }
        
         synchronized(this)
@@ -477,13 +477,13 @@ public class HttpDestination
     }
 
     /* ------------------------------------------------------------ */
-    public Authentication getProxyAuthentication()
+    public Authorization getProxyAuthentication()
     {
         return _proxyAuthentication;
     }
 
     /* ------------------------------------------------------------ */
-    public void setProxyAuthentication(Authentication authentication)
+    public void setProxyAuthentication(Authorization authentication)
     {
         _proxyAuthentication = authentication;
     }

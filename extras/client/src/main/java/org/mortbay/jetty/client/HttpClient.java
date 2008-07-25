@@ -42,8 +42,8 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpSchemes;
-import org.mortbay.jetty.client.security.Authentication;
-import org.mortbay.jetty.client.security.SecurityRealmResolver;
+import org.mortbay.jetty.client.security.Authorization;
+import org.mortbay.jetty.client.security.RealmResolver;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.thread.QueuedThreadPool;
@@ -94,7 +94,7 @@ public class HttpClient extends AbstractBuffers
     int _soTimeout = 10000;
     private Timeout _timeoutQ = new Timeout();
     private InetSocketAddress _proxy;
-    private Authentication _proxyAuthentication;
+    private Authorization _proxyAuthentication;
     private Set<InetAddress> _noProxy;
     private int _maxRetries = 3;
     private LinkedList<String> _registeredListeners;
@@ -114,7 +114,7 @@ public class HttpClient extends AbstractBuffers
     private String _provider;
     private String _secureRandomAlgorithm; 
 
-    private SecurityRealmResolver _realmResolver;    
+    private RealmResolver _realmResolver;    
 
     
     public void dump() throws IOException
@@ -198,7 +198,7 @@ public class HttpClient extends AbstractBuffers
     }
 
     /* ------------------------------------------------------------ */
-    public void setSecurityRealmResolver( SecurityRealmResolver resolver )
+    public void setRealmResolver( RealmResolver resolver )
     {
         _realmResolver = resolver;
     }
@@ -209,7 +209,7 @@ public class HttpClient extends AbstractBuffers
      * 
      * @return 
      */
-    public SecurityRealmResolver getSecurityRealmResolver()
+    public RealmResolver getRealmResolver()
     {
         return _realmResolver;
     }
@@ -559,13 +559,13 @@ public class HttpClient extends AbstractBuffers
     }
 
     /* ------------------------------------------------------------ */
-    public Authentication getProxyAuthentication()
+    public Authorization getProxyAuthentication()
     {
         return _proxyAuthentication;
     }
 
     /* ------------------------------------------------------------ */
-    public void setProxyAuthentication(Authentication authentication)
+    public void setProxyAuthentication(Authorization authentication)
     {
         _proxyAuthentication = authentication;
     }

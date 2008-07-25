@@ -29,11 +29,11 @@ import org.mortbay.util.StringUtil;
  * 
  * @author jesse
  */
-public class BasicAuthentication implements Authentication
+public class BasicAuthorization implements Authorization
 {
     private Buffer _authorization;
     
-    public BasicAuthentication(SecurityRealm realm) throws IOException
+    public BasicAuthorization(Realm realm) throws IOException
     {
         String authenticationString = "basic " + B64Code.encode( realm.getPrincipal() + ":" + realm.getCredentials(), StringUtil.__ISO_8859_1);
         _authorization= new ByteArrayBuffer(authenticationString);

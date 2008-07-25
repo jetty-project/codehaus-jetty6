@@ -24,13 +24,13 @@ import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 
-public class DigestAuthentication implements Authentication
+public class DigestAuthorization implements Authorization
 {
     private static final String NC = "00000001";
-    SecurityRealm securityRealm;
+    Realm securityRealm;
     Map details;
     
-    public DigestAuthentication(SecurityRealm realm, Map details)
+    public DigestAuthorization(Realm realm, Map details)
     {
         this.securityRealm=realm;
         this.details=details;
@@ -68,7 +68,7 @@ public class DigestAuthentication implements Authentication
                 new String(buffer.toString().getBytes(StringUtil.__ISO_8859_1)));
     }
     
-    protected String newResponse(String cnonce, HttpExchange exchange, SecurityRealm securityRealm, Map details)
+    protected String newResponse(String cnonce, HttpExchange exchange, Realm securityRealm, Map details)
     {        
         try{
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -110,7 +110,7 @@ public class DigestAuthentication implements Authentication
         }        
     }
     
-    protected String newCnonce(HttpExchange exchange, SecurityRealm securityRealm, Map details)
+    protected String newCnonce(HttpExchange exchange, Realm securityRealm, Map details)
     {
         try
         {
