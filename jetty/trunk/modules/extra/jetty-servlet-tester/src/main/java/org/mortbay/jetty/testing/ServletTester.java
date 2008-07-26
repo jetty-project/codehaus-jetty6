@@ -76,6 +76,12 @@ public class ServletTester
     {
         _server.stop();
     }
+
+    /* ------------------------------------------------------------ */
+    public Context getContext()
+    {
+        return _context;
+    }
     
     /* ------------------------------------------------------------ */
     /** Get raw HTTP responses from raw HTTP requests.
@@ -99,6 +105,24 @@ public class ServletTester
      * Multiple requests and responses may be handled, but only if
      * persistent connections conditions apply.
      * @param rawRequests String of raw HTTP requests
+     * @param connector The connector to handle the responses
+     * @return String of raw HTTP responses
+     * @throws Exception
+     */
+    public String getResponses(String rawRequests, LocalConnector connector) throws Exception
+    {
+        connector.reopen();
+        //System.err.println(">>>>\n"+rawRequests);
+        String responses = connector.getResponses(rawRequests);
+        //System.err.println("<<<<\n"+responses);
+        return responses;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get raw HTTP responses from raw HTTP requests.
+     * Multiple requests and responses may be handled, but only if
+     * persistent connections conditions apply.
+     * @param rawRequests String of raw HTTP requests
      * @return String of raw HTTP responses
      * @throws Exception
      */
@@ -108,7 +132,23 @@ public class ServletTester
         ByteArrayBuffer responses = _connector.getResponses(rawRequests,false);
         return responses;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** Get raw HTTP responses from raw HTTP requests.
+     * Multiple requests and responses may be handled, but only if
+     * persistent connections conditions apply.
+     * @param rawRequests String of raw HTTP requests
+     * @param connector The connector to handle the responses
+     * @return String of raw HTTP responses
+     * @throws Exception
+     */
+    public ByteArrayBuffer getResponses(ByteArrayBuffer rawRequests, LocalConnector connector) throws Exception
+    {
+        connector.reopen();
+        ByteArrayBuffer responses = connector.getResponses(rawRequests,false);
+        return responses;
+    }
+
     /* ------------------------------------------------------------ */
     /** Create a Socket connector.
      * This methods adds a socket connector to the server
@@ -131,6 +171,25 @@ public class ServletTester
        return "http://"+(localhost?"127.0.0.1":
        InetAddress.getLocalHost().getHostAddress()    
        )+":"+connector.getLocalPort();
+   }
+
+    /* ------------------------------------------------------------ */
+    /** Create a Socket connector.
+     * This methods adds a socket connector to the server
+     * @param locahost if true, only listen on local host, else listen on all interfaces.
+     * @return A URL to access the server via the socket connector.
+     * @throws Exception
+     */
+    public LocalConnector createLocalConnector()
+    throws Exception
+    {
+       LocalConnector connector = new LocalConnector();
+       _server.addConnector(connector);
+       
+       if (_server.isStarted())
+           connector.start();
+       
+       return connector;
    }
 
     /* ------------------------------------------------------------ */
