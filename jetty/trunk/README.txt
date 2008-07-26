@@ -59,6 +59,9 @@ in /etc/init.d
 
 JETTY OPTIONS
 =============
+Unlike Jetty-6, the start.jar of jetty-7 does not automatically
+put all the libraries in lib onto the classpath.
+
 Optional components of Jetty can be included with the -DOPTION
 eg.
 
