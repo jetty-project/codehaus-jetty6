@@ -26,7 +26,7 @@ import org.mortbay.util.ArrayQueue;
  * init parameter (default 10), with higher values having higher priority.
  * <p>
  * The maxRequest limit is policed by a {@link Semaphore} and the filter will wait a short while attempting to acquire
- * the semaphore. This wait is controlled by the "waitMs" init parameter and allows the expense of a suspend to be
+ * the semaphore. This wait is controlled by the "maxWaitMs" init parameter and allows the expense of a suspend to be
  * avoided if the semaphore is shortly available.
  * 
  * @author gregw
@@ -37,6 +37,10 @@ public class QoSFilter implements Filter
     final static int __DEFAULT_MAX_PRIORITY=10;
     final static int __DEFAULT_PASSES=10;
     final static int __DEFAULT_WAIT_MS=50;
+    
+    final static String MAX_REQUESTS_INIT_PARAM="maxRequests";
+    final static String MAX_PRIORITY_INIT_PARAM="maxPriority";
+    final static String MAX_WAIT_INIT_PARAM="maxWaitMs";
     
     ServletContext _context;
     long _waitMs;
@@ -49,20 +53,20 @@ public class QoSFilter implements Filter
         _context=filterConfig.getServletContext();
         
         int max_priority=__DEFAULT_MAX_PRIORITY;
-        if (filterConfig.getInitParameter("maxPriority")!=null)
-            max_priority=Integer.parseInt(filterConfig.getInitParameter("maxPriority"));
+        if (filterConfig.getInitParameter(MAX_PRIORITY_INIT_PARAM)!=null)
+            max_priority=Integer.parseInt(filterConfig.getInitParameter(MAX_PRIORITY_INIT_PARAM));
         _queue=new Queue[max_priority+1];
         for (int p=0;p<_queue.length;p++)
             _queue[p]=new ArrayQueue<ServletRequest>();
         
         int passes=__DEFAULT_PASSES;
-        if (filterConfig.getInitParameter("maxRequests")!=null)
-            passes=Integer.parseInt(filterConfig.getInitParameter("maxRequests"));
+        if (filterConfig.getInitParameter(MAX_REQUESTS_INIT_PARAM)!=null)
+            passes=Integer.parseInt(filterConfig.getInitParameter(MAX_REQUESTS_INIT_PARAM));
         _passes=new Semaphore(passes,true);
         
         long wait = __DEFAULT_WAIT_MS;
-        if (filterConfig.getInitParameter("waitMs")!=null)
-            wait=Integer.parseInt(filterConfig.getInitParameter("waitMs"));
+        if (filterConfig.getInitParameter(MAX_WAIT_INIT_PARAM)!=null)
+            wait=Integer.parseInt(filterConfig.getInitParameter(MAX_WAIT_INIT_PARAM));
         _waitMs=wait;
     }
     
@@ -70,13 +74,12 @@ public class QoSFilter implements Filter
     throws IOException, ServletException
     {
         boolean accepted=false;
-
+        String request_id = ((org.mortbay.jetty.Request)request).getHeader("num");
         try
         {
             if (request.isInitial() || request.getAttribute(_suspended)==null)
             {
                 accepted=_passes.tryAcquire(_waitMs,TimeUnit.MILLISECONDS);
-                
                 if (accepted)
                 {
                     request.setAttribute(_suspended,Boolean.FALSE);
@@ -118,9 +121,14 @@ public class QoSFilter implements Filter
             
 
             if (accepted)
+            {
+                ((org.mortbay.jetty.Response)response).addHeader("num", request_id);
                 chain.doFilter(request,response);
+            }
             else
+            {
                 ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            }
             
             
             
@@ -148,7 +156,7 @@ public class QoSFilter implements Filter
         }
     }
 
-    /**
+    /** 
      * @param request
      * @return
      */
