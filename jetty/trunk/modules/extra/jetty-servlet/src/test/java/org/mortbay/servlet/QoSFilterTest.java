@@ -131,49 +131,32 @@ public class QoSFilterTest extends TestCase
          
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
         {
-            if(request.isInitial())
+            try
             {
-                try
+                synchronized(TestServlet.class)
                 {
-                    synchronized(TestServlet.class)
-                    {
-                        __sleepers++;
-                        if(__sleepers > __maxSleepers)
-                            __maxSleepers = __sleepers;
-                    }
-
-                    Thread.sleep(200);
-
-                    synchronized(TestServlet.class)
-                    {
-                        __sleepers--;
-                        if(__sleepers > __maxSleepers)
-                            __maxSleepers = __sleepers;
-                    }
-
+                    __sleepers++;
+                    if(__sleepers > __maxSleepers)
+                        __maxSleepers = __sleepers;
                 }
-                catch (InterruptedException e)
+
+                Thread.sleep(200);
+
+                synchronized(TestServlet.class)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }    
+                    __sleepers--;
+                    if(__sleepers > __maxSleepers)
+                        __maxSleepers = __sleepers;
+                }
+
+                response.setContentType("text/plain");
+                response.getWriter().println("DONE!");    
             }
-            else if(request.isTimeout())
+            catch (InterruptedException e)
             {
-                //System.out.println("request "+request.getHeader("num")+" timed out!" );
-            }
-            else if(request.isSuspended())
-            {
-                //System.out.println("request "+request.getHeader("num")+" was suspended!" );
-            }
-            else if(request.isResumed())
-            {
-                //System.out.println("request "+request.getHeader("num")+" resumed!" );
-            }
-            else
-            {
-                //System.out.println("request "+request.getHeader("num")+" dunno!" );
-            }
+                e.printStackTrace();
+                response.sendError(500);
+            }  
         }
     }
     
