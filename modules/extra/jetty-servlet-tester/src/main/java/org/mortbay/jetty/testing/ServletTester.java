@@ -94,9 +94,7 @@ public class ServletTester
     public String getResponses(String rawRequests) throws Exception
     {
         _connector.reopen();
-        //System.err.println(">>>>\n"+rawRequests);
         String responses = _connector.getResponses(rawRequests);
-        //System.err.println("<<<<\n"+responses);
         return responses;
     }
 
@@ -112,9 +110,7 @@ public class ServletTester
     public String getResponses(String rawRequests, LocalConnector connector) throws Exception
     {
         connector.reopen();
-        //System.err.println(">>>>\n"+rawRequests);
         String responses = connector.getResponses(rawRequests);
-        //System.err.println("<<<<\n"+responses);
         return responses;
     }
     
@@ -159,18 +155,21 @@ public class ServletTester
     public String createSocketConnector(boolean localhost)
     throws Exception
     {
-       SocketConnector connector = new SocketConnector();
-       if (localhost)
-           connector.setHost("127.0.0.1");
-       _server.addConnector(connector);
-       if (_server.isStarted())
-           connector.start();
-       else
-           connector.open();
-       
-       return "http://"+(localhost?"127.0.0.1":
-       InetAddress.getLocalHost().getHostAddress()    
-       )+":"+connector.getLocalPort();
+        synchronized (this)
+        {
+            SocketConnector connector = new SocketConnector();
+            if (localhost)
+                connector.setHost("127.0.0.1");
+            _server.addConnector(connector);
+            if (_server.isStarted())
+                connector.start();
+            else
+                connector.open();
+
+            return "http://"+(localhost?"127.0.0.1":
+                InetAddress.getLocalHost().getHostAddress()    
+            )+":"+connector.getLocalPort();
+        }
    }
 
     /* ------------------------------------------------------------ */
@@ -183,13 +182,16 @@ public class ServletTester
     public LocalConnector createLocalConnector()
     throws Exception
     {
-       LocalConnector connector = new LocalConnector();
-       _server.addConnector(connector);
-       
-       if (_server.isStarted())
-           connector.start();
-       
-       return connector;
+        synchronized (this)
+        {
+            LocalConnector connector = new LocalConnector();
+            _server.addConnector(connector);
+            
+            if (_server.isStarted())
+                connector.start();
+            
+            return connector;
+        }
    }
 
     /* ------------------------------------------------------------ */

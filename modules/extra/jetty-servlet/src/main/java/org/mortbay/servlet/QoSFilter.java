@@ -25,9 +25,25 @@ import org.mortbay.util.ArrayQueue;
  * the {@link #getPriority(ServletRequest)} method and are a value between 0 and the value given by the "maxPriority" 
  * init parameter (default 10), with higher values having higher priority.
  * <p>
+ * This filter is ideal to prevent wasting threads waiting for slow/limited 
+ * resources such as a JDBC connection pool.  It avoids the situation where all of a 
+ * containers thread pool may be consumed blocking on such a slow resource.
+ * By limiting the number of active threads, a smaller thread pool may be used as 
+ * the threads are not wasted waiting.  Thus more memory may be available for use by 
+ * the active threads.
+ * <p>
+ * Furthermore, this filter uses a priority when resuming waiting requests. So that if
+ * a container is under load, and there are many requests waiting for resources,
+ * the {@link #getPriority(ServletRequest)} method is used, so that more important 
+ * requests are serviced first.     For example, this filter could be deployed with a 
+ * maxRequest limit slightly smaller than the containers thread pool and a high priority 
+ * allocated to admin users.  Thus regardless of load, admin users would always be
+ * able to access the web application.
+ * <p>
  * The maxRequest limit is policed by a {@link Semaphore} and the filter will wait a short while attempting to acquire
- * the semaphore. This wait is controlled by the "maxWaitMs" init parameter and allows the expense of a suspend to be
- * avoided if the semaphore is shortly available.
+ * the semaphore. This wait is controlled by the "waitMs" init parameter and allows the expense of a suspend to be
+ * avoided if the semaphore is shortly available.  If the semaphore cannot be obtained, the request will be suspended
+ * for the default suspend period of the container or the valued set as the "suspendMs" init parameter.
  * 
  * @author gregw
  *
@@ -37,13 +53,16 @@ public class QoSFilter implements Filter
     final static int __DEFAULT_MAX_PRIORITY=10;
     final static int __DEFAULT_PASSES=10;
     final static int __DEFAULT_WAIT_MS=50;
+    final static long __DEFAULT_TIMEOUT_MS = -1;
     
     final static String MAX_REQUESTS_INIT_PARAM="maxRequests";
     final static String MAX_PRIORITY_INIT_PARAM="maxPriority";
-    final static String MAX_WAIT_INIT_PARAM="maxWaitMs";
+    final static String MAX_WAIT_INIT_PARAM="waitMs";
+    final static String SUSPEND_INIT_PARAM="suspendMs";
     
     ServletContext _context;
     long _waitMs;
+    long _suspendMs;
     Semaphore _passes;
     Queue<ServletRequest>[] _queue;
     String _suspended="QoSFilter@"+this.hashCode();
@@ -68,13 +87,17 @@ public class QoSFilter implements Filter
         if (filterConfig.getInitParameter(MAX_WAIT_INIT_PARAM)!=null)
             wait=Integer.parseInt(filterConfig.getInitParameter(MAX_WAIT_INIT_PARAM));
         _waitMs=wait;
+        
+        long suspend = __DEFAULT_TIMEOUT_MS;
+        if (filterConfig.getInitParameter(SUSPEND_INIT_PARAM)!=null)
+            suspend=Integer.parseInt(filterConfig.getInitParameter(SUSPEND_INIT_PARAM));
+        _suspendMs=suspend;
     }
     
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
     throws IOException, ServletException
     {
         boolean accepted=false;
-        String request_id = ((org.mortbay.jetty.Request)request).getHeader("num");
         try
         {
             if (request.isInitial() || request.getAttribute(_suspended)==null)
@@ -87,7 +110,10 @@ public class QoSFilter implements Filter
                 else
                 {
                     request.setAttribute(_suspended,Boolean.TRUE);
-                    request.suspend();
+                    if (_suspendMs<=0)
+                        request.suspend();
+                    else
+                        request.suspend(_suspendMs);
                     int priority = getPriority(request);
                     _queue[priority].add(request);
                     return;
@@ -122,7 +148,6 @@ public class QoSFilter implements Filter
 
             if (accepted)
             {
-                ((org.mortbay.jetty.Response)response).addHeader("num", request_id);
                 chain.doFilter(request,response);
             }
             else
@@ -157,6 +182,14 @@ public class QoSFilter implements Filter
     }
 
     /** 
+     * Get the request Priority.
+     * <p> The default implementation assigns the following priorities:<ul>
+     * <li> 2 - for a authenticated request
+     * <li> 1 - for a request with valid /non new session 
+     * <li> 0 - for all other requests.
+     * </ul>
+     * This method may be specialised to provide application specific priorities.
+     * 
      * @param request
      * @return
      */
