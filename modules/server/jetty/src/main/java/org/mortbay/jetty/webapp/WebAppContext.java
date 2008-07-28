@@ -100,15 +100,15 @@ public class WebAppContext extends Context
             "org.w3c.", 
             "org.apache.commons.logging.", 
             "org.apache.log4j.",
-            "org.mortbay.jetty.servlet.",
-            "org.mortbay.util.ajax.",
-            "org.mortbay.naming."
+            "org.mortbay.jetty.servlet.", // webapp cannot change default servlets
+            "org.mortbay.util.ajax.",     // webapp cannot change continuation classes
+            "org.mortbay.naming."         // webapp cannot change naming classes
             };
     private String[] _serverClasses = {
-            "-org.mortbay.naming.",
-            "-org.mortbay.util.ajax.",
-            "org.mortbay.",
-            "org.slf4j."
+            "-org.mortbay.naming.",       // don't hide naming classes
+            "-org.mortbay.util.ajax.",    // don't hide continuation classes
+            "org.mortbay.",               // hide rest of mortbay classes
+            "org.slf4j."                  // hide slf4j
             }; 
     private File _tmpDir;
     private boolean _isExistingTmpDir;
