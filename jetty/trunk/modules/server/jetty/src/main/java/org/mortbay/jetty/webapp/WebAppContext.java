@@ -101,10 +101,12 @@ public class WebAppContext extends Context
             "org.apache.commons.logging.", 
             "org.apache.log4j.",
             "org.mortbay.util.ajax.Continuation",
-            "org.mortbay.jetty.plus.jaas.",
+            "org.mortbay.jetty.",
             "org.mortbay.naming."
             };
     private String[] _serverClasses = {
+            "-org.mortbay.jetty.plus.jaas.",
+            "-org.mortbay.naming.",
             "org.mortbay.", 
             "org.slf4j."
             }; 
