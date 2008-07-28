@@ -40,10 +40,13 @@ import org.mortbay.util.LazyList;
  * system classes are loaded from the classpath in preference to the
  * parent loader.  Java2 compliant loading, where the parent loader
  * always has priority, can be selected with the 
- * {@link org.mortbay.jetty.webapp.WebAppContext#setParentLoaderPriority(boolean)} method.
+ * {@link org.mortbay.jetty.webapp.WebAppContext#setParentLoaderPriority(boolean)} 
+ * method and influenced with {@link WebAppContext#isServerClass(String)} and 
+ * {@link WebAppContext#isSystemClass(String)}.
  *
- * If no parent class loader is provided, then the current thread context classloader will
- * be used.  If that is null then the classloader that loaded this class is used as the parent.
+ * If no parent class loader is provided, then the current thread 
+ * context classloader will be used.  If that is null then the 
+ * classloader that loaded this class is used as the parent.
  * 
  * @author Greg Wilkins (gregw)
  */
@@ -280,7 +283,15 @@ public class WebAppClassLoader extends URLClassLoader
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
         
-        if (c == null && _parent!=null && (_context.isParentLoaderPriority() || _context.isSystemClass(name)) )
+        boolean system_class=_context.isSystemClass(name);
+        boolean server_class=_context.isServerClass(name);
+        
+        if (system_class && server_class)
+        {
+            return null;
+        }
+        
+        if (c == null && _parent!=null && (_context.isParentLoaderPriority() || system_class) )
         {
             tried_parent= true;
             try
@@ -307,7 +318,7 @@ public class WebAppClassLoader extends URLClassLoader
             }
         }
 
-        if (c == null && _parent!=null && !tried_parent && !_context.isServerClass(name) )
+        if (c == null && _parent!=null && !tried_parent && !server_class )
             c= _parent.loadClass(name);
 
         if (c == null)
