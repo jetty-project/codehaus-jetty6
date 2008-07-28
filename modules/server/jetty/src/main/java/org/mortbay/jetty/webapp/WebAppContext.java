@@ -100,15 +100,14 @@ public class WebAppContext extends Context
             "org.w3c.", 
             "org.apache.commons.logging.", 
             "org.apache.log4j.",
+            "org.mortbay.jetty.servlet.",
             "org.mortbay.util.ajax.",
-            "org.mortbay.jetty.",
             "org.mortbay.naming."
             };
     private String[] _serverClasses = {
             "-org.mortbay.naming.",
-            "-org.mortbay.jetty.plus.jaas.",
             "-org.mortbay.util.ajax.",
-            "org.mortbay.", 
+            "org.mortbay.",
             "org.slf4j."
             }; 
     private File _tmpDir;
@@ -116,7 +115,6 @@ public class WebAppContext extends Context
     private String _war;
     private String _extraClasspath;
     private Throwable _unavailableException;
-    
     
     private transient Map _resourceAliases;
     private transient boolean _ownClassLoader=false;
