@@ -12,9 +12,22 @@
  	<servlet-name>AsyncRestServlet</servlet-name>
  	<servlet-class>org.mortbay.demo.AsyncRestServlet</servlet-class>
  </servlet>
+ <servlet>
+ 	<description>
+ 	</description>
+ 	<display-name>
+ 	SerialRestServlet</display-name>
+ 	<servlet-name>SerialRestServlet</servlet-name>
+ 	<servlet-class>
+ 	org.mortbay.demo.SerialRestServlet</servlet-class>
+ </servlet>
 
  <servlet-mapping>
  	<servlet-name>AsyncRestServlet</servlet-name>
  	<url-pattern>/testAsync</url-pattern>
+ </servlet-mapping>
+ <servlet-mapping>
+ 	<servlet-name>SerialRestServlet</servlet-name>
+ 	<url-pattern>/testSerial</url-pattern>
  </servlet-mapping>
 </web-app>
