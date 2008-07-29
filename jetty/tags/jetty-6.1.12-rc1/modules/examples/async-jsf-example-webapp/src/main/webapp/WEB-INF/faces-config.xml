@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+    version="1.2">
+        
+	<navigation-rule>
+		<from-view-id>/jsf-demo.jsp</from-view-id>
+		<navigation-case>
+                        <from-action>#{JSFDemoBean.searchEbay}</from-action>
+			<from-outcome>success</from-outcome>
+			<to-view-id>/hello.jsp</to-view-id>
+		</navigation-case></navigation-rule>
+	<navigation-rule>
+		<from-view-id>/hello.jsp</from-view-id>
+		<navigation-case>
+			<from-outcome>success</from-outcome>
+			<to-view-id>/jsf-demo.jsp</to-view-id>
+		</navigation-case></navigation-rule>
+	<managed-bean>
+		<managed-bean-name>JSFDemoBean</managed-bean-name>
+		<managed-bean-class>org.mortbay.jetty.JSFDemoBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>	
+	
+</faces-config>
+    
