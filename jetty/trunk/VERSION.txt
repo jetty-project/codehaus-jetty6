@@ -34,6 +34,47 @@ jetty-7.0-SNAPSHOT
  + JETTY-656 HttpClient defaults to async mode
  + JETTY-659 ContentExchange and missing headers in HttpClient
 
+jetty-6.1.12rc1 30 July 2008
+ + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
+ + JETTY-319 Get unavailable exception and added startWithUnavailable option 
+ + JETTY-442 Accessors for mimeType on ResourceHandler
+ + JETTY-502 forward of an include should hide include attributes
+ + JETTY-562 RewriteHandler support for virtual hosts
+ + JETTY-563 GWT OpenRemoteServiceServlet GWT1.5M2+
+ + JETTY-564 Consider optionally importing org.apache.jasper.servlet
+ + JETTY-571 SelectChannelConnector throws Exception on close on Windows
+ + JETTY-596 Proxy authorization support in HttpClient
+ + JETTY-599 handle buffers consistently handle invalid index for poke
+ + JETTY-603 Handle IPv6 in HttpURI
+ + JETTY-605 Added optional threadpool to BayeuxService
+ + JETTY-606 better writeTo impl for BIO
+ + JETTY-607 Add GigaSpaces session clustering
+ + JETTY-610 jetty.class.path not being interpreted
+ + JETTY-613 website module now generates site-component for jetty-site
+ + JETTY-614 scanner allocated hashmap on every scan
+ + JETTY-623 ServletContext.getServerInfo() non compliant
+ + JETTY-626 Null protect reading the dtd resource from classloader
+ + JETTY-628 Rewrite rule for rewriting scheme
+ + JETTY-629 Don't hold timeout lock during expiry call.
+ + JETTY-632 OSGi tags for Jetty client
+ + JETTY-633 Default form encoding 8859_1 rather than utf-8
+ + JETTY-635 Correctly merge request parameters when doing forward
+ + JETTY-637 empty date headers throw IllegalArgumentException
+ + JETTY-641 JDBC Realm purge cache problem
+ + JETTY-642 NPE in LdapLoginModule
+ + JETTY-644 LdapLoginModule uses proper filters when searching
+ + JETTY-646 Should set Cache-Control header when sending errors to avoid caching
+ + JETTY-647 suspended POSTs with binary data do too many resumes
+ + JETTY-650 Parse "*" URI for HTTP OPTIONS request
+ + JETTY-651 Release resources during destroy
+ + JETTY-654 Allow Cometd Bayeux object to be JMX manageable
+ + JETTY-655 Support parsing application/x-www-form-urlencoded parameters via http PUT
+ + JETTY-656 HttpClient defaults to async mode
+ + JETTY-657 Backport jetty-7 sslengine
+ + JETTY-658 backport latest HttpClient from jetty-7 to jetty-6
+ + JETTY-659 ContentExchange and missing headers in HttpClient
+ + JETTY-660 Backported QoSFilter
+
 jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full
  + JETTY-425 race in stopping SelectManager
