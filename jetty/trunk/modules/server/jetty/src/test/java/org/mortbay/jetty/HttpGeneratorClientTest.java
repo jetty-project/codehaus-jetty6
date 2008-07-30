@@ -24,6 +24,88 @@ public class HttpGeneratorClientTest extends TestCase
     {
         junit.textui.TestRunner.run(HttpGeneratorTest.class);
     }
+
+    public void testContentLength()
+        throws Exception
+    {
+        Buffer bb=new ByteArrayBuffer(8096);
+        Buffer sb=new ByteArrayBuffer(1500);
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpGenerator generator = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
+        
+        generator.setRequest("GET","/usr");
+        
+        HttpFields fields = new HttpFields();
+        fields.add("Header","Value");
+        fields.add("Content-Type","text/plain");
+        
+        String content = "The quick brown fox jumped over the lazy dog";
+        fields.addLongField("Content-Length",content.length());
+        
+        generator.completeHeader(fields,false);
+        
+        generator.addContent(new ByteArrayBuffer(content),true);
+        generator.flush();
+        generator.complete();
+        generator.flush();
+        
+        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+        assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Content-Length: 44||"+content,result);
+    }
+
+    public void testAutoContentLength()
+        throws Exception
+    {
+        Buffer bb=new ByteArrayBuffer(8096);
+        Buffer sb=new ByteArrayBuffer(1500);
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpGenerator generator = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
+        
+        generator.setRequest("GET","/usr");
+        
+        HttpFields fields = new HttpFields();
+        fields.add("Header","Value");
+        fields.add("Content-Type","text/plain");
+        
+        String content = "The quick brown fox jumped over the lazy dog";
+
+        generator.addContent(new ByteArrayBuffer(content),true);
+        generator.completeHeader(fields,true);
+        
+        generator.flush();
+        generator.complete();
+        generator.flush();
+        
+        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+        assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Content-Length: 44||"+content,result);
+    }
+
+    public void testChunked()
+        throws Exception
+    {
+        Buffer bb=new ByteArrayBuffer(8096);
+        Buffer sb=new ByteArrayBuffer(1500);
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpGenerator generator = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
+        
+        generator.setRequest("GET","/usr");
+        
+        HttpFields fields = new HttpFields();
+        fields.add("Header","Value");
+        fields.add("Content-Type","text/plain");
+        
+        String content = "The quick brown fox jumped over the lazy dog";
+
+        generator.completeHeader(fields,false);
+        
+        generator.addContent(new ByteArrayBuffer(content),false);
+        generator.flush();
+        generator.complete();
+        generator.flush();
+        
+        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+        assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Transfer-Encoding: chunked||2C|"+content+"|0||",result);
+    }
     
     public void testHTTP()
         throws Exception
