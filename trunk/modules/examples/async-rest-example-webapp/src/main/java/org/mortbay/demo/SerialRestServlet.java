@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +46,8 @@ public class SerialRestServlet extends HttpServlet
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+        long start = System.currentTimeMillis();
+        
         String searchParameters = request.getParameter(ITEMS_PARAM);
         List<String> itemTokens = new ArrayList<String>();
 
@@ -61,18 +66,17 @@ public class SerialRestServlet extends HttpServlet
 
             while ( strtok.hasMoreTokens() )
             {
-                itemTokens.add( strtok.nextToken() );
+                itemTokens.add( URLEncoder.encode(strtok.nextToken(), "UTF-8") );
             }
         }
 
-
-        long _totalTime = System.currentTimeMillis();
         
         List list = new ArrayList();        
         // make all requests serially
-        for (String itemToken: itemTokens)
+        for (String itemName : itemTokens)
         {
-            URL url = new URL("http://open.api.ebay.com/shopping?MaxEntries=5&appid="+_appid+"&version=573&siteid=0&callname=FindItems&responseencoding=JSON&QueryKeywords="+itemToken);
+            URL url = new URL("http://open.api.ebay.com/shopping?MaxEntries=5&appid="+_appid+"&version=573&siteid=0&callname=FindItems&responseencoding=JSON&QueryKeywords=" + itemName);
+            
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
             connection.setRequestMethod("GET");
             
@@ -83,8 +87,8 @@ public class SerialRestServlet extends HttpServlet
             if (itemsArray==null)
             {
                 Map<String, String> m = new HashMap<String, String>();
-                m.put("ItemID", "\"" + itemToken + "\"");
-                m.put("Title", " not found!");
+
+                m.put("Title", "\"" + itemName + "\" not found!");
                 list.add(m);
             }
             else
@@ -113,7 +117,7 @@ public class SerialRestServlet extends HttpServlet
 
         out.println("<hr />");
         out.print( "Total Time: ");
-        long duration=System.currentTimeMillis()-_totalTime;
+        long duration=System.currentTimeMillis()-start;
         out.print( duration );
         out.println( "ms<br/>");
         out.print( "Thread held: ");
