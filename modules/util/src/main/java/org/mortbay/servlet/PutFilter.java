@@ -60,8 +60,8 @@ public class PutFilter implements Filter
     public final static String __MOVE="MOVE";
     public final static String __OPTIONS="OPTIONS";
 
-    Set<String> _operations = new HashSet<String>();
-    protected ConcurrentMap<String,String> _hidden = new ConcurrentHashMap<String, String>();
+    Set _operations = new HashSet();
+    protected ConcurrentMap _hidden = new ConcurrentHashMap();
 
     protected ServletContext _context;
     protected String _baseURI;
