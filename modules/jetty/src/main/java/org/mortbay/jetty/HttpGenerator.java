@@ -522,7 +522,7 @@ public class HttpGenerator extends AbstractGenerator
                 // written yet?
 
                 // Response known not to have a body
-                if (_contentWritten == 0 && (_status < 200 || _status == 204 || _status == 304))
+                if (_contentWritten == 0 && _method==null && (_status < 200 || _status == 204 || _status == 304))
                     _contentLength = HttpTokens.NO_CONTENT;
                 else if (_last)
                 {
