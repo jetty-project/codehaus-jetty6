@@ -26,12 +26,10 @@ public class EbayFindItemAsync
     private String _appid;
     private List<Map<String, String>> _results = new ArrayList<Map<String, String>>();
 
-    private long _startTime;
     private int _todo;
 
     public EbayFindItemAsync(HttpClient client, ServletRequest request, String appid)
     {
-        _startTime = System.currentTimeMillis();
         _request = request;
         _client = client;
         _appid = appid;
@@ -52,8 +50,7 @@ public class EbayFindItemAsync
                 if (itemsArray == null)
                 {
                     Map<String, String> m = new HashMap<String, String>();
-                    m.put("ItemID", "\"" + itemName + "\"");
-                    m.put("Title", " not found!");
+                    m.put("Title", "\"" + itemName + "\" not found!");
                     _results.add(m);
                 }
                 else
@@ -85,10 +82,5 @@ public class EbayFindItemAsync
     public List<Map<String, String>> getPayload()
     {
         return _results;
-    }
-
-    public long getStartTime()
-    {
-        return _startTime;
     }
 }

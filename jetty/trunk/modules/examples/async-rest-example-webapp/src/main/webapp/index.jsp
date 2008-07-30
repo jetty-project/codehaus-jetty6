@@ -1,3 +1,5 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
 
 
 <h1>Asynchronous Jetty+REST</h1>
@@ -19,24 +21,15 @@ string.
 </tr>
 
 <tr>
-<td>chair</td>
+<td><%= request.getParameter("items") %></td>
 <td>
-  <iframe id="f1" width='100%' height='200px' src="testSerial?items=chair"></iframe>
+  <iframe id="f1" width='100%' height='200px' src="testSerial?items=<%= request.getParameter("items") %>"></iframe>
 </td>
 <td>
-  <iframe id="f2" width='100%' height='200px' src="testAsync?items=chair"/></iframe>
+  <iframe id="f2" width='100%' height='200px' src="testAsync?items=<%= request.getParameter("items") %>"/></iframe>
 </td>
 </tr>
  
-<tr>
-<td>mouse,<br/>beer,<br/>gnome</a></td>
-<td>
-  <iframe id="f3" width='100%' height='500px' src="testSerial?items=mouse,beer,gnome"></iframe>
-</td>
-<td>
-  <iframe id="f4" width='100%' height='500px' src="testAsync?items=mouse,beer,gnome"/></iframe>
-</td>
-</tr>
 
 </table>
 </p>
