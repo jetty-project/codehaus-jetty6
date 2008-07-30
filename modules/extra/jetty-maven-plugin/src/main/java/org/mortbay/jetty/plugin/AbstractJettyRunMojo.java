@@ -342,7 +342,11 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
                     itor = files.iterator();
                     while (itor.hasNext())
                         getLog().info("Adding extra scan target from pattern: "+itor.next());
-                    setExtraScanTargets(files);
+                    List currentTargets = getExtraScanTargets();
+                    if(currentTargets!=null && !currentTargets.isEmpty())
+                        currentTargets.addAll(files);
+                    else
+                        setExtraScanTargets(files);
                 }
                 catch (IOException e)
                 {
