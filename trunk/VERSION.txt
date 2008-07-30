@@ -35,6 +35,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-659 ContentExchange and missing headers in HttpClient
  + JETTY-665 Support merging class directories 
  + JETTY-666 scanTargetPatterns override the values already being set by scanTarget
+ + JETTY-667 HttpClient handles chunked content
 
 jetty-6.1.12rc1 30 July 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
