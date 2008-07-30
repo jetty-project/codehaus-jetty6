@@ -33,6 +33,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-655 Support parsing application/x-www-form-urlencoded parameters via http PUT
  + JETTY-656 HttpClient defaults to async mode
  + JETTY-659 ContentExchange and missing headers in HttpClient
+ + JETTY-665 Support merging class directories 
 
 jetty-6.1.12rc1 30 July 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008

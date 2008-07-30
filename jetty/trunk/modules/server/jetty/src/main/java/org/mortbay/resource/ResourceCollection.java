@@ -44,21 +44,25 @@ public class ResourceCollection extends Resource
         
     }
     
+    /* ------------------------------------------------------------ */
     public ResourceCollection(Resource[] resources)
     {
         setResources(resources);
     }
     
+    /* ------------------------------------------------------------ */
     public ResourceCollection(String[] resources)
     {
         setResources(resources);
     }
     
+    /* ------------------------------------------------------------ */
     public ResourceCollection(String csvResources)
     {
         setResources(csvResources);
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * 
      * @param resources Resource array
@@ -82,6 +86,7 @@ public class ResourceCollection extends Resource
         }
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * 
      * @param resources String array
@@ -113,6 +118,7 @@ public class ResourceCollection extends Resource
         }
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * 
      * @param csvResources Comma separated values
@@ -146,6 +152,7 @@ public class ResourceCollection extends Resource
         }
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * 
      * @return the resource array
@@ -155,6 +162,7 @@ public class ResourceCollection extends Resource
         return _resources;
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * @param path The path segment to add
      * @return The contained resource (found first) in the collection of resources
@@ -200,6 +208,7 @@ public class ResourceCollection extends Resource
         return null;
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * @param path
      * @return the resource(file) if found, returns a list of resource dirs if its a dir, else null.
@@ -244,11 +253,13 @@ public class ResourceCollection extends Resource
         return null;
     }
     
+    /* ------------------------------------------------------------ */
     public boolean delete() throws SecurityException
     {
         throw new UnsupportedOperationException();
     }
     
+    /* ------------------------------------------------------------ */
     public boolean exists()
     {
         if(_resources==null)
@@ -257,6 +268,7 @@ public class ResourceCollection extends Resource
         return true;
     }
     
+    /* ------------------------------------------------------------ */
     public File getFile() throws IOException
     {
         if(_resources==null)
@@ -271,6 +283,7 @@ public class ResourceCollection extends Resource
         return null;
     }
     
+    /* ------------------------------------------------------------ */
     public InputStream getInputStream() throws IOException
     {
         if(_resources==null)
@@ -285,6 +298,7 @@ public class ResourceCollection extends Resource
         return null;
     }
     
+    /* ------------------------------------------------------------ */
     public String getName()
     {
         if(_resources==null)
@@ -299,6 +313,7 @@ public class ResourceCollection extends Resource
         return null;
     }
     
+    /* ------------------------------------------------------------ */
     public OutputStream getOutputStream() throws IOException, SecurityException
     {
         if(_resources==null)
@@ -313,6 +328,7 @@ public class ResourceCollection extends Resource
         return null;
     }
     
+    /* ------------------------------------------------------------ */
     public URL getURL()
     {
         if(_resources==null)
@@ -327,6 +343,7 @@ public class ResourceCollection extends Resource
         return null;
     }
     
+    /* ------------------------------------------------------------ */
     public boolean isDirectory()
     {
         if(_resources==null)
@@ -335,6 +352,7 @@ public class ResourceCollection extends Resource
         return true;
     }
     
+    /* ------------------------------------------------------------ */
     public long lastModified()
     {
         if(_resources==null)
@@ -349,11 +367,13 @@ public class ResourceCollection extends Resource
         return -1;
     }
     
+    /* ------------------------------------------------------------ */
     public long length()
     {
         return -1;
     }    
     
+    /* ------------------------------------------------------------ */
     /**
      * @return The list of resource names(merged) contained in the collection of resources.
      */    
@@ -371,6 +391,7 @@ public class ResourceCollection extends Resource
         return set.toArray(new String[set.size()]);
     }
     
+    /* ------------------------------------------------------------ */
     public void release()
     {
         if(_resources==null)
@@ -380,9 +401,25 @@ public class ResourceCollection extends Resource
             r.release();
     }
     
+    /* ------------------------------------------------------------ */
     public boolean renameTo(Resource dest) throws SecurityException
     {
         throw new UnsupportedOperationException();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the list of resources separated by a path separator
+     */
+    public String toString()
+    {
+        if(_resources==null)
+            throw new IllegalStateException("*resources* not set.");
+        
+        StringBuilder buffer = new StringBuilder();
+        for(Resource r : _resources)
+            buffer.append(r.toString()).append(';');
+        return buffer.toString();
     }
 
 }
