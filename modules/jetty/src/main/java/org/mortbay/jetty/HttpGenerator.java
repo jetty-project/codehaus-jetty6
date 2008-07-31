@@ -103,10 +103,7 @@ public class HttpGenerator extends AbstractGenerator
     public void addContent(Buffer content, boolean last) throws IOException
     {
         if (_noContent)
-        {
-            content.clear();
-            return;
-        }
+            throw new IllegalStateException("NO CONTENT");
 
         if (_last || _state==STATE_END) 
         {
@@ -166,7 +163,7 @@ public class HttpGenerator extends AbstractGenerator
     public boolean addContent(byte b) throws IOException
     {
         if (_noContent)
-            return false;
+            throw new IllegalStateException("NO CONTENT");
         
         if (_last || _state==STATE_END) 
         {
@@ -543,7 +540,10 @@ public class HttpGenerator extends AbstractGenerator
                     // No idea, so we must assume that a body is coming
                     _contentLength = (_close || _version < HttpVersions.HTTP_1_1_ORDINAL ) ? HttpTokens.EOF_CONTENT : HttpTokens.CHUNKED_CONTENT;
                     if (_method!=null && _contentLength==HttpTokens.EOF_CONTENT)
+                    {
                         _contentLength=HttpTokens.NO_CONTENT;
+                        _noContent=true;
+                    }
                 }
                 break;
 
