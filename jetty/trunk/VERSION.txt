@@ -33,6 +33,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-655 Support parsing application/x-www-form-urlencoded parameters via http PUT
  + JETTY-656 HttpClient defaults to async mode
  + JETTY-659 ContentExchange and missing headers in HttpClient
+ + JETTY-663 AbstractDatabaseLoginModule doesn't react gracefully when getting UserInfo and userName is not found in the specified dbUserTable
  + JETTY-665 Support merging class directories 
  + JETTY-666 scanTargetPatterns override the values already being set by scanTarget
  + JETTY-667 HttpClient handles chunked content
