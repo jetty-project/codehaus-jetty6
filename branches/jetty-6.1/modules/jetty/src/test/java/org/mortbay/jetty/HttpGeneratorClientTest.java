@@ -130,7 +130,7 @@ public class HttpGeneratorClientTest extends TestCase
                     // For none, keep-alive, close
                     for (int c=0;c<connect.length;c++)
                     {
-                        String t="v="+v+",r="+r+",chunks="+chunks+",connect="+connect[c]+",tr="+tr[r];
+                        String t="v="+v+",r="+r+",chunks="+chunks+",c="+c+",tr="+tr[r];
                         // System.err.println(t);
                         
                         hb.reset(true);
@@ -145,8 +145,9 @@ public class HttpGeneratorClientTest extends TestCase
                         }
                         catch(IllegalStateException e)
                         {
-                            if (v==10 && chunks>2)
+                            if (v<10 || v==10 && chunks>2)
                                 continue;
+                            System.err.println(t);
                             throw e;
                         }
                         String request=endp.getOut().toString();
@@ -233,7 +234,11 @@ public class HttpGeneratorClientTest extends TestCase
                     if (i%2==0)
                     {
                         if (hb.isState(HttpGenerator.STATE_HEADER))
+                        {
+                            if (version<11)
+                                fields.addLongField("Content-Length",body.length());
                             hb.completeHeader(fields, HttpGenerator.MORE);
+                        }
                         hb.flush();
                     }
                 }
