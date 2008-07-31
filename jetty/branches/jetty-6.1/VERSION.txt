@@ -1,4 +1,5 @@
  + JETTY-381 JETTY-622 Multiple Web Application Source Directory
+ + JETTY-663 AbstractDatabaseLoginModule doesn't react gracefully when getting UserInfo and userName is not found in the specified dbUserTable
  + JETTY-665 Support merging class directories
  + JETTY-666 scanTargetPatterns override the values already being set by scanTarget
  + JETTY-667 HttpClient handles chunked content
