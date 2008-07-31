@@ -543,12 +543,13 @@ public class HttpGenerator extends AbstractGenerator
                     // No idea, so we must assume that a body is coming
                     _contentLength = (_close || _version < HttpVersions.HTTP_1_1_ORDINAL ) ? HttpTokens.EOF_CONTENT : HttpTokens.CHUNKED_CONTENT;
                     if (_method!=null && _contentLength==HttpTokens.EOF_CONTENT)
-                        throw new IllegalStateException("No Content-Length");
+                        _contentLength=HttpTokens.NO_CONTENT;
                 }
                 break;
 
             case HttpTokens.NO_CONTENT:
-                if (content_length == null && _status >= 200 && _status != 204 && _status != 304) _header.put(CONTENT_LENGTH_0);
+                if (content_length == null && _method==null && _status >= 200 && _status != 204 && _status != 304) 
+                    _header.put(CONTENT_LENGTH_0);
                 break;
 
             case HttpTokens.EOF_CONTENT:
