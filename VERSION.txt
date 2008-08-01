@@ -43,7 +43,7 @@ jetty-6.1.12rc1 1 August 2008
  + JETTY-665 Support merging class directories
  + JETTY-666 scanTargetPatterns override the values already being set by scanTarget
  + JETTY-667 HttpClient handles chunked content
- + JETTY-669 Http methods other than GET and POST should not get dispatched to the DefaultServlet
+ + JETTY-669 Http methods other than GET and POST should not have error page content
 
 jetty-6.1.11 6 June 2008
  + JETTY-336 413 error for full header buffer
