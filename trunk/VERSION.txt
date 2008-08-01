@@ -2,7 +2,7 @@ jetty-7.0-SNAPSHOT
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
  + JETTY-30  Externalize servlet-api to own project
  + JETTY-182 Support setting explicit system classpath for jasper Jsr199JavaCompiler
- + JETTY-319 Get unavailable exception and added startWithUnavailable option 
+ + JETTY-319 Get unavailable exception and added startWithUnavailable option
  + JETTY-381 JETTY-622 Multiple Web Application Source Directory
  + JETTY-442 Accessors for mimeType on ResourceHandler
  + JETTY-502 forward of an include should hide include attributes
@@ -34,10 +34,11 @@ jetty-7.0-SNAPSHOT
  + JETTY-656 HttpClient defaults to async mode
  + JETTY-659 ContentExchange and missing headers in HttpClient
  + JETTY-663 AbstractDatabaseLoginModule handle not found UserInfo and userName
- + JETTY-665 Support merging class directories 
+ + JETTY-665 Support merging class directories
  + JETTY-666 scanTargetPatterns override the values already being set by scanTarget
  + JETTY-667 HttpClient handles chunked content
  + JETTY-669 Http methods other than GET and POST should not have error page content
+ + JETTY-671 Configure DTD does not allow <Property> children
 
 jetty-6.1.12rc1 1 August 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
@@ -177,7 +178,7 @@ jetty-7.0.0pre0 - 21 April 2008
  + Renamed modules management and naming to jmx and jndi.
  + JETTY-282 Support manually-triggered reloading by maven plugin
  + JETTY-341 100-Continues sent only after getInputStream called.
- + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean) 
+ + JETTY-386 backout fix and replaced with ContextHandler.setCompactPath(boolean)
  + JETTY-399 update OpenRemoteServiceServlet to gwt 1.4
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
@@ -272,14 +273,14 @@ jetty-6.1.8 28 February 2008
 jetty-6.1.7 - 22 December 2007
  + Added BayeuxService
  + Added JSON.Convertor and non static JSON instances
- + Add "mvn jetty:stop" 
+ + Add "mvn jetty:stop"
  + allow sessions to be periodically persisted to disk
  + Cookie support in BayeuxClient
  + grizzly fixed for posts
  + jetty-6.1 branch created from 6.1.6 and r593 of jetty-contrib trunk
  + Optimizations and improvements of Cometd, more pooled objects
  + Update java5 patch
- + JETTY-386 CERT-553235. backout fix and replaced with ContextHandler.setCompactPath(boolean) 
+ + JETTY-386 CERT-553235. backout fix and replaced with ContextHandler.setCompactPath(boolean)
  + JETTY-467 allow URL rewriting to be disabled.
  + JETTY-468 unique holder names for addServletWithMapping
  + JETTY-474 Fixed case sensitivity issue with HttpFields
@@ -307,7 +308,7 @@ jetty-6.1.6rc1 - 5 November 2007
  + Give Terracotta session scavenger a name
  + Jetty Eclipse Plugin 1.0.1: force copy of context file on redeploy
  + JETTY-388 Handle utf-16 and other multibyte non-utf-8 form content.
- + JETTY-409 String params that denote files changed to File 
+ + JETTY-409 String params that denote files changed to File
  + JETTY-438 handle trailing . in vhosts
  + JETTY-439 Fixed 100 continues clash with Connection:close
  + JETTY-451 Concurrent modification of session during invalidate
@@ -410,12 +411,12 @@ jetty-6.1.4 - 15 Jun 2007
  + JETTY-372 make test for cookie caching more rigorous
 
 jetty-6.1.4rc1 - 10 Jun 2007
- + Work around IBM JVM socket close issue 
+ + Work around IBM JVM socket close issue
  + moved documentation for jetty and jspc maven plugins to wiki
  + async client improvements
  + fixed handling of large streamed files
  + Fixed synchronization conflict SslSelectChannel and SelectChannel
- + Optional static content cache 
+ + Optional static content cache
  + JETTY-310 better exception when no filter file for cometd servlet
  + JETTY-323 handle htaccess without a user realm
  + JETTY-346 add wildcard support to extra scan targets for maven plugin
@@ -448,7 +449,7 @@ jetty-6.1.4rc0 - 1 Jun 2007
  + JETTY-309 fix applied to sslEngine
  + JETTY-317 rollback inclusion of cometd jar for maven plugin
  + JETTY-318 Prevent meta channels being created
- + JETTY-330 Allow dependencies with scope provided for jspc plugin 
+ + JETTY-330 Allow dependencies with scope provided for jspc plugin
  + JETTY-335 SslEngine overflow fix
  + JETTY-337 deprecated get/setCipherSuites and added get/setExcludeCipherSuites
  + JETTY-338 protect isMoreInBuffer from destroy
@@ -495,7 +496,7 @@ jetty-6.1.2rc4 - 19 April 2007
 jetty-6.1.2rc3 - 16 April 2007
  + Improved performance and exclusions for TLD scanning
  + MBean properties assume writeable unless marked RO
- + refactor of SessionManager and SessionIdManager for clustering 
+ + refactor of SessionManager and SessionIdManager for clustering
  + Improvements to allow simple setting of Cache-Control headers
  + AJP redirects https requests correctly
  + Fixed writes of unencoded char arrays.
@@ -590,7 +591,7 @@ jetty-6.1.2pre1 5 Feb 2007
  + added win32service to standard build
  + refactored cometd to be continuation independent
  + allow ResourceHandler to use resource base from an enclosing ContextHandler
- 
+
 jetty-6.1.2pre0 1 Feb 2007
  + Fixed 1.4 method in jetty plus
  + Fixed generation of errors during jsp compilation for jsp-2.1
@@ -601,14 +602,14 @@ jetty-6.1.2pre0 1 Feb 2007
  + JETTY-216 handle AJP packet fragmentation
  + JETTY-218 handle AJP ssl key size and integer
  + JETTY-219 fixed trailing encoded chars in cookies
- + JETTY-220 fixed AJP content 
+ + JETTY-220 fixed AJP content
  + JETTY-222 fix problem parsing faces-config.xml
  + add support for Annotations in servlet, filter and listener sources
  + improved writer buffering
  + moved JSON parser to util to support reuse
  + handle virtual hosts in ContextHandlerCollection
  + enable SslSelectChannelConnector to modify the SslEngine's client authentication settings
- 
+
 jetty-6.1.1 - 15 Jan 2007
 jetty-6.1.1rc1 - 12 Jan 2007
  + Use timers for Rollover logs and scanner
@@ -659,7 +660,7 @@ jetty-6.1.0rc2 - 20 December 2006
  + remove code to remove SecurityHandler if no constraints present
  + JETTY-201 make run-as work for both web container and ejb container in jboss
  + ensure com.sun.el.Messages.properties included in jsp-2.1 jar
- 
+
 jetty-6.1.0rc1 - 14 December 2006
  + simplified idle timeout handling
  + JETTY-193 MailSessionReference without authentication
@@ -686,7 +687,7 @@ jetty-6.1.0rc0 - 8 December 2006
  + JETTY-184 cometd connect non blocking
  + Support for RFC2518 102-processing response
  + JETTY-123 fix improved
- + Added org.mortbay.thread.concurrent.ThreadPool 
+ + Added org.mortbay.thread.concurrent.ThreadPool
  + Added extras/gwt
  + Fixed idle timeout
  + JETTY-189 ProxyConnection
@@ -698,12 +699,12 @@ jetty-6.1.0pre3 - 22 November 2006
  + fixed NIO endpoint flush. Avoid duplicate sends
  + CVE-2006-6969 Upgraded session ID generation to use SecureRandom
  + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
- + Support TLS_DHE_RSA_WITH_AES_256_CBC_SHA 
+ + Support TLS_DHE_RSA_WITH_AES_256_CBC_SHA
  + JETTY-180 XBean support for context deploy
  + JETTY-154 Cookies are double quotes only
  + Expose isResumed on Continuations
  + Refactored AJP generator
- 
+
 
 jetty-6.0.2 - 22 November 2006
  + Moved all modules updates from 6.1pre2 to 6.0
@@ -755,7 +756,7 @@ jetty-6.0.2 - 22 November 2006
  + SocketConnector closes all connections in doStop
  + Upgraded session ID generation to use SecureRandom
  + updated glassfish jasper to tag SJSAS-9_1-B25-EA-08_Nov_2006
- + Support TLS_DHE_RSA_WITH_AES_256_CBC_SHA 
+ + Support TLS_DHE_RSA_WITH_AES_256_CBC_SHA
 
 Jetty-5.1.14 - 9 Aug 2007
  + patched with correct version
@@ -771,7 +772,7 @@ Jetty-5.1.12 - 22 November 2006
  + Quote single quotes in cookies
  + AJP protected against bad requests from mod_jk
  + JETTY-154 Cookies ignore single quotes
- 
+
 Jetty-4.2.27 - 22 November 2006
  + Upgraded session ID generation to use SecureRandom
  + AJP protected against bad requests from mod_jk
@@ -784,7 +785,7 @@ jetty-6.1.0pre2 - 20 Nov 2006
 jetty-6.1.0pre1 - 19 Nov 2006
  + Use ContextDeployer as main deployer in jetty.xml
  + Added extras/jboss
- + Major refactor of SelectChannel EndPoint for client selector 
+ + Major refactor of SelectChannel EndPoint for client selector
  + Fixed NPE in bio.SocketEndPoint.getRemoteAddr()
  + Reverted UnixCrypt to use coersions (that effected results)
  + JETTY-151 Idle timeout only applies to blocking operations
@@ -793,7 +794,7 @@ jetty-6.1.0pre1 - 19 Nov 2006
  + JETTY-172 use getName() instead of toString
  + JETTY-173 restore servletpath after dispatch
  + release resource lookup in Default servlet
- + Simplified ResourceCache and Default servlet 
+ + Simplified ResourceCache and Default servlet
  + Added override descriptor for deployment of RO webapps
  + Added hierarchical destroy of mbeans
  + JETTY-151 refactored writers
@@ -841,14 +842,14 @@ jetty-6.1.0pre0 - 21 Oct 2006
  + Allow session cookie to be refreshed
  + Added DataFilter configuration to cometd
  + Added extras/setuid to support start as root
- + Apply queryEncoding to getQueryString 
+ + Apply queryEncoding to getQueryString
  + JETTY-118 ignore extra content after close.
  + HttpGenerator can generate requests
  + Ported HtAccessHandler
  + Start of a client API
  + Session IDs can change worker ID
  + Default soLinger is -1 (disabled)
- + AJP Connector 
+ + AJP Connector
 
 Jetty-5.1.11 - 8 October 2006
  + fixed ByteBufferOutputStream capacity calculation
@@ -857,7 +858,7 @@ Jetty-5.1.11 - 8 October 2006
  + Fixed order of destruction event calls
  + Fix to HttpOutputStream from M.Traverso
  + Default servlet only uses setContentLength on wrapped responses
- 
+
 Jetty-4.2.26 - 8 October 2006
  + Backport of AJP fixes
 
@@ -1197,10 +1198,10 @@ Jetty-5.1.11RC0 - 5 April 2006
  + stop JDBCUserRealm forcing all credentials to be String
  + force close with shutdownOutput for win32
  + NPE protection if desirable client certificates
- + Added provider support to SslListener 
+ + Added provider support to SslListener
  + logging improvements for servlet and runtime exceptions
  + Fixed AJP handling of ;jsessionid.
- + improved contentType param handling 
+ + improved contentType param handling
 
 Jetty-5.1.10 - 5 January 2006
  + Fixed path aliasing with // on windows.
@@ -1208,12 +1209,12 @@ Jetty-5.1.10 - 5 January 2006
  + Fix for AJP13 with encoded path
  + Remove null dispatch attributes from getAttributeNames
  + Put POST content default back to iso_8859_1. GET is UTF-8 still
- 
+
 Jetty-4.2.25 - 4 Jan 2006
  + Fixed aliasing of // for win32
 
 Jetty-5.1.9 - 7 December 2005
- + Fixed wantClientAuth(false) overriding netClientAuth(true) 
+ + Fixed wantClientAuth(false) overriding netClientAuth(true)
 
 Jetty-6.0.0betaX -
  + See http://jetty.mortbay.org/jetty6 for 6.0 releases
@@ -1248,7 +1249,7 @@ Jetty-5.1.5rc2 - 7 October 2005
  + unsynchronized ContextLoader
  + ReFixed merge of Dispatcher params
  + public ServerMBean constructor
- + UTF-8 encoding for URLs 
+ + UTF-8 encoding for URLs
  + Response.setLocale will set locale even if getWriter called.
 
 Jetty-5.1.5rc1 - 23 August 2005
@@ -1290,7 +1291,7 @@ Jetty-5.1.4rc0 - 19 April 2005
 Jetty-5.1.3 - 7 April 2005
  + Some minor code janitorial services
 
-Jetty-4.2.24 - 7 April 2005 
+Jetty-4.2.24 - 7 April 2005
 
 Jetty-5.1.3rc4 - 31 March 2005
  + Moved servlet request wrapping to enterContextScope for geronimo security
@@ -1314,7 +1315,7 @@ Jetty-5.1.3rc1 - 13 March 2005
  + Fixed principal naming in FormAuthenticator
  + JettyPlus updated to JOTM 2.0.5, XAPool 1.4.2
 
-Jetty-4.2.24rc1 
+Jetty-4.2.24rc1
  + Fixed principal naming in FormAuthenticator
 
 Jetty-5.1.3rc0 - 8 March 2005
@@ -1361,7 +1362,7 @@ Jetty-4.2.23RC0 - 17 December 2004
 
 Jetty-5.1.1 - 1 December 2004
 
-Jetty-5.1.1RC1 
+Jetty-5.1.1RC1
  + Some minor findbugs code cleanups
  + Made more WebApplicationHandle configuration methods public.
  + Fixed ordering of filters with multiple interleaved mappings.
@@ -1380,7 +1381,7 @@ Jetty-5.1.RC1 - 24 October 2004
  + Allow JSSE listener to be just confidential or just integral.
  + Fixed NPE for null contenttype
  + improved clean targets
- + when committed setHeader is a noop rather than IllegalStateException 
+ + when committed setHeader is a noop rather than IllegalStateException
  + Partially flush writers on every write so content length can be detected.
  + Build unsealed jars
  + default / mapping does not apply to Filters
@@ -1433,7 +1434,7 @@ Jetty-5.0.RC2 - 2 July 2004
  + OPTIONS works for all URLs on default servlet
  + add JMX support for JettyPlus
  + add listing of java:comp/env for webapp with JMX
- + make choice of override of JNDI ENC entries: config.xml or web.xml 
+ + make choice of override of JNDI ENC entries: config.xml or web.xml
  + Default servlet may use only pathInfo for resource
  + Fixed session leak in j2ee
  + Fixed no-role security constraint combination.
@@ -1445,7 +1446,7 @@ Jetty-4.2.21 - 2 July 2004
  + integrated jetty-jboss with jboss-3.2.4
  + add JMX support for JettyPlus
  + add listing of java:comp/env for webapp with JMX
- + make choice of override of JNDI ENC entries: config.xml or web.xml 
+ + make choice of override of JNDI ENC entries: config.xml or web.xml
  + Fixed JAAS logout
 
 Jetty-5.0.RC1 - 24 May 2004
@@ -1509,7 +1510,7 @@ Jetty-5.0.beta2 - 12 Feb 2004
  + Added experimental NIO listeners again.
  + fixed filter dispatch configuration.
  + fixed lazy authentication with FORMs
- 
+
 Jetty-4.2.18 - 1 Mar 2004
  + Added log4j context repository to jettyplus
  + NPE guard for no-listener junit deployment
@@ -1519,7 +1520,7 @@ Jetty-4.2.18 - 1 Mar 2004
  + Default servlet respectes servlet path
 
 Jetty-4.2.17 - 1 Feb 2004
- + Fixed busy loop in threadpool run  
+ + Fixed busy loop in threadpool run
  + Reorganized ServletHolder init
 
 Jetty-4.2.16 - 30 Jan 2004
@@ -1545,10 +1546,10 @@ Jetty-4.2.15 - 24 December 2003
  + Added patch for JBoss realm single sign on
  + Environment variables for CGI
  + Removed support for old JBoss clustering
-                                                                                             
+
 Jetty-5.0.beta0 - 22 November 2003
  + Removed support for HTTP trailers
- + PathMap uses own Map.Entry impl for IBM JVMs 
+ + PathMap uses own Map.Entry impl for IBM JVMs
  + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
  + Protect ThreadPool.run() from interrupted exceptions
  + Added org.mortbay.http.ErrorHandler for error pages.
@@ -1562,7 +1563,7 @@ Jetty-5.0.beta0 - 22 November 2003
  + Removed the CMR/CMP distributed session implementation
 
 Jetty-4.2.15rc0 - 22 November 2003
- + PathMap uses own Map.Entry impl for IBM JVMs 
+ + PathMap uses own Map.Entry impl for IBM JVMs
  + Race in HttpFields cache
  + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
  + Protect ThreadPool.run() from interrupted exceptions
@@ -1593,9 +1594,9 @@ Jetty-5.0.alpha3 - 19 October 2003
 
 Jetty-4.2.14RC1 - 19 October 2003
  + Reworked Dispatcher to better support cross context sessions.
- + Added UserRealm.logout and arrange for form auth  
+ + Added UserRealm.logout and arrange for form auth
  + Allow customization of HttpConnections
- + Failed requests excluded from 
+ + Failed requests excluded from
 
 Jetty-4.2.14RC0 - 7 October 2003
  + Correctly setup context classloader in cross context dispatch.
@@ -1640,7 +1641,7 @@ Jetty-5.0.alpha0 - 16 Jul 2003
  + Implemented remote/local addr/port methods
  + Updated authentication so that a normal Principal is used.
  + updated to jasper 5.0.3
- + Implemented setCharaterEncoding 
+ + Implemented setCharaterEncoding
  + Implemented filter-mapping <dispatcher> element
  + Implemented Dispatcher forward attributes.
 
@@ -1659,11 +1660,11 @@ Jetty-4.2.12 - 12 August 2003
 Jetty-4.2.11 - 12 July 2003
  + Fixed race in servlet initialization code.
  + Cookie params all in lower case.
- + Simplified AJP13 connection handling. 
+ + Simplified AJP13 connection handling.
  + Prevent AJP13 from reordering query.
  + Support separate Monitor class for start
  + Branched for Jetty 5 development.
- 
+
 Jetty-4.2.10 - 7 July 2003
  + Updates to JettyPlus documentation
  + Updates to Jetty tutorial for start.jar, jmx etc
