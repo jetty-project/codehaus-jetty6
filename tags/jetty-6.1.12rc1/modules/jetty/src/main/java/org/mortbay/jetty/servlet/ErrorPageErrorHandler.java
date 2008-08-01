@@ -25,6 +25,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -57,6 +59,12 @@ public class ErrorPageErrorHandler extends ErrorHandler
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
     {
+        String method = request.getMethod();
+        if(!method.equals(HttpMethods.GET) && !method.equals(HttpMethods.POST))
+        {
+            HttpConnection.getCurrentConnection().getRequest().setHandled(true);
+            return;
+        }
         if (_errorPages!=null)
         {
             String error_page= null;
