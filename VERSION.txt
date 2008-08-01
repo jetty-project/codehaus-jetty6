@@ -33,15 +33,16 @@ jetty-7.0-SNAPSHOT
  + JETTY-655 Support parsing application/x-www-form-urlencoded parameters via http PUT
  + JETTY-656 HttpClient defaults to async mode
  + JETTY-659 ContentExchange and missing headers in HttpClient
- + JETTY-663 AbstractDatabaseLoginModule doesn't react gracefully when getting UserInfo and userName is not found in the specified dbUserTable
+ + JETTY-663 AbstractDatabaseLoginModule handle not found UserInfo and userName
  + JETTY-665 Support merging class directories 
  + JETTY-666 scanTargetPatterns override the values already being set by scanTarget
  + JETTY-667 HttpClient handles chunked content
- + JETTY-669 Http methods other than GET and POST should not get dispatched to the DefaultServlet
+ + JETTY-669 Http methods other than GET and POST should not have error page content
 
-jetty-6.1.12rc1 30 July 2008
+jetty-6.1.12rc1 1 August 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
- + JETTY-319 Get unavailable exception and added startWithUnavailable option 
+ + JETTY-319 Get unavailable exception and added startWithUnavailable option
+ + JETTY-381 JETTY-622 Multiple Web Application Source Directory
  + JETTY-442 Accessors for mimeType on ResourceHandler
  + JETTY-502 forward of an include should hide include attributes
  + JETTY-562 RewriteHandler support for virtual hosts
@@ -79,6 +80,11 @@ jetty-6.1.12rc1 30 July 2008
  + JETTY-658 backport latest HttpClient from jetty-7 to jetty-6
  + JETTY-659 ContentExchange and missing headers in HttpClient
  + JETTY-660 Backported QoSFilter
+ + JETTY-663 AbstractDatabaseLoginModule handle not found UserInfo and userName
+ + JETTY-665 Support merging class directories
+ + JETTY-666 scanTargetPatterns override the values already being set by scanTarget
+ + JETTY-667 HttpClient handles chunked content
+ + JETTY-669 Http methods other than GET and POST should not have error page content
 
 jetty-7.0.0pre2 - 30 June 2008
  + JETTY-336 413 error for header buffer full
