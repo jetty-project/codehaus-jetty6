@@ -54,7 +54,7 @@ public class Utf8StringBuffer
     
     public void append(byte b)
     {
-        if (b>0)
+        if (b>=0)
         {
             if (_more>0)
             {
