@@ -39,6 +39,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-667 HttpClient handles chunked content
  + JETTY-669 Http methods other than GET and POST should not have error page content
  + JETTY-671 Configure DTD does not allow <Property> children
+ + JETTY-672 Utf8StringBuffer doesn't properly handle null characters (char with byte value 0)
 
 jetty-6.1.12rc1 1 August 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
