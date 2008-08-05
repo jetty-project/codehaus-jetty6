@@ -8,6 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty.example</groupId>
   <artifactId>async-jsf-example-webapp</artifactId>
+  <name>Jetty Example :: Async Rest Example Webapp</name>
   <version>7.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <properties>  	
