@@ -1379,9 +1379,12 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
             try
             {
                 Resource resource=ContextHandler.this.getResource(path);
-                File file =resource.getFile();
-                if (file!=null)
-                    return file.getCanonicalPath();
+                if(resource!=null)
+                {
+                    File file = resource.getFile();
+                    if (file!=null)
+                        return file.getCanonicalPath();
+                }
             }
             catch (Exception e)
             {
