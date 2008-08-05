@@ -1369,6 +1369,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public String getRealPath(String path)
         {
+            if(path==null)
+                return null;
+            if(path.length()==0)
+                path = URIUtil.SLASH;
+            else if(path.charAt(0)!='/')
+                path = URIUtil.SLASH + path;
+                
             try
             {
                 Resource resource=ContextHandler.this.getResource(path);
