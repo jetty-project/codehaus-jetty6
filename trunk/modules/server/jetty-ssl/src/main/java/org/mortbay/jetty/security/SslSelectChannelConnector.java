@@ -474,7 +474,11 @@ public class SslSelectChannelConnector extends SelectChannelConnector
     {
         _truststoreType=truststoreType;
     }
-
+    
+    public void setSslContext(SSLContext sslContext) {
+		this._context = sslContext;
+	}
+    
     /* ------------------------------------------------------------ */
     /**
      * By default, we're confidential, given we speak SSL. But, if we've been
@@ -571,7 +575,9 @@ public class SslSelectChannelConnector extends SelectChannelConnector
    
     protected void doStart() throws Exception
     {
-        _context=createSSLContext();
+    	if (_context == null) {
+           _context=createSSLContext();
+    	}
         
         SSLEngine engine=createSSLEngine();
         SSLSession ssl_session=engine.getSession();
