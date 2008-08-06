@@ -106,7 +106,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     private String _contextPath="/";
     private Map _initParams;
     private String _displayName;
-    private String _docRoot;
     private Resource _baseResource;  
     private MimeTypes _mimeTypes;
     private Map _localeEncodingMap;
@@ -962,23 +961,6 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     public void setBaseResource(Resource base) 
     {
         _baseResource=base;
-        _docRoot=null;
-        
-        try
-        {
-            File file=_baseResource.getFile();
-            if (file!=null)
-            {
-                _docRoot=file.getCanonicalPath();
-                if (_docRoot.endsWith(File.pathSeparator))
-                    _docRoot=_docRoot.substring(0,_docRoot.length()-1);
-            }
-        }
-        catch (Exception e)
-        {
-            Log.warn(e);
-            throw new IllegalArgumentException(base.toString());
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -1293,19 +1275,29 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
          */
         public String getRealPath(String path)
         {
-            if (_docRoot==null)
+            if(path==null)
                 return null;
+            if(path.length()==0)
+                path = URIUtil.SLASH;
+            else if(path.charAt(0)!='/')
+                path = URIUtil.SLASH + path;
+                
+            try
+            {
+                Resource resource=ContextHandler.this.getResource(path);
+                if(resource!=null)
+                {
+                    File file = resource.getFile();
+                    if (file!=null)
+                        return file.getCanonicalPath();
+                }
+            }
+            catch (Exception e)
+            {
+                Log.ignore(e);
+            }
             
-            if (path==null)
-                return null;
-            path=URIUtil.canonicalPath(path);
-            
-            if (!path.startsWith(URIUtil.SLASH))
-                path=URIUtil.SLASH+path;
-            if (File.separatorChar!='/')
-                path =path.replace('/', File.separatorChar);
-            
-            return _docRoot+path;
+            return null;
         }
 
         /* ------------------------------------------------------------ */
