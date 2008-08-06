@@ -91,5 +91,17 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.googlecode.jsslutils</groupId>
+      <artifactId>jsslutils</artifactId>
+      <version>0.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.jsslutils</groupId>
+      <artifactId>jsslutils-test-certificates</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

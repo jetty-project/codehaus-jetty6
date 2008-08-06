@@ -151,6 +151,8 @@ public class SslSocketConnector extends SocketConnector
     /** Set to true if we would like client certificate authentication. */
     private boolean _wantClientAuth = false;
     private int _handshakeTimeout = 0; //0 means use maxIdleTime
+    
+    private SSLContext _context;
 
 
     /* ------------------------------------------------------------ */
@@ -185,41 +187,44 @@ public class SslSocketConnector extends SocketConnector
     protected SSLServerSocketFactory createFactory() 
         throws Exception
     {
-        if (_truststore==null)
-        {
-            _truststore=_keystore;
-            _truststoreType=_keystoreType;
-        }
-
-        KeyManager[] keyManagers = null;
-        InputStream keystoreInputStream = null;
-        if (_keystore != null)
-        	keystoreInputStream = Resource.newResource(_keystore).getInputStream();
-        KeyStore keyStore = KeyStore.getInstance(_keystoreType);
-        keyStore.load(keystoreInputStream, _password==null?null:_password.toString().toCharArray());
-
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
-        keyManagerFactory.init(keyStore,_keyPassword==null?null:_keyPassword.toString().toCharArray());
-        keyManagers = keyManagerFactory.getKeyManagers();
-
-        TrustManager[] trustManagers = null;
-        InputStream truststoreInputStream = null;
-        if (_truststore != null)
-        	truststoreInputStream = Resource.newResource(_truststore).getInputStream();
-        KeyStore trustStore = KeyStore.getInstance(_truststoreType);
-        trustStore.load(truststoreInputStream,_trustPassword==null?null:_trustPassword.toString().toCharArray());
-        
-        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
-        trustManagerFactory.init(trustStore);
-        trustManagers = trustManagerFactory.getTrustManagers();
-        
-
-        SecureRandom secureRandom = _secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
-
-        SSLContext context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
-
-        context.init(keyManagers, trustManagers, secureRandom);
-
+    	SSLContext context = _context;
+    	if (context == null) {
+	        if (_truststore==null)
+	        {
+	            _truststore=_keystore;
+	            _truststoreType=_keystoreType;
+	        }
+	
+	        KeyManager[] keyManagers = null;
+	        InputStream keystoreInputStream = null;
+	        if (_keystore != null)
+	        	keystoreInputStream = Resource.newResource(_keystore).getInputStream();
+	        KeyStore keyStore = KeyStore.getInstance(_keystoreType);
+	        keyStore.load(keystoreInputStream, _password==null?null:_password.toString().toCharArray());
+	
+	        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_sslKeyManagerFactoryAlgorithm);        
+	        keyManagerFactory.init(keyStore,_keyPassword==null?null:_keyPassword.toString().toCharArray());
+	        keyManagers = keyManagerFactory.getKeyManagers();
+	
+	        TrustManager[] trustManagers = null;
+	        InputStream truststoreInputStream = null;
+	        if (_truststore != null)
+	        	truststoreInputStream = Resource.newResource(_truststore).getInputStream();
+	        KeyStore trustStore = KeyStore.getInstance(_truststoreType);
+	        trustStore.load(truststoreInputStream,_trustPassword==null?null:_trustPassword.toString().toCharArray());
+	        
+	        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(_sslTrustManagerFactoryAlgorithm);
+	        trustManagerFactory.init(trustStore);
+	        trustManagers = trustManagerFactory.getTrustManagers();
+	        
+	
+	        SecureRandom secureRandom = _secureRandomAlgorithm==null?null:SecureRandom.getInstance(_secureRandomAlgorithm);
+	
+	        context = _provider==null?SSLContext.getInstance(_protocol):SSLContext.getInstance(_protocol, _provider);
+	
+	        context.init(keyManagers, trustManagers, secureRandom);
+    	}
+    	
         return context.getServerSocketFactory();
     }
 
@@ -539,6 +544,11 @@ public class SslSocketConnector extends SocketConnector
     public void setTruststoreType(String truststoreType)
     {
         _truststoreType = truststoreType;
+    }
+    
+    public void setSslContext(SSLContext sslContext)
+    {
+    	_context = sslContext;
     }
 
     /* ------------------------------------------------------------ */
