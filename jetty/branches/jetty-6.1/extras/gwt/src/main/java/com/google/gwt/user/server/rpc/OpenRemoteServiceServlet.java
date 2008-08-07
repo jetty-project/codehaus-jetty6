@@ -15,12 +15,14 @@
  */
 package com.google.gwt.user.server.rpc;
 
-import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.rpc.SerializationException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletContext;
@@ -28,6 +30,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
+import com.google.gwt.user.client.rpc.SerializationException;
 
 /**
  * RemoteServiceServlet changes to allow extensions required for Jetty Continuatution support.
@@ -39,7 +44,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Craig Day (craig@alderaan.com.au)
  *
  */
-public class OpenRemoteServiceServlet extends HttpServlet {
+public class OpenRemoteServiceServlet extends HttpServlet implements SerializationPolicyProvider {
     /*
      * These members are used to get and set the different HttpServletResponse and
      * HttpServletRequest headers.
@@ -171,6 +176,12 @@ public class OpenRemoteServiceServlet extends HttpServlet {
     private final ThreadLocal perThreadRequest = new ThreadLocal();
 
     private final ThreadLocal perThreadResponse = new ThreadLocal();
+    
+    /**
+     * A cache of moduleBaseURL and serialization policy strong name to
+     * {@link SerializationPolicy}.
+     */
+    private final Map<String, SerializationPolicy> serializationPolicyCache = new HashMap<String, SerializationPolicy>();
 
     /**
      * The default constructor.
@@ -251,9 +262,9 @@ public class OpenRemoteServiceServlet extends HttpServlet {
      */
     public String processCall(String payload) throws SerializationException {
         try {
-            RPCRequest rpcRequest = RPC.decodeRequest(payload, this.getClass());
+            RPCRequest rpcRequest = RPC.decodeRequest(payload, this.getClass(), this);
             return RPC.invokeAndEncodeResponse(this, rpcRequest.getMethod(),
-                    rpcRequest.getParameters());
+                    rpcRequest.getParameters(), rpcRequest.getSerializationPolicy());
         } catch (IncompatibleRemoteServiceException ex) {
             return RPC.encodeResponseForFailure(null, ex);
         }
@@ -409,5 +420,165 @@ public class OpenRemoteServiceServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         response.getOutputStream().write(reply);
     }
+
+    public final SerializationPolicy getSerializationPolicy(String moduleBaseURL, String strongName)
+    {
+        SerializationPolicy serializationPolicy = getCachedSerializationPolicy(moduleBaseURL, 
+                strongName);
+        if (serializationPolicy != null)
+            return serializationPolicy;
+
+
+        serializationPolicy = doGetSerializationPolicy(getThreadLocalRequest(),
+                moduleBaseURL, strongName);
+
+        if (serializationPolicy == null) 
+        {
+            // Failed to get the requested serialization policy; use the default
+            getServletContext().log(
+                "WARNING: Failed to get the SerializationPolicy '"
+                    + strongName
+                    + "' for module '"
+                    + moduleBaseURL
+                    + "'; a legacy, 1.3.3 compatible, serialization policy will be used.  You may experience SerializationExceptions as a result.");
+            serializationPolicy = RPC.getDefaultSerializationPolicy();
+        }
+
+        // This could cache null or an actual instance. Either way we will not
+        // attempt to lookup the policy again.
+        putCachedSerializationPolicy(moduleBaseURL, strongName, serializationPolicy);
+
+        return serializationPolicy;
+    }
+    
+    private SerializationPolicy getCachedSerializationPolicy(String moduleBaseURL, 
+            String strongName) 
+    {
+        synchronized (serializationPolicyCache) 
+        {
+            return serializationPolicyCache.get(moduleBaseURL + strongName);
+        }
+    }
+    
+    private void putCachedSerializationPolicy(String moduleBaseURL, String strongName, 
+            SerializationPolicy serializationPolicy) 
+    {
+        synchronized (serializationPolicyCache) 
+        {
+            serializationPolicyCache.put(moduleBaseURL + strongName, serializationPolicy);
+        }
+    }
+    
+    /**
+     * Gets the {@link SerializationPolicy} for given module base URL and strong
+     * name if there is one.
+     * 
+     * Override this method to provide a {@link SerializationPolicy} using an
+     * alternative approach.
+     * 
+     * @param request the HTTP request being serviced
+     * @param moduleBaseURL as specified in the incoming payload
+     * @param strongName a strong name that uniquely identifies a serialization
+     *          policy file
+     * @return a {@link SerializationPolicy} for the given module base URL and
+     *         strong name, or <code>null</code> if there is none
+     */    
+    protected SerializationPolicy doGetSerializationPolicy(HttpServletRequest request, 
+            String moduleBaseURL, String strongName) 
+    {
+        // The request can tell you the path of the web app relative to the
+        // container root.
+        String contextPath = request.getContextPath();
+
+        String modulePath = null;
+        if (moduleBaseURL != null) 
+        {
+            try 
+            {
+                modulePath = new URL(moduleBaseURL).getPath();
+            } 
+            catch (MalformedURLException ex) 
+            {
+                // log the information, we will default
+                getServletContext().log("Malformed moduleBaseURL: " + moduleBaseURL, ex);
+            }
+        }
+
+        SerializationPolicy serializationPolicy = null;
+
+        /*
+         * Check that the module path must be in the same web app as the servlet
+         * itself. If you need to implement a scheme different than this, override
+         * this method.
+         */
+        if (modulePath == null || !modulePath.startsWith(contextPath)) 
+        {
+            String message = "ERROR: The module path requested, "
+                + modulePath
+                + ", is not in the same web application as this servlet, "
+                + contextPath
+                + ".  Your module may not be properly configured or your client and server code maybe out of date.";
+            getServletContext().log(message);
+        } 
+        else 
+        {
+            // Strip off the context path from the module base URL. It should be a
+            // strict prefix.
+            String contextRelativePath = modulePath.substring(contextPath.length());
+
+            String serializationPolicyFilePath = SerializationPolicyLoader.getSerializationPolicyFileName(contextRelativePath
+                + strongName);
+
+            // Open the RPC resource file read its contents.
+            InputStream is = getServletContext().getResourceAsStream(
+                serializationPolicyFilePath);
+            try 
+            {
+                if (is != null) 
+                {
+                    try 
+                    {
+                        serializationPolicy = SerializationPolicyLoader.loadFromStream(is, null);
+                    } 
+                    catch (ParseException e) 
+                    {
+                        getServletContext().log(
+                                "ERROR: Failed to parse the policy file '"
+                                    + serializationPolicyFilePath + "'", e);
+                    } 
+                    catch (IOException e) 
+                    {
+                        getServletContext().log(
+                                "ERROR: Could not read the policy file '"
+                                    + serializationPolicyFilePath + "'", e);
+                    }
+                } 
+                else 
+                {
+                    String message = "ERROR: The serialization policy file '"
+                        + serializationPolicyFilePath
+                        + "' was not found; did you forget to include it in this deployment?";
+                    getServletContext().log(message);
+                }
+            } 
+            finally 
+            {
+                if (is != null) 
+                {
+                    try 
+                    {
+                        is.close();
+                    } 
+                    catch (IOException e) 
+                    {
+                        // Ignore this error
+                    }
+                }
+            }
+        }
+
+        return serializationPolicy;
+    }
+    
 
 }
