@@ -1,5 +1,6 @@
 jetty-7.0-SNAPSHOT
  + JETTY-677 GWT serialization issue
+ + JETTY-682 Added listeners and queue methods to cometd
 
 jetty-7.0.0pre3 - 6 August 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008

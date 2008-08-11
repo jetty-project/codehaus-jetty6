@@ -21,9 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.cometd.Channel;
+import org.cometd.ChannelListener;
 import org.cometd.Client;
 import org.cometd.DataFilter;
 import org.cometd.Message;
+import org.cometd.SubscriptionListener;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
@@ -39,6 +41,7 @@ public class ChannelImpl implements Channel
     protected AbstractBayeux _bayeux;
     private ClientImpl[] _subscribers=new ClientImpl[0]; // copy on write
     private DataFilter[] _dataFilters=new DataFilter[0]; // copy on write
+    private SubscriptionListener[] _subscriptionListeners=new SubscriptionListener[0]; // copy on write
     private ChannelId _id;
     private ConcurrentMap<String,ChannelImpl> _children = new ConcurrentHashMap<String, ChannelImpl>();
     private ChannelImpl _wild;
@@ -84,6 +87,8 @@ public class ChannelImpl implements Channel
             
             branch.addChild(channel);
         }
+        
+        _bayeux.addChannel(channel);
     }
     
     /* ------------------------------------------------------------ */
@@ -168,7 +173,41 @@ public class ChannelImpl implements Channel
     /* ------------------------------------------------------------ */
     public boolean remove()
     {
-        return _bayeux.removeChannel(getChannelId());
+        return _bayeux.removeChannel(this);
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean doRemove(ChannelImpl channel)
+    {
+        ChannelId channelId = channel.getChannelId();
+        String key = channelId.getSegment(channelId.depth()-1);
+        if (_children.containsKey(key))
+        {
+            ChannelImpl child = _children.get(key);
+            
+            synchronized (this)
+            { 
+                synchronized (child)
+                {
+                    if (!child.isPersistent() && child.getSubscriberCount()==0 && child.getChannelCount()==1)
+                    {
+                        _children.remove(key);
+                        return true;
+                    }
+                    else
+                        return false;                    
+                }
+            }
+        }
+        else
+        {
+            for (ChannelImpl child : _children.values())
+            {
+                if (child.doRemove(channel))
+                    return true;
+            }
+        }
+        return false;
     }
     
     /* ------------------------------------------------------------ */
@@ -208,6 +247,9 @@ public class ChannelImpl implements Channel
                     return;
             }
             _subscribers=(ClientImpl[])LazyList.addToArray(_subscribers,client,null);
+
+            for (SubscriptionListener l : _subscriptionListeners)
+                l.subscribed(client);
         }
         
         ((ClientImpl)client).addSubscription(this);
@@ -232,10 +274,13 @@ public class ChannelImpl implements Channel
         synchronized(this)
         {
             _subscribers=(ClientImpl[])LazyList.removeFromArray(_subscribers,client);
-            
-            if (!_persistent && _subscribers.length==0 && _children.size()==0)
-                remove();
+                        
+            for (SubscriptionListener l : _subscriptionListeners)
+                l.unsubscribed(client);
         }
+        
+        if (!_persistent && _subscribers.length==0 && _children.size()==0)
+            remove();
     }
 
     /* ------------------------------------------------------------ */
@@ -376,6 +421,14 @@ public class ChannelImpl implements Channel
         }
     }
 
-    
+    /* ------------------------------------------------------------ */
+    public void addListener(ChannelListener listener)
+    {
+        synchronized(this)
+        {
+            if (listener instanceof SubscriptionListener)
+                _subscriptionListeners=(SubscriptionListener[])LazyList.addToArray(_subscriptionListeners,listener,null);
+        }
+    }
     
 }

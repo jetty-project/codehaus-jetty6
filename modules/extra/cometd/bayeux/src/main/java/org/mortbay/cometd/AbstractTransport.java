@@ -46,14 +46,5 @@ public abstract class AbstractTransport implements Transport
     {
         _pollReply=reply;
     }
-
-    public void send(List<Message> messages) throws IOException
-    {
-        if (messages!=null)
-        {
-            for (Message message: messages)
-                send(message);
-        }
-    }
     
 }
