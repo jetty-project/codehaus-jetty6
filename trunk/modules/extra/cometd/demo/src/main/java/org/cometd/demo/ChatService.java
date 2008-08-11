@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.cometd.Bayeux;
+import org.cometd.Channel;
 import org.cometd.Client;
 import org.cometd.RemoveListener;
 import org.mortbay.cometd.BayeuxService;
@@ -62,8 +63,10 @@ public class ChatService extends BayeuxService
                 public void removed(String clientId, boolean timeout)
                 {
                     members.remove(username);
-                    getBayeux().getChannel(channel_,false).publish(getClient(),members,id_);
                     Log.info("members: "+members);
+                    Channel ch=getBayeux().getChannel(channel_,false);
+                    if (ch!=null)
+                        ch.publish(getClient(),members,id_);
                 }
             });
             Log.info("Members: "+members);

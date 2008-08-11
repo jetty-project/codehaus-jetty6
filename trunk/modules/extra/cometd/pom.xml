@@ -21,7 +21,7 @@
   </modules>
 
   <properties>
-    <cometd-version>1.0.beta1</cometd-version>
+    <cometd-version>1.0-SNAPSHOT</cometd-version>
   </properties>
 
   <repositories>

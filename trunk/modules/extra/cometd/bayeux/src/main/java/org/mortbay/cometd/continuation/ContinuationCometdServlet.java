@@ -16,6 +16,7 @@ package org.mortbay.cometd.continuation;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Queue;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ import org.mortbay.cometd.AbstractCometdServlet;
 import org.mortbay.cometd.ClientImpl;
 import org.mortbay.cometd.MessageImpl;
 import org.mortbay.cometd.Transport;
+import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
@@ -188,72 +190,37 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
         // Send any messages.
         if (client!=null) 
         { 
-            List<Message> messages = null; 
             Message message = null; 
             synchronized(client)
             {
-                switch (client.getMessages())
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        message = client.takeMessage(); 
-                        break;
-                    default:
-                        messages = client.takeMessages(); 
-                        break;
-                }
-                
-                if (!_asyncDeliver)
-                {
-                    try
-                    {
-                        if (message!=null)
-                            transport.send(message); 
-                        else if (messages!=null)
-                            transport.send(messages); 
-                        
-                        transport.complete();
-                        resp.flushBuffer();
+                ArrayQueue<Message> messages= (ArrayQueue)client.getQueue();
+                int size=messages.size();
 
-                        if (transport.resumePoll())
-                            client.resume();
-                        
-                        return;
-                    }
-                    catch(Throwable e)
+                boolean flushed=false;
+                try
+                {
+                    for (int i=0;i<size;i++)
                     {
-                        // delivery failed!
-                        if (message!=null)
-                            client.returnMessage(message);
-                        else if (messages!=null)
-                            client.returnMessages(messages);
-                            
-                        if (e instanceof ServletException)
-                            throw (ServletException)e;
-                        if (e instanceof IOException)
-                            throw (IOException)e;
-                        if (e instanceof RuntimeException)
-                            throw (RuntimeException)e;
-                        if (e instanceof Error)
-                            throw (Error)e;
-                        if (e instanceof ThreadDeath)
-                            throw (ThreadDeath)e;
-                        throw new ServletException(e);
+                        message=messages.get(i);
+                        transport.send(message); 
                     }
+
+                    transport.complete();
+                    resp.flushBuffer();
+                    flushed=true;
+                }
+                finally
+                {
+                    if (flushed)
+                        messages.clear();
                 }
             }
-            
-            if (message!=null)
-                transport.send(message); 
-            else if (messages!=null)
-                transport.send(messages); 
             
             if (transport.resumePoll())
             	client.resume();
         }
-        
-        if (transport!=null)
+        else
             transport.complete();
+            
     }
 }
