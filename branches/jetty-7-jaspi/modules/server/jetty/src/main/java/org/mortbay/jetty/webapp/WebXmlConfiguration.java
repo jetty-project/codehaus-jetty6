@@ -25,25 +25,25 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.regex.Pattern;
 
-import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.config.ServerAuthConfig;
+import javax.security.auth.message.config.ServerAuthContext;
 import javax.servlet.Servlet;
 import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.security.AbstractSecurityHandler;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.RunAsToken;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.ServletCallbackHandler;
-import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.DigestAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.LoginService;
-import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
-import org.mortbay.jetty.security.jaspi.modules.ClientCertAuthModule;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
+import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
+import org.mortbay.jetty.security.jaspi.modules.ClientCertAuthModule;
+import org.mortbay.jetty.security.jaspi.modules.DigestAuthModule;
+import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
+import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
@@ -80,7 +80,7 @@ public class WebXmlConfiguration implements Configuration
     protected String _jspServletClass;
     protected boolean _defaultWelcomeFileList;
     protected ServletHandler _servletHandler;
-    protected AbstractSecurityHandler _securityHandler;
+    protected SecurityHandler _securityHandler;
     protected int _version;
     protected boolean _metaDataComplete = false;
     private URL _webxml;
@@ -1090,7 +1090,7 @@ public class WebXmlConfiguration implements Configuration
             _securityHandler.setAuthConfig(serverAuthConfig);
             _securityHandler.setServletCallbackHandler(callbackHandler);
             //TODO??
-//            _securityHandler.setServiceSubject(null);
+            _securityHandler.setServiceSubject(null);
         }
 
 
