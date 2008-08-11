@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
+import org.mortbay.util.URIUtil;
+
 /**
  * A collection of resources (dirs).
  * Allows webapps to have multiple (static) sources.
@@ -171,6 +173,12 @@ public class ResourceCollection extends Resource
     {
         if(_resources==null)
             throw new IllegalStateException("*resources* not set.");
+        
+        if(path==null)
+            throw new MalformedURLException();
+        
+        if(path.length()==0 || URIUtil.SLASH.equals(path))
+            return this;
         
         Resource resource=null;
         ArrayList<Resource> resources = null;
