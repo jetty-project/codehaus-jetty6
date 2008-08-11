@@ -42,8 +42,10 @@ import org.mortbay.jetty.handler.HandlerWrapper;
 /**
  * @version $Rev$ $Date$
  */
-public abstract class AbstractSecurityHandler extends HandlerWrapper
-{/* ------------------------------------------------------------ */
+public abstract class AbstractSecurityHandler extends HandlerWrapper implements SecurityHandler
+{
+
+/* ------------------------------------------------------------ */
 //    private UserRealm _userRealm;
     private NotChecked _notChecked = new NotChecked();
     private boolean _checkWelcomeFiles = false;//jaspi stuff
@@ -296,8 +298,6 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
 
     protected abstract UserIdentity newSystemUserIdentity();
 
-    public abstract RunAsToken newRunAsToken(String runAsRole);
-
     protected abstract Object prepareConstraintInfo(
             String pathInContext,
             Request request);
@@ -320,7 +320,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper
             return "NOT CHECKED";
         }
 
-        public AbstractSecurityHandler getSecurityHandler()
+        public SecurityHandler getSecurityHandler()
         {
             return AbstractSecurityHandler.this;
         }

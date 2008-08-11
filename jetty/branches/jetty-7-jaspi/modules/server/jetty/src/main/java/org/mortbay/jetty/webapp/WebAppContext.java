@@ -41,7 +41,7 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
-import org.mortbay.jetty.security.AbstractSecurityHandler;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ErrorPageErrorHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -292,7 +292,7 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     /**
      */
-    public WebAppContext(AbstractSecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
+    public WebAppContext(SecurityHandler securityHandler,SessionHandler sessionHandler, ServletHandler servletHandler, ErrorHandler errorHandler)
     {
         super(null,
               sessionHandler!=null?sessionHandler:new SessionHandler(),
@@ -986,7 +986,7 @@ public class WebAppContext extends Context
     /* ------------------------------------------------------------ */
     /**
      * The override descriptor is a web.xml format file that is applied to the context after the standard WEB-INF/web.xml
-     * @param defaultsDescriptor The overrideDescritpor to set.
+     * @param overrideDescriptor The overrideDescritpor to set.
      */
     public void setOverrideDescriptor(String overrideDescriptor)
     {

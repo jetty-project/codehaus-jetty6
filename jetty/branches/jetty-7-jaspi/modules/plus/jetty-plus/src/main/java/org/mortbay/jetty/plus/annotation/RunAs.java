@@ -15,7 +15,7 @@
 
 package org.mortbay.jetty.plus.annotation;
 
-import org.mortbay.jetty.security.AbstractSecurityHandler;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
@@ -53,7 +53,7 @@ public class RunAs
     }
 
 
-    public void setRunAs (ServletHolder holder, AbstractSecurityHandler securityHandler)
+    public void setRunAs (ServletHolder holder, SecurityHandler securityHandler)
     {
         if (holder == null)
             return;

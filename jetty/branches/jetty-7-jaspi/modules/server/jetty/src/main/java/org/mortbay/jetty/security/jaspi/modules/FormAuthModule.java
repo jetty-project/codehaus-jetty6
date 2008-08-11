@@ -60,9 +60,9 @@ public class FormAuthModule extends BaseAuthModule
     public final static String __J_PASSWORD = "j_password";
 
     //    private String realmName;
-    private static final String LOGIN_PAGE_KEY = "org.mortbay.jetty.security.jaspi.modules.LoginPage";
-    private static final String ERROR_PAGE_KEY = "org.mortbay.jetty.security.jaspi.modules.ErrorPage";
-    private static final String SSO_SOURCE_KEY = "org.mortbay.jetty.security.jaspi.modules.SsoSource";
+    public static final String LOGIN_PAGE_KEY = "org.mortbay.jetty.security.jaspi.modules.LoginPage";
+    public static final String ERROR_PAGE_KEY = "org.mortbay.jetty.security.jaspi.modules.ErrorPage";
+    public static final String SSO_SOURCE_KEY = "org.mortbay.jetty.security.jaspi.modules.SsoSource";
 
     private String _formErrorPage;
     private String _formErrorPath;
