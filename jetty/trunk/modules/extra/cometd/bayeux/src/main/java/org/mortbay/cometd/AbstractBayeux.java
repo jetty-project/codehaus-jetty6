@@ -32,11 +32,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.cometd.Bayeux;
+import org.cometd.BayeuxListener;
 import org.cometd.Channel;
+import org.cometd.ChannelBayeuxListener;
 import org.cometd.Client;
-import org.cometd.DataFilter;
 import org.cometd.Extension;
 import org.cometd.Message;
+import org.cometd.ClientBayeuxListener;
 import org.cometd.SecurityPolicy;
 import org.mortbay.util.ajax.JSON;
 
@@ -94,9 +96,12 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     transient ConcurrentHashMap<String, ChannelId> _channelIdCache;
     protected Handler _publishHandler;
     protected Handler _metaPublishHandler;
+    protected int _maxClientQueue=-1;
 
     protected List<Extension> _extensions=new CopyOnWriteArrayList<Extension>();
     protected JSON.Literal _transports=new JSON.Literal("[\""+Bayeux.TRANSPORT_LONG_POLL+ "\",\""+Bayeux.TRANSPORT_CALLBACK_POLL+"\"]");
+    protected List<ClientBayeuxListener> _clientListeners=new CopyOnWriteArrayList<ClientBayeuxListener>();
+    protected List<ChannelBayeuxListener> _channelListeners=new CopyOnWriteArrayList<ChannelBayeuxListener>();
     
     /* ------------------------------------------------------------ */
     /**
@@ -151,6 +156,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     public ChannelImpl getChannel(String id)
     {
         ChannelId cid=getChannelId(id);
+
         if (cid.depth()==0)
             return null;
         return _root.getChild(cid);
@@ -462,12 +468,22 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
 
     /* ------------------------------------------------------------ */
-    public boolean removeChannel(ChannelId channelId)
+    public boolean removeChannel(ChannelImpl channel)
     {
-        // TODO Auto-generated method stub
-        return false;
+        boolean removed = _root.doRemove(channel);
+        if (removed)
+            for (ChannelBayeuxListener l : _channelListeners)
+                l.channelRemoved(channel);
+        return removed;
     }
 
+    /* ------------------------------------------------------------ */
+    public void addChannel(ChannelImpl channel)
+    {
+        for (ChannelBayeuxListener l : _channelListeners)
+            l.channelAdded(channel);
+    }
+    
     /* ------------------------------------------------------------ */
     protected String newClientId(long variation, String idPrefix)
     {
@@ -487,7 +503,12 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             
             ClientImpl other = _clients.putIfAbsent(id,client);
             if (other==null)
+            {
+                for (ClientBayeuxListener l : _clientListeners)
+                    l.clientAdded((Client)client);
+                    
                 return;
+            }
         }
     }
     
@@ -507,6 +528,8 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         if (client!=null)
         {
             client.unsubscribeAll();
+            for (ClientBayeuxListener l : _clientListeners)
+                l.clientRemoved((Client)client);
         }
         return client;
     }
@@ -703,8 +726,14 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     public Channel removeChannel(String channelId)
     {
         Channel channel = getChannel(channelId);
-        channel.remove();
-        return channel;
+        boolean removed = false;
+        if (channel!=null)
+            removed = channel.remove();
+        
+        if (removed) 
+            return channel;
+        else
+            return null;
     }
 
     /* ------------------------------------------------------------ */
@@ -769,7 +798,30 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         return clients;
     }
     
+    /* ------------------------------------------------------------ */
+    public void addListener(BayeuxListener listener)
+    {
+        if (listener instanceof ClientBayeuxListener)
+            _clientListeners.add((ClientBayeuxListener)listener);
+        else if (listener instanceof ChannelBayeuxListener)
+            _channelListeners.add((ChannelBayeuxListener)listener);
+    }    
+      
     
+    /* ------------------------------------------------------------ */
+    public int getMaxClientQueue()
+    {
+        return _maxClientQueue;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setMaxClientQueue(int size)
+    {
+        _maxClientQueue=size;
+    }
+
+
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     public static class DefaultPolicy implements SecurityPolicy
@@ -927,7 +979,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             }
             if (isLogInfo())
                 logInfo("Disconnect "+client.getId());
-                
+
             client.remove(false);
             
             Message reply=newMessage(message);
@@ -1305,7 +1357,4 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         }
         
     }
-
-
-
 }

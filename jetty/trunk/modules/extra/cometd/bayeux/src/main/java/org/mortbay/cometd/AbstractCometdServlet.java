@@ -87,11 +87,6 @@ import org.mortbay.util.ajax.JSON;
  * <dt>directDeliver</dt>
  * <dd>true if published messages are delivered directly to subscribers (default). If false, a message copy is created with only supported fields (default true).</dd>
  * 
- * <dt>asyncDeliver</dt>
- * <dd>true if responses should be flushed asynchronously.  This improves performance and reduces the required thread pool size, but increases the risk of
- * messages being lost if a response is lost due to a transient network failure (default false). </dd>
- * 
- * 
  * </dl>
  * 
  * @author gregw
@@ -110,7 +105,6 @@ public abstract class AbstractCometdServlet extends HttpServlet
     public final static String BROWSER_ID="BAYEUX_BROWSER";
     
     protected AbstractBayeux _bayeux;
-    protected boolean _asyncDeliver=false;
 
     public AbstractBayeux getBayeux()
     {
@@ -205,7 +199,7 @@ public abstract class AbstractCometdServlet extends HttpServlet
 
                 String async=getInitParameter("asyncDeliver");
                 if (async!=null)
-                    _asyncDeliver = Boolean.parseBoolean(async);
+                    getServletContext().log("asyncDeliver no longer supported");
                 
                 _bayeux.generateAdvice();
             }
