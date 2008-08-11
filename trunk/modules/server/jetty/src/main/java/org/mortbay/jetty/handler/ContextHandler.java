@@ -428,6 +428,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * Set the context event listeners.
+     * @see ServletContextListener
+     * @see ServletContextAttributeListener
+     * @see ServletRequestListener
+     * @see ServletRequestAttributeListener
+     */
     public void setEventListeners(EventListener[] eventListeners)
     {
         _contextListeners=null;
@@ -456,6 +463,13 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
     }     
 
     /* ------------------------------------------------------------ */
+    /**
+    * Add a context event listeners.
+    * @see ServletContextListener
+    * @see ServletContextAttributeListener
+    * @see ServletRequestListener
+    * @see ServletRequestAttributeListener
+    */
     public void addEventListener(EventListener listener) 
     {
         setEventListeners((EventListener[])LazyList.addToArray(getEventListeners(), listener, EventListener.class));
