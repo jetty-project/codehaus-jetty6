@@ -224,8 +224,16 @@ public class ResourceHandler extends AbstractHandler
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         Request base_request = request instanceof Request?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-        if (base_request.isHandled() || !request.getMethod().equals(HttpMethods.GET))
+        if (base_request.isHandled())
             return;
+        
+        boolean skipContentBody = false;
+        if(!HttpMethods.GET.equals(request.getMethod()))
+        {
+            if(!HttpMethods.HEAD.equals(request.getMethod()))
+                return;
+            skipContentBody = true;
+        }
      
         Resource resource=getResource(request);
         
@@ -269,7 +277,9 @@ public class ResourceHandler extends AbstractHandler
         
         // set the headers
         doResponseHeaders(response,resource,mime!=null?mime.toString():null);
-
+        response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
+        if(skipContentBody)
+            return;
         // Send the content
         OutputStream out =null;
         try {out = response.getOutputStream();}
@@ -279,13 +289,11 @@ public class ResourceHandler extends AbstractHandler
         if (out instanceof HttpConnection.Output)
         {
             // TODO file mapped buffers
-            response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
             ((HttpConnection.Output)out).sendContent(resource.getInputStream());
         }
         else
         {
             // Write content normally
-            response.setDateHeader(HttpHeaders.LAST_MODIFIED,last_modified);
             resource.writeTo(out,0,resource.length());
         }
     }
