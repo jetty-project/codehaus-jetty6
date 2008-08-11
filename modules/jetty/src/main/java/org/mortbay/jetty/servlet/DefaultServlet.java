@@ -156,7 +156,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         {
             try
             {
-                _resourceBase=Resource.newResource(_context.getResource(URIUtil.SLASH)).addPath(rrb);
+                _resourceBase = _context.getContextHandler().getResource(URIUtil.SLASH).addPath(rrb);
             }
             catch (Exception e) 
             {
@@ -186,7 +186,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         try
         {
             if (_resourceBase==null)
-                _resourceBase=Resource.newResource(_context.getResource(URIUtil.SLASH));
+                _resourceBase = _context.getContextHandler().getResource(URIUtil.SLASH);
 
             String cache_type =getInitParameter("cacheType");
             int max_cache_size=getInitInt("maxCacheSize", -2);
