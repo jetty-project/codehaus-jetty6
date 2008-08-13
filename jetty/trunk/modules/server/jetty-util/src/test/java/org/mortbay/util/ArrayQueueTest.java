@@ -79,4 +79,50 @@ public class ArrayQueueTest extends TestCase
         for (int i=0;i<99;i++)
             assertEquals(i+"!",queue.get(i));
     }
+
+    public void testGrow() throws Exception
+    {
+        ArrayQueue<String> queue = new ArrayQueue<String>(3,5);
+        assertEquals(3,queue.getCapacity());
+        
+        queue.add("a");
+        queue.add("b");
+        assertEquals(3,queue.getCapacity());
+        queue.add("c");
+        assertEquals(8,queue.getCapacity());
+        
+        for (int i=0;i<4;i++)
+            queue.add(""+('d'+i));
+        assertEquals(8,queue.getCapacity());
+        for (int i=0;i<4;i++)
+            queue.poll();
+        assertEquals(8,queue.getCapacity());
+        for (int i=0;i<4;i++)
+            queue.add(""+('d'+i));
+        assertEquals(8,queue.getCapacity());
+        for (int i=0;i<4;i++)
+            queue.poll();
+        assertEquals(8,queue.getCapacity());
+        for (int i=0;i<4;i++)
+            queue.add(""+('d'+i));
+        assertEquals(8,queue.getCapacity());
+
+        queue.add("z");
+        assertEquals(13,queue.getCapacity());
+        
+        queue.clear();
+        assertEquals(13,queue.getCapacity());
+        for (int i=0;i<12;i++)
+            queue.add(""+('a'+i));
+        assertEquals(13,queue.getCapacity());
+        queue.clear();
+        assertEquals(13,queue.getCapacity());
+        for (int i=0;i<12;i++)
+            queue.add(""+('a'+i));
+        assertEquals(13,queue.getCapacity());
+        
+        
+        
+        
+    }
 }

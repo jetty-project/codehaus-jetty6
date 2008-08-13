@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,13 +41,7 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
     }
 
     /* ------------------------------------------------------------ */
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-    {
-        doPost(req,resp);
-    }
-
-    /* ------------------------------------------------------------ */
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         // Look for an existing client and protect from context restarts
         SuspendingClient client=null;
@@ -195,7 +191,7 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
                 {
                     for (int i=0;i<size;i++)
                     {
-                        message=messages.get(i);
+                        message=messages.getUnsafe(i);
                         transport.send(message); 
                     }
 
