@@ -185,7 +185,6 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
             {
                 ArrayQueue<Message> messages= (ArrayQueue)client.getQueue();
                 int size=messages.size();
-
                 boolean flushed=false;
                 try
                 {
@@ -196,7 +195,7 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
                     }
 
                     transport.complete();
-                    response.flushBuffer();
+                    response.getWriter().close();
                     flushed=true;
                 }
                 finally
