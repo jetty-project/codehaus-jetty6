@@ -51,6 +51,12 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     }
     
     /* ------------------------------------------------------------ */
+    public int getRefs()
+    {
+        return _refs.get();
+    }
+    
+    /* ------------------------------------------------------------ */
     public void incRef()
     {
         _refs.getAndIncrement();
