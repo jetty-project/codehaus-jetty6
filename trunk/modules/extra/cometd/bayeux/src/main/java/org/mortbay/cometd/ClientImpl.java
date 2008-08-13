@@ -30,8 +30,6 @@ import org.cometd.RemoveListener;
 import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.LazyList;
 
-
-
 /* ------------------------------------------------------------ */
 /**
  * 
@@ -53,7 +51,7 @@ public class ClientImpl implements Client
     private int _adviseVersion;
     private int _batch;
     private int _maxQueue;
-    private ArrayQueue<Message> _queue=new ArrayQueue<Message>(this,8,4);
+    private ArrayQueue<Message> _queue=new ArrayQueue<Message>(8,16,this);
     private long _timeout;
 
     /* ------------------------------------------------------------ */
@@ -106,11 +104,11 @@ public class ClientImpl implements Client
 
             if (_maxQueue<0)
             {
-                _queue.add(message);
+                _queue.addUnsafe(message);
             }
             else
             { 
-                boolean add=true;
+                boolean add=_maxQueue>0;
                 if (_queue.size()>=_maxQueue)
                 {
                     for (QueueListener l:_qListeners)
@@ -120,7 +118,7 @@ public class ClientImpl implements Client
                 }
                     
                 if (add)
-                    _queue.add(message);
+                    _queue.addUnsafe(message);
             }               
             
             if (_batch==0 &&  _responsesPending<1)

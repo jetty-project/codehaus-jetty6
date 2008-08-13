@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -95,7 +98,7 @@ import org.mortbay.util.ajax.JSON;
  * @see {@link AbstractBayeux}
  * @see {@link ChannelId}
  */
-public abstract class AbstractCometdServlet extends HttpServlet
+public abstract class AbstractCometdServlet extends GenericServlet
 {
     public static final String CLIENT_ATTR="org.mortbay.cometd.client";
     public static final String TRANSPORT_ATTR="org.mortbay.cometd.transport";
@@ -208,14 +211,19 @@ public abstract class AbstractCometdServlet extends HttpServlet
         getServletContext().setAttribute(Bayeux.DOJOX_COMETD_BAYEUX,_bayeux);
     }
 
+    protected abstract void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException;  
+    
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    public void service(ServletRequest req, ServletResponse resp) throws ServletException, IOException
     {
+        HttpServletRequest request=(HttpServletRequest)req;
+        HttpServletResponse response=(HttpServletResponse)resp;
+        
         if (_bayeux.isRequestAvailable())
-            _bayeux.setCurrentRequest(req);
+            _bayeux.setCurrentRequest(request);
         try
         {
-            super.service(req,resp);
+            service(request,response);
         }
         finally
         {

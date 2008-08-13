@@ -43,24 +43,17 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
 {
     /* ------------------------------------------------------------ */
     @Override
-	protected AbstractBayeux newBayeux()
+    protected AbstractBayeux newBayeux()
     {
         return new ContinuationBayeux();
     }
 
     /* ------------------------------------------------------------ */
     @Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-    {
-        doPost(req,resp);
-    }
-
-    /* ------------------------------------------------------------ */
-    @Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         // Look for an existing client and protect from context restarts
-        Object clientObj=req.getAttribute(CLIENT_ATTR);
+        Object clientObj=request.getAttribute(CLIENT_ATTR);
         ContinuationClient client=(clientObj instanceof ClientImpl)?(ContinuationClient)clientObj:null;
         Transport transport=null;
         boolean connect=false;
@@ -70,16 +63,16 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
         if (client!=null)
         {
             // yes - extract saved properties
-            transport=(Transport)req.getAttribute(TRANSPORT_ATTR);
-            transport.setResponse(resp);
+            transport=(Transport)request.getAttribute(TRANSPORT_ATTR);
+            transport.setResponse(response);
         }
         else
         {
-            Message[] messages = getMessages(req);
+            Message[] messages = getMessages(request);
             num_msgs=messages.length;
 
             /* check jsonp parameter */
-            String jsonpParam=req.getParameter("jsonp");
+            String jsonpParam=request.getParameter("jsonp");
 
             // Handle all messages
             try
@@ -97,14 +90,14 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                         if (client==null)
                         {
                             // Setup a browser ID
-                            String browser_id=browserId(req);
+                            String browser_id=browserId(request);
                             if (browser_id==null)
-                                browser_id=newBrowserId(req,resp);
+                                browser_id=newBrowserId(request,response);
 
                             if (transport==null)
                             {
                                 transport=_bayeux.newTransport(client,message);
-                                transport.setResponse(resp);
+                                transport.setResponse(response);
                             }
                             _bayeux.handle(null,transport,message);
                             message=null;
@@ -113,7 +106,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                         }
                         else
                         {
-                            String browser_id=browserId(req);
+                            String browser_id=browserId(request);
                             if (browser_id!=null && (client.getBrowserId()==null || !client.getBrowserId().equals(browser_id)))
                                 client.setBrowserId(browser_id);
 
@@ -121,7 +114,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                             if (transport==null)
                             {
                                 transport=_bayeux.newTransport(client,message);
-                                transport.setResponse(resp);
+                                transport.setResponse(response);
                             }
 
                             // Tell client to hold messages as a response is likely to be sent.
@@ -156,7 +149,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                 if (timeout==0)
                     timeout=_bayeux.getTimeout();
 
-                Continuation continuation=ContinuationSupport.getContinuation(req,client);
+                Continuation continuation=ContinuationSupport.getContinuation(request,client);
                 if (!continuation.isPending())
                     client.access();
 
@@ -167,8 +160,8 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                     {
                         // save state and suspend
                         ((ContinuationClient)client).setContinuation(continuation);
-                        req.setAttribute(CLIENT_ATTR,client);
-                        req.setAttribute(TRANSPORT_ATTR,transport);
+                        request.setAttribute(CLIENT_ATTR,client);
+                        request.setAttribute(TRANSPORT_ATTR,transport);
                         continuation.suspend(timeout);
                     }
                     continuation.reset();
@@ -201,12 +194,12 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                 {
                     for (int i=0;i<size;i++)
                     {
-                        message=messages.get(i);
+                        message=messages.getUnsafe(i);
                         transport.send(message); 
                     }
 
                     transport.complete();
-                    resp.flushBuffer();
+                    response.flushBuffer();
                     flushed=true;
                 }
                 finally

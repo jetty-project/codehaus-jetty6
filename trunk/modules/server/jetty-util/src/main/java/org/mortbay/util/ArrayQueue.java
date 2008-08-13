@@ -64,14 +64,19 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
     }
 
     /* ------------------------------------------------------------ */
-    public ArrayQueue(Object lock,int initCapacity,int growBy)
+    public ArrayQueue(int initCapacity,int growBy,Object lock)
     {
         _elements=new Object[initCapacity];
         _growCapacity=growBy;
         _lock=lock;
     }
-    
 
+    /* ------------------------------------------------------------ */
+    public int getCapacity()
+    {
+        return _elements.length;
+    }
+    
     /* ------------------------------------------------------------ */
     public boolean add(E e)
     {
@@ -85,6 +90,17 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
                 grow();
         }
         return true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void addUnsafe(E e)
+    {
+        _size++;
+        _elements[_nextSlot++]=e;
+        if (_nextSlot==_elements.length)
+            _nextSlot=0;
+        if (_nextSlot==_nextE)
+            grow();
     }
 
     /* ------------------------------------------------------------ */
@@ -170,6 +186,7 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
         }
     }
 
+    /* ------------------------------------------------------------ */
     public void clear()
     {
         synchronized(_lock)
@@ -207,6 +224,15 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
                 i-=_elements.length;
             return (E)_elements[i];
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    public E getUnsafe(int index)
+    {
+        int i = _nextE+index;
+        if (i>=_elements.length)
+            i-=_elements.length;
+        return (E)_elements[i];
     }
 
     /* ------------------------------------------------------------ */
