@@ -93,6 +93,10 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * add without synchronization or bounds checking
+     * @see #add(Object)
+     */
     public void addUnsafe(E e)
     {
         _size++;
@@ -227,6 +231,10 @@ public class ArrayQueue<E> extends AbstractList<E> implements Queue<E>
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Get without synchronization or bounds checking.
+     * @see get(int)
+     */
     public E getUnsafe(int index)
     {
         int i = _nextE+index;
