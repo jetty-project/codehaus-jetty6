@@ -17,9 +17,13 @@ package org.mortbay.demo;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -27,10 +31,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.client.ContentExchange;
 import org.mortbay.jetty.client.HttpClient;
+import org.mortbay.util.ajax.JSON;
 
 /**
- * Servlet implementation class AsyncRESTServlet
+ * Servlet implementation class AsyncRESTServlet.
+ * Enquires ebay REST service for auctions by key word.
+ * May be configured with init parameters: <dl>
+ * <dt>appid</dt><dd>The eBay application ID to use</dd>
+ * </dl>
+ * Each request examines the following request parameters:<dl>
+ * <dt>items</dt><dd>The keyword to search for</dd>
+ * </dl>
  */
 public class AsyncRestServlet extends HttpServlet
 {
@@ -66,34 +79,65 @@ public class AsyncRestServlet extends HttpServlet
         }
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    protected void doGet(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         Long start=System.currentTimeMillis();
 
         if (request.isInitial() || request.getAttribute(CLIENT_ATTR)==null)
         {
-            System.err.println("Search EBAY " + request.getParameter(ITEMS_PARAM));
-
-            // Suspend and send the restful request
+            // extract keywords to search for
+            String[] keywords=request.getParameter(ITEMS_PARAM).split(",");
+            
+            // define results data structures
+            final List<Map<String, String>> results = 
+                Collections.synchronizedList(new ArrayList<Map<String, String>>());
+            final AtomicInteger count=new AtomicInteger(keywords.length);
+            
+            // suspend the request
             request.suspend();
+            request.setAttribute(CLIENT_ATTR, results);
 
-            EbayFindItemAsync searches = new EbayFindItemAsync(_client, request, _appid);
-
-            StringTokenizer strtok = new StringTokenizer(request.getParameter(ITEMS_PARAM), ",");
-            while (strtok.hasMoreTokens())
+            // For each keyword
+            for (final String item:keywords)
             {
-                searches.search(URLEncoder.encode(strtok.nextToken(), "UTF-8") );
+                // create an asynchronous HTTP exchange
+                ContentExchange exchange = new ContentExchange()
+                {
+                    protected void onResponseComplete() throws IOException
+                    {
+                        // extract auctions from the results
+                        Map query = (Map) JSON.parse(this.getResponseContent());
+                        Object[] auctions = (Object[]) query.get("Item");
+                        if (auctions != null)
+                        {
+                            for (Object o : auctions)
+                                results.add((Map) o);
+                        }
+
+                        // if that was all, resume the request
+                        if (count.decrementAndGet()<=0)
+                            request.resume();
+                    }
+                };
+
+                // send the exchange
+                exchange.setMethod("GET");
+                exchange.setURL("http://open.api.ebay.com/shopping?MaxEntries=5&appid=" + 
+                        _appid + 
+                        "&version=573&siteid=0&callname=FindItems&responseencoding=JSON&QueryKeywords=" + 
+                        URLEncoder.encode(item,"UTF-8"));
+                _client.send(exchange);
+                
             }
 
-            request.setAttribute(CLIENT_ATTR, searches);
+            // save timing info and return
             request.setAttribute(START_ATTR, start);
             request.setAttribute(DURATION_ATTR, new Long(System.currentTimeMillis() - start));
             return;
         }
 
         // resumed request: either we got all the results, or we timed out
-        EbayFindItemAsync aggregator = (EbayFindItemAsync) request.getAttribute(CLIENT_ATTR);
-        List<Map<String, String>> results = aggregator.getPayload();
+        List<Map<String, String>> results = (List<Map<String, String>>) request.getAttribute(CLIENT_ATTR);
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
         out.println("<html><head><style type='text/css'>img:hover {height:75px}</style></head><body><small>");
