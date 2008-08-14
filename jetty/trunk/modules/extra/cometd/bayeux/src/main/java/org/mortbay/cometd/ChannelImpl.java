@@ -249,7 +249,7 @@ public class ChannelImpl implements Channel
             _subscribers=(ClientImpl[])LazyList.addToArray(_subscribers,client,null);
 
             for (SubscriptionListener l : _subscriptionListeners)
-                l.subscribed(client);
+                l.subscribed(client, this);
         }
         
         ((ClientImpl)client).addSubscription(this);
@@ -276,7 +276,7 @@ public class ChannelImpl implements Channel
             _subscribers=(ClientImpl[])LazyList.removeFromArray(_subscribers,client);
                         
             for (SubscriptionListener l : _subscriptionListeners)
-                l.unsubscribed(client);
+                l.unsubscribed(client, this);
         }
         
         if (!_persistent && _subscribers.length==0 && _children.size()==0)
