@@ -66,7 +66,7 @@ public class ContentExchange extends CachedExchange
         int header = HttpHeaders.CACHE.getOrdinal(value);
         switch (header)
         {
-            case HttpHeaders.CONTENT_LANGUAGE_ORDINAL:
+            case HttpHeaders.CONTENT_LENGTH_ORDINAL:
                 _contentLength = BufferUtil.toInt(value);
                 break;
             case HttpHeaders.CONTENT_TYPE_ORDINAL:

@@ -115,8 +115,7 @@ public class PutFilter implements Filter
         String pathInContext = URIUtil.addPaths(servletPath, pathInfo);    
 
         String resource = URIUtil.addPaths(_baseURI,pathInContext); 
-        System.err.println("Doing PUT filter "+resource);
-   
+       
         String method = request.getMethod();
         boolean op = _operations.contains(method);
         
