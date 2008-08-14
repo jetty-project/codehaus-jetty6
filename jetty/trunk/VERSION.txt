@@ -1,4 +1,5 @@
 jetty-7.0-SNAPSHOT
+ + JETTY-591 No server classes for jetty-web.xml
  + JETTY-676 ResourceHandler doesn't support HTTP HEAD requests
  + JETTY-677 GWT serialization issue
  + JETTY-682 Added listeners and queue methods to cometd
