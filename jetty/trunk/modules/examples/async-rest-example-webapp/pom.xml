@@ -9,7 +9,7 @@
   <groupId>async-rest-example-webapp</groupId>
   <artifactId>async-rest-example-webapp</artifactId>
   <packaging>war</packaging>
-  <name>async-rest-example-webapp</name>
+  <name>Jetty Example :: Async Rest Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
