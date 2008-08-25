@@ -243,7 +243,7 @@ public class UrlEncoded extends MultiMap
     {
         synchronized(map)
         {
-            Utf8StringBuffer buffer = new Utf8StringBuffer();
+            Utf8StringBuffer buffer = new Utf8StringBuffer(length);
             String key = null;
             String value = null;
             
