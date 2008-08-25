@@ -66,6 +66,7 @@ public class HttpURI
     int _query;
     int _fragment;
     int _end;
+    boolean _encoded=false;
     
     public HttpURI()
     {
@@ -108,6 +109,7 @@ public class HttpURI
     
     private void parse2(byte[] raw,int offset, int length)
     {
+        _encoded=false;
         _raw=raw;
         int i=offset;
         int e=offset+length;
@@ -353,6 +355,10 @@ public class HttpURI
                             _fragment = s;
                             break state;
                         }
+                        case '%':
+                        {
+                            _encoded=true;
+                        }
                     }
                     continue;
                 }
@@ -449,7 +455,8 @@ public class HttpURI
     {
         if (_path==_param)
             return null;
-        return URIUtil.decodePath(_raw,_path,_param-_path);
+        
+        return _encoded?URIUtil.decodePath(_raw,_path,_param-_path):StringUtil.toString(_raw,_path,_param-_path,URIUtil.__CHARSET);
     }
     
     public String getPathAndParam()
@@ -514,6 +521,7 @@ public class HttpURI
         _scheme=_authority=_host=_port=_path=_param=_query=_fragment=_end=0;
         _raw=__empty;
         _rawString="";
+        _encoded=false;
     }
     
     public String toString()
