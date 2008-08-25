@@ -164,4 +164,24 @@ public class HttpURITest extends TestCase
         }
     }
 
+    String[][] encoding_tests=
+    { 
+       /* 0*/ {"/path/info","/path/info"}, 
+       /* 1*/ {"/path/%69nfo","/path/info"}, 
+       /* 2*/ {"http://host/path/%69nfo","/path/info"}, 
+       /* 3*/ {"http://host/path/%69nf%c2%a4","/path/inf\u00a4"}, 
+    };
+    
+    public void testEncoded()
+    {
+
+        HttpURI uri = new HttpURI();
+        
+        for (int t=0;t<encoding_tests.length;t++)
+        {
+            uri.parse(encoding_tests[t][0]);
+            assertEquals(""+t,encoding_tests[t][1],uri.getDecodedPath());
+            
+        }
+    }
 }
