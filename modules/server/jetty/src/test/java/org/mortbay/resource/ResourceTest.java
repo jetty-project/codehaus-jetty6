@@ -258,9 +258,16 @@ public class ResourceTest extends junit.framework.TestCase
             assertTrue(""+i+":"+data[i].test,c.startsWith(data[i].content));
         }
     }
-    
-    
-    
+
+    /* ------------------------------------------------------------ */
+    public void testEncoding() throws Exception
+    {
+        Resource r =Resource.newResource("/tmp/a file with,spe#ials/");
+        assertTrue(r.getURL().toString().indexOf("a%20file%20with,spe%23ials")>0);
+        assertTrue(r.getFile().toString().indexOf("a file with,spe#ials")>0);
+    }
+
+    /* ------------------------------------------------------------ */
     public void testJarFile()
     throws Exception
     {
