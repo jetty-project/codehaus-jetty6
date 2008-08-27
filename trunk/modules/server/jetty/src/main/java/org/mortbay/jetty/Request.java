@@ -347,7 +347,7 @@ public class Request extends Suspendable implements HttpServletRequest
         }
 
         if (_cookies==null)
-            _cookies=new CookieCutter();
+            _cookies=new CookieCutter(this);
 
         Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
         while (enm.hasMoreElements())
@@ -1327,7 +1327,7 @@ public class Request extends Suspendable implements HttpServletRequest
     public void setCookies(Cookie[] cookies)
     {
         if (_cookies==null)
-            _cookies=new CookieCutter();
+            _cookies=new CookieCutter(this);
         _cookies.setCookies(cookies);
     }
     

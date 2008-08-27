@@ -14,6 +14,7 @@
 
 package org.mortbay.jetty;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
@@ -42,7 +43,17 @@ public class CookieCutter
     private String[] _fields;
     int _added=0;
     boolean _dirty;
+    HttpServletRequest _request;
+    
+    public CookieCutter()
+    {
+        
+    }
  
+    public CookieCutter(HttpServletRequest request)
+    {
+        _request = request;
+    }
     
     public Cookie[] getCookies()
     {
@@ -141,8 +152,9 @@ public class CookieCutter
                                 break;
                             case STATE_UNQUOTED_VALUE:
                                 state = STATE_NAME;
-                                // TODO remove this old style jetty cookie support (encoding)
-                                value = URIUtil.decodePath(hdr.substring(tokenstart, i).trim());
+                                value = hdr.substring(tokenstart, i).trim();
+                                if(_request!=null && _request.isRequestedSessionIdFromURL())
+                                    value = URIUtil.decodePath(value);
                                 tokenstart = i + 1;
                                 break;
                             case STATE_NAME:
@@ -206,8 +218,9 @@ public class CookieCutter
                     switch (state)
                     {
                         case STATE_UNQUOTED_VALUE:
-                            // TODO remove this old style jetty cookie support (encoding)
-                            value = URIUtil.decodePath(hdr.substring(tokenstart).trim());
+                            value = hdr.substring(tokenstart).trim();
+                            if(_request!=null && _request.isRequestedSessionIdFromURL())
+                                value = URIUtil.decodePath(value);
                             break;
                         case STATE_NAME:
                             name = hdr.substring(tokenstart);
