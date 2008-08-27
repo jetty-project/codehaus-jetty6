@@ -412,8 +412,9 @@ public class Request implements HttpServletRequest
                                     break;
                                 case STATE_UNQUOTED_VALUE:
                                     state = STATE_NAME;
-                                    // TODO remove this old style jetty cookie support (encoding)
-                                    value = URIUtil.decodePath(hdr.substring(tokenstart, i).trim());
+                                    value = hdr.substring(tokenstart, i).trim();
+                                    if(isRequestedSessionIdFromURL())
+                                        value = URIUtil.decodePath(value);
                                     tokenstart = i + 1;
                                     break;
                                 case STATE_NAME:
@@ -477,8 +478,9 @@ public class Request implements HttpServletRequest
                         switch (state)
                         {
                             case STATE_UNQUOTED_VALUE:
-                                // TODO remove this old style jetty cookie support (encoding)
-                                value = URIUtil.decodePath(hdr.substring(tokenstart).trim());
+                                value = hdr.substring(tokenstart).trim();
+                                if(isRequestedSessionIdFromURL())
+                                    value = URIUtil.decodePath(value);
                                 break;
                             case STATE_NAME:
                                 name = hdr.substring(tokenstart);
