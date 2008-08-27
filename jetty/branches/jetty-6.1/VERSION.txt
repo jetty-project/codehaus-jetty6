@@ -8,6 +8,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-682 Added listeners and queue methods to cometd
  + JETTY-683 ResourceCollection works for jsp files but does not work for static resources under DefaultServlet
  + JETTY-687 Issue with servlet-mapping in dynamic servlet invoker
+ + JETTY-688 Cookie causes NumberFormatException
  + JETTY-696 ./jetty.sh restart not working
 
 jetty-6.1.12rc1 1 August 2008
