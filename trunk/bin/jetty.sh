@@ -571,6 +571,9 @@ case "$ACTION" in
         ;;
 
   restart)
+        if [ ! -f $0 ]; then
+          cd $JETTY_HOME/bin
+        fi
         $0 stop $*
         sleep 5
         $0 start $*
