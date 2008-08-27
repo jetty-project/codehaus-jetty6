@@ -571,12 +571,17 @@ case "$ACTION" in
         ;;
 
   restart)
-        if [ ! -f $0 ]; then
-          cd $JETTY_HOME/bin
+        JETTY_SH=$0
+        if [ ! -f $JETTY_SH ]; then
+          if [ ! -f $JETTY_HOME/bin/jetty.sh ]; then
+            echo "$JETTY_HOME/bin/jetty.sh does not exist."
+            exit 1
+          fi
+          JETTY_SH=$JETTY_HOME/bin/jetty.sh
         fi
-        $0 stop $*
+        $JETTY_SH stop $*
         sleep 5
-        $0 start $*
+        $JETTY_SH start $*
         ;;
 
   supervise)
