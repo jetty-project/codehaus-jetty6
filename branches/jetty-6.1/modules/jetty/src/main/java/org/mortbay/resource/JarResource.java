@@ -217,6 +217,7 @@ public class JarResource extends URLResource
             if (deleteOnExit)
                 file.deleteOnExit();
         }
+        IO.close(jin);
     }
     
     /* ------------------------------------------------------------ */
