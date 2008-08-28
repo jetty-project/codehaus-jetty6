@@ -491,7 +491,7 @@ case "$ACTION" in
 	fi
 
 
-	if which start-stop-daemon > /dev/null 2>&1 
+	if type start-stop-daemon > /dev/null 2>&1 
 	then
           [ x$JETTY_USER = x ] && JETTY_USER=$(whoami)
 	  [ $UID = 0 ] && CH_USER="-c $JETTY_USER"
@@ -537,7 +537,7 @@ case "$ACTION" in
 
   stop)
         echo -n "Stopping Jetty: "
-	if which start-stop-daemon > /dev/null 2>&1; then
+	if type start-stop-daemon > /dev/null 2>&1; then
 	  start-stop-daemon -K -p $JETTY_PID -d $JETTY_HOME -a $JAVA -s HUP 
 	  sleep 1
 	  if running $JETTY_PID
