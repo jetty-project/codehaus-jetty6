@@ -8,6 +8,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-688 Cookie causes NumberFormatException
  + JETTY-690 Updated XBean dependencies to XBean version 3.4.3 and Spring 2.0.5.
  + JETTY-696 ./jetty.sh restart not working
+ + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
 
 jetty-7.0.0pre3 - 6 August 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
