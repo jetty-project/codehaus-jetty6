@@ -1,5 +1,6 @@
 jetty-7.0-SNAPSHOT
  + JETTY-591 No server classes for jetty-web.xml
+ + JETTY-670 $JETTY_HOME/bin/jetty.sh not worked in Solaris, because of /usr/bin/which has no error-code
  + JETTY-676 ResourceHandler doesn't support HTTP HEAD requests
  + JETTY-677 GWT serialization issue
  + JETTY-681 JETTY-692 MultiPartFilter is slow for file uploads
