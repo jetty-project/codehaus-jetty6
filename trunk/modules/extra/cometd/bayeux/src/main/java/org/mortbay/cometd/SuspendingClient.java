@@ -63,7 +63,6 @@ public class SuspendingClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void setPollRequest(ServletRequest request)
     {
-        Timeout.Task task=null;
         
         if (request==null)
         {
@@ -75,11 +74,8 @@ public class SuspendingClient extends ClientImpl
                         _pollRequest.resume(); 
                 }
                 _pollRequest=null;
-                task=_timeout;
+                _bayeux.startTimeout(_timeout,getTimeout());
             }
-
-            if (task!=null)
-                _bayeux.startTimeout(task,getTimeout());
         }
         else
         {
@@ -91,11 +87,8 @@ public class SuspendingClient extends ClientImpl
                         _pollRequest.resume(); 
                 }
                 _pollRequest=request;
-                task=_timeout;
+                _bayeux.cancelTimeout(_timeout);
             }
-
-            if (task!=null)
-                _bayeux.cancelTimeout(task);
         }
     }
     
@@ -108,20 +101,15 @@ public class SuspendingClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void resume()
     {
-        Timeout.Task task=null;
         synchronized (this)
         {
             if (_pollRequest!=null)
             {
                 _pollRequest.getServletResponse().disable();
                 _pollRequest.resume();
-                task=_timeout;
             }
             _pollRequest=null;
         }
-        
-        if (task!=null)
-            _bayeux.startTimeout(task,getTimeout());
     }
 
     /* ------------------------------------------------------------ */
@@ -133,17 +121,15 @@ public class SuspendingClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void access()
     {
-        Timeout.Task task=null;
         synchronized(this)
         {
             // distribute access time in cluster
             _accessed=_bayeux.getNow();
-            if (_timeout!=null && _timeout.isScheduled())
-                task=_timeout;
+            if (_timeout.isScheduled())
+            {
+                _timeout.reschedule();
+            }
         }
-        
-        if (task!=null)
-            _bayeux.startTimeout(task,getTimeout());
     }
 
 

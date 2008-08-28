@@ -55,6 +55,14 @@ public class NIOBuffer extends AbstractBuffer
         _buf.limit(_buf.capacity());
     }
     
+    public NIOBuffer(ByteBuffer buffer,boolean immutable)
+    {
+        super(immutable?IMMUTABLE:READWRITE,NON_VOLATILE);
+        _buf = buffer;
+        setGetIndex(buffer.position());
+        setPutIndex(buffer.limit());
+    }
+    
     /**
      * @param file
      */
@@ -195,18 +203,12 @@ public class NIOBuffer extends AbstractBuffer
             _buf.position(0);
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
     public ByteBuffer getByteBuffer()
     {
         return _buf;
     }
-    
-    
-    public void setByteBuffer(ByteBuffer buf)
-    {
-        this._buf = buf;
-    }
-
 
     /* ------------------------------------------------------------ */
     public int readFrom(InputStream in, int max) throws IOException

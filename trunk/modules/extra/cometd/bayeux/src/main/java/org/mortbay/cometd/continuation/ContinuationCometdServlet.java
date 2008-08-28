@@ -15,18 +15,21 @@
 package org.mortbay.cometd.continuation;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Queue;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.cometd.Bayeux;
 import org.cometd.Extension;
 import org.cometd.Message;
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.cometd.AbstractCometdServlet;
+import org.mortbay.cometd.AbstractTransport;
 import org.mortbay.cometd.ClientImpl;
+import org.mortbay.cometd.JSONTransport;
 import org.mortbay.cometd.MessageImpl;
 import org.mortbay.cometd.Transport;
 import org.mortbay.util.ArrayQueue;
@@ -183,7 +186,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
         // Send any messages.
         if (client!=null) 
         { 
-            Message message = null; 
+            
             synchronized(client)
             {
                 ArrayQueue<Message> messages= (ArrayQueue)client.getQueue();
@@ -192,15 +195,68 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                 boolean flushed=false;
                 try
                 {
-                    for (int i=0;i<size;i++)
+                    if (size==1)
                     {
-                        message=messages.getUnsafe(i);
-                        transport.send(message); 
-                    }
+                        MessageImpl message = (MessageImpl)messages.peek();
+                        
+                        ByteBuffer buffer = message.getBuffer();
+                        if (message.getRefs()>=_refsThreshold && transport instanceof JSONTransport)
+                        {
+                            if (buffer==null)
+                            {
+                                // create a new buffer
+                                AbstractTransport trans = (AbstractTransport)transport;
+                                MessageImpl connectResponse = new MessageImpl();
+                                connectResponse.put(Bayeux.SUCCESSFUL_FIELD,Boolean.TRUE);
+                                connectResponse.put(Bayeux.CHANNEL_FIELD,Bayeux.META_CONNECT);
+                                
+                                byte[] contentBytes = ("["+connectResponse.getJSON()+","+message.getJSON()+"]").getBytes();
+                                int contentLength = contentBytes.length;
 
-                    transport.complete();
-                    response.flushBuffer();
-                    flushed=true;
+                                String headerString = "HTTP/1.1 200 OK\r\n"+
+                                        "Content-Type: text/json; charset=utf-8\r\n" +
+                                        "Content-Length: " + contentLength + "\r\n" +
+                                        "\r\n";
+                                
+                                byte[] headerBytes = null;
+                                try 
+                                {
+                                    headerBytes = headerString.getBytes(request.getCharacterEncoding());
+                                }
+                                catch (UnsupportedEncodingException e)
+                                {
+                                    headerBytes = headerString.getBytes();
+                                }
+                                
+                                buffer = ByteBuffer.allocateDirect(headerBytes.length+contentLength);
+                                buffer.put(headerBytes);
+                                buffer.put(contentBytes);
+                                
+                                message.setBuffer(buffer);
+                            }
+                        }
+                        
+                        if (buffer != null)
+                        {
+                            request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
+                            ((MessageImpl)message).decRef();
+                            flushed=true;
+                        }
+                    }
+                    
+                    if (!flushed)
+                    {
+                        Message message = null;
+                        for (int i = 0;i<size;i++)
+                        {
+                            message=messages.getUnsafe(i);
+                            transport.send(message);
+                        }
+
+                        transport.complete();
+                        response.flushBuffer();
+                        flushed=true;
+                    }
                 }
                 finally
                 {
