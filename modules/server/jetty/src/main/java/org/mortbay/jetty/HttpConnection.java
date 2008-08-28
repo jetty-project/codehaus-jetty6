@@ -951,6 +951,12 @@ public class HttpConnection implements Connection
         }
 
         /* ------------------------------------------------------------ */
+        public void sendResponse(Buffer response) throws IOException
+        {
+            ((HttpGenerator)_generator).sendResponse(response);
+        }
+        
+        /* ------------------------------------------------------------ */
         public void sendContent(Object content) throws IOException
         {
             Resource resource=null;

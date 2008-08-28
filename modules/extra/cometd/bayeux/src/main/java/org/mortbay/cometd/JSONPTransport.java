@@ -91,7 +91,7 @@ public class JSONPTransport extends AbstractTransport
             _out.write("])*/\r\n");
         else
             _out.write("])\r\n");
-        _out.flush();
+        _out.close();
     }
 
     /* ------------------------------------------------------------ */

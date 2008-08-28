@@ -151,6 +151,28 @@ public class HttpGenerator extends AbstractGenerator
                 _content = null;
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * send complete response.
+     * 
+     * @param response
+     */
+    public void sendResponse(Buffer response) throws IOException
+    {
+        if (_noContent || _state!=STATE_HEADER || _content!=null && _content.length()>0 || _bufferChunked || _head )
+            throw new IllegalStateException();
+
+        _last = true;
+
+        _content = response;
+        _bypass = true;
+        _state = STATE_FLUSHING;
+
+        // TODO this is not exactly right, but should do.
+        _contentLength =_contentWritten = response.length();
+        
+    }
     
     /* ------------------------------------------------------------ */
     /**

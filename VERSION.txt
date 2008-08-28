@@ -10,6 +10,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-690 Updated XBean dependencies to XBean version 3.4.3 and Spring 2.0.5.
  + JETTY-696 ./jetty.sh restart not working
  + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
+ + JETTY-699 Optimized cometd sending of 1 message to many many clients
  + JETTY-700 unit test for unread request data
 
 jetty-7.0.0pre3 - 6 August 2008
