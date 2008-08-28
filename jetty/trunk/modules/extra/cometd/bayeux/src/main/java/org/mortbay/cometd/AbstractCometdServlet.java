@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -90,6 +89,10 @@ import org.mortbay.util.ajax.JSON;
  * <dt>directDeliver</dt>
  * <dd>true if published messages are delivered directly to subscribers (default). If false, a message copy is created with only supported fields (default true).</dd>
  * 
+ * <dt>refsThreshold</dt>
+ * <dd>The number of message refs at which the a single message response will be 
+ * cached instead of being generated for every client delivered to. Done to optimize 
+ * a single message being sent to multiple clients.</dd>
  * </dl>
  * 
  * @author gregw
@@ -108,6 +111,8 @@ public abstract class AbstractCometdServlet extends GenericServlet
     public final static String BROWSER_ID="BAYEUX_BROWSER";
     
     protected AbstractBayeux _bayeux;
+    public final static int __DEFAULT_REFS_THRESHOLD = 1;
+    protected int _refsThreshold;
 
     public AbstractBayeux getBayeux()
     {
@@ -206,6 +211,11 @@ public abstract class AbstractCometdServlet extends GenericServlet
                 
                 _bayeux.generateAdvice();
             }
+            
+            _refsThreshold = __DEFAULT_REFS_THRESHOLD;
+            String refsThreshold=getInitParameter("refsThreshold");
+            if (refsThreshold!=null)
+                _refsThreshold=Integer.parseInt(refsThreshold);
         }
 
         getServletContext().setAttribute(Bayeux.DOJOX_COMETD_BAYEUX,_bayeux);

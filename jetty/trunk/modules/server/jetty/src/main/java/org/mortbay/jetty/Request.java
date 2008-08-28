@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,8 +46,10 @@ import javax.servlet.http.HttpSession;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
@@ -1084,6 +1087,9 @@ public class Request extends Suspendable implements HttpServletRequest
      * Set a request attribute.
      * if the attribute name is "org.mortbay.jetty.Request.queryEncoding" then
      * the value is also passed in a call to {@link #setQueryEncoding}.
+     *  
+     * if the attribute name is "org.mortbay.jetty.ResponseBuffer", then
+     * the response buffer is flushed with @{link #flushResponseBuffer}  
      * 
      * @see javax.servlet.ServletRequest#setAttribute(java.lang.String, java.lang.Object)
      */
@@ -1093,7 +1099,22 @@ public class Request extends Suspendable implements HttpServletRequest
         
         if ("org.mortbay.jetty.Request.queryEncoding".equals(name))
             setQueryEncoding(value==null?null:value.toString());
-        
+        else if("org.mortbay.jetty.ResponseBuffer".equals(name))
+        {
+            try 
+            {
+                ByteBuffer byteBuffer=(ByteBuffer)value;
+                NIOBuffer buffer = new NIOBuffer(byteBuffer,true);
+                buffer.setGetIndex(byteBuffer.position());
+                buffer.setPutIndex(byteBuffer.limit());
+                ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
+            } 
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (_attributes==null)
             _attributes=new AttributesMap();
         _attributes.setAttribute(name, value);
@@ -1666,6 +1687,16 @@ public class Request extends Suspendable implements HttpServletRequest
     {
         _queryEncoding=queryEncoding;
         _queryString=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param byteBuffer Content to flush directly to the 
+     * {@link org.mortbay.io.EndPoint}
+     */
+    private void flushResxponseBuffer(ByteBuffer byteBuffer)
+    {
+
     }
 
     /* ------------------------------------------------------------ */

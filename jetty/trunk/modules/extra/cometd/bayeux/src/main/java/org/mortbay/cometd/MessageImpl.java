@@ -14,6 +14,7 @@
 
 package org.mortbay.cometd;
 
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,6 +37,8 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     Object _data;
     Message _associated;
     AtomicInteger _refs=new AtomicInteger();
+    
+    private ByteBuffer _buffer;
 
     /* ------------------------------------------------------------ */
     public MessageImpl()
@@ -128,6 +131,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     public void clear()
     {
         _json=null;
+        _buffer=null;
         _id=null;
         _channel=null;
         _clientId=null;
@@ -160,6 +164,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     public Object put(String key, Object value)
     {
         _json=null;
+        _buffer=null;
         if (Bayeux.CHANNEL_FIELD.equals(key))
             _channel=(String)value;
         else if (Bayeux.ID_FIELD.equals(key))
@@ -179,6 +184,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     public void putAll(Map<? extends String, ? extends Object> m)
     {
         _json=null;
+        _buffer=null;
         super.putAll(m);
         _channel=(String)get(Bayeux.CHANNEL_FIELD);
         Object id=get(Bayeux.ID_FIELD);
@@ -194,6 +200,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     public Object remove(Object key)
     {
         _json=null;
+        _buffer=null;
         if (Bayeux.CHANNEL_FIELD.equals(key))
             _channel=null;
         else if (Bayeux.ID_FIELD.equals(key))
@@ -241,6 +248,21 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
                 ((MessageImpl)_associated).incRef();
         }
     }
+        
+    /* ------------------------------------------------------------ */
+    /**
+     * @param buffer A cached buffer containing HTTP response headers 
+     * and message content, to be reused when sending one message
+     * to multiple clients 
+     */
+    public void setBuffer(ByteBuffer buffer)
+    {
+        _buffer = buffer;
+    }
     
-
-}
+    /* ------------------------------------------------------------ */
+    public ByteBuffer getBuffer()
+    {
+        return _buffer;
+    }
+ }

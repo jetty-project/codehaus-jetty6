@@ -49,8 +49,8 @@
       <param-value>true</param-value> 
     </init-param>
     <init-param>
-      <param-name>asyncDeliver</param-name>
-      <param-value>false</param-value>
+      <param-name>refsThreshold</param-name>
+      <param-value>10</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>

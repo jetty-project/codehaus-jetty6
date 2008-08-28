@@ -114,6 +114,7 @@ public class JSONTransport extends AbstractTransport
             _out.write(_start);
         }
         _out.write(_end);
+        _out.close();
         _responses=0;
     }
 
