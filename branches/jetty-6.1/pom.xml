@@ -257,20 +257,45 @@
     <profile>
       <id>generate-site</id>
       <build>
-        <plugins>
-          <plugin>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>process</goal>
+              </goals>
+              <configuration>
+                <resourceBundles>
+                  <resourceBundle>org.mortbay.jetty:jetty-build-resources:1.0.1</resourceBundle>
+                </resourceBundles>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
               <configuration>
                 <excludePackageNames>org.apache.*:ebay.*:javax.*:com.sun.*:com.google.*:dojox.*:com.acme.*</excludePackageNames>
                 <aggregate>true</aggregate>
                 <debug>false</debug>
-                <stylesheetfile>${basedir}/project-website/project-site/src/resources/javadoc.css</stylesheetfile>
+                <stylesheetfile>${project.build.directory}/maven-shared-archive-resources/org/mortbay/jetty/build/resources/javadoc.css</stylesheetfile>
                 <links>
                   <link>http://java.sun.com/javaee/5/docs/api</link>
                   <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
                 </links>
             </configuration>
+            <executions>
+              <execution>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>javadoc</goal>
+                </goals>
+              </execution>
+            </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
