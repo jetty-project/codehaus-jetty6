@@ -158,6 +158,16 @@ public class ResourceCollection extends Resource
     /* ------------------------------------------------------------ */
     /**
      * 
+     * @param csvResources Comma separated values
+     */
+    public void setResourcesAsCSV(String csvResources)
+    {
+        setResources(csvResources);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * 
      * @return the resource array
      */
     public Resource[] getResources()
