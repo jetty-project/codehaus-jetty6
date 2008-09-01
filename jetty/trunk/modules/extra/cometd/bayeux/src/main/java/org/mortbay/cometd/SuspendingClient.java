@@ -125,7 +125,7 @@ public class SuspendingClient extends ClientImpl
         {
             // distribute access time in cluster
             _accessed=_bayeux.getNow();
-            if (_timeout.isScheduled())
+            if (_timeout!=null && _timeout.isScheduled())
             {
                 _timeout.reschedule();
             }
@@ -145,18 +145,13 @@ public class SuspendingClient extends ClientImpl
      */
     public void remove(boolean wasTimeout) 
     {
-        Timeout.Task task=null;
         synchronized(this)
         {
-            if (!wasTimeout)
-                task=_timeout;
+            if (!wasTimeout && _timeout!=null)
+                _bayeux.cancelTimeout(_timeout);
             _timeout=null;
             super.remove(wasTimeout);
-        }
-        
-        if (task!=null)
-            _bayeux.cancelTimeout(task);
-        
+        }   
     }
 
 }
