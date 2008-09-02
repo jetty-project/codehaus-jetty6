@@ -1104,10 +1104,13 @@ public class Request extends Suspendable implements HttpServletRequest
             try 
             {
                 ByteBuffer byteBuffer=(ByteBuffer)value;
-                NIOBuffer buffer = new NIOBuffer(byteBuffer,true);
-                buffer.setGetIndex(byteBuffer.position());
-                buffer.setPutIndex(byteBuffer.limit());
-                ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
+                synchronized (byteBuffer)
+                {
+                    NIOBuffer buffer = new NIOBuffer(byteBuffer,true);
+                    buffer.setGetIndex(byteBuffer.position());
+                    buffer.setPutIndex(byteBuffer.limit());
+                    ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
+                }
             } 
             catch (IOException e)
             {

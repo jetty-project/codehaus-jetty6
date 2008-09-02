@@ -149,17 +149,19 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
                 {
                     if (!client.hasMessages() && initial && received<=1)
                     {
-                        // save state and suspend
+                        // suspend and save state 
+                        request.suspend(timeout);
                         client.setPollRequest(request);
                         request.setAttribute(CLIENT_ATTR,client);
                         request.setAttribute(TRANSPORT_ATTR,transport);
-                        request.suspend(timeout);
                         return;
                     }
                     
                     if (initial)
                         client.access();
                 }
+                
+                transport.setPollReply(null);
 
                 for (Extension e:_bayeux.getExtensions())
                     pollReply=e.sendMeta(pollReply);     
@@ -184,29 +186,25 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
                 {
                     if (pollReply!=null)
                     {
-                        if (size==1 && transport instanceof JSONTransport)
+                        // Can we bypass response generation?
+                        if (_refsThreshold>0 && size==1 && transport instanceof JSONTransport)
                         {
                             MessageImpl message = (MessageImpl)messages.peek();
 
+                            // Is there a response already prepared?
                             ByteBuffer buffer = message.getBuffer();
                             if (buffer != null )
                             {
-                                synchronized (buffer)
-                                {
-                                    request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
-                                    ((MessageImpl)message).decRef();
-                                    flushed=true;
-                                }
+                                request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
+                                ((MessageImpl)message).decRef();
+                                flushed=true;
                             }
                             else if (message.getRefs()>=_refsThreshold)
                             {
-                                // create a new buffer
-                                AbstractTransport trans = (AbstractTransport)transport;
-                                MessageImpl connectResponse = new MessageImpl();
-                                connectResponse.put(Bayeux.SUCCESSFUL_FIELD,Boolean.TRUE);
-                                connectResponse.put(Bayeux.CHANNEL_FIELD,Bayeux.META_CONNECT);
-
-                                byte[] contentBytes = ("["+connectResponse.getJSON()+","+message.getJSON()+"]").getBytes(StringUtil.__UTF8);
+                                // prepare a response buffer
+                                byte[] contentBytes = ("[{\""+Bayeux.SUCCESSFUL_FIELD+"\":true,\""+
+                                        Bayeux.CHANNEL_FIELD+"\":\""+Bayeux.META_CONNECT+"\"},"+
+                                        message.getJSON()+"]").getBytes(StringUtil.__UTF8);
                                 int contentLength = contentBytes.length;
 
                                 String headerString = "HTTP/1.1 200 OK\r\n"+
@@ -220,15 +218,11 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
                                 buffer.put(headerBytes);
                                 buffer.put(contentBytes);
                                 buffer.flip();
-
-                                synchronized (buffer)
-                                {
-                                    message.setBuffer(buffer);
-
-                                    request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
-                                    ((MessageImpl)message).decRef();
-                                    flushed=true;
-                                }
+                                message.setBuffer(buffer);
+                                
+                                request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
+                                ((MessageImpl)message).decRef();
+                                flushed=true;
                             }
                             else
                                 transport.send(pollReply);            
@@ -261,6 +255,8 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
                 client.resume();
         }
         else
+        {
             transport.complete();
+        }
     }
 }
