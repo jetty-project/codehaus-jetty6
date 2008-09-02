@@ -556,6 +556,7 @@ public class Suspendable
             case __RESUMING:
             case __SUSPENDED:
             case __SUSPENDING:
+            case __UNSUSPENDING:
                 return false;
                 
             default:

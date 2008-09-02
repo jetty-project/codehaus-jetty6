@@ -47,6 +47,7 @@ public class ChannelImpl implements Channel
     private ChannelImpl _wild;
     private ChannelImpl _wildWild;
     private boolean _persistent;
+    private int _split;
 
     /* ------------------------------------------------------------ */
     ChannelImpl(String id,AbstractBayeux bayeux)
@@ -349,12 +350,17 @@ public class ChannelImpl implements Channel
                 synchronized (this)
                 {
                     subscribers=_subscribers;
+                    _split++;
                 }
-                for (ClientImpl client: subscribers)
+                if (subscribers.length>0)
                 {
-                    client.doDelivery(from,msg);
+                    // fair delivery 
+                    int split=_split%_subscribers.length;
+                    for (int i=split;i<subscribers.length;i++)
+                        subscribers[i].doDelivery(from,msg);
+                    for (int i=0;i<split;i++)
+                        subscribers[i].doDelivery(from,msg);
                 }
-                
                 break;
 
             case 1:

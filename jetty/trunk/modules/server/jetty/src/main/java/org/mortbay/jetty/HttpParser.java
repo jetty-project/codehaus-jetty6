@@ -19,6 +19,7 @@ import java.io.IOException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;

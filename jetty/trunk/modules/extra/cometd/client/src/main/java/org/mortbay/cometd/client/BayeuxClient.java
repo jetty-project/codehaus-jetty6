@@ -495,7 +495,10 @@ public class BayeuxClient extends MessagePool implements Client
 
             if (getResponseStatus()==200)
             {
-                _responses=parse(getResponseContent());
+                String content = getResponseContent();
+                if (content==null || content.length()==0)
+                    throw new IllegalStateException();
+                _responses=parse(content);
             }
         }
 
