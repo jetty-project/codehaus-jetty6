@@ -530,9 +530,13 @@ public class HttpConnection implements Connection
                 }
 
                 if (_request.shouldHandleRequest())
+                {
                     _server.handle(this);
+                }
                 else
+                {
                     _request.setHandled(true);
+                }
             }
             catch (RetryRequest r)
             {

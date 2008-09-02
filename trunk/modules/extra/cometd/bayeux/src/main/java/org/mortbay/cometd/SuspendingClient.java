@@ -15,6 +15,8 @@
 package org.mortbay.cometd;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.cometd.ClientImpl;
 import org.mortbay.thread.Timeout;
@@ -105,7 +107,7 @@ public class SuspendingClient extends ClientImpl
         {
             if (_pollRequest!=null)
             {
-                _pollRequest.getServletResponse().disable();
+                ((HttpServletResponse)((HttpServletRequest)_pollRequest).getServletResponse()).addHeader("Debug","Resume");
                 _pollRequest.resume();
             }
             _pollRequest=null;
