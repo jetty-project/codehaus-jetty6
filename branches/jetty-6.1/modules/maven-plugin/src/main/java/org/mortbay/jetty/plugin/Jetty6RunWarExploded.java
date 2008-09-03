@@ -21,9 +21,7 @@ import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.mortbay.jetty.Connector;
 import org.mortbay.util.Scanner;
-import org.mortbay.jetty.security.UserRealm;
 
 /**
  * 
@@ -98,38 +96,8 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
             {
                 try
                 {
-                    getLog().info("Restarting webapp");
-                    getLog().debug("Stopping webapp ...");
-                    webAppConfig.stop();
-                    getLog().debug("Reconfiguring webapp ...");
-
-                    checkPomConfiguration();
-                    
-                    // check if we need to reconfigure the scanner,
-                    // which is if the pom changes
-                    if (changes.contains(getProject().getFile().getCanonicalPath()))
-                    {
-                        getLog().info("Reconfiguring scanner after change to pom.xml ...");
-                        ArrayList scanList = getScanList();
-                        scanList.clear();
-                        scanList.add(getProject().getFile());
-                        File webInfDir = new File(webApp,"WEB-INF");
-                        scanList.add(new File(webInfDir, "web.xml"));
-                        File jettyWebXmlFile = findJettyWebXmlFile(webInfDir);
-                        if (jettyWebXmlFile != null)
-                            scanList.add(jettyWebXmlFile);
-                        File jettyEnvXmlFile = new File(webInfDir, "jetty-env.xml");
-                        if (jettyEnvXmlFile.exists())
-                            scanList.add(jettyEnvXmlFile);
-                        scanList.add(new File(webInfDir, "classes"));
-                        scanList.add(new File(webInfDir, "lib"));
-                        setScanList(scanList);
-                        getScanner().setScanDirs(scanList);
-                    }
-
-                    getLog().debug("Restarting webapp ...");
-                    webAppConfig.start();
-                    getLog().info("Restart completed.");
+                    boolean reconfigure = changes.contains(getProject().getFile().getCanonicalPath());
+                    restartWebApp(reconfigure);
                 }
                 catch (Exception e)
                 {
@@ -140,7 +108,46 @@ public class Jetty6RunWarExploded extends AbstractJetty6Mojo
         setScannerListeners(listeners);
     }
 
+    
+    
+    
+    public void restartWebApp(boolean reconfigureScanner) throws Exception 
+    {
+        getLog().info("Restarting webapp");
+        getLog().debug("Stopping webapp ...");
+        webAppConfig.stop();
+        getLog().debug("Reconfiguring webapp ...");
 
+        checkPomConfiguration();
+
+        // check if we need to reconfigure the scanner,
+        // which is if the pom changes
+        if (reconfigureScanner)
+        {
+            getLog().info("Reconfiguring scanner after change to pom.xml ...");
+            ArrayList scanList = getScanList();
+            scanList.clear();
+            scanList.add(getProject().getFile());
+            File webInfDir = new File(webApp,"WEB-INF");
+            scanList.add(new File(webInfDir, "web.xml"));
+            File jettyWebXmlFile = findJettyWebXmlFile(webInfDir);
+            if (jettyWebXmlFile != null)
+                scanList.add(jettyWebXmlFile);
+            File jettyEnvXmlFile = new File(webInfDir, "jetty-env.xml");
+            if (jettyEnvXmlFile.exists())
+                scanList.add(jettyEnvXmlFile);
+            scanList.add(new File(webInfDir, "classes"));
+            scanList.add(new File(webInfDir, "lib"));
+            setScanList(scanList);
+            getScanner().setScanDirs(scanList);
+        }
+
+        getLog().debug("Restarting webapp ...");
+        webAppConfig.start();
+        getLog().info("Restart completed.");
+    }
+
+        
     /* (non-Javadoc)
      * @see org.mortbay.jetty.plugin.util.AbstractJettyMojo#finishConfigurationBeforeStart()
      */
