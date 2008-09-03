@@ -34,14 +34,19 @@ import org.mortbay.util.ajax.JSON;
 
 public class BayeuxLoadGenerator
 {
+    final static String __DOTS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-=+!@#$%^&*>";
+    
     SecureRandom _random= new SecureRandom();
     HttpClient http;
     InetSocketAddress address;
     ArrayList<BayeuxClient> clients=new ArrayList<BayeuxClient>();
+  
+    long _targetLatency;
     long _minLatency;
     long _maxLatency;
     long _totalLatency;
     long _got;
+    long _over;
     AtomicInteger _subscribed = new AtomicInteger();
     
     public BayeuxLoadGenerator() throws Exception
@@ -92,6 +97,7 @@ public class BayeuxLoadGenerator
         int publish=1000;
         int pause=100;
         int burst=10;
+        _targetLatency=1000;
         int maxLatency=5000;
 
         System.err.print("base[/chat/demo]: ");
@@ -112,6 +118,12 @@ public class BayeuxLoadGenerator
             t=""+rooms_per_client;
         rooms_per_client=Integer.parseInt(t);
         
+        
+        System.err.print("target Latency ["+_targetLatency+"]: ");
+        t = in.readLine().trim();
+        if (t.length()==0)
+            t=""+_targetLatency;
+        _targetLatency=Integer.parseInt(t);
         
         System.err.print("max Latency ["+maxLatency+"]: ");
         t = in.readLine().trim();
@@ -171,6 +183,8 @@ public class BayeuxLoadGenerator
                                     if (_minLatency==0 || latency<_minLatency)
                                         _minLatency=latency;
                                     _totalLatency+=latency;
+                                    if (latency>_targetLatency)
+                                        _over++;
                                 }
                             }
                         }
@@ -238,6 +252,7 @@ public class BayeuxLoadGenerator
                 _minLatency=0;
                 _maxLatency=0;
                 _totalLatency=0;
+                _over=0;
             }
 
 
@@ -300,7 +315,8 @@ public class BayeuxLoadGenerator
                             break trial;
                         }
                         
-                        char dot=(char)('0'+(int)(latency/100));
+                        int l=(int)(latency/100);
+                        char dot=l<__DOTS.length()?__DOTS.charAt(l):'~';
                         System.err.print(dot);
                         if (i%1000==0)
                             System.err.println();
@@ -338,7 +354,9 @@ public class BayeuxLoadGenerator
             
             long end=System.currentTimeMillis();
 
-            System.err.println("Got "+_got+" at "+(_got*1000/(end-start))+"/s, latency min/ave/max ="+_minLatency+"/"+(_totalLatency/_got)+"/"+_maxLatency+"ms");
+            System.err.println("Got "+_got+" at "+(_got*1000/(end-start))+
+                    "/s, latency min/ave/max ="+_minLatency+"/"+(_totalLatency/_got)+"/"+_maxLatency+"ms, "+
+                    _over+" over "+_targetLatency+"ms");
         }
 
     }
