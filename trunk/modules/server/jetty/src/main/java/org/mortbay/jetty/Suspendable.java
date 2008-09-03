@@ -314,13 +314,10 @@ public class Suspendable
                     return true;
 
                 case __SUSPENDED:
-                    throw new IllegalStateException(this.getStatusString());
-
                 case __UNSUSPENDING:
+                default:
                     throw new IllegalStateException(this.getStatusString());
 
-                default:
-                    throw new IllegalStateException(""+_state);
             }
 
         }
@@ -329,6 +326,7 @@ public class Suspendable
     /* ------------------------------------------------------------ */
     public void resume()
     {
+        boolean dispatch=false;
         synchronized (this)
         {
             switch(_state)
@@ -337,36 +335,35 @@ public class Suspendable
                     _resumed=true;
                     return;
                     
-                case __IDLE:
-                    return;
-                    
                 case __SUSPENDING:
                     _resumed=true;
                     _state=__RESUMING;
                     return;
-                    
+
+                case __IDLE:
                 case __RESUMING:
-                    _resumed=true;
-                    _state=__RESUMING;
-                    return;
-                    
                 case __COMPLETING:
                     return;
                     
                 case __SUSPENDED:
+                    dispatch=true;
                     _resumed=true;
                     _state=__UNSUSPENDING;
-                    cancelTimeout();
-                    scheduleDispatch();
-                    return;
+                    break;
                     
                 case __UNSUSPENDING:
                     _resumed=true;
                     return;
                     
                 default:
-                    throw new IllegalStateException(""+_state);
+                    throw new IllegalStateException(this.getStatusString());
             }
+        }
+        
+        if (dispatch)
+        {
+            cancelTimeout();
+            scheduleDispatch();
         }
     }
 
@@ -375,6 +372,7 @@ public class Suspendable
     protected void expire()
     {
         // just like resume, except don't set _resumed=true;
+        boolean dispatch=false;
         synchronized (this)
         {
             switch(_state)
@@ -388,30 +386,32 @@ public class Suspendable
                 case __SUSPENDING:
                     _timeout=true;
                     _state=__RESUMING;
+                    cancelTimeout();
                     return;
                     
                 case __RESUMING:
-                    _timeout=true;
-                    _state=__RESUMING;
                     return;
                     
                 case __COMPLETING:
-                    throw new IllegalStateException(this.getStatusString());
+                    return;
                     
                 case __SUSPENDED:
+                    dispatch=true;
                     _timeout=true;
                     _state=__UNSUSPENDING;
-                    cancelTimeout();
-                    scheduleDispatch();
-                    return;
+                    break;
                     
                 case __UNSUSPENDING:
                     _timeout=true;
                     return;
                     
                 default:
-                    throw new IllegalStateException(""+_state);
+                    throw new IllegalStateException(this.getStatusString());
             }
+        }
+        if (dispatch)
+        {
+            scheduleDispatch();
         }
     }
     
@@ -422,20 +422,22 @@ public class Suspendable
     public void complete() throws IOException
     {
         // just like resume, except don't set _resumed=true;
+        boolean dispatch=false;
         synchronized (this)
         {
             switch(_state)
             {
                 case __HANDLING:
-                    _state=__COMPLETING;
-                    break;
+                    throw new IllegalStateException(this.getStatusString());
                     
                 case __IDLE:
                     return;
                     
                 case __SUSPENDING:
-                case __RESUMING:
                     _state=__COMPLETING;
+                    break;
+                    
+                case __RESUMING:
                     break;
 
                 case __COMPLETING:
@@ -443,17 +445,21 @@ public class Suspendable
                     
                 case __SUSPENDED:
                     _state=__COMPLETING;
-                    cancelTimeout();
-                    scheduleDispatch();
-                    return;
+                    dispatch=true;
+                    break;
                     
                 case __UNSUSPENDING:
-                    _state=__COMPLETING;
                     return;
                     
                 default:
-                    throw new IllegalStateException(""+_state);
+                    throw new IllegalStateException(this.getStatusString());
             }
+        }
+        
+        if (dispatch)
+        {
+            cancelTimeout();
+            scheduleDispatch();
         }
     }
 
