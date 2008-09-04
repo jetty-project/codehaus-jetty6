@@ -350,11 +350,9 @@ public class BayeuxLoadGenerator
                 last=_got;
                 sleep+=100;
             }
-            System.err.println("Got:"+_got+" of "+(nclients/rooms*rooms_per_client*publish));
-            
             long end=System.currentTimeMillis();
 
-            System.err.println("Got "+_got+" at "+(_got*1000/(end-start))+
+            System.err.println("Got "+_got+" of "+(nclients/rooms*rooms_per_client*publish)+" at "+(_got*1000/(end-start))+
                     "/s, latency min/ave/max ="+_minLatency+"/"+(_totalLatency/_got)+"/"+_maxLatency+"ms, "+
                     _over+" over "+_targetLatency+"ms");
         }
