@@ -1,82 +1,40 @@
-//========================================================================
-//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
-//------------------------------------------------------------------------
-//Licensed under the Apache License, Version 2.0 (the "License");
-//you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
-//http://www.apache.org/licenses/LICENSE-2.0
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
-//========================================================================
-
 package org.mortbay.jetty.plus.naming;
 
 
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-
-import javax.naming.Binding;
-import javax.naming.LinkRef;
 import javax.naming.Name;
 import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
-
 import javax.naming.NamingException;
 
 import org.mortbay.log.Log;
-import org.mortbay.naming.NamingUtil;
 
 
 public class NamingEntryUtil
 {
  
-    /**
-     * Check to see if there is a mapping for a local resource name from
-     * web.xml. A mapping links up a name as referenced in web.xml
-     * with a name in the environment, represented as an 
-     * org.mortbay.jetty.plus.naming.Link object, stored in jndi.
-     * 
-     * @param localName
-     * @return
-     * @throws NamingException
-     */
-    public static String getMappedName (String localName)
-    throws NamingException
-    {
-        if (localName==null||"".equals(localName))
-            return null;
-        
-       NamingEntry ne = lookupNamingEntry(localName);
-       if (ne==null)
-           return null;
-       
-       if (ne instanceof Link)
-           return (String)((Link)ne).getObjectToBind();
-       
-       return null;
-    }
     
     /**
-     * Link a name in a webapps java:/comp/evn namespace to a pre-existing
+     * Link a name in a webapp's java:/comp/evn namespace to a pre-existing
      * resource. The pre-existing resource can be either in the webapp's
-     * namespace, or in the container's namespace. Webapp's namespace takes
-     * precedence over the global namespace (to allow for overriding).
+     * naming environment, or in the container's naming environment. Webapp's 
+     * environment takes precedence over the server's namespace.
      * 
      * @param asName the name to bind as
      * @param mappedName the name from the environment to link to asName
      * @param namingEntryType
      * @throws NamingException
      */
-    public static void bindToENC (String asName, String mappedName)
+    public static boolean bindToENC (Object scope, String asName, String mappedName)
     throws NamingException
     {  
         if (asName==null||asName.trim().equals(""))
@@ -85,30 +43,13 @@ public class NamingEntryUtil
         if (mappedName==null || "".equals(mappedName))
             mappedName=asName;
         
-        //locally scoped entries take precedence over globally scoped entries of the same name
-        NamingEntry entry = lookupNamingEntry (mappedName);
+        NamingEntry entry = lookupNamingEntry (scope, mappedName);
+        if (entry == null)
+            return false;
         
-        if (entry!=null)
-            entry.bindToENC(asName);
-        else
-        {
-            //No NamingEntry configured in environment, perhaps there is just an Object bound into this webapp's java:comp/env we can
-            //link to
-            try
-            {
-                InitialContext ic = new InitialContext();
-                Context envContext = (Context)ic.lookup("java:comp/env");
-                envContext.lookup(mappedName);
-
-                if (!mappedName.equals(asName))
-                    NamingUtil.bind(envContext, asName, new LinkRef("."+mappedName));   
-            }
-            catch (NamingException e)
-            {
-                throw new NameNotFoundException("No resource to bind matching name="+mappedName);
-            }
-        }
-    }
+        entry.bindToENC(asName);
+        return true;
+     }
 
     
     
@@ -124,88 +65,120 @@ public class NamingEntryUtil
      * @return
      * @throws NamingException
      */
-    public static NamingEntry lookupNamingEntry (String jndiName)
+    public static NamingEntry lookupNamingEntry (Object scope, String jndiName)
     throws NamingException
     {
-        //locally scoped entries take precedence over globally scoped entries of the same name
         NamingEntry entry = null;
-        InitialContext ic = new InitialContext();
         try
-        {
-            entry = (NamingEntry)lookupNamingEntry ((Context)ic.lookup("java:comp/env"), jndiName);
+        {         
+            Name scopeName = getNameForScope(scope);
+            InitialContext ic = new InitialContext();   
+            NameParser parser = ic.getNameParser("");
+            Name namingEntryName = makeNamingEntryName(parser, jndiName);  
+            scopeName.addAll(namingEntryName);           
+            entry =  (NamingEntry)ic.lookup(scopeName);
         }
-        catch (NameNotFoundException e)
+        catch (NameNotFoundException ee)
         {
-            try
-            {
-                entry = (NamingEntry)lookupNamingEntry (ic, jndiName);
-            }
-            catch (NameNotFoundException ee)
-            {
-            }
         }
 
         return entry;
     }
 
     
-
-  
-  
-    
-    /**
-     * Find a NamingEntry.
-     * 
-     * @param context the context to search
-     * @param clazz the type of the entry (ie subclass of NamingEntry)
-     * @param jndiName the name of the class instance
-     * @return
-     * @throws NamingException
-     */
-    public static Object lookupNamingEntry (Context context,  String jndiName)
-    throws NamingException
-    {
-        NameParser parser = context.getNameParser("");    
-        Name namingEntryName = NamingEntry.makeNamingEntryName(parser, jndiName);
-        
-        return context.lookup(namingEntryName.toString());
-    }
-    
-    
-    
     /** 
-     * Get all NameEntries of a certain type in either the local or global
-     * namespace.
+     * Get all NameEntries of a certain type in the given naming
+     * environment scope (server-wide names or context-specific names)
      * 
-     * @param scopeType local or global
+     * @param scope 
      * @param clazz the type of the entry
      * @return
      * @throws NamingException
      */
-    public static List lookupNamingEntries (int scopeType, Class clazz)
+    public static List lookupNamingEntries (Object scope, Class clazz)
     throws NamingException
-    {
-        ArrayList list = new ArrayList();
-        switch (scopeType)
+    { 
+        try
         {
-            case NamingEntry.SCOPE_CONTAINER:
-            {
-                lookupNamingEntries(list, new InitialContext(), EnvEntry.class);
-                break;
-            }
-            case NamingEntry.SCOPE_WEBAPP:
-            {
-                //WARNING: you can only look up local scope if you are indeed in the scope
-                InitialContext ic = new InitialContext();
-                lookupNamingEntries(list, (Context)ic.lookup("java:comp/env"), EnvEntry.class);
-                break;
-            }
+            Context scopeContext = getContextForScope(scope);
+            Context namingEntriesContext = (Context)scopeContext.lookup(NamingEntry.__contextName);
+            ArrayList list = new ArrayList();
+            lookupNamingEntries(list, namingEntriesContext, clazz);
+            return list;
         }
-        return list;
+        catch (NameNotFoundException e)
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
     
     
+    public static Name makeNamingEntryName (NameParser parser, NamingEntry namingEntry)
+    throws NamingException
+    {
+        return makeNamingEntryName(parser, (namingEntry==null?null:namingEntry.getJndiName()));
+    }
     
+    public static Name makeNamingEntryName (NameParser parser, String jndiName)
+    throws NamingException
+    {
+        if (jndiName==null)
+            return null;
+        
+        if (parser==null)
+        {
+            InitialContext ic = new InitialContext();
+            parser = ic.getNameParser("");
+        }
+        
+        Name name = parser.parse("");
+        name.add(NamingEntry.__contextName);
+        name.addAll(parser.parse(jndiName));
+        return name;
+    }
+    
+
+    public static Name getNameForScope (Object scope)
+    {
+        try
+        {
+            InitialContext ic = new InitialContext();
+            NameParser parser = ic.getNameParser("");
+            Name name = parser.parse("");
+            if (scope != null)
+            {
+                name.add(canonicalizeScope(scope));
+            }  
+            return name;
+        }
+        catch (NamingException e)
+        {
+            Log.warn(e);
+            return null;
+        }
+    }
+
+    public static Context getContextForScope(Object scope)
+    throws NamingException
+    {
+
+        InitialContext ic = new InitialContext();
+        NameParser parser = ic.getNameParser("");
+        Name name = parser.parse("");
+        if (scope != null)
+        {
+            name.add(canonicalizeScope(scope));
+        }  
+        return (Context)ic.lookup(name);
+    }
+    
+    public static Context getContextForNamingEntries (Object scope)
+    throws NamingException
+    {
+        Context scopeContext = getContextForScope(scope);
+        return (Context)scopeContext.lookup(NamingEntry.__contextName);
+    }
+
     /**
      * Build up a list of NamingEntry objects that are of a specific type.
      * 
@@ -238,4 +211,12 @@ public class NamingEntryUtil
         return list;
     }
 
+    private static String canonicalizeScope(Object scope)
+    {
+        if (scope==null)
+            return "";
+        String str = scope.toString();
+        str=str.replace('/', '_').replace(" ", "_");
+        return str;
+    }
 }

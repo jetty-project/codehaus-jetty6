@@ -38,71 +38,20 @@ import org.mortbay.naming.NamingUtil;
 public class EnvEntry extends NamingEntry
 {
     private boolean overrideWebXml;
-    
-    
-    /**
-     * Bind a name and value to java:comp/env, taking into account
-     * any overriding EnvEntrys in the environment, either local or global.
-     * 
-     * @param name the name from web.xml env-entry
-     * @param value the value from web.xml env-entry
-     * @throws NamingException
-     */
-    public static void bindToENC (String name, Object value)
-    throws NamingException
-    {       
-        if (name==null||name.trim().equals(""))
-            throw new NamingException("No name for EnvEntry");
+  
 
-        //Is there an EnvEntry with the same name? If so, check its overrideWebXml setting. If true,
-        //it's value should be used instead of the one supplied in web.xml - as the name matches, then in
-        //fact the value is already bound, so there's nothing to do . If false, use the value
-        //from web.xml. In the case where the EnvEntry has been scoped only to the webapp (ie it was
-        //in jetty-env.xml).
-        EnvEntry envEntry = (EnvEntry)NamingEntryUtil.lookupNamingEntry(name);
-        if (envEntry!=null && envEntry.isOverrideWebXml())
-            envEntry.bindToENC(name);
-        else
-        {
-            //No EnvEntry, or it wasnt set to override, so just bind the value from web.xml
-            InitialContext ic = new InitialContext();
-            Context envCtx = (Context)ic.lookup("java:comp/env");
-            NamingUtil.bind(envCtx, name, value);
-        }     
-    }
-    
-    public static List lookupGlobalEnvEntries ()
+    public EnvEntry (Object scope, String jndiName, Object objToBind, boolean overrideWebXml)
     throws NamingException
     {
-        ArrayList list = new ArrayList();
-        lookupEnvEntries(list, new InitialContext());
-        return list;
+        super (scope, jndiName, objToBind);
+        this.overrideWebXml = overrideWebXml;
     }
     
-    private static List lookupEnvEntries (List list, Context context)
+    public EnvEntry (Object scope, String jndiName, Object objToBind)
     throws NamingException
     {
-        try
-        {
-            NamingEnumeration nenum = context.listBindings("");
-            while (nenum.hasMoreElements())
-            {
-                Binding binding = (Binding)nenum.next();
-                if (binding.getObject() instanceof Context)
-                    lookupEnvEntries (list, (Context)binding.getObject());
-                else if (EnvEntry.class.isInstance(binding.getObject()))
-                  list.add(binding.getObject());
-            }
-        }
-        catch (NameNotFoundException e)
-        {
-            Log.debug("No EnvEntries in context="+context);
-        }
-
-        return list;
+        this (scope, jndiName, objToBind, false);
     }
-
-    
     
     public EnvEntry (String jndiName, Object objToBind)
     throws NamingException

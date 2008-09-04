@@ -132,7 +132,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
                     }
                 });
         
-        AnnotationProcessor processor = new AnnotationProcessor(finder, _runAsCollection, _injections, _callbacks, 
+        AnnotationProcessor processor = new AnnotationProcessor(getWebAppContext(), finder, _runAsCollection, _injections, _callbacks, 
                 LazyList.getList(_servlets), LazyList.getList(_filters), LazyList.getList(_listeners), 
                 LazyList.getList(_servletMappings), LazyList.getList(_filterMappings));
         processor.process();
