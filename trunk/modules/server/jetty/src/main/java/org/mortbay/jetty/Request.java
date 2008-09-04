@@ -46,7 +46,6 @@ import javax.servlet.http.HttpSession;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
-import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.io.nio.NIOBuffer;
@@ -1107,8 +1106,6 @@ public class Request extends Suspendable implements HttpServletRequest
                 synchronized (byteBuffer)
                 {
                     NIOBuffer buffer = new NIOBuffer(byteBuffer,true);
-                    buffer.setGetIndex(byteBuffer.position());
-                    buffer.setPutIndex(byteBuffer.limit());
                     ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
                 }
             } 
@@ -1690,16 +1687,6 @@ public class Request extends Suspendable implements HttpServletRequest
     {
         _queryEncoding=queryEncoding;
         _queryString=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param byteBuffer Content to flush directly to the 
-     * {@link org.mortbay.io.EndPoint}
-     */
-    private void flushResxponseBuffer(ByteBuffer byteBuffer)
-    {
-
     }
 
     /* ------------------------------------------------------------ */
