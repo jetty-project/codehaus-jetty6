@@ -65,8 +65,6 @@ public class ContinuationClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void setContinuation(Continuation continuation)
     {
-        Timeout.Task task=null;
-        
         if (continuation==null)
         {
             synchronized (this)
@@ -77,11 +75,8 @@ public class ContinuationClient extends ClientImpl
                         _continuation.resume(); 
                 }
                 _continuation=null;
-                task=_timeout;
+                _bayeux.startTimeout(_timeout,getTimeout());
             }
-
-            if (task!=null)
-                _bayeux.startTimeout(task,getTimeout());
         }
         else
         {
@@ -93,11 +88,8 @@ public class ContinuationClient extends ClientImpl
                         _continuation.resume(); 
                 }
                 _continuation=continuation;
-                task=_timeout;
+                _bayeux.cancelTimeout(_timeout);
             }
-
-            if (task!=null)
-                _bayeux.cancelTimeout(task);
         }
     }
     
@@ -111,19 +103,14 @@ public class ContinuationClient extends ClientImpl
     @Override
 	public void resume()
     {
-        Timeout.Task task=null;
         synchronized (this)
         {
             if (_continuation!=null)
             {
                 _continuation.resume();
-                task=_timeout;
             }
             _continuation=null;
-        }
-        
-        if (task!=null)
-            _bayeux.startTimeout(task,getTimeout());
+        }        
     }
 
     /* ------------------------------------------------------------ */
@@ -136,17 +123,15 @@ public class ContinuationClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void access()
     {
-        Timeout.Task task=null;
         synchronized(this)
         {
             // distribute access time in cluster
             _accessed=_bayeux.getNow();
             if (_timeout!=null && _timeout.isScheduled())
-                task=_timeout;
+            {
+                _timeout.reschedule();
+            }
         }
-        
-        if (task!=null)
-            _bayeux.startTimeout(task,getTimeout());
     }
 
 
@@ -163,18 +148,13 @@ public class ContinuationClient extends ClientImpl
     @Override
     public void remove(boolean wasTimeout) 
     {
-        Timeout.Task task=null;
         synchronized(this)
         {
-            if (!wasTimeout)
-                task=_timeout;
+            if (!wasTimeout && _timeout!=null)
+                _bayeux.cancelTimeout(_timeout);
             _timeout=null;
             super.remove(wasTimeout);
-        }
-        
-        if (task!=null)
-            _bayeux.cancelTimeout(task);
-        
+        }        
     }
 
 }
