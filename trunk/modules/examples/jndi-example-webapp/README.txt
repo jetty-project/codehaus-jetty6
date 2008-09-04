@@ -1,41 +1,53 @@
-After Building
+Deploying
 --------------
-After you have built the example, you will need to edit a couple
-of files to uncomment the appropriate  configuration for the
-transaction manager you are using.
+Jetty does not ship with a native transaction manager, but 
+can plugin a variety of solutions. This demo has been tested
+with both JOTM (http://jotm.objectweb.org) or Atomikos
+(http://www.atomikos.com).
 
-+ edit contexts/test-jndi.xml and uncomment one of the transaction
-  manager setups.
+You will need to download the relevant jars for your chosen
+transaction manager, and install them into $JETTY-HOME/lib/ext.
+See the jetty wiki pages for JOTM(http://docs.codehaus.org/display/JETTY/JOTM)
+and Atomikos (http://docs.codehaus.org/display/JETTY/Atomikos)
+for more info.
 
-+ edit contexts/test-jndi.d/WEB-INF/jetty-env.xml and uncomment
-  one of the transaction manager setups.
+The example uses the Derby database, so also download the
+derby.jar and derbytools.jar file from the Derby site
+(http://db.apache.org/derby) and put them in $JETTY-HOME/lib/ext.
+
+Copy or move the test-jndi.xml file to $JETTY-HOME/contexts.
+Copy or move the test-jndi.d directory to $JETTY-HOME/contexts.
+
+Now edit $JETTY-HOME/contexts/test-jndi.xml and uncomment one of the 
+transaction manager setups.
+
+Edit $JETTY-HOME/contexts/test-jndi.d/WEB-INF/jetty-env.xml and uncomment
+one of the transaction manager setups.
 
 
 Running the Demo
 ----------------
-You will need to copy a derby.jar to the jetty lib/ directory, as well
-as copy all the necessary jars for the flavour of transaction manager
-you are using. There are instructions for some of the popular 
-transaction managers on the wiki at:
-
-http://docs.codehaus.org/display/JETTY/Jetty+Documentation
-
 You run the demo like so:
    
-   java -DOPTIONS=plus -jar start.jar 
+   java -DOPTIONS=plus,ext,default -jar start.jar 
 
 
 Adding Support for a Different Transaction Manager
 --------------------------------------------------
 
-1. Edit the src/etc/templates/filter.properties file and add
-   a new set of token and replacement strings following the
+1. Edit the filter.properties file in 
+   $JETTY-HOME/modules/examples/jndi-example-webapp/src/etc/templates
+   and add a new set of token and replacement strings following the
    pattern established for ATOMIKOS and JOTM.
 
-2. Edit the src/etc/templates/jetty-env.xml file and add
-   configuration for new transaction manager following the
+2. Edit the jetty-env.xml file in
+   $JETTY-HOME/modules/examples/jndi-example-webapp/src/etc/templates
+   and add configuration for new transaction manager following the
    pattern established for the other transaction managers.
 
-3. Edit the src/etc/templates/jetty-test-jndi.xml file and
-   add configuration for the new transaction manager following
+3. Edit jetty-test-jndi.xml file in
+   $JETTY-HOME/modules/examples/jndi-example-webapp/src/etc/templates
+   and add configuration for the new transaction manager following
    the pattern established for the other transaction managers.
+
+4. Rebuild $JETTY-HOME/modules/examples/jndi-example-webapp (mvn clean install).
