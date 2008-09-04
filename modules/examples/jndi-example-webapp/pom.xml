@@ -28,6 +28,7 @@
                   <fileset dir="../../../contexts-available/test-jndi.d/" includes="**/**" />
                 </delete>
                 <delete failonerror="false" file="../../../contexts-available/test-jndi.xml" />
+                <delete failonerror="false" file="../../../contexts-available/README-test-jndi.txt" />
               </tasks>
             </configuration>
           </execution>
@@ -58,6 +59,7 @@
               <tasks>
                 <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../../contexts-available/test-jndi.d/" />
                 <copy file="target/config/test-jndi.xml" todir="../../../contexts-available" overwrite="true" />
+                <copy file="README.txt" tofile="../../../contexts-available/README-test-jndi.txt" overwrite="true" />
               </tasks>
             </configuration>
           </execution>

@@ -57,6 +57,13 @@ There is also a unix start script in bin/jetty.sh that can be used
 in /etc/init.d
 
 
+OTHER DEMOS
+===========
+
+There are more demo webapps available in the $JETTY-HOME/contexts-available
+directory. See the README files in that directory for instructions.
+
+
 JETTY OPTIONS
 =============
 Unlike Jetty-6, the start.jar of jetty-7 does not automatically
@@ -73,6 +80,7 @@ Standard options include:
    ssl          (default)
    plus
    annotations
+   ext
    wadi
    grizzly
    jmx
@@ -128,7 +136,7 @@ RUNNING WITH JETTY PLUS
 The server can be run as JettyPlus (JNDI, JAAS etc.) with the 
 command:
 
-   java -DOPTIONS=plus -jar start.jar etc/jetty.xml etc/jetty-plus.xml
+   java -DOPTIONS=plus,ext -jar start.jar etc/jetty.xml etc/jetty-plus.xml
    
 This command adds the plus configuration file after the server configuration file,
 although you will first need to follow the instructions inside the etc/jetty-plus.xml

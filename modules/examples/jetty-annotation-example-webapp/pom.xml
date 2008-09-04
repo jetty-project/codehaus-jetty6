@@ -28,6 +28,7 @@
                   <fileset dir="../../../contexts-available/">
                     <include name="test-annotations.d/**" />
                     <include name="test-annotations.xml" />
+                    <include name="README-test-annotations.txt" />
                   </fileset>
                 </delete>
               </tasks>
@@ -60,6 +61,7 @@
               <tasks>
                 <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../../contexts-available/test-annotations.d/" />
                 <copy file="target/config/annotations-context.xml" tofile="../../../contexts-available/test-annotations.xml" overwrite="true" />
+                <copy file="README.txt" tofile="../../../contexts-available/README-test-annotations.txt" overwrite="true"/>
               </tasks>
             </configuration>
           </execution>
