@@ -24,6 +24,7 @@ import javax.naming.NameNotFoundException;
 
 import junit.framework.TestCase;
 
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plus.annotation.Injection;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallback;
@@ -36,6 +37,7 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.jetty.webapp.WebAppContext;
 
 public class ServletAnnotationTest extends TestCase
 { 
@@ -50,6 +52,10 @@ public class ServletAnnotationTest extends TestCase
     
     public void testAnnotations() throws Exception
     {
+        Server server = new Server();
+        WebAppContext wac = new WebAppContext();
+        wac.setServer(server);
+        
         InitialContext ic = new InitialContext();
         Context comp = (Context)ic.lookup("java:comp");
         Context env = null;
@@ -94,7 +100,7 @@ public class ServletAnnotationTest extends TestCase
         InjectionCollection injections = new InjectionCollection();
         LifeCycleCallbackCollection callbacks = new LifeCycleCallbackCollection();
         
-        AnnotationProcessor processor = new AnnotationProcessor (finder, runAs, injections, callbacks, 
+        AnnotationProcessor processor = new AnnotationProcessor (wac, finder, runAs, injections, callbacks, 
                 servlets, filters, listeners, servletMappings, filterMappings);
         processor.process();
         
