@@ -352,9 +352,9 @@ public class BayeuxLoadGenerator
             }
             long end=System.currentTimeMillis();
 
-            System.err.println("Sent "+publish+"x"+size+"b in bursts of "+burst+" to "+nclients+" clients in "+rooms+" rooms. Got "+_got+" of "+(nclients/rooms*rooms_per_client*publish)+" at "+(_got*1000/(end-start))+
+            System.err.println("Sent "+publish+"x"+size+"b in bursts of "+burst+"@"+pause+"ms to "+nclients+" clients in "+rooms+" rooms. Got "+_got+" of "+(nclients/rooms*rooms_per_client*publish)+" at "+(_got*1000/(end-start))+
                     "/s, latency min/ave/max ="+_minLatency+"/"+(_totalLatency/_got)+"/"+_maxLatency+"ms, "+
-                    ((_over*100+49)/_got)+"%>"+_targetLatency+"ms");
+                    ((_over*100)/_got)+"%>"+_targetLatency+"ms");
         }
 
     }
