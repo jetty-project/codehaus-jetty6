@@ -28,6 +28,8 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.annotation.Resources;
 import javax.annotation.security.RunAs;
+import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.annotation.InitParam;
@@ -52,6 +54,7 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
 import org.mortbay.util.LazyList;
@@ -76,13 +79,15 @@ public class AnnotationProcessor
     List _servletMappings;
     List _filterMappings;
     Map _pojoInstances = new HashMap();
+    WebAppContext _webApp;
     
     private static Class[] __envEntryTypes = 
         new Class[] {String.class, Character.class, Integer.class, Boolean.class, Double.class, Byte.class, Short.class, Long.class, Float.class};
    
-    public AnnotationProcessor(AnnotationFinder finder, RunAsCollection runAs, InjectionCollection injections, LifeCycleCallbackCollection callbacks,
+    public AnnotationProcessor(WebAppContext webApp, AnnotationFinder finder, RunAsCollection runAs, InjectionCollection injections, LifeCycleCallbackCollection callbacks,
             List servlets, List filters, List listeners, List servletMappings, List filterMappings)
     {
+        _webApp=webApp;
         _finder=finder;
         _runAs=runAs;
         _injections=injections;
@@ -333,7 +338,9 @@ public class AnnotationProcessor
     }
     
     
-
+    /**
+     * Process @Resources annotation on classes
+     */
     public void processResourcesAnnotations ()
     throws Exception
     {
@@ -351,7 +358,6 @@ public class AnnotationProcessor
 
             for (int j=0;j<resArray.length;j++)
             {
-
                 String name = resArray[j].name();
                 String mappedName = resArray[j].mappedName();
                 Resource.AuthenticationType auth = resArray[j].authenticationType();
@@ -360,12 +366,18 @@ public class AnnotationProcessor
 
                 if (name==null || name.trim().equals(""))
                     throw new IllegalStateException ("Class level Resource annotations must contain a name (Common Annotations Spec Section 2.3)");
-                //TODO don't ignore the shareable, auth etc etc
+                try
+                {
+                    //TODO don't ignore the shareable, auth etc etc
 
-                //make it optional to use the mappedName to represent the JNDI name of the resource in
-                //the runtime environment. If present the mappedName would represent the JNDI name set
-                //for a Resource entry in jetty.xml or jetty-env.xml.
-                org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name, mappedName);
+                       if (!org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp, name, mappedName))
+                           if (!org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName))
+                               throw new IllegalStateException("No resource bound at "+(mappedName==null?name:mappedName));
+                }
+                catch (NamingException e)
+                {
+                    throw new IllegalStateException(e);
+                }
             }
         }
     }
@@ -379,7 +391,11 @@ public class AnnotationProcessor
         processFieldResourceAnnotations();
     }
     
-    
+    /**
+     *  Class level Resource annotations declare a name in the
+     *  environment that will be looked up at runtime. They do
+     *  not specify an injection.
+     */
     public void processClassResourceAnnotations ()
     throws Exception
     {
@@ -388,24 +404,39 @@ public class AnnotationProcessor
         {
             //Handle Resource annotation - add namespace entries
             Resource resource = (Resource)clazz.getAnnotation(Resource.class);
-            if (resource == null)
-                continue;
-
-            String name = resource.name();
-            String mappedName = resource.mappedName();
-            Resource.AuthenticationType auth = resource.authenticationType();
-            Class type = resource.type();
-            boolean shareable = resource.shareable();
-
-            if (name==null || name.trim().equals(""))
-                throw new IllegalStateException ("Class level Resource annotations must contain a name (Common Annotations Spec Section 2.3)");
-
-            //TODO don't ignore the shareable, auth etc etc
-            org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name,mappedName);
+            if (resource != null)
+            {
+               String name = resource.name();
+               String mappedName = resource.mappedName();
+               Resource.AuthenticationType auth = resource.authenticationType();
+               Class type = resource.type();
+               boolean shareable = resource.shareable();
+               
+               if (name==null || name.trim().equals(""))
+                   throw new IllegalStateException ("Class level Resource annotations must contain a name (Common Annotations Spec Section 2.3)");
+               
+               try
+               {
+                   //TODO don't ignore the shareable, auth etc etc
+                   if (!org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp, name,mappedName))
+                       if (!org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp.getServer(), name,mappedName))
+                           throw new IllegalStateException("No resource at "+(mappedName==null?name:mappedName));
+               }
+               catch (NamingException e)
+               {
+                   throw new IllegalStateException(e);
+               }
+            }
         }
     }
     
-
+    /**
+     * Process a Resource annotation on the Methods.
+     * 
+     * This will generate a JNDI entry, and an Injection to be
+     * processed when an instance of the class is created.
+     * @param injections
+     */
     public void processMethodResourceAnnotations ()
     throws Exception
     {
@@ -473,16 +504,54 @@ public class AnnotationProcessor
             {
                 try
                 {
-                    org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name, mappedName);
+                    //try binding name to environment
+                    //try the webapp's environment first
+                    boolean bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp, name, mappedName);
+                    
+                    //try the server's environment
+                    if (!bound)
+                        bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName);
+                    
+                    //try the jvm's environment
+                    if (!bound)
+                        bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(null, name, mappedName);
+                    
+                    //TODO if it is an env-entry from web.xml it can be injected, in which case there will be no
+                    //NamingEntry, just a value bound in java:comp/env
+                    if (!bound)
+                    {
+                        try
+                        {
+                            InitialContext ic = new InitialContext();
+                            String nameInEnvironment = (mappedName!=null?mappedName:name);
+                            ic.lookup("java:comp/env/"+nameInEnvironment);                               
+                            bound = true;
+                        }
+                        catch (NameNotFoundException e)
+                        {
+                            bound = false;
+                        }
+                    }
+                    
+                    if (bound)
+                    {
+                        Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
+                        //   Make the Injection for it
+                        Injection injection = new Injection();
+                        injection.setTargetClass(m.getDeclaringClass());
+                        injection.setJndiName(name);
+                        injection.setMappingName(mappedName);
+                        injection.setTarget(m);
+                        _injections.add(injection);
+                    } 
+                    else if (!isEnvEntryType(type))
+                    {
 
-                    Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
-                    //   Make the Injection for it
-                    Injection injection = new Injection();
-                    injection.setTargetClass(m.getDeclaringClass());
-                    injection.setJndiName(name);
-                    injection.setMappingName(mappedName);
-                    injection.setTarget(m);
-                    _injections.add(injection);
+                        //if this is an env-entry type resource and there is no value bound for it, it isn't
+                        //an error, it just means that perhaps the code will use a default value instead
+                        // JavaEE Spec. sec 5.4.1.3   
+                        throw new IllegalStateException("No resource at "+(mappedName==null?name:mappedName));
+                    }
                 }
                 catch (NamingException e)
                 {  
@@ -505,7 +574,13 @@ public class AnnotationProcessor
         }
     }
 
-
+    /**
+     * Process @Resource annotation for a Field. These will both set up a
+     * JNDI entry and generate an Injection. Or they can be the equivalent
+     * of env-entries with default values
+     * 
+     * @param injections
+     */
     public void processFieldResourceAnnotations ()
     throws Exception
     {
@@ -551,16 +626,46 @@ public class AnnotationProcessor
             {
                 try
                 {
+                    boolean bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp, name, mappedName);
+                    if (!bound)
+                        bound = org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(_webApp.getServer(), name, mappedName);
+                    if (!bound)
+                        bound =  org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(null, name, mappedName); 
+                    if (!bound)
+                    {
+                        //see if there is an env-entry value been bound from web.xml
+                        try
+                        {
+                            InitialContext ic = new InitialContext();
+                            String nameInEnvironment = (mappedName!=null?mappedName:name);
+                            ic.lookup("java:comp/env/"+nameInEnvironment);                               
+                            bound = true;
+                        }
+                        catch (NameNotFoundException e)
+                        {
+                            bound = false;
+                        }
+                    }
                     //Check there is a JNDI entry for this annotation 
-                    org.mortbay.jetty.plus.naming.NamingEntryUtil.bindToENC(name, mappedName);
-                    Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
-                    //   Make the Injection for it if the binding succeeded
-                    Injection injection = new Injection();
-                    injection.setTargetClass(f.getDeclaringClass());
-                    injection.setJndiName(name);
-                    injection.setMappingName(mappedName);
-                    injection.setTarget(f);
-                    _injections.add(injection); 
+                    if (bound)
+                    { 
+                        Log.debug("Bound "+(mappedName==null?name:mappedName) + " as "+ name);
+                        //   Make the Injection for it if the binding succeeded
+                        Injection injection = new Injection();
+                        injection.setTargetClass(f.getDeclaringClass());
+                        injection.setJndiName(name);
+                        injection.setMappingName(mappedName);
+                        injection.setTarget(f);
+                        _injections.add(injection); 
+                    }  
+                    else if (!isEnvEntryType(type))
+                    {
+                        //if this is an env-entry type resource and there is no value bound for it, it isn't
+                        //an error, it just means that perhaps the code will use a default value instead
+                        // JavaEE Spec. sec 5.4.1.3
+
+                        throw new IllegalStateException("No resource at "+(mappedName==null?name:mappedName));
+                    }
                 }
                 catch (NamingException e)
                 {
