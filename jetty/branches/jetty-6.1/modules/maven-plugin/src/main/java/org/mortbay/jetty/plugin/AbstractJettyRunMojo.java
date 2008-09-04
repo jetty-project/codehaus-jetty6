@@ -366,10 +366,14 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     {
        super.configureWebApplication();
         setClassPathFiles(setUpClassPath());
-        webAppConfig.setWebXmlFile(getWebXmlFile());
-        webAppConfig.setJettyEnvXmlFile(getJettyEnvXmlFile());
-        webAppConfig.setClassPathFiles(getClassPathFiles());
-        webAppConfig.setWar(getWebAppSourceDirectory().getCanonicalPath());
+        if(webAppConfig.getWebXmlFile()==null)
+            webAppConfig.setWebXmlFile(getWebXmlFile());
+        if(webAppConfig.getJettyEnvXmlFile()==null)
+            webAppConfig.setJettyEnvXmlFile(getJettyEnvXmlFile());
+        if(webAppConfig.getClassPathFiles()==null)
+            webAppConfig.setClassPathFiles(getClassPathFiles());
+        if(webAppConfig.getWar()==null)
+            webAppConfig.setWar(getWebAppSourceDirectory().getCanonicalPath());
         getLog().info("Webapp directory = " + getWebAppSourceDirectory().getCanonicalPath());
 
         webAppConfig.configure();
