@@ -15,7 +15,6 @@
 package org.mortbay.cometd.continuation;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 import javax.servlet.ServletException;
@@ -27,12 +26,12 @@ import org.cometd.Extension;
 import org.cometd.Message;
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.cometd.AbstractCometdServlet;
-import org.mortbay.cometd.AbstractTransport;
 import org.mortbay.cometd.ClientImpl;
 import org.mortbay.cometd.JSONTransport;
 import org.mortbay.cometd.MessageImpl;
 import org.mortbay.cometd.Transport;
 import org.mortbay.util.ArrayQueue;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
@@ -60,7 +59,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
         ContinuationClient client=(clientObj instanceof ClientImpl)?(ContinuationClient)clientObj:null;
         Transport transport=null;
         boolean connect=false;
-        int num_msgs=-1;
+        int received=-1;
         
         // Have we seen this request before
         if (client!=null)
@@ -72,7 +71,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
         else
         {
             Message[] messages = getMessages(request);
-            num_msgs=messages.length;
+            received=messages.length;
 
             /* check jsonp parameter */
             String jsonpParam=request.getParameter("jsonp");
@@ -140,10 +139,11 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
             }
         }
 
+        Message pollReply=null;
         // Do we need to wait for messages
         if (transport!=null)
         {
-            Message pollReply=transport.getPollReply();
+            pollReply=transport.getPollReply();
             if (pollReply!=null)
             {
                 if (_bayeux.isLogDebug())
@@ -153,13 +153,11 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                     timeout=_bayeux.getTimeout();
 
                 Continuation continuation=ContinuationSupport.getContinuation(request,client);
-                if (!continuation.isPending())
-                    client.access();
 
                 // Get messages or wait
                 synchronized (client)
                 {
-                    if (!client.hasMessages() && !continuation.isPending()&& num_msgs<=1)
+                    if (!client.hasMessages() && !continuation.isPending()&& received<=1)
                     {
                         // save state and suspend
                         ((ContinuationClient)client).setContinuation(continuation);
@@ -167,6 +165,10 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                         request.setAttribute(TRANSPORT_ATTR,transport);
                         continuation.suspend(timeout);
                     }
+                    
+                    if (!continuation.isPending())
+                        client.access();
+
                     continuation.reset();
                 }
 
@@ -175,7 +177,6 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
 
                 for (Extension e:_bayeux.getExtensions())
                     pollReply=e.sendMeta(pollReply);
-                transport.send(pollReply);                 
             }
             else if (client!=null)
             {
@@ -195,53 +196,57 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                 boolean flushed=false;
                 try
                 {
-                    if (size==1)
+                    if (pollReply!=null)
                     {
-                        MessageImpl message = (MessageImpl)messages.peek();
-                        
-                        ByteBuffer buffer = message.getBuffer();
-                        if (message.getRefs()>=_refsThreshold && transport instanceof JSONTransport)
+                        // can we bypass response generation?
+                        if (_refsThreshold>0 && size==1 && transport instanceof JSONTransport)
                         {
-                            if (buffer==null)
-                            {
-                                // create a new buffer
-                                AbstractTransport trans = (AbstractTransport)transport;
-                                MessageImpl connectResponse = new MessageImpl();
-                                connectResponse.put(Bayeux.SUCCESSFUL_FIELD,Boolean.TRUE);
-                                connectResponse.put(Bayeux.CHANNEL_FIELD,Bayeux.META_CONNECT);
-                                
-                                byte[] contentBytes = ("["+connectResponse.getJSON()+","+message.getJSON()+"]").getBytes();
+                            MessageImpl message = (MessageImpl)messages.peek();
+                            
+                            // is there a response already prepared
+                            ByteBuffer buffer = message.getBuffer();
+                            if (buffer!=null)
+                           {
+                                synchronized (buffer)
+                                {
+                                    request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
+                                    ((MessageImpl)message).decRef();
+                                    flushed=true;
+                                }
+                            }
+                            else if (message.getRefs()>=_refsThreshold)
+                            {                                
+                                byte[] contentBytes = ("[{\""+Bayeux.SUCCESSFUL_FIELD+"\":true,\""+
+                                        Bayeux.CHANNEL_FIELD+"\":\""+Bayeux.META_CONNECT+"\"},"+
+                                        message.getJSON()+"]").getBytes(StringUtil.__UTF8);
                                 int contentLength = contentBytes.length;
 
                                 String headerString = "HTTP/1.1 200 OK\r\n"+
-                                        "Content-Type: text/json; charset=utf-8\r\n" +
-                                        "Content-Length: " + contentLength + "\r\n" +
-                                        "\r\n";
+                                "Content-Type: text/json; charset=utf-8\r\n" +
+                                "Content-Length: " + contentLength + "\r\n" +
+                                "\r\n";
                                 
-                                byte[] headerBytes = null;
-                                try 
-                                {
-                                    headerBytes = headerString.getBytes(request.getCharacterEncoding());
-                                }
-                                catch (UnsupportedEncodingException e)
-                                {
-                                    headerBytes = headerString.getBytes();
-                                }
+                                byte[] headerBytes = headerString.getBytes(StringUtil.__UTF8);
                                 
                                 buffer = ByteBuffer.allocateDirect(headerBytes.length+contentLength);
                                 buffer.put(headerBytes);
                                 buffer.put(contentBytes);
-                                
-                                message.setBuffer(buffer);
+                                buffer.flip();
+
+                                synchronized (buffer) 
+                                {
+                                    message.setBuffer(buffer);
+                                    
+                                    request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
+                                    ((MessageImpl)message).decRef();
+                                    flushed=true;
+                                }
                             }
+                            else
+                                transport.send(pollReply);
                         }
-                        
-                        if (buffer != null)
-                        {
-                            request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
-                            ((MessageImpl)message).decRef();
-                            flushed=true;
-                        }
+                        else
+                            transport.send(pollReply);                        
                     }
                     
                     if (!flushed)
@@ -254,7 +259,6 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                         }
 
                         transport.complete();
-                        response.flushBuffer();
                         flushed=true;
                     }
                 }
@@ -269,7 +273,8 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
             	client.resume();
         }
         else
+        {
             transport.complete();
-            
+        }   
     }
 }
