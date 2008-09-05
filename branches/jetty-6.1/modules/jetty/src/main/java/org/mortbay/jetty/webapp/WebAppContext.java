@@ -53,6 +53,7 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
+import org.mortbay.util.UrlEncoded;
 
 /* ------------------------------------------------------------ */
 /** Web Application Context Handler.
@@ -1283,13 +1284,14 @@ public class WebAppContext extends Context
                 resource= Resource.newResource(_war);
             }
                 
-            String tmp = resource.getURL().toExternalForm();
+            String tmp = URIUtil.decodePath(resource.getURL().getPath());
             if (tmp.endsWith("/"))
                 tmp = tmp.substring(0, tmp.length()-1);
             if (tmp.endsWith("!"))
                 tmp = tmp.substring(0, tmp.length() -1);
             //get just the last part which is the filename
             int i = tmp.lastIndexOf("/");
+            
             canonicalName.append(tmp.substring(i+1, tmp.length()));
         }
         catch (Exception e)
@@ -1301,7 +1303,6 @@ public class WebAppContext extends Context
         canonicalName.append("_");
         String contextPath = getContextPath();
         contextPath=contextPath.replace('/','_');
-        contextPath=contextPath.replace('.','_');
         contextPath=contextPath.replace('\\','_');
         canonicalName.append(contextPath);
         
@@ -1314,6 +1315,15 @@ public class WebAppContext extends Context
         String hash = Integer.toString(canonicalName.toString().hashCode(),36);
         canonicalName.append("_");
         canonicalName.append(hash);
+        
+        // sanitize
+        for (int i=0;i<canonicalName.length();i++)
+        {
+        	char c=canonicalName.charAt(i);
+        	if (!Character.isJavaIdentifierPart(c))
+        		canonicalName.setCharAt(i,'.');
+        }
+  
         return canonicalName.toString();
     }
 }

@@ -15,6 +15,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-696 ./jetty.sh restart not working
  + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
  + JETTY-709 Jetty plugin's WebAppConfig configured properties gets overridden by AbstractJettyRunMojo even when already set
+ + JETTY-710 Worked around poor implementation of File.toURL()
 
 jetty-6.1.12rc1 1 August 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
