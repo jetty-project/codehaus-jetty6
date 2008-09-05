@@ -29,6 +29,7 @@ import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -204,7 +205,10 @@ public class WebAppClassLoader extends URLClassLoader
                     String fnlc=fn.getName().toLowerCase();
                     if (fnlc.endsWith(".jar") || fnlc.endsWith(".zip"))
                     {
-                        addClassPath(fn.toString());
+                        String jar=fn.toString();
+                        jar=StringUtil.replace(jar, ",", "%2C");
+                        jar=StringUtil.replace(jar, ";", "%3B");
+                        addClassPath(jar);
                     }
                 }
                 catch (Exception ex)
