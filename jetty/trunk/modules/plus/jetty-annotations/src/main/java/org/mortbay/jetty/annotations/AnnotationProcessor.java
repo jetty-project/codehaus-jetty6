@@ -268,6 +268,11 @@ public class AnnotationProcessor
     {
         for (Class clazz:_finder.getClassesForAnnotation(RunAs.class))
         {
+            if (!javax.servlet.Servlet.class.isAssignableFrom(clazz) && !(_pojoInstances.containsKey(clazz)))
+            {
+                Log.debug("Ignoring runAs notation on on-servlet class "+clazz.getName());
+                continue;
+            }
             RunAs runAs = (RunAs)clazz.getAnnotation(RunAs.class);
             if (runAs != null)
             {
@@ -297,7 +302,11 @@ public class AnnotationProcessor
         //      TODO: check that the same class does not have more than one
         for (Method m:_finder.getMethodsForAnnotation(PostConstruct.class))
         {
-
+            if (!isServletType(m.getDeclaringClass()))
+            {
+                Log.debug("Ignoring "+m.getName()+" as non-servlet type");
+                continue;
+            }
             if (m.getParameterTypes().length != 0)
                 throw new IllegalStateException(m+" has parameters");
             if (m.getReturnType() != Void.TYPE)
@@ -321,6 +330,11 @@ public class AnnotationProcessor
 
         for (Method m: _finder.getMethodsForAnnotation(PreDestroy.class))
         {
+            if (!isServletType(m.getDeclaringClass()))
+            {
+                Log.debug("Ignoring "+m.getName()+" as non-servlet type");
+                continue;
+            }
             if (m.getParameterTypes().length != 0)
                 throw new IllegalStateException(m+" has parameters");
             if (m.getReturnType() != Void.TYPE)
@@ -347,6 +361,11 @@ public class AnnotationProcessor
         List<Class<?>> classes = _finder.getClassesForAnnotation(Resources.class);
         for (Class<?> clazz:classes)
         {
+            if (!isServletType(clazz))
+            {
+                Log.debug("Ignoring @Resources annotation on on-servlet type class "+clazz.getName());
+                continue;
+            }
             //Handle Resources annotation - add namespace entries
             Resources resources = (Resources)clazz.getAnnotation(Resources.class);
             if (resources == null)
@@ -402,6 +421,11 @@ public class AnnotationProcessor
         List<Class<?>> classes = _finder.getClassesForAnnotation(Resource.class);
         for (Class<?> clazz:classes)
         {
+            if (!isServletType(clazz))
+            {
+                Log.debug("Ignoring @Resource annotation on on-servlet type class "+clazz.getName());
+                continue;
+            }
             //Handle Resource annotation - add namespace entries
             Resource resource = (Resource)clazz.getAnnotation(Resource.class);
             if (resource != null)
@@ -445,6 +469,11 @@ public class AnnotationProcessor
 
         for (Method m: methods)
         {
+            if (!isServletType(m.getDeclaringClass()))
+            {
+                Log.debug("Ignoring @Resource annotation on on-servlet type method "+m.getName());
+                continue;
+            }
             /*
              * Commons Annotations Spec 2.3
              * " The Resource annotation is used to declare a reference to a resource.
@@ -588,6 +617,11 @@ public class AnnotationProcessor
         List<Field> fields = _finder.getFieldsForAnnotation(Resource.class);
         for (Field f: fields)
         {
+            if (!isServletType(f.getDeclaringClass()))
+            {
+                Log.debug("Ignoring @Resource annotation on on-servlet type field "+f.getName());
+                continue;
+            }
             Resource resource = (Resource)f.getAnnotation(Resource.class);
             if (resource == null)
                 continue;
@@ -686,7 +720,41 @@ public class AnnotationProcessor
             }
         }
     }
+    
 
+    /**
+     * Check if the presented method belongs to a class that is one
+     * of the classes with which a servlet container should be concerned.
+     * @param m
+     * @return
+     */
+    private boolean isServletType (Class c)
+    {    
+        boolean isServlet = false;
+        if (javax.servlet.Servlet.class.isAssignableFrom(c) ||
+                javax.servlet.Filter.class.isAssignableFrom(c) || 
+                javax.servlet.ServletContextListener.class.isAssignableFrom(c) ||
+                javax.servlet.ServletContextAttributeListener.class.isAssignableFrom(c) ||
+                javax.servlet.ServletRequestListener.class.isAssignableFrom(c) ||
+                javax.servlet.ServletRequestAttributeListener.class.isAssignableFrom(c) ||
+                javax.servlet.http.HttpSessionListener.class.isAssignableFrom(c) ||
+                javax.servlet.http.HttpSessionAttributeListener.class.isAssignableFrom(c) || 
+                (_pojoInstances.get(c) != null))
+
+                isServlet=true;
+        
+        return isServlet;  
+    }
+    
+   
+    /**
+     * Get an already-created instance of a pojo, or create one
+     * otherwise.
+     * @param clazz
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
     private Object getPojoInstanceFor (Class clazz) 
     throws InstantiationException, IllegalAccessException
     {
