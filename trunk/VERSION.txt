@@ -9,6 +9,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-682 Added listeners and queue methods to cometd
  + JETTY-687 Issue with servlet-mapping in dynamic servlet invoker
  + JETTY-688 Cookie causes NumberFormatException
+ + JETTY-689 processing of non-servlet related annotations
  + JETTY-690 Updated XBean dependencies to XBean version 3.4.3 and Spring 2.0.5.
  + JETTY-696 ./jetty.sh restart not working
  + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
