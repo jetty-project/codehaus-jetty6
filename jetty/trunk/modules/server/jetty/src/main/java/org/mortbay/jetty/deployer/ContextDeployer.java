@@ -355,11 +355,11 @@ public class ContextDeployer extends AbstractLifeCycle
     {
         // The config file can call any method on WebAppContext to configure
         // the webapp being deployed.
-        File hotDeployXmlFile=new File(filename);
-        if (!hotDeployXmlFile.exists())
+        Resource resource = Resource.newResource(filename);
+        if (!resource.exists())
             return null;
 
-        XmlConfiguration xmlConfiguration=new XmlConfiguration(hotDeployXmlFile.toURL());
+        XmlConfiguration xmlConfiguration=new XmlConfiguration(resource.getURL());
         HashMap properties = new HashMap();
         properties.put("Server", _contexts.getServer());
         if (_configMgr!=null)
