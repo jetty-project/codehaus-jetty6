@@ -17,6 +17,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-700 unit test for unread request data
  + JETTY-708 allow 3 scopes for jndi resources: jvm, server or webapp
  + JETTY-709 Jetty plugin's WebAppConfig configured properties gets overridden by AbstractJettyRunMojo even when already set
+ + JETTY-710 Worked around poor implementation of File.toURL()
 
 jetty-7.0.0pre3 - 6 August 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
