@@ -54,14 +54,12 @@ public class NamingEntryUtil
     
     
  
-    
+
     /**
-     * Find a NamingEntry instance. 
+     * Find a NamingEntry in the given scope.
      * 
-     * First the webapp's naming space is searched, and then
-     * the container's.
-     * 
-     * @param jndiName name to lookup
+     * @param scope
+     * @param jndiName
      * @return
      * @throws NamingException
      */
@@ -83,6 +81,19 @@ public class NamingEntryUtil
         }
 
         return entry;
+    }
+    
+    
+    public static Object lookup (Object scope, String jndiName)
+    throws NamingException
+    {
+        Object o = null;
+                
+            Name scopeName = getNameForScope(scope);
+            InitialContext ic = new InitialContext();   
+            NameParser parser = ic.getNameParser("");          
+            scopeName.addAll(parser.parse(jndiName));           
+            return ic.lookup(scopeName);
     }
 
     
