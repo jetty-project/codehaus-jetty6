@@ -15,6 +15,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-688 Cookie causes NumberFormatException
  + JETTY-696 ./jetty.sh restart not working
  + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
+ + JETTY-699 Optimize cometd sending of 1 message to many many clients
  + JETTY-709 Jetty plugin's WebAppConfig configured properties gets overridden by AbstractJettyRunMojo even when already set
  + JETTY-710 Worked around poor implementation of File.toURL()
 
