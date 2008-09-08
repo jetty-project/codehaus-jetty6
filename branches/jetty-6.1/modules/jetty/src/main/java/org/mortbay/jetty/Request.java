@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,10 +34,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -45,6 +48,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.jetty.security.Authenticator;
@@ -1284,6 +1288,9 @@ public class Request implements HttpServletRequest
      * Set a request attribute.
      * if the attribute name is "org.mortbay.jetty.Request.queryEncoding" then
      * the value is also passed in a call to {@link #setQueryEncoding}.
+     *
+     * if the attribute name is "org.mortbay.jetty.ResponseBuffer", then
+     * the response buffer is flushed with @{link #flushResponseBuffer}  
      * 
      * @see javax.servlet.ServletRequest#setAttribute(java.lang.String, java.lang.Object)
      */
@@ -1293,7 +1300,24 @@ public class Request implements HttpServletRequest
         
         if ("org.mortbay.jetty.Request.queryEncoding".equals(name))
             setQueryEncoding(value==null?null:value.toString());
-        
+        else if("org.mortbay.jetty.ResponseBuffer".equals(name))
+        {
+            try 
+            {
+                ByteBuffer byteBuffer=(ByteBuffer)value;
+                synchronized (byteBuffer)
+                {
+                    NIOBuffer buffer = new NIOBuffer(byteBuffer,true);
+                    ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
+                }
+            } 
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
+
         if (_attributes==null)
             _attributes=new AttributesMap();
         _attributes.setAttribute(name, value);
@@ -1874,6 +1898,18 @@ public class Request implements HttpServletRequest
     public Map getRoleMap()
     {
         return _roleMap;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ServletContext getServletContext()
+    {
+        return _context;
+    }
+
+    /* ------------------------------------------------------------ */
+    public ServletResponse getServletResponse()
+    {
+        return _connection.getResponse();
     }
 }
 
