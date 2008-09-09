@@ -75,7 +75,8 @@ public class ContinuationClient extends ClientImpl
                         _continuation.resume(); 
                 }
                 _continuation=null;
-                _bayeux.startTimeout(_timeout,getTimeout());
+                if(_timeout!=null)
+                    _bayeux.startTimeout(_timeout,getTimeout());
             }
         }
         else
