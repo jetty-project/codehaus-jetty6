@@ -39,8 +39,10 @@ public class WebdavListener extends HttpEventListenerWrapper
 {
     private HttpDestination _destination;
     private HttpExchange _exchange;
-
+    private boolean _requestComplete;
+    private boolean _responseComplete; 
     private boolean _webdavEnabled;
+    private boolean _needIntercept;
 
     public WebdavListener(HttpDestination destination, HttpExchange ex)
     {
@@ -61,7 +63,9 @@ public class WebdavListener extends HttpEventListenerWrapper
     {
         if ( !_webdavEnabled )
         {
+            _needIntercept = false;
             super.onResponseStatus(version, status, reason);
+            return;
         }
         
         if (Log.isDebugEnabled())
@@ -73,19 +77,25 @@ public class WebdavListener extends HttpEventListenerWrapper
         {
             if ( _webdavEnabled )
             {
-                Log.debug("WebdavListener:Response Status: dav enabled, taking a stab at resolving put issue" );
-
-                setDelegating( false ); // stop delegating, we can try and fix this request
+                if (Log.isDebugEnabled())
+                    Log.debug("WebdavListener:Response Status: dav enabled, taking a stab at resolving put issue" );
+                setDelegatingResponses( false ); // stop delegating, we can try and fix this request
+                _needIntercept = true;
             }
             else
             {
-                Log.debug("WebdavListener:Response Status: Webdav Disabled" );
-                setDelegating( true ); // just make sure we delegate
+                if (Log.isDebugEnabled())
+                    Log.debug("WebdavListener:Response Status: Webdav Disabled" );
+                setDelegatingResponses( true ); // just make sure we delegate
+                setDelegatingRequests( true );
+                _needIntercept = false;
             }
         }
         else
         {
-            setDelegating( true );
+            _needIntercept = false;
+            setDelegatingResponses( true );
+            setDelegatingRequests( true );
         }
 
         super.onResponseStatus(version, status, reason);
@@ -93,38 +103,99 @@ public class WebdavListener extends HttpEventListenerWrapper
 
     public void onResponseComplete() throws IOException
     {
-
-        
-        if ( isDelegating() )
+        _responseComplete = true;
+        if (_needIntercept)
         {
-            super.onResponseComplete();
-        }
-        else
-        {
-            try
+            if ( _requestComplete && _responseComplete)
             {
-                // we have some work to do before retrying this
-                if ( resolveCollectionIssues() )
+                try
                 {
-                    setDelegating( true );
-                    _destination.resend(_exchange);
+                    // we have some work to do before retrying this
+                    if ( resolveCollectionIssues() )
+                    {
+                        setDelegatingRequests( true );
+                        setDelegatingResponses(true);
+                        _requestComplete = false;
+                        _responseComplete = false;
+                        _destination.resend(_exchange);
+                    }
+                    else
+                    {
+                        // admit defeat but retry because someone else might have 
+                        setDelegatingRequests( true );
+                        setDelegatingResponses(true);
+                        super.onResponseComplete();
+                    }
                 }
-                else
+                catch ( IOException ioe )
                 {
-                    // admit defeat but retry because someone else might have 
-                    setDelegating( true );
+                    Log.debug("WebdavListener:Complete:IOException: might not be dealing with dav server, delegate");
                     super.onResponseComplete();
                 }
             }
-            catch ( IOException ioe )
+            else
             {
-                Log.debug("WebdavListener:Complete:IOException: might not be dealing with dav server, delegate");
+                if (Log.isDebugEnabled())
+                    Log.debug("WebdavListener:Not ready, calling super");
                 super.onResponseComplete();
             }
         }
+        else
+        {
+            super.onResponseComplete();
+        }
     }
 
+    
+    
+    public void onRequestComplete () throws IOException
+    {
+        _requestComplete = true;
+        if (_needIntercept)
+        {
+            if ( _requestComplete && _responseComplete)
+            {
+                try
+                {
+                    // we have some work to do before retrying this
+                    if ( resolveCollectionIssues() )
+                    {
+                        setDelegatingRequests( true );
+                        setDelegatingResponses(true);
+                        _requestComplete = false;
+                        _responseComplete = false;
+                        _destination.resend(_exchange);
+                    }
+                    else
+                    {
+                        // admit defeat but retry because someone else might have 
+                        setDelegatingRequests( true );
+                        setDelegatingResponses(true);
+                        super.onRequestComplete();
+                    }
+                }
+                catch ( IOException ioe )
+                {
+                    Log.debug("WebdavListener:Complete:IOException: might not be dealing with dav server, delegate");
+                    super.onRequestComplete();
+                }
+            }
+            else
+            {
+                if (Log.isDebugEnabled())
+                    Log.debug("WebdavListener:Not ready, calling super");
+                super.onRequestComplete();
+            }
+        }
+        else
+        {
+            super.onRequestComplete();
+        } 
+    }
 
+   
+    
+    
     /**
      * walk through the steps to try and resolve missing parent collection issues via webdav
      *

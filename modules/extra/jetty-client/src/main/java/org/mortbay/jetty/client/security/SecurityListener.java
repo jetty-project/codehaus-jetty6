@@ -40,6 +40,9 @@ public class SecurityListener extends HttpEventListenerWrapper
 {
     private HttpDestination _destination;
     private HttpExchange _exchange;
+    private boolean _requestComplete;
+    private boolean _responseComplete;  
+    private boolean _needIntercept;
     
     private int _attempts = 0; // TODO remember to settle on winning solution
 
@@ -107,7 +110,7 @@ public class SecurityListener extends HttpEventListenerWrapper
         return authenticationDetails;
     }
 
-    @Override
+  
     public void onResponseStatus( Buffer version, int status, Buffer reason )
         throws IOException
     {
@@ -117,23 +120,27 @@ public class SecurityListener extends HttpEventListenerWrapper
         if ( status == HttpServletResponse.SC_UNAUTHORIZED && _attempts<_destination.getHttpClient().maxRetries()) 
         {
             // Let's absorb events until we have done some retries
-            setDelegating(false);
+            setDelegatingResponses(false);
+            _needIntercept = true;
         }
         else 
         {
-            setDelegating(true);
+            setDelegatingResponses(true);
+            setDelegatingRequests(true);
+            _needIntercept = false;
         }
         super.onResponseStatus(version,status,reason);
     }
 
 
-    @Override
     public void onResponseHeader( Buffer name, Buffer value )
         throws IOException
     {
         if (Log.isDebugEnabled())
             Log.debug( "SecurityListener:Header: " + name.toString() + " / " + value.toString() );
-        if (!isDelegating())
+        
+        
+        if (!isDelegatingResponses())
         {
             int header = HttpHeaders.CACHE.getOrdinal(name);
             switch (header)
@@ -176,20 +183,78 @@ public class SecurityListener extends HttpEventListenerWrapper
         super.onResponseHeader(name,value);
     }
     
-    @Override
-    public void onResponseComplete() throws IOException
+
+    public void onRequestComplete() throws IOException
     {
-        if (!isDelegating())
-            _destination.resend(_exchange);
+        _requestComplete = true;
+
+        if (_needIntercept)
+        {
+            if (_requestComplete && _responseComplete)
+            {
+               if (Log.isDebugEnabled())
+                   Log.debug("onRequestComplete, Both complete: Resending from onResponseComplete "+_exchange); 
+                _responseComplete = false;
+                _requestComplete = false;
+                setDelegatingRequests(true);
+                setDelegatingResponses(true);
+                _destination.resend(_exchange);  
+            } 
+            else
+            {
+                if (Log.isDebugEnabled())
+                    Log.debug("onRequestComplete, Response not yet complete onRequestComplete, calling super for "+_exchange);
+                super.onRequestComplete(); 
+            }
+        }
         else
-            super.onResponseComplete();
+        {
+            if (Log.isDebugEnabled())
+                Log.debug("onRequestComplete, delegating to super with Request complete="+_requestComplete+", response complete="+_responseComplete+" "+_exchange);
+            super.onRequestComplete();
+        }
     }
 
-    @Override
+
+    public void onResponseComplete() throws IOException
+    {   
+        _responseComplete = true;
+        if (_needIntercept)
+        {  
+            if (_requestComplete && _responseComplete)
+            {              
+                if (Log.isDebugEnabled())
+                    Log.debug("onResponseComplete, Both complete: Resending from onResponseComplete"+_exchange);
+                _responseComplete = false;
+                _requestComplete = false;
+                setDelegatingResponses(true);
+                setDelegatingRequests(true);
+                _destination.resend(_exchange); 
+
+            }
+            else
+            {
+               if (Log.isDebugEnabled())
+                   Log.debug("onResponseComplete, Request not yet complete from onResponseComplete,  calling super "+_exchange);
+                super.onResponseComplete(); 
+            }
+        }
+        else
+        {
+            if (Log.isDebugEnabled())
+                Log.debug("OnResponseComplete, delegating to super with Request complete="+_requestComplete+", response complete="+_responseComplete+" "+_exchange);
+            super.onResponseComplete();  
+        }
+    }
+
     public void onRetry()
     {
         _attempts++;
-        setDelegating(true);
+        setDelegatingRequests(true);
+        setDelegatingResponses(true);
+        _requestComplete=false;
+        _responseComplete=false;
+        _needIntercept=false;
         super.onRetry();
     }  
     
