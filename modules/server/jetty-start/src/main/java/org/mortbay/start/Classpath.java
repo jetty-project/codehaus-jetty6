@@ -177,13 +177,16 @@ public class Classpath {
                   default:
                       // let's be over conservative here!
                       if (Character.isJavaIdentifierPart((char)b))
-                          buf.append((char)b);
-                      else
                       {
-                          buf.append('%');
-                          buf.append(Integer.toHexString((0xf0&(int)b)>>4));
-                          buf.append(Integer.toHexString((0x0f&(int)b)));
+                          if(b>='a' && b<='z' || b>='A' && b<='Z' || b>='0' && b<='9')
+                          {
+                              buf.append((char)b);
+                              continue;
+                          }
                       }
+                      buf.append('%');
+                      buf.append(Integer.toHexString((0xf0&(int)b)>>4));
+                      buf.append(Integer.toHexString((0x0f&(int)b)));
                       continue;
                 }
             }
