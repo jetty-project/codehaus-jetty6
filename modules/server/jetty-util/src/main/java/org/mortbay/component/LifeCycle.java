@@ -14,6 +14,10 @@
 
 package org.mortbay.component;
 
+import java.util.EventListener;
+
+import org.mortbay.util.LazyList;
+
 /* ------------------------------------------------------------ */
 /**
  * The lifecycle interface for generic components.
@@ -90,4 +94,24 @@ public interface LifeCycle
      * @return true if the component has failed to start or has failed to stop.
      */
     public boolean isFailed();
+    
+    /* ------------------------------------------------------------ */
+    public void addLifeCycleListener(LifeCycle.Listener listener);
+
+    /* ------------------------------------------------------------ */
+    public void removeLifeCycleListener(LifeCycle.Listener listener);
+    
+
+    /* ------------------------------------------------------------ */
+    /** Listener.
+     * A listener for Lifecycle events.
+     */
+    public interface Listener extends EventListener
+    {
+        public void lifeCycleStarting(LifeCycle event);
+        public void lifeCycleStarted(LifeCycle event);
+        public void lifeCycleFailure(LifeCycle event,Throwable cause);
+        public void lifeCycleStopping(LifeCycle event);
+        public void lifeCycleStopped(LifeCycle event);
+    }
 }
