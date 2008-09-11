@@ -76,7 +76,8 @@ public class SuspendingClient extends ClientImpl
                         _pollRequest.resume(); 
                 }
                 _pollRequest=null;
-                _bayeux.startTimeout(_timeout,getTimeout());
+                if (_timeout!=null)
+                    _bayeux.startTimeout(_timeout,getTimeout());
             }
         }
         else
@@ -89,7 +90,8 @@ public class SuspendingClient extends ClientImpl
                         _pollRequest.resume(); 
                 }
                 _pollRequest=request;
-                _bayeux.cancelTimeout(_timeout);
+                if (_timeout!=null)
+                    _bayeux.cancelTimeout(_timeout);
             }
         }
     }
