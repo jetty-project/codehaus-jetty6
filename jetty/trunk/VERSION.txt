@@ -23,6 +23,29 @@ jetty-7.0-SNAPSHOT
  + JETTY-711 DataSourceUserRealm implementation
  + JETTY-712 HttpClient does not handle request complete after response complete
 
+jetty-6.1.12rc1 12 September 2008
+ + JETTY-282 Support manually-triggered reloading
+ + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to startup)
+ + JETTY-591 No server classes for jetty-web.xml
+ + JETTY-670 $JETTY_HOME/bin/jetty.sh not worked in Solaris, because of /usr/bin/which has no error-code
+ + JETTY-671 Configure DTD does not allow <Property> children
+ + JETTY-672 Utf8StringBuffer doesn't properly handle null characters (char with byte value 0)
+ + JETTY-676 ResourceHandler doesn't support HTTP HEAD requests
+ + JETTY-677 GWT serialization issue
+ + JETTY-680 Can't configure the ResourceCollection with maven
+ + JETTY-681 JETTY-692 MultiPartFilter is slow for file uploads
+ + JETTY-682 Added listeners and queue methods to cometd
+ + JETTY-683 ResourceCollection works for jsp files but does not work for static resources under DefaultServlet
+ + JETTY-687 Issue with servlet-mapping in dynamic servlet invoker
+ + JETTY-688 Cookie causes NumberFormatException
+ + JETTY-696 ./jetty.sh restart not working
+ + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
+ + JETTY-699 Optimize cometd sending of 1 message to many many clients
+ + JETTY-709 Jetty plugin's WebAppConfig configured properties gets overridden by AbstractJettyRunMojo even when already set
+ + JETTY-710 Worked around poor implementation of File.toURL()
+ + JETTY-712 HttpClient does not handle request complete after response complete
+
+
 jetty-7.0.0pre3 - 6 August 2008
  + Upgrade jsp 2.1 to SJSAS-9_1_02-B04-11_Apr_2008
  + JETTY-30  Externalize servlet-api to own project
