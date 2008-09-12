@@ -1,4 +1,6 @@
 jetty-6.1-SNAPSHOT
+
+jetty-6.1.12rc1 12 September 2008
  + JETTY-282 Support manually-triggered reloading
  + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to startup)
  + JETTY-591 No server classes for jetty-web.xml 
