@@ -5,20 +5,189 @@
 sed s/__JETTY_VERSION__/$1/g << "_EOF_" | patch -p0
 Index: pom.xml
 ===================================================================
---- pom.xml	(revision 2122)
+--- pom.xml	(revision 3630)
 +++ pom.xml	(working copy)
-@@ -4,7 +4,7 @@
+@@ -9,7 +9,7 @@
    <artifactId>project</artifactId>
    <packaging>pom</packaging>
    <name>Jetty Server Project</name>
 -  <version>6.1-SNAPSHOT</version>
 +  <version>__JETTY_VERSION__</version>
-   <url>http://jetty.mortbay.org</url>
-   <issueManagement>
-     <system>jira</system>
+   <url>http://jetty.mortbay.org</url>  
+   <licenses>
+     <license>
+Index: extras/jboss/pom.xml
+===================================================================
+--- extras/jboss/pom.xml	(revision 3630)
++++ extras/jboss/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/gwt/pom.xml
+===================================================================
+--- extras/gwt/pom.xml	(revision 3630)
++++ extras/gwt/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/threadpool/pom.xml
+===================================================================
+--- extras/threadpool/pom.xml	(revision 3630)
++++ extras/threadpool/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/spring/pom.xml
+===================================================================
+--- extras/spring/pom.xml	(revision 3630)
++++ extras/spring/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/win32service/pom.xml
+===================================================================
+--- extras/win32service/pom.xml	(revision 3630)
++++ extras/win32service/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/sslengine/pom.xml
+===================================================================
+--- extras/sslengine/pom.xml	(revision 3630)
++++ extras/sslengine/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/servlet-tester/pom.xml
+===================================================================
+--- extras/servlet-tester/pom.xml	(revision 3630)
++++ extras/servlet-tester/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/ajp/pom.xml
+===================================================================
+--- extras/ajp/pom.xml	(revision 3630)
++++ extras/ajp/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/setuid/modules/java/pom.xml
+===================================================================
+--- extras/setuid/modules/java/pom.xml	(revision 3630)
++++ extras/setuid/modules/java/pom.xml	(working copy)
+@@ -3,7 +3,7 @@
+     <parent>
+         <artifactId>jetty-setuid</artifactId>
+         <groupId>org.mortbay.jetty</groupId>
+-        <version>6.1-SNAPSHOT</version>
++        <version>__JETTY_VERSION__</version>
+         <relativePath>../../pom.xml</relativePath>
+     </parent>
+     <modelVersion>4.0.0</modelVersion>
+Index: extras/setuid/modules/native/pom.xml
+===================================================================
+--- extras/setuid/modules/native/pom.xml	(revision 3630)
++++ extras/setuid/modules/native/pom.xml	(working copy)
+@@ -5,7 +5,7 @@
+     <parent>
+         <artifactId>jetty-setuid</artifactId>
+         <groupId>org.mortbay.jetty</groupId>
+-        <version>6.1-SNAPSHOT</version>
++        <version>__JETTY_VERSION__</version>
+         <relativePath>../../pom.xml</relativePath>
+     </parent>
+     <modelVersion>4.0.0</modelVersion>
+Index: extras/setuid/pom.xml
+===================================================================
+--- extras/setuid/pom.xml	(revision 3630)
++++ extras/setuid/pom.xml	(working copy)
+@@ -3,7 +3,7 @@
+     <parent>
+         <artifactId>project</artifactId>
+         <groupId>org.mortbay.jetty</groupId>
+-        <version>6.1-SNAPSHOT</version>
++        <version>__JETTY_VERSION__</version>
+         <relativePath>../../pom.xml</relativePath>
+     </parent>
+     <modelVersion>4.0.0</modelVersion>
+Index: extras/xbean/pom.xml
+===================================================================
+--- extras/xbean/pom.xml	(revision 3630)
++++ extras/xbean/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: extras/client/pom.xml
+===================================================================
+--- extras/client/pom.xml	(revision 3630)
++++ extras/client/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.mortbay.jetty</groupId>
 Index: project-website/project-site/src/site/site.xml
 ===================================================================
---- project-website/project-site/src/site/site.xml	(revision 2122)
+--- project-website/project-site/src/site/site.xml	(revision 3630)
 +++ project-website/project-site/src/site/site.xml	(working copy)
 @@ -5,7 +5,7 @@
    <skin>
@@ -31,7 +200,7 @@ Index: project-website/project-site/src/site/site.xml
      <name>Jetty</name>
 Index: project-website/project-site/pom.xml
 ===================================================================
---- project-website/project-site/pom.xml	(revision 2122)
+--- project-website/project-site/pom.xml	(revision 3630)
 +++ project-website/project-site/pom.xml	(working copy)
 @@ -3,7 +3,7 @@
    <parent>
@@ -49,11 +218,11 @@ Index: project-website/project-site/pom.xml
 -  <version>6.1-SNAPSHOT</version>
 +  <version>__JETTY_VERSION__</version>
    <build>
-     <plugins>
+     <plugins>    
        <plugin>
 Index: project-website/project-skin/pom.xml
 ===================================================================
---- project-website/project-skin/pom.xml	(revision 2122)
+--- project-website/project-skin/pom.xml	(revision 3630)
 +++ project-website/project-skin/pom.xml	(working copy)
 @@ -7,7 +7,7 @@
    </parent>
@@ -66,7 +235,7 @@ Index: project-website/project-skin/pom.xml
  </project>
 Index: project-website/pom.xml
 ===================================================================
---- project-website/pom.xml	(revision 2122)
+--- project-website/pom.xml	(revision 3630)
 +++ project-website/pom.xml	(working copy)
 @@ -3,7 +3,7 @@
    <parent>
@@ -86,178 +255,9 @@ Index: project-website/pom.xml
    <modules>
      <module>project-skin</module>
      <module>project-site</module>
-Index: extras/jboss/pom.xml
-===================================================================
---- extras/jboss/pom.xml	(revision 2122)
-+++ extras/jboss/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/gwt/pom.xml
-===================================================================
---- extras/gwt/pom.xml	(revision 2122)
-+++ extras/gwt/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/threadpool/pom.xml
-===================================================================
---- extras/threadpool/pom.xml	(revision 2122)
-+++ extras/threadpool/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/spring/pom.xml
-===================================================================
---- extras/spring/pom.xml	(revision 2122)
-+++ extras/spring/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/win32service/pom.xml
-===================================================================
---- extras/win32service/pom.xml	(revision 2122)
-+++ extras/win32service/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/sslengine/pom.xml
-===================================================================
---- extras/sslengine/pom.xml	(revision 2122)
-+++ extras/sslengine/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/servlet-tester/pom.xml
-===================================================================
---- extras/servlet-tester/pom.xml	(revision 2122)
-+++ extras/servlet-tester/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/ajp/pom.xml
-===================================================================
---- extras/ajp/pom.xml	(revision 2122)
-+++ extras/ajp/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/setuid/modules/java/pom.xml
-===================================================================
---- extras/setuid/modules/java/pom.xml	(revision 2122)
-+++ extras/setuid/modules/java/pom.xml	(working copy)
-@@ -3,7 +3,7 @@
-     <parent>
-         <artifactId>jetty-setuid</artifactId>
-         <groupId>org.mortbay.jetty</groupId>
--        <version>6.1-SNAPSHOT</version>
-+        <version>__JETTY_VERSION__</version>
-         <relativePath>../../pom.xml</relativePath>
-     </parent>
-     <modelVersion>4.0.0</modelVersion>
-Index: extras/setuid/modules/native/pom.xml
-===================================================================
---- extras/setuid/modules/native/pom.xml	(revision 2122)
-+++ extras/setuid/modules/native/pom.xml	(working copy)
-@@ -5,7 +5,7 @@
-     <parent>
-         <artifactId>jetty-setuid</artifactId>
-         <groupId>org.mortbay.jetty</groupId>
--        <version>6.1-SNAPSHOT</version>
-+        <version>__JETTY_VERSION__</version>
-         <relativePath>../../pom.xml</relativePath>
-     </parent>
-     <modelVersion>4.0.0</modelVersion>
-Index: extras/setuid/pom.xml
-===================================================================
---- extras/setuid/pom.xml	(revision 2122)
-+++ extras/setuid/pom.xml	(working copy)
-@@ -3,7 +3,7 @@
-     <parent>
-         <artifactId>project</artifactId>
-         <groupId>org.mortbay.jetty</groupId>
--        <version>6.1-SNAPSHOT</version>
-+        <version>__JETTY_VERSION__</version>
-         <relativePath>../../pom.xml</relativePath>
-     </parent>
-     <modelVersion>4.0.0</modelVersion>
-Index: extras/xbean/pom.xml
-===================================================================
---- extras/xbean/pom.xml	(revision 2122)
-+++ extras/xbean/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: extras/client/pom.xml
-===================================================================
---- extras/client/pom.xml	(revision 2122)
-+++ extras/client/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>project</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-   <groupId>org.mortbay.jetty</groupId>
 Index: modules/plus/pom.xml
 ===================================================================
---- modules/plus/pom.xml	(revision 2122)
+--- modules/plus/pom.xml	(revision 3630)
 +++ modules/plus/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -270,7 +270,7 @@ Index: modules/plus/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/jsp-2.0/pom.xml
 ===================================================================
---- modules/jsp-2.0/pom.xml	(revision 2122)
+--- modules/jsp-2.0/pom.xml	(revision 3630)
 +++ modules/jsp-2.0/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -283,7 +283,7 @@ Index: modules/jsp-2.0/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/jsp-2.1/pom.xml
 ===================================================================
---- modules/jsp-2.1/pom.xml	(revision 2122)
+--- modules/jsp-2.1/pom.xml	(revision 3630)
 +++ modules/jsp-2.1/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -296,7 +296,7 @@ Index: modules/jsp-2.1/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/annotations/pom.xml
 ===================================================================
---- modules/annotations/pom.xml	(revision 2122)
+--- modules/annotations/pom.xml	(revision 3630)
 +++ modules/annotations/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -309,7 +309,7 @@ Index: modules/annotations/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/servlet-api-2.5/pom.xml
 ===================================================================
---- modules/servlet-api-2.5/pom.xml	(revision 2122)
+--- modules/servlet-api-2.5/pom.xml	(revision 3630)
 +++ modules/servlet-api-2.5/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -322,7 +322,7 @@ Index: modules/servlet-api-2.5/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/start/pom.xml
 ===================================================================
---- modules/start/pom.xml	(revision 2122)
+--- modules/start/pom.xml	(revision 3630)
 +++ modules/start/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -335,7 +335,7 @@ Index: modules/start/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/jetty/pom.xml
 ===================================================================
---- modules/jetty/pom.xml	(revision 2122)
+--- modules/jetty/pom.xml	(revision 3630)
 +++ modules/jetty/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -348,7 +348,7 @@ Index: modules/jetty/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/jspc-maven-plugin/pom.xml
 ===================================================================
---- modules/jspc-maven-plugin/pom.xml	(revision 2122)
+--- modules/jspc-maven-plugin/pom.xml	(revision 3630)
 +++ modules/jspc-maven-plugin/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -361,7 +361,7 @@ Index: modules/jspc-maven-plugin/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/jsp-api-2.0/pom.xml
 ===================================================================
---- modules/jsp-api-2.0/pom.xml	(revision 2122)
+--- modules/jsp-api-2.0/pom.xml	(revision 3630)
 +++ modules/jsp-api-2.0/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -374,7 +374,7 @@ Index: modules/jsp-api-2.0/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/jsp-api-2.1/pom.xml
 ===================================================================
---- modules/jsp-api-2.1/pom.xml	(revision 2122)
+--- modules/jsp-api-2.1/pom.xml	(revision 3630)
 +++ modules/jsp-api-2.1/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -387,8 +387,21 @@ Index: modules/jsp-api-2.1/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/maven-plugin/pom.xml
 ===================================================================
---- modules/maven-plugin/pom.xml	(revision 2122)
+--- modules/maven-plugin/pom.xml	(revision 3630)
 +++ modules/maven-plugin/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: modules/util5/pom.xml
+===================================================================
+--- modules/util5/pom.xml	(revision 3630)
++++ modules/util5/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
      <artifactId>project</artifactId>
@@ -400,7 +413,7 @@ Index: modules/maven-plugin/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/html/pom.xml
 ===================================================================
---- modules/html/pom.xml	(revision 2122)
+--- modules/html/pom.xml	(revision 3630)
 +++ modules/html/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -413,7 +426,7 @@ Index: modules/html/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/naming/pom.xml
 ===================================================================
---- modules/naming/pom.xml	(revision 2122)
+--- modules/naming/pom.xml	(revision 3630)
 +++ modules/naming/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -426,7 +439,7 @@ Index: modules/naming/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/management/pom.xml
 ===================================================================
---- modules/management/pom.xml	(revision 2122)
+--- modules/management/pom.xml	(revision 3630)
 +++ modules/management/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -439,7 +452,7 @@ Index: modules/management/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: modules/util/pom.xml
 ===================================================================
---- modules/util/pom.xml	(revision 2122)
+--- modules/util/pom.xml	(revision 3630)
 +++ modules/util/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -452,7 +465,7 @@ Index: modules/util/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: examples/tests/pom.xml
 ===================================================================
---- examples/tests/pom.xml	(revision 2122)
+--- examples/tests/pom.xml	(revision 3630)
 +++ examples/tests/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -465,7 +478,7 @@ Index: examples/tests/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: examples/spring-ebj3-demo/pom.xml
 ===================================================================
---- examples/spring-ebj3-demo/pom.xml	(revision 2122)
+--- examples/spring-ebj3-demo/pom.xml	(revision 3630)
 +++ examples/spring-ebj3-demo/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -478,7 +491,7 @@ Index: examples/spring-ebj3-demo/pom.xml
    <groupId>org.mortbay.jetty</groupId>
 Index: examples/test-jaas-webapp/pom.xml
 ===================================================================
---- examples/test-jaas-webapp/pom.xml	(revision 2122)
+--- examples/test-jaas-webapp/pom.xml	(revision 3630)
 +++ examples/test-jaas-webapp/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -491,7 +504,7 @@ Index: examples/test-jaas-webapp/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: examples/embedded/pom.xml
 ===================================================================
---- examples/embedded/pom.xml	(revision 2122)
+--- examples/embedded/pom.xml	(revision 3630)
 +++ examples/embedded/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -504,7 +517,7 @@ Index: examples/embedded/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: examples/test-annotations/pom.xml
 ===================================================================
---- examples/test-annotations/pom.xml	(revision 2122)
+--- examples/test-annotations/pom.xml	(revision 3630)
 +++ examples/test-annotations/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -517,7 +530,7 @@ Index: examples/test-annotations/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: examples/test-webapp/pom.xml
 ===================================================================
---- examples/test-webapp/pom.xml	(revision 2122)
+--- examples/test-webapp/pom.xml	(revision 3630)
 +++ examples/test-webapp/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -530,7 +543,7 @@ Index: examples/test-webapp/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: examples/test-jndi-webapp/pom.xml
 ===================================================================
---- examples/test-jndi-webapp/pom.xml	(revision 2122)
+--- examples/test-jndi-webapp/pom.xml	(revision 3630)
 +++ examples/test-jndi-webapp/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -543,7 +556,7 @@ Index: examples/test-jndi-webapp/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: contrib/jetty-ant/pom.xml
 ===================================================================
---- contrib/jetty-ant/pom.xml	(revision 505)
+--- contrib/jetty-ant/pom.xml	(revision 1197)
 +++ contrib/jetty-ant/pom.xml	(working copy)
 @@ -3,7 +3,7 @@
    <parent>
@@ -556,7 +569,7 @@ Index: contrib/jetty-ant/pom.xml
    <groupId>org.mortbay.jetty</groupId>
 Index: contrib/jetty-ant-demo/build.xml
 ===================================================================
---- contrib/jetty-ant-demo/build.xml	(revision 505)
+--- contrib/jetty-ant-demo/build.xml	(revision 1197)
 +++ contrib/jetty-ant-demo/build.xml	(working copy)
 @@ -1,9 +1,9 @@
  <project name="Test application" basedir=".">
@@ -570,9 +583,43 @@ Index: contrib/jetty-ant-demo/build.xml
  
    <path id="jetty.plugin.classpath">
      <fileset dir="${M2_REPO}">
+Index: contrib/debian/src/main/debian/changelog
+===================================================================
+--- contrib/debian/src/main/debian/changelog	(revision 1197)
++++ contrib/debian/src/main/debian/changelog	(working copy)
+@@ -1,6 +1,6 @@
+-jetty6 (6.1-SNAPSHOT-1) unstable; urgency=low
++jetty6 (__JETTY_VERSION__-1) unstable; urgency=low
+ 
+-  * Initial Release for jetty 6
++  * Initial Release for jetty 6.1.12
+ 
+  -- Greg Wilkins <gregw@mortbay.com>  Thu, 08 Nov 2007 18:23:39 +1100
+ 
+Index: contrib/debian/pom.xml
+===================================================================
+--- contrib/debian/pom.xml	(revision 1197)
++++ contrib/debian/pom.xml	(working copy)
+@@ -3,14 +3,14 @@
+     <parent>
+         <artifactId>project</artifactId>
+         <groupId>org.mortbay.jetty</groupId>
+-	<version>6.1-SNAPSHOT</version>
++	<version>__JETTY_VERSION__</version>
+         <relativePath>../../pom.xml</relativePath>
+     </parent>
+ 
+     <modelVersion>4.0.0</modelVersion>
+     <groupId>org.mortbay.jetty</groupId>
+     <artifactId>jetty-deb</artifactId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <name>Jetty Deb Packages</name>
+     <packaging>pom</packaging>
+ 
 Index: contrib/wadi/pom.xml
 ===================================================================
---- contrib/wadi/pom.xml	(revision 505)
+--- contrib/wadi/pom.xml	(revision 1197)
 +++ contrib/wadi/pom.xml	(working copy)
 @@ -2,13 +2,13 @@
    <!--parent>
@@ -590,49 +637,9 @@ Index: contrib/wadi/pom.xml
    <name>Wadi - Jetty Session Cache</name>
    <url>http://jetty.mortbay.org</url>
    <licenses>
-Index: contrib/jetty-deb/modules/jetty-deb-package/pom.xml
-===================================================================
---- contrib/jetty-deb/modules/jetty-deb-package/pom.xml	(revision 505)
-+++ contrib/jetty-deb/modules/jetty-deb-package/pom.xml	(working copy)
-@@ -3,13 +3,13 @@
-     <parent>
-         <artifactId>project</artifactId>
-         <groupId>org.mortbay.jetty</groupId>
--        <version>6.1-SNAPSHOT</version>
-+        <version>__JETTY_VERSION__</version>
-         <relativePath>../../pom.xml</relativePath>
-     </parent>
-     <modelVersion>4.0.0</modelVersion>
-     <groupId>org.mortbay.jetty</groupId>
-     <artifactId>jetty-deb-package</artifactId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <name>Jetty Debian Package</name>
-     <packaging>pom</packaging>
-     <licenses>
-@@ -142,4 +142,4 @@
-     <properties>
-         <deb-install-root>/usr/local/jetty/jetty-${project.version}</deb-install-root>
-     </properties>
--</project>
-\ No newline at end of file
-+</project>
-Index: contrib/jetty-deb/modules/maven-deb-plugin/pom.xml
-===================================================================
---- contrib/jetty-deb/modules/maven-deb-plugin/pom.xml	(revision 505)
-+++ contrib/jetty-deb/modules/maven-deb-plugin/pom.xml	(working copy)
-@@ -5,7 +5,7 @@
-     <parent>
-         <artifactId>project</artifactId>
-         <groupId>org.mortbay.jetty</groupId>
--        <version>6.1-SNAPSHOT</version>
-+        <version>__JETTY_VERSION__</version>
-         <relativePath>../../pom.xml</relativePath>
-     </parent>
- 
 Index: contrib/jetty-deb/pom.xml
 ===================================================================
---- contrib/jetty-deb/pom.xml	(revision 505)
+--- contrib/jetty-deb/pom.xml	(revision 1197)
 +++ contrib/jetty-deb/pom.xml	(working copy)
 @@ -3,14 +3,14 @@
      <parent>
@@ -645,15 +652,15 @@ Index: contrib/jetty-deb/pom.xml
  
      <modelVersion>4.0.0</modelVersion>
      <groupId>org.mortbay.jetty</groupId>
-     <artifactId>jetty-deb-package-parent</artifactId>
+     <artifactId>jetty-deb</artifactId>
 -    <version>6.1-SNAPSHOT</version>
 +    <version>__JETTY_VERSION__</version>
-     <name>Jetty Deb Package-parent</name>
+     <name>Jetty Deb Packages</name>
      <packaging>pom</packaging>
-     <licenses>
+ </project>
 Index: contrib/terracotta/pom.xml
 ===================================================================
---- contrib/terracotta/pom.xml	(revision 505)
+--- contrib/terracotta/pom.xml	(revision 1197)
 +++ contrib/terracotta/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
@@ -666,7 +673,7 @@ Index: contrib/terracotta/pom.xml
    <modelVersion>4.0.0</modelVersion>
 Index: contrib/j2se6/pom.xml
 ===================================================================
---- contrib/j2se6/pom.xml	(revision 505)
+--- contrib/j2se6/pom.xml	(revision 1197)
 +++ contrib/j2se6/pom.xml	(working copy)
 @@ -3,7 +3,7 @@
    <parent>
@@ -677,11 +684,11 @@ Index: contrib/j2se6/pom.xml
    </parent>
  	<modelVersion>4.0.0</modelVersion>
    <groupId>org.mortbay.jetty</groupId>
-Index: contrib/grizzly/pom.xml
+Index: contrib/jetty-rewrite-handler/pom.xml
 ===================================================================
---- contrib/grizzly/pom.xml	(revision 505)
-+++ contrib/grizzly/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
+--- contrib/jetty-rewrite-handler/pom.xml	(revision 1197)
++++ contrib/jetty-rewrite-handler/pom.xml	(working copy)
+@@ -3,7 +3,7 @@
    <parent>
      <artifactId>project</artifactId>
      <groupId>org.mortbay.jetty</groupId>
@@ -690,69 +697,116 @@ Index: contrib/grizzly/pom.xml
      <relativePath>../../pom.xml</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-Index: contrib/cometd/demo/bin/runTerracottaNode.sh
+Index: contrib/grizzly/pom.xml
 ===================================================================
---- contrib/cometd/demo/bin/runTerracottaNode.sh	(revision 505)
-+++ contrib/cometd/demo/bin/runTerracottaNode.sh	(working copy)
-@@ -8,7 +8,7 @@
- cd $(dirname $0)/..
- DEMO_HOME=$(pwd)
- JETTY_HOME=../..
--JETTY_VERSION=6.1-SNAPSHOT
-+JETTY_VERSION=__JETTY_VERSION__
- 
- TC_HOME=/java/terracotta-trunk
- TC_BOOT_JAR=$TC_HOME/dso-boot-hotspot_linux_150_08.jar
-Index: contrib/cometd/demo/pom.xml
-===================================================================
---- contrib/cometd/demo/pom.xml	(revision 505)
-+++ contrib/cometd/demo/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>cometd</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: contrib/cometd/api/pom.xml
-===================================================================
---- contrib/cometd/api/pom.xml	(revision 505)
-+++ contrib/cometd/api/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
-   <parent>
-     <artifactId>cometd</artifactId>
-     <groupId>org.mortbay.jetty</groupId>
--    <version>6.1-SNAPSHOT</version>
-+    <version>__JETTY_VERSION__</version>
-     <relativePath>../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-Index: contrib/cometd/pom.xml
-===================================================================
---- contrib/cometd/pom.xml	(revision 505)
-+++ contrib/cometd/pom.xml	(working copy)
-@@ -2,7 +2,7 @@
+--- contrib/grizzly/pom.xml	(revision 1197)
++++ contrib/grizzly/pom.xml	(working copy)
+@@ -3,7 +3,7 @@
    <parent>
      <artifactId>project</artifactId>
      <groupId>org.mortbay.jetty</groupId>
 -    <version>6.1-SNAPSHOT</version>
 +    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.mortbay.jetty</groupId>
-Index: contrib/cometd/bayeux/pom.xml
+Index: contrib/cometd/demo/pom.xml
 ===================================================================
---- contrib/cometd/bayeux/pom.xml	(revision 505)
-+++ contrib/cometd/bayeux/pom.xml	(working copy)
+--- contrib/cometd/demo/pom.xml	(revision 1197)
++++ contrib/cometd/demo/pom.xml	(working copy)
 @@ -2,7 +2,7 @@
    <parent>
-     <artifactId>cometd</artifactId>
      <groupId>org.mortbay.jetty</groupId>
+     <artifactId>cometd-project</artifactId>
 -    <version>6.1-SNAPSHOT</version>
 +    <version>__JETTY_VERSION__</version>
      <relativePath>../pom.xml</relativePath>
    </parent>
    <modelVersion>4.0.0</modelVersion>
+Index: contrib/cometd/install/pom.xml
+===================================================================
+--- contrib/cometd/install/pom.xml	(revision 1197)
++++ contrib/cometd/install/pom.xml	(working copy)
+@@ -2,13 +2,13 @@
+   <parent>
+     <groupId>org.mortbay.jetty</groupId>
+     <artifactId>cometd-project</artifactId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.mortbay.jetty</groupId>
+   <artifactId>cometd-install</artifactId>
+-  <version>6.1-SNAPSHOT</version>
++  <version>__JETTY_VERSION__</version>
+   <packaging>pom</packaging>
+   <name>Cometd :: Jetty :: Install</name>
+   <url>http://www.cometd.com</url>
+Index: contrib/cometd/pom.xml
+===================================================================
+--- contrib/cometd/pom.xml	(revision 1197)
++++ contrib/cometd/pom.xml	(working copy)
+@@ -3,12 +3,12 @@
+   <parent>
+     <artifactId>project</artifactId>
+     <groupId>org.mortbay.jetty</groupId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <groupId>org.mortbay.jetty</groupId>
+   <artifactId>cometd-project</artifactId>
+-  <version>6.1-SNAPSHOT</version>
++  <version>__JETTY_VERSION__</version>
+   <packaging>pom</packaging>
+   <name>Cometd :: Jetty</name>
+   <url>http://www.cometd.com</url>
+Index: contrib/cometd/bayeux/pom.xml
+===================================================================
+--- contrib/cometd/bayeux/pom.xml	(revision 1197)
++++ contrib/cometd/bayeux/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <groupId>org.mortbay.jetty</groupId>
+     <artifactId>cometd-project</artifactId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: contrib/cometd/client/bin/run.sh
+===================================================================
+--- contrib/cometd/client/bin/run.sh	(revision 1197)
++++ contrib/cometd/client/bin/run.sh	(working copy)
+@@ -1,2 +1,2 @@
+ #!/bin/sh
+-java -Xmx2048M -cp target/classes:target/test-classes/:../bayeux/target/classes/:../../../lib/cometd/cometd-api-1.0-SNAPSHOT.jar:../../../lib/ext/jetty-client-6.1-SNAPSHOT.jar:../../../lib/ext/jetty-sslengine-6.1-SNAPSHOT.jar:../../../lib/jre1.5/jetty-util5-6.1-SNAPSHOT.jar:../../../lib/jetty-util-6.1-SNAPSHOT.jar:../../../lib/jetty-6.1-SNAPSHOT.jar:../../../lib/servlet-api-2.5-6.1-SNAPSHOT.jar org.mortbay.cometd.client.BayeuxLoadGenerator
++java -Xmx2048M -cp target/classes:target/test-classes/:../bayeux/target/classes/:../../../lib/cometd/cometd-api-1.0-SNAPSHOT.jar:../../../lib/ext/jetty-client-__JETTY_VERSION__.jar:../../../lib/ext/jetty-sslengine-__JETTY_VERSION__.jar:../../../lib/jre1.5/jetty-util5-__JETTY_VERSION__.jar:../../../lib/jetty-util-__JETTY_VERSION__.jar:../../../lib/jetty-__JETTY_VERSION__.jar:../../../lib/servlet-api-2.5-__JETTY_VERSION__.jar org.mortbay.cometd.client.BayeuxLoadGenerator
+Index: contrib/cometd/client/pom.xml
+===================================================================
+--- contrib/cometd/client/pom.xml	(revision 1197)
++++ contrib/cometd/client/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+   <parent>
+     <groupId>org.mortbay.jetty</groupId>
+     <artifactId>cometd-project</artifactId>
+-    <version>6.1-SNAPSHOT</version>
++    <version>__JETTY_VERSION__</version>
+     <relativePath>../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+Index: contrib/jetty-openspaces/pom.xml
+===================================================================
+--- contrib/jetty-openspaces/pom.xml	(revision 1197)
++++ contrib/jetty-openspaces/pom.xml	(working copy)
+@@ -2,7 +2,7 @@
+     <parent>
+       <artifactId>project</artifactId>
+       <groupId>org.mortbay.jetty</groupId>
+-      <version>6.1-SNAPSHOT</version>
++      <version>__JETTY_VERSION__</version>
+     </parent>
+ 
+     <modelVersion>4.0.0</modelVersion>
 _EOF_
