@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.mortbay.jetty.example</groupId>
     <artifactId>jetty-examples-parent</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>7.0.0.pre4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -61,7 +61,7 @@
               <tasks>
                 <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../../contexts-available/test-annotations.d/" />
                 <copy file="target/config/annotations-context.xml" tofile="../../../contexts-available/test-annotations.xml" overwrite="true" />
-                <copy file="README.txt" tofile="../../../contexts-available/README-test-annotations.txt" overwrite="true"/>
+                <copy file="README.txt" tofile="../../../contexts-available/README-test-annotations.txt" overwrite="true" />
               </tasks>
             </configuration>
           </execution>
