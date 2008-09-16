@@ -340,7 +340,8 @@ public abstract class SessionTestServer extends Server
 
 
         Context contextA2 = new Context(contextsA, "/contextB", Context.SESSIONS);
-        contextA2.addServlet(new ServletHolder(new SessionForwardedServlet()), "/session/*");   
+        contextA2.addServlet(new ServletHolder(new SessionForwardedServlet()), "/session/*");
+        contextA2.addServlet(new ServletHolder(new SessionActionServlet()), "/action/session/*");
         contextA2.getSessionHandler().setSessionManager(_sessionMgr2);
         _sessionMgr2.setIdManager(_sessionIdMgr);
     }
