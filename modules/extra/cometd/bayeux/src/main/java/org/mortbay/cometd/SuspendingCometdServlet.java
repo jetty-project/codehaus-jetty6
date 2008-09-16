@@ -254,7 +254,7 @@ public class SuspendingCometdServlet extends AbstractCometdServlet
             if (transport.resumePoll())
                 client.resume();
         }
-        else
+        else if (transport!=null)
         {
             transport.complete();
         }
