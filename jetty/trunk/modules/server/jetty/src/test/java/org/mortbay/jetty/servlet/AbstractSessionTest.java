@@ -68,6 +68,19 @@ public abstract class AbstractSessionTest extends TestCase
         assertTrue(client2.send("/contextA/dispatch/forward/contextB", cookie1));
         assertTrue(client1.send("/contextB", cookie1));
         
+        // verify that session attributes on /contextA is different from /contextB
+        assertFalse(client1.hasAttribute("/contextB/action", cookie1, "foo", "bar"));
+        
+        // add new session attributes on /contextB
+        client1.setAttribute("/contextB/action", cookie1, "zzzzz", "yyyyy");
+        assertTrue(client1.hasAttribute("/contextB/action", cookie1, "zzzzz", "yyyyy"));
+        
+        // verify that client2 has same sessionAttributes on /contextB
+        // client1's newly added attribute "zzzzz" needs to be flushed to the database first
+        // saveInterval is configured at 10ms... to test, uncomment the 2 lines below.
+        //Thread.sleep(10000);
+        //assertTrue(client2.hasAttribute("/contextB/action", cookie1, "zzzzz", "yyyyy"));        
+        
         String cookie2 = client2.newSession("/contextA");
         assertNotNull(cookie2);
         System.err.println("cookie2: " + cookie2);
