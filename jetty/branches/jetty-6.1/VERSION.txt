@@ -1,5 +1,6 @@
 jetty-6.1-SNAPSHOT
  + JETTY-686 LifeCycle.Listener
+ + JETTY-716 NPE for empty cometd message
 
 jetty-6.1.12rc1 12 September 2008
  + JETTY-282 Support manually-triggered reloading
