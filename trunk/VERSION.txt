@@ -22,6 +22,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-710 Worked around poor implementation of File.toURL()
  + JETTY-711 DataSourceUserRealm implementation
  + JETTY-712 HttpClient does not handle request complete after response complete
+ + JETTY-716 Fixed NPE on empty cometd message
 
 jetty-6.1.12rc1 12 September 2008
  + JETTY-282 Support manually-triggered reloading
