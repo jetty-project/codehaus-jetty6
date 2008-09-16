@@ -1,4 +1,5 @@
 jetty-6.1-SNAPSHOT
+ + JETTY-686 LifeCycle.Listener
 
 jetty-6.1.12rc1 12 September 2008
  + JETTY-282 Support manually-triggered reloading
