@@ -25,8 +25,9 @@ jetty-7.0-SNAPSHOT
  + JETTY-712 HttpClient does not handle request complete after response complete
  + JETTY-716 Fixed NPE on empty cometd message
  + JETTY-718 during ssl unwrap, return true if some bytes were read, even if underflow
+ + JETTY-720 fix HttpExchange.waitForStatus
 
-jetty-6.1.12rc1 12 September 2008
+jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading
  + JETTY-331 SecureRandom hangs on systems with low entropy (connectors slow to startup)
  + JETTY-591 No server classes for jetty-web.xml
