@@ -309,7 +309,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                                     {
                                         case BUFFER_OVERFLOW:
                                         case BUFFER_UNDERFLOW:
-                                            Log.warn("unwrap {}",_result);
+                                            Log.warn("wrap {}",_result);
                                         case CLOSED:
                                             _closing=true;
                                     }
@@ -448,7 +448,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
                             {
                                 case BUFFER_OVERFLOW:
                                 case BUFFER_UNDERFLOW:
-                                    Log.warn("unwrap {}",_result);
+                                    Log.warn("wrap {}",_result);
                                 case CLOSED:
                                     _closing=true;
                             }
@@ -554,8 +554,8 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         {
             case BUFFER_OVERFLOW:
             case BUFFER_UNDERFLOW:
-                Log.warn("unwrap {}",_result);
-                return false;
+                if (Log.isDebugEnabled()) Log.debug("unwrap {}",_result);
+                return (total_filled > 0);
                 
             case CLOSED:
                 _closing=true;
@@ -654,7 +654,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         {
             case BUFFER_OVERFLOW:
             case BUFFER_UNDERFLOW:
-                Log.warn("unwrap {}",_result);
+                Log.warn("wrap {}",_result);
                 
             case OK:
                 return _result.bytesConsumed();
@@ -712,7 +712,7 @@ public class SslHttpChannelEndPoint extends SelectChannelConnector.ConnectorEndP
         {
             case BUFFER_OVERFLOW:
             case BUFFER_UNDERFLOW:
-                Log.warn("unwrap {}",_result);
+                Log.warn("wrap {}",_result);
                 
             case OK:
                 return _result.bytesConsumed();
