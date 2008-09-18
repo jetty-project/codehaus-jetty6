@@ -445,7 +445,7 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     private List getDependencyFiles ()
     {
         List dependencyFiles = new ArrayList();
-        List<Resource> overlays = new ArrayList();
+        List<Resource> overlays = new ArrayList<Resource>();
         for ( Iterator iter = getProject().getArtifacts().iterator(); iter.hasNext(); )
         {
             Artifact artifact = (Artifact) iter.next();
