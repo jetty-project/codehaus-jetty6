@@ -28,6 +28,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
 import org.mortbay.jetty.plugin.util.ScanTargetPattern;
+import org.mortbay.resource.Resource;
+import org.mortbay.resource.ResourceCollection;
 import org.mortbay.util.Scanner;
 
 /**
@@ -297,18 +299,14 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
         }
         
         
-        
-        if (scanTargets == null)
-            setExtraScanTargets(Collections.EMPTY_LIST);
-        else
-        {
-            ArrayList list = new ArrayList();
+        setExtraScanTargets(new ArrayList());
+        if (scanTargets != null)
+        {            
             for (int i=0; i< scanTargets.length; i++)
             {
                 getLog().info("Added extra scan target:"+ scanTargets[i]);
-                list.add(scanTargets[i]);
-            }
-            setExtraScanTargets(list);
+                getExtraScanTargets().add(scanTargets[i]);
+            }            
         }
         
         
@@ -447,16 +445,92 @@ public abstract class AbstractJettyRunMojo extends AbstractJettyMojo
     private List getDependencyFiles ()
     {
         List dependencyFiles = new ArrayList();
+        List<Resource> overlays = new ArrayList();
         for ( Iterator iter = getProject().getArtifacts().iterator(); iter.hasNext(); )
         {
             Artifact artifact = (Artifact) iter.next();
             // Include runtime and compile time libraries, and possibly test libs too
+            if(artifact.getType().equals("war"))
+            {
+                try
+                {
+                    Resource r = Resource.newResource("jar:" + artifact.getFile().toURL().toString() + "!/");
+                    overlays.add(r);
+                    getExtraScanTargets().add(artifact.getFile());
+                }
+                catch(Exception e)
+                {
+                    throw new RuntimeException(e);
+                }
+                continue;
+            }
             if (((!Artifact.SCOPE_PROVIDED.equals(artifact.getScope())) && (!Artifact.SCOPE_TEST.equals( artifact.getScope()))) 
                     ||
                 (useTestClasspath && Artifact.SCOPE_TEST.equals( artifact.getScope())))
             {
                 dependencyFiles.add(artifact.getFile());
                 getLog().debug( "Adding artifact " + artifact.getFile().getName() + " for WEB-INF/lib " );   
+            }
+        }
+        if(!overlays.isEmpty())
+        {
+            try
+            {
+                Resource resource = webAppConfig.getBaseResource();
+                ResourceCollection rc = new ResourceCollection();
+                if(resource==null)
+                {
+                    // nothing configured, so we automagically enable the overlays                    
+                    int size = overlays.size()+1;
+                    Resource[] resources = new Resource[size];
+                    resources[0] = Resource.newResource(getWebAppSourceDirectory().toURL());
+                    for(int i=1; i<size; i++)
+                    {
+                        resources[i] = overlays.get(i-1);
+                        getLog().info("Adding overlay: " + resources[i]);
+                    }
+                    rc.setResources(resources);
+                }                
+                else
+                {                    
+                    if(resource instanceof ResourceCollection)
+                    {
+                        // there was a preconfigured ResourceCollection ... append the artifact wars
+                        Resource[] old = ((ResourceCollection)resource).getResources();
+                        int size = old.length + overlays.size();
+                        Resource[] resources = new Resource[size];
+                        System.arraycopy(old, 0, resources, 0, old.length);
+                        for(int i=old.length,j=0; i<size; i++,j++)
+                        {
+                            resources[i] = overlays.get(j);
+                            getLog().info("Adding overlay: " + resources[i]);
+                        }
+                        rc.setResources(resources);
+                    }
+                    else
+                    {
+                        // baseResource was already configured w/c could be src/main/webapp
+                        if(!resource.isDirectory() && String.valueOf(resource.getFile()).endsWith(".war"))
+                        {
+                            // its a war                            
+                            resource = Resource.newResource("jar:" + resource.getURL().toString() + "!/");
+                        }
+                        int size = overlays.size()+1;
+                        Resource[] resources = new Resource[size];
+                        resources[0] = resource;
+                        for(int i=1; i<size; i++)
+                        {
+                            resources[i] = overlays.get(i-1);
+                            getLog().info("Adding overlay: " + resources[i]);
+                        }
+                        rc.setResources(resources);
+                    }
+                }
+                webAppConfig.setBaseResource(rc);
+            }
+            catch(Exception e)
+            {
+                throw new RuntimeException(e);
             }
         }
         return dependencyFiles; 
