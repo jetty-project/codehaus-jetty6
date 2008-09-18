@@ -86,7 +86,8 @@ public class HttpExchange
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
     boolean _retryStatus = false;
-
+    private Object syncLock = new Object();
+    
     /**
      * boolean controlling if the exchange will have listeners autoconfigured by
      * the destination
@@ -121,6 +122,20 @@ public class HttpExchange
             }
         }
     }
+    
+    
+    public int waitForCompletion () throws InterruptedException
+    {
+        synchronized (syncLock)
+        {
+            syncLock.wait();
+        }
+        
+        return _status;
+    }
+    
+    
+    
 
     /* ------------------------------------------------------------ */
     public void reset() 
@@ -492,23 +507,39 @@ public class HttpExchange
     }
 
     protected void onResponseComplete() throws IOException
-    {
+    {   
+        synchronized (syncLock)
+        {
+            syncLock.notifyAll();
+        }
     }
 
     protected void onConnectionFailed(Throwable ex)
     {
         Log.warn("CONNECTION FAILED on " + this,ex);
+        synchronized (syncLock)
+        {
+            syncLock.notifyAll();
+        }
     }
 
     protected void onException(Throwable ex)
     {
         
         Log.warn("EXCEPTION on " + this,ex);
+        synchronized (syncLock)
+        {
+            syncLock.notifyAll();
+        }
     }
 
     protected void onExpire()
     {
         Log.debug("EXPIRED " + this);
+        synchronized (syncLock)
+        {
+            syncLock.notifyAll();
+        }
     }
 
     protected void onRetry() throws IOException

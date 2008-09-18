@@ -16,15 +16,18 @@ package org.mortbay.jetty.client;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 import junit.framework.TestCase;
 
+import org.mortbay.io.Buffer;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.HashRealmResolver;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.client.security.SimpleRealmResolver;
+import org.mortbay.jetty.client.webdav.WebdavListener;
 
 /**
  * Functional testing for HttpExchange.
@@ -40,18 +43,84 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
     protected HttpClient _httpClient;
     protected Connector _connector;
 
-    private String _username = "foo";
-    private String _password = "pwd";
+    private String _username = "janb";
+    private String _password = "8rtrta";
 
+    private String _singleFileURL;
+    private String _dirFileURL;
+    private String _dirURL;
+    
+    
+    //TODO refactor to separate class
+    /*
+    public static class SynchronousContentExchange extends ContentExchange
+    {
+        private Object lock = new Object();
+
+
+        public void waitForCompletion ()
+        throws Exception
+        {
+            synchronized (lock)
+            {
+                lock.wait();
+            }
+        }
+
+        public void onResponseComplete ()
+        throws IOException
+        {
+            synchronized (lock)
+            {
+                lock.notifyAll();
+            }
+            super.onResponseComplete();
+        }
+
+ 
+        protected void onConnectionFailed(Throwable ex)
+        {
+            synchronized (lock)
+            {
+                lock.notifyAll();
+            }
+            super.onConnectionFailed(ex);
+        }
+
+
+        protected void onException(Throwable ex)
+        {
+            synchronized (lock)
+            {
+                lock.notifyAll();
+            }
+            super.onException(ex);
+        }
+
+ 
+        protected void onExpire()
+        {
+            synchronized (lock)
+            {
+                lock.notifyAll();
+            }
+            super.onExpire();
+        }   
+        
+    }
+*/
+    
+   
     protected void setUp() throws Exception
     {
+        _singleFileURL = "https://dav.codehaus.org/user/" + _username + "/foo.txt";
+        _dirURL = "https://dav.codehaus.org/user/" + _username + "/ttt/";
+        _dirFileURL = _dirURL+"foo.txt";
         _scheme="https://";
-        //startServer();
+ 
         _httpClient=new HttpClient();
-        //_httpClient.setMaxRetries( 10 );
-        //_httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
-        _httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
-        _httpClient.setMaxConnectionsPerAddress(4);
+        _httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+        //_httpClient.setMaxConnectionsPerAddress(4);
 
         _httpClient.setRealmResolver( new SimpleRealmResolver (
                 new Realm(){
@@ -72,54 +141,94 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
                 }
         ));
 
-        //_httpClient.enableWebdav();
+        _httpClient.registerListener( "org.mortbay.jetty.client.webdav.WebdavListener");
         _httpClient.start();
     }
-
-
-    public void testSslGetWithContentExchange() throws Exception
+    
+    
+    public void tearDown () throws Exception
     {
-        //for (int i=0;i<20;i++)
-        //{
-            ContentExchange httpExchange=new ContentExchange();
-
-            // Working GET method
-            //httpExchange.setURL("https://dav.codehaus.org/user/" + _username + "/");
-            //httpExchange.setMethod( HttpMethods.GET );
-
-
-
-
-            // failing PUT
-            httpExchange.setURL("https://dav.codehaus.org/user/" + _username + "/foo.txt");
-            httpExchange.setMethod( HttpMethods.PUT );
-            //FileResource file = new FileResource(new URL("file:///Users/jesse/src/codehaus/trunks/jetty/modules/extra/jetty-client/src/test/resources/foo.txt"));
-            File file = new File("src/test/resources/foo.txt");
-            httpExchange.setRequestContentSource( new FileInputStream( file ) );
-            httpExchange.setRequestHeader( "Content-Type", "application/octet-stream");
-            httpExchange.setRequestHeader("Content-Length", String.valueOf( file.length() ));
-
-
-            // propfind works like this
-            //httpExchange.setMethod("PROPFIND", "/user/jesse/file0.txt HTTP/1.1");
-            //httpExchange.setRequestHeader( "Depth", "1");
-                                       
-            // Working MKCOL
-            //httpExchange.setRequestHeader("MKCOL", "/user/jesse/foo/ HTTP/1.1 ");
-
-
-            // failing MKCOL
-            //httpExchange.setMethod("MKCOL /user/jesse/foo/foo/foo HTTP/1.1");
-
-
-            _httpClient.send(httpExchange);
-
-            httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
-            String result=httpExchange.getResponseContent();
-
-            System.out.println( result );
-
-            Thread.sleep(5);
-        //}
+        _httpClient.stop();
     }
+   
+
+    public void testPUTandDELETEwithSSL() throws Exception
+    { 
+        File file = new File("src/test/resources/foo.txt");
+        assertTrue(file.exists());
+        
+        
+        /*
+         * UNCOMMENT TO TEST WITH REAL DAV SERVER
+         * Remember to set _username and _password to a real user's account.
+         * 
+         */
+            
+        //PUT a FILE
+        ContentExchange singleFileExchange = new ContentExchange();
+        singleFileExchange.setURL(_singleFileURL);
+        singleFileExchange.setMethod( HttpMethods.PUT );
+        singleFileExchange.setFileForUpload(file);
+        singleFileExchange.setRequestHeader( "Content-Type", "application/octet-stream");
+        singleFileExchange.setRequestHeader("Content-Length", String.valueOf( file.length() ));
+        _httpClient.send(singleFileExchange);
+        singleFileExchange.waitForCompletion();
+        
+        String result = singleFileExchange.getResponseContent();
+        assertEquals(201, singleFileExchange.getResponseStatus());    
+      
+       
+        //PUT a FILE in a directory hierarchy
+        ContentExchange dirFileExchange = new ContentExchange();
+        dirFileExchange.setURL(_dirFileURL);
+        dirFileExchange.setMethod( HttpMethods.PUT );
+        dirFileExchange.setFileForUpload(file);
+        dirFileExchange.setRequestHeader( "Content-Type", "application/octet-stream");
+        dirFileExchange.setRequestHeader("Content-Length", String.valueOf( file.length() ));
+        _httpClient.send(dirFileExchange);
+        dirFileExchange.waitForCompletion();
+        result = dirFileExchange.getResponseContent();        
+        assertEquals(201, singleFileExchange.getResponseStatus());
+       
+      /*  
+        SynchronousContentExchange del = new SynchronousContentExchange()
+        {
+            public void onRequestComplete() throws IOException
+            {
+                // TODO Auto-generated method stub
+                super.onRequestComplete();
+                System.err.println(getURI()+": On RequestComplete");
+            }
+
+            public void onResponseComplete() throws IOException
+            {
+                // TODO Auto-generated method stub
+                super.onResponseComplete();
+                System.err.println(getURI()+":On ResponseComplete");
+            }
+
+            public void onResponseStatus(Buffer version, int status,
+                    Buffer reason) throws IOException
+            {
+                assertEquals(204, status);
+                super.onResponseStatus(version, status, reason);
+            }
+        };
+     */
+        //DELETE the single file
+        HttpExchange del = new HttpExchange();
+        del.setURL(_singleFileURL);
+        del.setMethod(HttpMethods.DELETE);
+        _httpClient.send(del);
+        del.waitForCompletion();
+          
+        //DELETE the whole dir
+        del.setURL(_dirURL);
+        del.setMethod(HttpMethods.DELETE);  
+        del.setRequestHeader("Depth", "infinity");
+        _httpClient.send(del);
+        del.waitForCompletion();
+         
+    }
+  
 }
