@@ -261,19 +261,11 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-remote-resources-plugin</artifactId>
-          <executions>
-            <execution>
-              <phase>generate-resources</phase>
-              <goals>
-                <goal>process</goal>
-              </goals>
-              <configuration>
+          <configuration>
                 <resourceBundles>
                   <resourceBundle>org.mortbay.jetty:jetty-build-resources:1.0.1</resourceBundle>
                 </resourceBundles>
               </configuration>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
