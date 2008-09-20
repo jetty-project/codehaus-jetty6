@@ -19,6 +19,7 @@ import java.io.IOException;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.ByteArrayEndPoint;
+import org.mortbay.util.StringUtil;
 
 public class LocalConnector extends AbstractConnector
 {
@@ -96,7 +97,7 @@ public class LocalConnector extends AbstractConnector
     {
         // System.out.println("\nREQUESTS :\n"+requests);
         // System.out.flush();
-        ByteArrayBuffer buf=new ByteArrayBuffer(requests);
+        ByteArrayBuffer buf=new ByteArrayBuffer(requests,StringUtil.__ISO_8859_1);
         if (_in.space()<buf.length())
         {
             ByteArrayBuffer n = new ByteArrayBuffer(_in.length()+buf.length());
@@ -118,7 +119,7 @@ public class LocalConnector extends AbstractConnector
         
         // System.err.println("\nRESPONSES:\n"+out);
         _out=_endp.getOut();
-        return _out.toString();
+        return _out.toString(StringUtil.__ISO_8859_1);
     }
     
     /* ------------------------------------------------------------ */

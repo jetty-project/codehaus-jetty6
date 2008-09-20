@@ -47,7 +47,6 @@ import javax.servlet.http.HttpSession;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -836,7 +835,7 @@ public class Request extends Suspendable implements HttpServletRequest
         {
             _serverName = getLocalName();
             _port = getLocalPort();
-            if (_serverName != null && !Portable.ALL_INTERFACES.equals(_serverName)) 
+            if (_serverName != null && !StringUtil.ALL_INTERFACES.equals(_serverName)) 
                 return _serverName;
         }
 

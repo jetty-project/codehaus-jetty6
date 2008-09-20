@@ -26,8 +26,8 @@ import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 
 
 /**
@@ -305,7 +305,7 @@ public class ChannelEndPoint implements EndPoint
             _local=(InetSocketAddress)_socket.getLocalSocketAddress();
         
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
-           return Portable.ALL_INTERFACES;
+           return StringUtil.ALL_INTERFACES;
         
         return _local.getAddress().getHostAddress();
     }
@@ -323,7 +323,7 @@ public class ChannelEndPoint implements EndPoint
             _local=(InetSocketAddress)_socket.getLocalSocketAddress();
         
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
-           return Portable.ALL_INTERFACES;
+           return StringUtil.ALL_INTERFACES;
         
         return _local.getAddress().getCanonicalHostName();
     }
