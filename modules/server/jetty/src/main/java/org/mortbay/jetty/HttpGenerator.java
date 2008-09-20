@@ -22,9 +22,9 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /**
@@ -38,20 +38,20 @@ public class HttpGenerator extends AbstractGenerator
     // common _content
     private static byte[] LAST_CHUNK =
     { (byte) '0', (byte) '\015', (byte) '\012', (byte) '\015', (byte) '\012'};
-    private static byte[] CONTENT_LENGTH_0 = Portable.getBytes("Content-Length: 0\015\012");
-    private static byte[] CONNECTION_KEEP_ALIVE = Portable.getBytes("Connection: keep-alive\015\012");
-    private static byte[] CONNECTION_CLOSE = Portable.getBytes("Connection: close\015\012");
-    private static byte[] CONNECTION_ = Portable.getBytes("Connection: ");
-    private static byte[] CRLF = Portable.getBytes("\015\012");
-    private static byte[] TRANSFER_ENCODING_CHUNKED = Portable.getBytes("Transfer-Encoding: chunked\015\012");
-    private static byte[] SERVER = Portable.getBytes("Server: Jetty(7.0.x)\015\012");
+    private static byte[] CONTENT_LENGTH_0 = StringUtil.getBytes("Content-Length: 0\015\012");
+    private static byte[] CONNECTION_KEEP_ALIVE = StringUtil.getBytes("Connection: keep-alive\015\012");
+    private static byte[] CONNECTION_CLOSE = StringUtil.getBytes("Connection: close\015\012");
+    private static byte[] CONNECTION_ = StringUtil.getBytes("Connection: ");
+    private static byte[] CRLF = StringUtil.getBytes("\015\012");
+    private static byte[] TRANSFER_ENCODING_CHUNKED = StringUtil.getBytes("Transfer-Encoding: chunked\015\012");
+    private static byte[] SERVER = StringUtil.getBytes("Server: Jetty(7.0.x)\015\012");
 
     // other statics
     private static int CHUNK_SPACE = 12;
     
     public static void setServerVersion(String version)
     {
-        SERVER=Portable.getBytes("Server: Jetty("+version+")\015\012");
+        SERVER=StringUtil.getBytes("Server: Jetty("+version+")\015\012");
     }
 
     // data

@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.mortbay.util.StringUtil;
+
 /* ------------------------------------------------------------------------------- */
 /**
  * @author gregw
@@ -64,7 +66,7 @@ public class ByteArrayBuffer extends AbstractBuffer
     public ByteArrayBuffer(String value)
     {
         super(READWRITE,NON_VOLATILE);
-        _bytes = Portable.getBytes(value);
+        _bytes = StringUtil.getBytes(value);
         setGetIndex(0);
         setPutIndex(_bytes.length);
         _access=IMMUTABLE;
@@ -114,7 +116,7 @@ public class ByteArrayBuffer extends AbstractBuffer
         if (l < 0) 
             return -1;
         
-        Portable.arraycopy(_bytes, index, b, offset, l);
+        System.arraycopy(_bytes, index, b, offset, l);
         return l;
     }
 
