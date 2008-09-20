@@ -119,15 +119,15 @@ public class ClientImpl implements Client
                     
                 if (add)
                     _queue.addUnsafe(message);
-            }               
-            
-            if (_batch==0 &&  _responsesPending<1)
-                resume();
+            }    
 
             // deliver unsynchronized
             for (MessageListener l:_syncMListeners)
                 l.deliver(from,this,message);
             alisteners=_asyncMListeners;
+             
+            if (_batch==0 &&  _responsesPending<1 && _queue.size()>0)
+                resume();
         }
         
         // deliver unsynchronized
