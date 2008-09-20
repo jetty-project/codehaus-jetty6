@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.mortbay.log.Log;
+
 /**
  * @author gregw
  *  
@@ -64,7 +66,7 @@ public abstract class AbstractBuffer implements Buffer
         byte[] bytes = new byte[length()];
         byte[] array = array();
         if (array != null)
-            Portable.arraycopy(array, getIndex(), bytes, 0, bytes.length);
+            System.arraycopy(array, getIndex(), bytes, 0, bytes.length);
         else
             peek(getIndex(), bytes, 0, length());
         return bytes;
@@ -138,7 +140,7 @@ public abstract class AbstractBuffer implements Buffer
             if (length > 0)
             {
                 if (array != null)
-                    Portable.arraycopy(array(), s, array(), 0, length);
+                    System.arraycopy(array(), s, array(), 0, length);
                 else
                     poke(0, peek(s, length));
             }
@@ -341,7 +343,7 @@ public abstract class AbstractBuffer implements Buffer
         byte[] src_array = src.array();
         byte[] dst_array = array();
         if (src_array != null && dst_array != null)
-            Portable.arraycopy(src_array, src.getIndex(), dst_array, index, length);
+            System.arraycopy(src_array, src.getIndex(), dst_array, index, length);
         else if (src_array != null)
         {
             int s=src.getIndex();
@@ -380,7 +382,7 @@ public abstract class AbstractBuffer implements Buffer
         
         byte[] dst_array = array();
         if (dst_array != null)
-            Portable.arraycopy(b, offset, dst_array, index, length);
+            System.arraycopy(b, offset, dst_array, index, length);
         else
         {
             int s=offset;
@@ -563,6 +565,23 @@ public abstract class AbstractBuffer implements Buffer
             return _string;
         }
         return new String(asArray(), 0, length());
+    }
+
+    /* ------------------------------------------------------------ */
+    public String toString(String charset)
+    {
+        try
+        {
+            byte[] bytes=array();
+            if (bytes!=null)
+                return new String(bytes,getIndex(),length(),charset);
+            return new String(asArray(), 0, length(),charset);
+        }
+        catch(Exception e)
+        {
+            Log.warn(e);
+            return new String(asArray(), 0, length());
+        }
     }
 
     /* ------------------------------------------------------------ */

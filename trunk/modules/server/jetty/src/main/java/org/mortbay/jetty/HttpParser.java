@@ -28,6 +28,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.View;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -463,7 +464,7 @@ public class HttpParser implements Parser
                                             _contentLength=HttpTokens.CHUNKED_CONTENT;
                                         else
                                         {
-                                            String c=value.toString();
+                                            String c=value.toString(StringUtil.__ISO_8859_1);
                                             if (c.endsWith(HttpHeaderValues.CHUNKED))
                                                 _contentLength=HttpTokens.CHUNKED_CONTENT;
                                             
@@ -592,9 +593,9 @@ public class HttpParser implements Parser
                             else
                             {
                                 // Continuation line!
-                                if (_multiLineValue == null) _multiLineValue=_tok1.toString();
+                                if (_multiLineValue == null) _multiLineValue=_tok1.toString(StringUtil.__ISO_8859_1);
                                 _tok1.update(_buffer.markIndex(), _buffer.markIndex() + _length);
-                                _multiLineValue += " " + _tok1.toString();
+                                _multiLineValue += " " + _tok1.toString(StringUtil.__ISO_8859_1);
                             }
                         }
                         _eol=ch;

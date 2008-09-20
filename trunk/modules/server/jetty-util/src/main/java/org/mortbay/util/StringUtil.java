@@ -16,6 +16,8 @@ package org.mortbay.util;
 
 import java.io.UnsupportedEncodingException;
 
+import org.mortbay.log.Log;
+
 // ====================================================================
 /** Fast String Utilities.
  *
@@ -28,6 +30,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class StringUtil
 {
+    public static final String ALL_INTERFACES="0.0.0.0";
     public static final String CRLF="\015\012";
     public static final String __LINE_SEPARATOR=
         System.getProperty("line.separator","\n");
@@ -352,5 +355,29 @@ public class StringUtil
         return buf.toString();
     }
     
+    public static byte[] getBytes(String s)
+    {
+        try
+        {
+            return s.getBytes(__ISO_8859_1);
+        }
+        catch(Exception e)
+        {
+            Log.warn(e);
+            return s.getBytes();
+        }
+    }
     
+    public static byte[] getBytes(String s,String charset)
+    {
+        try
+        {
+            return s.getBytes(charset);
+        }
+        catch(Exception e)
+        {
+            Log.warn(e);
+            return s.getBytes();
+        }
+    }
 }

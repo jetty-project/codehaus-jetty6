@@ -20,6 +20,8 @@
  */
 package org.mortbay.jetty;
 
+import java.nio.charset.Charset;
+
 import junit.framework.TestCase;
 
 /**

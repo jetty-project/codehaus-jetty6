@@ -157,6 +157,7 @@ public class HttpParserTest extends TestCase
         StringEndPoint io=new StringEndPoint();
         io.setInput(
             "GET / HTTP/1.0\015\012"
+                + "Host: localhost\015\012"
                 + "Header1: value1\015\012"
                 + "Header2  :   value 2a  \015\012"
                 + "                    value 2b  \015\012"
@@ -174,17 +175,19 @@ public class HttpParserTest extends TestCase
         assertEquals("GET", f0);
         assertEquals("/", f1);
         assertEquals("HTTP/1.0", f2);
-        assertEquals("Header1", hdr[0]);
-        assertEquals("value1", val[0]);
-        assertEquals("Header2", hdr[1]);
-        assertEquals("value 2a value 2b", val[1]);
-        assertEquals("Header3", hdr[2]);
-        assertEquals("", val[2]);
-        assertEquals("Header4", hdr[3]);
-        assertEquals("value4", val[3]);
-        assertEquals("Server5", hdr[4]);
-        assertEquals("notServer", val[4]);
-        assertEquals(4, h);
+        assertEquals("Host", hdr[0]);
+        assertEquals("localhost", val[0]);
+        assertEquals("Header1", hdr[1]);
+        assertEquals("value1", val[1]);
+        assertEquals("Header2", hdr[2]);
+        assertEquals("value 2a value 2b", val[2]);
+        assertEquals("Header3", hdr[3]);
+        assertEquals("", val[3]);
+        assertEquals("Header4", hdr[4]);
+        assertEquals("value4", val[4]);
+        assertEquals("Server5", hdr[5]);
+        assertEquals("notServer", val[5]);
+        assertEquals(5, h);
     }
 
     public void testChunkParse()
@@ -494,9 +497,8 @@ public class HttpParserTest extends TestCase
 
         public void parsedHeader(Buffer name, Buffer value)
         {
-            fields.add(name, value);
-            hdr[++h]= name.toString();
-            val[h]= value.toString();
+            hdr[++h]= name.toString(StringUtil.__ISO_8859_1);
+            val[h]= value.toString(StringUtil.__ISO_8859_1);
         }
 
         public void headerComplete()

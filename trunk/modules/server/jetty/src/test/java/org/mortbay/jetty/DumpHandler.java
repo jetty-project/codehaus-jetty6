@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.Enumeration;
 
@@ -170,15 +171,20 @@ public class DumpHandler extends AbstractHandler
         }
         
         writer.write("</pre>\n<h3>Content:</h3>\n<pre>");
-        byte[] content= new byte[4096];
+        char[] content= new char[4096];
         int len;
         try{
-            InputStream in=request.getInputStream();
+            request.setCharacterEncoding(StringUtil.__UTF8);
+            Reader in=request.getReader();
+            String charset=request.getCharacterEncoding();
+            if (charset==null)
+                charset=StringUtil.__ISO_8859_1;
             while((len=in.read(content))>=0)
                 writer.write(new String(content,0,len));
         }
         catch(IOException e)
         {   
+            e.printStackTrace();
             writer.write(e.toString());
         }
         

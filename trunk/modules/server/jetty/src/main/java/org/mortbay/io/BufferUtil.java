@@ -16,6 +16,7 @@ package org.mortbay.io;
 
 import java.io.UnsupportedEncodingException;
 
+import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------------------------- */
@@ -306,24 +307,8 @@ public class BufferUtil
 
     public static String to8859_1_String(Buffer buffer)
     {
-        if (buffer.isImmutable())
+        if (buffer instanceof CachedBuffer)
             return buffer.toString();
-        
-        try
-        {
-            byte[] bytes=buffer.array();
-            if (bytes!=null)
-                return new String(bytes,buffer.getIndex(),buffer.length(),StringUtil.__ISO_8859_1);
-            
-            StringBuilder b = new StringBuilder(buffer.length());
-            for (int i=buffer.getIndex(),c=0;c<buffer.length();i++,c++)
-                b.append((char)(0x7f&buffer.peek(i)));
-            return b.toString();
-        }
-        catch(UnsupportedEncodingException e)
-        {
-            e.printStackTrace();
-            return buffer.toString();
-        }
+        return buffer.toString(StringUtil.__ISO_8859_1);
     }
 }
