@@ -126,6 +126,7 @@ public class Configuration extends AbstractConfiguration
         ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getWebAppContext().getClassLoader());
         lockCompEnv();
+        NamingEntry.setScope(NamingEntry.SCOPE_GLOBAL);//unassociate the thread
         Thread.currentThread().setContextClassLoader(oldLoader);
     }
     
