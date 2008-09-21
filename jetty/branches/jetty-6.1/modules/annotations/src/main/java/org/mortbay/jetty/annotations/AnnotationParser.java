@@ -30,6 +30,7 @@ import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.servlet.Holder;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.util.IntrospectionUtil;
 
@@ -79,16 +80,18 @@ public class AnnotationParser
      * servlet2.5 spec annotations found with those already existing (from parsing web.xml)
      * respecting the overriding rules found in the spec.
      * 
+     * @param webApp the webapp
      * @param clazz the class to inspect
      * @param runAs any run-as elements from web.xml
      * @param injections any injections specified in web.xml
      * @param callbacks any postconstruct/predestroy callbacks in web.xml
      */
-    public static void parseAnnotations (Class clazz, RunAsCollection runAs, InjectionCollection injections, LifeCycleCallbackCollection callbacks)
+    public static void parseAnnotations (WebAppContext webApp, Class clazz, RunAsCollection runAs, InjectionCollection injections, LifeCycleCallbackCollection callbacks)
     {
         if (clazz==null)
             return;
-        AnnotationCollection annotations = processClass(clazz);       
+        AnnotationCollection annotations = processClass(clazz);
+        annotations.setWebAppContext(webApp);
         annotations.processRunAsAnnotations(runAs);
         annotations.processResourcesAnnotations();
         annotations.processResourceAnnotations(injections);

@@ -15,10 +15,7 @@
 
 package org.mortbay.jetty.plus.naming;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.LinkRef;
-import javax.naming.NamingException;
+import javax.naming.*;
 import javax.transaction.UserTransaction;
 
 import org.mortbay.log.Log;
@@ -41,14 +38,21 @@ public class Transaction extends NamingEntry
     public static final String USER_TRANSACTION = "UserTransaction";
     
 
-    public static Transaction getTransaction (int scopeType)
+    public static void bindToENC ()
     throws NamingException
     {
-       return (Transaction)lookupNamingEntry(scopeType, Transaction.class, USER_TRANSACTION);
+        Transaction txEntry = (Transaction)NamingEntryUtil.lookupNamingEntry(null, Transaction.USER_TRANSACTION);
+
+        if ( txEntry != null )
+        {
+            txEntry.bindToComp();
+        }
+        else
+        {
+            throw new NameNotFoundException( USER_TRANSACTION + " not found" );
+        }
     }
-    
-
-
+ 
     
     
     public Transaction (UserTransaction userTransaction)
@@ -58,16 +62,34 @@ public class Transaction extends NamingEntry
     }
     
     
-    public void bindToENC ()
+    /** 
+     * Allow other bindings of UserTransaction.
+     * 
+     * These should be in ADDITION to java:comp/UserTransaction
+     * @see org.mortbay.jetty.plus.naming.NamingEntry#bindToENC(java.lang.String)
+     */
+    public void bindToENC (String localName)
     throws NamingException
     {   
         InitialContext ic = new InitialContext();
-        Context env = (Context)ic.lookup("java:comp");
-        Log.debug("Binding java:comp/"+getJndiName()+" to "+absoluteObjectNameString);
-        NamingUtil.bind(env, getJndiName(), new LinkRef(absoluteObjectNameString));
+        Context env = (Context)ic.lookup("java:comp/env");
+        Log.debug("Binding java:comp/env"+getJndiName()+" to "+objectNameString);
+        NamingUtil.bind(env, localName, new LinkRef(objectNameString));
     }
     
-    
+    /**
+     * Insist on the java:comp/UserTransaction binding
+     * @throws NamingException
+     */
+    private void bindToComp ()
+    throws NamingException
+    {   
+        //ignore the name, it is always bound to java:comp
+        InitialContext ic = new InitialContext();
+        Context env = (Context)ic.lookup("java:comp");
+        Log.debug("Binding java:comp/"+getJndiName()+" to "+objectNameString);
+        NamingUtil.bind(env, getJndiName(), new LinkRef(objectNameString));
+    }
     
     /**
      * Unbind this Transaction from a java:comp
@@ -86,6 +108,4 @@ public class Transaction extends NamingEntry
             Log.warn(e);
         }
     }
-    
-    
 }
