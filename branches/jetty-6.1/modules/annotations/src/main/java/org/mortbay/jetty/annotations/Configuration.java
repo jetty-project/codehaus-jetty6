@@ -29,6 +29,11 @@ import org.mortbay.util.LazyList;
  */
 public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
 {
+    
+    public Configuration () throws ClassNotFoundException
+    {
+        super();
+    }
 
     /** 
      * @see org.mortbay.jetty.plus.webapp.AbstractConfiguration#parseAnnotations()
@@ -41,7 +46,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
         {
             ServletHolder holder = (ServletHolder)itor.next();
             Class servlet = getWebAppContext().loadClass(holder.getClassName());
-            AnnotationParser.parseAnnotations(servlet, _runAsCollection,  _injections, _callbacks);
+            AnnotationParser.parseAnnotations(getWebAppContext(), servlet, _runAsCollection,  _injections, _callbacks);
         }
         
         //look thru _filters
@@ -50,7 +55,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
         {
             FilterHolder holder = (FilterHolder)itor.next();
             Class filter = getWebAppContext().loadClass(holder.getClassName());
-            AnnotationParser.parseAnnotations(filter, null, _injections, _callbacks);
+            AnnotationParser.parseAnnotations(getWebAppContext(), filter, null, _injections, _callbacks);
         }
         
         //look thru _listeners
@@ -58,7 +63,7 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
         while (itor.hasNext())
         {
             Object listener = itor.next();
-            AnnotationParser.parseAnnotations(listener.getClass(), null, _injections, _callbacks);
+            AnnotationParser.parseAnnotations(getWebAppContext(), listener.getClass(), null, _injections, _callbacks);
         }
     }
 }
