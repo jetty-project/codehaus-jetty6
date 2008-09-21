@@ -22,12 +22,15 @@ import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.annotations.resources.ResourceA;
 import org.mortbay.jetty.annotations.resources.ResourceB;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.naming.NamingEntry;
+import org.mortbay.jetty.webapp.WebAppContext;
 
 
 import junit.framework.TestCase;
@@ -42,9 +45,7 @@ public class TestAnnotationInheritance extends TestCase
     
     public void testInheritance ()
     throws Exception
-    {        
-        NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
-        
+    {          
         AnnotationParser processor = new AnnotationParser();
         AnnotationCollection collection = processor.processClass(ClassB.class);
         
@@ -81,26 +82,26 @@ public class TestAnnotationInheritance extends TestCase
         
         Field f = ClassA.class.getDeclaredField("m");
         assertTrue(fields.indexOf(f) >= 0);
-        
-     
-        NamingEntry.setScope(NamingEntry.SCOPE_GLOBAL);
     }
     
     
     public void testResourceAnnotations ()
     throws Exception
     {
+        Server server = new Server();
+        WebAppContext wac = new WebAppContext();
+        wac.setServer(server);
+        
         InitialContext ic = new InitialContext();
         Context comp = (Context)ic.lookup("java:comp");
         Context env = comp.createSubcontext("env");
         
-        org.mortbay.jetty.plus.naming.EnvEntry resourceA = new org.mortbay.jetty.plus.naming.EnvEntry("resA", new Integer(1000));
-        org.mortbay.jetty.plus.naming.EnvEntry resourceB = new org.mortbay.jetty.plus.naming.EnvEntry("resB", new Integer(2000));
+        org.mortbay.jetty.plus.naming.EnvEntry resourceA = new org.mortbay.jetty.plus.naming.EnvEntry(server, "resA", new Integer(1000), false);
+        org.mortbay.jetty.plus.naming.EnvEntry resourceB = new org.mortbay.jetty.plus.naming.EnvEntry(server, "resB", new Integer(2000), false);
         
-        NamingEntry.setScope(NamingEntry.SCOPE_LOCAL);
         
         AnnotationParser processor = new AnnotationParser();
-        processor.processClass(ResourceB.class);
+        processor.processClass(ResourceA.class);
         InjectionCollection injections = new InjectionCollection();
         LifeCycleCallbackCollection callbacks = new LifeCycleCallbackCollection();
         RunAsCollection runAses = new RunAsCollection();
@@ -111,7 +112,7 @@ public class TestAnnotationInheritance extends TestCase
         assertEquals(6, collection.getFields().size());
         
         //process with all the specific annotations turned into injections, callbacks etc
-        processor.parseAnnotations(ResourceB.class, runAses, injections, callbacks);
+        processor.parseAnnotations(wac, ResourceB.class, runAses, injections, callbacks);
         
         //processing classA should give us these jndi name bindings:
         // java:comp/env/myf
@@ -135,9 +136,20 @@ public class TestAnnotationInheritance extends TestCase
         
         List fieldInjections = injections.getFieldInjections(ResourceB.class);
         assertNotNull(fieldInjections);
+        
+        Iterator itor = fieldInjections.iterator();
+        System.err.println("Field injections:");
+        while (itor.hasNext())
+        {
+            System.err.println(itor.next());
+        }
         assertEquals(5, fieldInjections.size());
         
         List methodInjections = injections.getMethodInjections(ResourceB.class);
+        itor = methodInjections.iterator();
+        System.err.println("Method injections:");
+        while (itor.hasNext())
+            System.err.println(itor.next());
         assertNotNull(methodInjections);
         assertEquals(3, methodInjections.size());
     }

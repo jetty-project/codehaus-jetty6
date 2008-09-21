@@ -31,7 +31,7 @@
   </env-entry>
 
   <resource-ref>
-    <res-ref-name>jdbc/mydatasource</res-ref-name>
+    <res-ref-name>jdbc/mydatasource1</res-ref-name>
     <res-type>javax.sql.DataSource</res-type>
     <res-auth>Container</res-auth>
     <injection-target>

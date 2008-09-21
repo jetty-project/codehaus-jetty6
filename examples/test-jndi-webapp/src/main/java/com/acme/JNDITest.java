@@ -97,21 +97,22 @@ public class JNDITest extends HttpServlet {
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
+        String realPath = config.getServletContext().getRealPath("/");
         try
         {
             InitialContext ic = new InitialContext();
             woggle = (Integer)ic.lookup("java:comp/env/woggle");
-            System.err.println("woggle="+woggle);
-            System.err.println("gargle="+(Double)ic.lookup("java:comp/env/gargle"));
+            System.err.println(realPath+":woggle="+woggle);
             UserTransaction utx = (UserTransaction)ic.lookup("java:comp/UserTransaction");
-            System.err.println("utx="+utx);
+            System.err.println(realPath+":utx="+utx);
             myMailSession = (Session)ic.lookup("java:comp/env/mail/Session");
-            System.err.println("myMailSession: "+myMailSession);
+            System.err.println(realPath+":myMailSession: "+myMailSession);
             
             doSetup();
         }
         catch (Exception e)
         {
+            System.err.println(realPath+":"+e.getMessage());
             throw new ServletException(e);
         }
     }

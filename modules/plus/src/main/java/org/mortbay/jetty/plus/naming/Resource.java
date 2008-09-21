@@ -27,15 +27,12 @@ import javax.naming.NamingException;
  */
 public class Resource extends NamingEntry
 {
-  
-    public static Resource getResource (int scopeType, String jndiName)
+    
+    public  Resource (Object scope, String jndiName, Object objToBind)
     throws NamingException
     {
-        return (Resource)lookupNamingEntry (scopeType, Resource.class, jndiName);
+        super(scope, jndiName, objToBind);
     }
-    
-    
-    
     
     /**
      * @param jndiName

@@ -139,12 +139,14 @@ public class TestJAASUserRealm extends TestCase
         
         EmbeddedDataSource eds = new EmbeddedDataSource();
         
+        Context comp = null;
+        Context env = null;
         try
         {
             //make the java:comp/env
             InitialContext ic = new InitialContext();
-            Context comp = (Context)ic.lookup("java:comp");
-            Context env = comp.createSubcontext ("env");
+            comp = (Context)ic.lookup("java:comp");
+            env = comp.createSubcontext ("env");
             
             //make a DataSource    
             eds.setDatabaseName(dbname);          
@@ -232,6 +234,7 @@ public class TestJAASUserRealm extends TestCase
         }
         finally
         {
+            comp.destroySubcontext("env");
             try
             {
                 Connection c = eds.getConnection();
