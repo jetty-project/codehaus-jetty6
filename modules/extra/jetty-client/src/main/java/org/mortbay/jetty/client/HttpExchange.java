@@ -124,11 +124,11 @@ public class HttpExchange
     }
     
     
-    public int waitForTermination () throws InterruptedException
+    public int waitForDone () throws InterruptedException
     {
         synchronized (this)
         {
-            while (!isTerminal(_status))
+            while (!isDone(_status))
                 this.wait();
         }
         return _status;
@@ -193,7 +193,7 @@ public class HttpExchange
     }
     
     /* ------------------------------------------------------------ */
-    public boolean isTerminal (int status)
+    public boolean isDone (int status)
     {
         return ((status == STATUS_COMPLETED) || (status == STATUS_EXPIRED) || (status == STATUS_EXCEPTED));
     }
