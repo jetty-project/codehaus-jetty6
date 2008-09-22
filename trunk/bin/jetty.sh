@@ -123,7 +123,6 @@ shift
 ARGS="$*"
 CONFIGS=""
 NO_START=0
-TMP=/tmp
 
 ##################################################
 # See if there's a default configuration file
@@ -142,6 +141,14 @@ if [ -f $HOME/.jettyrc ] ; then
   . $HOME/.jettyrc
 fi
 
+##################################################
+# Set tmp if not already set.
+##################################################
+
+if [ -z "$TMP" ] 
+then
+  TMP=/tmp
+fi
 
 ##################################################
 # Jetty's hallmark

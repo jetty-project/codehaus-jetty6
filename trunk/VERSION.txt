@@ -26,6 +26,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-716 Fixed NPE on empty cometd message
  + JETTY-718 during ssl unwrap, return true if some bytes were read, even if underflow
  + JETTY-720 fix HttpExchange.waitForStatus
+ + JETTY-723 jetty.sh does not check if TMP already is set
  + JETTY-724 better handle EBSDIC default JVM encoding
 
 jetty-6.1.12rc2 12 September 2008
