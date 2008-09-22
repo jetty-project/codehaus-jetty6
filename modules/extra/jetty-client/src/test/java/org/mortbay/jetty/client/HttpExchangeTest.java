@@ -214,8 +214,10 @@ public class HttpExchangeTest extends TestCase
             httpExchange.setMethod(HttpMethods.POST);
             httpExchange.setRequestContent(new ByteArrayBuffer("<hello />"));
             _httpClient.send(httpExchange);
-            httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
+            int status = httpExchange.waitForTermination(); 
+            //httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
+            assertEquals(HttpExchange.STATUS_COMPLETED, status);
             assertEquals("i="+i,"<hello />",result);
         }
     }
@@ -228,11 +230,12 @@ public class HttpExchangeTest extends TestCase
             httpExchange.setURL(_scheme+"localhost:"+_port+"/?i="+i);
             httpExchange.setMethod(HttpMethods.GET);
             _httpClient.send(httpExchange);
-            httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
+            int status = httpExchange.waitForTermination(); 
+            //httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             assertEquals("i="+i,0,result.indexOf("<hello>"));
             assertEquals("i="+i,result.length()-10,result.indexOf("</hello>"));
-
+            assertEquals(HttpExchange.STATUS_COMPLETED, status);
             Thread.sleep(5);
         }
     }
@@ -251,9 +254,11 @@ public class HttpExchangeTest extends TestCase
             httpExchange.setMethod(HttpMethods.GET);
             httpExchange.setURI("/jetty-6");
             _httpClient.send(httpExchange);
-            httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
+            int status = httpExchange.waitForTermination();
+            //httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             result=result.trim();
+            assertEquals(HttpExchange.STATUS_COMPLETED, status);
             assertTrue(result.startsWith("Proxy request: http://jetty.mortbay.org:8080/jetty-6"));
             assertTrue(result.endsWith("basic dXNlcjpwYXNzd29yZA=="));
         }
