@@ -26,7 +26,6 @@ import org.mortbay.log.Log;
 public class MkcolExchange extends CachedExchange
 {
     boolean exists = false;
-    private boolean _isComplete = false;
 
     public MkcolExchange()
     {
@@ -55,23 +54,4 @@ public class MkcolExchange extends CachedExchange
     {
         return exists;
     }
-
-    public void waitTilCompletion() throws InterruptedException
-    {
-        synchronized (this)
-        {
-            while ( !_isComplete)
-            {
-                this.wait();
-            }
-        }
-    }
-
-    protected void onResponseComplete() throws IOException
-    {
-        _isComplete = true;
-
-        super.onResponseComplete();
-    }
-    
 }
