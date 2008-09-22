@@ -4,6 +4,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-716 NPE for empty cometd message
  + JETTY-718 during ssl unwrap, return true if some bytes were read, even if underflow
  + JETTY-722 jndi related threadlocal not cleared after deploying webapp
+ + JETTY-723 jetty.sh does not check if TMP already is set
  + JETTY-725 port JETTY-708 (jndi scoping) to jetty-6
 
 jetty-6.1.12rc2 12 September 2008
