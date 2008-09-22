@@ -26,7 +26,6 @@ import org.mortbay.log.Log;
 public class PropfindExchange extends HttpExchange
 {
     boolean _propertyExists = false;
-    private boolean _isComplete = false;
 
     /* ------------------------------------------------------------ */
     protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException
@@ -48,23 +47,4 @@ public class PropfindExchange extends HttpExchange
     {
         return _propertyExists;
     }
-
-    public void waitTilCompletion() throws InterruptedException
-    {
-        synchronized (this)
-        {
-            while ( !_isComplete)
-            {
-                this.wait();
-            }
-        }
-    }
-
-    protected void onResponseComplete() throws IOException
-    {
-        _isComplete = true;
-
-        super.onResponseComplete();
-    }
-
 }
