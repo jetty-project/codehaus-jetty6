@@ -50,65 +50,7 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
     private String _dirFileURL;
     private String _dirURL;
     
-    
-    //TODO refactor to separate class
-    /*
-    public static class SynchronousContentExchange extends ContentExchange
-    {
-        private Object lock = new Object();
 
-
-        public void waitForCompletion ()
-        throws Exception
-        {
-            synchronized (lock)
-            {
-                lock.wait();
-            }
-        }
-
-        public void onResponseComplete ()
-        throws IOException
-        {
-            synchronized (lock)
-            {
-                lock.notifyAll();
-            }
-            super.onResponseComplete();
-        }
-
- 
-        protected void onConnectionFailed(Throwable ex)
-        {
-            synchronized (lock)
-            {
-                lock.notifyAll();
-            }
-            super.onConnectionFailed(ex);
-        }
-
-
-        protected void onException(Throwable ex)
-        {
-            synchronized (lock)
-            {
-                lock.notifyAll();
-            }
-            super.onException(ex);
-        }
-
- 
-        protected void onExpire()
-        {
-            synchronized (lock)
-            {
-                lock.notifyAll();
-            }
-            super.onExpire();
-        }   
-        
-    }
-*/
     
    
     protected void setUp() throws Exception
@@ -172,7 +114,7 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
         singleFileExchange.setRequestHeader( "Content-Type", "application/octet-stream");
         singleFileExchange.setRequestHeader("Content-Length", String.valueOf( file.length() ));
         _httpClient.send(singleFileExchange);
-        singleFileExchange.waitForCompletion();
+        singleFileExchange.waitForDone();
         
         String result = singleFileExchange.getResponseContent();
         assertEquals(201, singleFileExchange.getResponseStatus());    
@@ -186,7 +128,7 @@ public class WebdavListenerTest extends TestCase//extends HttpExchangeTest
         dirFileExchange.setRequestHeader( "Content-Type", "application/octet-stream");
         dirFileExchange.setRequestHeader("Content-Length", String.valueOf( file.length() ));
         _httpClient.send(dirFileExchange);
-        dirFileExchange.waitForCompletion();
+        dirFileExchange.waitForDone();
         result = dirFileExchange.getResponseContent();        
         assertEquals(201, singleFileExchange.getResponseStatus());
        
