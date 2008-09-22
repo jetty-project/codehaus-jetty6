@@ -61,6 +61,14 @@ public class SessionTestClient
         return isAttributeSet(conn, name, value);
     }
     
+    public boolean invalidate(String context, String cookie) throws Exception
+    {
+        // should be POST, GET for now
+        HttpURLConnection conn = sendRequest("GET", new URL(_baseUrl + context + 
+                "/session/?Action=Invalidate"), cookie);
+        return !isSessionAvailable(conn);
+    } 
+    
     protected static boolean isSessionAvailable(HttpURLConnection conn) throws Exception
     {
         return !isTokenPresent(conn, "<H3>No Session</H3>");

@@ -93,5 +93,32 @@ public abstract class AbstractSessionTest extends TestCase
         assertTrue(client1.send("/contextA/dispatch/forward/contextB", cookie2));        
         assertTrue(client2.send("/contextA/dispatch/forward/contextB", cookie2));
         assertTrue(client1.send("/contextB", cookie2));
+        
+        // Session invalidate on contextA
+        assertTrue(client1.invalidate("/contextA", cookie1));
+        
+        // confirm that session on contextB has not been invalidated after contextA has been invalidated
+        assertTrue(client1.send("/contextB", cookie1));       
+        
+        // confirm that session on contextA has been deleted
+        assertFalse(client1.send("/contextA", cookie1));
+        
+        // session will reflect after 10s, so node2 still would not be deleted.
+        assertTrue(client2.send("/contextA", cookie1));
+        
+        // Session invalidate on contextB
+        assertTrue(client1.invalidate("/contextB/action", cookie1)); 
+        
+        // confirm that session on contextB has been deleted
+        assertFalse(client1.send("/contextB/action", cookie1));
+        
+        // session will reflect after 10s, so node2 still would not be deleted.
+        assertTrue(client2.send("/contextB/action", cookie1));
+        
+        // wait for saveInterval and check if the session invalidation has been reflected to the other node
+        // to test, uncomment 3 lines below
+        //Thread.sleep(10000);
+        //assertFalse(client2.send("/contextA", cookie1));
+        //assertFalse(client2.send("/contextB/action", cookie1));        
     }
 }
