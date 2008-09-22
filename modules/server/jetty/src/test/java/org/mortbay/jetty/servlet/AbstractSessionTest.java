@@ -121,4 +121,44 @@ public abstract class AbstractSessionTest extends TestCase
         //assertFalse(client2.send("/contextA", cookie1));
         //assertFalse(client2.send("/contextB/action", cookie1));        
     }
+    
+    public void testSessionManagerStop() throws Exception
+    {     
+        SessionTestClient client1 = new SessionTestClient("http://"+__host1+":"+__port1);
+        SessionTestClient client2 = new SessionTestClient("http://"+__host2+":"+__port2);
+        // confirm that user has no session
+        assertFalse(client1.send("/contextA", null));
+        String cookie1 = client1.newSession("/contextA");
+        assertNotNull(cookie1);
+        System.err.println("cookie1: " + cookie1);
+        
+        // creates a session for contextB
+        assertTrue(client1.send("/contextB", cookie1));
+        
+        // confirm that /contextA and /contextB sessions are available        
+        assertTrue(client1.send("/contextA", cookie1));
+        assertTrue(client1.send("/contextB/action", cookie1));
+        assertTrue(client1.setAttribute("/contextA", cookie1, "a", "b"));
+        assertTrue(client1.setAttribute("/contextB/action", cookie1, "c", "d"));
+        
+        // confirm that /contextA and /contextB sessions from client2 are available   
+        assertTrue(client2.send("/contextA", cookie1));
+        assertTrue(client2.send("/contextB/action", cookie1));
+        assertTrue(client2.hasAttribute("/contextA", cookie1, "a", "b"));
+        assertTrue(client2.hasAttribute("/contextB/action", cookie1, "c", "d"));
+        
+        // stop sessionManager from node1
+        _server1._sessionMgr1.stop();
+        
+        // verify session still exists for contextB
+        assertTrue(client1.send("/contextB/action", cookie1));
+        assertTrue(client1.hasAttribute("/contextB/action", cookie1, "c", "d"));
+        
+        // stop sessionManager from node2
+        _server2._sessionMgr2.stop();
+        
+        // verfiy session still exists for contextA
+        assertTrue(client2.send("/contextA", cookie1));
+        assertTrue(client2.hasAttribute("/contextA", cookie1, "a", "b"));
+    }
 }
