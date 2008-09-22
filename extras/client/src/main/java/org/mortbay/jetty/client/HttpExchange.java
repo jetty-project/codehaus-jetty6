@@ -86,7 +86,8 @@ public class HttpExchange
     InputStream _requestContentSource;
     Buffer _requestContentChunk;
     boolean _retryStatus = false;
-
+    
+    
     /**
      * boolean controlling if the exchange will have listeners autoconfigured by
      * the destination
@@ -121,6 +122,20 @@ public class HttpExchange
             }
         }
     }
+    
+    
+    public int waitForDone () throws InterruptedException
+    {
+        synchronized (this)
+        {
+            while (!isDone(_status))
+                this.wait();
+        }
+        return _status;
+    }
+    
+    
+    
 
     /* ------------------------------------------------------------ */
     public void reset() 
@@ -176,7 +191,13 @@ public class HttpExchange
             }
         }
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public boolean isDone (int status)
+    {
+        return ((status == STATUS_COMPLETED) || (status == STATUS_EXPIRED) || (status == STATUS_EXCEPTED));
+    }
+    
     /* ------------------------------------------------------------ */
     public HttpEventListener getEventListener()
     {
@@ -492,7 +513,7 @@ public class HttpExchange
     }
 
     protected void onResponseComplete() throws IOException
-    {
+    {   
     }
 
     protected void onConnectionFailed(Throwable ex)
