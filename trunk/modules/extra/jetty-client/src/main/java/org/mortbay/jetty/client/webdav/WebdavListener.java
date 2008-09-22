@@ -249,7 +249,7 @@ public class WebdavListener extends HttpEventListenerWrapper
 
         try
         {
-            propfindExchange.waitForTermination();
+            propfindExchange.waitForDone();
 
             return propfindExchange.exists();
         }
@@ -274,7 +274,7 @@ public class WebdavListener extends HttpEventListenerWrapper
 
         try
         {
-            mkcolExchange.waitForTermination();
+            mkcolExchange.waitForDone();
 
             return mkcolExchange.exists();
         }

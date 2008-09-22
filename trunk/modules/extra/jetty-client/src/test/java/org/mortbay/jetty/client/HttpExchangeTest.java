@@ -214,7 +214,7 @@ public class HttpExchangeTest extends TestCase
             httpExchange.setMethod(HttpMethods.POST);
             httpExchange.setRequestContent(new ByteArrayBuffer("<hello />"));
             _httpClient.send(httpExchange);
-            int status = httpExchange.waitForTermination(); 
+            int status = httpExchange.waitForDone(); 
             //httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             assertEquals(HttpExchange.STATUS_COMPLETED, status);
@@ -230,7 +230,7 @@ public class HttpExchangeTest extends TestCase
             httpExchange.setURL(_scheme+"localhost:"+_port+"/?i="+i);
             httpExchange.setMethod(HttpMethods.GET);
             _httpClient.send(httpExchange);
-            int status = httpExchange.waitForTermination(); 
+            int status = httpExchange.waitForDone(); 
             //httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             assertEquals("i="+i,0,result.indexOf("<hello>"));
@@ -254,7 +254,7 @@ public class HttpExchangeTest extends TestCase
             httpExchange.setMethod(HttpMethods.GET);
             httpExchange.setURI("/jetty-6");
             _httpClient.send(httpExchange);
-            int status = httpExchange.waitForTermination();
+            int status = httpExchange.waitForDone();
             //httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             result=result.trim();
