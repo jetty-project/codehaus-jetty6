@@ -77,7 +77,7 @@ public abstract class AbstractSessionTest extends TestCase
         
         // verify that client2 has same sessionAttributes on /contextB
         // client1's newly added attribute "zzzzz" needs to be flushed to the database first
-        // saveInterval is configured at 10ms... to test, uncomment the 2 lines below.
+        // saveInterval is configured at 10s... to test, uncomment the 2 lines below.
         //Thread.sleep(10000);
         //assertTrue(client2.hasAttribute("/contextB/action", cookie1, "zzzzz", "yyyyy"));        
         
