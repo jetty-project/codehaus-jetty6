@@ -9,7 +9,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-680 Can't configure the ResourceCollection with maven
  + JETTY-681 JETTY-692 MultiPartFilter is slow for file uploads
  + JETTY-682 Added listeners and queue methods to cometd
- + JETTY-686 LifeCycle.Listener 
+ + JETTY-686 LifeCycle.Listener
  + JETTY-687 Issue with servlet-mapping in dynamic servlet invoker
  + JETTY-688 Cookie causes NumberFormatException
  + JETTY-689 processing of non-servlet related annotations
@@ -27,7 +27,8 @@ jetty-7.0-SNAPSHOT
  + JETTY-718 during ssl unwrap, return true if some bytes were read, even if underflow
  + JETTY-720 fix HttpExchange.waitForStatus
  + JETTY-723 jetty.sh does not check if TMP already is set
- + JETTY-724 better handle EBSDIC default JVM encoding
+ + JETTY-724 better handle EBCDIC default JVM encoding
+ + JETTY-728 Improve Terracotta integration and performances
 
 jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading
