@@ -161,4 +161,20 @@ public abstract class AbstractSessionTest extends TestCase
         assertTrue(client2.send("/contextA", cookie1));
         assertTrue(client2.hasAttribute("/contextA", cookie1, "a", "b"));
     }
+    
+    public void testFailover() throws Exception
+    {
+        SessionTestClient client1 = new SessionTestClient("http://"+__host1+":"+__port1);
+        SessionTestClient client2 = new SessionTestClient("http://"+__host2+":"+__port2);
+        // confirm that user has no session
+        assertFalse(client1.send("/contextA", null));
+        String cookie1 = client1.newSession("/contextA");
+        
+        assertNotNull(cookie1);
+        System.err.println("cookie1: " + cookie1);
+        
+        assertTrue(client1.setAttribute("/contextA", cookie1, "a", "b"));
+        
+        assertTrue(client2.hasAttribute("/contextA", cookie1, "a", "b"));
+    }
 }
