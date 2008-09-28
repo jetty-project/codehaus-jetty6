@@ -29,6 +29,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-723 jetty.sh does not check if TMP already is set
  + JETTY-724 better handle EBCDIC default JVM encoding
  + JETTY-728 Improve Terracotta integration and performances
+ + JETTY-731 DeliverListener for cometd
 
 jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading

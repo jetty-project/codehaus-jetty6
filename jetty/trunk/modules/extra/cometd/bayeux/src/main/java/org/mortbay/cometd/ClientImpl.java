@@ -21,6 +21,7 @@ import java.util.Queue;
 
 import org.cometd.Bayeux;
 import org.cometd.Client;
+import org.cometd.DeliverListener;
 import org.cometd.Extension;
 import org.cometd.ClientListener;
 import org.cometd.Message;
@@ -42,10 +43,11 @@ public class ClientImpl implements Client
     private int _responsesPending;
     private ChannelImpl[] _subscriptions=new ChannelImpl[0]; // copy on write
     private boolean _JSONCommented;
-    private RemoveListener[] _rListeners=new RemoveListener[0]; // copy on write
-    private MessageListener[] _syncMListeners=new MessageListener[0]; // copy on write
-    private MessageListener[] _asyncMListeners=new MessageListener[0]; // copy on write
-    private QueueListener[] _qListeners=new QueueListener[0]; // copy on write
+    private RemoveListener[] _rListeners; // copy on write
+    private MessageListener[] _syncMListeners; // copy on write
+    private MessageListener[] _asyncMListeners; // copy on write
+    private QueueListener[] _qListeners; // copy on write
+    private DeliverListener[] _dListeners; // copy on write
     protected AbstractBayeux _bayeux;
     private String _browserId;
     private int _adviseVersion;
@@ -109,7 +111,7 @@ public class ClientImpl implements Client
             else
             { 
                 boolean add=_maxQueue>0;
-                if (_queue.size()>=_maxQueue)
+                if (_queue.size()>=_maxQueue && _qListeners!=null)
                 {
                     for (QueueListener l:_qListeners)
                     {
@@ -122,8 +124,9 @@ public class ClientImpl implements Client
             }    
 
             // deliver unsynchronized
-            for (MessageListener l:_syncMListeners)
-                l.deliver(from,this,message);
+            if (_syncMListeners!=null)
+                for (MessageListener l:_syncMListeners)
+                    l.deliver(from,this,message);
             alisteners=_asyncMListeners;
              
             if (_batch==0 &&  _responsesPending<1 && _queue.size()>0)
@@ -131,8 +134,20 @@ public class ClientImpl implements Client
         }
         
         // deliver unsynchronized
-        for (MessageListener l:alisteners)
-            l.deliver(from,this,message);
+        if (alisteners!=null)
+            for (MessageListener l:alisteners)
+                l.deliver(from,this,message);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void doDeliverListeners()
+    {
+        synchronized (this)
+        {
+            if (_dListeners!=null)
+                for (DeliverListener l:_dListeners)
+                    l.deliver(this,_queue);
+        }
     }
 
 
