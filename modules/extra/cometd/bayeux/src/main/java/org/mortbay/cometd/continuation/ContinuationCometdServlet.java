@@ -190,6 +190,7 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
             
             synchronized(client)
             {
+                client.doDeliverListeners();
                 ArrayQueue<Message> messages= (ArrayQueue)client.getQueue();
                 int size=messages.size();
 
