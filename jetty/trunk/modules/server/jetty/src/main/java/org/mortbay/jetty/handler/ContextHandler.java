@@ -224,7 +224,8 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      * matching virtual host name.
      * @param vhosts Array of virtual hosts that this context responds to. A
      * null host name or null/empty array means any hostname is acceptable.
-     * Host names may String representation of IP addresses.
+     * Host names may String representation of IP addresses. Host names may
+     * start with '*.' to wildcard one level of names.
      */
     public void setVirtualHosts( String[] vhosts )
     {
@@ -250,6 +251,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      * @return Array of virtual hosts that this context responds to. A
      * null host name or empty array means any hostname is acceptable.
      * Host names may be String representation of IP addresses.
+     * Host names may start with '*.' to wildcard one level of names.
      */
     public String[] getVirtualHosts()
     {
@@ -676,7 +678,15 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
                 
                 // TODO non-linear lookup
                 for (int i=0;!match && i<_vhosts.length;i++)
-                    match=_vhosts[i]!=null && _vhosts[i].equalsIgnoreCase(vhost);
+                {
+                    String contextVhost = _vhosts[i];
+                    if(contextVhost==null) continue;
+                    if(contextVhost.startsWith("*.")) {
+                        // wildcard only at the beginning, and only for one additional subdomain level
+                        match=contextVhost.regionMatches(true,2,vhost,vhost.indexOf(".")+1,contextVhost.length()-2);
+                    } else
+                        match=contextVhost.equalsIgnoreCase(vhost);
+                }
                 if (!match)
                     return;
             }
