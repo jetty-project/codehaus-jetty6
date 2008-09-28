@@ -7,6 +7,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-722 jndi related threadlocal not cleared after deploying webapp
  + JETTY-723 jetty.sh does not check if TMP already is set
  + JETTY-725 port JETTY-708 (jndi scoping) to jetty-6
+ + JETTY-731 DeliverListener for cometd
 
 jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading
