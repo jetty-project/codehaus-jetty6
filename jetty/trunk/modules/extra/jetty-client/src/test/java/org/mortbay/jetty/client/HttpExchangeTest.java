@@ -260,7 +260,7 @@ public class HttpExchangeTest extends TestCase
             result=result.trim();
             assertEquals(HttpExchange.STATUS_COMPLETED, status);
             assertTrue(result.startsWith("Proxy request: http://jetty.mortbay.org:8080/jetty-6"));
-            assertTrue(result.endsWith("basic dXNlcjpwYXNzd29yZA=="));
+            assertTrue(result.endsWith("Basic dXNlcjpwYXNzd29yZA=="));
         }
         finally
         {
