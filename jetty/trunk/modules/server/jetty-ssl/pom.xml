@@ -69,6 +69,19 @@
            </execution>
         </executions>
       </plugin>
+      <!-- always include sources since jetty-xbean makes use of them -->
+       <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-source-plugin</artifactId>
+         <executions>
+           <execution>
+             <id>attach-sources</id>
+             <goals>
+               <goal>jar</goal>
+             </goals>
+           </execution>
+         </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>

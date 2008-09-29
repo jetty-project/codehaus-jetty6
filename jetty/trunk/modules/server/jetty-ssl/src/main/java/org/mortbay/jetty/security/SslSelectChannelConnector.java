@@ -59,6 +59,8 @@ import org.mortbay.resource.Resource;
 /**
  * SslSelectChannelConnector.
  * 
+ * @org.apache.xbean.XBean element="sslConnector" description="Creates an NIO ssl connector"
+ *
  * @author Nik Gonzalez <ngonzalez@exist.com>
  * @author Greg Wilkins <gregw@mortbay.com>
  */
