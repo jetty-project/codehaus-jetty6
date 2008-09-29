@@ -35,7 +35,7 @@ public class BasicAuthorization implements Authorization
     
     public BasicAuthorization(Realm realm) throws IOException
     {
-        String authenticationString = "basic " + B64Code.encode( realm.getPrincipal() + ":" + realm.getCredentials(), StringUtil.__ISO_8859_1);
+        String authenticationString = "Basic " + B64Code.encode( realm.getPrincipal() + ":" + realm.getCredentials(), StringUtil.__ISO_8859_1);
         _authorization= new ByteArrayBuffer(authenticationString);
     }
     
