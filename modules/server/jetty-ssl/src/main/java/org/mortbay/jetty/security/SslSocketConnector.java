@@ -61,6 +61,8 @@ import org.mortbay.resource.Resource;
  * This is heavily based on the work from Court Demas, which in turn is based on the work from Forge
  * Research.
  * 
+ * @org.apache.xbean.XBean element="sslSocketConnector" description="Creates an ssl socket connector"
+ *
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd ACN 003 491 576
