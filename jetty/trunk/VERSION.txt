@@ -30,6 +30,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-724 better handle EBCDIC default JVM encoding
  + JETTY-728 Improve Terracotta integration and performances
  + JETTY-731 DeliverListener for cometd
+ + JETTY-732 Case Sensitive Basic Authentication Response Header Implementations
  + JETTY-733 Expose ssl connectors with xbean
 
 jetty-6.1.12rc2 12 September 2008

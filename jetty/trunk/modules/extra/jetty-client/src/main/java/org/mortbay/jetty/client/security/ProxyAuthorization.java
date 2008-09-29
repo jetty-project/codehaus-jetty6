@@ -35,7 +35,7 @@ public class ProxyAuthorization implements Authorization
     
     public ProxyAuthorization(String username,String password) throws IOException
     {
-        String authenticationString = "basic " + B64Code.encode( username + ":" + password, StringUtil.__ISO_8859_1);
+        String authenticationString = "Basic " + B64Code.encode( username + ":" + password, StringUtil.__ISO_8859_1);
         _authorization= new ByteArrayBuffer(authenticationString);
     }
     
