@@ -45,7 +45,7 @@ import org.mortbay.log.Log;
  */
 public class DataSourceUserRealm extends HashUserRealm
 {
-    private String _jndiName = "jdbc/Default";
+    private String _jndiName = "javax.sql.DataSource/default";
     private DataSource _datasource;
     private Server _server;
     private String _userTableName = "users";

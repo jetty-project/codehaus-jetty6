@@ -30,7 +30,7 @@ public class TestDataSourceUserRealm extends TestCase
         ds.setCreateDatabase("create");
  
 
-        Resource res = new Resource("jdbc/Default",ds);
+        Resource res = new Resource("javax.sql.DataSource/default",ds);
         
         //create tables
         Connection c = ds.getConnection();
@@ -126,7 +126,7 @@ public class TestDataSourceUserRealm extends TestCase
     public void testRealm ()
     throws Exception
     {
-       DataSourceUserRealm realm = new DataSourceUserRealm("jdbc/Default");
+       DataSourceUserRealm realm = new DataSourceUserRealm("javax.sql.DataSource/default");
        realm.setName("test");
        realm.setUserTableName("users_");
        realm.setRoleTableName("roles_");
