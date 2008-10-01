@@ -28,6 +28,7 @@
     <layout>default</layout>
     <url>http://snapshots.repository.codehaus.org</url>
     <snapshots><enabled>true</enabled></snapshots>
+    <releases><enabled>false</enabled></releases>
    </repository>
   </repositories>
   <scm>
