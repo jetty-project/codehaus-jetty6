@@ -38,23 +38,6 @@
     <url>http://www.mortbay.com</url>
   </organization>
   <build>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh-external</artifactId>
-        <version>${maven-wagon-version}</version>
-      </extension>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh</artifactId>
-        <version>${maven-wagon-version}</version>
-      </extension>
-      <extension>
-	    <groupId>org.apache.maven.wagon</groupId>
-	    <artifactId>wagon-webdav-jackrabbit</artifactId>
-	    <version>${maven-wagon-version}</version>
-      </extension>
-    </extensions>
     <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
@@ -251,7 +234,6 @@
     <slf4j-version>1.3.1</slf4j-version>
     <maven-bundle-plugin-version>1.4.0</maven-bundle-plugin-version>
     <maven-jar-plugin-version>2.2</maven-jar-plugin-version>
-    <maven-wagon-version>1.0-beta-4</maven-wagon-version>
   </properties>
   <profiles>
     <profile>
