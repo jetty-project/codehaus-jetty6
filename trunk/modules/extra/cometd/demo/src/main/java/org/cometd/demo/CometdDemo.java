@@ -26,7 +26,7 @@ import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.MovedContextHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.mortbay.jetty.ssl.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.resource.Resource;
