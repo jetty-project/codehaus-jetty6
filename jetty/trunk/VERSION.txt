@@ -14,7 +14,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-688 Cookie causes NumberFormatException
  + JETTY-689 processing of non-servlet related annotations
  + JETTY-690 Updated XBean dependencies to XBean version 3.4.3 and Spring 2.0.5.
- + JETTY-696 ./jetty.sh restart not working
+ + JETTY-696 jetty.sh restart not working
  + JETTY-698 org.mortbay.resource.JarResource.extract does not close JarInputStream jin
  + JETTY-699 Optimized cometd sending of 1 message to many many clients
  + JETTY-700 unit test for unread request data
@@ -33,6 +33,8 @@ jetty-7.0-SNAPSHOT
  + JETTY-732 Case Sensitive Basic Authentication Response Header Implementations
  + JETTY-733 Expose ssl connectors with xbean
  + JETTY-735 Wrong default jndi name on DataSourceUserRealm
+ + JETTY-736 Client Specific cometd advice
+
 
 jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading
