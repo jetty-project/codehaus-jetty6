@@ -20,7 +20,7 @@ import java.io.File;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.xml.XmlConfiguration;
 
 /**
