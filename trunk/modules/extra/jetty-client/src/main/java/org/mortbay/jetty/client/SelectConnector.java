@@ -31,7 +31,7 @@ import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.jetty.AbstractBuffers;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.HttpVersions;
-import org.mortbay.jetty.security.SslSelectChannelEndPoint;
+import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
 import org.mortbay.log.Log;
 
 class SelectConnector extends AbstractLifeCycle implements HttpClient.Connector, Runnable

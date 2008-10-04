@@ -8,7 +8,7 @@
       <directory>${basedir}</directory>
       <outputDirectory>jetty</outputDirectory>
       <includes>
-        <include>src/main/resources/org/mortbay/xml/**</include>
+        <include>src/main/resources/org/mortbay/**</include>
       </includes>
     </fileSet>
   </fileSets>
