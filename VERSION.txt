@@ -9,6 +9,7 @@ jetty-6.1-SNAPSHOT
  + JETTY-725 port JETTY-708 (jndi scoping) to jetty-6
  + JETTY-731 DeliverListener for cometd
  + JETTY-732 Case Sensitive Basic Authentication Response Header Implementations
+ + JETTY-736 Client Specific cometd advice
 
 jetty-6.1.12rc2 12 September 2008
  + JETTY-282 Support manually-triggered reloading
