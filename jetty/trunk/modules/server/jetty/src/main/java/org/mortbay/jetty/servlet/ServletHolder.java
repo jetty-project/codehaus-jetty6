@@ -32,9 +32,9 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.log.Log;
 
 

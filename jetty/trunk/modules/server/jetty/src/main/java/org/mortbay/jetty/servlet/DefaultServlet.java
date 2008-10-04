@@ -34,6 +34,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.WriterOutputStream;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Dispatcher;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpContent;
 import org.mortbay.jetty.HttpFields;

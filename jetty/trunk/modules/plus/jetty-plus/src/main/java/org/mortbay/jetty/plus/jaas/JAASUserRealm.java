@@ -29,7 +29,7 @@ import javax.security.auth.login.LoginException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.plus.jaas.callback.AbstractCallbackHandler;
 import org.mortbay.jetty.plus.jaas.callback.DefaultCallbackHandler;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.log.Log;
 import org.mortbay.util.Loader;
 
