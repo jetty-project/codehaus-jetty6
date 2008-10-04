@@ -203,17 +203,15 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                         if (_refsThreshold>0 && size==1 && transport instanceof JSONTransport)
                         {
                             MessageImpl message = (MessageImpl)messages.peek();
-                            
+
                             // is there a response already prepared
                             ByteBuffer buffer = message.getBuffer();
                             if (buffer!=null)
-                           {
-                                synchronized (buffer)
-                                {
-                                    request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
-                                    ((MessageImpl)message).decRef();
-                                    flushed=true;
-                                }
+                            {
+                                request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
+                                ((MessageImpl)message).decRef();
+                                flushed=true;
+
                             }
                             else if (message.getRefs()>=_refsThreshold)
                             {                                
@@ -234,14 +232,10 @@ public class ContinuationCometdServlet extends AbstractCometdServlet
                                 buffer.put(contentBytes);
                                 buffer.flip();
 
-                                synchronized (buffer) 
-                                {
-                                    message.setBuffer(buffer);
-                                    
-                                    request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
-                                    ((MessageImpl)message).decRef();
-                                    flushed=true;
-                                }
+                                message.setBuffer(buffer);
+                                request.setAttribute("org.mortbay.jetty.ResponseBuffer",buffer);
+                                ((MessageImpl)message).decRef();
+                                flushed=true;
                             }
                             else
                                 transport.send(pollReply);

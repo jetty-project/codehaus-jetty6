@@ -14,6 +14,7 @@
 package org.mortbay.servlet;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import java.util.concurrent.CountDownLatch;
@@ -37,15 +38,16 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.testing.HttpTester;
 import org.mortbay.jetty.testing.ServletTester;
 import org.mortbay.log.Log;
+import org.mortbay.util.IO;
 
 public class QoSFilterTest extends TestCase 
 {
     private ServletTester _tester;
     private LocalConnector[] _connectors;
     private CountDownLatch _doneRequests;
-    private final int NUM_CONNECTIONS = 20;
-    private final int NUM_LOOPS = 10;
-    private final int MAX_QOS = 5;
+    private final int NUM_CONNECTIONS = 8;
+    private final int NUM_LOOPS = 6;
+    private final int MAX_QOS = 4;
     
     protected void setUp() throws Exception 
     {
@@ -78,8 +80,7 @@ public class QoSFilterTest extends TestCase
         
         _doneRequests.await(10,TimeUnit.SECONDS);
         
-        if (TestServlet.__maxSleepers<=MAX_QOS)
-            Log.warn("TEST WAS NOT PARALLEL ENOUGH!");
+        assertFalse("TEST WAS NOT PARALLEL ENOUGH!",TestServlet.__maxSleepers<=MAX_QOS);
         assertTrue(TestServlet.__maxSleepers<=NUM_CONNECTIONS);
     }
 
@@ -95,9 +96,8 @@ public class QoSFilterTest extends TestCase
         }
 
         _doneRequests.await(10,TimeUnit.SECONDS);
-        if (TestServlet.__maxSleepers<MAX_QOS)
-            Log.warn("TEST WAS NOT PARALLEL ENOUGH!");
-        assertTrue(TestServlet.__maxSleepers<=MAX_QOS);
+        assertFalse("TEST WAS NOT PARALLEL ENOUGH!",TestServlet.__maxSleepers<MAX_QOS);
+        assertTrue(TestServlet.__maxSleepers==MAX_QOS);
     }
 
     public void testQosFilter() throws Exception
@@ -111,9 +111,8 @@ public class QoSFilterTest extends TestCase
             new Thread(new Worker2(i)).start();
         }
         
-        _doneRequests.await(10,TimeUnit.SECONDS);
-        if (TestServlet.__maxSleepers<MAX_QOS)
-            Log.warn("TEST WAS NOT PARALLEL ENOUGH!");
+        _doneRequests.await(20,TimeUnit.SECONDS);
+        assertFalse("TEST WAS NOT PARALLEL ENOUGH!",TestServlet.__maxSleepers<MAX_QOS);
         assertTrue(TestServlet.__maxSleepers<=MAX_QOS);
     }
     
@@ -168,19 +167,22 @@ public class QoSFilterTest extends TestCase
 
         public void run()
         {
+            URL url=null;
             try
             {
                 String addr = _tester.createSocketConnector(true);
                 for (int i=0;i<NUM_LOOPS;i++)
                 {
-                    URL url=new URL(addr+"/context/test?priority="+(_num%QoSFilter.__DEFAULT_MAX_PRIORITY)+"&n="+_num+"&l="+i);
-                    url.getContent();
+                    url=new URL(addr+"/context/test?priority="+(_num%QoSFilter.__DEFAULT_MAX_PRIORITY)+"&n="+_num+"&l="+i);
+                    // System.err.println(_num+"-"+i+" Try "+url);
+                    InputStream in = (InputStream)url.getContent();
                     _doneRequests.countDown();
+                    // System.err.println(_num+"-"+i+" Got "+IO.toString(in)+" "+_doneRequests.getCount());
                 }
             }
             catch(Exception e)
             {
-                e.printStackTrace();
+                Log.warn(url.toString(),e);
             }
         }
     }
@@ -201,7 +203,7 @@ public class QoSFilterTest extends TestCase
                         __maxSleepers = __sleepers;
                 }
 
-                Thread.sleep(200);
+                Thread.sleep(50);
 
                 synchronized(TestServlet.class)
                 {
