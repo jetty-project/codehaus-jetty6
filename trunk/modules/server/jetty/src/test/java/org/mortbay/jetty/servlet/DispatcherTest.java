@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.mortbay.jetty.Dispatcher;
 import org.mortbay.jetty.LocalConnector;
 import org.mortbay.jetty.Server;
 

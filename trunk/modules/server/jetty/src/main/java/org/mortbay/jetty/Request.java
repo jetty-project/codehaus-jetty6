@@ -50,8 +50,10 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
+import org.mortbay.jetty.security.Authenticator;
+import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -946,32 +948,29 @@ public class Request extends Suspendable implements HttpServletRequest
      */
     public Principal getUserPrincipal()
     {
-        if (_userPrincipal != null && _userPrincipal == UserRealm.NOT_CHECKED && _context!=null)
+        if (_userPrincipal != null && _userPrincipal instanceof SecurityHandler.NotChecked)
         {
-            _userPrincipal = UserRealm.NO_USER;
+            SecurityHandler.NotChecked not_checked=(SecurityHandler.NotChecked)_userPrincipal;
+            _userPrincipal = SecurityHandler.__NO_USER;
             
-            SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
-            if (securityHandler!=null)
+            Authenticator auth=not_checked.getSecurityHandler().getAuthenticator();
+            UserRealm realm=not_checked.getSecurityHandler().getUserRealm();
+            String pathInContext=getPathInfo()==null?getServletPath():(getServletPath()+getPathInfo());
+            
+            if (realm != null && auth != null)
             {
-                Authenticator auth=securityHandler.getAuthenticator();
-                UserRealm realm=securityHandler.getUserRealm();
-                String pathInContext=getPathInfo()==null?getServletPath():(getServletPath()+getPathInfo());
-
-                if (realm != null && auth != null)
+                try
                 {
-                    try
-                    {
-                        auth.authenticate(realm, pathInContext, this, null);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.ignore(e);
-                    }
+                    auth.authenticate(realm, pathInContext, this, null);
+                }
+                catch (Exception e)
+                {
+                    Log.ignore(e);
                 }
             }
         }
         
-        if (_userPrincipal == UserRealm.NO_USER) 
+        if (_userPrincipal == SecurityHandler.__NO_USER) 
             return null;
         return _userPrincipal;
     }

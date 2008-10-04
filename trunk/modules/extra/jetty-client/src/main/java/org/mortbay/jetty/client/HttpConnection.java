@@ -30,8 +30,8 @@ import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpParser;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.HttpVersions;
+import org.mortbay.jetty.security.SslSelectChannelEndPoint;
 import org.mortbay.jetty.client.security.Authorization;
-import org.mortbay.jetty.ssl.SslSelectChannelEndPoint;
 import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 
