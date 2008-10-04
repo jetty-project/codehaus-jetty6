@@ -38,7 +38,8 @@ import javax.sql.DataSource;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.SessionManager;
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.log.Log;
 
 
@@ -350,10 +351,12 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
         {
             //tell all contexts that may have a session object with this id to
             //get rid of them
-            Handler[] contexts = _server.getChildHandlersByClass(WebAppContext.class);
+            Handler[] contexts = _server.getChildHandlersByClass(ContextHandler.class);
             for (int i=0; contexts!=null && i<contexts.length; i++)
             {
-                AbstractSessionManager manager = ((AbstractSessionManager)((WebAppContext)contexts[i]).getSessionHandler().getSessionManager());
+                SessionManager manager = (SessionManager)
+                    ((SessionHandler)((ContextHandler)contexts[i]).getChildHandlerByClass(SessionHandler.class)).getSessionManager();
+                        
                 if (manager instanceof JDBCSessionManager)
                 {
                     ((JDBCSessionManager)manager).invalidateSession(id);
@@ -646,10 +649,12 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
 
 
                 //tell the SessionManagers to expire any sessions with a matching sessionId in memory
-                Handler[] contexts = _server.getChildHandlersByClass(WebAppContext.class);
+                Handler[] contexts = _server.getChildHandlersByClass(ContextHandler.class);
                 for (int i=0; contexts!=null && i<contexts.length; i++)
                 {
-                    AbstractSessionManager manager = ((AbstractSessionManager)((WebAppContext)contexts[i]).getSessionHandler().getSessionManager());
+                    SessionManager manager = (SessionManager)
+                        ((SessionHandler)((ContextHandler)contexts[i]).getChildHandlerByClass(SessionHandler.class)).getSessionManager();
+                            
                     if (manager instanceof JDBCSessionManager)
                     {
                         ((JDBCSessionManager)manager).expire(expiredSessionIds);

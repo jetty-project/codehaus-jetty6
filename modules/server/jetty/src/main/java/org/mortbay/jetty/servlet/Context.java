@@ -22,11 +22,13 @@ import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
+import org.mortbay.jetty.Dispatcher;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
-import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.handler.SecurityHandler;
 import org.mortbay.log.Log;
+import org.mortbay.util.Loader;
 import org.mortbay.util.URIUtil;
 
 
@@ -73,7 +75,7 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     public Context(HandlerContainer parent, String contextPath, int options)
     {
-        this(parent,contextPath,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?new SecurityHandler():null,null,null);
+        this(parent,contextPath,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?newSecurityHandler():null,null,null);
     }
     
     /* ------------------------------------------------------------ */
@@ -130,6 +132,20 @@ public class Context extends ContextHandler
         if (parent!=null)
             parent.addHandler(this);
     }    
+
+    /* ------------------------------------------------------------ */
+    static SecurityHandler newSecurityHandler()
+    {
+        try
+        {
+            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.ConstraintsSecurityHandler");
+            return (SecurityHandler)l.newInstance();
+        }
+        catch(Exception e)
+        {
+            throw new IllegalStateException(e);
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -314,41 +330,7 @@ public class Context extends ContextHandler
             return new Dispatcher(context, name);
         }
 
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see javax.servlet.ServletContext#getRequestDispatcher(java.lang.String)
-         */
-        public RequestDispatcher getRequestDispatcher(String uriInContext)
-        {
-            if (uriInContext == null)
-                return null;
 
-            if (!uriInContext.startsWith("/"))
-                return null;
-            
-            try
-            {
-                String query=null;
-                int q=0;
-                if ((q=uriInContext.indexOf('?'))>0)
-                {
-                    query=uriInContext.substring(q+1);
-                    uriInContext=uriInContext.substring(0,q);
-                }
-                if ((q=uriInContext.indexOf(';'))>0)
-                    uriInContext=uriInContext.substring(0,q);
-
-                String pathInContext=URIUtil.canonicalPath(URIUtil.decodePath(uriInContext));
-                String uri=URIUtil.addPaths(getContextPath(), uriInContext);
-                ContextHandler context=org.mortbay.jetty.servlet.Context.this;
-                return new Dispatcher(context,uri, pathInContext, query);
-            }
-            catch(Exception e)
-            {
-                Log.ignore(e);
-            }
-            return null;
-        }
 
         /* ------------------------------------------------------------ */
         /* (non-Javadoc)
