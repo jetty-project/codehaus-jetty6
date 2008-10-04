@@ -42,7 +42,7 @@ public class InvokerTest extends TestCase
         super.setUp();
         _server = new Server();
         _connector = new LocalConnector();
-        _context = new Context(Context.SESSIONS|Context.SECURITY);
+        _context = new Context(Context.SESSIONS);
         
         _server.setSendServerVersion(false);
         _server.addConnector(_connector);

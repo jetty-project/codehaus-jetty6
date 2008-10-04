@@ -30,6 +30,7 @@ import org.cometd.QueueListener;
 import org.cometd.RemoveListener;
 import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.ajax.JSON;
 
 /* ------------------------------------------------------------ */
 /**
@@ -50,11 +51,14 @@ public class ClientImpl implements Client
     private DeliverListener[] _dListeners; // copy on write
     protected AbstractBayeux _bayeux;
     private String _browserId;
-    private int _adviseVersion;
+    private JSON.Literal _advice;
     private int _batch;
     private int _maxQueue;
     private ArrayQueue<Message> _queue=new ArrayQueue<Message>(8,16,this);
     private long _timeout;
+    
+    // manipulated and synchronized by AbstractBayeux
+    int _adviseVersion;
 
     /* ------------------------------------------------------------ */
     protected ClientImpl(AbstractBayeux bayeux)
@@ -389,22 +393,24 @@ public class ClientImpl implements Client
 
     /* ------------------------------------------------------------ */
     /**
-     * @return the advised
+     * Get the advice specific for this Client
+     * @return advice specific for this client or null
      */
-    public int getAdviceVersion()
+    public JSON.Literal getAdvice()
     {
-    	return _adviseVersion;
+    	return _advice;
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @param advised the advised to set
+     * @param advice specific for this client
      */
-    public void setAdviceVersion(int version)
+    public void setAdvice(JSON.Literal advice)
     {
-    	_adviseVersion=version;
+    	_advice=advice;
     }
-
+    
+    
     /* ------------------------------------------------------------ */
     public void addListener(ClientListener listener)
     {

@@ -74,9 +74,10 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     private ChannelImpl _root = new ChannelImpl("/",this);
     private ConcurrentHashMap<String,ClientImpl> _clients=new ConcurrentHashMap<String,ClientImpl>();
     protected SecurityPolicy _securityPolicy=new DefaultPolicy();
-    protected Object _advice;
+    protected JSON.Literal _advice;
+    protected JSON.Literal _multiFrameAdvice; 
     protected int _adviceVersion=0;
-    protected Object _unknownAdvice=new JSON.Literal("{\"reconnect\":\"handshake\",\"interval\":500}");
+    protected Object _handshakeAdvice=new JSON.Literal("{\"reconnect\":\"handshake\",\"interval\":500}");
     protected int _logLevel;
     protected long _timeout=240000;
     protected long _interval=0;
@@ -85,7 +86,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     protected boolean _initialized;
     protected ConcurrentHashMap<String, List<String>> _browser2client=new ConcurrentHashMap<String, List<String>>();
     protected int _multiFrameInterval=-1;
-    protected JSON.Literal _multiFrameAdvice; 
     
     protected boolean _directDeliver=true;
     protected boolean _requestAvailable;
@@ -588,11 +588,67 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
 
     /* ------------------------------------------------------------ */
-    void generateAdvice()
+    /**
+     * The time a client should delay between reconnects when multiple
+     * connections from the same browser are detected. This effectively 
+     * produces traditional polling.
+     * @param multiFrameInterval the multiFrameInterval to set
+     */
+    public void setMultiFrameInterval(int multiFrameInterval)
     {
-        setAdvice(new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+getInterval()+",\"timeout\":"+getTimeout()+"}"));        
+        _multiFrameInterval=multiFrameInterval;
+        generateAdvice();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the multiFrameInterval in milliseconds
+     */
+    public int getMultiFrameInterval()
+    {
+        return _multiFrameInterval;
     }
 
+    /* ------------------------------------------------------------ */
+    void generateAdvice()
+    {
+        setAdvice(new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+getInterval()+",\"timeout\":"+getTimeout()+"}"));     
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setAdvice(JSON.Literal advice)
+    {
+        synchronized(this)
+        {
+            _adviceVersion++;
+            _advice=advice;
+            _multiFrameAdvice=new JSON.Literal(JSON.toString(multiFrameAdvice(advice)));
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    private Map<String,Object> multiFrameAdvice(JSON.Literal advice)
+    {
+        Map<String,Object> a = (Map<String,Object>)JSON.parse(_advice.toString());
+        a.put("multiple-clients",Boolean.TRUE);
+        if (_multiFrameInterval>0)
+        {
+            a.put("reconnect","retry");
+            a.put("interval",_multiFrameInterval);
+        }
+        else
+            a.put("reconnect","none");
+        return a;
+    }
+    
+    
+    
+    /* ------------------------------------------------------------ */
+    public JSON.Literal getAdvice()
+    {
+        return _advice;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return TRUE if {@link #getCurrentRequest()} will return the current request
@@ -628,50 +684,8 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     {
         _request.set(request);
     }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the multiFrameInterval in milliseconds
-     */
-    public int getMultiFrameInterval()
-    {
-        return _multiFrameInterval;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * The time a client should delay between reconnects when multiple
-     * connections from the same browser are detected. This effectively 
-     * produces traditional polling.
-     * @param multiFrameInterval the multiFrameInterval to set
-     */
-    public void setMultiFrameInterval(int multiFrameInterval)
-    {
-        _multiFrameInterval=multiFrameInterval;
-        if (multiFrameInterval>0)
-            _multiFrameAdvice=new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+_multiFrameInterval+",\"multiple-clients\":true,\"timeout\":"+getTimeout()+"}");
-        else
-            _multiFrameAdvice=new JSON.Literal("{\"reconnect\":\"none\",\"multiple-clients\":true,\"timeout\":"+getTimeout()+"}");
-        
-    }
 
 
-    /* ------------------------------------------------------------ */
-    public Object getAdvice()
-    {
-        return _advice;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    public void setAdvice(Object advice)
-    {
-        synchronized(this)
-        {
-            _advice=advice;
-            _adviceVersion++;
-        }
-    }
     
     /* ------------------------------------------------------------ */
     public Collection<Channel> getChannels()
@@ -864,7 +878,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             reply.put(CHANNEL_FIELD,channel);
             reply.put(SUCCESSFUL_FIELD,Boolean.FALSE);
             reply.put(ERROR_FIELD,"402::Unknown client");
-            reply.put("advice",new JSON.Literal("{\"reconnect\":\"handshake\"}"));
+            reply.put("advice",_handshakeAdvice);
             transport.send(reply);
         }
     }
@@ -899,21 +913,22 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
                 client.setConnectionType(type);
                 polling=false;
             }
-            
+
             Object advice = message.get(ADVICE_FIELD);
             if (advice!=null)
             {
-            	Long timeout=(Long)((Map)advice).get("timeout");
-            	if (timeout!=null && timeout.longValue()>0)
-            		client.setTimeout(timeout.longValue());
-            	else
-            		client.setTimeout(0);
+                Long timeout=(Long)((Map)advice).get("timeout");
+                if (timeout!=null && timeout.longValue()>0)
+                    client.setTimeout(timeout.longValue());
+                else
+                    client.setTimeout(0);
             }
             else
-        		client.setTimeout(0);
+                client.setTimeout(0);
             
             advice=null; 
         
+            // Work out if multiple clients from some browser?
             if (polling && _multiFrameInterval>0 && client.getBrowserId()!=null)
             {
                 List<String> clients=clientsOnBrowser(client.getBrowserId());
@@ -921,18 +936,26 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
                 if (count>1)
                 {
                     polling=clients.get(0).equals(client.getId());
-                    advice=_multiFrameAdvice;
-                    client.setAdviceVersion(-1);
+                    advice=client.getAdvice();
+                    if (advice==null)
+                        advice=_multiFrameAdvice;
+                    else // could probably cache this 
+                        advice=multiFrameAdvice((JSON.Literal)advice);
                 }
             }
 
             synchronized(this)
             {
-                if (client.getAdviceVersion()!=_adviceVersion && (client.getAdviceVersion()>=0||advice==null))
+                if (advice==null)
                 {
-                    advice=_advice;
-                    client.setAdviceVersion(_adviceVersion);
+                    if (_adviceVersion!=client._adviseVersion)
+                    {
+                        advice=_advice;
+                        client._adviseVersion=_adviceVersion;
+                    }
                 }
+                else
+                    client._adviseVersion=-1; // clear so it is reset after multi state clears
             }
            
             // reply to connect message
@@ -947,7 +970,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             if (id!=null)
                 reply.put(ID_FIELD,id);
 
-            
             if (polling)
                 transport.setPollReply(reply);
             else
@@ -1355,6 +1377,5 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             if (client.isLocal())
                 super.subscribe(client);
         }
-        
     }
 }

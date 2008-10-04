@@ -35,15 +35,15 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.UserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.thread.BoundedThreadPool;
+import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.IO;
 
 public class WebAppTest extends TestCase
 {
     Server server = new Server();
-    BoundedThreadPool threadPool = new BoundedThreadPool();
+    QueuedThreadPool threadPool = new QueuedThreadPool();
     Connector connector=new SelectChannelConnector();
     HandlerCollection handlers = new HandlerCollection();
     ContextHandlerCollection contexts = new ContextHandlerCollection();
