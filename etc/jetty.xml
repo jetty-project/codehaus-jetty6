@@ -143,7 +143,7 @@
     <!-- example).                                                   -->
     <!-- =========================================================== -->
     <Set name="UserRealms">
-      <Array type="org.mortbay.jetty.security.UserRealm">
+      <Array type="org.mortbay.jetty.UserRealm">
         <Item>
           <New class="org.mortbay.jetty.security.HashUserRealm">
             <Set name="name">Test Realm</Set>

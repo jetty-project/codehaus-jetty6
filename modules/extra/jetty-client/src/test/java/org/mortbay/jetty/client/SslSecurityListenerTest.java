@@ -40,10 +40,10 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
+import org.mortbay.jetty.security.ConstraintsSecurityHandler;
 import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.SslSocketConnector;
-import org.mortbay.jetty.security.UserRealm;
+import org.mortbay.jetty.ssl.SslSocketConnector;
+import org.mortbay.jetty.UserRealm;
 
 /**
  * Functional testing.
@@ -153,7 +153,7 @@ public class SslSecurityListenerTest extends TestCase
         cm.setConstraint(constraint);
         cm.setPathSpec("/*");
 
-        SecurityHandler sh = new SecurityHandler();
+        ConstraintsSecurityHandler sh = new ConstraintsSecurityHandler();
         _server.setHandler(sh);
         sh.setUserRealm(userRealm);
         sh.setConstraintMappings(new ConstraintMapping[]
