@@ -35,6 +35,7 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.client.security.HashRealmResolver;
 import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.client.security.SimpleRealmResolver;
 import org.mortbay.jetty.handler.AbstractHandler;
@@ -42,9 +43,9 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.BasicAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.ConstraintsSecurityHandler;
 import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.UserRealm;
+import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.UserRealm;
 
 /**
  * Functional testing for HttpExchange.
@@ -277,7 +278,7 @@ public class SecurityListenerTest extends TestCase
          cm.setConstraint(constraint);
          cm.setPathSpec("/*");
 
-         ConstraintsSecurityHandler sh = new ConstraintsSecurityHandler();
+         SecurityHandler sh = new SecurityHandler();
          _server.setHandler(sh);
          sh.setUserRealm(userRealm);
          sh.setConstraintMappings(new ConstraintMapping[]{cm});

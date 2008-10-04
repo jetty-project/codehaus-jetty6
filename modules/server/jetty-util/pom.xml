@@ -12,6 +12,28 @@
   <description>Utility classes for Jetty</description>
   <build>
     <defaultGoal>install</defaultGoal>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>org/mortbay/**/*.properties</include>
+          <include>org/mortbay/**/*.dtd</include>
+          <include>org/mortbay/**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+        <includes>
+          <include>**/*Test.java</include>
+          <include>org/mortbay/**/*.xml</include>
+        </includes>
+        <excludes>
+          <exclude>**/Abstract*.java</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
