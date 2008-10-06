@@ -29,6 +29,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-723 jetty.sh does not check if TMP already is set
  + JETTY-724 better handle EBCDIC default JVM encoding
  + JETTY-728 Improve Terracotta integration and performances
+ + JETTY-730 Set SAX parse features to defaults
  + JETTY-731 DeliverListener for cometd
  + JETTY-732 Case Sensitive Basic Authentication Response Header Implementations
  + JETTY-733 Expose ssl connectors with xbean
