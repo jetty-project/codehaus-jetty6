@@ -515,8 +515,14 @@ case "$ACTION" in
 
           if [ -f $JETTY_PID ]
           then
-            echo "Already Running!!"
-            exit 1
+            if running $JETTY_PID
+            then
+              echo "Already Running!!"
+              exit 1
+            else
+              # dead pid file - remove
+              rm -f $JETTY_PID
+            fi
           fi
 
           if [ x$JETTY_USER != x ] 
@@ -604,8 +610,14 @@ case "$ACTION" in
 
         if [ -f $JETTY_PID ]
         then
-            echo "Already Running!!"
-            exit 1
+            if running $JETTY_PID
+            then
+              echo "Already Running!!"
+              exit 1
+            else
+              # dead pid file - remove
+              rm -f $JETTY_PID
+            fi
         fi
 
         exec $RUN_CMD
