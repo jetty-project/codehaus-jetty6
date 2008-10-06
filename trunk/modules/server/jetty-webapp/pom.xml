@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-webapp</artifactId>
-  <name>Jetty :: webapp</name>
+  <name>Jetty :: Webapp Application Support</name>
   <url>http://jetty.mortbay.org</url>
   <description>Jetty web application support</description>
   <licenses>
