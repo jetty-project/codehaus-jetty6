@@ -155,6 +155,9 @@ public class ContextHandlerTest extends TestCase
         try
         {
             server.start();
+            checkWildcardHost(true,server,null,new String[] {"example.com", ".example.com", "vhost.example.com"});
+            checkWildcardHost(false,server,new String[] {null},new String[] {"example.com", ".example.com", "vhost.example.com"});
+            
             checkWildcardHost(true,server,new String[] {"example.com", "*.example.com"}, new String[] {"example.com", ".example.com", "vhost.example.com"});
             checkWildcardHost(false,server,new String[] {"example.com", "*.example.com"}, new String[] {"badexample.com", ".badexample.com", "vhost.badexample.com"});
             

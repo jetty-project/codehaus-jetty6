@@ -140,7 +140,42 @@ public class VirtualHostRuleContainerTest extends AbstractRuleTestCase
         assertEquals("{_fooContainerRule: vhosts[cheese.com, foo.com], Host: foo.com}: apply _fooRule", "/cheese/fooRule", _request.getRequestURI());
     }
     
+    public void testWildcardVirtualHosts() throws Exception
+    {
+        checkWildcardHost(true,null,new String[] {"foo.com", ".foo.com", "vhost.foo.com"});
+        checkWildcardHost(true,new String[] {null},new String[] {"foo.com", ".foo.com", "vhost.foo.com"});
+
+        checkWildcardHost(true,new String[] {"foo.com", "*.foo.com"}, new String[] {"foo.com", ".foo.com", "vhost.foo.com"});
+        checkWildcardHost(false,new String[] {"foo.com", "*.foo.com"}, new String[] {"badfoo.com", ".badfoo.com", "vhost.badfoo.com"});
+        
+        checkWildcardHost(false,new String[] {"*."}, new String[] {"anything.anything"});
+        
+        checkWildcardHost(true,new String[] {"*.foo.com"}, new String[] {"vhost.foo.com", ".foo.com"});
+        checkWildcardHost(false,new String[] {"*.foo.com"}, new String[] {"vhost.www.foo.com", "foo.com", "www.vhost.foo.com"});
+
+        checkWildcardHost(true,new String[] {"*.sub.foo.com"}, new String[] {"vhost.sub.foo.com", ".sub.foo.com"});
+        checkWildcardHost(false,new String[] {"*.sub.foo.com"}, new String[] {".foo.com", "sub.foo.com", "vhost.foo.com"});
+        
+        checkWildcardHost(false,new String[] {"foo.*.com","foo.com.*"}, new String[] {"foo.vhost.com", "foo.com.vhost", "foo.com"});                    
+    }
     
+    private void checkWildcardHost(boolean succeed, String[] ruleHosts, String[] requestHosts) throws Exception
+    {
+        _fooContainerRule.setVirtualHosts(ruleHosts);
+        _handler.setRules(new Rule[] { _fooContainerRule });
+
+        for(String host: requestHosts)
+        {
+            _request.setServerName(host);
+            _request.setRequestURI("/cheese/bar");
+            handleRequest();
+            if(succeed)
+                assertEquals("{_fooContainerRule, Host: "+host+"}: should apply _fooRule", "/cheese/fooRule", _request.getRequestURI());
+            else
+                assertEquals("{_fooContainerRule, Host: "+host+"}: should not apply _fooRule", "/cheese/bar", _request.getRequestURI());
+        }
+    }
+
     private void handleRequest() throws Exception
     {
         _server.handle("/cheese/bar", _request, _response, 0);
