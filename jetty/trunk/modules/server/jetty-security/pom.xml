@@ -7,9 +7,9 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty-security</artifactId>
-  <name>Jetty :: webapp</name>
+  <name>Jetty :: Security</name>
   <url>http://jetty.mortbay.org</url>
-  <description>Jetty security</description>
+  <description>Jetty security infrastructure</description>
   <licenses>
     <license>
       <name>Apache License Version 2</name>
