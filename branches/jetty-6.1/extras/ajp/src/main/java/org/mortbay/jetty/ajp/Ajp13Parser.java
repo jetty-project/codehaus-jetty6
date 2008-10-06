@@ -408,7 +408,8 @@ public class Ajp13Parser implements Parser
                         
                     case Ajp13RequestHeaders.SSL_KEYSIZE_ATTR:
                         
-                        // This has been implemented as either a string or a integer.
+                        // This has been implemented in AJP13 as either a string or a integer.
+                        // Servlet specs say javax.servlet.request.key_size must be an Integer
                         
                         // Does it look like a string containing digits?
                         int length = Ajp13RequestPacket.getInt(_buffer);
@@ -417,10 +418,10 @@ public class Ajp13Parser implements Parser
                         {
                             // this must be a string length rather than a key length
                             _buffer.skip(-2);
-                            _handler.parsedRequestAttribute("javax.servlet.request.key_size", Ajp13RequestPacket.getString(_buffer, _tok1));
+                            _handler.parsedSslKeySize(Integer.parseInt(Ajp13RequestPacket.getString(_buffer, _tok1).toString()));
                         }
                         else
-                            _handler.parsedRequestAttribute("javax.servlet.request.key_size",length);
+                            _handler.parsedSslKeySize(length);
                         
                         break;
 
@@ -758,7 +759,7 @@ public class Ajp13Parser implements Parser
 
         public void parsedSslSession(Buffer sslSession) throws IOException;
 
-
+        public void parsedSslKeySize(int keySize) throws IOException;
 
 
 

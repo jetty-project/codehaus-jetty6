@@ -142,6 +142,11 @@ public class Ajp13Connection extends HttpConnection
         {
             _request.setAttribute("javax.servlet.request.ssl_session", sslSession.toString());
         }
+        
+        public void parsedSslKeySize(int keySize) throws IOException
+        {
+           _request.setAttribute("javax.servlet.request.key_size", new Integer(keySize));
+        }
 
         public void parsedMethod(Buffer method) throws IOException
         {

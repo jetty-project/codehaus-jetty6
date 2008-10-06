@@ -1,6 +1,7 @@
 jetty-6.1-SNAPSHOT
  + JETTY-241 Support for web application overlays in rapid application development (jetty:run)
  + JETTY-686 LifeCycle.Listener
+ + JETTY-715 AJP key size
  + JETTY-716 NPE for empty cometd message
  + JETTY-718 during ssl unwrap, return true if some bytes were read, even if underflow
  + JETTY-720 fix HttpExchange.waitForStatus
