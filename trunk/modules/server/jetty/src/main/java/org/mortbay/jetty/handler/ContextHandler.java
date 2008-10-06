@@ -224,7 +224,7 @@ public class ContextHandler extends HandlerWrapper implements Attributes, Server
      * matching virtual host name.
      * @param vhosts Array of virtual hosts that this context responds to. A
      * null host name or null/empty array means any hostname is acceptable.
-     * Host names may String representation of IP addresses. Host names may
+     * Host names may be String representation of IP addresses. Host names may
      * start with '*.' to wildcard one level of names.
      */
     public void setVirtualHosts( String[] vhosts )
