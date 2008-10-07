@@ -18,20 +18,25 @@
  */
 
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty;
 
-import javax.security.auth.message.MessageInfo;
+import java.security.Principal;
+import java.util.List;
+
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.AuthException;
-
-import org.mortbay.jetty.security.AuthResult;
+import javax.security.auth.Subject;
 
 /**
- * @version $Rev:$ $Date:$
+ * This can evaluate results lazily.
+ *
+ * @version $Rev$ $Date$
  */
-public interface ServerAuthentication {
+public interface AuthResult {
 
-    AuthResult validateRequest(MessageInfo messageInfo, boolean authRequired) throws AuthException;
-
-    AuthStatus secureResponse(MessageInfo messageInfo, AuthResult validatedUser) throws AuthException;
+    AuthStatus getAuthStatus();
+    Subject getClientSubject();
+    Principal getUserPrincipal();
+    List<String> getGroups();
+    String getAuthMethod();
+    
 }

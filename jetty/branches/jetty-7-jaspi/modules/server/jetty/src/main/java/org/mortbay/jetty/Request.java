@@ -51,7 +51,7 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
-import org.mortbay.jetty.security.UserIdentity;
+import org.mortbay.jetty.UserIdentity;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;

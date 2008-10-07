@@ -33,9 +33,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
+import org.mortbay.jetty.UserIdentity;
+import org.mortbay.jetty.AuthResult;
+import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.handler.HandlerWrapper;
-import org.mortbay.jetty.security.AuthResult;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.handler.SecurityHandler;
 
 /**
  * @version $Rev$ $Date$

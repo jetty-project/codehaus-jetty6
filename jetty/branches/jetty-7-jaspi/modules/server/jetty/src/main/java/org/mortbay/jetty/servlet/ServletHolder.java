@@ -32,8 +32,8 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
-import org.mortbay.jetty.security.RunAsToken;
-import org.mortbay.jetty.security.UserIdentity;
+import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.UserIdentity;
 import org.mortbay.log.Log;
 
 

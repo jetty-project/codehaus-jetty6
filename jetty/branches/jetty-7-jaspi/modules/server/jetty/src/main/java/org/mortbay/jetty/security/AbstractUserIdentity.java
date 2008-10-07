@@ -22,12 +22,13 @@ package org.mortbay.jetty.security;
 
 import java.security.Principal;
 
-import org.mortbay.jetty.security.AuthResult;
+import org.mortbay.jetty.AuthResult;
+import org.mortbay.jetty.UserIdentity;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
-public abstract class AbstractUserIdentity implements UserIdentity{
+public abstract class AbstractUserIdentity implements UserIdentity {
     private final AuthResult authResult;
 
     protected AbstractUserIdentity(AuthResult authResult) {

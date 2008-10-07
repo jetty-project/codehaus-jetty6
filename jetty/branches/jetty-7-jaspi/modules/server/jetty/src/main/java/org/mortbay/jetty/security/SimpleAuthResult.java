@@ -28,10 +28,10 @@ import java.util.Arrays;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.security.AuthResult;
+import org.mortbay.jetty.AuthResult;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class SimpleAuthResult implements AuthResult {
 

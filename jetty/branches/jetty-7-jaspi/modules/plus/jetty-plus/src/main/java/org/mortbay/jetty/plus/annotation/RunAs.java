@@ -15,11 +15,11 @@
 
 package org.mortbay.jetty.plus.annotation;
 
-import org.mortbay.jetty.security.SecurityHandler;
-import javax.servlet.Servlet;
+import org.mortbay.jetty.handler.SecurityHandler;
+
 import javax.servlet.ServletException;
 
-import org.mortbay.jetty.servlet.ServletHolder;   
+import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
  * RunAs
