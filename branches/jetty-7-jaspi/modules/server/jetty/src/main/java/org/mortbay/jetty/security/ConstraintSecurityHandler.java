@@ -23,7 +23,9 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.jetty.security.AuthResult;
+import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.UserIdentity;
+import org.mortbay.jetty.AuthResult;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.util.LazyList;
 

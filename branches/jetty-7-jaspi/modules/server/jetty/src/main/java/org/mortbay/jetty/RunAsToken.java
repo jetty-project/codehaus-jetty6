@@ -18,25 +18,12 @@
  */
 
 
-package org.mortbay.jetty.security;
-
-import java.security.Principal;
-import java.util.List;
-
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.Subject;
+package org.mortbay.jetty;
 
 /**
- * This can evaluate results lazily.
- *
- * @version $Rev:$ $Date:$
+ * marker interface for run-as-role tokens
+ * @version $Rev$ $Date$
  */
-public interface AuthResult {
-
-    AuthStatus getAuthStatus();
-    Subject getClientSubject();
-    Principal getUserPrincipal();
-    List<String> getGroups();
-    String getAuthMethod();
-    
+public interface RunAsToken
+{
 }

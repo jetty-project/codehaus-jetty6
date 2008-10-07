@@ -12,12 +12,11 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty;
 import java.security.Principal;
-import java.util.Map;
-import java.util.Collections;
 
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.RunAsToken;
 
 /* ------------------------------------------------------------ */
 /** User object that encapsulates user identity and operations such as run-as-role actions, checking isUserInRole and getUserPrincipal.

@@ -36,7 +36,7 @@ import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
 import org.mortbay.jetty.servlet.SessionHandler;
 

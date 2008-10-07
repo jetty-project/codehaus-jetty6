@@ -20,8 +20,10 @@
 
 package org.mortbay.jetty.security;
 
+import org.mortbay.jetty.RunAsToken;
+
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class ConstraintRunAsToken implements RunAsToken
 {

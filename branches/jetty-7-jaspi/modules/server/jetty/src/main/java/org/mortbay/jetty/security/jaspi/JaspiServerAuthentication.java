@@ -20,7 +20,6 @@
 
 package org.mortbay.jetty.security.jaspi;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.security.Principal;
 
@@ -35,12 +34,12 @@ import javax.security.auth.message.config.ServerAuthContext;
 
 import org.mortbay.jetty.security.JettyMessageInfo;
 import org.mortbay.jetty.security.ServletCallbackHandler;
-import org.mortbay.jetty.security.ServerAuthentication;
-import org.mortbay.jetty.security.AuthResult;
+import org.mortbay.jetty.ServerAuthentication;
+import org.mortbay.jetty.AuthResult;
 import org.mortbay.jetty.security.SimpleAuthResult;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class JaspiServerAuthentication implements ServerAuthentication {
 

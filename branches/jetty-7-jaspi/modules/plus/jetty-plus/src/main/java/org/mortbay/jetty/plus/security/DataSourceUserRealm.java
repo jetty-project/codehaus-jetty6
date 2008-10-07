@@ -17,10 +17,7 @@
 package org.mortbay.jetty.plus.security;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -29,7 +26,6 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.plus.naming.NamingEntryUtil;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;

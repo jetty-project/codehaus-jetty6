@@ -32,13 +32,13 @@ import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Dispatcher;
+import org.mortbay.jetty.RunAsToken;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
-import org.mortbay.jetty.security.RunAsToken;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.handler.SecurityHandler;
+import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;

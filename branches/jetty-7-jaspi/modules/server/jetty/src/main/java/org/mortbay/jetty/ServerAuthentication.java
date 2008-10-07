@@ -18,12 +18,22 @@
  */
 
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty;
+
+import javax.security.auth.message.MessageInfo;
+import javax.security.auth.message.AuthStatus;
+import javax.security.auth.message.AuthException;
+
+import org.mortbay.jetty.AuthResult;
 
 /**
- * marker interface for run-as-role tokens
- * @version $Rev:$ $Date:$
+ * This is like the JASPI ServerAuthContext but is intended to be easier to use and allow lazy auth.
+ *
+ * @version $Rev$ $Date$
  */
-public interface RunAsToken
-{
+public interface ServerAuthentication {
+
+    AuthResult validateRequest(MessageInfo messageInfo, boolean authRequired) throws AuthException;
+
+    AuthStatus secureResponse(MessageInfo messageInfo, AuthResult validatedUser) throws AuthException;
 }

@@ -20,10 +20,10 @@
 
 package org.mortbay.jetty.security;
 
-import javax.security.auth.Subject;
-import javax.security.auth.message.config.ServerAuthConfig;
-
 import org.mortbay.jetty.handler.HandlerWrapper;
+import org.mortbay.jetty.handler.SecurityHandler;
+import org.mortbay.jetty.RunAsToken;
+import org.mortbay.jetty.ServerAuthentication;
 
 /**
  * @version $Rev$ $Date$

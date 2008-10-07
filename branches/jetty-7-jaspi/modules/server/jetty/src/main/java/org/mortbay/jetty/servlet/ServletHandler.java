@@ -42,7 +42,7 @@ import org.mortbay.jetty.HttpException;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.security.UserIdentity;
+import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.log.Log;

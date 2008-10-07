@@ -25,8 +25,9 @@ import java.util.Map;
 import java.util.Collections;
 
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.security.AuthResult;
+import org.mortbay.jetty.AuthResult;
 import org.mortbay.jetty.security.SimpleAuthResult;
+import org.mortbay.jetty.RunAsToken;
 
 /**
  * @version $Rev$ $Date$
