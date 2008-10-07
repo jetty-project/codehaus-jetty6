@@ -17,10 +17,11 @@
  */
 package org.cometd.demo;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.cometd.Bayeux;
 import org.cometd.Channel;
@@ -31,64 +32,45 @@ import org.mortbay.log.Log;
 
 public class ChatService extends BayeuxService
 {
-    /**
-     * A map(channel, map(userName, clientId))
-     */
-    private final ConcurrentMap<String, Map<String, String>> _members = new ConcurrentHashMap<String, Map<String, String>>();
+    ConcurrentMap<String,Set<String>> _members = new ConcurrentHashMap<String,Set<String>>();
 
     public ChatService(Bayeux bayeux)
     {
-        super(bayeux, "chat");
-        subscribe("/chat/**", "trackMembers");
-        subscribe("/service/privatechat", "privateChat");
+        super(bayeux,"chat");
+        subscribe("/chat/**","trackMembers");
     }
 
-    public void trackMembers(final Client joiner, final String channelName, Map<String, Object> data, final String messageId)
+    public void trackMembers(Client joiner,String channel,Map<String,Object> data,String id)
     {
         if (Boolean.TRUE.equals(data.get("join")))
         {
-            Map<String, String> membersMap = _members.get(channelName);
-            if (membersMap == null)
+            Set<String> m = _members.get(channel);
+            if (m==null)
             {
-                Map<String, String> newMembersMap = new ConcurrentHashMap<String, String>();
-                membersMap = _members.putIfAbsent(channelName, newMembersMap);
-                if (membersMap == null) membersMap = newMembersMap;
+                Set<String> new_list=new CopyOnWriteArraySet<String>();
+                m=_members.putIfAbsent(channel,new_list);
+                if (m==null)
+                    m=new_list;
             }
 
-            final Map<String, String> members = membersMap;
-            final String userName = (String)data.get("user");
-            members.put(userName, joiner.getId());
-            joiner.addListener(new RemoveListener()
-            {
+            final Set<String> members=m;
+            final String username=(String)data.get("user");
+
+            members.add(username);
+            final String channel_=channel;
+            final String id_=id;
+            joiner.addListener(new RemoveListener(){
                 public void removed(String clientId, boolean timeout)
                 {
-//                    members.remove(joiner.getId());
-                    members.remove(clientId);
-                    Log.info("members: " + members);
-                    // Broadcast the members to all existing members
-                    Channel channel = getBayeux().getChannel(channelName, false);
-                    if (channel != null) channel.publish(getClient(), members.keySet(), messageId);
+                    members.remove(username);
+                    Log.info("members: "+members);
+                    Channel ch=getBayeux().getChannel(channel_,false);
+                    if (ch!=null)
+                        ch.publish(getClient(),members,id_);
                 }
             });
-
-            Log.info("Members: " + members);
-            // Broadcast the members to all existing members
-            getBayeux().getChannel(channelName, false).publish(getClient(), members.keySet(), messageId);
+            Log.info("Members: "+members);
+            getBayeux().getChannel(channel,false).publish(getClient(),members,id);
         }
-    }
-
-    public void privateChat(Client source, String channel, Map<String, Object> data, String messageId)
-    {
-        String roomName = (String)data.get("room");
-        Map<String, String> membersMap = _members.get(roomName);
-        String peerName = (String)data.get("peer");
-        String peerId = membersMap.get(peerName);
-        Client peer = getBayeux().getClient(peerId);
-
-        Map<String, Object> message = new HashMap<String, Object>();
-        message.put("chat", data.get("chat"));
-        message.put("user", data.get("user"));
-        message.put("scope", "private");
-        peer.deliver(getClient(), roomName, message, messageId);
     }
 }
