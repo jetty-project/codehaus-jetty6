@@ -36,6 +36,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.jetty.EofException;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.client.Address;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.log.Log;
@@ -52,7 +53,7 @@ import org.mortbay.util.TypeUtil;
 public class AsyncProxyServlet implements Servlet
 {
     HttpClient _client;
-    
+
     protected HashSet<String> _DontProxyHeaders = new HashSet<String>();
     {
         _DontProxyHeaders.add("proxy-connection");
@@ -65,10 +66,10 @@ public class AsyncProxyServlet implements Servlet
         _DontProxyHeaders.add("proxy-authenticate");
         _DontProxyHeaders.add("upgrade");
     }
-    
+
     private ServletConfig config;
     private ServletContext context;
-    
+
     /* (non-Javadoc)
      * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
      */
@@ -161,7 +162,7 @@ public class AsyncProxyServlet implements Servlet
                     }
 
                     protected void onConnectionFailed(Throwable ex)
-                    {   
+                    {
                         onException(ex);
                     }
 
@@ -172,7 +173,7 @@ public class AsyncProxyServlet implements Servlet
                             Log.ignore(ex);
                             return;
                         }
-                        
+
                         try
                         {
                             Log.warn(ex.toString());
@@ -191,7 +192,7 @@ public class AsyncProxyServlet implements Servlet
                             Log.debug(e);
                         }
                     }
-                    
+
                     protected void onExpire()
                     {
                         try
@@ -209,20 +210,20 @@ public class AsyncProxyServlet implements Servlet
                             Log.warn(e.toString());
                             Log.debug(e);
                         }
-                    }   
+                    }
 
                 };
 
                 exchange.setScheme(HttpSchemes.HTTPS.equals(request.getScheme())?HttpSchemes.HTTPS_BUFFER:HttpSchemes.HTTP_BUFFER);
                 exchange.setMethod(request.getMethod());
                 exchange.setURI(uri);
-                
+
                 exchange.setVersion(request.getProtocol());
-                InetSocketAddress address=new InetSocketAddress(request.getServerName(),request.getServerPort());
+                Address address=new Address(request.getServerName(),request.getServerPort());
                 exchange.setAddress(address);
-                
+
                 if (Log.isDebugEnabled())
-                    Log.debug("PROXY TO http://"+address.getHostName()+":"+address.getPort()+uri);
+                    Log.debug("PROXY TO http://"+address.getHost()+":"+address.getPort()+uri);
 
 
                 // check connection header
@@ -284,9 +285,9 @@ public class AsyncProxyServlet implements Servlet
 
                 request.suspend();
                 _client.send(exchange);
-                
+
             }
-        } 
+        }
     }
 
 
@@ -296,12 +297,12 @@ public class AsyncProxyServlet implements Servlet
         throws IOException
     {
         String uri = request.getRequestURI();
-        
+
         context.log("CONNECT: "+uri);
-        
+
         String port = "";
         String host = "";
-        
+
         int c = uri.indexOf(':');
         if (c>=0)
         {
@@ -312,10 +313,10 @@ public class AsyncProxyServlet implements Servlet
         }
 
         // TODO - make this async!
-       
+
 
         InetSocketAddress inetAddress = new InetSocketAddress (host, Integer.parseInt(port));
-        
+
         //if (isForbidden(HttpMessage.__SSL_SCHEME,addrPort.getHost(),addrPort.getPort(),false))
         //{
         //    sendForbid(request,response,uri);
@@ -324,23 +325,23 @@ public class AsyncProxyServlet implements Servlet
         {
             InputStream in=request.getInputStream();
             OutputStream out=response.getOutputStream();
-            
+
             Socket socket = new Socket(inetAddress.getAddress(),inetAddress.getPort());
             context.log("Socket: "+socket);
-            
+
             response.setStatus(200);
             response.setHeader("Connection","close");
             response.flushBuffer();
             // TODO prevent real close!
-            
+
             context.log("out<-in");
             IO.copyThread(socket.getInputStream(),out);
             context.log("in->out");
             IO.copy(in,socket.getOutputStream());
         }
     }
-        
-    
+
+
     /* (non-Javadoc)
      * @see javax.servlet.Servlet#getServletInfo()
      */
@@ -356,6 +357,6 @@ public class AsyncProxyServlet implements Servlet
     {
 
     }
-    
+
 
 }

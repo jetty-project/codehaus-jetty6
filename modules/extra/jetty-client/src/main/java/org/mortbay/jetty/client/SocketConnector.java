@@ -28,7 +28,7 @@ import org.mortbay.log.Log;
 class SocketConnector extends AbstractLifeCycle implements HttpClient.Connector
 {
     /**
-     * 
+     *
      */
     private final HttpClient _httpClient;
 
@@ -43,7 +43,7 @@ class SocketConnector extends AbstractLifeCycle implements HttpClient.Connector
     public void startConnection(final HttpDestination destination) throws IOException
     {
         Socket socket=null;
-        
+
         if ( destination.isSecure() )
         {
             SSLContext sslContext = _httpClient.getSSLContext();
@@ -52,13 +52,14 @@ class SocketConnector extends AbstractLifeCycle implements HttpClient.Connector
         else
         {
             Log.debug("Using Regular Socket");
-            socket = SocketFactory.getDefault().createSocket();                
+            socket = SocketFactory.getDefault().createSocket();
         }
-       
-        socket.connect(destination.isProxied()?destination.getProxy():destination.getAddress());
-        
+
+        Address address = destination.isProxied() ? destination.getProxy() : destination.getAddress();
+        socket.connect(address.toSocketAddress());
+
         EndPoint endpoint=new SocketEndPoint(socket);
-        
+
         final HttpConnection connection=new HttpConnection(_httpClient,endpoint,_httpClient.getHeaderBufferSize(),_httpClient.getRequestBufferSize());
         connection.setDestination(destination);
         destination.onNewConnection(connection);
@@ -82,6 +83,6 @@ class SocketConnector extends AbstractLifeCycle implements HttpClient.Connector
                 }
             }
         });
-             
+
     }
 }
