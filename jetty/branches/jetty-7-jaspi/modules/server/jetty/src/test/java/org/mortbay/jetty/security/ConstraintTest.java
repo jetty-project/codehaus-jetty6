@@ -17,7 +17,6 @@ package org.mortbay.jetty.security;
 
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Collections;
 
 import javax.security.auth.message.config.ServerAuthContext;
@@ -37,6 +36,8 @@ import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.security.jaspi.modules.FormAuthModule;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
+import org.mortbay.jetty.security.ServerAuthentication;
+import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
 import org.mortbay.jetty.servlet.SessionHandler;
 
 /**
@@ -68,7 +69,6 @@ public class ConstraintTest extends TestCase
         _context.setHandler(_session);
         _session.setHandler(_security);
         _security.setHandler(_handler);
-        _security.setServletCallbackHandler(callbackHandler);
 
         Constraint constraint0 = new Constraint();
         constraint0.setAuthenticate(true);
@@ -118,8 +118,13 @@ public class ConstraintTest extends TestCase
     public void testBasic()
             throws Exception
     {
-        ServerAuthContext authContext = new BasicAuthModule(callbackHandler, loginService, TEST_REALM);
-        _security.setAuthConfig(new SimpleAuthConfig(APP_CONTEXT, authContext));
+        ServerAuthContext authModule = new BasicAuthModule(callbackHandler, loginService, TEST_REALM);
+        ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
+                new SimpleAuthConfig(APP_CONTEXT, authModule),
+                null,
+                callbackHandler,
+                null);
+        _security.setServerAuthentication(serverAuthentication);
         _server.start();
 
         String response;
@@ -154,8 +159,13 @@ public class ConstraintTest extends TestCase
     public void testForm()
             throws Exception
     {
-        ServerAuthContext authContext = new FormAuthModule(callbackHandler, loginService, "/testLoginPage", "/testErrorPage");
-        _security.setAuthConfig(new SimpleAuthConfig(APP_CONTEXT, authContext));
+        ServerAuthContext authModule = new FormAuthModule(callbackHandler, loginService, "/testLoginPage", "/testErrorPage");
+        ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
+                new SimpleAuthConfig(APP_CONTEXT, authModule),
+                null,
+                callbackHandler,
+                null);
+        _security.setServerAuthentication(serverAuthentication);
         _server.start();
 
         String response;

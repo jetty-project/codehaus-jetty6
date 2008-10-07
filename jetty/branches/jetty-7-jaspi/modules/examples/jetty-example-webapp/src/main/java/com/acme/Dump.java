@@ -47,10 +47,18 @@ import org.mortbay.util.ajax.ContinuationSupport;
  */
 public class Dump extends HttpServlet
 {
+    static boolean fixed;
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config) throws ServletException
     {
     	super.init(config);
+    	
+    	if (config.getInitParameter("unavailable")!=null && !fixed)
+    	{
+    	    
+    	    fixed=true;
+    	    throw new UnavailableException("Unavailable test",Integer.parseInt(config.getInitParameter("unavailable")));
+    	}
     }
 
     /* ------------------------------------------------------------ */
@@ -570,7 +578,7 @@ public class Dump extends HttpServlet
             {
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\" valign=\"top\">"+name+":&nbsp;</th>");
+                pout.write("<th align=\"right\" valign=\"top\">"+name.replace("."," .")+":&nbsp;</th>");
                 pout.write("<td>"+"<pre>" + toString(request.getAttribute(name)) + "</pre>"+"</td>");
             }            
 
@@ -593,7 +601,7 @@ public class Dump extends HttpServlet
             {
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\">"+name+":&nbsp;</th>");
+                pout.write("<th align=\"right\" valign=\"top\">"+name.replace("."," .")+":&nbsp;</th>");
                 pout.write("<td>"+ toString(getServletContext().getInitParameter(name)) + "</td>");
             }
 
@@ -604,7 +612,7 @@ public class Dump extends HttpServlet
             {
                 name= (String)a.nextElement();
                 pout.write("</tr><tr>\n");
-                pout.write("<th align=\"right\" valign=\"top\">"+name+":&nbsp;</th>");
+                pout.write("<th align=\"right\" valign=\"top\">"+name.replace("."," .")+":&nbsp;</th>");
                 pout.write("<td>"+"<pre>" + toString(getServletContext().getAttribute(name)) + "</pre>"+"</td>");
             }
 

@@ -31,15 +31,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.cometd.Bayeux;
+import org.cometd.BayeuxListener;
+import org.cometd.Channel;
+import org.cometd.ChannelBayeuxListener;
+import org.cometd.Client;
+import org.cometd.Extension;
+import org.cometd.Message;
+import org.cometd.ClientBayeuxListener;
+import org.cometd.SecurityPolicy;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Channel;
-import dojox.cometd.Client;
-import dojox.cometd.DataFilter;
-import dojox.cometd.Extension;
-import dojox.cometd.Message;
-import dojox.cometd.SecurityPolicy;
 
 /* ------------------------------------------------------------ */
 /**
@@ -72,9 +74,10 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     private ChannelImpl _root = new ChannelImpl("/",this);
     private ConcurrentHashMap<String,ClientImpl> _clients=new ConcurrentHashMap<String,ClientImpl>();
     protected SecurityPolicy _securityPolicy=new DefaultPolicy();
-    protected Object _advice;
+    protected JSON.Literal _advice;
+    protected JSON.Literal _multiFrameAdvice; 
     protected int _adviceVersion=0;
-    protected Object _unknownAdvice=new JSON.Literal("{\"reconnect\":\"handshake\",\"interval\":500}");
+    protected Object _handshakeAdvice=new JSON.Literal("{\"reconnect\":\"handshake\",\"interval\":500}");
     protected int _logLevel;
     protected long _timeout=240000;
     protected long _interval=0;
@@ -83,7 +86,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     protected boolean _initialized;
     protected ConcurrentHashMap<String, List<String>> _browser2client=new ConcurrentHashMap<String, List<String>>();
     protected int _multiFrameInterval=-1;
-    protected JSON.Literal _multiFrameAdvice; 
     
     protected boolean _directDeliver=true;
     protected boolean _requestAvailable;
@@ -94,9 +96,12 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     transient ConcurrentHashMap<String, ChannelId> _channelIdCache;
     protected Handler _publishHandler;
     protected Handler _metaPublishHandler;
+    protected int _maxClientQueue=-1;
 
     protected List<Extension> _extensions=new CopyOnWriteArrayList<Extension>();
     protected JSON.Literal _transports=new JSON.Literal("[\""+Bayeux.TRANSPORT_LONG_POLL+ "\",\""+Bayeux.TRANSPORT_CALLBACK_POLL+"\"]");
+    protected List<ClientBayeuxListener> _clientListeners=new CopyOnWriteArrayList<ClientBayeuxListener>();
+    protected List<ChannelBayeuxListener> _channelListeners=new CopyOnWriteArrayList<ChannelBayeuxListener>();
     
     /* ------------------------------------------------------------ */
     /**
@@ -116,39 +121,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         _handlers.put(META_PING,new PingHandler());
         
         setTimeout(getTimeout());
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated user {@link Channel#addFilter}
-     * @param channels
-     *            A {@link ChannelId}
-     * @param filter
-     *            The filter instance to apply to new channels matching the
-     *            pattern
-     */
-    public void addFilter(String channels, DataFilter filter)
-    {
-        synchronized (this)
-        {
-            ChannelImpl channel = (ChannelImpl)getChannel(channels,true);
-            channel.addDataFilter(filter);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @deprecated user {@link Channel#removeFilter}
-     * @see dojox.cometd.Bayeux#removeFilter(java.lang.String, dojox.cometd.DataFilter)
-     */
-    public void removeFilter(String channels, DataFilter filter)
-    {
-        synchronized (this)
-        {
-            ChannelImpl channel = (ChannelImpl)getChannel(channels,false);
-            if (channel!=null)
-                channel.removeDataFilter(filter);
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -184,6 +156,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     public ChannelImpl getChannel(String id)
     {
         ChannelId cid=getChannelId(id);
+
         if (cid.depth()==0)
             return null;
         return _root.getChild(cid);
@@ -419,17 +392,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @deprecated use {@link #newClient(String)}
-     */
-    public Client newClient(String idPrefix,dojox.cometd.Listener listener)
-    {
-        ClientImpl client = new ClientImpl(this,idPrefix);
-        client.setListener(listener);
-        return client;
-    }
-
-    /* ------------------------------------------------------------ */
     public abstract ClientImpl newRemoteClient();
 
     /* ------------------------------------------------------------ */
@@ -506,37 +468,22 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @deprecated use {@link Channel#publish(Client, Object, String)}
-     */
-    public void publish(Client fromClient, String toChannelId, Object data, String msgId)
+    public boolean removeChannel(ChannelImpl channel)
     {
-        doPublish(getChannelId(toChannelId),fromClient,data,msgId);
+        boolean removed = _root.doRemove(channel);
+        if (removed)
+            for (ChannelBayeuxListener l : _channelListeners)
+                l.channelRemoved(channel);
+        return removed;
     }
 
-
     /* ------------------------------------------------------------ */
-    /** (non-Javadoc)
-     * @deprecated use {@link Client#deliver(Client, Message)}
-     * @see dojox.cometd.Bayeux#deliver(dojox.cometd.Client, dojox.cometd.Client, java.lang.String, dojox.cometd.Message)
-     */
-    public void deliver(Client fromClient,Client toClient, String toChannel, Message message)
+    public void addChannel(ChannelImpl channel)
     {
-        if (toChannel!=null)
-            message.put(Bayeux.CHANNEL_FIELD,toChannel);
-
-        if (toClient!=null)
-            toClient.deliver(fromClient,message);
+        for (ChannelBayeuxListener l : _channelListeners)
+            l.channelAdded(channel);
     }
     
-
-    /* ------------------------------------------------------------ */
-    public boolean removeChannel(ChannelId channelId)
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
     /* ------------------------------------------------------------ */
     protected String newClientId(long variation, String idPrefix)
     {
@@ -556,7 +503,12 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             
             ClientImpl other = _clients.putIfAbsent(id,client);
             if (other==null)
+            {
+                for (ClientBayeuxListener l : _clientListeners)
+                    l.clientAdded((Client)client);
+                    
                 return;
+            }
         }
     }
     
@@ -576,6 +528,8 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         if (client!=null)
         {
             client.unsubscribeAll();
+            for (ClientBayeuxListener l : _clientListeners)
+                l.clientRemoved((Client)client);
         }
         return client;
     }
@@ -634,11 +588,67 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
 
     /* ------------------------------------------------------------ */
-    void generateAdvice()
+    /**
+     * The time a client should delay between reconnects when multiple
+     * connections from the same browser are detected. This effectively 
+     * produces traditional polling.
+     * @param multiFrameInterval the multiFrameInterval to set
+     */
+    public void setMultiFrameInterval(int multiFrameInterval)
     {
-        setAdvice(new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+getInterval()+",\"timeout\":"+getTimeout()+"}"));        
+        _multiFrameInterval=multiFrameInterval;
+        generateAdvice();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the multiFrameInterval in milliseconds
+     */
+    public int getMultiFrameInterval()
+    {
+        return _multiFrameInterval;
     }
 
+    /* ------------------------------------------------------------ */
+    void generateAdvice()
+    {
+        setAdvice(new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+getInterval()+",\"timeout\":"+getTimeout()+"}"));     
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setAdvice(JSON.Literal advice)
+    {
+        synchronized(this)
+        {
+            _adviceVersion++;
+            _advice=advice;
+            _multiFrameAdvice=new JSON.Literal(JSON.toString(multiFrameAdvice(advice)));
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    private Map<String,Object> multiFrameAdvice(JSON.Literal advice)
+    {
+        Map<String,Object> a = (Map<String,Object>)JSON.parse(_advice.toString());
+        a.put("multiple-clients",Boolean.TRUE);
+        if (_multiFrameInterval>0)
+        {
+            a.put("reconnect","retry");
+            a.put("interval",_multiFrameInterval);
+        }
+        else
+            a.put("reconnect","none");
+        return a;
+    }
+    
+    
+    
+    /* ------------------------------------------------------------ */
+    public JSON.Literal getAdvice()
+    {
+        return _advice;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return TRUE if {@link #getCurrentRequest()} will return the current request
@@ -674,74 +684,8 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     {
         _request.set(request);
     }
-    
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @deprecated use {@link Channel#subscribe(Client)}
-     * @see dojox.cometd.Bayeux#subscribe(java.lang.String, dojox.cometd.Client)
-     */
-    public void subscribe(String toChannel, Client subscriber)
-    {
-        ChannelImpl channel = (ChannelImpl)getChannel(toChannel,true);
-        if (channel!=null)
-            channel.subscribe(subscriber);
-    }
-
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @deprecated use {@link Channel#subscribe(Client)}
-     */
-    public void unsubscribe(String toChannel, Client subscriber)
-    {
-        ChannelImpl channel = (ChannelImpl)getChannel(toChannel);
-        if (channel!=null)
-            channel.unsubscribe(subscriber);
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the multiFrameInterval in milliseconds
-     */
-    public int getMultiFrameInterval()
-    {
-        return _multiFrameInterval;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * The time a client should delay between reconnects when multiple
-     * connections from the same browser are detected. This effectively 
-     * produces traditional polling.
-     * @param multiFrameInterval the multiFrameInterval to set
-     */
-    public void setMultiFrameInterval(int multiFrameInterval)
-    {
-        _multiFrameInterval=multiFrameInterval;
-        if (multiFrameInterval>0)
-            _multiFrameAdvice=new JSON.Literal("{\"reconnect\":\"retry\",\"interval\":"+_multiFrameInterval+",\"multiple-clients\":true,\"timeout\":"+getTimeout()+"}");
-        else
-            _multiFrameAdvice=new JSON.Literal("{\"reconnect\":\"none\",\"multiple-clients\":true,\"timeout\":"+getTimeout()+"}");
-        
-    }
 
 
-    /* ------------------------------------------------------------ */
-    public Object getAdvice()
-    {
-        return _advice;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    public void setAdvice(Object advice)
-    {
-        synchronized(this)
-        {
-            _advice=advice;
-            _adviceVersion++;
-        }
-    }
     
     /* ------------------------------------------------------------ */
     public Collection<Channel> getChannels()
@@ -750,7 +694,16 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         _root.getChannels(channels);
         return channels;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public int getChannelCount()
+    {
+        return _root.getChannelCount();
+    }
+    
     /* ------------------------------------------------------------ */
     public Collection<Client> getClients()
     {
@@ -761,9 +714,21 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     }
 
     /* ------------------------------------------------------------ */
-    public boolean hasClient(String clientId)
+    /**
+     * @return
+     */
+    public int getClientCount()
     {
         synchronized(this)
+        {
+            return _clients.size();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean hasClient(String clientId)
+    {
+        synchronized(this)      
         {
             if (clientId==null)
                 return false;
@@ -775,8 +740,14 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     public Channel removeChannel(String channelId)
     {
         Channel channel = getChannel(channelId);
-        channel.remove();
-        return channel;
+        boolean removed = false;
+        if (channel!=null)
+            removed = channel.remove();
+        
+        if (removed) 
+            return channel;
+        else
+            return null;
     }
 
     /* ------------------------------------------------------------ */
@@ -841,7 +812,30 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         return clients;
     }
     
+    /* ------------------------------------------------------------ */
+    public void addListener(BayeuxListener listener)
+    {
+        if (listener instanceof ClientBayeuxListener)
+            _clientListeners.add((ClientBayeuxListener)listener);
+        else if (listener instanceof ChannelBayeuxListener)
+            _channelListeners.add((ChannelBayeuxListener)listener);
+    }    
+      
     
+    /* ------------------------------------------------------------ */
+    public int getMaxClientQueue()
+    {
+        return _maxClientQueue;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setMaxClientQueue(int size)
+    {
+        _maxClientQueue=size;
+    }
+
+
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     public static class DefaultPolicy implements SecurityPolicy
@@ -884,7 +878,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             reply.put(CHANNEL_FIELD,channel);
             reply.put(SUCCESSFUL_FIELD,Boolean.FALSE);
             reply.put(ERROR_FIELD,"402::Unknown client");
-            reply.put("advice",new JSON.Literal("{\"reconnect\":\"handshake\"}"));
+            reply.put("advice",_handshakeAdvice);
             transport.send(reply);
         }
     }
@@ -895,11 +889,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     {
         protected String _metaChannel=META_CONNECT;
 
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_CONNECT_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {      
             if (client==null)
@@ -917,21 +913,22 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
                 client.setConnectionType(type);
                 polling=false;
             }
-            
+
             Object advice = message.get(ADVICE_FIELD);
             if (advice!=null)
             {
-            	Long timeout=(Long)((Map)advice).get("timeout");
-            	if (timeout!=null && timeout.longValue()>0)
-            		client.setTimeout(timeout.longValue());
-            	else
-            		client.setTimeout(0);
+                Long timeout=(Long)((Map)advice).get("timeout");
+                if (timeout!=null && timeout.longValue()>0)
+                    client.setTimeout(timeout.longValue());
+                else
+                    client.setTimeout(0);
             }
             else
-        		client.setTimeout(0);
+                client.setTimeout(0);
             
             advice=null; 
         
+            // Work out if multiple clients from some browser?
             if (polling && _multiFrameInterval>0 && client.getBrowserId()!=null)
             {
                 List<String> clients=clientsOnBrowser(client.getBrowserId());
@@ -939,18 +936,26 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
                 if (count>1)
                 {
                     polling=clients.get(0).equals(client.getId());
-                    advice=_multiFrameAdvice;
-                    client.setAdviceVersion(-1);
+                    advice=client.getAdvice();
+                    if (advice==null)
+                        advice=_multiFrameAdvice;
+                    else // could probably cache this 
+                        advice=multiFrameAdvice((JSON.Literal)advice);
                 }
             }
 
             synchronized(this)
             {
-                if (client.getAdviceVersion()!=_adviceVersion && (client.getAdviceVersion()>=0||advice==null))
+                if (advice==null)
                 {
-                    advice=_advice;
-                    client.setAdviceVersion(_adviceVersion);
+                    if (_adviceVersion!=client._adviseVersion)
+                    {
+                        advice=_advice;
+                        client._adviseVersion=_adviceVersion;
+                    }
                 }
+                else
+                    client._adviseVersion=-1; // clear so it is reset after multi state clears
             }
            
             // reply to connect message
@@ -965,7 +970,6 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             if (id!=null)
                 reply.put(ID_FIELD,id);
 
-            
             if (polling)
                 transport.setPollReply(reply);
             else
@@ -981,11 +985,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class DisconnectHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_DISCONNECT_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             if (client==null)
@@ -995,7 +1001,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
             }
             if (isLogInfo())
                 logInfo("Disconnect "+client.getId());
-                
+
             client.remove(false);
             
             Message reply=newMessage(message);
@@ -1025,11 +1031,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class HandshakeHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_HANDSHAKE_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             if (client!=null)
@@ -1096,11 +1104,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class PublishHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return null;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             String channel_id=message.getChannel();
@@ -1155,11 +1165,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class MetaPublishHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return null;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             String channel_id=message.getChannel();
@@ -1181,11 +1193,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class SubscribeHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_SUBSCRIBE_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             if (client==null)
@@ -1269,11 +1283,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class UnsubscribeHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_UNSUBSCRIBE_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             if (client==null)
@@ -1311,11 +1327,13 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
     /* ------------------------------------------------------------ */
     protected class PingHandler extends Handler
     {
+        @Override
         ChannelId getMetaChannelId()
         {
             return META_PING_ID;
         }
-        
+
+        @Override
         public void handle(ClientImpl client, Transport transport, Message message) throws IOException
         {
             Message reply=newMessage(message);
@@ -1345,6 +1363,7 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         /* (non-Javadoc)
          * @see org.mortbay.cometd.ChannelImpl#addChild(org.mortbay.cometd.ChannelImpl)
          */
+        @Override
         public void addChild(ChannelImpl channel)
         {
             super.addChild(channel);
@@ -1352,14 +1371,11 @@ public abstract class AbstractBayeux extends MessagePool implements Bayeux
         }
 
         /* ------------------------------------------------------------ */
+        @Override
         public void subscribe(Client client)
         {
             if (client.isLocal())
                 super.subscribe(client);
         }
-        
     }
-
-
-
 }

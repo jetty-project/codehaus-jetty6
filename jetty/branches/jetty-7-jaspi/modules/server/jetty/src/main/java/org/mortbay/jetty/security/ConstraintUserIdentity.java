@@ -21,57 +21,32 @@
 package org.mortbay.jetty.security;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.Map;
-
-import javax.security.auth.message.callback.CallerPrincipalCallback;
-import javax.security.auth.message.callback.GroupPrincipalCallback;
+import java.util.Collections;
 
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.security.AuthResult;
+import org.mortbay.jetty.security.SimpleAuthResult;
 
 /**
  * @version $Rev$ $Date$
  */
-public class ConstraintUserIdentity implements UserIdentity
+public class ConstraintUserIdentity extends AbstractUserIdentity
 {
-    private static final String[] NO_ROLES = new String[] {};
+    private static final AuthResult NO_AUTH_RESULTS = new SimpleAuthResult(null, null, null, Collections.<String>emptyList(), null);
 
-    private final Principal _userPrincipal;
-    private final String[] _roles;
     private ServletHolder servletHolder;
     private RunAsToken _runAsRole;
 
-    public ConstraintUserIdentity(ServletCallbackHandler callbackHandler)
-    {
-        CallerPrincipalCallback principalCallback = callbackHandler.getThreadCallerPrincipalCallback();
-        this._userPrincipal = principalCallback == null? null:principalCallback.getPrincipal();
-        if (_userPrincipal == null)
-        {
-            _roles = NO_ROLES;
-        }
-        else
-        {
-            GroupPrincipalCallback groupPrincipalCallback = callbackHandler.getThreadGroupPrincipalCallback();
-            _roles = groupPrincipalCallback.getGroups();
-        }
-    }
-
-    public ConstraintUserIdentity(Principal userPrincipal, String[] roles)
-    {
-        this._userPrincipal = userPrincipal;
-        this._roles = roles;
+    public ConstraintUserIdentity(AuthResult authResult) {
+        super(authResult);
     }
 
     public ConstraintUserIdentity()
     {
-        _userPrincipal = null;
-        _roles = NO_ROLES;
+        super(NO_AUTH_RESULTS);
     }
 
-    public Principal getUserPrincipal()
-    {
-        return _userPrincipal;
-    }/* ------------------------------------------------------------ */
 
     //jaspi called from Request.isUserInRole and ConstraintSecurityHandler.check
 
@@ -87,7 +62,7 @@ public class ConstraintUserIdentity implements UserIdentity
         {
             actualRole = role;
         }
-        for (String userRole: _roles)
+        for (String userRole: getAuthResult().getGroups())
         {
             if (userRole.equals(actualRole))
             {

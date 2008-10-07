@@ -13,7 +13,7 @@
 
   <Call name="addConnector">
     <Arg>
-      <New class="org.mortbay.jetty.security.SslSelectChannelConnector">
+      <New class="org.mortbay.jetty.ssl.SslSelectChannelConnector">
 	<Set name="Port">8443</Set>
 	<Set name="maxIdleTime">30000</Set>
         <Set name="Acceptors">2</Set>

@@ -6,9 +6,14 @@
    version="2.5"> 
   <display-name>Cometd Test WebApp</display-name>
   
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.ManagedAttributes</param-name>
+    <param-value>org.cometd.bayeux,dojox.cometd.bayeux</param-value>
+  </context-param>
+  
   <listener>
     <listener-class>
-     	dojox.cometd.demo.BayeuxStartupListener
+     	org.cometd.demo.BayeuxServicesListener
     </listener-class>
   </listener>
   
@@ -44,8 +49,8 @@
       <param-value>true</param-value> 
     </init-param>
     <init-param>
-      <param-name>asyncDeliver</param-name>
-      <param-value>false</param-value>
+      <param-name>refsThreshold</param-name>
+      <param-value>10</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>

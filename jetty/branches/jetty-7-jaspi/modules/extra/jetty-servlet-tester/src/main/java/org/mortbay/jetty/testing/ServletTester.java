@@ -1,3 +1,17 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty.testing;
 
 import java.io.IOException;
@@ -78,6 +92,12 @@ public class ServletTester
     {
         _server.stop();
     }
+
+    /* ------------------------------------------------------------ */
+    public Context getContext()
+    {
+        return _context;
+    }
     
     /* ------------------------------------------------------------ */
     /** Get raw HTTP responses from raw HTTP requests.
@@ -90,12 +110,26 @@ public class ServletTester
     public String getResponses(String rawRequests) throws Exception
     {
         _connector.reopen();
-        //System.err.println(">>>>\n"+rawRequests);
         String responses = _connector.getResponses(rawRequests);
-        //System.err.println("<<<<\n"+responses);
         return responses;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get raw HTTP responses from raw HTTP requests.
+     * Multiple requests and responses may be handled, but only if
+     * persistent connections conditions apply.
+     * @param rawRequests String of raw HTTP requests
+     * @param connector The connector to handle the responses
+     * @return String of raw HTTP responses
+     * @throws Exception
+     */
+    public String getResponses(String rawRequests, LocalConnector connector) throws Exception
+    {
+        connector.reopen();
+        String responses = connector.getResponses(rawRequests);
+        return responses;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get raw HTTP responses from raw HTTP requests.
      * Multiple requests and responses may be handled, but only if
@@ -110,7 +144,23 @@ public class ServletTester
         ByteArrayBuffer responses = _connector.getResponses(rawRequests,false);
         return responses;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** Get raw HTTP responses from raw HTTP requests.
+     * Multiple requests and responses may be handled, but only if
+     * persistent connections conditions apply.
+     * @param rawRequests String of raw HTTP requests
+     * @param connector The connector to handle the responses
+     * @return String of raw HTTP responses
+     * @throws Exception
+     */
+    public ByteArrayBuffer getResponses(ByteArrayBuffer rawRequests, LocalConnector connector) throws Exception
+    {
+        connector.reopen();
+        ByteArrayBuffer responses = connector.getResponses(rawRequests,false);
+        return responses;
+    }
+
     /* ------------------------------------------------------------ */
     /** Create a Socket connector.
      * This methods adds a socket connector to the server
@@ -121,18 +171,43 @@ public class ServletTester
     public String createSocketConnector(boolean localhost)
     throws Exception
     {
-       SocketConnector connector = new SocketConnector();
-       if (localhost)
-           connector.setHost("127.0.0.1");
-       _server.addConnector(connector);
-       if (_server.isStarted())
-           connector.start();
-       else
-           connector.open();
-       
-       return "http://"+(localhost?"127.0.0.1":
-       InetAddress.getLocalHost().getHostAddress()    
-       )+":"+connector.getLocalPort();
+        synchronized (this)
+        {
+            SocketConnector connector = new SocketConnector();
+            if (localhost)
+                connector.setHost("127.0.0.1");
+            _server.addConnector(connector);
+            if (_server.isStarted())
+                connector.start();
+            else
+                connector.open();
+
+            return "http://"+(localhost?"127.0.0.1":
+                InetAddress.getLocalHost().getHostAddress()    
+            )+":"+connector.getLocalPort();
+        }
+   }
+
+    /* ------------------------------------------------------------ */
+    /** Create a Socket connector.
+     * This methods adds a socket connector to the server
+     * @param locahost if true, only listen on local host, else listen on all interfaces.
+     * @return A URL to access the server via the socket connector.
+     * @throws Exception
+     */
+    public LocalConnector createLocalConnector()
+    throws Exception
+    {
+        synchronized (this)
+        {
+            LocalConnector connector = new LocalConnector();
+            _server.addConnector(connector);
+            
+            if (_server.isStarted())
+                connector.start();
+            
+            return connector;
+        }
    }
 
     /* ------------------------------------------------------------ */

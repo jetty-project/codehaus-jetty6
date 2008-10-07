@@ -16,6 +16,7 @@ package org.mortbay.start;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -108,7 +109,8 @@ public class Classpath {
         URL[] urls = new URL[cnt];
         for (int i=0; i < cnt; i++) {
             try {
-                urls[i] = ((File)(_elements.elementAt(i))).toURL();
+                String u=((File)(_elements.elementAt(i))).toURL().toString();
+                urls[i] = new URL(encodeFileURL(u));
             } catch (MalformedURLException e) {}
         }
         
@@ -138,4 +140,58 @@ public class Classpath {
         }
     }
     
+    public static String encodeFileURL(String path)
+    {
+        byte[] bytes;
+        try 
+        { 
+            bytes=path.getBytes("utf-8");
+        } 
+        catch (UnsupportedEncodingException e) 
+        {
+            bytes=path.getBytes();
+        }
+        
+        StringBuffer buf = new StringBuffer(bytes.length*2);
+        buf.append("file:");
+        
+        synchronized(buf)
+        {
+            for (int i=5;i<bytes.length;i++)
+            {
+                byte b=bytes[i]; 
+                switch(b)
+                {
+                  case '%':
+                      buf.append("%25");
+                      continue;
+                  case ' ':
+                      buf.append("%20");
+                      continue;
+                  case '/':
+                  case '.':
+                  case '-':
+                  case '_':
+                      buf.append((char)b);
+                      continue;
+                  default:
+                      // let's be over conservative here!
+                      if (Character.isJavaIdentifierPart((char)b))
+                      {
+                          if(b>='a' && b<='z' || b>='A' && b<='Z' || b>='0' && b<='9')
+                          {
+                              buf.append((char)b);
+                              continue;
+                          }
+                      }
+                      buf.append('%');
+                      buf.append(Integer.toHexString((0xf0&(int)b)>>4));
+                      buf.append(Integer.toHexString((0x0f&(int)b)));
+                      continue;
+                }
+            }
+        }
+
+        return buf.toString();
+    }
 }

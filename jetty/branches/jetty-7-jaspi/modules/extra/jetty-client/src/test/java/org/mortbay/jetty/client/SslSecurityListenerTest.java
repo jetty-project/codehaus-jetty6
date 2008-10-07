@@ -33,18 +33,20 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.client.security.DefaultRealmResolver;
-import org.mortbay.jetty.client.security.SecurityRealm;
+import org.mortbay.jetty.ssl.SslSocketConnector;
+import org.mortbay.jetty.client.security.HashRealmResolver;
+import org.mortbay.jetty.client.security.Realm;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.ServletCallbackHandler;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.mortbay.jetty.security.ServerAuthentication;
 import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
+import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
 
 /**
  * Functional testing.
@@ -54,7 +56,7 @@ public class SslSecurityListenerTest extends TestCase
     protected  Server _server;
     protected int _port;
     protected HttpClient _httpClient;
-    protected SecurityRealm _jettyRealm;
+    protected Realm _jettyRealm;
     protected int _type = HttpClient.CONNECTOR_SOCKET;
     private static final String APP_CONTEXT = "localhost /";
 
@@ -66,7 +68,7 @@ public class SslSecurityListenerTest extends TestCase
         _httpClient.setMaxConnectionsPerAddress(2);
         _httpClient.start();
 
-        _jettyRealm = new SecurityRealm()
+        _jettyRealm = new Realm()
         {
             public String getId()
             {
@@ -84,14 +86,16 @@ public class SslSecurityListenerTest extends TestCase
             }
         };
 
-        _httpClient.setSecurityRealmResolver(new DefaultRealmResolver());
-        _httpClient.getSecurityRealmResolver().addSecurityRealm(_jettyRealm);
+        HashRealmResolver resolver = new HashRealmResolver();
+        resolver.addSecurityRealm(_jettyRealm);
+        _httpClient.setRealmResolver(resolver);
     }
 
     protected void tearDown() throws Exception
     {
+        Thread.sleep(1000);
         _httpClient.stop();
-        Thread.sleep(100);
+        Thread.sleep(1000);
         stopServer();
     }
 
@@ -155,10 +159,13 @@ public class SslSecurityListenerTest extends TestCase
         ServletCallbackHandler callbackHandler = new ServletCallbackHandler();
         BasicAuthModule authModule = new BasicAuthModule(callbackHandler, userRealm, "MyRealm");
         ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
-        sh.setAuthConfig(new SimpleAuthConfig(APP_CONTEXT, authModule));
-        sh.setServletCallbackHandler(callbackHandler);
-        sh.setConstraintMappings(new ConstraintMapping[]
-        { cm });
+        ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
+                new SimpleAuthConfig(APP_CONTEXT, authModule),
+                null,
+                callbackHandler,
+                null);
+        sh.setServerAuthentication(serverAuthentication);
+        sh.setConstraintMappings(new ConstraintMapping[] { cm });
         _server.setHandler(sh);
 
         Handler testHandler = new AbstractHandler()

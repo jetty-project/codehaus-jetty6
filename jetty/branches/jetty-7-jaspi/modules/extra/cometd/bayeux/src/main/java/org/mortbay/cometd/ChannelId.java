@@ -57,7 +57,8 @@ public class ChannelId
     {
         return _wild>0;
     }
-    
+
+    @Override
     public boolean equals(Object obj)
     {
         if (this==obj)
@@ -125,12 +126,14 @@ public class ChannelId
         // TODO more efficient?
         return matches(new ChannelId(name));
     }
-    
+
+    @Override
     public int hashCode()
     {
         return _name.hashCode();
     }
 
+    @Override
     public String toString()
     {
         return _name;

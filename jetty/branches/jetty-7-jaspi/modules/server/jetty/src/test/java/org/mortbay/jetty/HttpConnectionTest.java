@@ -1,3 +1,17 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 /*
  * Created on 9/01/2004
  *
@@ -5,6 +19,8 @@
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package org.mortbay.jetty;
+
+import java.nio.charset.Charset;
 
 import junit.framework.TestCase;
 
@@ -252,7 +268,59 @@ public class HttpConnectionTest extends TestCase
         }
     }
     
-    
+    public void testAsterisk()
+    {
+        String response = null;
+
+        try 
+        {
+            int offset=0;
+            
+            offset=0; connector.reopen();
+            response=connector.getResponses("OPTIONS * HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 200");
+            offset = checkContains(response,offset,"*");
+            
+            // to prevent the DumpHandler from picking this up and returning 200 OK
+            server.setHandler(null);
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET * HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 404 Not Found");
+
+            offset=0; connector.reopen();
+            response=connector.getResponses("GET ** HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain; charset=utf-8\n"+
+                                           "\015\012"+
+                                           "5;\015\012"+
+                                           "12345\015\012"+
+                                           "0;\015\012\015\012");
+            offset = checkContains(response,offset,"HTTP/1.1 400 Bad Request");
+        } 
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            assertTrue(false);
+            if (response!=null)
+                 System.err.println(response);
+        }
+
+    }
     
     private int checkContains(String s,int offset,String c)
     {

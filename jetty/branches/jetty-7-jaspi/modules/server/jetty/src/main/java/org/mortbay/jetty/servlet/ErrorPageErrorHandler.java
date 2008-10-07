@@ -25,9 +25,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.Dispatcher;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.util.TypeUtil;
 
@@ -40,6 +42,8 @@ import org.mortbay.util.TypeUtil;
  */
 public class ErrorPageErrorHandler extends ErrorHandler
 {
+    public final static String ERROR_PAGE="org.mortbay.jetty.error_page";
+    
     protected ServletContext _servletContext;
     protected Map _errorPages; // code or exception to URL
     protected List _errorPageList; // list of ErrorCode by range 
@@ -57,6 +61,12 @@ public class ErrorPageErrorHandler extends ErrorHandler
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
     {
+        String method = request.getMethod();
+        if(!method.equals(HttpMethods.GET) && !method.equals(HttpMethods.POST))
+        {
+            HttpConnection.getCurrentConnection().getRequest().setHandled(true);
+            return;
+        }
         if (_errorPages!=null)
         {
             String error_page= null;
@@ -108,10 +118,10 @@ public class ErrorPageErrorHandler extends ErrorHandler
             
             if (error_page!=null)
             {
-                String old_error_page=(String)request.getAttribute(WebAppContext.ERROR_PAGE);
+                String old_error_page=(String)request.getAttribute(ERROR_PAGE);
                 if (old_error_page==null || !old_error_page.equals(error_page))
                 {
-                    request.setAttribute(WebAppContext.ERROR_PAGE, error_page);
+                    request.setAttribute(ERROR_PAGE, error_page);
                     
                     Dispatcher dispatcher = (Dispatcher) _servletContext.getRequestDispatcher(error_page);
                     try

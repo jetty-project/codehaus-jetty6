@@ -19,13 +19,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.Subject;
-import javax.servlet.http.HttpServletResponse;
-
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
+import org.mortbay.jetty.security.AuthResult;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.util.LazyList;
 
@@ -93,9 +91,9 @@ public class ConstraintSecurityHandler extends AbstractSecurityHandler
         }
     }
 
-    protected UserIdentity newUserIdentity(ServletCallbackHandler callbackHandler, Subject clientSubject)
+    protected UserIdentity newUserIdentity(AuthResult authResult)
     {
-        return new ConstraintUserIdentity(callbackHandler);
+        return new ConstraintUserIdentity(authResult);
     }
 
     protected UserIdentity newSystemUserIdentity()

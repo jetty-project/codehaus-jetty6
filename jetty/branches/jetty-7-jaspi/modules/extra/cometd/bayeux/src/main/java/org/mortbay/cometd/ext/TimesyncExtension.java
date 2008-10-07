@@ -17,9 +17,10 @@ package org.mortbay.cometd.ext;
 import java.util.HashMap;
 import java.util.Map;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Extension;
-import dojox.cometd.Message;
+import org.cometd.Bayeux;
+import org.cometd.Extension;
+import org.cometd.Message;
+
 
 public class TimesyncExtension implements Extension
 {

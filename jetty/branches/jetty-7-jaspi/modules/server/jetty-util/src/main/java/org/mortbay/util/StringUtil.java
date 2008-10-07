@@ -16,6 +16,8 @@ package org.mortbay.util;
 
 import java.io.UnsupportedEncodingException;
 
+import org.mortbay.log.Log;
+
 // ====================================================================
 /** Fast String Utilities.
  *
@@ -28,6 +30,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class StringUtil
 {
+    public static final String ALL_INTERFACES="0.0.0.0";
     public static final String CRLF="\015\012";
     public static final String __LINE_SEPARATOR=
         System.getProperty("line.separator","\n");
@@ -308,36 +311,24 @@ public class StringUtil
     {
         try
         {
-            if (length<32)
-            {
-                Utf8StringBuffer buffer = new Utf8StringBuffer(length);
-                buffer.append(b,offset,length);
-                return buffer.toString();
-            }
-            
             return new String(b,offset,length,__UTF8);
         }
         catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
-            return null;
+            throw new IllegalArgumentException(e);
         }
     }
 
     /* ------------------------------------------------------------ */
     public static String toString(byte[] b,int offset,int length,String charset)
     {
-        if (charset==null || StringUtil.isUTF8(charset))
-            return toUTF8String(b,offset,length);
-        
         try
         {
             return new String(b,offset,length,charset);
         }
         catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
-            return null;
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -364,5 +355,29 @@ public class StringUtil
         return buf.toString();
     }
     
+    public static byte[] getBytes(String s)
+    {
+        try
+        {
+            return s.getBytes(__ISO_8859_1);
+        }
+        catch(Exception e)
+        {
+            Log.warn(e);
+            return s.getBytes();
+        }
+    }
     
+    public static byte[] getBytes(String s,String charset)
+    {
+        try
+        {
+            return s.getBytes(charset);
+        }
+        catch(Exception e)
+        {
+            Log.warn(e);
+            return s.getBytes();
+        }
+    }
 }

@@ -20,7 +20,7 @@ import java.net.URL;
 
 import junit.framework.TestCase;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.DefaultHandler;
+import org.mortbay.jetty.handler.DefaultHandler;           
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;

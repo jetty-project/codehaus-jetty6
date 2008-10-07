@@ -16,7 +16,10 @@
 package org.mortbay.jetty.plus.annotation;
 
 import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
+import org.mortbay.jetty.servlet.ServletHolder;   
 
 /**
  * RunAs
@@ -54,12 +57,22 @@ public class RunAs
 
 
     public void setRunAs (ServletHolder holder, SecurityHandler securityHandler)
+    throws ServletException
     {
         if (holder == null)
             return;
-        if (securityHandler == null)
-            return;
-        if (holder.getClassName().equals(_targetClass.getName()))
+        String className = getServletClassNameForHolder(holder);
+
+        if (className.equals(_targetClass.getName()))
             holder.setRunAs(securityHandler.newRunAsToken(_roleName));
     }
+
+    public static String getServletClassNameForHolder (ServletHolder holder)
+    throws ServletException
+    {
+        if (PojoServlet.class.getName().equals(holder.getClassName()))
+            return ((PojoWrapper)holder.getServlet()).getPojo().getClass().getName();
+        return holder.getClassName();
+    }
+
 }

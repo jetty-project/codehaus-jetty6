@@ -303,6 +303,7 @@ public class ResponseTest extends TestCase
         response.sendError(500, "Database Error");
         assertEquals(500, response.getStatus());
         assertEquals("Database Error", response.getReason());
+        assertEquals("must-revalidate,no-cache,no-store", response.getHeader(HttpHeaders.CACHE_CONTROL));
 
         response=newResponse();
         
@@ -315,6 +316,7 @@ public class ResponseTest extends TestCase
         response.sendError(406, "Super Nanny");
         assertEquals(406, response.getStatus());
         assertEquals("Super Nanny", response.getReason());
+        assertEquals("must-revalidate,no-cache,no-store", response.getHeader(HttpHeaders.CACHE_CONTROL));
     }
     
     public void testEncodeRedirect()

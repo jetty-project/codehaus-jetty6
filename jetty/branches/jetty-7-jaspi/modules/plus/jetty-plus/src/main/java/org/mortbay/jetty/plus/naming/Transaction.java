@@ -41,7 +41,7 @@ public class Transaction extends NamingEntry
     public static void bindToENC ()
     throws NamingException
     {
-        Transaction txEntry = (Transaction)NamingEntryUtil.lookupNamingEntry(Transaction.USER_TRANSACTION);
+        Transaction txEntry = (Transaction)NamingEntryUtil.lookupNamingEntry(null, Transaction.USER_TRANSACTION);
 
         if ( txEntry != null )
         {
@@ -73,8 +73,8 @@ public class Transaction extends NamingEntry
     {   
         InitialContext ic = new InitialContext();
         Context env = (Context)ic.lookup("java:comp/env");
-        Log.debug("Binding java:comp/env"+getJndiName()+" to "+absoluteObjectNameString);
-        NamingUtil.bind(env, localName, new LinkRef(absoluteObjectNameString));
+        Log.debug("Binding java:comp/env"+getJndiName()+" to "+objectNameString);
+        NamingUtil.bind(env, localName, new LinkRef(objectNameString));
     }
     
     /**
@@ -87,8 +87,8 @@ public class Transaction extends NamingEntry
         //ignore the name, it is always bound to java:comp
         InitialContext ic = new InitialContext();
         Context env = (Context)ic.lookup("java:comp");
-        Log.debug("Binding java:comp/"+getJndiName()+" to "+absoluteObjectNameString);
-        NamingUtil.bind(env, getJndiName(), new LinkRef(absoluteObjectNameString));
+        Log.debug("Binding java:comp/"+getJndiName()+" to "+objectNameString);
+        NamingUtil.bind(env, getJndiName(), new LinkRef(objectNameString));
     }
     
     /**

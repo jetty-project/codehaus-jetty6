@@ -18,7 +18,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import dojox.cometd.Message;
+import org.cometd.Message;
+
 
 
 public abstract class AbstractTransport implements Transport
@@ -44,15 +45,6 @@ public abstract class AbstractTransport implements Transport
     public void setPollReply(Message reply)
     {
         _pollReply=reply;
-    }
-
-    public void send(List<Message> messages) throws IOException
-    {
-        if (messages!=null)
-        {
-            for (Message message: messages)
-                send(message);
-        }
     }
     
 }

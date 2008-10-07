@@ -123,7 +123,6 @@ shift
 ARGS="$*"
 CONFIGS=""
 NO_START=0
-TMP=/tmp
 
 ##################################################
 # See if there's a default configuration file
@@ -142,6 +141,14 @@ if [ -f $HOME/.jettyrc ] ; then
   . $HOME/.jettyrc
 fi
 
+##################################################
+# Set tmp if not already set.
+##################################################
+
+if [ -z "$TMP" ] 
+then
+  TMP=/tmp
+fi
 
 ##################################################
 # Jetty's hallmark
@@ -489,7 +496,7 @@ case "$ACTION" in
 	fi
 
 
-	if which start-stop-daemon > /dev/null 2>&1 
+	if type start-stop-daemon > /dev/null 2>&1 
 	then
           [ x$JETTY_USER = x ] && JETTY_USER=$(whoami)
 	  [ $UID = 0 ] && CH_USER="-c $JETTY_USER"
@@ -508,8 +515,14 @@ case "$ACTION" in
 
           if [ -f $JETTY_PID ]
           then
-            echo "Already Running!!"
-            exit 1
+            if running $JETTY_PID
+            then
+              echo "Already Running!!"
+              exit 1
+            else
+              # dead pid file - remove
+              rm -f $JETTY_PID
+            fi
           fi
 
           if [ x$JETTY_USER != x ] 
@@ -535,7 +548,7 @@ case "$ACTION" in
 
   stop)
         echo -n "Stopping Jetty: "
-	if which start-stop-daemon > /dev/null 2>&1; then
+	if type start-stop-daemon > /dev/null 2>&1; then
 	  start-stop-daemon -K -p $JETTY_PID -d $JETTY_HOME -a $JAVA -s HUP 
 	  sleep 1
 	  if running $JETTY_PID
@@ -571,9 +584,17 @@ case "$ACTION" in
         ;;
 
   restart)
-        $0 stop $*
+        JETTY_SH=$0
+        if [ ! -f $JETTY_SH ]; then
+          if [ ! -f $JETTY_HOME/bin/jetty.sh ]; then
+            echo "$JETTY_HOME/bin/jetty.sh does not exist."
+            exit 1
+          fi
+          JETTY_SH=$JETTY_HOME/bin/jetty.sh
+        fi
+        $JETTY_SH stop $*
         sleep 5
-        $0 start $*
+        $JETTY_SH start $*
         ;;
 
   supervise)
@@ -589,8 +610,14 @@ case "$ACTION" in
 
         if [ -f $JETTY_PID ]
         then
-            echo "Already Running!!"
-            exit 1
+            if running $JETTY_PID
+            then
+              echo "Already Running!!"
+              exit 1
+            else
+              # dead pid file - remove
+              rm -f $JETTY_PID
+            fi
         fi
 
         exec $RUN_CMD

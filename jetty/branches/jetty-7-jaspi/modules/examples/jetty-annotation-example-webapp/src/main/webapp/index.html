@@ -7,7 +7,7 @@
 <BODY>
 <A HREF="http://jetty.mortbay.org/jetty6"><IMG SRC="http://jetty.mortbay.org/jetty/images/jetty_banner.gif"></A>
 <P>
-<h1>Jetty 6 and Annotations</h1>
+<h1>Jetty and Annotations</h1>
 
 <p>
 This example shows how to use annotations.
@@ -22,8 +22,10 @@ This example shows how to use annotations.
 </p>
 <blockquote>
 <pre>
-  +  cd $JETTY_HOME/examples/test-annotations
+  +  cd $JETTY_HOME/modules/examples/jetty-annotation-example-webapp
   +  mvn clean install
+  + cp -R $JETTY_HOME/contexts-available/test-annotations.d $JETTY_HOME/contexts
+  + cp $JETTY_HOME/contexts-available/test-annotations.xml $JETTY_HOME/contexts
 </pre>
 </blockquote>
 <li> Set up the configuration files with the transaction manager of your choice:
@@ -39,14 +41,18 @@ This example shows how to use annotations.
 Now you can start the demo:
 <blockquote>
 <pre>
-   java -DOPTIONS=annotations -jar start.jar 
+   java -DOPTIONS=plus,annotations,default -jar start.jar 
 </pre>
 </blockquote>
 <h2>The Test</h2>
 <p>
 </p>
 <form action="test" method="post">
-  <button type="submit">Do It</button>
+  <button type="submit">Test Servlet 2.5 Annotations</button>
+</form>
+
+<form action="ttt" method="post">
+  <button type="submit">Test Servlet 3.0 Annotations</button>
 </form>
 </BODY>
 </HTML>

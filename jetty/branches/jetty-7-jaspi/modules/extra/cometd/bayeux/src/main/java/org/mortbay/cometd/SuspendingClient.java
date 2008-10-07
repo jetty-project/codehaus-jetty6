@@ -15,6 +15,8 @@
 package org.mortbay.cometd;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.cometd.ClientImpl;
 import org.mortbay.thread.Timeout;
@@ -63,7 +65,6 @@ public class SuspendingClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void setPollRequest(ServletRequest request)
     {
-        Timeout.Task task=null;
         
         if (request==null)
         {
@@ -75,11 +76,9 @@ public class SuspendingClient extends ClientImpl
                         _pollRequest.resume(); 
                 }
                 _pollRequest=null;
-                task=_timeout;
+                if (_timeout!=null)
+                    _bayeux.startTimeout(_timeout,getTimeout());
             }
-
-            if (task!=null)
-                _bayeux.startTimeout(task,getTimeout());
         }
         else
         {
@@ -91,11 +90,9 @@ public class SuspendingClient extends ClientImpl
                         _pollRequest.resume(); 
                 }
                 _pollRequest=request;
-                task=_timeout;
+                if (_timeout!=null)
+                    _bayeux.cancelTimeout(_timeout);
             }
-
-            if (task!=null)
-                _bayeux.cancelTimeout(task);
         }
     }
     
@@ -108,20 +105,15 @@ public class SuspendingClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void resume()
     {
-        Timeout.Task task=null;
         synchronized (this)
         {
             if (_pollRequest!=null)
             {
-                _pollRequest.getServletResponse().disable();
+                ((HttpServletResponse)((HttpServletRequest)_pollRequest).getServletResponse()).addHeader("Debug","Resume");
                 _pollRequest.resume();
-                task=_timeout;
             }
             _pollRequest=null;
         }
-        
-        if (task!=null)
-            _bayeux.startTimeout(task,getTimeout());
     }
 
     /* ------------------------------------------------------------ */
@@ -133,17 +125,15 @@ public class SuspendingClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void access()
     {
-        Timeout.Task task=null;
         synchronized(this)
         {
             // distribute access time in cluster
             _accessed=_bayeux.getNow();
             if (_timeout!=null && _timeout.isScheduled())
-                task=_timeout;
+            {
+                _timeout.reschedule();
+            }
         }
-        
-        if (task!=null)
-            _bayeux.startTimeout(task,getTimeout());
     }
 
 
@@ -159,18 +149,13 @@ public class SuspendingClient extends ClientImpl
      */
     public void remove(boolean wasTimeout) 
     {
-        Timeout.Task task=null;
         synchronized(this)
         {
-            if (!wasTimeout)
-                task=_timeout;
+            if (!wasTimeout && _timeout!=null)
+                _bayeux.cancelTimeout(_timeout);
             _timeout=null;
             super.remove(wasTimeout);
-        }
-        
-        if (task!=null)
-            _bayeux.cancelTimeout(task);
-        
+        }   
     }
 
 }

@@ -51,14 +51,14 @@ public class NamingUtil
      * @param obj the object to be bound
      * @exception NamingException if an error occurs
      */
-    public static void bind (Context ctx, String nameStr, Object obj)
+    public static Context bind (Context ctx, String nameStr, Object obj)
         throws NamingException
     {
         Name name = ctx.getNameParser("").parse(nameStr);
 
         //no name, nothing to do 
         if (name.size() == 0)
-            return;
+            return null;
 
         Context subCtx = ctx;
         
@@ -79,6 +79,8 @@ public class NamingUtil
 
         subCtx.rebind (name.get(name.size() - 1), obj);
         if(Log.isDebugEnabled())Log.debug("Bound object to "+name.get(name.size() - 1));
+        return subCtx;
+       
     } 
     
     

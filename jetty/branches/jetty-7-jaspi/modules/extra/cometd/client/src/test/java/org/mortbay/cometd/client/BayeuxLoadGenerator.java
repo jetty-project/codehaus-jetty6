@@ -1,3 +1,17 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.cometd.client;
 
 import java.io.InputStreamReader;
@@ -7,27 +21,32 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.cometd.Bayeux;
+import org.cometd.Client;
+import org.cometd.Listener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Client;
-import dojox.cometd.Listener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
 
 public class BayeuxLoadGenerator
 {
+    final static String __DOTS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-=+!@#$%^&*>";
+    
     SecureRandom _random= new SecureRandom();
     HttpClient http;
     InetSocketAddress address;
     ArrayList<BayeuxClient> clients=new ArrayList<BayeuxClient>();
+  
+    long _targetLatency;
     long _minLatency;
     long _maxLatency;
     long _totalLatency;
     long _got;
+    long _over;
     AtomicInteger _subscribed = new AtomicInteger();
     
     public BayeuxLoadGenerator() throws Exception
@@ -78,6 +97,7 @@ public class BayeuxLoadGenerator
         int publish=1000;
         int pause=100;
         int burst=10;
+        _targetLatency=1000;
         int maxLatency=5000;
 
         System.err.print("base[/chat/demo]: ");
@@ -98,6 +118,12 @@ public class BayeuxLoadGenerator
             t=""+rooms_per_client;
         rooms_per_client=Integer.parseInt(t);
         
+        
+        System.err.print("target Latency ["+_targetLatency+"]: ");
+        t = in.readLine().trim();
+        if (t.length()==0)
+            t=""+_targetLatency;
+        _targetLatency=Integer.parseInt(t);
         
         System.err.print("max Latency ["+maxLatency+"]: ");
         t = in.readLine().trim();
@@ -157,6 +183,8 @@ public class BayeuxLoadGenerator
                                     if (_minLatency==0 || latency<_minLatency)
                                         _minLatency=latency;
                                     _totalLatency+=latency;
+                                    if (latency>_targetLatency)
+                                        _over++;
                                 }
                             }
                         }
@@ -224,6 +252,7 @@ public class BayeuxLoadGenerator
                 _minLatency=0;
                 _maxLatency=0;
                 _totalLatency=0;
+                _over=0;
             }
 
 
@@ -286,7 +315,8 @@ public class BayeuxLoadGenerator
                             break trial;
                         }
                         
-                        char dot=(char)('0'+(int)(latency/100));
+                        int l=(int)(latency/100);
+                        char dot=l<__DOTS.length()?__DOTS.charAt(l):'~';
                         System.err.print(dot);
                         if (i%1000==0)
                             System.err.println();
@@ -320,11 +350,11 @@ public class BayeuxLoadGenerator
                 last=_got;
                 sleep+=100;
             }
-            System.err.println("Got:"+_got+" of "+(nclients/rooms*rooms_per_client*publish));
-            
             long end=System.currentTimeMillis();
 
-            System.err.println("Got "+_got+" at "+(_got*1000/(end-start))+"/s, latency min/ave/max ="+_minLatency+"/"+(_totalLatency/_got)+"/"+_maxLatency+"ms");
+            System.err.println("Sent "+publish+"x"+size+"b in bursts of "+burst+"@"+pause+"ms to "+nclients+" clients in "+rooms+" rooms. Got "+_got+" of "+(nclients/rooms*rooms_per_client*publish)+" at "+(_got*1000/(end-start))+
+                    "/s, latency min/ave/max ="+_minLatency+"/"+(_totalLatency/_got)+"/"+_maxLatency+"ms, "+
+                    ((_over*100)/_got)+"%>"+_targetLatency+"ms");
         }
 
     }

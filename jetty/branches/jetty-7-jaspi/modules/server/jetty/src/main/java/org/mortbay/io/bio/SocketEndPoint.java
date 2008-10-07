@@ -20,8 +20,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import org.mortbay.io.Portable;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 
 /**
  * @author gregw
@@ -89,7 +89,7 @@ public class SocketEndPoint extends StreamEndPoint
             _local=(InetSocketAddress)_socket.getLocalSocketAddress();
         
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
-           return Portable.ALL_INTERFACES;
+           return StringUtil.ALL_INTERFACES;
         
         return _local.getAddress().getHostAddress();
     }
@@ -104,7 +104,7 @@ public class SocketEndPoint extends StreamEndPoint
             _local=(InetSocketAddress)_socket.getLocalSocketAddress();
         
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
-           return Portable.ALL_INTERFACES;
+           return StringUtil.ALL_INTERFACES;
         
         return _local.getAddress().getCanonicalHostName();
     }

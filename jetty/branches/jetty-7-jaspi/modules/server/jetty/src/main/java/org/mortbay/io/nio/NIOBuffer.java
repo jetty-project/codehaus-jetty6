@@ -55,6 +55,14 @@ public class NIOBuffer extends AbstractBuffer
         _buf.limit(_buf.capacity());
     }
     
+    public NIOBuffer(ByteBuffer buffer,boolean immutable)
+    {
+        super(immutable?IMMUTABLE:READWRITE,NON_VOLATILE);
+        _buf = buffer;
+        setGetIndex(buffer.position());
+        setPutIndex(buffer.limit());
+    }
+    
     /**
      * @param file
      */
@@ -111,16 +119,19 @@ public class NIOBuffer extends AbstractBuffer
         return l;
     }
 
-    public void poke(int position, byte b)
+    public void poke(int index, byte b)
     {
         if (isReadOnly()) throw new IllegalStateException(__READONLY);
-        _buf.put(position,b);
+        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
+        if (index > capacity())
+                throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
+        _buf.put(index, b);
     }
 
     public int poke(int index, Buffer src)
     {
         if (isReadOnly()) throw new IllegalStateException(__READONLY);
-        
+
         byte[] array=src.array();
         if (array!=null)
         {
@@ -139,7 +150,7 @@ public class NIOBuffer extends AbstractBuffer
                 {   
                     _buf.position(index);
                     int space = _buf.remaining();
-                    
+
                     int length=src.length();
                     if (length>space)    
                         length=space;
@@ -165,6 +176,16 @@ public class NIOBuffer extends AbstractBuffer
     public int poke(int index, byte[] b, int offset, int length)
     {
         if (isReadOnly()) throw new IllegalStateException(__READONLY);
+
+        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
+
+        if (index + length > capacity())
+        {
+            length=capacity()-index;
+            if (length<0)
+                throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
+        }
+
         try
         {
             _buf.position(index);
@@ -182,18 +203,12 @@ public class NIOBuffer extends AbstractBuffer
             _buf.position(0);
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
     public ByteBuffer getByteBuffer()
     {
         return _buf;
     }
-    
-    
-    public void setByteBuffer(ByteBuffer buf)
-    {
-        this._buf = buf;
-    }
-
 
     /* ------------------------------------------------------------ */
     public int readFrom(InputStream in, int max) throws IOException

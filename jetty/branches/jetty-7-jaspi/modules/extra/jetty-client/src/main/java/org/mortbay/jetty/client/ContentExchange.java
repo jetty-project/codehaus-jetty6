@@ -1,7 +1,24 @@
+//========================================================================
+//Copyright 2006-2007 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty.client;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.mortbay.io.Buffer;
@@ -19,11 +36,19 @@ public class ContentExchange extends CachedExchange
     String _encoding = "utf-8";
     ByteArrayOutputStream _responseContent;
 
+    File _fileForUpload;
+
     public ContentExchange()
     {
         super(false);
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public ContentExchange(boolean cacheFields)
+    {
+        super(cacheFields);
+    }    
+    
     /* ------------------------------------------------------------ */
     public String getResponseContent() throws UnsupportedEncodingException
     {
@@ -41,7 +66,7 @@ public class ContentExchange extends CachedExchange
         int header = HttpHeaders.CACHE.getOrdinal(value);
         switch (header)
         {
-            case HttpHeaders.CONTENT_LANGUAGE_ORDINAL:
+            case HttpHeaders.CONTENT_LENGTH_ORDINAL:
                 _contentLength = BufferUtil.toInt(value);
                 break;
             case HttpHeaders.CONTENT_TYPE_ORDINAL:
@@ -67,5 +92,36 @@ public class ContentExchange extends CachedExchange
         if (_responseContent == null)
             _responseContent = new ByteArrayOutputStream(_contentLength);
         content.writeTo(_responseContent);
+    }
+
+    protected void onRetry() throws IOException
+    {
+        if ( _fileForUpload != null  )
+        {
+            _requestContent = null;
+            _requestContentSource =  getInputStream();
+        }
+        else if ( _requestContentSource != null )
+        {
+            throw new IOException("Unsupported Retry attempt, no registered file for upload.");
+        }
+
+        super.onRetry();
+    }
+
+    private InputStream getInputStream() throws IOException
+    {
+        return new FileInputStream( _fileForUpload );
+    }
+
+    public File getFileForUpload()
+    {
+        return _fileForUpload;
+    }
+
+    public void setFileForUpload(File fileForUpload) throws IOException
+    {
+        this._fileForUpload = fileForUpload;
+        _requestContentSource = getInputStream();
     }
 }

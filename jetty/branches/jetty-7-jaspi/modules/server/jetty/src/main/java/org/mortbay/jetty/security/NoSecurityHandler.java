@@ -26,7 +26,7 @@ import javax.security.auth.message.config.ServerAuthConfig;
 import org.mortbay.jetty.handler.HandlerWrapper;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class NoSecurityHandler extends HandlerWrapper implements SecurityHandler {
 
@@ -34,12 +34,7 @@ public class NoSecurityHandler extends HandlerWrapper implements SecurityHandler
         return null;
     }
 
-    public void setAuthConfig(ServerAuthConfig serverAuthConfig) {
+    public void setServerAuthentication(ServerAuthentication serverAuthentication) {
     }
 
-    public void setServletCallbackHandler(ServletCallbackHandler callbackHandler) {
-    }
-
-    public void setServiceSubject(Subject subject) {
-    }
 }

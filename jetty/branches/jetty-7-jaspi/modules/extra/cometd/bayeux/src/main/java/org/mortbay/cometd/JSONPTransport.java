@@ -19,9 +19,9 @@ import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.cometd.Message;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Message;
 
 /* ------------------------------------------------------------ */
 /**
@@ -91,7 +91,7 @@ public class JSONPTransport extends AbstractTransport
             _out.write("])*/\r\n");
         else
             _out.write("])\r\n");
-        _out.flush();
+        _out.close();
     }
 
     /* ------------------------------------------------------------ */
@@ -107,6 +107,7 @@ public class JSONPTransport extends AbstractTransport
     }
 
     /* ------------------------------------------------------------ */
+    @Override
     public String toString()
     {
         return "JSONPTransport[jsonp="+this._jsonp+"]";

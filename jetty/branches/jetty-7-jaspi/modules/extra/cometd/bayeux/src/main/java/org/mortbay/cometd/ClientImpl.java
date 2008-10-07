@@ -16,19 +16,21 @@ package org.mortbay.cometd;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EventListener;
 import java.util.List;
+import java.util.Queue;
 
+import org.cometd.Bayeux;
+import org.cometd.Client;
+import org.cometd.DeliverListener;
+import org.cometd.Extension;
+import org.cometd.ClientListener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
+import org.cometd.QueueListener;
+import org.cometd.RemoveListener;
+import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.LazyList;
-
-import dojox.cometd.Bayeux;
-import dojox.cometd.Client;
-import dojox.cometd.Extension;
-import dojox.cometd.Listener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
-import dojox.cometd.RemoveListener;
-
+import org.mortbay.util.ajax.JSON;
 
 /* ------------------------------------------------------------ */
 /**
@@ -39,26 +41,30 @@ public class ClientImpl implements Client
 {
     private String _id;
     private String _type;
-    private Object _messageQ=null;
     private int _responsesPending;
     private ChannelImpl[] _subscriptions=new ChannelImpl[0]; // copy on write
     private boolean _JSONCommented;
-    private Listener _listener;
-    private RemoveListener[] _rListeners=new RemoveListener[0]; // copy on write
-    private MessageListener[] _syncMListeners=new MessageListener[0]; // copy on write
-    private MessageListener[] _asyncMListeners=new MessageListener[0]; // copy on write
+    private RemoveListener[] _rListeners; // copy on write
+    private MessageListener[] _syncMListeners; // copy on write
+    private MessageListener[] _asyncMListeners; // copy on write
+    private QueueListener[] _qListeners; // copy on write
+    private DeliverListener[] _dListeners; // copy on write
     protected AbstractBayeux _bayeux;
     private String _browserId;
-    private int _adviseVersion;
+    private JSON.Literal _advice;
     private int _batch;
     private int _maxQueue;
+    private ArrayQueue<Message> _queue=new ArrayQueue<Message>(8,16,this);
     private long _timeout;
+    
+    // manipulated and synchronized by AbstractBayeux
+    int _adviseVersion;
 
     /* ------------------------------------------------------------ */
     protected ClientImpl(AbstractBayeux bayeux)
     {
         _bayeux=bayeux;
-        _maxQueue=-1;
+        _maxQueue=bayeux.getMaxClientQueue();
         _bayeux.addClient(this,null);
         if (_bayeux.isLogInfo())
             _bayeux.logInfo("newClient: "+this);
@@ -75,58 +81,6 @@ public class ClientImpl implements Client
         if (_bayeux.isLogInfo())
             _bayeux.logInfo("newClient: "+this);
         
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated
-     */
-    protected ClientImpl(AbstractBayeux bayeux, String idPrefix, Listener listener)
-    {
-        this(bayeux,idPrefix);
-        _listener=listener;
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated use {@link Channel#publish(Client, Object, String)}
-     * @see dojox.cometd.Client#publish(java.lang.String, java.lang.Object, java.lang.String)
-     */
-    public void publish(String toChannel, Object data, String msgId)
-    {
-        _bayeux.getChannel(toChannel).publish(this,data,msgId);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated use {@link Channel#subscribe(Client)}
-     * @see dojox.cometd.Client#subscribe(java.lang.String)
-     */
-    public void subscribe(String toChannel)
-    {
-        _bayeux.subscribe(toChannel,this);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated use {@link Channel#unsubscribe(Client)}
-     * @see dojox.cometd.Client#unsubscribe(java.lang.String)
-     */
-    public void unsubscribe(String toChannel)
-    {
-        _bayeux.unsubscribe(toChannel,this);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated use {@link #deliver(Client, String, Object, String)}
-     */
-    public void deliver(Client from, Message message)
-    {
-        for (Extension e:_bayeux._extensions)
-            message=e.send(message);
-        doDelivery(from,message);
     }
 
     /* ------------------------------------------------------------ */
@@ -153,28 +107,51 @@ public class ClientImpl implements Client
         synchronized(this)
         {
             ((MessageImpl)message).incRef();
-            
+
             if (_maxQueue<0)
-                _messageQ=LazyList.add(_messageQ,message);
-            else if (_maxQueue>0)
-            { 
-                if (LazyList.size(_messageQ)>=_maxQueue)
-                    _messageQ=LazyList.remove(_messageQ,0);
-                _messageQ=LazyList.add(_messageQ,message);
+            {
+                _queue.addUnsafe(message);
             }
-            
-            if (_batch==0 &&  _responsesPending<1)
-                resume();
+            else
+            { 
+                boolean add=_maxQueue>0;
+                if (_queue.size()>=_maxQueue && _qListeners!=null)
+                {
+                    for (QueueListener l:_qListeners)
+                    {
+                        add&= l.queueMaxed((Client)this,message);
+                    }
+                }
+                    
+                if (add)
+                    _queue.addUnsafe(message);
+            }    
 
             // deliver unsynchronized
-            for (MessageListener l:_syncMListeners)
-                l.deliver(from,this,message);
+            if (_syncMListeners!=null)
+                for (MessageListener l:_syncMListeners)
+                    l.deliver(from,this,message);
             alisteners=_asyncMListeners;
+             
+            if (_batch==0 &&  _responsesPending<1 && _queue.size()>0)
+                resume();
         }
         
         // deliver unsynchronized
-        for (MessageListener l:alisteners)
-            l.deliver(from,this,message);
+        if (alisteners!=null)
+            for (MessageListener l:alisteners)
+                l.deliver(from,this,message);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void doDeliverListeners()
+    {
+        synchronized (this)
+        {
+            if (_dListeners!=null)
+                for (DeliverListener l:_dListeners)
+                    l.deliver(this,_queue);
+        }
     }
 
 
@@ -192,7 +169,7 @@ public class ClientImpl implements Client
     {
         synchronized(this)
         {
-            if (--_batch==0 && LazyList.size(_messageQ)>0 && _responsesPending<1)
+            if (--_batch==0 && _queue.size()>0 && _responsesPending<1)
                 resume();
         }
     }
@@ -213,15 +190,9 @@ public class ClientImpl implements Client
     }
    
     /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see org.mortbay.cometd.C#hasMessages()
-     */
     public boolean hasMessages()
     {
-        synchronized(this)
-        {
-            return LazyList.size(_messageQ)>0;
-        }
+        return _queue.size()>0;
     }
     
     /* ------------------------------------------------------------ */
@@ -253,16 +224,16 @@ public class ClientImpl implements Client
         {
             Client client=_bayeux.removeClient(_id);   
             if (_bayeux.isLogInfo())
-                _bayeux.logInfo("Remove client "+client+" timeout="+timeout); 
-            if (_rListeners!=null)
-                for (RemoveListener l:_rListeners)
-                    l.removed(_id, timeout);
+                _bayeux.logInfo("Remove client "+client+" timeout="+timeout);
             if (_browserId!=null)
                 _bayeux.clientOffBrowser(getBrowserId(),_id);
             _browserId=null;
+            
+            if (_rListeners!=null)
+                for (RemoveListener l:_rListeners)
+                    l.removed(_id, timeout);
         }
         resume();
-        
     }
     
     /* ------------------------------------------------------------ */
@@ -303,122 +274,42 @@ public class ClientImpl implements Client
     }
 
     /* ------------------------------------------------------------ */
-    public void setListener(Listener listener)
-    {
-        synchronized(this)
-        {
-            if (_listener!=null)
-                removeListener(_listener);
-            _listener=listener;
-            if (_listener!=null)
-                addListener(_listener);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public Listener getListener()
-    {
-        return _listener;
-    }
-
-    /* ------------------------------------------------------------ */
     /*
      * @return the number of messages queued
      */
     public int getMessages()
     {
-        synchronized(this)
-        {
-            return LazyList.size(_messageQ);
-        }
+        return _queue.size();
     }
     
     /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see org.mortbay.cometd.C#takeMessages()
+    /**
+     * @deprecated
      */
     public List<Message> takeMessages()
     {
         synchronized(this)
         {
-            switch (LazyList.size(_messageQ))
-            {
-                case 0: return null;
-                case 1: 
-                    Message message = (Message)LazyList.get(_messageQ,0);
-                    _messageQ=null;
-                    return Collections.singletonList(message);
-                default:
-                    List<Message> messages = LazyList.getList(_messageQ);
-                    _messageQ=null;
-                    return messages;
-            }
+            ArrayList<Message> list = new ArrayList<Message>(_queue);
+            _queue.clear();
+            return list;
         }
     }
-    
 
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
     public void returnMessages(List<Message> messages)
     {
         synchronized(this)
         {
-            switch (LazyList.size(_messageQ))
-            {
-                case 0:
-                    _messageQ=messages;
-                    break;
-                case 1: 
-                default:
-                    throw new IllegalStateException(); // TODO implement
-            }
+            _queue.addAll(0,messages);
         }
     }
     
     /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see org.mortbay.cometd.C#takeMessages()
-     */
-    public Message takeMessage()
-    {
-        synchronized(this)
-        {
-            switch (LazyList.size(_messageQ))
-            {
-                case 0: return null;
-                case 1: 
-                {
-                    Message message = (Message)LazyList.get(_messageQ,0);
-                    _messageQ=null;
-                    return message;
-                }
-                default:
-                {
-                    Message message = (Message)LazyList.get(_messageQ,0);
-                    _messageQ=LazyList.remove(_messageQ,0);
-                    return message;
-                }
-            }
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void returnMessage(Message message)
-    {
-        synchronized(this)
-        {
-            switch (LazyList.size(_messageQ))
-            {
-                case 0:
-                    _messageQ=message;
-                    break;
-                case 1: 
-                default:
-                    throw new IllegalStateException(); // TODO implement
-            }
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
+    @Override
     public String toString()
     {
         return _id;
@@ -466,7 +357,7 @@ public class ClientImpl implements Client
         ChannelImpl[] subscriptions;
         synchronized(this)
         {
-            _messageQ=null;
+            _queue.clear();
             subscriptions=_subscriptions;
             _subscriptions=new ChannelImpl[0];
         }
@@ -490,77 +381,103 @@ public class ClientImpl implements Client
     {
         return _browserId;
     }
+
+    /* ------------------------------------------------------------ */
+    @Override
+    public boolean equals(Object o)
+    {
+    	if (!(o instanceof Client))
+    		return false;
+    	return getId().equals(((Client)o).getId());
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Get the advice specific for this Client
+     * @return advice specific for this client or null
+     */
+    public JSON.Literal getAdvice()
+    {
+    	return _advice;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param advice specific for this client
+     */
+    public void setAdvice(JSON.Literal advice)
+    {
+    	_advice=advice;
+    }
+    
     
     /* ------------------------------------------------------------ */
-   public boolean equals(Object o)
-   {
-       if (!(o instanceof Client))
-           return false;
-       return getId().equals(((Client)o).getId());
-   }
+    public void addListener(ClientListener listener)
+    {
+    	synchronized(this)
+    	{
+    		if (listener instanceof MessageListener)
+    		{
+    			if (listener instanceof MessageListener.Synchronous)
+    				_syncMListeners=(MessageListener[])LazyList.addToArray(_syncMListeners,listener,MessageListener.class);
+    			else
+    				_asyncMListeners=(MessageListener[])LazyList.addToArray(_asyncMListeners,listener,MessageListener.class);
+    		}
 
-   /* ------------------------------------------------------------ */
-   /**
-    * @return the advised
-    */
-   public int getAdviceVersion()
-   {
-       return _adviseVersion;
-   }
+    		if (listener instanceof RemoveListener)
+    			_rListeners=(RemoveListener[])LazyList.addToArray(_rListeners,listener,RemoveListener.class);
+    		
+    		if (listener instanceof QueueListener)
+    		    _qListeners=(QueueListener[])LazyList.addToArray(_qListeners,listener,QueueListener.class);
+    	}
+    }
 
-   /* ------------------------------------------------------------ */
-   /**
-    * @param advised the advised to set
-    */
-   public void setAdviceVersion(int version)
-   {
-       _adviseVersion=version;
-   }
+    /* ------------------------------------------------------------ */
+    public void removeListener(ClientListener listener)
+    {
+        synchronized (this)
+        {
+    		if (listener instanceof MessageListener)
+    		{
+    			_syncMListeners=(MessageListener[])LazyList.removeFromArray(_syncMListeners,listener);
+    			_asyncMListeners=(MessageListener[])LazyList.removeFromArray(_asyncMListeners,listener);
+    		}
 
-   /* ------------------------------------------------------------ */
-   public void addListener(EventListener listener)
-   {
-       synchronized(this)
-       {
-           if (listener instanceof MessageListener)
-           {
-               if (listener instanceof MessageListener.Synchronous)
-                   _syncMListeners=(MessageListener[])LazyList.addToArray(_syncMListeners,listener,MessageListener.class);
-               else
-                   _asyncMListeners=(MessageListener[])LazyList.addToArray(_asyncMListeners,listener,MessageListener.class);
-           }
-               
-           if (listener instanceof RemoveListener)
-               _rListeners=(RemoveListener[])LazyList.addToArray(_rListeners,listener,RemoveListener.class);
-       }
-   }
+    		if (listener instanceof RemoveListener)
+    			_rListeners=(RemoveListener[])LazyList.removeFromArray(_rListeners,listener);
+    		
+    		if (listener instanceof QueueListener)
+    		    _qListeners=(QueueListener[])LazyList.removeFromArray(_qListeners,listener);
+    	}
+    }
 
-   /* ------------------------------------------------------------ */
-   public void removeListener(EventListener listener)
-   {
-       synchronized(this)
-       {
-           if (listener instanceof MessageListener)
-           {
-               _syncMListeners=(MessageListener[])LazyList.removeFromArray(_syncMListeners,listener);
-               _asyncMListeners=(MessageListener[])LazyList.removeFromArray(_asyncMListeners,listener);
-           }
-           
-           if (listener instanceof RemoveListener)
-               _rListeners=(RemoveListener[])LazyList.removeFromArray(_rListeners,listener);
-       }
-   }
+    /* ------------------------------------------------------------ */
+    public long getTimeout() 
+    {
+    	return _timeout;
+    }
 
-   /* ------------------------------------------------------------ */
-   public long getTimeout() 
-   {
-       return _timeout;
-   }
-   
-   /* ------------------------------------------------------------ */
-   public void setTimeout(long timeoutMS) 
-   {
-       _timeout=timeoutMS;
-   }
+    /* ------------------------------------------------------------ */
+    public void setTimeout(long timeoutMS) 
+    {
+    	_timeout=timeoutMS;
+    }
 
+    /* ------------------------------------------------------------ */
+    public void setMaxQueue(int maxQueue)
+    {
+        _maxQueue=maxQueue;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int getMaxQueue()
+    {
+        return _maxQueue;
+    }
+
+    /* ------------------------------------------------------------ */
+    public Queue<Message> getQueue()
+    {
+        return _queue;
+    }
 }

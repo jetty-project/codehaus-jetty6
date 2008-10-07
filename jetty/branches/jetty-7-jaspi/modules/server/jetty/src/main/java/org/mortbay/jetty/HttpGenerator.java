@@ -22,9 +22,9 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /**
@@ -38,20 +38,20 @@ public class HttpGenerator extends AbstractGenerator
     // common _content
     private static byte[] LAST_CHUNK =
     { (byte) '0', (byte) '\015', (byte) '\012', (byte) '\015', (byte) '\012'};
-    private static byte[] CONTENT_LENGTH_0 = Portable.getBytes("Content-Length: 0\015\012");
-    private static byte[] CONNECTION_KEEP_ALIVE = Portable.getBytes("Connection: keep-alive\015\012");
-    private static byte[] CONNECTION_CLOSE = Portable.getBytes("Connection: close\015\012");
-    private static byte[] CONNECTION_ = Portable.getBytes("Connection: ");
-    private static byte[] CRLF = Portable.getBytes("\015\012");
-    private static byte[] TRANSFER_ENCODING_CHUNKED = Portable.getBytes("Transfer-Encoding: chunked\015\012");
-    private static byte[] SERVER = Portable.getBytes("Server: Jetty(7.0.x)\015\012");
+    private static byte[] CONTENT_LENGTH_0 = StringUtil.getBytes("Content-Length: 0\015\012");
+    private static byte[] CONNECTION_KEEP_ALIVE = StringUtil.getBytes("Connection: keep-alive\015\012");
+    private static byte[] CONNECTION_CLOSE = StringUtil.getBytes("Connection: close\015\012");
+    private static byte[] CONNECTION_ = StringUtil.getBytes("Connection: ");
+    private static byte[] CRLF = StringUtil.getBytes("\015\012");
+    private static byte[] TRANSFER_ENCODING_CHUNKED = StringUtil.getBytes("Transfer-Encoding: chunked\015\012");
+    private static byte[] SERVER = StringUtil.getBytes("Server: Jetty(7.0.x)\015\012");
 
     // other statics
     private static int CHUNK_SPACE = 12;
     
     public static void setServerVersion(String version)
     {
-        SERVER=Portable.getBytes("Server: Jetty("+version+")\015\012");
+        SERVER=StringUtil.getBytes("Server: Jetty("+version+")\015\012");
     }
 
     // data
@@ -103,10 +103,7 @@ public class HttpGenerator extends AbstractGenerator
     public void addContent(Buffer content, boolean last) throws IOException
     {
         if (_noContent)
-        {
-            content.clear();
-            return;
-        }
+            throw new IllegalStateException("NO CONTENT");
 
         if (_last || _state==STATE_END) 
         {
@@ -154,6 +151,28 @@ public class HttpGenerator extends AbstractGenerator
                 _content = null;
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * send complete response.
+     * 
+     * @param response
+     */
+    public void sendResponse(Buffer response) throws IOException
+    {
+        if (_noContent || _state!=STATE_HEADER || _content!=null && _content.length()>0 || _bufferChunked || _head )
+            throw new IllegalStateException();
+
+        _last = true;
+
+        _content = response;
+        _bypass = true;
+        _state = STATE_FLUSHING;
+
+        // TODO this is not exactly right, but should do.
+        _contentLength =_contentWritten = response.length();
+        
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -166,7 +185,7 @@ public class HttpGenerator extends AbstractGenerator
     public boolean addContent(byte b) throws IOException
     {
         if (_noContent)
-            return false;
+            throw new IllegalStateException("NO CONTENT");
         
         if (_last || _state==STATE_END) 
         {
@@ -522,7 +541,7 @@ public class HttpGenerator extends AbstractGenerator
                 // written yet?
 
                 // Response known not to have a body
-                if (_contentWritten == 0 && (_status < 200 || _status == 204 || _status == 304))
+                if (_contentWritten == 0 && _method==null && (_status < 200 || _status == 204 || _status == 304))
                     _contentLength = HttpTokens.NO_CONTENT;
                 else if (_last)
                 {
@@ -543,12 +562,16 @@ public class HttpGenerator extends AbstractGenerator
                     // No idea, so we must assume that a body is coming
                     _contentLength = (_close || _version < HttpVersions.HTTP_1_1_ORDINAL ) ? HttpTokens.EOF_CONTENT : HttpTokens.CHUNKED_CONTENT;
                     if (_method!=null && _contentLength==HttpTokens.EOF_CONTENT)
-                        throw new IllegalStateException("No Content-Length");
+                    {
+                        _contentLength=HttpTokens.NO_CONTENT;
+                        _noContent=true;
+                    }
                 }
                 break;
 
             case HttpTokens.NO_CONTENT:
-                if (content_length == null && _status >= 200 && _status != 204 && _status != 304) _header.put(CONTENT_LENGTH_0);
+                if (content_length == null && _method==null && _status >= 200 && _status != 204 && _status != 304) 
+                    _header.put(CONTENT_LENGTH_0);
                 break;
 
             case HttpTokens.EOF_CONTENT:
@@ -746,15 +769,14 @@ public class HttpGenerator extends AbstractGenerator
                     }
                 }
                 
+                
                 // If we failed to flush anything twice in a row break
-                if (len <= 0)
-                {
-                    if (last_len <= 0) 
-                        break Flushing;
-                    break;
-                }
+                if (len > 0)
+                    total+=len;
+                else if (last_len <= 0) 
+                    break Flushing;
+          
                 last_len = len;
-                total+=len;
             }
             
             return total;
@@ -872,5 +894,18 @@ public class HttpGenerator extends AbstractGenerator
 
     }
 
-
+    public int getBytesBuffered()
+    {
+        return(_header==null?0:_header.length())+
+        (_buffer==null?0:_buffer.length())+
+        (_content==null?0:_content.length());
+    }
+    
+    public String toString()
+    {
+        return "HttpGenerator s="+_state+
+        " h="+(_header==null?"null":_header.length())+
+        " b="+(_buffer==null?"null":_buffer.length())+
+        " c="+(_content==null?"null":_content.length());
+    }
 }

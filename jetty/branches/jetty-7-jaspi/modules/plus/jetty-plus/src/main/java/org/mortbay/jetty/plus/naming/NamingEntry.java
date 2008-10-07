@@ -15,17 +15,11 @@
 
 package org.mortbay.jetty.plus.naming;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
 import javax.naming.Name;
-import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
 import org.mortbay.log.Log;
@@ -46,43 +40,23 @@ import org.mortbay.naming.NamingUtil;
  */
 public abstract class NamingEntry
 {
-    public static final int SCOPE_CONTAINER = 0;
-    public static final int SCOPE_WEBAPP = 1;
+    public static final String __contextName = "__"; //all NamingEntries stored in context called "__"
     protected String jndiName;  //the name representing the object associated with the NamingEntry
     protected Object objectToBind; //the object associated with the NamingEntry
-    protected String absoluteObjectNameString; //the absolute name of the object
     protected String namingEntryNameString; //the name of the NamingEntry relative to the context it is stored in
     protected String objectNameString; //the name of the object relative to the context it is stored in
-    protected Context context; //the context in which both Naming Entry and object are saved
-    protected boolean isContainerScope;
-    protected static ThreadLocal scope = new ThreadLocal();
-    
-    public static void setScope (int scopeType)
-    {
-        scope.set(new Integer(scopeType));
-    }
-    
-    public static int getScope ()
-    {
-        Integer val = (Integer)scope.get();
-        return (val == null?SCOPE_CONTAINER:val.intValue());
-    }
-    
    
-    public static Name makeNamingEntryName (NameParser parser, String jndiName)
+   
+  
+ 
+    
+    public NamingEntry (Object scope, String jndiName, Object object)
     throws NamingException
     {
-        if (jndiName==null || parser==null)
-            return null;
-        
-        Name name = parser.parse("");
-        name.add(jndiName);
-        String lastAtom = (String)name.remove(name.size()-1);
-        lastAtom="__"+lastAtom;
-        name.add(lastAtom);
-        return name;
+        this.jndiName = jndiName;
+        this.objectToBind = object;
+        save(scope); 
     }
-    
     
     /** 
      * Create a NamingEntry. 
@@ -99,45 +73,11 @@ public abstract class NamingEntry
     public NamingEntry (String jndiName, Object object)
     throws NamingException
     {
-        this.jndiName = jndiName;
-        this.objectToBind = object;
-        
-        //if a threadlocal is set indicating we are inside a
-        //webapp, then save naming entries to the webapp's
-        //local context instead of the container's global context
-        isContainerScope=(getScope()==SCOPE_CONTAINER);
-        InitialContext icontext = new InitialContext();
-        if (isContainerScope)
-            context = icontext;
-        else
-            context = (Context)icontext.lookup("java:comp/env");
-        save(); 
+        this (null, jndiName, object);
     }
 
     
-    
-    /**
-     * Add a java:comp/env binding for the object represented by
-     * this NamingEntry
-     * @throws NamingException
-     */
-    /*
-    public void bindToENC ()
-    throws NamingException
-    {
-        if (isLocal())
-        {
-            //don't bind local scope naming entries as they are already bound to java:comp/env
-        }
-        else if (isGlobal())
-        {
-            InitialContext ic = new InitialContext();
-            Context env = (Context)ic.lookup("java:comp/env");
-            Log.debug("Binding java:comp/env/"+getJndiName()+" to "+absoluteObjectNameString);
-            NamingUtil.bind(env, getJndiName(), new LinkRef(absoluteObjectNameString));
-        }
-    }
-    */
+ 
     
     /**
      * Add a java:comp/env binding for the object represented by this NamingEntry,
@@ -147,18 +87,11 @@ public abstract class NamingEntry
     public void bindToENC(String localName)
     throws NamingException
     {
-        
-        
-        if (localName.equals(jndiName) && isLocal())
-        {
-            Log.warn("Already bound "+localName+" to java:comp/env with "+absoluteObjectNameString);
-            return; //name already bound to local
-        }
-        
+        //TODO - check on the whole overriding/non-overriding thing
         InitialContext ic = new InitialContext();
         Context env = (Context)ic.lookup("java:comp/env");
-        Log.debug("Binding java:comp/env/"+localName+" to "+absoluteObjectNameString);
-        NamingUtil.bind(env, localName, new LinkRef(absoluteObjectNameString));
+        Log.debug("Binding java:comp/env/"+localName+" to "+objectNameString);
+        NamingUtil.bind(env, localName, new LinkRef(objectNameString));
     }
     
     /**
@@ -186,14 +119,13 @@ public abstract class NamingEntry
     {
         try
         {
-            context.unbind(objectNameString);
-            context.unbind(namingEntryNameString);
-            this.absoluteObjectNameString=null;
+            InitialContext ic = new InitialContext();
+            ic.unbind(objectNameString);
+            ic.unbind(namingEntryNameString);
             this.jndiName=null;
             this.namingEntryNameString=null;
             this.objectNameString=null;
             this.objectToBind=null;
-            this.context=null;
         }
         catch (NamingException e)
         {
@@ -220,20 +152,7 @@ public abstract class NamingEntry
         return this.objectToBind;
     }
     
-    /**
-     * Check if this naming entry was global or locally scoped to a webapp
-     * @return true if naming entry was bound at global scope, false otherwise
-     */
-    public boolean isGlobal ()
-    {
-        return this.isContainerScope;
-    }
-    
-    public boolean isLocal()
-    {
-        return !this.isContainerScope;
-    }
-    
+
  
  
     
@@ -247,38 +166,33 @@ public abstract class NamingEntry
      * still retrieve the NamingEntry itself too.
      * 
      * The object is bound at the jndiName passed in.
-     * This NamingEntry is bound at __jndiName.
+     * This NamingEntry is bound at __/jndiName.
      * 
      * eg
      * 
-     * /jdbc/foo   : DataSource
-     * /jdbc/__foo : NamingEntry
+     * jdbc/foo    : DataSource
+     * __/jdbc/foo : NamingEntry
      * 
      * @throws NamingException
      */
-    protected void save ()
+    protected void save (Object scope)
     throws NamingException
     {
-        NameParser parser = context.getNameParser("");
-        Name contextName = parser.parse(context.getNameInNamespace());
-        
-        //save the NamingEntry itself so it can be accessed later       
-        Name namingEntryName = makeNamingEntryName(parser, jndiName);
+        InitialContext ic = new InitialContext();
+        NameParser parser = ic.getNameParser("");
+        Name prefix = NamingEntryUtil.getNameForScope(scope);
+      
+        //bind the NamingEntry into the context
+        Name namingEntryName = NamingEntryUtil.makeNamingEntryName(parser, getJndiName());
+        namingEntryName.addAll(0, prefix);
         namingEntryNameString = namingEntryName.toString();
-        NamingUtil.bind(context, namingEntryNameString, this);
-        Log.debug("Bound "+(isGlobal()?"":"java:")+namingEntryName.addAll(0,contextName));
-        
-        //put the Object into JNDI so it can be linked to later  
+        NamingUtil.bind(ic, namingEntryNameString, this);
+                
+        //bind the object as well
         Name objectName = parser.parse(getJndiName());
+        objectName.addAll(0, prefix);
         objectNameString = objectName.toString();
-        NamingUtil.bind(context, objectNameString, getObjectToBind());       
-        
-        //remember the full name of the bound object so that it can be used in
-        //link references later
-        Name fullName = objectName.addAll(0,contextName);
-        absoluteObjectNameString = (isContainerScope?"":"java:")+fullName.toString();       
-        Log.debug("Bound "+absoluteObjectNameString);
-    }
-    
+        NamingUtil.bind(ic, objectNameString, objectToBind);
+    } 
     
 }

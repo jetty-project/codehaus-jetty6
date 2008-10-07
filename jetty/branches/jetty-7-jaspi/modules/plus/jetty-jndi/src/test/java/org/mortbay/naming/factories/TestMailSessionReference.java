@@ -67,5 +67,8 @@ public class TestMailSessionReference extends TestCase
         Session fooSession = (Session)o;
         assertEquals(props, fooSession.getProperties());
         assertTrue(fooSession.getDebug());
+        
+        icontext.destroySubcontext("mail");
+        icontext.destroySubcontext("foo");
     }
 }

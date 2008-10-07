@@ -8,7 +8,7 @@
       <directory>${basedir}</directory>
       <outputDirectory>jetty-maven-plugin</outputDirectory>
       <includes>
-        <include>target/generated-site/**</include>
+        <include>target/site/**</include>
       </includes>
     </fileSet>
   </fileSets>

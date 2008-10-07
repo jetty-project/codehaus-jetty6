@@ -19,7 +19,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
 import org.mortbay.jetty.security.jaspi.modules.LoginService;
-import org.mortbay.xml.XmlConfiguration;
+import org.mortbay.xml.XmlConfiguration;                         
 
 /**
  * AbstractJetty6Mojo

@@ -28,6 +28,11 @@ import javax.naming.NamingException;
 public class Resource extends NamingEntry
 {
     
+    public  Resource (Object scope, String jndiName, Object objToBind)
+    throws NamingException
+    {
+        super(scope, jndiName, objToBind);
+    }
     
     /**
      * @param jndiName

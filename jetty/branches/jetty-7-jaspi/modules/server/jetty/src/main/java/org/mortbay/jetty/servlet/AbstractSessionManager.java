@@ -3,7 +3,7 @@
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
+// You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.jetty.HttpOnlyCookie;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.SessionManager;
@@ -56,7 +55,7 @@ import org.mortbay.util.LazyList;
  * org.mortbay.jetty.servlet.AbstractSessionManager.23Notifications is set to
  * true, the 2.3 servlet spec notification style will be used.
  * <p>
- * 
+ *
  * @author Greg Wilkins (gregw)
  */
 public abstract class AbstractSessionManager extends AbstractLifeCycle implements SessionManager
@@ -67,7 +66,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     private static final HttpSessionContext __nullSessionContext=new NullSessionContext();
 
     private boolean _usingCookies=true;
-    
+
     /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
@@ -81,12 +80,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     protected boolean _secureCookies=false;
     protected Object _sessionAttributeListeners;
     protected Object _sessionListeners;
-    
+
     protected ClassLoader _loader;
     protected ContextHandler.SContext _context;
     protected String _sessionCookie=__DefaultSessionCookie;
-    protected String _sessionURL=__DefaultSessionURL;
-    protected String _sessionURLPrefix=";"+_sessionURL+"=";
+    protected String _sessionIdPathParameterName = __DefaultSessionIdPathParameterName;
+    protected String _sessionIdPathParameterNamePrefix =";"+ _sessionIdPathParameterName +"=";
     protected String _sessionDomain;
     protected String _sessionPath;
     protected int _maxCookieAge=-1;
@@ -105,7 +104,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
 
         Session s = ((SessionIf)session).getSession();
         s.access(now);
-        
+
         // Do we need to refresh the cookie?
         if (isUsingCookies() &&
             (s.isIdChanged() ||
@@ -118,7 +117,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             s.setIdChanged(false);
             return cookie;
         }
-        
+
         return null;
     }
 
@@ -171,12 +170,11 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         String tmp=_context.getInitParameter(SessionManager.__SessionCookieProperty);
         if (tmp!=null)
             _sessionCookie=tmp;
-        
-        tmp=_context.getInitParameter(SessionManager.__SessionURLProperty);
+
+        tmp=_context.getInitParameter(SessionManager.__SessionIdPathParameterNameProperty);
         if (tmp!=null)
         {
-            _sessionURL=(tmp==null||"none".equals(tmp))?null:tmp;
-            _sessionURLPrefix=(tmp==null||"none".equals(tmp))?null:(";"+_sessionURL+"=");
+            setSessionIdPathParameterName(tmp);
         }
 
         // set up the max session cookie age if it isn't already
@@ -231,11 +229,11 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public HttpSession getHttpSession(String nodeId)
     {
         String cluster_id = getIdManager().getClusterId(nodeId);
-        
+
         synchronized (this)
         {
             Session session = getSession(cluster_id);
-            
+
             if (session!=null && !session.getNodeId().equals(nodeId))
                 session.setIdChanged(true);
             return session;
@@ -349,11 +347,11 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @deprecated.  Need to review if it is needed.
      */
     public abstract Map getSessionMap();
-    
+
     /* ------------------------------------------------------------ */
     public String getSessionPath()
     {
@@ -364,15 +362,15 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public abstract int getSessions();
 
     /* ------------------------------------------------------------ */
-    public String getSessionURL()
+    public String getSessionIdPathParameterName()
     {
-        return _sessionURL;
+        return _sessionIdPathParameterName;
     }
 
     /* ------------------------------------------------------------ */
-    public String getSessionURLPrefix()
+    public String getSessionIdPathParameterNamePrefix()
     {
-        return _sessionURLPrefix;
+        return _sessionIdPathParameterNamePrefix;
     }
 
     /* ------------------------------------------------------------ */
@@ -390,14 +388,14 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         Session s = ((SessionIf)session).getSession();
         return s.isValid();
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getClusterId(HttpSession session)
     {
         Session s = ((SessionIf)session).getSession();
         return s.getClusterId();
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getNodeId(HttpSession session)
     {
@@ -442,7 +440,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         _httpOnly=httpOnly;
     }
-    
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -457,10 +455,10 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public void setMaxCookieAge(int maxCookieAgeInSeconds)
     {
         _maxCookieAge=maxCookieAgeInSeconds;
-        
+
         if (_maxCookieAge>0 && _refreshCookieAge==0)
             _refreshCookieAge=_maxCookieAge/3;
-            
+
     }
 
     /* ------------------------------------------------------------ */
@@ -525,13 +523,10 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the session ID URL parameter name
-     * @param param The parameter name for session id URL rewriting (null or "none" for no rewriting).
-     */
-    public void setSessionURL(String param)
+    public void setSessionIdPathParameterName(String param)
     {
-        _sessionURL=(param==null||"none".equals(param))?null:param;
-        _sessionURLPrefix=(param==null||"none".equals(param))?null:(";"+_sessionURL+"=");
+        _sessionIdPathParameterName =(param==null||"none".equals(param))?null:param;
+        _sessionIdPathParameterNamePrefix =(param==null||"none".equals(param))?null:(";"+ _sessionIdPathParameterName +"=");
     }
     /* ------------------------------------------------------------ */
     /**
@@ -575,7 +570,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 ((HttpSessionListener)LazyList.get(_sessionListeners,i)).sessionCreated(event);
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Get a known existingsession
@@ -586,7 +581,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
 
     protected abstract void invalidateSessions();
 
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Create a new session instance
@@ -594,12 +589,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      * @return
      */
     protected abstract Session newSession(HttpServletRequest request);
-    
+
 
 
     /* ------------------------------------------------------------ */
     /**
-     * @return true if the cluster node id (worker id) is returned as part of the session id by {@link HttpSession#getId()}. Default is false. 
+     * @return true if the cluster node id (worker id) is returned as part of the session id by {@link HttpSession#getId()}. Default is false.
      */
     public boolean isNodeIdInSessionId()
     {
@@ -616,7 +611,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    /** Remove session from manager 
+    /** Remove session from manager
      * @param session The session to remove
      * @param invalidate True if {@link HttpSessionListener#sessionDestroyed(HttpSessionEvent)} and
      * {@link SessionIdManager#invalidateAll(String)} should be called.
@@ -628,7 +623,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    /** Remove session from manager 
+    /** Remove session from manager
      * @param session The session to remove
      * @param invalidate True if {@link HttpSessionListener#sessionDestroyed(HttpSessionEvent)} and
      * {@link SessionIdManager#invalidateAll(String)} should be called.
@@ -639,7 +634,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         synchronized (_sessionIdManager)
         {
             boolean removed = false;
-            
+
             synchronized (this)
             {
                 //take this session out of the map of sessions for this context
@@ -648,8 +643,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                     removed = true;
                     removeSession(session.getClusterId());
                 }
-            }   
-            
+            }
+
             if (removed)
             {
                 // Remove session from all context and global id maps
@@ -658,7 +653,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                     _sessionIdManager.invalidateAll(session.getClusterId());
             }
         }
-        
+
         if (invalidate && _sessionListeners!=null)
         {
             HttpSessionEvent event=new HttpSessionEvent(session);
@@ -673,11 +668,11 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
 
     /* ------------------------------------------------------------ */
     protected abstract void removeSession(String idInCluster);
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Null returning implementation of HttpSessionContext
-     * 
+     *
      * @author Greg Wilkins (gregw)
      */
     public static class NullSessionContext implements HttpSessionContext
@@ -718,14 +713,14 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         public Session getSession();
     }
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /**
-     * 
+     *
      * <p>
-     * Implements {@link javax.servlet.HttpSession} from the {@link javax.servlet} package.   
+     * Implements {@link javax.servlet.HttpSession} from the {@link javax.servlet} package.
      * </p>
      * @author gregw
      *
@@ -771,9 +766,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         {
             return this;
         }
-        
+
         /* ------------------------------------------------------------- */
-        protected void initValues() 
+        protected void initValues()
         {
             _values=newAttributeMap();
         }
@@ -804,9 +799,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 return Collections.enumeration(names);
             }
         }
-        
+
         /* ------------------------------------------------------------- */
-        public long getCookieSetTime() 
+        public long getCookieSetTime()
         {
             return _cookieSet;
         }
@@ -830,7 +825,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         {
             return _nodeId;
         }
-        
+
         /* ------------------------------------------------------------- */
         protected String getClusterId()
         {
@@ -923,8 +918,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                     doInvalidate();
             }
         }
-        
-        
+
+
         /* ------------------------------------------------------------- */
         protected void timeout() throws IllegalStateException
         {
@@ -940,7 +935,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                     _doInvalidate=true;
             }
         }
-        
+
         /* ------------------------------------------------------------- */
         public void invalidate() throws IllegalStateException
         {
@@ -948,7 +943,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             removeSession(this,true);
             doInvalidate();
         }
-        
+
         /* ------------------------------------------------------------- */
         protected void doInvalidate() throws IllegalStateException
         {
@@ -1032,7 +1027,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
 
                 old=_values.remove(name);
             }
-            
+
             if (old!=null)
             {
                 unbindValue(name,old);
@@ -1076,7 +1071,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 old_value=_values.put(name,value);
             }
 
-            if (old_value==null || !value.equals(old_value)) 
+            if (old_value==null || !value.equals(old_value))
             {
                 unbindValue(name,old_value);
                 bindValue(name,value);
@@ -1150,15 +1145,15 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
-        protected void willPassivate() 
+        protected void willPassivate()
         {
             synchronized(this)
             {
                 HttpSessionEvent event = new HttpSessionEvent(this);
-                for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
+                for (Iterator iter = _values.values().iterator(); iter.hasNext();)
                 {
                     Object value = iter.next();
-                    if (value instanceof HttpSessionActivationListener) 
+                    if (value instanceof HttpSessionActivationListener)
                     {
                         HttpSessionActivationListener listener = (HttpSessionActivationListener) value;
                         listener.sessionWillPassivate(event);
@@ -1168,15 +1163,15 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
 
         /* ------------------------------------------------------------- */
-        protected void didActivate() 
+        protected void didActivate()
         {
             synchronized(this)
             {
                 HttpSessionEvent event = new HttpSessionEvent(this);
-                for (Iterator iter = _values.values().iterator(); iter.hasNext();) 
+                for (Iterator iter = _values.values().iterator(); iter.hasNext();)
                 {
                     Object value = iter.next();
-                    if (value instanceof HttpSessionActivationListener) 
+                    if (value instanceof HttpSessionActivationListener)
                     {
                         HttpSessionActivationListener listener = (HttpSessionActivationListener) value;
                         listener.sessionDidActivate(event);

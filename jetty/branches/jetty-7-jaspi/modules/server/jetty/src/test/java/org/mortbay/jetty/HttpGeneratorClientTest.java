@@ -1,3 +1,17 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty;
 
 import java.io.IOException;
@@ -24,6 +38,88 @@ public class HttpGeneratorClientTest extends TestCase
     {
         junit.textui.TestRunner.run(HttpGeneratorTest.class);
     }
+
+    public void testContentLength()
+        throws Exception
+    {
+        Buffer bb=new ByteArrayBuffer(8096);
+        Buffer sb=new ByteArrayBuffer(1500);
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpGenerator generator = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
+        
+        generator.setRequest("GET","/usr");
+        
+        HttpFields fields = new HttpFields();
+        fields.add("Header","Value");
+        fields.add("Content-Type","text/plain");
+        
+        String content = "The quick brown fox jumped over the lazy dog";
+        fields.addLongField("Content-Length",content.length());
+        
+        generator.completeHeader(fields,false);
+        
+        generator.addContent(new ByteArrayBuffer(content),true);
+        generator.flush();
+        generator.complete();
+        generator.flush();
+        
+        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+        assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Content-Length: 44||"+content,result);
+    }
+
+    public void testAutoContentLength()
+        throws Exception
+    {
+        Buffer bb=new ByteArrayBuffer(8096);
+        Buffer sb=new ByteArrayBuffer(1500);
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpGenerator generator = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
+        
+        generator.setRequest("GET","/usr");
+        
+        HttpFields fields = new HttpFields();
+        fields.add("Header","Value");
+        fields.add("Content-Type","text/plain");
+        
+        String content = "The quick brown fox jumped over the lazy dog";
+
+        generator.addContent(new ByteArrayBuffer(content),true);
+        generator.completeHeader(fields,true);
+        
+        generator.flush();
+        generator.complete();
+        generator.flush();
+        
+        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+        assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Content-Length: 44||"+content,result);
+    }
+
+    public void testChunked()
+        throws Exception
+    {
+        Buffer bb=new ByteArrayBuffer(8096);
+        Buffer sb=new ByteArrayBuffer(1500);
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpGenerator generator = new HttpGenerator(new SimpleBuffers(new Buffer[]{sb,bb}),endp, sb.capacity(), bb.capacity());
+        
+        generator.setRequest("GET","/usr");
+        
+        HttpFields fields = new HttpFields();
+        fields.add("Header","Value");
+        fields.add("Content-Type","text/plain");
+        
+        String content = "The quick brown fox jumped over the lazy dog";
+
+        generator.completeHeader(fields,false);
+        
+        generator.addContent(new ByteArrayBuffer(content),false);
+        generator.flush();
+        generator.complete();
+        generator.flush();
+        
+        String result=endp.getOut().toString().replace("\r\n","|").replace('\r','|').replace('\n','|');
+        assertEquals("GET /usr HTTP/1.1|Header: Value|Content-Type: text/plain|Transfer-Encoding: chunked||2C|"+content+"|0||",result);
+    }
     
     public void testHTTP()
         throws Exception
@@ -48,7 +144,7 @@ public class HttpGeneratorClientTest extends TestCase
                     // For none, keep-alive, close
                     for (int c=0;c<connect.length;c++)
                     {
-                        String t="v="+v+",r="+r+",chunks="+chunks+",connect="+connect[c]+",tr="+tr[r];
+                        String t="v="+v+",r="+r+",chunks="+chunks+",c="+c+",tr="+tr[r];
                         // System.err.println(t);
                         
                         hb.reset(true);
@@ -63,8 +159,9 @@ public class HttpGeneratorClientTest extends TestCase
                         }
                         catch(IllegalStateException e)
                         {
-                            if (v==10 && chunks>2)
+                            if (v<10 || v==10 && chunks>2)
                                 continue;
+                            System.err.println(t);
                             throw e;
                         }
                         String request=endp.getOut().toString();
@@ -151,7 +248,11 @@ public class HttpGeneratorClientTest extends TestCase
                     if (i%2==0)
                     {
                         if (hb.isState(HttpGenerator.STATE_HEADER))
+                        {
+                            if (version<11)
+                                fields.addLongField("Content-Length",body.length());
                             hb.completeHeader(fields, HttpGenerator.MORE);
+                        }
                         hb.flush();
                     }
                 }

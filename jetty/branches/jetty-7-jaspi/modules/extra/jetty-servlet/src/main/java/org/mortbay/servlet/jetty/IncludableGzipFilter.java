@@ -1,3 +1,17 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.servlet.jetty;
 
 import java.io.IOException;
@@ -5,12 +19,12 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
 import org.mortbay.servlet.GzipFilter;
+
 
 /* ------------------------------------------------------------ */
 /** Includable GZip Filter.
- * This extension to the {@link GzipFilter} that uses Jetty APIs to allow
+ * This extension to the {@link GzipFilter} that uses Jetty features to allow
  * headers to be set during calls to 
  * {@link javax.servlet.RequestDispatcher#include(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}.
  * This allows the gzip filter to function correct during includes and to make a decision to gzip or not
@@ -50,9 +64,12 @@ public class IncludableGzipFilter extends GzipFilter
 
         protected boolean setContentEncodingGzip()
         {
-            HttpConnection connection = HttpConnection.getCurrentConnection();
-            connection.getResponseFields().put("Content-Encoding", "gzip");
-            return true;
+            if (_request.getAttribute("javax.servlet.include.request_uri")!=null)
+                _response.setHeader("org.mortbay.jetty.include.Content-Encoding", "gzip");
+            else
+                _response.setHeader("Content-Encoding", "gzip");
+                
+            return _response.containsHeader("Content-Encoding");
         }
         
     }

@@ -1,5 +1,20 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.cometd;
 
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -7,10 +22,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.cometd.Bayeux;
+import org.cometd.Message;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Message;
 
 public class MessageImpl extends HashMap<String, Object> implements Message, org.mortbay.util.ajax.JSON.Generator
 {
@@ -22,6 +37,8 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     Object _data;
     Message _associated;
     AtomicInteger _refs=new AtomicInteger();
+    
+    private ByteBuffer _buffer;
 
     /* ------------------------------------------------------------ */
     public MessageImpl()
@@ -34,6 +51,12 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     {
         super(8);
         _pool=bayeux;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getRefs()
+    {
+        return _refs.get();
     }
     
     /* ------------------------------------------------------------ */
@@ -104,9 +127,11 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#clear()
      */
+    @Override
     public void clear()
     {
         _json=null;
+        _buffer=null;
         _id=null;
         _channel=null;
         _clientId=null;
@@ -135,9 +160,11 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#put(java.lang.Object, java.lang.Object)
      */
+    @Override
     public Object put(String key, Object value)
     {
         _json=null;
+        _buffer=null;
         if (Bayeux.CHANNEL_FIELD.equals(key))
             _channel=(String)value;
         else if (Bayeux.ID_FIELD.equals(key))
@@ -153,9 +180,11 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#putAll(java.util.Map)
      */
+    @Override
     public void putAll(Map<? extends String, ? extends Object> m)
     {
         _json=null;
+        _buffer=null;
         super.putAll(m);
         _channel=(String)get(Bayeux.CHANNEL_FIELD);
         Object id=get(Bayeux.ID_FIELD);
@@ -167,9 +196,11 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#remove(java.lang.Object)
      */
+    @Override
     public Object remove(Object key)
     {
         _json=null;
+        _buffer=null;
         if (Bayeux.CHANNEL_FIELD.equals(key))
             _channel=null;
         else if (Bayeux.ID_FIELD.equals(key))
@@ -183,6 +214,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#entrySet()
      */
+    @Override
     public Set<java.util.Map.Entry<String, Object>> entrySet()
     {
         return Collections.unmodifiableSet(super.entrySet());
@@ -192,6 +224,7 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
     /* (non-Javadoc)
      * @see java.util.HashMap#keySet()
      */
+    @Override
     public Set<String> keySet()
     {
         return Collections.unmodifiableSet(super.keySet());
@@ -215,6 +248,21 @@ public class MessageImpl extends HashMap<String, Object> implements Message, org
                 ((MessageImpl)_associated).incRef();
         }
     }
+        
+    /* ------------------------------------------------------------ */
+    /**
+     * @param buffer A cached buffer containing HTTP response headers 
+     * and message content, to be reused when sending one message
+     * to multiple clients 
+     */
+    public void setBuffer(ByteBuffer buffer)
+    {
+        _buffer = buffer;
+    }
     
-
-}
+    /* ------------------------------------------------------------ */
+    public ByteBuffer getBuffer()
+    {
+        return _buffer;
+    }
+ }

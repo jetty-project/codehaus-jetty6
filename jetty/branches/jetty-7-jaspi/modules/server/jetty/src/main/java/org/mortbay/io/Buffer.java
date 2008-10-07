@@ -357,7 +357,9 @@ public interface Buffer extends Cloneable
      */
     int readFrom(InputStream in, int max) throws IOException;
     
-    
+
+    /* ------------------------------------------------------------ */
+    String toString(String charset);
     
     /* 
      * Buffers implementing this interface should be compared with case insensitive equals

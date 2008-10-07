@@ -1,6 +1,21 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty;
 
 import java.io.IOException;
+
 import org.mortbay.io.AsyncEndPoint;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
@@ -117,7 +132,20 @@ public class Suspendable
     {
         synchronized(this)
         {
-            return _state==__SUSPENDING || _state==__SUSPENDED;
+            switch(_state)
+            {
+                case __IDLE:
+                case __HANDLING:
+                    return false;
+                case __SUSPENDING:
+                case __RESUMING:
+                case __COMPLETING:
+                case __SUSPENDED:
+                    return true;
+                case __UNSUSPENDING:
+                default:
+                    return false;   
+            }
         }
     }
 
@@ -248,6 +276,10 @@ public class Suspendable
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return true if handling is complete, false if the request should 
+     * be handled again (eg because of a resume)
+     */
     public boolean unhandling()
     {
         synchronized (this)
@@ -265,9 +297,11 @@ public class Suspendable
                     _initial=false;
                     _state=__SUSPENDED;
                     scheduleTimeout(); // could block and change state.
-                    if (_state==__SUSPENDED)
+                    if (_state==__SUSPENDED || _state==__COMPLETING)
                         return true;
-                    // fall through to resuming action
+                    _initial=false;
+                    _state=__HANDLING;
+                    return false; 
 
                 case __RESUMING:
                     _initial=false;
@@ -280,13 +314,10 @@ public class Suspendable
                     return true;
 
                 case __SUSPENDED:
-                    throw new IllegalStateException(this.getStatusString());
-
                 case __UNSUSPENDING:
+                default:
                     throw new IllegalStateException(this.getStatusString());
 
-                default:
-                    throw new IllegalStateException(""+_state);
             }
 
         }
@@ -295,6 +326,7 @@ public class Suspendable
     /* ------------------------------------------------------------ */
     public void resume()
     {
+        boolean dispatch=false;
         synchronized (this)
         {
             switch(_state)
@@ -303,36 +335,35 @@ public class Suspendable
                     _resumed=true;
                     return;
                     
-                case __IDLE:
-                    return;
-                    
                 case __SUSPENDING:
                     _resumed=true;
                     _state=__RESUMING;
                     return;
-                    
+
+                case __IDLE:
                 case __RESUMING:
-                    _resumed=true;
-                    _state=__RESUMING;
-                    return;
-                    
                 case __COMPLETING:
                     return;
                     
                 case __SUSPENDED:
+                    dispatch=true;
                     _resumed=true;
                     _state=__UNSUSPENDING;
-                    cancelTimeout();
-                    scheduleDispatch();
-                    return;
+                    break;
                     
                 case __UNSUSPENDING:
                     _resumed=true;
                     return;
                     
                 default:
-                    throw new IllegalStateException(""+_state);
+                    throw new IllegalStateException(this.getStatusString());
             }
+        }
+        
+        if (dispatch)
+        {
+            cancelTimeout();
+            scheduleDispatch();
         }
     }
 
@@ -341,6 +372,7 @@ public class Suspendable
     protected void expire()
     {
         // just like resume, except don't set _resumed=true;
+        boolean dispatch=false;
         synchronized (this)
         {
             switch(_state)
@@ -354,30 +386,32 @@ public class Suspendable
                 case __SUSPENDING:
                     _timeout=true;
                     _state=__RESUMING;
+                    cancelTimeout();
                     return;
                     
                 case __RESUMING:
-                    _timeout=true;
-                    _state=__RESUMING;
                     return;
                     
                 case __COMPLETING:
-                    throw new IllegalStateException(this.getStatusString());
+                    return;
                     
                 case __SUSPENDED:
+                    dispatch=true;
                     _timeout=true;
                     _state=__UNSUSPENDING;
-                    cancelTimeout();
-                    scheduleDispatch();
-                    return;
+                    break;
                     
                 case __UNSUSPENDING:
                     _timeout=true;
                     return;
                     
                 default:
-                    throw new IllegalStateException(""+_state);
+                    throw new IllegalStateException(this.getStatusString());
             }
+        }
+        if (dispatch)
+        {
+            scheduleDispatch();
         }
     }
     
@@ -388,20 +422,22 @@ public class Suspendable
     public void complete() throws IOException
     {
         // just like resume, except don't set _resumed=true;
+        boolean dispatch=false;
         synchronized (this)
         {
             switch(_state)
             {
                 case __HANDLING:
-                    _state=__COMPLETING;
-                    break;
+                    throw new IllegalStateException(this.getStatusString());
                     
                 case __IDLE:
                     return;
                     
                 case __SUSPENDING:
-                case __RESUMING:
                     _state=__COMPLETING;
+                    break;
+                    
+                case __RESUMING:
                     break;
 
                 case __COMPLETING:
@@ -409,17 +445,21 @@ public class Suspendable
                     
                 case __SUSPENDED:
                     _state=__COMPLETING;
-                    cancelTimeout();
-                    scheduleDispatch();
-                    return;
+                    dispatch=true;
+                    break;
                     
                 case __UNSUSPENDING:
-                    _state=__COMPLETING;
                     return;
                     
                 default:
-                    throw new IllegalStateException(""+_state);
+                    throw new IllegalStateException(this.getStatusString());
             }
+        }
+        
+        if (dispatch)
+        {
+            cancelTimeout();
+            scheduleDispatch();
         }
     }
 
@@ -432,6 +472,7 @@ public class Suspendable
             _state=(_state==__SUSPENDED||_state==__IDLE)?__IDLE:__HANDLING;
             _resumed = false;
             _initial = true;
+            _timeout = false;
             cancelTimeout();
         }
     }
@@ -521,6 +562,7 @@ public class Suspendable
             case __RESUMING:
             case __SUSPENDED:
             case __SUSPENDING:
+            case __UNSUSPENDING:
                 return false;
                 
             default:

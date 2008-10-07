@@ -22,19 +22,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.cometd.Bayeux;
+import org.cometd.DataFilter;
+import org.cometd.Message;
 import org.mortbay.cometd.filter.JSONDataFilter;
 import org.mortbay.log.Log;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.DataFilter;
-import dojox.cometd.Message;
 
 /**
  * Cometd Filter Servlet implementing the {@link AbstractBayeux} protocol.
@@ -87,11 +89,10 @@ import dojox.cometd.Message;
  * <dt>directDeliver</dt>
  * <dd>true if published messages are delivered directly to subscribers (default). If false, a message copy is created with only supported fields (default true).</dd>
  * 
- * <dt>asyncDeliver</dt>
- * <dd>true if responses should be flushed asynchronously.  This improves performance and reduces the required thread pool size, but increases the risk of
- * messages being lost if a response is lost due to a transient network failure (default false). </dd>
- * 
- * 
+ * <dt>refsThreshold</dt>
+ * <dd>The number of message refs at which the a single message response will be 
+ * cached instead of being generated for every client delivered to. Done to optimize 
+ * a single message being sent to multiple clients.</dd>
  * </dl>
  * 
  * @author gregw
@@ -100,7 +101,7 @@ import dojox.cometd.Message;
  * @see {@link AbstractBayeux}
  * @see {@link ChannelId}
  */
-public abstract class AbstractCometdServlet extends HttpServlet
+public abstract class AbstractCometdServlet extends GenericServlet
 {
     public static final String CLIENT_ATTR="org.mortbay.cometd.client";
     public static final String TRANSPORT_ATTR="org.mortbay.cometd.transport";
@@ -110,7 +111,8 @@ public abstract class AbstractCometdServlet extends HttpServlet
     public final static String BROWSER_ID="BAYEUX_BROWSER";
     
     protected AbstractBayeux _bayeux;
-    protected boolean _asyncDeliver=false;
+    public final static int __DEFAULT_REFS_THRESHOLD = 10;
+    protected int _refsThreshold=__DEFAULT_REFS_THRESHOLD;
 
     public AbstractBayeux getBayeux()
     {
@@ -118,7 +120,8 @@ public abstract class AbstractCometdServlet extends HttpServlet
     }
     
     protected abstract AbstractBayeux newBayeux();
-    
+
+    @Override
     public void init() throws ServletException
     {
         synchronized (AbstractCometdServlet.class)
@@ -204,22 +207,42 @@ public abstract class AbstractCometdServlet extends HttpServlet
 
                 String async=getInitParameter("asyncDeliver");
                 if (async!=null)
-                    _asyncDeliver = Boolean.parseBoolean(async);
+                    getServletContext().log("asyncDeliver no longer supported");
+                
+                String refsThreshold=getInitParameter("refsThreshold");
+                if (refsThreshold!=null)
+                    _refsThreshold=Integer.parseInt(refsThreshold);
                 
                 _bayeux.generateAdvice();
+                
+                if (_bayeux.isLogInfo())
+                {
+                    getServletContext().log("timeout="+timeout);
+                    getServletContext().log("interval="+interval);
+                    getServletContext().log("maxInterval="+maxInterval);
+                    getServletContext().log("multiFrameInterval="+mfInterval);
+                    getServletContext().log("filters="+filters);
+                    getServletContext().log("refsThreshold="+refsThreshold);
+                }
             }
         }
 
         getServletContext().setAttribute(Bayeux.DOJOX_COMETD_BAYEUX,_bayeux);
     }
 
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    protected abstract void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException;  
+    
+    @Override
+    public void service(ServletRequest req, ServletResponse resp) throws ServletException, IOException
     {
+        HttpServletRequest request=(HttpServletRequest)req;
+        HttpServletResponse response=(HttpServletResponse)resp;
+        
         if (_bayeux.isRequestAvailable())
-            _bayeux.setCurrentRequest(req);
+            _bayeux.setCurrentRequest(request);
         try
         {
-            super.service(req,resp);
+            service(request,response);
         }
         finally
         {
@@ -289,8 +312,7 @@ public abstract class AbstractCometdServlet extends HttpServlet
                     continue;
 
                 fodder=batches[i];
-                _bayeux.parseTo(fodder,messages);
-                
+                _bayeux.parseTo(fodder,messages);   
             }
 
             return messages.toArray(new Message[messages.size()]);

@@ -23,8 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
+import org.mortbay.util.LazyList;
 
-public class StatisticsHandler extends HandlerWrapper
+public class StatisticsHandler extends HandlerWrapper implements CompleteHandler
 {
     transient long _statsStartedAt;
     
@@ -49,7 +50,7 @@ public class StatisticsHandler extends HandlerWrapper
     transient int _responses5xx; // Server Error
     
     transient long _responsesBytesTotal;
-
+       
     /* ------------------------------------------------------------ */
     public void statsReset()
     {
@@ -83,7 +84,7 @@ public class StatisticsHandler extends HandlerWrapper
     {
         final Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         final Response base_response=(response instanceof Response)?((Response)response):HttpConnection.getCurrentConnection().getResponse();
-
+        
         long timestamp0=base_request.getTimeStamp();
         long timestamp1=timestamp0;
         try
@@ -124,16 +125,16 @@ public class StatisticsHandler extends HandlerWrapper
                 if (duration>_requestsActiveDurationMax)
                     _requestsActiveDurationMax=duration;
 
-                if(!base_request.isSuspended())
+                
+                if(base_request.isSuspended())
                 {
-                    // TODO handle completed requests!
-                    
-                    duration = System.currentTimeMillis()-timestamp0;
-                    _requestsDurationTotal+=duration;
-                    if (_requestsDurationMin==0 || duration<_requestsDurationMin)
-                        _requestsDurationMin=duration;
-                    if (duration>_requestsDurationMax)
-                        _requestsDurationMax=duration;
+                    Object list = base_request.getAttribute(COMPLETE_HANDLER_ATTR);
+                    base_request.setAttribute(COMPLETE_HANDLER_ATTR, LazyList.add(list, this));
+                }
+                else
+                {
+                    duration = System.currentTimeMillis()-timestamp0;                    
+                    addRequestsDurationTotal(duration);
                     
                     switch(base_response.getStatus()/100)
                     {
@@ -146,7 +147,6 @@ public class StatisticsHandler extends HandlerWrapper
                     
                     _responsesBytesTotal += base_response.getContentCount();
                 }                                            
-                
             }
         }
     }
@@ -163,7 +163,7 @@ public class StatisticsHandler extends HandlerWrapper
     {
         super.doStop();
     }
-
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Get the number of requests handled by this context
@@ -327,5 +327,31 @@ public class StatisticsHandler extends HandlerWrapper
      * @return Total bytes of content sent in responses
      */
     public long getResponsesBytesTotal() {return _responsesBytesTotal; }
+    
+    private void addRequestsDurationTotal(long duration) 
+    {
+        synchronized(this)
+        {
+            _requestsDurationTotal+=duration;
+            if (_requestsDurationMin==0 || duration<_requestsDurationMin)
+                _requestsDurationMin=duration;
+            if (duration>_requestsDurationMax)
+                _requestsDurationMax=duration;
+        }
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Handle completed requests.
+     * 
+     * @param request
+     *                the request which has just completed
+     */
+    public void complete(Request request)
+    {
+        long duration = System.currentTimeMillis() - request.getTimeStamp();
+        addRequestsDurationTotal(duration);
+    }
 
 }

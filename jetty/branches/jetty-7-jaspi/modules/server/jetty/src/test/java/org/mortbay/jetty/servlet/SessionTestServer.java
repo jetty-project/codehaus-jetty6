@@ -32,8 +32,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
  * SessionTestServer
@@ -244,7 +242,7 @@ public abstract class SessionTestServer extends Server
                               HttpServletResponse response)
         throws ServletException, IOException
         {
-            HttpSession session = request.getSession(true);
+            request.getSession(true);
             dump(request, response);
         }
     }
@@ -342,7 +340,8 @@ public abstract class SessionTestServer extends Server
 
 
         Context contextA2 = new Context(contextsA, "/contextB", Context.SESSIONS);
-        contextA2.addServlet(new ServletHolder(new SessionForwardedServlet()), "/session/*");   
+        contextA2.addServlet(new ServletHolder(new SessionForwardedServlet()), "/session/*");
+        contextA2.addServlet(new ServletHolder(new SessionActionServlet()), "/action/session/*");
         contextA2.getSessionHandler().setSessionManager(_sessionMgr2);
         _sessionMgr2.setIdManager(_sessionIdMgr);
     }
