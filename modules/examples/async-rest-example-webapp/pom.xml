@@ -3,14 +3,12 @@
     <groupId>org.mortbay.jetty.example</groupId>
     <artifactId>jetty-examples-parent</artifactId>
     <version>7.0-SNAPSHOT</version>
-  </parent>
-  
+  </parent>  
   <modelVersion>4.0.0</modelVersion>
   <groupId>async-rest-example-webapp</groupId>
   <artifactId>async-rest-example-webapp</artifactId>
   <packaging>war</packaging>
   <name>Jetty Example :: Async Rest Webapp</name>
-  <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
