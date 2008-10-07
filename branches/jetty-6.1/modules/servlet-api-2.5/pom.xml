@@ -48,7 +48,9 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.2</version>
         <configuration>
           <stylesheetfile>${basedir}/../../project-website/project-site/src/resources/javadoc.css</stylesheetfile>
         </configuration>
