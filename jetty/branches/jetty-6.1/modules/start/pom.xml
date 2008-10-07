@@ -9,15 +9,6 @@
   <artifactId>start</artifactId>
   <name>Jetty start jar</name>
   <build>
-    <defaultGoal>install</defaultGoal>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <includes>
-          <include>org/mortbay/start/*.config</include>
-        </includes>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>

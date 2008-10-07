@@ -10,7 +10,6 @@
   <name>Glassfish Jasper API</name>
   <description>JSP2.1 API</description>
   <build>
-    <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
         <directory>target/generated-sources/main/resources</directory>
@@ -96,17 +95,6 @@
             </configuration>
            </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin-version}</version>
-        <configuration>
-          <archive>
-              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
       </plugin>
     </plugins>
   </build>

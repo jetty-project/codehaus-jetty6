@@ -9,12 +9,6 @@
   <artifactId>jetty-annotations</artifactId>
   <name>Servlet Annotations</name>
   <build>
-    <defaultGoal>install</defaultGoal>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -76,16 +70,6 @@
             </configuration>
            </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin-version}</version>
-        <configuration>
-          <archive>
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

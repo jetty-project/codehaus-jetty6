@@ -10,9 +10,7 @@
   <artifactId>jetty-test-annotations</artifactId>
   <packaging>war</packaging>
   <name>Jetty Annotations Test Webapp</name>
-  <url>http://jetty.mortbay.org</url>
   <build>
-    <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>

@@ -10,25 +10,7 @@
   <artifactId>jetty-naming</artifactId>
   <name>Jetty Naming</name>
   <description>JNDI spi impl for java namespace</description>
-  <url>http://jetty.mortbay.org</url>
   <build>
-    <defaultGoal>install</defaultGoal>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <includes>
-          <include>**</include>
-        </includes>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-        <includes>
-          <include>**</include>
-        </includes>
-      </testResource>
-    </testResources>
     <plugins>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -80,16 +62,6 @@
             </configuration>
            </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin-version}</version>
-        <configuration>
-          <archive>
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
