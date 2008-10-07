@@ -9,18 +9,6 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-spring</artifactId>
   <name>Jetty Spring</name>
-  <url>http://jetty.mortbay.org</url>
-  <build>
-    <defaultGoal>install</defaultGoal>
-    <resources>
-      <resource>
-         <directory>src/main/resources</directory>
-          <includes>
-            <include>spring-jee-bootstrap.xml</include>
-          </includes>
-      </resource>
-    </resources>
-  </build>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

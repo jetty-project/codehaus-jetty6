@@ -66,28 +66,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-           <execution>
-             <id>install</id>
-             <goals>
-               <goal>attach-artifact</goal>               
-             </goals>
-             <configuration>
-               <artifacts>
-               	 <artifact>
-               	   <file>target/${artifactId}-${version}-site-component.jar</file>
-               	   <type>jar</type>
-               	   <classifier>site-component</classifier>
-               	 </artifact>
-               </artifacts>
-             </configuration>
-           </execution>
-         </executions>
-      </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -131,23 +109,6 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-  <!-- reporting>
-    <plugins>
-      <plugin>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>project-team</report>
-              <report>mailing-list</report>
-              <report>issue-tracking</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    </plugins>
-  </reporting -->
-
   <profiles>
     <profile>
       <id>jdk1.4</id>

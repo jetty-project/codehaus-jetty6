@@ -9,15 +9,7 @@
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>jetty-java5-threadpool</artifactId>
   <name>Jetty Java5 Threadpool</name>
-  <url>http://jetty.mortbay.org</url>
-  <licenses>
-    <license>
-      <name>Apache License Version 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
   <build>
-    <defaultGoal>install</defaultGoal>
     <plugins>
        <plugin>
         <artifactId>maven-compiler-plugin</artifactId>

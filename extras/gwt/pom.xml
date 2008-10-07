@@ -10,9 +10,7 @@
   <artifactId>jetty-gwt</artifactId>
   <packaging>jar</packaging>
   <name>Jetty Contrib :: jetty-gwt RemoteServiceServlet</name>
-  <url>http://jetty.mortbay.org</url>
   <build>
-    <defaultGoal>install</defaultGoal>
     <plugins>
        <plugin>
         <artifactId>maven-compiler-plugin</artifactId>

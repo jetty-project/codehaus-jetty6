@@ -10,11 +10,8 @@
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-setuid</artifactId>
     <name>Jetty SetUID</name>
-    <url>http://jetty.mortbay.org</url>
     <packaging>pom</packaging>
-
     <build>
-        <defaultGoal>install</defaultGoal>
         <plugins>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -38,8 +35,6 @@
 
         </plugins>
     </build>
-
-
     <profiles>
 
         <profile>

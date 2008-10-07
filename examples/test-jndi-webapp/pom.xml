@@ -10,9 +10,7 @@
   <artifactId>jetty-test-jndi</artifactId>
   <packaging>war</packaging>
   <name>Jetty JNDI Test Webapp</name>
-  <url>http://jetty.mortbay.org</url>
   <build>
-    <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>

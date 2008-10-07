@@ -10,15 +10,7 @@
   <artifactId>jetty-servlet-tester</artifactId>
   <packaging>jar</packaging>
   <name>Jetty Servlet Tester</name>
-  <url>http://jetty.mortbay.org</url>
-  <licenses>
-    <license>
-      <name>Apache License Version 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
   <build>
-    <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
