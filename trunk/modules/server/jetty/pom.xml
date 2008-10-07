@@ -3,23 +3,13 @@
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>modules-server</artifactId>
     <version>7.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jetty</artifactId>
   <name>Jetty :: Server Core</name>
-  <url>http://jetty.mortbay.org</url>
   <description>The core jetty server artifact.</description>
   <build>
-    <defaultGoal>install</defaultGoal>
     <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -146,28 +136,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-           <execution>
-             <id>install</id>
-             <goals>
-               <goal>attach-artifact</goal>               
-             </goals>
-             <configuration>
-               <artifacts>
-               	 <artifact>
-               	   <file>target/${artifactId}-${version}-site-component.jar</file>
-               	   <type>jar</type>
-               	   <classifier>site-component</classifier>
-               	 </artifact>
-               </artifacts>
-             </configuration>
-           </execution>
-         </executions>
       </plugin>
     </plugins>
   </build>
