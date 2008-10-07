@@ -115,6 +115,10 @@ public class HashSessionIdManager extends AbstractLifeCycle implements SessionId
         {      
             try 
             {
+                //This operation may block on some systems with low entropy. See this page
+                //for workaround suggestions:
+                //http://docs.codehaus.org/display/JETTY/Connectors+slow+to+startup
+                Log.debug("Init SecureRandom."); 
                 _random=SecureRandom.getInstance(SESSION_ID_RANDOM_ALGORITHM);
             }
             catch (NoSuchAlgorithmException e)

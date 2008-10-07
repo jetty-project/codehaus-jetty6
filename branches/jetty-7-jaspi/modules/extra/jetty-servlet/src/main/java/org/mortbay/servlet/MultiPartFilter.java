@@ -14,6 +14,7 @@
 package org.mortbay.servlet;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,6 +65,7 @@ public class MultiPartFilter implements Filter
     private File tempdir;
     private boolean _deleteFiles;
     private ServletContext _context;
+    private int _fileOutputBuffer = 0;
 
     /* ------------------------------------------------------------------------------- */
     /**
@@ -73,6 +75,9 @@ public class MultiPartFilter implements Filter
     {
         tempdir=(File)filterConfig.getServletContext().getAttribute("javax.servlet.context.tempdir");
         _deleteFiles="true".equals(filterConfig.getInitParameter("deleteFiles"));
+        String fileOutputBuffer = filterConfig.getInitParameter("fileOutputBuffer");
+        if(fileOutputBuffer!=null)
+            _fileOutputBuffer = Integer.parseInt(fileOutputBuffer);
         _context=filterConfig.getServletContext();
     }
 
@@ -173,6 +178,8 @@ public class MultiPartFilter implements Filter
                     {
                         file = File.createTempFile("MultiPart", "", tempdir);
                         out = new FileOutputStream(file);
+                        if(_fileOutputBuffer>0)
+                            out = new BufferedOutputStream(out, _fileOutputBuffer);
                         request.setAttribute(name,file);
                         params.put(name, filename);
                         

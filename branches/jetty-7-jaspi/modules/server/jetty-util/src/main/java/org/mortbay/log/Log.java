@@ -45,13 +45,20 @@ public class Log
     private static boolean __ignored = System.getProperty("IGNORED",null)!=null;
     private static Logger __log;
    
-    static
-    {
-        initialize();
-    }
+    private static boolean _initialized;
     
-    public static void initialize()
+    public static boolean initialized()
     {
+        if (__log!=null)
+            return true;
+        
+        synchronized (Log.class)
+        {
+            if (_initialized)
+                return __log!=null;
+            _initialized=true;
+        }
+        
         Class log_class=null;
         try
         {
@@ -73,7 +80,8 @@ public class Log
                     e.printStackTrace();
             }
         }
-        
+
+        return __log!=null;
     }
     
     public static void setLog(Logger log)
@@ -85,11 +93,48 @@ public class Log
     {
         return __log;
     }
+
     
+    /**
+     * Set Log to parent Logger.
+     * <p>
+     * If there is a different Log class available from a parent classloader,
+     * call {@link #getLogger(String)} on it and construct a {@link LoggerLog} instance
+     * as this Log's Logger, so that logging is delegated to the parent Log.
+     * <p>
+     * This should be used if a webapp is using Log, but wishes the logging to be 
+     * directed to the containers log.
+     * <p>
+     * If there is not parent Log, then this call is equivalent to<pre>
+     *   Log.setLog(Log.getLogger(name));
+     * </pre> 
+     * @param name Logger name
+     */
+    public static void setLogToParent(String name)
+    {
+        ClassLoader loader = Log.class.getClassLoader();
+        if (loader.getParent()!=null)
+        {
+            try
+            {
+                Class<?> uberlog = loader.getParent().loadClass("org.mortbay.log.Log");
+                Method getLogger=uberlog.getMethod("getLogger",new Class[]{String.class});
+                Object logger = getLogger.invoke(null,name);
+                setLog(new LoggerLog(logger));
+                return;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }     
+        }
+            
+        setLog(getLogger(name));
+    }
     
     public static void debug(Throwable th)
-    {
-        if (__log==null || !isDebugEnabled())
+    {        
+        if (!isDebugEnabled())
             return;
         __log.debug(EXCEPTION,th);
         unwind(th);
@@ -97,21 +142,22 @@ public class Log
 
     public static void debug(String msg)
     {
-        if (__log==null)
+        if (!initialized())
             return;
+        
         __log.debug(msg,null,null);
     }
     
     public static void debug(String msg,Object arg)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.debug(msg,arg,null);
     }
     
     public static void debug(String msg,Object arg0, Object arg1)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.debug(msg,arg0,arg1);
     }
@@ -123,7 +169,7 @@ public class Log
      */
     public static void ignore(Throwable th)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         if (__ignored)
         {
@@ -139,56 +185,56 @@ public class Log
     
     public static void info(String msg)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.info(msg,null,null);
     }
     
     public static void info(String msg,Object arg)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.info(msg,arg,null);
     }
     
     public static void info(String msg,Object arg0, Object arg1)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.info(msg,arg0,arg1);
     }
     
     public static boolean isDebugEnabled()
     {
-        if (__log==null)
+        if (!initialized())
             return false;
         return __log.isDebugEnabled();
     }
     
     public static void warn(String msg)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.warn(msg,null,null);
     }
     
     public static void warn(String msg,Object arg)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.warn(msg,arg,null);        
     }
     
     public static void warn(String msg,Object arg0, Object arg1)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.warn(msg,arg0,arg1);        
     }
     
     public static void warn(String msg, Throwable th)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.warn(msg,th);
         unwind(th);
@@ -196,7 +242,7 @@ public class Log
 
     public static void warn(Throwable th)
     {
-        if (__log==null)
+        if (!initialized())
             return;
         __log.warn(EXCEPTION,th);
         unwind(th);
@@ -207,8 +253,9 @@ public class Log
      */
     public static Logger getLogger(String name)
     {
-        if (__log==null)
-            return __log;
+        if (!initialized())
+            return null;
+        
         if (name==null)
           return __log;
         return __log.getLogger(name);

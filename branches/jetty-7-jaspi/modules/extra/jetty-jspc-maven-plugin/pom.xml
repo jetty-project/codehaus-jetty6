@@ -39,6 +39,17 @@
         </executions>
       </plugin>
       <plugin>
+        <artifactId>maven-site-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>site</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
            <descriptors>
@@ -86,7 +97,7 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jsp-2.1</artifactId>
+      <artifactId>jsp-2.1-jetty</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

@@ -117,7 +117,8 @@ public class HttpURITest extends TestCase
        /*37*/ {"http://user@[2001:db8::1]:8080/","http","//user@[2001:db8::1]:8080","[2001:db8::1]","8080","/",null,null,null},
        /*38*/ {"http://[2001:db8::1]/","http","//[2001:db8::1]","[2001:db8::1]",null,"/",null,null,null},
        /*39*/ {"//[2001:db8::1]:8080/",null,null,null,null,"//[2001:db8::1]:8080/",null,null,null},
-       /*40*/ {"http://user@[2001:db8::1]:8080/","http","//user@[2001:db8::1]:8080","[2001:db8::1]","8080","/",null,null,null}
+       /*40*/ {"http://user@[2001:db8::1]:8080/","http","//user@[2001:db8::1]:8080","[2001:db8::1]","8080","/",null,null,null},
+       /*41*/ {"*",null,null,null,null,"*",null, null,null}
     };
     
     
@@ -144,12 +145,18 @@ public class HttpURITest extends TestCase
     
     public void testInvalidAddress() throws Exception
     {
+        assertInvalidURI("http://[ffff::1:8080/", "Invalid URL; no closing ']' -- should throw exception");
+        assertInvalidURI("**", "only '*', not '**'");
+        assertInvalidURI("*/", "only '*', not '*/'");
+    }
+    
+    public void assertInvalidURI(String invalidURI, String message)
+    {
         HttpURI uri = new HttpURI();
-        
         try
         {
-            uri.parse("http://[ffff::1:8080/");
-            fail("Invalid URL; no closing ']' -- should throw exception");
+            uri.parse(invalidURI);
+            fail(message);
         }
         catch (IllegalArgumentException e)
         {
@@ -157,4 +164,24 @@ public class HttpURITest extends TestCase
         }
     }
 
+    String[][] encoding_tests=
+    { 
+       /* 0*/ {"/path/info","/path/info"}, 
+       /* 1*/ {"/path/%69nfo","/path/info"}, 
+       /* 2*/ {"http://host/path/%69nfo","/path/info"}, 
+       /* 3*/ {"http://host/path/%69nf%c2%a4","/path/inf\u00a4"}, 
+    };
+    
+    public void testEncoded()
+    {
+
+        HttpURI uri = new HttpURI();
+        
+        for (int t=0;t<encoding_tests.length;t++)
+        {
+            uri.parse(encoding_tests[t][0]);
+            assertEquals(""+t,encoding_tests[t][1],uri.getDecodedPath());
+            
+        }
+    }
 }

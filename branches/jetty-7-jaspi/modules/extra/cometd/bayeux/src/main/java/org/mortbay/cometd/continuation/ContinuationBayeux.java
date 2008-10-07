@@ -43,7 +43,8 @@ public class ContinuationBayeux extends AbstractBayeux
     /* (non-Javadoc)
      * @see org.mortbay.cometd.AbstractBayeux#newClient(java.lang.String, dojox.io.cometd.Destination)
      */
-    public ClientImpl newRemoteClient()
+    @Override
+	public ClientImpl newRemoteClient()
     {
         return new ContinuationClient(this);
     }
@@ -52,7 +53,8 @@ public class ContinuationBayeux extends AbstractBayeux
     /* (non-Javadoc)
      * @see org.mortbay.cometd.AbstractBayeux#initialize(javax.servlet.ServletContext)
      */
-    protected void initialize(ServletContext context)
+    @Override
+	protected void initialize(ServletContext context)
     {
         super.initialize(context);
         
@@ -62,11 +64,11 @@ public class ContinuationBayeux extends AbstractBayeux
     
         _tick.schedule(new TimerTask()
         {
-            public void run()
+            @Override
+			public void run()
             {
-                _timeout.setNow();
-                _now=_timeout.getNow();
-                _timeout.tick();
+                _now=System.currentTimeMillis();
+                _timeout.tick(_now);
             }
         },500L,500L);
     }
@@ -78,7 +80,8 @@ public class ContinuationBayeux extends AbstractBayeux
     }
     
     /* ------------------------------------------------------------ */
-    public void setMaxInterval(long ms)
+    @Override
+	public void setMaxInterval(long ms)
     {
         _timeout.setDuration(ms);
         super.setMaxInterval(ms);

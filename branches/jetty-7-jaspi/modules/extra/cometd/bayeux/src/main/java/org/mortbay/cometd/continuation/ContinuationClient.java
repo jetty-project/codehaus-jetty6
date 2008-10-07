@@ -46,11 +46,13 @@ public class ContinuationClient extends ClientImpl
         {
             _timeout=new Timeout.Task()
             {
-                public void expired()
+                @Override
+				public void expired()
                 {
                     remove(true);
                 }
-                public String toString()
+                @Override
+				public String toString()
                 {
                     return "T-"+ContinuationClient.this.toString();
                 }
@@ -63,8 +65,6 @@ public class ContinuationClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void setContinuation(Continuation continuation)
     {
-        Timeout.Task task=null;
-        
         if (continuation==null)
         {
             synchronized (this)
@@ -75,11 +75,9 @@ public class ContinuationClient extends ClientImpl
                         _continuation.resume(); 
                 }
                 _continuation=null;
-                task=_timeout;
+                if(_timeout!=null)
+                    _bayeux.startTimeout(_timeout,getTimeout());
             }
-
-            if (task!=null)
-                _bayeux.startTimeout(task,getTimeout());
         }
         else
         {
@@ -91,11 +89,8 @@ public class ContinuationClient extends ClientImpl
                         _continuation.resume(); 
                 }
                 _continuation=continuation;
-                task=_timeout;
+                _bayeux.cancelTimeout(_timeout);
             }
-
-            if (task!=null)
-                _bayeux.cancelTimeout(task);
         }
     }
     
@@ -106,24 +101,21 @@ public class ContinuationClient extends ClientImpl
     }
 
     /* ------------------------------------------------------------ */
-    public void resume()
+    @Override
+	public void resume()
     {
-        Timeout.Task task=null;
         synchronized (this)
         {
             if (_continuation!=null)
             {
                 _continuation.resume();
-                task=_timeout;
             }
             _continuation=null;
-        }
-        
-        if (task!=null)
-            _bayeux.startTimeout(task,getTimeout());
+        }        
     }
 
     /* ------------------------------------------------------------ */
+    @Override
     public boolean isLocal()
     {
         return false;
@@ -132,17 +124,15 @@ public class ContinuationClient extends ClientImpl
     /* ------------------------------------------------------------ */
     public void access()
     {
-        Timeout.Task task=null;
         synchronized(this)
         {
             // distribute access time in cluster
             _accessed=_bayeux.getNow();
             if (_timeout!=null && _timeout.isScheduled())
-                task=_timeout;
+            {
+                _timeout.reschedule();
+            }
         }
-        
-        if (task!=null)
-            _bayeux.startTimeout(task,getTimeout());
     }
 
 
@@ -156,20 +146,16 @@ public class ContinuationClient extends ClientImpl
     /* (non-Javadoc)
      * @see org.mortbay.cometd.ClientImpl#remove(boolean)
      */
+    @Override
     public void remove(boolean wasTimeout) 
     {
-        Timeout.Task task=null;
         synchronized(this)
         {
-            if (!wasTimeout)
-                task=_timeout;
+            if (!wasTimeout && _timeout!=null)
+                _bayeux.cancelTimeout(_timeout);
             _timeout=null;
             super.remove(wasTimeout);
-        }
-        
-        if (task!=null)
-            _bayeux.cancelTimeout(task);
-        
+        }        
     }
 
 }

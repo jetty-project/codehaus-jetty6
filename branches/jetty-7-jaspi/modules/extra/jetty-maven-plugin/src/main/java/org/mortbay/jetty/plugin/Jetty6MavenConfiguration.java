@@ -27,7 +27,7 @@ import java.util.List;
 import org.mortbay.jetty.plus.annotation.InjectionCollection;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.RunAsCollection;
-import org.mortbay.jetty.plus.webapp.Configuration;
+import org.mortbay.jetty.annotations.Configuration;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
@@ -118,39 +118,7 @@ public class Jetty6MavenConfiguration extends Configuration
         int minor = Integer.parseInt(version[1]);
         if ((major >= 1) && (minor >= 5))
         {     
-            //TODO it would be nice to be able to re-use the parseAnnotations() method on 
-            //the org.mortbay.jetty.annotations.Configuration class, but it's too difficult?
-            
-            //able to use annotations on on jdk1.5 and above
-            Class annotationParserClass = Thread.currentThread().getContextClassLoader().loadClass("org.mortbay.jetty.annotations.AnnotationParser");
-            Method parseAnnotationsMethod = 
-                annotationParserClass.getMethod("parseAnnotations", new Class[] {Class.class, RunAsCollection.class, InjectionCollection.class, LifeCycleCallbackCollection.class });
-
-            //look thru _servlets
-            Iterator itor = LazyList.iterator(_servlets);
-            while (itor.hasNext())
-            {
-                ServletHolder holder = (ServletHolder)itor.next();
-                Class servlet = getWebAppContext().loadClass(holder.getClassName());
-                parseAnnotationsMethod.invoke(null, new Object[] {servlet, _runAsCollection,  _injections, _callbacks});
-            }
-
-            //look thru _filters
-            itor = LazyList.iterator(_filters);
-            while (itor.hasNext())
-            {
-                FilterHolder holder = (FilterHolder)itor.next();
-                Class filter = getWebAppContext().loadClass(holder.getClassName());
-                parseAnnotationsMethod.invoke(null, new Object[] {filter, null, _injections, _callbacks});
-            }
-
-            //look thru _listeners
-            itor = LazyList.iterator(_listeners);
-            while (itor.hasNext())
-            {
-                Object listener = itor.next();
-                parseAnnotationsMethod.invoke(null, new Object[] {listener.getClass(), null, _injections, _callbacks});
-            }
+            super.parseAnnotations();
         }
         else
             Log.info("Annotations are not supported on jvms prior to jdk1.5");

@@ -19,6 +19,7 @@ import java.io.IOException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
@@ -27,6 +28,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.View;
 import org.mortbay.io.BufferCache.CachedBuffer;
 import org.mortbay.log.Log;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -265,6 +267,8 @@ public class HttpParser implements Parser
             if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
                     throw new HttpException(HttpStatus.ORDINAL_413_Request_Entity_Too_Large, "FULL");
             
+            IOException ioex=null;
+            
             if (_endp != null && filled<=0)
             {
                 // Compress buffer if handling _content buffer
@@ -285,8 +289,8 @@ public class HttpParser implements Parser
                 catch(IOException e)
                 {
                     Log.debug(e);
-                    reset(true);
-                    throw (e instanceof EofException) ? e:new EofException(e);
+                    ioex=e;
+                    filled=-1;
                 }
             }
 
@@ -294,12 +298,20 @@ public class HttpParser implements Parser
             {
                 if ( _state == STATE_EOF_CONTENT)
                 {
+                    if (_buffer.length()>0)
+                    {
+                        // TODO should we do this here or fall down to main loop?
+                        Buffer chunk=_buffer.get(_buffer.length());
+                        _contentPosition += chunk.length();
+                        _contentView.update(chunk);
+                        _handler.content(chunk); // May recurse here 
+                    }
                     _state=STATE_END;
                     _handler.messageComplete(_contentPosition);
                     return total_filled;
                 }
                 reset(true);
-                throw new EofException();
+                throw new EofException(ioex);
             }
             length=_buffer.length();
         }
@@ -452,7 +464,7 @@ public class HttpParser implements Parser
                                             _contentLength=HttpTokens.CHUNKED_CONTENT;
                                         else
                                         {
-                                            String c=value.toString();
+                                            String c=value.toString(StringUtil.__ISO_8859_1);
                                             if (c.endsWith(HttpHeaderValues.CHUNKED))
                                                 _contentLength=HttpTokens.CHUNKED_CONTENT;
                                             
@@ -581,9 +593,9 @@ public class HttpParser implements Parser
                             else
                             {
                                 // Continuation line!
-                                if (_multiLineValue == null) _multiLineValue=_tok1.toString();
+                                if (_multiLineValue == null) _multiLineValue=_tok1.toString(StringUtil.__ISO_8859_1);
                                 _tok1.update(_buffer.markIndex(), _buffer.markIndex() + _length);
-                                _multiLineValue += " " + _tok1.toString();
+                                _multiLineValue += " " + _tok1.toString(StringUtil.__ISO_8859_1);
                             }
                         }
                         _eol=ch;
@@ -646,6 +658,11 @@ public class HttpParser implements Parser
                     _contentView.update(chunk);
                     _handler.content(chunk); // May recurse here 
                     
+                    if(_contentPosition == _contentLength)
+                    {
+                        _state=STATE_END;
+                        _handler.messageComplete(_contentPosition);
+                    }                    
                     // TODO adjust the _buffer to keep unconsumed content
                     return total_filled;
                 }
@@ -893,6 +910,12 @@ public class HttpParser implements Parser
     {
         return "state=" + _state + " length=" + _length + " buf=" + buf.hashCode();
     }
+    
+    /* ------------------------------------------------------------------------------- */
+    public String toString()
+    {
+        return "state=" + _state + " length=" + _length + " len=" + _contentLength;
+    }    
 
     /* ------------------------------------------------------------ */
     public Buffer getHeaderBuffer()

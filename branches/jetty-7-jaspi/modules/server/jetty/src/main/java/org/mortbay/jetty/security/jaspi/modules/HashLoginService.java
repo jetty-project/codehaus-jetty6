@@ -111,6 +111,11 @@ public class HashLoginService extends AbstractLifeCycle implements LoginService
         return _config;
     }
 
+    public Resource getConfigResource()
+    {
+        return _configResource;
+    }
+
     /* ------------------------------------------------------------ */
     /** Load realm users from properties file.
      * The property file maps usernames to password specs followed by

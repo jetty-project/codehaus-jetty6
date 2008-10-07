@@ -6,7 +6,7 @@
 <!-- Configure the test-annotations webapp                           -->
 <!-- =============================================================== -->
 
-<Configure class="org.mortbay.jetty.webapp.WebAppContext">
+<Configure id='wac' class="org.mortbay.jetty.webapp.WebAppContext">
 
   <!-- =========================================================== -->
   <!-- Configurations for WebAppContexts                          -->
@@ -54,6 +54,7 @@
 
 
   <New id="maxAmount"  class="org.mortbay.jetty.plus.naming.EnvEntry">
+    <Arg><Ref id='wac'/></Arg>
     <Arg>maxAmount</Arg>
     <Arg type="java.lang.Double">100</Arg>
     <Arg type="boolean">true</Arg>
@@ -81,6 +82,7 @@
 
 
   <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
      @ATOMIKOS-DATASOURCE1@
@@ -102,6 +104,7 @@
 
 
   <New id="mydatasource" class="org.mortbay.jetty.plus.naming.Resource">
+    <Arg><Ref id='wac'/></Arg>
     <Arg>jdbc/mydatasource</Arg>
     <Arg>
      @JOTM-DATASOURCE1@

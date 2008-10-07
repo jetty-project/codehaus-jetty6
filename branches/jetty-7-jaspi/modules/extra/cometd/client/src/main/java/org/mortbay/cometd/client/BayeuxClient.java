@@ -23,10 +23,18 @@ import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.Cookie;
 
+import org.cometd.Bayeux;
+import org.cometd.Client;
+import org.cometd.Listener;
+import org.cometd.ClientListener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
+import org.cometd.RemoveListener;
 import org.mortbay.cometd.MessageImpl;
 import org.mortbay.cometd.MessagePool;
 import org.mortbay.io.Buffer;
@@ -38,15 +46,10 @@ import org.mortbay.jetty.client.HttpConnection;
 import org.mortbay.jetty.client.HttpDestination;
 import org.mortbay.jetty.client.HttpExchange;
 import org.mortbay.log.Log;
+import org.mortbay.util.ArrayQueue;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.ajax.JSON;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Client;
-import dojox.cometd.Listener;
-import dojox.cometd.RemoveListener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
 
 /* ------------------------------------------------------------ */
 /** Bayeux protocol Client.
@@ -71,8 +74,8 @@ public class BayeuxClient extends MessagePool implements Client
     private Listener _listener;
     private List<RemoveListener> _rListeners;
     private List<MessageListener> _mListeners;
-    private List<Message> _inQ;  // queue of incoming messages used if no listener available. Used as the lock object for all incoming operations.
-    private List<Message> _outQ; // queue of outgoing messages. Used as the lock object for all outgoing operations.
+    private Queue<Message> _inQ;  // queue of incoming messages used if no listener available. Used as the lock object for all incoming operations.
+    private Queue<Message> _outQ; // queue of outgoing messages. Used as the lock object for all outgoing operations.
     private int _batch;
     private boolean _formEncoded;
     private Map<String, Cookie> _cookies=new ConcurrentHashMap<String, Cookie>();
@@ -84,8 +87,8 @@ public class BayeuxClient extends MessagePool implements Client
         _address=address;
         _uri=uri;
 
-        _inQ=new LinkedList<Message>();
-        _outQ=new LinkedList<Message>();
+        _inQ=new ArrayQueue<Message>();
+        _outQ=new ArrayQueue<Message>();
     }
 
     /* ------------------------------------------------------------ */
@@ -135,7 +138,7 @@ public class BayeuxClient extends MessagePool implements Client
     /* ------------------------------------------------------------ */
     /** (non-Javadoc)
      * @deprecated use {@link #deliver(Client, String, Object, String)}
-     * @see dojox.cometd.Client#deliver(dojox.cometd.Client, java.util.Map)
+     * @see org.cometd.Client#deliver(org.cometd.Client, java.util.Map)
      */
     public void deliver(Client from, Message message)
     {
@@ -408,7 +411,7 @@ public class BayeuxClient extends MessagePool implements Client
             }
         }
 
-        protected void setMessages(List<Message> messages)
+        protected void setMessages(Queue<Message> messages)
         {
             try
             {
@@ -492,7 +495,10 @@ public class BayeuxClient extends MessagePool implements Client
 
             if (getResponseStatus()==200)
             {
-                _responses=parse(getResponseContent());
+                String content = getResponseContent();
+                if (content==null || content.length()==0)
+                    throw new IllegalStateException();
+                _responses=parse(content);
             }
         }
 
@@ -732,7 +738,7 @@ public class BayeuxClient extends MessagePool implements Client
         }
     }
 
-    public void addListener(EventListener listener)
+    public void addListener(ClientListener listener)
     {
         synchronized(_inQ)
         {
@@ -751,7 +757,7 @@ public class BayeuxClient extends MessagePool implements Client
         }
     }
 
-    public void removeListener(EventListener listener)
+    public void removeListener(ClientListener listener)
     {
         synchronized(_inQ)
         {
@@ -766,6 +772,22 @@ public class BayeuxClient extends MessagePool implements Client
                     _rListeners.remove((RemoveListener)listener);
             }
         }
+    }
+
+    public int getMaxQueue()
+    {
+        return -1;
+    }
+
+    public Queue<Message> getQueue()
+    {
+        return _inQ;
+    }
+
+    public void setMaxQueue(int max)
+    {
+        if (max!=-1)
+            throw new UnsupportedOperationException();
     }
 
 }

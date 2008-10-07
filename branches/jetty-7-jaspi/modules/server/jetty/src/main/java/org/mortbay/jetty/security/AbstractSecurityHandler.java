@@ -22,14 +22,10 @@ package org.mortbay.jetty.security;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Map;
 
-import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.config.ServerAuthConfig;
-import javax.security.auth.message.config.ServerAuthContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +34,8 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.HandlerWrapper;
+import org.mortbay.jetty.security.AuthResult;
+import org.mortbay.jetty.security.ServerAuthentication;
 
 /**
  * @version $Rev$ $Date$
@@ -47,13 +45,15 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 
 /* ------------------------------------------------------------ */
 //    private UserRealm _userRealm;
-    private NotChecked _notChecked = new NotChecked();
+//    private NotChecked _notChecked = new NotChecked();
     private boolean _checkWelcomeFiles = false;//jaspi stuff
-    private ServerAuthConfig authConfig;
-    private Subject serviceSubject;
-    private Map authProperties;
-    //    private ServerAuthContext authContext;
-    private ServletCallbackHandler servletCallbackHandler;
+//    private ServerAuthConfig authConfig;
+//    private Subject serviceSubject;
+//    private Map authProperties;
+//    private ServletCallbackHandler servletCallbackHandler;
+
+    private ServerAuthentication serverAuthentication;
+
     public static Principal __NO_USER = new Principal()
     {
         public String getName()
@@ -111,24 +111,9 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
     }
 
     //set jaspi components
-    public void setAuthConfig(ServerAuthConfig authConfig)
-    {
-        this.authConfig = authConfig;
-    }
 
-    public void setAuthProperties(Map authProperties)
-    {
-        this.authProperties = authProperties;
-    }
-
-    public void setServiceSubject(Subject serviceSubject)
-    {
-        this.serviceSubject = serviceSubject;
-    }
-
-    public void setServletCallbackHandler(ServletCallbackHandler servletCallbackHandler)
-    {
-        this.servletCallbackHandler = servletCallbackHandler;
+    public void setServerAuthentication(ServerAuthentication serverAuthentication) {
+        this.serverAuthentication = serverAuthentication;
     }
 
     /* ------------------------------------------------------------ */
@@ -136,10 +121,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
             throws Exception
     {
         super.doStart();
-        if (authConfig == null)
+        if (serverAuthentication == null)
             throw new NullPointerException("No auth configuration configured");
-        if (servletCallbackHandler == null)
-            throw new NullPointerException("No CallbackHandler configured");
     }/* ------------------------------------------------------------ */
 
     /*
@@ -174,31 +157,32 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                 //TODO check with greg about whether requirement that these be the request/response passed to the resource(servlet) is realistic (i.e. this requires no wrapping between here and invocation)
                 //TODO we have to get the auth context from the authconfig on each call.
                 MessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
-                String authContextID = authConfig.getAuthContextID(messageInfo);
-                ServerAuthContext authContext = authConfig.getAuthContext(authContextID, serviceSubject, authProperties);
+//                String authContextID = authConfig.getAuthContextID(messageInfo);
+//                ServerAuthContext authContext = authConfig.getAuthContext(authContextID, serviceSubject, authProperties);
 
                 //JASPI 3.8.2
-                Subject clientSubject = new Subject();
+//                Subject clientSubject = new Subject();
 
                 try
                 {
-                    AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
-                    if (authStatus == AuthStatus.SUCCESS)
+                    AuthResult authResult = serverAuthentication.validateRequest(messageInfo, isAuthMandatory);
+//                    AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
+                    if (!isAuthMandatory || authResult.getAuthStatus() == AuthStatus.SUCCESS)
                     {
                         //JASPI 3.8.  Supply the UserPrincipal and ClientSubject to the web resource permission check
                         //JASPI 3.8.4 establish request values
-                        UserIdentity userIdentity = newUserIdentity(servletCallbackHandler, clientSubject);
+                        UserIdentity userIdentity = newUserIdentity(authResult);
                         base_request.setUserIdentity(userIdentity);
-                        if (userIdentity.getUserPrincipal() == null)
-                        {
-                            base_request.setAuthType(null);
-                        }
-                        else
-                        {
-                            //NOTE! we assume jaspi is configured to always provide correct authMethod values
-                            base_request.setAuthType((String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY));
-                        }
-                        if (!checkWebResourcePermissions(pathInContext, base_request, base_response, constraintInfo, userIdentity))
+//                        if (userIdentity.getUserPrincipal() == null)
+//                        {
+//                            base_request.setAuthType(null);
+//                        }
+//                        else
+//                        {
+//                            //NOTE! we assume jaspi is configured to always provide correct authMethod values
+//                            base_request.setAuthType((String) messageInfo.getMap().get(JettyMessageInfo.AUTH_METHOD_KEY));
+//                        }
+                        if (!isAuthMandatory && !checkWebResourcePermissions(pathInContext, base_request, base_response, constraintInfo, userIdentity))
                         {
                             response.sendError(Response.SC_FORBIDDEN,"User not in required role");
                             base_request.setHandled(true);
@@ -212,7 +196,8 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                             boolean secureResponse = true;
                             if (secureResponse)
                             {
-                                authContext.secureResponse(messageInfo, serviceSubject);
+                                serverAuthentication.secureResponse(messageInfo, authResult);
+//                                authContext.secureResponse(messageInfo, serviceSubject);
                             }
                         }
                         //TODO is this a sufficient dissociate call?
@@ -239,7 +224,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                 finally
                 {
                     //jaspi clean up subject
-                    authContext.cleanSubject(messageInfo, clientSubject);
+//                    authContext.cleanSubject(messageInfo, clientSubject);
                 }
 
             }
@@ -294,7 +279,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
         }
     }
 
-    protected abstract UserIdentity newUserIdentity(ServletCallbackHandler callbackHandler, Subject clientSubject);
+    protected abstract UserIdentity newUserIdentity(AuthResult authResult);
 
     protected abstract UserIdentity newSystemUserIdentity();
 

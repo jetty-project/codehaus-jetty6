@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
+//You may obtain a copy of the License at
 //http://www.apache.org/licenses/LICENSE-2.0
 //Unless required by applicable law or agreed to in writing, software
 //distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,7 +34,7 @@ import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
 /** SessionHandler.
- * 
+ *
  * @author gregw
  *
  */
@@ -49,10 +49,10 @@ public class SessionHandler extends HandlerWrapper
      * java.util.Random generator is created.
      */
     public SessionHandler()
-    {   
+    {
         this(new HashSessionManager());
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param manager The session manager
@@ -61,7 +61,7 @@ public class SessionHandler extends HandlerWrapper
     {
         setSessionManager(manager);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the sessionManager.
@@ -70,7 +70,7 @@ public class SessionHandler extends HandlerWrapper
     {
         return _sessionManager;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param sessionManager The sessionManager to set.
@@ -80,15 +80,15 @@ public class SessionHandler extends HandlerWrapper
         if (isStarted())
             throw new IllegalStateException();
         SessionManager old_session_manager = _sessionManager;
-        
+
         if (getServer()!=null)
             getServer().getContainer().update(this, old_session_manager, sessionManager, "sessionManager",true);
-        
+
         if (sessionManager!=null)
             sessionManager.setSessionHandler(this);
-        
+
         _sessionManager = sessionManager;
-        
+
         if (old_session_manager!=null)
             old_session_manager.setSessionHandler(null);
     }
@@ -104,10 +104,10 @@ public class SessionHandler extends HandlerWrapper
         if (server!=null && server!=old_server)
             server.getContainer().update(this, null,_sessionManager, "sessionManager",true);
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.thread.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
@@ -116,7 +116,7 @@ public class SessionHandler extends HandlerWrapper
         super.doStart();
     }
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.thread.AbstractLifeCycle#doStop()
      */
     protected void doStop() throws Exception
@@ -124,32 +124,32 @@ public class SessionHandler extends HandlerWrapper
         super.doStop();
         _sessionManager.stop();
     }
-    
+
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
         setRequestedId(request, dispatch);
-        
+
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         SessionManager old_session_manager=null;
         HttpSession old_session=null;
-        
+
         try
         {
             old_session_manager = base_request.getSessionManager();
             old_session = base_request.getSession(false);
-            
+
             if (old_session_manager != _sessionManager)
             {
                 // new session context
                 base_request.setSessionManager(_sessionManager);
                 base_request.setSession(null);
             }
-            
+
             // access any existing session
             HttpSession session=null;
             if (_sessionManager!=null)
@@ -164,20 +164,20 @@ public class SessionHandler extends HandlerWrapper
                             response.addCookie(cookie);
                     }
                 }
-                else 
+                else
                 {
                     session=base_request.recoverNewSession(_sessionManager);
                     if (session!=null)
                         base_request.setSession(session);
                 }
             }
-            
+
             if(Log.isDebugEnabled())
             {
                 Log.debug("sessionManager="+_sessionManager);
                 Log.debug("session="+session);
             }
-        
+
             getHandler().handle(target, request, response, dispatch);
         }
         catch (RetryRequest r)
@@ -201,13 +201,13 @@ public class SessionHandler extends HandlerWrapper
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Look for a requested session ID in cookies and URI parameters
      * @param request
      * @param dispatch
      */
-    protected void setRequestedId(HttpServletRequest request, int dispatch) 
+    protected void setRequestedId(HttpServletRequest request, int dispatch)
     {
         Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         String requested_session_id=request.getRequestedSessionId();
@@ -215,11 +215,11 @@ public class SessionHandler extends HandlerWrapper
         {
             return;
         }
-        
+
         SessionManager sessionManager = getSessionManager();
         boolean requested_session_id_from_cookie=false;
-        
-        // Look for session id cookie    
+
+        // Look for session id cookie
         if (_sessionManager.isUsingCookies())
         {
             Cookie[] cookies=request.getCookies();
@@ -245,30 +245,30 @@ public class SessionHandler extends HandlerWrapper
                 }
             }
         }
-        
+
         if (requested_session_id==null)
         {
             String uri = request.getRequestURI();
-            
+
             int semi = uri.lastIndexOf(';');
             if (semi>=0)
-            {   
+            {
                 String path_params=uri.substring(semi+1);
-                
+
                 // check if there is a url encoded session param.
-                String param=sessionManager.getSessionURL();
+                String param=sessionManager.getSessionIdPathParameterName();
                 if (param!=null && path_params!=null && path_params.startsWith(param))
                 {
-                    requested_session_id = path_params.substring(sessionManager.getSessionURL().length()+1);
+                    requested_session_id = path_params.substring(sessionManager.getSessionIdPathParameterName().length()+1);
                     if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from URL");
                 }
             }
         }
-        
+
         base_request.setRequestedSessionId(requested_session_id);
         base_request.setRequestedSessionIdFromCookie(requested_session_id!=null && requested_session_id_from_cookie);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param listener

@@ -29,8 +29,6 @@ import org.mortbay.jetty.HttpURI;
 import org.mortbay.jetty.HttpVersions;
 import org.mortbay.log.Log;
 
-import sun.security.action.GetLongAction;
-
 
 /**
  * An HTTP client API that encapsulates Exchange with a HTTP server.
@@ -90,6 +88,13 @@ public class HttpExchange
     boolean _retryStatus = false;
     
     
+    /**
+     * boolean controlling if the exchange will have listeners autoconfigured by
+     * the destination
+     */
+    boolean _configureListeners = true;
+    
+    
     private HttpEventListener _listener = new Listener();
     
     /* ------------------------------------------------------------ */
@@ -117,6 +122,20 @@ public class HttpExchange
             }
         }
     }
+    
+    
+    public int waitForDone () throws InterruptedException
+    {
+        synchronized (this)
+        {
+            while (!isDone(_status))
+                this.wait();
+        }
+        return _status;
+    }
+    
+    
+    
 
     /* ------------------------------------------------------------ */
     public void reset() 
@@ -172,7 +191,13 @@ public class HttpExchange
             }
         }
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public boolean isDone (int status)
+    {
+        return ((status == STATUS_COMPLETED) || (status == STATUS_EXPIRED) || (status == STATUS_EXCEPTED));
+    }
+    
     /* ------------------------------------------------------------ */
     public HttpEventListener getEventListener()
     {
@@ -488,7 +513,7 @@ public class HttpExchange
     }
 
     protected void onResponseComplete() throws IOException
-    {
+    {   
     }
 
     protected void onConnectionFailed(Throwable ex)
@@ -507,10 +532,26 @@ public class HttpExchange
         Log.debug("EXPIRED " + this);
     }
 
-    protected void onRetry()
-    {        
+    protected void onRetry() throws IOException
+    {}
+
+    /**
+     * true of the exchange should have listeners configured for it by the destination
+     *
+     * false if this is being managed elsewhere
+     * 
+     * @return
+     */
+    public boolean configureListeners()
+    {
+        return _configureListeners;
     }
-    
+
+    public void setConfigureListeners(boolean autoConfigure )
+    {
+        this._configureListeners = autoConfigure;
+    }
+
     private class Listener implements HttpEventListener
     {
         public void onConnectionFailed(Throwable ex)
@@ -566,7 +607,14 @@ public class HttpExchange
         public void onRetry()
         {
             HttpExchange.this.setRetryStatus( true );
-            HttpExchange.this.onRetry();
+            try
+            {
+                HttpExchange.this.onRetry();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
     }
     

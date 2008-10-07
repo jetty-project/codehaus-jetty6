@@ -1,4 +1,3 @@
-package org.mortbay.jetty.client;
 //========================================================================
 //Copyright 2006-2007 Mort Bay Consulting Pty. Ltd.
 //------------------------------------------------------------------------
@@ -12,8 +11,11 @@ package org.mortbay.jetty.client;
 //See the License for the specific language governing permissions and
 //limitations under the License.
 //========================================================================
+package org.mortbay.jetty.client;
+
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -25,7 +27,7 @@ import javax.servlet.http.Cookie;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.client.security.Authentication;
+import org.mortbay.jetty.client.security.Authorization;
 import org.mortbay.jetty.client.security.SecurityListener;
 import org.mortbay.jetty.servlet.PathMap;
 import org.mortbay.log.Log;
@@ -48,11 +50,27 @@ public class HttpDestination
     private ArrayBlockingQueue<Object> _newQueue = new ArrayBlockingQueue<Object>(10,true);
     private int _newConnection=0;
     private InetSocketAddress _proxy;
+    private Authorization _proxyAuthentication;
     private PathMap _authorizations;
     private List<Cookie> _cookies;
     
-    // TODO add a repository of cookies and authenticated credentials
-    
+
+
+    public void dump() throws IOException
+    {
+        synchronized (this)
+        {
+            System.err.println(this);
+            System.err.println("connections="+_connections.size());
+            System.err.println("idle="+_idle.size());
+            System.err.println("pending="+_pendingConnections);
+            for (HttpConnection c : _connections)
+            {
+                if (!c.isIdle())
+                    c.dump();
+            }
+        }
+    }
     
     /* The queue of exchanged for this destination if connections are limited */
     private LinkedList<HttpExchange> _queue=new LinkedList<HttpExchange>();
@@ -96,13 +114,13 @@ public class HttpDestination
     }
     
     /* ------------------------------------------------------------ */
-    public void addAuthorization(String pathSpec,Authentication authentication)
+    public void addAuthorization(String pathSpec,Authorization authorization)
     {
         synchronized (this)
         {
             if (_authorizations==null)
                 _authorizations=new PathMap();
-            _authorizations.put(pathSpec,authentication);
+            _authorizations.put(pathSpec,authorization);
         }
         
         // TODO query and remove methods
@@ -329,9 +347,36 @@ public class HttpDestination
     /* ------------------------------------------------------------ */
     public void send(HttpExchange ex) throws IOException
     {
-        if (_client.hasRealms())
-            ex.setEventListener(new SecurityListener(this,ex));
+        LinkedList<String> listeners = _client.getRegisteredListeners();
 
+        if (listeners != null)
+        {
+            // Add registered listeners, fail if we can't load them
+            for (int i = listeners.size(); i > 0; --i)
+            {
+                String listenerClass = listeners.get(i - 1);
+
+                try
+                {
+                    Class listener = Class.forName(listenerClass);
+                    Constructor constructor = listener.getDeclaredConstructor(HttpDestination.class, HttpExchange.class);
+                    HttpEventListener elistener = (HttpEventListener) constructor.newInstance(this, ex);
+                    ex.setEventListener(elistener);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    throw new IOException("Unable to instantiate registered listener for destination: " + listenerClass );
+                }
+            }
+        }
+
+        // Security is supported by default and should be the first consulted
+        if ( _client.hasRealms() )
+        {
+            ex.setEventListener( new SecurityListener( this, ex ) );
+        }
+        
         doSend(ex);
     }
     
@@ -367,13 +412,15 @@ public class HttpDestination
         // Add any known authorizations
         if (_authorizations!=null)
         {
-            Authentication auth= (Authentication)_authorizations.match(ex.getURI());
+            Authorization auth= (Authorization)_authorizations.match(ex.getURI());
             if (auth !=null)
-                ((Authentication)auth).setCredentials(ex);
+                ((Authorization)auth).setCredentials(ex);
         }
        
         synchronized(this)
         {
+            //System.out.println( "Sending: " + ex.toString() );
+
             HttpConnection connection=null;
             if (_queue.size()>0 || (connection=getIdleConnection())==null || !connection.send(ex))
             {
@@ -428,7 +475,19 @@ public class HttpDestination
     {
         return _proxy;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public Authorization getProxyAuthentication()
+    {
+        return _proxyAuthentication;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setProxyAuthentication(Authorization authentication)
+    {
+        _proxyAuthentication = authentication;
+    }
+
     /* ------------------------------------------------------------ */
     public boolean isProxied()
     {

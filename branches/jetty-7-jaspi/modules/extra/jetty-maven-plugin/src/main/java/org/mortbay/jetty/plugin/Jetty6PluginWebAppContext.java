@@ -59,15 +59,29 @@ public class Jetty6PluginWebAppContext extends WebAppContext
         this.classpathFiles = classpathFiles;
     }
 
+    public List getClassPathFiles()
+    {
+        return this.classpathFiles;
+    }
     
     public void setWebXmlFile(File webXmlFile)
     {
         this.webXmlFile = webXmlFile;
     }
     
+    public File getWebXmlFile()
+    {
+        return this.webXmlFile;
+    }
+    
     public void setJettyEnvXmlFile (File jettyEnvXmlFile)
     {
         this.jettyEnvXmlFile = jettyEnvXmlFile;
+    }
+    
+    public File getJettyEnvXmlFile()
+    {
+        return this.jettyEnvXmlFile;
     }
     
     public void configure ()

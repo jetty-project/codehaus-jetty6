@@ -51,7 +51,8 @@ public class HttpURI
     PORT=6,
     PATH=7,
     PARAM=8,
-    QUERY=9;
+    QUERY=9,
+    ASTERISK=10;
     
     boolean _partial=false;
     byte[] _raw=__empty;
@@ -65,6 +66,7 @@ public class HttpURI
     int _query;
     int _fragment;
     int _end;
+    boolean _encoded=false;
     
     public HttpURI()
     {
@@ -107,6 +109,7 @@ public class HttpURI
     
     private void parse2(byte[] raw,int offset, int length)
     {
+        _encoded=false;
         _raw=raw;
         int i=offset;
         int e=offset+length;
@@ -131,34 +134,36 @@ public class HttpURI
                 case START:
                 {
                     m=s;
-                    if (c=='/')
+                    switch(c)
                     {
-                        state=AUTH_OR_PATH;
+                        case '/':
+                            state=AUTH_OR_PATH;
+                            break;
+                        case ';':
+                            _param=s;
+                            state=PARAM;
+                            break;
+                        case '?':
+                            _param=s;
+                            _query=s;
+                            state=QUERY;
+                            break;
+                        case '#':
+                            _param=s;
+                            _query=s;
+                            _fragment=s;
+                            break;
+                        case '*':
+                            _path=s;
+                            state=ASTERISK;
+                            break;
+                            
+                        default:
+                            if (Character.isLetterOrDigit(c))
+                                state=SCHEME_OR_PATH;
+                            else
+                                throw new IllegalArgumentException(StringUtil.toString(_raw,offset,length,URIUtil.__CHARSET));
                     }
-                    else if (Character.isLetterOrDigit(c))
-                    {
-                        state=SCHEME_OR_PATH;
-                    }
-                    else if (c==';')
-                    {
-                        _param=s;
-                        state=PARAM;
-                    }
-                    else if (c=='?')
-                    {
-                        _param=s;
-                        _query=s;
-                        state=QUERY;
-                    }
-                    else if (c=='#')
-                    {
-                        _param=s;
-                        _query=s;
-                        _fragment=s;
-                        break;
-                    }
-                    else
-                        throw new IllegalArgumentException(StringUtil.toString(_raw,offset,length,URIUtil.__CHARSET));
                     
                     continue;
                 }
@@ -350,6 +355,10 @@ public class HttpURI
                             _fragment = s;
                             break state;
                         }
+                        case '%':
+                        {
+                            _encoded=true;
+                        }
                     }
                     continue;
                 }
@@ -382,6 +391,11 @@ public class HttpURI
                         break state;
                     }
                     continue;
+                }
+                
+                case ASTERISK:
+                {
+                    throw new IllegalArgumentException("only '*'");
                 }
             }
         }
@@ -441,7 +455,8 @@ public class HttpURI
     {
         if (_path==_param)
             return null;
-        return URIUtil.decodePath(_raw,_path,_param-_path);
+        
+        return _encoded?URIUtil.decodePath(_raw,_path,_param-_path):StringUtil.toString(_raw,_path,_param-_path,URIUtil.__CHARSET);
     }
     
     public String getPathAndParam()
@@ -506,6 +521,7 @@ public class HttpURI
         _scheme=_authority=_host=_port=_path=_param=_query=_fragment=_end=0;
         _raw=__empty;
         _rawString="";
+        _encoded=false;
     }
     
     public String toString()

@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpGenerator;
+import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.StringUtil;
@@ -45,10 +47,14 @@ public class ErrorHandler extends AbstractHandler
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
     {
-        HttpConnection.getCurrentConnection().getRequest().setHandled(true);
-        response.setContentType(MimeTypes.TEXT_HTML_8859_1);
-        ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(4096);
         HttpConnection connection = HttpConnection.getCurrentConnection();
+        connection.getRequest().setHandled(true);
+        String method = request.getMethod();
+        if(!method.equals(HttpMethods.GET) && !method.equals(HttpMethods.POST))
+            return;
+        response.setContentType(MimeTypes.TEXT_HTML_8859_1);        
+        response.setHeader(HttpHeaders.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
+        ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(4096);
         handleErrorPage(request, writer, connection.getResponse().getStatus(), connection.getResponse().getReason());
         writer.flush();
         response.setContentLength(writer.size());

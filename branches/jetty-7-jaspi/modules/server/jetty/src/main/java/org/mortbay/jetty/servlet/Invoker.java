@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.Dispatcher;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerWrapper;
@@ -171,15 +172,7 @@ public class Invoker extends HttpServlet
                 {
                     // Make a holder
                     Log.debug("Making new servlet="+servlet+" with path="+path+"/*");
-                    holder=_servletHandler.addServlet(servlet, path+"/*");
-                    Map.Entry eee = _servletHandler.getHolderEntry(path);
-                    ServletMapping mapping = new ServletMapping();
-                    mapping.setServletName(servlet);
-                    mapping.setPathSpec(path+".class/*");
-                    _servletHandler.setServletMappings((ServletMapping[])LazyList.addToArray(_servletHandler.getServletMappings(), mapping, ServletMapping.class));
-                    
-                    
-                    
+                    holder=_servletHandler.addServletWithMapping(servlet, path+"/*");
                     
                     if (_parameters!=null)
                         holder.setInitParameters(_parameters);

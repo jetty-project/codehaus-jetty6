@@ -16,11 +16,11 @@ package org.mortbay.cometd.ext;
 
 import java.util.TimeZone;
 
+import org.cometd.Extension;
+import org.cometd.Message;
 import org.mortbay.cometd.AbstractBayeux;
 import org.mortbay.util.DateCache;
 
-import dojox.cometd.Extension;
-import dojox.cometd.Message;
 
 public class TimestampExtension implements Extension
 {

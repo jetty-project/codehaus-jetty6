@@ -1,5 +1,20 @@
+//========================================================================
+//Copyright 2004-2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.jetty;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
@@ -28,7 +43,17 @@ public class CookieCutter
     private String[] _fields;
     int _added=0;
     boolean _dirty;
+    HttpServletRequest _request;
+    
+    public CookieCutter()
+    {
+        
+    }
  
+    public CookieCutter(HttpServletRequest request)
+    {
+        _request = request;
+    }
     
     public Cookie[] getCookies()
     {
@@ -127,8 +152,9 @@ public class CookieCutter
                                 break;
                             case STATE_UNQUOTED_VALUE:
                                 state = STATE_NAME;
-                                // TODO remove this old style jetty cookie support (encoding)
-                                value = URIUtil.decodePath(hdr.substring(tokenstart, i).trim());
+                                value = hdr.substring(tokenstart, i).trim();
+                                if(_request!=null && _request.isRequestedSessionIdFromURL())
+                                    value = URIUtil.decodePath(value);
                                 tokenstart = i + 1;
                                 break;
                             case STATE_NAME:
@@ -192,8 +218,9 @@ public class CookieCutter
                     switch (state)
                     {
                         case STATE_UNQUOTED_VALUE:
-                            // TODO remove this old style jetty cookie support (encoding)
-                            value = URIUtil.decodePath(hdr.substring(tokenstart).trim());
+                            value = hdr.substring(tokenstart).trim();
+                            if(_request!=null && _request.isRequestedSessionIdFromURL())
+                                value = URIUtil.decodePath(value);
                             break;
                         case STATE_NAME:
                             name = hdr.substring(tokenstart);

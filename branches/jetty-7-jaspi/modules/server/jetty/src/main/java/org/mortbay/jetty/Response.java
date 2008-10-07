@@ -40,9 +40,9 @@ import org.mortbay.util.URIUtil;
 /* ------------------------------------------------------------ */
 /** Response.
  * <p>
- * Implements {@link javax.servlet.HttpServletResponse} from the {@link javax.servlet} package.   
+ * Implements {@link javax.servlet.HttpServletResponse} from the {@link javax.servlet} package.
  * </p>
- * 
+ *
  * @author gregw
  *
  */
@@ -53,6 +53,13 @@ public class Response implements HttpServletResponse
         NONE=0,
         STREAM=1,
         WRITER=2;
+
+    /**
+     * If a header name starts with this string,  the header (stripped of the prefix)
+     * can be set during include using only {@link #setHeader(String, String)} or
+     * {@link #addHeader(String, String)}.
+     */
+    public static String SET_INCLUDE_HEADER_PREFIX = "org.mortbay.jetty.include.";
 
     private static PrintWriter __nullPrintWriter;
     private static ServletOutputStream __nullServletOut;
@@ -139,7 +146,7 @@ public class Response implements HttpServletResponse
         SessionManager sessionManager = request.getSessionManager();
         if (sessionManager==null)
             return url;
-        String sessionURLPrefix = sessionManager.getSessionURLPrefix();
+        String sessionURLPrefix = sessionManager.getSessionIdPathParameterNamePrefix();
         if (sessionURLPrefix==null)
             return url;
 
@@ -167,14 +174,14 @@ public class Response implements HttpServletResponse
         if (session == null)
             return url;
 
-        
+
         // invalid session
         if (!sessionManager.isValid(session))
             return url;
-        
+
         String id=sessionManager.getNodeId(session);
-        
-        
+
+
         // TODO Check host and port are for this server
         // Already encoded
         int prefix=url.indexOf(sessionURLPrefix);
@@ -235,7 +242,7 @@ public class Response implements HttpServletResponse
     {
     	if (_connection.isIncluding() || _disabled)
     		return;
-    	
+
         if (isCommitted())
             Log.warn("Committed before "+code+" "+message);
 
@@ -246,10 +253,10 @@ public class Response implements HttpServletResponse
         setHeader(HttpHeaders.CACHE_CONTROL,null);
         setHeader(HttpHeaders.CONTENT_TYPE,null);
         setHeader(HttpHeaders.CONTENT_LENGTH,null);
-     
+
         _outputState=NONE;
         setStatus(code,message);
-        
+
         if (message==null)
             message=HttpGenerator.getReason(code);
 
@@ -271,12 +278,13 @@ public class Response implements HttpServletResponse
                 request.setAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE,new Integer(code));
                 request.setAttribute(ServletHandler.__J_S_ERROR_MESSAGE, message);
                 request.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI, request.getRequestURI());
-                request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,request.getServletName()); 
-                
+                request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,request.getServletName());
+
                 error_handler.handle(null,_connection.getRequest(),this, Handler.ERROR);
             }
             else
             {
+                setHeader(HttpHeaders.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
                 setContentType(MimeTypes.TEXT_HTML_8859_1);
                 ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
                 if (message != null)
@@ -292,7 +300,7 @@ public class Response implements HttpServletResponse
                     uri= StringUtil.replace(uri, "<", "&lt;");
                     uri= StringUtil.replace(uri, ">", "&gt;");
                 }
-                
+
                 writer.write("<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n");
                 writer.write("<title>Error ");
                 writer.write(Integer.toString(code));
@@ -307,11 +315,11 @@ public class Response implements HttpServletResponse
                 writer.write("</pre>\n<p>RequestURI=");
                 writer.write(uri);
                 writer.write("</p>\n<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by jetty://</a></small></i></p>");
-                
+
                 for (int i= 0; i < 20; i++)
                     writer.write("\n                                                ");
                 writer.write("\n</body>\n</html>\n");
-                
+
                 writer.flush();
                 setContentLength(writer.size());
                 writer.writeTo(getOutputStream());
@@ -356,9 +364,9 @@ public class Response implements HttpServletResponse
         if (g instanceof HttpGenerator)
         {
             HttpGenerator generator = (HttpGenerator)g;
-            
+
             String expect = _connection.getRequest().getHeader(HttpHeaders.EXPECT);
-            
+
             if (expect!=null && expect.startsWith("102") && generator.getVersion()>=HttpVersions.HTTP_1_1_ORDINAL)
             {
                 boolean was_persistent=generator.isPersistent();
@@ -381,7 +389,7 @@ public class Response implements HttpServletResponse
     {
     	if (_connection.isIncluding()|| _disabled)
     		return;
-    	
+
         if (location==null)
             throw new IllegalArgumentException();
 
@@ -436,7 +444,14 @@ public class Response implements HttpServletResponse
      */
     public void setHeader(String name, String value)
     {
-        if (!_connection.isIncluding()&& !_disabled)
+        if (_connection.isIncluding())
+        {
+            if (name.startsWith(SET_INCLUDE_HEADER_PREFIX))
+                name=name.substring(SET_INCLUDE_HEADER_PREFIX.length());
+            else
+                return;
+        }
+        if (!_disabled)
         {
             _connection.getResponseFields().put(name, value);
             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
@@ -448,7 +463,7 @@ public class Response implements HttpServletResponse
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /*
      */
@@ -458,7 +473,7 @@ public class Response implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      */
     public Enumeration getHeaders(String name)
     {
@@ -474,7 +489,15 @@ public class Response implements HttpServletResponse
      */
     public void addHeader(String name, String value)
     {
-        if (!_connection.isIncluding()&& !_disabled)
+        if (_connection.isIncluding())
+        {
+            if (name.startsWith(SET_INCLUDE_HEADER_PREFIX))
+                name=name.substring(SET_INCLUDE_HEADER_PREFIX.length());
+            else
+                return;
+        }
+
+        if (!_disabled)
         {
             _connection.getResponseFields().add(name, value);
             if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name))
@@ -575,7 +598,7 @@ public class Response implements HttpServletResponse
     {
         return _outputState==WRITER;
     }
-    
+
     /* ------------------------------------------------------------ */
     /*
      * @see javax.servlet.ServletResponse#getWriter()
@@ -621,9 +644,9 @@ public class Response implements HttpServletResponse
     {
     	if (_connection.isIncluding() || _disabled)
     		return;
-    	
+
         // TODO throw unsupported encoding exception ???
-        
+
         if (this._outputState==0 && !isCommitted())
         {
             _explicitEncoding=true;
@@ -648,7 +671,7 @@ public class Response implements HttpServletResponse
                 {
                     int i0=_contentType.indexOf(';');
                     if (i0<0)
-                    {   
+                    {
                         _contentType=null;
                         if(_cachedMimeType!=null)
                         {
@@ -659,10 +682,10 @@ public class Response implements HttpServletResponse
                                 _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,content_type);
                             }
                         }
-                        
+
                         if (_contentType==null)
                         {
-                            _contentType = _mimeType+"; charset="+QuotedStringTokenizer.quote(_characterEncoding,";= "); 
+                            _contentType = _mimeType+"; charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
                             _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                         }
                     }
@@ -671,7 +694,7 @@ public class Response implements HttpServletResponse
                         int i1=_contentType.indexOf("charset=",i0);
                         if (i1<0)
                         {
-                            _contentType = _contentType+" charset="+QuotedStringTokenizer.quote(_characterEncoding,";= "); 
+                            _contentType = _contentType+" charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
                         }
                         else
                         {
@@ -737,7 +760,7 @@ public class Response implements HttpServletResponse
         _connection._generator.setContentLength(len);
         _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
     }
-    
+
     /* ------------------------------------------------------------ */
     /*
      * @see javax.servlet.ServletResponse#setContentType(java.lang.String)
@@ -746,11 +769,11 @@ public class Response implements HttpServletResponse
     {
         if (isCommitted() || _connection.isIncluding() || _disabled)
             return;
-        
+
         // Yes this method is horribly complex.... but there are lots of special cases and
         // as this method is called on every request, it is worth trying to save string creation.
         //
-        
+
         if (contentType==null)
         {
             if (_locale==null)
@@ -768,7 +791,7 @@ public class Response implements HttpServletResponse
             if (i0>0)
             {
                 // we have content type parameters
-            
+
                 // Extract params off mimetype
                 _mimeType=contentType.substring(0,i0).trim();
                 _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
@@ -822,7 +845,7 @@ public class Response implements HttpServletResponse
                         // The params are just the char encoding
                         _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
                         _characterEncoding = QuotedStringTokenizer.unquote(contentType.substring(i8));
-                        
+
                         if (_cachedMimeType!=null)
                         {
                             CachedBuffer content_type = _cachedMimeType.getAssociate(_characterEncoding);
@@ -851,7 +874,7 @@ public class Response implements HttpServletResponse
                     }
                     else
                     {
-                        _characterEncoding = QuotedStringTokenizer.unquote(contentType.substring(i8)); 
+                        _characterEncoding = QuotedStringTokenizer.unquote(contentType.substring(i8));
                         _contentType=contentType;
                         _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                     }
@@ -867,7 +890,7 @@ public class Response implements HttpServletResponse
             {
                 _mimeType=contentType;
                 _cachedMimeType=MimeTypes.CACHE.get(_mimeType);
-                
+
                 if (_characterEncoding!=null)
                 {
                     if (_cachedMimeType!=null)
@@ -900,7 +923,7 @@ public class Response implements HttpServletResponse
                     _contentType=contentType;
                     _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_contentType);
                 }
-            }   
+            }
         }
     }
 
@@ -943,7 +966,7 @@ public class Response implements HttpServletResponse
     public void reset()
     {
         resetBuffer();
-        
+
         HttpFields response_fields=_connection.getResponseFields();
         response_fields.clear();
         String connection=_connection.getRequestFields().getStringField(HttpHeaders.CONNECTION_BUFFER);
@@ -973,13 +996,13 @@ public class Response implements HttpServletResponse
                 }
             }
         }
-        
+
         if (_connection.getConnector().getServer().getSendDateHeader())
         {
             Request request=_connection.getRequest();
             response_fields.put(HttpHeaders.DATE_BUFFER, request.getTimeStampBuffer(),request.getTimeStamp());
         }
-        
+
         _status=200;
         _reason=null;
         _mimeType=null;
@@ -1028,15 +1051,15 @@ public class Response implements HttpServletResponse
 
         _locale = locale;
         _connection.getResponseFields().put(HttpHeaders.CONTENT_LANGUAGE_BUFFER,locale.toString().replace('_','-'));
-        
+
         if (_explicitEncoding || _outputState!=0 )
             return;
 
         if (_connection.getRequest().getContext()==null)
             return;
-        
+
         String charset = _connection.getRequest().getContext().getContextHandler().getLocaleEncoding(locale);
-        
+
         if (charset!=null && charset.length()>0)
         {
             _characterEncoding=charset;
@@ -1077,7 +1100,7 @@ public class Response implements HttpServletResponse
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The HTTP status code that has been set for this request. This will be <code>200<code> 
+     * @return The HTTP status code that has been set for this request. This will be <code>200<code>
      *    ({@link HttpServletResponse#SC_OK}), unless explicitly set through one of the <code>setStatus</code> methods.
      */
     public int getStatus()
@@ -1087,7 +1110,7 @@ public class Response implements HttpServletResponse
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The reason associated with the current {@link #getStatus() status}. This will be <code>null</code>, 
+     * @return The reason associated with the current {@link #getStatus() status}. This will be <code>null</code>,
      *    unless one of the <code>setStatus</code> methods have been called.
      */
     public String getReason()
@@ -1121,7 +1144,7 @@ public class Response implements HttpServletResponse
     {
         return _connection.getResponseFields();
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString()
     {
@@ -1136,7 +1159,7 @@ public class Response implements HttpServletResponse
             _disabledOutputState=_outputState;
         _disabled=true;
         _outputState=DISABLED;
-        
+
     }
 
 
@@ -1176,7 +1199,7 @@ public class Response implements HttpServletResponse
         public void write(byte[] b, int off, int len) throws IOException
         {
         }
-        
+
     }
 
 }

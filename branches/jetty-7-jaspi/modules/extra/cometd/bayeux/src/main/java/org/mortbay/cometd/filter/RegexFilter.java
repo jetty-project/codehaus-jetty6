@@ -34,7 +34,8 @@ public class RegexFilter extends JSONDataFilter
      * if the regex replacement string is null, then an IllegalStateException is thrown if
      * the pattern matches.
      */
-    public void init(Object init)
+    @Override
+	public void init(Object init)
     {
         super.init(init);
         
@@ -67,7 +68,8 @@ public class RegexFilter extends JSONDataFilter
         }
     }
 
-    protected Object filterString(String string)
+    @Override
+	protected Object filterString(String string)
     {
         checkPatterns();
         

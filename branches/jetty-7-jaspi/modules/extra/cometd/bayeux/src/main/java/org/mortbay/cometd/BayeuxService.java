@@ -17,16 +17,16 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.cometd.Bayeux;
+import org.cometd.Channel;
+import org.cometd.Client;
+import org.cometd.Listener;
+import org.cometd.Message;
+import org.cometd.MessageListener;
 import org.mortbay.component.LifeCycle;
 import org.mortbay.thread.QueuedThreadPool;
 import org.mortbay.thread.ThreadPool;
 
-import dojox.cometd.Bayeux;
-import dojox.cometd.Channel;
-import dojox.cometd.Client;
-import dojox.cometd.Listener;
-import dojox.cometd.Message;
-import dojox.cometd.MessageListener;
 
 /* ------------------------------------------------------------ */
 /** Abstract Bayeux Service class.
@@ -58,6 +58,7 @@ public abstract class BayeuxService
     private Map<String,Method> _methods = new ConcurrentHashMap<String,Method>();
     private ThreadPool _threadPool;
     private MessageListener _listener;
+    private boolean _seeOwn=false;
     
     /* ------------------------------------------------------------ */
     /** Instantiate the service.
@@ -99,11 +100,10 @@ public abstract class BayeuxService
             setThreadPool(new QueuedThreadPool(maxThreads));
         _name=name;
         _bayeux=bayeux;
-        _client=_bayeux.newClient(name);  
-        if (synchronous)
-            _client.addListener(_listener=new SyncListen());
-        else
-            _client.addListener(_listener=new AsyncListen());
+        _client=_bayeux.newClient(name); 
+        _listener=(synchronous)?new SyncListen():new  AsyncListen();
+        _client.addListener(_listener);
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -146,6 +146,18 @@ public abstract class BayeuxService
         _threadPool = pool;
     }
     
+    /* ------------------------------------------------------------ */
+    public boolean isSeeOwnPublishes()
+    {
+        return _seeOwn;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setSeeOwnPublishes(boolean own)
+    {
+        _seeOwn = own;
+    }
+
     /* ------------------------------------------------------------ */
     /** Subscribe to a channel.
      * Subscribe to channel and map a method to handle received messages.
@@ -209,7 +221,7 @@ public abstract class BayeuxService
         { 
             final Method m=method;
             Client wild_client=_bayeux.newClient(_name+"-wild");
-            wild_client.addListener(_listener instanceof MessageListener.Asynchronous?new AsyncWildListen(m):new SyncWildListen(m));
+            wild_client.addListener(_listener instanceof MessageListener.Asynchronous?new AsyncWildListen(wild_client,m):new SyncWildListen(wild_client,m));
             channel.subscribe(wild_client);
         }
         else
@@ -251,6 +263,7 @@ public abstract class BayeuxService
      */
     protected void exception(Client fromClient, Client toClient, Map<String, Object> msg,Throwable th)
     {
+        System.err.println(msg);
         th.printStackTrace();
     }
 
@@ -278,7 +291,6 @@ public abstract class BayeuxService
                 }   
             });
         }
-        
     }
     
     /* ------------------------------------------------------------ */
@@ -313,10 +325,12 @@ public abstract class BayeuxService
             }
             catch (Exception e)
             {
+                System.err.println(method);
                 exception(fromClient,toClient,msg,e);
             }
             catch (Error e)
             {
+                System.err.println(method);
                 exception(fromClient,toClient,msg,e);
             }
         }
@@ -328,6 +342,8 @@ public abstract class BayeuxService
     {
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
+            if (!_seeOwn && fromClient==getClient())
+                return;
             String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
             Method method=_methods.get(channel);
             invoke(method,fromClient,toClient,msg);
@@ -340,6 +356,8 @@ public abstract class BayeuxService
     {
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
+            if (!_seeOwn && fromClient==getClient())
+                return;
             String channel=(String)msg.get(Bayeux.CHANNEL_FIELD);
             Method method=_methods.get(channel);
             invoke(method,fromClient,toClient,msg);
@@ -351,13 +369,18 @@ public abstract class BayeuxService
     /* ------------------------------------------------------------ */
     private class SyncWildListen implements MessageListener, MessageListener.Synchronous
     {
+        Client _client;
         Method _method;
-        public SyncWildListen(Method method)
+        
+        public SyncWildListen(Client client,Method method)
         {
+            _client=client;
             _method=method;
         }
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
+            if (!_seeOwn && (fromClient==_client || fromClient==getClient()))
+                return;
             invoke(_method,fromClient,toClient,msg);
         }
     };
@@ -367,13 +390,17 @@ public abstract class BayeuxService
     /* ------------------------------------------------------------ */
     private class AsyncWildListen implements MessageListener, MessageListener.Asynchronous
     {
+        Client _client;
         Method _method;
-        public AsyncWildListen(Method method)
+        public AsyncWildListen(Client client,Method method)
         {
+            _client=client;
             _method=method;
         }
         public void deliver(Client fromClient, Client toClient, Message msg)
         {
+            if (!_seeOwn && (fromClient==_client || fromClient==getClient()))
+                return;
             invoke(_method,fromClient,toClient,msg);
         }
     };

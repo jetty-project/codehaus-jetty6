@@ -282,7 +282,6 @@ public class HttpHeaderTest extends TestCase
         assertEquals(null,header.getStringField("name1"));
         header.put(n1,vb);
         assertEquals("value1",header.getStringField("name1"));
-        assertTrue(va.toString()==header.getStringField("name1"));
         
         int matches=0;
         Enumeration e = header.getFieldNames();

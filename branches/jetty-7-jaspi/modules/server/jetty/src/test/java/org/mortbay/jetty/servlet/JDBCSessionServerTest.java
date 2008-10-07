@@ -14,9 +14,8 @@
 
 package org.mortbay.jetty.servlet;
 
-import junit.framework.TestCase;
 
-public class JDBCSessionServerTest extends TestCase
+public class JDBCSessionServerTest extends AbstractSessionTest
 {
     JDBCSessionServer _serverA;
     JDBCSessionServer _serverB;
@@ -45,37 +44,26 @@ public class JDBCSessionServerTest extends TestCase
         public void configureSessionManager1()
         {
            JDBCSessionManager mgr1 = new JDBCSessionManager();
+           mgr1.setSaveInterval(10);
            _sessionMgr1 = mgr1;
         }
 
         public void configureSessionManager2()
         {
             JDBCSessionManager mgr2 = new JDBCSessionManager();
+            mgr2.setSaveInterval(10);
             _sessionMgr2 = mgr2;
         }
     }
     
-    public void setUp () throws Exception
+    public SessionTestServer newServer1 ()
     {
-        _serverA = new JDBCSessionServer (8010, "duke");
-        _serverA.start();
-        _serverB = new JDBCSessionServer (8011, "daisy");
-        _serverB.start();
+        return new JDBCSessionServer (Integer.parseInt(__port1), "duke");
     }
     
-    public void tearDown () throws Exception
+    public SessionTestServer newServer2 ()
     {
-        if (_serverA != null)
-            _serverA.stop();
-        if (_serverB != null)
-            _serverB.stop();
-        
-        _serverA=null;
-        _serverB=null;
+        return new JDBCSessionServer (Integer.parseInt(__port2), "daisy");
     }
     
-    public void testSessions () throws Exception
-    {
-        //TODO test session clustering
-    }
 }

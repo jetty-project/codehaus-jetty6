@@ -15,11 +15,16 @@
 
 package org.mortbay.jetty.annotations;
 
+import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.Iterator;
-
+import java.util.List;
 
 import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletMapping;
+import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 
 /**
@@ -29,6 +34,10 @@ import org.mortbay.util.LazyList;
  */
 public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
 {
+    public static final String __web_inf_pattern = "org.mortbay.jetty.webapp.WebInfIncludeAnnotationJarPattern";
+    public static final String __container_pattern = "org.mortbay.jetty.webapp.ContainerIncludeAnnotationJarPattern";
+                                                      
+    
     
     public Configuration () throws ClassNotFoundException
     {
@@ -40,30 +49,102 @@ public class Configuration extends org.mortbay.jetty.plus.webapp.Configuration
      */
     public void parseAnnotations() throws Exception
     {
-        //look thru _servlets
-        Iterator itor = LazyList.iterator(_servlets);
-        while (itor.hasNext())
-        {
-            ServletHolder holder = (ServletHolder)itor.next();
-            Class servlet = getWebAppContext().loadClass(holder.getClassName());
-            AnnotationParser.parseAnnotations(servlet, _runAsCollection,  _injections, _callbacks);
-        }
+        /*
+         * TODO Need to also take account of hidden classes on system classpath that should never
+         * contribute annotations to a webapp (system and server classes):
+         * 
+         * --- when scanning system classpath:
+         *   + system classes : should always be scanned (subject to pattern)
+         *   + server classes : always ignored
+         *   
+         * --- when scanning webapp classpath:
+         *   + system classes : always ignored
+         *   + server classes : always scanned
+         * 
+         * 
+         * If same class is found in both container and in context then need to use
+         * webappcontext parentloaderpriority to work out which one contributes the
+         * annotation.
+         */
+       
+       
+        AnnotationFinder finder = new AnnotationFinder();
+
+        //if no pattern for the container path is defined, then by default scan NOTHING
+        Log.debug("Scanning system jars");
+        finder.find(getWebAppContext().getClassLoader().getParent(), true, getWebAppContext().getInitParameter(__container_pattern), false, 
+                new ClassNameResolver ()
+                {
+                    public boolean isExcluded (String name)
+                    {
+                        if (getWebAppContext().isSystemClass(name)) return false;
+                        if (getWebAppContext().isServerClass(name)) return true;
+                        return false;
+                    }
+
+                    public boolean shouldOverride (String name)
+                    { 
+                        //looking at system classpath
+                        if (getWebAppContext().isParentLoaderPriority())
+                            return true;
+                        return false;
+                    }
+                });
+
+        Log.debug("Scanning WEB-INF/lib jars");
+        //if no pattern for web-inf/lib is defined, then by default scan everything in it
+        finder.find (getWebAppContext().getClassLoader(), false, getWebAppContext().getInitParameter(__web_inf_pattern), true,
+                new ClassNameResolver()
+                {
+                    public boolean isExcluded (String name)
+                    {    
+                        if (getWebAppContext().isSystemClass(name)) return true;
+                        if (getWebAppContext().isServerClass(name)) return false;
+                        return false;
+                    }
+
+                    public boolean shouldOverride (String name)
+                    {
+                        //looking at webapp classpath, found already-parsed class of same name - did it come from system or duplicate in webapp?
+                        if (getWebAppContext().isParentLoaderPriority())
+                            return false;
+                        return true;
+                    }
+                });       
         
-        //look thru _filters
-        itor = LazyList.iterator(_filters);
-        while (itor.hasNext())
-        {
-            FilterHolder holder = (FilterHolder)itor.next();
-            Class filter = getWebAppContext().loadClass(holder.getClassName());
-            AnnotationParser.parseAnnotations(filter, null, _injections, _callbacks);
-        }
+        Log.debug("Scanning classes in WEB-INF/classes");
+        finder.find(_context.getWebInf().addPath("classes/"), 
+                new ClassNameResolver()
+                {
+                    public boolean isExcluded (String name)
+                    {
+                        if (getWebAppContext().isSystemClass(name)) return true;
+                        if (getWebAppContext().isServerClass(name)) return false;
+                        return false;
+                    }
+
+                    public boolean shouldOverride (String name)
+                    {
+                        //looking at webapp classpath, found already-parsed class of same name - did it come from system or duplicate in webapp?
+                        if (getWebAppContext().isParentLoaderPriority())
+                            return false;
+                        return true;
+                    }
+                });
         
-        //look thru _listeners
-        itor = LazyList.iterator(_listeners);
-        while (itor.hasNext())
-        {
-            Object listener = itor.next();
-            AnnotationParser.parseAnnotations(listener.getClass(), null, _injections, _callbacks);
-        }
+        AnnotationProcessor processor = new AnnotationProcessor(getWebAppContext(), finder, _runAsCollection, _injections, _callbacks, 
+                LazyList.getList(_servlets), LazyList.getList(_filters), LazyList.getList(_listeners), 
+                LazyList.getList(_servletMappings), LazyList.getList(_filterMappings));
+        processor.process();
+        _servlets = processor.getServlets();
+        _filters = processor.getFilters();
+        _servletMappings = processor.getServletMappings();
+        _filterMappings = processor.getFilterMappings();
+        _listeners = processor.getListeners();
+        _servletHandler.setFilters((FilterHolder[])LazyList.toArray(_filters,FilterHolder.class));
+        _servletHandler.setFilterMappings((FilterMapping[])LazyList.toArray(_filterMappings,FilterMapping.class));
+        _servletHandler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
+        _servletHandler.setServletMappings((ServletMapping[])LazyList.toArray(_servletMappings,ServletMapping.class));
+        getWebAppContext().setEventListeners((EventListener[])LazyList.toArray(_listeners,EventListener.class));
     }
 }

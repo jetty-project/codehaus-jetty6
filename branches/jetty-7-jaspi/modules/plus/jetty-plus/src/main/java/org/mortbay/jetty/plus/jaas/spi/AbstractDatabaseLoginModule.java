@@ -100,7 +100,8 @@ public abstract class AbstractDatabaseLoginModule extends AbstractLoginModule
             results.close();
             statement.close();
             
-            return new UserInfo (userName, Credential.getCredential(dbCredential), roles);
+            return dbCredential==null ? null : new UserInfo (userName, 
+                    Credential.getCredential(dbCredential), roles);
         }
         finally
         {

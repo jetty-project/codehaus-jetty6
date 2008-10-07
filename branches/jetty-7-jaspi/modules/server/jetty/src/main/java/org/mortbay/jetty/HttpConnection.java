@@ -528,11 +528,15 @@ public class HttpConnection implements Connection
                     threadName=Thread.currentThread().getName();
                     Thread.currentThread().setName(threadName+" - "+_uri);
                 }
-                
+
                 if (_request.shouldHandleRequest())
+                {
                     _server.handle(this);
+                }
                 else
+                {
                     _request.setHandled(true);
+                }
             }
             catch (RetryRequest r)
             {
@@ -567,7 +571,6 @@ public class HttpConnection implements Connection
             finally
             {   
                 handling = !_request.unhandling() && _server != null;
-                
                 if (handling)
                     continue;
                 
@@ -951,6 +954,12 @@ public class HttpConnection implements Connection
             writer.print(s);
         }
 
+        /* ------------------------------------------------------------ */
+        public void sendResponse(Buffer response) throws IOException
+        {
+            ((HttpGenerator)_generator).sendResponse(response);
+        }
+        
         /* ------------------------------------------------------------ */
         public void sendContent(Object content) throws IOException
         {

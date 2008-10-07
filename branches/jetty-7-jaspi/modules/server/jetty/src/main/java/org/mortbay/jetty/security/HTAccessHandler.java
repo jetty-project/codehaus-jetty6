@@ -41,6 +41,7 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.jaspi.modules.BaseAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.LoginResult;
 import org.mortbay.jetty.security.jaspi.modules.UserPasswordLoginCredentials;
+import org.mortbay.jetty.security.AuthResult;
 import org.mortbay.log.Log;
 import org.mortbay.log.Logger;
 import org.mortbay.resource.Resource;
@@ -74,6 +75,7 @@ public class HTAccessHandler extends AbstractSecurityHandler
      * @see org.mortbay.jetty.Handler#handle(java.lang.String,
      *      javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse, int)
+     * @param authResult
      */
     /*
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
@@ -234,9 +236,9 @@ public class HTAccessHandler extends AbstractSecurityHandler
         }
     }
 */
-    protected UserIdentity newUserIdentity(ServletCallbackHandler callbackHandler, Subject clientSubject)
+    protected UserIdentity newUserIdentity(AuthResult authResult)
     {
-        return new ConstraintUserIdentity(callbackHandler);
+        return new ConstraintUserIdentity(authResult);
     }
 
     protected UserIdentity newSystemUserIdentity()

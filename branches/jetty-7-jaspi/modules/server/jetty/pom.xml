@@ -12,16 +12,6 @@
   <description>The core jetty server artifact.</description>
   <build>
     <defaultGoal>install</defaultGoal>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-      </testResource>
-    </testResources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -29,6 +19,28 @@
           <source>1.5</source>
           <target>1.5</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-deps</id>
+            <phase>install</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.mortbay.jetty</groupId>
+                  <artifactId>servlet-api</artifactId>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>../../../lib</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -43,7 +55,6 @@
               <tasks>
                 <delete includeemptydirs="true">
                   <fileset dir="../../../lib/" includes="${project.artifactId}-${project.version}.${project.packaging}" />
-                  <fileset dir="../../../lib/" includes="servlet-api-3.0.jar" />
                   <fileset dir="../../../etc/" includes="webdefault.xml" />
                 </delete>
               </tasks>
@@ -101,7 +112,7 @@
                 <Bundle-SymbolicName>org.mortbay.jetty.server</Bundle-SymbolicName>
                 <Bundle-RequiredExcutionEnvironment>J2SE-1.5</Bundle-RequiredExcutionEnvironment>
                 <Bundle-DocURL>http://jetty.mortbay.org</Bundle-DocURL>
-                <Import-Package>!org.mortbay.jetty.*,!org.mortbay.xml.*,!org.mortbay.resource.*,!org.mortbay.io.*,!org.mortbay.servlet.jetty.*,javax.servlet.resources;resolution:=optional,javax.servlet.jsp;resolution:=optional,org.mortbay.jetty.handler.management;resolution:=optional,*</Import-Package>
+                <Import-Package>!org.mortbay.jetty.*,!org.mortbay.xml.*,!org.mortbay.resource.*,!org.mortbay.io.*,!org.mortbay.servlet.jetty.*,javax.servlet.resources;resolution:=optional,javax.servlet.jsp;resolution:=optional,org.apache.jasper.servlet;resolution:=optional,org.mortbay.jetty.handler.management;resolution:=optional,*</Import-Package>
               </instructions>
             </configuration>
            </execution>
@@ -110,6 +121,20 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>artifact-jar</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>test-jar</id>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <archive>
             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
@@ -134,7 +159,6 @@
         <configuration>
            <descriptors>
             <descriptor>src/main/assembly/site-component.xml</descriptor>
-            <descriptor>src/main/assembly/test-component.xml</descriptor>
           </descriptors>
         </configuration>
         <executions>
@@ -177,24 +201,23 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>10.4.1.3</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jaspi_1.0_spec</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api-3.0</artifactId>
-      <version>${project.version}</version>
+      <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-util</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.derby</groupId>
+    	<artifactId>derby</artifactId>
+    	<version>10.4.1.3</version>
+    	<scope>test</scope>
     </dependency>
   </dependencies>
 </project>

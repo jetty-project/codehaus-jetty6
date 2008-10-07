@@ -73,7 +73,8 @@ public class LazyListTest extends TestCase
 
         list=LazyList.add(null,list);
         assertEquals(1,LazyList.size(list));
-        assertTrue(LazyList.get(list,0) instanceof List);
+        Object l = LazyList.get(list,0);
+        assertTrue(l instanceof List);
     }
 
     /*

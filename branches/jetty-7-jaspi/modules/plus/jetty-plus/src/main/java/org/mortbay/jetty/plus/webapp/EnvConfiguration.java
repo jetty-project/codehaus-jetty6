@@ -21,6 +21,8 @@ import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.Name;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
@@ -32,6 +34,7 @@ import org.mortbay.jetty.plus.naming.Transaction;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
+import org.mortbay.naming.NamingUtil;
 
 import org.mortbay.xml.XmlConfiguration;
 
@@ -43,7 +46,8 @@ import org.mortbay.xml.XmlConfiguration;
 public class EnvConfiguration implements Configuration
 {
     private WebAppContext webAppContext;
-    private Context compCtx;
+    private Context compCtx;    
+    private Context envCtx;
     private URL jettyEnvXmlUrl;
 
     protected void createEnvContext ()
@@ -51,7 +55,7 @@ public class EnvConfiguration implements Configuration
     {
         Context context = new InitialContext();
         compCtx =  (Context)context.lookup ("java:comp");
-        Context envCtx = compCtx.createSubcontext("env");
+        envCtx = compCtx.createSubcontext("env");
         if (Log.isDebugEnabled())
             Log.debug("Created java:comp/env for webapp "+getWebAppContext().getContextPath());
     }
@@ -92,7 +96,9 @@ public class EnvConfiguration implements Configuration
      * @throws Exception
      */
     public void configureDefaults() throws Exception
-    {
+    {        
+        //create a java:comp/env
+        createEnvContext();
     }
 
     /** 
@@ -101,16 +107,6 @@ public class EnvConfiguration implements Configuration
      */
     public void configureWebApp() throws Exception
     {
-        //create a java:comp/env
-        createEnvContext();
-        
-        //add java:comp/env entries for any globally defined EnvEntries
-        bindGlobalEnvEntries();
-        
-        //set up java:comp/env as the Context in which to bind directly
-        //the entries in jetty-env.xml
-        NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
-        
         //check to see if an explicit file has been set, if not,
         //look in WEB-INF/jetty-env.xml
         if (jettyEnvXmlUrl == null)
@@ -133,7 +129,9 @@ public class EnvConfiguration implements Configuration
             XmlConfiguration configuration = new XmlConfiguration(jettyEnvXmlUrl);
             configuration.configure(getWebAppContext());
         }
-
+        
+        //add java:comp/env entries for any EnvEntries that have been defined so far
+        bindEnvEntries();
     }
 
     /** 
@@ -143,62 +141,70 @@ public class EnvConfiguration implements Configuration
      */
     public void deconfigureWebApp() throws Exception
     {
-        //get rid of any bindings only defined for the webapp
+        //get rid of any bindings for comp/env for webapp
         ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(webAppContext.getClassLoader());
-        NamingEntry.setScope(NamingEntry.SCOPE_WEBAPP);
-        unbindLocalNamingEntries();
         compCtx.destroySubcontext("env");
-        NamingEntry.setScope(NamingEntry.SCOPE_CONTAINER);
+        
+        //unbind any NamingEntries that were configured in this webapp's name space
+        try
+        {
+            Context scopeContext = NamingEntryUtil.getContextForScope(getWebAppContext());
+            scopeContext.destroySubcontext(NamingEntry.__contextName);
+        }
+        catch (NameNotFoundException e)
+        {
+            Log.ignore(e);
+            Log.debug("No naming entries configured in environment for webapp "+getWebAppContext());
+        }
         Thread.currentThread().setContextClassLoader(oldLoader);
     }
     
-   
     /**
-     * Bind all EnvEntries that have been globally declared.
+     * Bind all EnvEntries that have been declared, so that the processing of the
+     * web.xml file can potentially override them.
+     * 
+     * We first bind EnvEntries declared in Server scope, then WebAppContext scope.
      * @throws NamingException
      */
-    public void bindGlobalEnvEntries ()
+    public void bindEnvEntries ()
     throws NamingException
     {
-        Log.debug("Finding global env entries");
-        
-        List  list = EnvEntry.lookupGlobalEnvEntries();
+        Log.debug("Binding env entries from the jvm scope");
+        Object scope = null;
+        List list = NamingEntryUtil.lookupNamingEntries(scope, EnvEntry.class);
         Iterator itor = list.iterator();
-        
         while (itor.hasNext())
         {
             EnvEntry ee = (EnvEntry)itor.next();
             ee.bindToENC(ee.getJndiName());
+            Name namingEntryName = NamingEntryUtil.makeNamingEntryName(null, ee);
+            NamingUtil.bind(envCtx, namingEntryName.toString(), ee);//also save the EnvEntry in the context so we can check it later          
         }
-    }
-    
-  
-    
-
-    
-    public void unbindLocalNamingEntries ()
-    throws NamingException
-    {
-        //TODO is this necessary??? Why not just cut loose the context at java:comp/env??
-   
-        /*
-        List  list = NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_WEBAPP, EnvEntry.class);
-        list.addAll(NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_WEBAPP, Resource.class));
-        list.addAll(NamingEntryUtil.lookupNamingEntries(NamingEntry.SCOPE_WEBAPP, Transaction.class));
         
-        Iterator itor = list.iterator();
+        Log.debug("Binding env entries from the server scope");
         
-        Log.debug("Finding all naming entries for webapp local naming context: size="+list.size());
+        scope = getWebAppContext().getServer();
+        list = NamingEntryUtil.lookupNamingEntries(scope, EnvEntry.class);
+        itor = list.iterator();
         while (itor.hasNext())
         {
-            NamingEntry ne = (NamingEntry)itor.next();
-            Log.debug("Unbinding naming entry "+ne.getJndiName());
-            ne.unbindENC();
-            ne.release();
+            EnvEntry ee = (EnvEntry)itor.next();
+            ee.bindToENC(ee.getJndiName());
+            Name namingEntryName = NamingEntryUtil.makeNamingEntryName(null, ee);
+            NamingUtil.bind(envCtx, namingEntryName.toString(), ee);//also save the EnvEntry in the context so we can check it later          
         }
-        */
         
-    }
-    
+        Log.debug("Binding env entries from the context scope");
+        scope = getWebAppContext();
+        list = NamingEntryUtil.lookupNamingEntries(scope, EnvEntry.class);
+        itor = list.iterator();
+        while (itor.hasNext())
+        {
+            EnvEntry ee = (EnvEntry)itor.next();
+            ee.bindToENC(ee.getJndiName());
+            Name namingEntryName = NamingEntryUtil.makeNamingEntryName(null, ee);
+            NamingUtil.bind(envCtx, namingEntryName.toString(), ee);//also save the EnvEntry in the context so we can check it later
+        }
+    }  
 }

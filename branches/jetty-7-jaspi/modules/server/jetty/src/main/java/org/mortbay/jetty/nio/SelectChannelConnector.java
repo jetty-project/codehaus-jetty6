@@ -28,6 +28,7 @@ import org.mortbay.io.nio.SelectorManager;
 import org.mortbay.io.nio.SelectorManager.SelectSet;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
+import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout.Task;
 
 /* ------------------------------------------------------------------------------- */
@@ -127,6 +128,17 @@ public class SelectChannelConnector extends AbstractNIOConnector
     {
         synchronized(this)
         {
+            if(_manager.isRunning())
+            {
+                try
+                {
+                    _manager.stop();
+                }
+                catch (Exception e)
+                {
+                    Log.warn(e);
+                }
+            }
             if (_acceptChannel != null)
                 _acceptChannel.close();
             _acceptChannel = null;
@@ -278,8 +290,7 @@ public class SelectChannelConnector extends AbstractNIOConnector
      * @see org.mortbay.jetty.AbstractConnector#doStop()
      */
     protected void doStop() throws Exception
-    {
-        _manager.stop();
+    {        
         super.doStop();
     }
 

@@ -27,12 +27,12 @@ import org.mortbay.jetty.plus.annotation.LifeCycleCallback;
 import org.mortbay.jetty.plus.annotation.LifeCycleCallbackCollection;
 import org.mortbay.jetty.plus.annotation.PostConstructCallback;
 import org.mortbay.jetty.plus.annotation.PreDestroyCallback;
-import org.mortbay.jetty.plus.annotation.RunAsCollection;
+import org.mortbay.jetty.plus.annotation.RunAsCollection;           
 import org.mortbay.jetty.plus.servlet.ServletHandler;
-import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.log.Log;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
@@ -449,7 +449,6 @@ public abstract class AbstractConfiguration extends WebXmlConfiguration
         {
             _runAsCollection.setRunAs(holders[i], _securityHandler);
         }
-        
         
         EventListener[] listeners = getWebAppContext().getEventListeners();
         for (int i=0;i<listeners.length;i++)

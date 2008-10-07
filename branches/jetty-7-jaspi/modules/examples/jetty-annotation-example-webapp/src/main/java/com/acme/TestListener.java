@@ -62,7 +62,7 @@ public class TestListener implements HttpSessionListener,  HttpSessionAttributeL
 
     public void contextInitialized(ServletContextEvent sce)
     {
-        System.err.println("contextInitialized, maxAmount injected as "+maxAmount);
+        //System.err.println("contextInitialized, maxAmount injected as "+maxAmount);
     }
 
     public void contextDestroyed(ServletContextEvent sce)

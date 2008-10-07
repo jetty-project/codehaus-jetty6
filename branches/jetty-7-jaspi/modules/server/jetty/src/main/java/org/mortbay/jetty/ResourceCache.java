@@ -17,6 +17,7 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -117,7 +118,12 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         {
             synchronized(this)
             {
+                ArrayList<Content> values=new ArrayList<Content>(_cache.values());
+                for (Content content : values)
+                    content.invalidate();
+                
                 _cache.clear();
+                
                 _cachedSize=0;
                 _cachedFiles=0;
                 _mostRecentlyUsed=null;
@@ -462,6 +468,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 
                 _prev=null;
                 _next=null;
+                if (_resource!=null)
+                    _resource.release();
                 _resource=null;
                 
             }

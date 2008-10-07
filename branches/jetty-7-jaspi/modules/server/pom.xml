@@ -11,10 +11,13 @@
   <description>The modules that comprise the core jetty server.</description>
   <packaging>pom</packaging>
   <modules>
-    <module>servlet-api-3.0</module>
     <module>jetty-util</module>
     <module>jetty</module>
+    <module>jetty-security</module>
     <module>jetty-ssl</module>
+    <module>jetty-xml</module>
+    <module>jetty-webapp</module>
+    <module>jetty-deploy</module>
     <module>jetty-start</module>
   </modules>
 </project>

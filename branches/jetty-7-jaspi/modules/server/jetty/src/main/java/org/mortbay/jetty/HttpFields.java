@@ -332,7 +332,8 @@ public class HttpFields
     {
         // TODO - really reuse strings from previous requests!
         Field field = getField(name);
-        if (field != null && field._revision == _revision) return field.getValue();
+        if (field != null && field._revision == _revision) 
+            return field.getValue();
         return null;
     }
 
@@ -1431,7 +1432,11 @@ public class HttpFields
         public String getValue()
         {
             if (_stringValue==null)
-                _stringValue=BufferUtil.to8859_1_String(_value);
+            {
+                _stringValue=(_value instanceof CachedBuffer)
+                    ?_value.toString()
+                    :BufferUtil.to8859_1_String(_value);
+            }
             return _stringValue;
         }
 

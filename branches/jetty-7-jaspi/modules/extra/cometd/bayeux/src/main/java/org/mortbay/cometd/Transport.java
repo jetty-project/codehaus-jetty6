@@ -19,14 +19,14 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import dojox.cometd.Message;
+import org.cometd.Message;
+
 
 public interface Transport 
 {
     public void setResponse(HttpServletResponse response) throws IOException;
 
     public void send(Message message) throws IOException;
-    public void send(List<Message> messages) throws IOException;
     public void complete() throws IOException;
     
     public Message getPollReply();

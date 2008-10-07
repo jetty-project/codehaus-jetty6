@@ -46,30 +46,30 @@ public abstract class AbstractHandlerContainer extends AbstractHandler implement
     }
         
     /* ------------------------------------------------------------ */
-    public Handler[] getChildHandlersByClass(Class byclass)
+    public Handler[] getChildHandlersByClass(Class<?> byclass)
     {
         Object list = expandChildren(null,byclass);
         return (Handler[])LazyList.toArray(list, Handler.class);
     }
     
     /* ------------------------------------------------------------ */
-    public Handler getChildHandlerByClass(Class byclass)
+    public Handler getChildHandlerByClass(Class<?> byclass)
     {
         // TODO this can be more efficient?
         Object list = expandChildren(null,byclass);
         if (list==null)
             return null;
-        return (Handler)LazyList.get(list, 0);
+        return LazyList.get(list, 0);
     }
     
     /* ------------------------------------------------------------ */
-    protected Object expandChildren(Object list, Class byClass)
+    protected Object expandChildren(Object list, Class<?> byClass)
     {
         return list;
     }
 
     /* ------------------------------------------------------------ */
-    protected Object expandHandler(Handler handler, Object list, Class byClass)
+    protected Object expandHandler(Handler handler, Object list, Class<?> byClass)
     {
         if (handler==null)
             return list;

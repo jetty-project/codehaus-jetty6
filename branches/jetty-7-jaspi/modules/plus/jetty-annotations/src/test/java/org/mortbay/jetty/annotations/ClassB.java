@@ -22,19 +22,19 @@ package org.mortbay.jetty.annotations;
  *
  *
  */
-@Sample(50)
+@Sample(value=50)
 public class ClassB extends ClassA
 {
 
     //test override of public scope method
-    @Sample(51)
+    @Sample(value=51)
     public void a()
     {
        System.err.println("ClassB.public");
     }
     
     //test override of package scope method
-    @Sample(52)
+    @Sample(value=52)
     void c()
     {
         System.err.println("ClassB.package");
@@ -44,6 +44,7 @@ public class ClassB extends ClassA
     {
         System.err.println("Overridden method l has no annotation");
     }
+    
     
     //test no annotation
     public void z()

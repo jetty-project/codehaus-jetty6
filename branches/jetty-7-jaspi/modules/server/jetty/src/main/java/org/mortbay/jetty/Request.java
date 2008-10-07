@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +47,8 @@ import javax.servlet.http.HttpSession;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
+import org.mortbay.io.nio.NIOBuffer;
+import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
 import org.mortbay.jetty.security.UserIdentity;
@@ -93,7 +95,7 @@ import org.mortbay.util.ajax.Continuation;
  * @author gregw
  *
  */
-public class Request extends Suspendable implements HttpServletRequest
+public class  Request extends Suspendable implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int __NONE=0, _STREAM=1, __READER=2;
@@ -242,11 +244,8 @@ public class Request extends Suspendable implements HttpServletRequest
     /* ------------------------------------------------------------ */
     public void setHandled(boolean h)
     {
-        if (h&& !shouldComplete())
-            new Throwable().printStackTrace();
         _handled=h;
     }
-    
     
     /* ------------------------------------------------------------ */
     /* 
@@ -348,7 +347,7 @@ public class Request extends Suspendable implements HttpServletRequest
         }
 
         if (_cookies==null)
-            _cookies=new CookieCutter();
+            _cookies=new CookieCutter(this);
 
         Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
         while (enm.hasMoreElements())
@@ -835,7 +834,7 @@ public class Request extends Suspendable implements HttpServletRequest
         {
             _serverName = getLocalName();
             _port = getLocalPort();
-            if (_serverName != null && !Portable.ALL_INTERFACES.equals(_serverName)) 
+            if (_serverName != null && !StringUtil.ALL_INTERFACES.equals(_serverName)) 
                 return _serverName;
         }
 
@@ -953,20 +952,24 @@ public class Request extends Suspendable implements HttpServletRequest
         {
             ConstraintSecurityHandler.NotChecked not_checked=(ConstraintSecurityHandler.NotChecked)_userPrincipal;
             _userPrincipal = ConstraintSecurityHandler.__NO_USER;
-            
-            Authenticator auth=not_checked.getSecurityHandler().getAuthenticator();
-            UserRealm realm=not_checked.getSecurityHandler().getUserRealm();
-            String pathInContext=getPathInfo()==null?getServletPath():(getServletPath()+getPathInfo());
-            
-            if (realm != null && auth != null)
+
+            SecurityHandler securityHandler =(SecurityHandler)_context.getContextHandler().getChildHandlerByClass(SecurityHandler.class);
+            if (securityHandler!=null)
             {
-                try
+                Authenticator auth=securityHandler.getAuthenticator();
+                UserRealm realm=securityHandler.getUserRealm();
+                String pathInContext=getPathInfo()==null?getServletPath():(getServletPath()+getPathInfo());
+
+                if (realm != null && auth != null)
                 {
-                    auth.authenticate(realm, pathInContext, this, null);
-                }
-                catch (Exception e)
-                {
-                    Log.ignore(e);
+                    try
+                    {
+                        auth.authenticate(realm, pathInContext, this, null);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.ignore(e);
+                    }
                 }
             }
         }
@@ -1088,7 +1091,10 @@ public class Request extends Suspendable implements HttpServletRequest
      * Set a request attribute.
      * if the attribute name is "org.mortbay.jetty.Request.queryEncoding" then
      * the value is also passed in a call to {@link #setQueryEncoding}.
-     * 
+     *
+     * if the attribute name is "org.mortbay.jetty.ResponseBuffer", then
+     * the response buffer is flushed with @{link #flushResponseBuffer}
+     *
      * @see javax.servlet.ServletRequest#setAttribute(java.lang.String, java.lang.Object)
      */
     public void setAttribute(String name, Object value)
@@ -1097,7 +1103,23 @@ public class Request extends Suspendable implements HttpServletRequest
         
         if ("org.mortbay.jetty.Request.queryEncoding".equals(name))
             setQueryEncoding(value==null?null:value.toString());
-        
+        else if("org.mortbay.jetty.ResponseBuffer".equals(name))
+        {
+            try
+            {
+                ByteBuffer byteBuffer=(ByteBuffer)value;
+                synchronized (byteBuffer)
+                {
+                    NIOBuffer buffer = new NIOBuffer(byteBuffer,true);
+                    ((HttpConnection.Output)getServletResponse().getOutputStream()).sendResponse(buffer);
+                }
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (_attributes==null)
             _attributes=new AttributesMap();
         _attributes.setAttribute(name, value);
@@ -1187,7 +1209,8 @@ public class Request extends Suspendable implements HttpServletRequest
         {
             content_type = HttpFields.valueParameters(content_type, null);
             
-            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) && HttpMethods.POST.equals(getMethod()))
+            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) &&
+                    (HttpMethods.POST.equals(getMethod()) || HttpMethods.PUT.equals(getMethod())))
             {
                 int content_length = getContentLength();
                 if (content_length != 0)
@@ -1330,7 +1353,7 @@ public class Request extends Suspendable implements HttpServletRequest
     public void setCookies(Cookie[] cookies)
     {
         if (_cookies==null)
-            _cookies=new CookieCutter();
+            _cookies=new CookieCutter(this);
         _cookies.setCookies(cookies);
     }
     
@@ -1669,8 +1692,16 @@ public class Request extends Suspendable implements HttpServletRequest
                 timeout=t.longValue();
         }
         suspend(timeout);
+
     }
     
+    /* ------------------------------------------------------------ */
+    public void resume()
+    {
+        removeAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
+        super.resume();
+    }
+
     /* ------------------------------------------------------------ */
     public void complete() throws IOException
     {
@@ -1681,9 +1712,26 @@ public class Request extends Suspendable implements HttpServletRequest
         finally
         {
             super.complete();
+
+            Object handlers = getAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
+            if(handlers != null )
+            {
+                for(int i=0;i<LazyList.size(handlers);i++)
+                {
+                    try
+                    {
+                        ((CompleteHandler)LazyList.get(handlers,i)).complete(this);
+                    }
+                    catch(Exception e)
+                    {
+                        Log.warn(e);
+                    }
+                }
+                removeAttribute(CompleteHandler.COMPLETE_HANDLER_ATTR);
+            }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public ServletContext getServletContext()
     {

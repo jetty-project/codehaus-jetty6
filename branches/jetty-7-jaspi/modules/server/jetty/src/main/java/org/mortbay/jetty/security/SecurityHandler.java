@@ -20,15 +20,13 @@
 
 package org.mortbay.jetty.security;
 
-import javax.security.auth.message.config.ServerAuthConfig;
-import javax.security.auth.Subject;
-
 import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.security.ServerAuthentication;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer {
 
@@ -38,10 +36,6 @@ public interface SecurityHandler extends LifeCycle, Handler, HandlerContainer {
 
     RunAsToken newRunAsToken(String runAsRole);
 
-    void setAuthConfig(ServerAuthConfig serverAuthConfig);
-
-    void setServletCallbackHandler(ServletCallbackHandler callbackHandler);
-
-    void setServiceSubject(Subject subject);
+    void setServerAuthentication(ServerAuthentication serverAuthentication);
 
 }

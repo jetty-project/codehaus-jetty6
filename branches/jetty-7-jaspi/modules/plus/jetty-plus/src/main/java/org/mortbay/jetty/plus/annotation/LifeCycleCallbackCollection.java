@@ -72,6 +72,37 @@ public class LifeCycleCallbackCollection
             callbacks.add(callback);
     }
 
+    public List getPreDestroyCallbacks (Object o)
+    {
+        if (o == null)
+            return null;
+        
+        Class clazz = o.getClass();
+        
+        if (o instanceof PojoWrapper)
+        {
+            o = ((PojoWrapper)o).getPojo();
+            clazz = o.getClass();
+        }
+    
+        return (List)preDestroyCallbacksMap.get(clazz);
+    }
+    
+    public List getPostConstructCallbacks (Object o)
+    {
+        if (o == null)
+            return null;
+        
+        Class clazz = o.getClass();
+        
+        if (o instanceof PojoWrapper)
+        {
+            o = ((PojoWrapper)o).getPojo();
+            clazz = o.getClass();
+        }
+    
+        return (List)postConstructCallbacksMap.get(clazz);
+    }
     
     /**
      * Call the method, if one exists, that is annotated with PostConstruct
@@ -85,7 +116,14 @@ public class LifeCycleCallbackCollection
         if (o == null)
             return;
         
-        List callbacks = (List)postConstructCallbacksMap.get(o.getClass());
+        Class clazz = o.getClass();
+        
+        if (o instanceof PojoWrapper)
+        {
+            o = ((PojoWrapper)o).getPojo();
+            clazz = o.getClass();
+        }
+        List callbacks = (List)postConstructCallbacksMap.get(clazz);
         
         if (callbacks == null)
             return;
@@ -105,8 +143,16 @@ public class LifeCycleCallbackCollection
     {
         if (o == null)
             return;
-
-        List callbacks = (List)preDestroyCallbacksMap.get(o.getClass());
+        
+        Class clazz = o.getClass();
+        
+        if (o instanceof PojoWrapper)
+        {
+            o = ((PojoWrapper)o).getPojo();
+            clazz = o.getClass();
+        }
+    
+        List callbacks = (List)preDestroyCallbacksMap.get(clazz);
         if (callbacks == null)
             return;
         
