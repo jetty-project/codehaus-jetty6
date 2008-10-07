@@ -15,11 +15,9 @@
 package org.mortbay.cometd.client;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +28,8 @@ import javax.servlet.http.Cookie;
 
 import org.cometd.Bayeux;
 import org.cometd.Client;
-import org.cometd.Listener;
 import org.cometd.ClientListener;
+import org.cometd.Listener;
 import org.cometd.Message;
 import org.cometd.MessageListener;
 import org.cometd.RemoveListener;
@@ -41,6 +39,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpSchemes;
+import org.mortbay.jetty.client.Address;
 import org.mortbay.jetty.client.HttpClient;
 import org.mortbay.jetty.client.HttpConnection;
 import org.mortbay.jetty.client.HttpDestination;
@@ -55,7 +54,7 @@ import org.mortbay.util.ajax.JSON;
 /** Bayeux protocol Client.
  * <p>
  * Implements a Bayeux Ajax Push client as part of the cometd project.
- * 
+ *
  * @see http://cometd.com
  * @author gregw
  *
@@ -64,7 +63,7 @@ public class BayeuxClient extends MessagePool implements Client
 {
     private HttpClient _client;
     private HttpConnection _clientConnection;
-    private InetSocketAddress _address;
+    private Address _address;
     private HttpExchange _pull;
     private HttpExchange _push;
     private String _uri="/cometd";
@@ -81,7 +80,7 @@ public class BayeuxClient extends MessagePool implements Client
     private Map<String, Cookie> _cookies=new ConcurrentHashMap<String, Cookie>();
 
     /* ------------------------------------------------------------ */
-    public BayeuxClient(HttpClient client, InetSocketAddress address, String uri) throws IOException
+    public BayeuxClient(HttpClient client, Address address, String uri) throws IOException
     {
         _client=client;
         _address=address;
@@ -110,7 +109,7 @@ public class BayeuxClient extends MessagePool implements Client
                 _pull=new Handshake();
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     private void checkConnection() throws UnknownHostException, IOException
     {
@@ -125,7 +124,7 @@ public class BayeuxClient extends MessagePool implements Client
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public boolean isPolling()
     {
@@ -164,9 +163,9 @@ public class BayeuxClient extends MessagePool implements Client
 
         message.put(Bayeux.CHANNEL_FIELD,toChannel);
         message.put(Bayeux.DATA_FIELD,data);
-        if (id!=null)   
+        if (id!=null)
             message.put(Bayeux.ID_FIELD,id);
-        
+
         synchronized (_inQ)
         {
             if (_mListeners==null)
@@ -227,7 +226,7 @@ public class BayeuxClient extends MessagePool implements Client
                 _push=new Publish();
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
      * @see dojox.cometd.Client#publish(java.lang.String, java.lang.Object, java.lang.String)
@@ -241,7 +240,7 @@ public class BayeuxClient extends MessagePool implements Client
             msg.put(Bayeux.ID_FIELD,msgId);
         publish(msg);
     }
-    
+
     /* ------------------------------------------------------------ */
     /* (non-Javadoc)
      * @see dojox.cometd.Client#subscribe(java.lang.String)
@@ -353,7 +352,7 @@ public class BayeuxClient extends MessagePool implements Client
     /** Customize an Exchange.
      * Called when an exchange is about to be sent to allow Cookies
      * and Credentials to be customized.  Default implementation sets
-     * any cookies 
+     * any cookies
      */
     protected void customize(HttpExchange exchange)
     {
@@ -674,7 +673,7 @@ public class BayeuxClient extends MessagePool implements Client
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * Publish message exchange.
      * Sends messages to bayeux server and handles any messages received as a result.
      */

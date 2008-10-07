@@ -39,6 +39,7 @@ jetty-7.0-SNAPSHOT
  + JETTY-736 Client Specific cometd advice
  + JETTY-737 refactored jetty.jar into jetty, xml, security, ssl, webapp and deploy jars
  + JETTY-738 If jetty.sh finds a pid file is does not check to see if a process with that pid is still running
+ + JETTY-741 HttpClient connects slowly due to reverse address lookup by InetAddress.getHostName()
 
 
 jetty-6.1.12rc2 12 September 2008

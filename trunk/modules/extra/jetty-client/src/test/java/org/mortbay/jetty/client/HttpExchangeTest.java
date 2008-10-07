@@ -17,7 +17,6 @@ package org.mortbay.jetty.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.jetty.Connector;
@@ -39,11 +37,10 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.client.security.ProxyAuthorization;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.util.StringUtil;
 
 /**
  * Functional testing for HttpExchange.
- * 
+ *
  * @author Matthew Purland
  * @author Greg Wilkins
  */
@@ -72,7 +69,7 @@ public class HttpExchangeTest extends TestCase
     }
 
     public void testPerf() throws Exception
-    {   
+    {
         sender(1,true);
         sender(1,false);
         sender(10,true);
@@ -83,7 +80,7 @@ public class HttpExchangeTest extends TestCase
 
     /**
      * Test sending data through the exchange.
-     * 
+     *
      * @throws IOException
      */
     public void sender(final int nb,final boolean close) throws Exception
@@ -93,7 +90,7 @@ public class HttpExchangeTest extends TestCase
         for (int i=0; i<nb; i++)
         {
             final int n=i;
-            
+
             httpExchange[n]=new HttpExchange()
             {
                 String result="pending";
@@ -162,7 +159,7 @@ public class HttpExchangeTest extends TestCase
                     System.err.println(n+" EXPIRED "+len);
                     super.onExpire();
                 }
-                
+
                 public String toString()
                 {
                     return n+" "+result+" "+len;
@@ -173,7 +170,7 @@ public class HttpExchangeTest extends TestCase
             httpExchange[n].addRequestHeader("arbitrary","value");
             if (close)
                 httpExchange[n].setRequestHeader("Connection","close");
-            
+
             _httpClient.send(httpExchange[n]);
         }
 
@@ -192,14 +189,14 @@ public class HttpExchangeTest extends TestCase
                     break;
                 last=next;
             }
-            System.err.println("missed "+latch.getCount()); 
+            System.err.println("missed "+latch.getCount());
             if (last>0)
             {
                 _httpClient.dump();
                 System.err.println("--");
                 for (Object o : httpExchange)
                     System.err.println(o);
-                
+
             }
         }
         assertEquals("nb="+nb+" close="+close,0,latch.getCount());
@@ -214,7 +211,7 @@ public class HttpExchangeTest extends TestCase
             httpExchange.setMethod(HttpMethods.POST);
             httpExchange.setRequestContent(new ByteArrayBuffer("<hello />"));
             _httpClient.send(httpExchange);
-            int status = httpExchange.waitForDone(); 
+            int status = httpExchange.waitForDone();
             //httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             assertEquals(HttpExchange.STATUS_COMPLETED, status);
@@ -225,12 +222,12 @@ public class HttpExchangeTest extends TestCase
     public void testGetWithContentExchange() throws Exception
     {
         for (int i=0;i<200;i++)
-        {   
+        {
             ContentExchange httpExchange=new ContentExchange();
             httpExchange.setURL(_scheme+"localhost:"+_port+"/?i="+i);
             httpExchange.setMethod(HttpMethods.GET);
             _httpClient.send(httpExchange);
-            int status = httpExchange.waitForDone(); 
+            int status = httpExchange.waitForDone();
             //httpExchange.waitForStatus(HttpExchange.STATUS_COMPLETED);
             String result=httpExchange.getResponseContent();
             assertEquals("i="+i,0,result.indexOf("<hello>"));
@@ -246,11 +243,11 @@ public class HttpExchangeTest extends TestCase
             return;
         try
         {
-            _httpClient.setProxy(new InetSocketAddress("127.0.0.1",_port));
+            _httpClient.setProxy(new Address("127.0.0.1",_port));
             _httpClient.setProxyAuthentication(new ProxyAuthorization("user","password"));
 
             ContentExchange httpExchange=new ContentExchange();
-            httpExchange.setAddress(new InetSocketAddress("jetty.mortbay.org",8080));
+            httpExchange.setAddress(new Address("jetty.mortbay.org",8080));
             httpExchange.setMethod(HttpMethods.GET);
             httpExchange.setURI("/jetty-6");
             _httpClient.send(httpExchange);
@@ -294,18 +291,18 @@ public class HttpExchangeTest extends TestCase
         _server=new Server();
         _server.setGracefulShutdown(500);
         _connector=new SelectChannelConnector();
-        
+
         _connector.setPort(0);
-        _server.setConnectors(new Connector[] { _connector });   
+        _server.setConnectors(new Connector[] { _connector });
     }
-    
+
     protected void startServer() throws Exception
     {
         newServer();
         _server.setHandler(new AbstractHandler()
         {
             public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
-            { 
+            {
                 int i=0;
                 try
                 {
