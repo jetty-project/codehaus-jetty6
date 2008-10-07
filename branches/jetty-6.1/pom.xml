@@ -3,47 +3,37 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-parent</artifactId>
-    <version>6</version>
+    <version>7-SNAPSHOT</version>
   </parent>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>project</artifactId>
   <packaging>pom</packaging>
   <name>Jetty Server Project</name>
   <version>6.1-SNAPSHOT</version>
-  <url>http://jetty.mortbay.org</url>
-  <licenses>
-    <license>
-      <name>Apache License Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
   <repositories>
     <repository>
       <id>codehaus.org</id>
       <name>Jetty snapshots</name>
       <layout>default</layout>
       <url>http://snapshots.repository.codehaus.org</url>
-      <snapshots><enabled>true</enabled></snapshots>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
   </repositories>
-  <pluginRepositories>
-  </pluginRepositories>
   <scm>
     <connection>scm:svn:http://svn.codehaus.org/jetty/jetty/branches/jetty-6.1</connection>
     <developerConnection>scm:svn:https://svn.codehaus.org/jetty/jetty/branches/jetty-6.1</developerConnection>
     <url>http://fisheye.codehaus.org/viewrep/jetty/</url>
   </scm>
-  <organization>
-    <name>Mort Bay Consulting</name>
-    <url>http://www.mortbay.com</url>
-  </organization>
   <build>
-    <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.0-alpha-3</version>
         <executions>
           <execution>
             <id>enforce-java</id>
@@ -85,8 +75,8 @@
             <manifestEntries>
               <mode>development</mode>
               <url>${pom.url}</url>
-	      <implementation-version>${pom.version}</implementation-version>
-	      <package>org.mortbay</package>
+	          <implementation-version>${pom.version}</implementation-version>
+	          <package>org.mortbay</package>
             </manifestEntries>
           </archive>
         </configuration>
@@ -105,20 +95,15 @@
 	    </executions>
       </plugin>
     </plugins>
-  <pluginManagement>
-    <plugins>
-       <plugin>
-        <groupId>org.apache.maven</groupId>
-	    <artifactId>maven-surefire-plugin</artifactId>
-	    <version>2.3</version>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.0.1</version>
-      </plugin>
-    </plugins>
-  </pluginManagement>
+    <pluginManagement>
+	  <plugins>
+	    <plugin>
+		  <groupId>org.apache.maven</groupId>
+		  <artifactId>maven-surefire-plugin</artifactId>
+		  <version>2.3</version>
+	    </plugin>
+	  </plugins>
+    </pluginManagement>
   </build>
   <modules>
     <module>modules/servlet-api-2.5</module>
@@ -209,22 +194,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <distributionManagement>
-    <repository>
-      <id>codehaus.org</id>
-      <name>Jetty Repository</name>
-      <url>dav:https://dav.codehaus.org/repository/jetty/</url>
-    </repository>
-    <snapshotRepository>
-      <id>codehaus.org</id>
-      <name>Jetty Snapshot Repository</name>
-      <url>dav:https://dav.codehaus.org/snapshots.repository/jetty/</url>
-    </snapshotRepository>
-    <site>
-      <id>codehaus.org</id>
-      <url>dav:https://dav.codehaus.org/jetty/</url>
-    </site>
-  </distributionManagement>
   <properties>
     <activation-version>1.1</activation-version>
     <ant-version>1.6.5</ant-version>
@@ -283,4 +252,13 @@
       </build>
     </profile>
   </profiles>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.0</version>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

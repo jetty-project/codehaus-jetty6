@@ -11,7 +11,6 @@
   <name>Servlet Specification 2.5 API</name>
   <description>Servlet Specification 2.5 API</description>
   <packaging>jar</packaging>
-  <url>http://jetty.mortbay.org</url>
   <licenses>
     <license>
       <name>CDDL 1.0</name>
@@ -19,17 +18,6 @@
     </license>
   </licenses>
   <build>
-    <defaultGoal>install</defaultGoal>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <includes>
-          <include>**/*.properties</include>
-          <include>**/*.dtd</include>
-          <include>**/*.xsd</include>
-        </includes>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -88,18 +76,6 @@
            </execution>
         </executions>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin-version}</version>
-        <configuration>
-          <archive>
-             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
-
     </plugins>
   </build>
 </project>
