@@ -30,6 +30,7 @@
     <url>http://fisheye.codehaus.org/viewrep/jetty/</url>
   </scm>
   <build>
+    <defaultGoal>install</defaultGoal>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
