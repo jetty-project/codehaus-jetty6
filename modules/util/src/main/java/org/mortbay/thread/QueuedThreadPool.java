@@ -113,14 +113,16 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                     if (!_warned)    
                     {
                         _warned=true;
-                        Log.debug("Out of threads for {}",this);
+                        Log.debug("Max threads for {}",this);
                     }
                 }
             }
         }
         
         if (thread!=null)
+        {
             thread.dispatch(job);
+        }
         else
         {
             synchronized(_jobsLock)
@@ -468,7 +470,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
     public class PoolThread extends Thread 
     {
         Runnable _job=null;
-        boolean _isIdle=false;
+        boolean _alive=true;
 
         /* ------------------------------------------------------------ */
         PoolThread()
@@ -483,36 +485,22 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
          */
         public void run()
         {
+            boolean idle=false;
+            Runnable job=null;
             try
             {
-                Runnable job=null;
-
                 while (isRunning())
-                {
+                {   
                     if (job!=null)
                     {
-                        _isIdle=false;
-                        Runnable todo=job;
+                        final Runnable todo=job;
                         job=null;
+                        idle=false;
                         todo.run();
                     }
-                    else
+                    else if (idle)
                     {
-                        // Look for a job
-                        synchronized (_jobsLock)
-                        {
-                            // is there a queued job?
-                            if (_queued>0)
-                            {
-                                _queued--;
-                                job=_jobs[_nextJob++];
-                                if (_nextJob==_jobs.length)
-                                    _nextJob=0;
-                                continue;
-                            }
-                        }
-
-
+                        // should this idle thread exit?
                         synchronized(_idleLock)
                         {
                             _warned=false;
@@ -522,26 +510,16 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                                  _idle.size()>_spawnOrShrinkAt &&        // are there idle threads?
                                 _threads.size()>_minThreads))       // AND are there more than min threads?
                             {
-                                // check this thread really is idle
-                                _isIdle=_idle.contains(this);
-                               
                                 long now = System.currentTimeMillis();
-                                if (_isIdle && (now-_lastShrink)>getMaxIdleTimeMs())
+                                if ((now-_lastShrink)>getMaxIdleTimeMs() && _idle.remove(this))
                                 {
                                     _lastShrink=now;
                                     return;
                                 }
                             }
-                        
-                            // we are going idle!
-                            if (!_isIdle)
-                            {
-                                _idle.add(this);
-                                _isIdle=true;
-                            }
                         }
 
-                        // wait for a job
+                        // still idle, so wait for a dispatched job
                         try
                         {
                             synchronized (this)
@@ -557,6 +535,33 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                             Log.ignore(e);
                         }
                     }
+                    else
+                    {
+                        // Look for a queued job
+                        synchronized (_jobsLock)
+                        {
+                            // is there a queued job?
+                            if (_queued>0)
+                            {
+                                _queued--;
+                                job=_jobs[_nextJob++];
+                                if (_nextJob==_jobs.length)
+                                    _nextJob=0;
+                                continue;
+                            }
+                        }
+                        
+                        // if no job found
+                        if (job==null)
+                        {
+                            // go idle
+                            synchronized (_idleLock)
+                            {
+                                _idle.add(this);
+                                idle=true;
+                            }
+                        }
+                    }
                 }
             }
             finally
@@ -570,13 +575,13 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
                     _threads.remove(this);
                 }
                 
-                Runnable job=null;
                 synchronized (this)
                 {
                     job=_job;
+                    _alive=false;
                 }
                 // we died with a job! reschedule it
-                if (job!=null && isRunning())
+                if (job!=null)
                     QueuedThreadPool.this.dispatch(job);
             }
         }
@@ -586,10 +591,14 @@ public class QueuedThreadPool extends AbstractLifeCycle implements Serializable,
         {
             synchronized (this)
             {
-                if(_job!=null || job==null)
-                    throw new IllegalStateException();
-                _job=job;
-                this.notify();
+                if (_alive)
+                {
+                    _job=job;
+                    this.notify();
+                }
+                else
+                    // thread died while dispatching so reschedule it
+                    QueuedThreadPool.this.dispatch(job);
             }
         }
     }
