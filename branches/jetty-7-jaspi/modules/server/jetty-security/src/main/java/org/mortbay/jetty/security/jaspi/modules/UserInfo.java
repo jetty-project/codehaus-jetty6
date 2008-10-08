@@ -21,39 +21,24 @@
 package org.mortbay.jetty.security.jaspi.modules;
 
 import java.util.Arrays;
-import java.io.UnsupportedEncodingException;
-
-import org.mortbay.jetty.security.B64Code;
-import org.mortbay.util.StringUtil;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
-public class UserPasswordLoginCredentials implements LoginCredentials
+public class UserInfo
 {
-    private final String username;
-    private final char[] password;
+    private final String userName;
+    private char[] password;
 
-
-    public UserPasswordLoginCredentials(String username, char[] password)
+    public UserInfo(String userName, char[] password)
     {
-        this.username = username;
+        this.userName = userName;
         this.password = password;
     }
 
-    public UserPasswordLoginCredentials(String credentials) throws UnsupportedEncodingException
+    public String getUserName()
     {
-        credentials = credentials.substring(credentials.indexOf(' ') + 1);
-        credentials = B64Code.decode(credentials, StringUtil.__ISO_8859_1);
-        int i = credentials.indexOf(':');
-        username = credentials.substring(0, i);
-        password = new char[credentials.length() - (i + 1)];
-        credentials.getChars(i + 1, credentials.length(), password, 0);//substring(i+1);
-    }
-
-    public String getUsername()
-    {
-        return username;
+        return userName;
     }
 
     public char[] getPassword()
@@ -61,9 +46,9 @@ public class UserPasswordLoginCredentials implements LoginCredentials
         return password;
     }
 
-    //erase passwords or other sensitive info
-    public void clear()
+    public void clearPassword()
     {
         Arrays.fill(password, (char)0);
+        password = null;
     }
 }

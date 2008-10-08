@@ -33,9 +33,9 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.message.AuthException;
 
-import org.mortbay.jetty.security.jaspi.modules.LoginCredentials;
-import org.mortbay.jetty.security.jaspi.modules.LoginResult;
-import org.mortbay.jetty.security.jaspi.modules.LoginService;
+import org.mortbay.jetty.LoginCredentials;
+import org.mortbay.jetty.LoginResult;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.security.jaspi.modules.UserPasswordLoginCredentials;
 
 

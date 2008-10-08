@@ -240,7 +240,7 @@
     <!-- example).                                                   -->
     <!-- =========================================================== -->
     <Set name="LoginServices">
-      <Array type="org.mortbay.jetty.security.jaspi.modules.LoginService">
+      <Array type="org.mortbay.jetty.LoginService">
         <Item>
           <New class="org.mortbay.jetty.security.jaspi.modules.HashLoginService">
             <Set name="name">Test Realm</Set>

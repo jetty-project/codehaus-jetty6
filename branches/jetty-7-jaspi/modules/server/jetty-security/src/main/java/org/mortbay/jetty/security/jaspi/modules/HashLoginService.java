@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.security.jaspi.modules;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -21,17 +21,19 @@ import java.io.PrintStream;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.StringTokenizer;
+
+import javax.security.auth.Subject;
+import javax.security.auth.message.AuthException;
 
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserRealm;
+import org.mortbay.jetty.security.Credential;
+import org.mortbay.jetty.security.Password;
+import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.LoginCredentials;
+import org.mortbay.jetty.LoginResult;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Scanner;
@@ -48,70 +50,70 @@ import org.mortbay.util.Scanner.BulkListener;
  * file is: <PRE>
  *  username: password [,rolename ...]
  * </PRE>
- * Passwords may be clear text, obfuscated or checksummed.  The class 
+ * Passwords may be clear text, obfuscated or checksummed.  The class
  * com.mortbay.Util.Password should be used to generate obfuscated
  * passwords or password checksums.
- * 
+ *
  * If DIGEST Authentication is used, the password must be in a recoverable
  * format, either plain text or OBF:.
  *
- * The HashUserRealm also implements SSORealm but provides no implementation
- * of SSORealm. Instead setSSORealm may be used to provide a delegate
- * SSORealm implementation. 
- *
- * @see Password
+ * @see org.mortbay.jetty.security.Password
  * @author Greg Wilkins (gregw)
  */
-public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORealm
+public class HashLoginService extends AbstractLifeCycle implements LoginService
 {
+    private static final String[] NO_ROLES = new String[0];
 
     /** HttpContext Attribute to set to activate SSO.
      */
     public static final String __SSO = "org.mortbay.http.SSO";
-    
+
     /* ------------------------------------------------------------ */
     private String _realmName;
     private String _config;
     private Resource _configResource;
-    protected HashMap _users=new HashMap();
-    protected HashMap _roles=new HashMap(7);
-    private SSORealm _ssoRealm;
+    protected Map<String, User> _users=new HashMap<String, User>();
     private Scanner _scanner;
     private int _refreshInterval=0;//default is not to reload
-    
+
 
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** Constructor.
      */
-    public HashUserRealm()
+    public HashLoginService()
     {}
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** Constructor.
      * @param name Realm Name
      */
-    public HashUserRealm(String name)
+    public HashLoginService(String name)
     {
         _realmName=name;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Constructor. 
+
+    public HashLoginService(String _realmName, Map<String, User> _users)
+    {
+        this._realmName = _realmName;
+        this._users = _users;
+    }/* ------------------------------------------------------------ */
+    /** Constructor.
      * @param name Realm name
      * @param config Filename or url of user properties file.
+     * @throws java.io.IOException if user properties file could not be loaded
      */
-    public HashUserRealm(String name, String config)
+    public HashLoginService(String name, String config)
         throws IOException
     {
         _realmName=name;
         setConfig(config);
     }
-    
+
     public String getConfig()
     {
         return _config;
     }
-    
+
     public Resource getConfigResource()
     {
         return _configResource;
@@ -123,7 +125,7 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
      * an optional comma separated list of role names.
      *
      * @param config Filename or url of user properties file.
-     * @exception IOException 
+     * @exception java.io.IOException if user properties file could not be loaded
      */
     public void setConfig(String config)
         throws IOException
@@ -131,260 +133,124 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
         _config=config;
         _configResource=Resource.newResource(_config);
        loadConfig();
- 
+
     }
-    
+
 
     public void setRefreshInterval (int msec)
     {
         _refreshInterval=msec;
     }
-    
+
     public int getRefreshInterval()
     {
         return _refreshInterval;
     }
-    
-    protected void loadConfig () 
+
+    public void loadConfig ()
     throws IOException
     {
         synchronized (this)
         {
             _users.clear();
-            _roles.clear();
-            
+
             if(Log.isDebugEnabled())Log.debug("Load "+this+" from "+_config);
             Properties properties = new Properties();
             properties.load(_configResource.getInputStream());
 
-            Iterator iter = properties.entrySet().iterator();
-            while(iter.hasNext())
+            for (Map.Entry<Object, Object> entry : properties.entrySet())
             {
-                Map.Entry entry = (Map.Entry)iter.next();
-
-                String username=entry.getKey().toString().trim();
-                String credentials=entry.getValue().toString().trim();
-                String roles=null;
-                int c=credentials.indexOf(',');
-                if (c>0)
+                String username = ((String) entry.getKey()).trim();
+                String credentials = ((String) entry.getValue()).trim();
+                String roles = null;
+                int c = credentials.indexOf(',');
+                if (c > 0)
                 {
-                    roles=credentials.substring(c+1).trim();
-                    credentials=credentials.substring(0,c).trim();
+                    roles = credentials.substring(c + 1).trim();
+                    credentials = credentials.substring(0, c).trim();
                 }
 
-                if (username!=null && username.length()>0 &&
-                        credentials!=null && credentials.length()>0)
+                if (username != null && username.length() > 0 &&
+                        credentials != null && credentials.length() > 0)
                 {
-                    put(username,credentials);
-                    if(roles!=null && roles.length()>0)
+
+                    String[] roleArray = NO_ROLES;
+                    if (roles != null && roles.length() > 0)
                     {
-                        StringTokenizer tok = new StringTokenizer(roles,", ");
-                        while (tok.hasMoreTokens())
-                            addUserToRole(username,tok.nextToken());
+                        roleArray = roles.split(",");
                     }
+                    put(username, new KnownUser(username, new Password(credentials), roleArray));
                 }
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @param name The realm name 
+    /**
+     * @param name The realm name
      */
     public void setName(String name)
     {
         _realmName=name;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @return The realm name. 
+    /**
+     * @return The realm name.
      */
     public String getName()
     {
         return _realmName;
     }
 
-    /* ------------------------------------------------------------ */
-    public Principal getPrincipal(String username)
-    {
-        return (Principal)_users.get(username);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Principal authenticate(String username,Object credentials,Request request)
-    {
-        KnownUser user;
-        synchronized (this)
-        {
-            user = (KnownUser)_users.get(username);
-        }
-        if (user==null)
-            return null;
-        
-        if (user.authenticate(credentials))
-            return user;
-        
-        return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void disassociate(Principal user)
-    {
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Principal pushRole(Principal user, String role)
-    {
-        if (user==null)
-            user=new User();
-        
-        return new WrappedUser(user,role);
-    }
 
-    /* ------------------------------------------------------------ */
-    public Principal popRole(Principal user)
-    {
-        WrappedUser wu = (WrappedUser)user;
-        return wu.getUserPrincipal();
-    }
-    
     /* ------------------------------------------------------------ */
     /** Put user into realm.
      * @param name User name
      * @param credentials String password, Password or UserPrinciple
-     *                    instance. 
+     *                    instance.
      * @return Old UserPrinciple value or null
      */
-    public synchronized Object put(Object name, Object credentials)
+    public synchronized Object put(String name, Object credentials)
     {
-        if (credentials instanceof Principal)
-            return _users.put(name.toString(),credentials);
-        
+        if (credentials instanceof User)
+            return _users.put(name, (User) credentials);
+
         if (credentials instanceof Password)
-            return _users.put(name,new KnownUser(name.toString(),(Password)credentials));
+            return _users.put(name,new KnownUser(name,(Password)credentials));
         if (credentials != null)
-            return _users.put(name,new KnownUser(name.toString(),Credential.getCredential(credentials.toString())));
+            return _users.put(name,new KnownUser(name,Credential.getCredential(credentials.toString())));
         return null;
     }
 
-    /* ------------------------------------------------------------ */
-    /** Add a user to a role.
-     * @param userName 
-     * @param roleName 
-     */
-    public synchronized void addUserToRole(String userName, String roleName)
-    {
-        HashSet userSet = (HashSet)_roles.get(roleName);
-        if (userSet==null)
-        {
-            userSet=new HashSet(11);
-            _roles.put(roleName,userSet);
-        }
-        userSet.add(userName);
-    }
-    
-    /* -------------------------------------------------------- */
-    public boolean reauthenticate(Principal user)
-    {
-        return ((User)user).isAuthenticated();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Check if a user is in a role.
-     * @param user The user, which must be from this realm 
-     * @param roleName 
-     * @return True if the user can act in the role.
-     */
-    public synchronized boolean isUserInRole(Principal user, String roleName)
-    {
-        if (user instanceof WrappedUser)
-            return ((WrappedUser)user).isUserInRole(roleName);
-         
-        if (user==null || !(user instanceof User) || ((User)user).getUserRealm()!=this)
-            return false;
-        
-        HashSet userSet = (HashSet)_roles.get(roleName);
-        return userSet!=null && userSet.contains(user.getName());
-    }
 
-    /* ------------------------------------------------------------ */
-    public void logout(Principal user)
-    {}
-    
     /* ------------------------------------------------------------ */
     public String toString()
     {
         return "Realm["+_realmName+"]=="+_users.keySet();
     }
-    
+
     /* ------------------------------------------------------------ */
     public void dump(PrintStream out)
     {
         out.println(this+":");
         out.println(super.toString());
-        out.println(_roles);
     }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return The SSORealm to delegate single sign on requests to.
-     */
-    public SSORealm getSSORealm()
-    {
-        return _ssoRealm;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the SSORealm.
-     * A SSORealm implementation may be set to enable support for SSO.
-     * @param ssoRealm The SSORealm to delegate single sign on requests to.
-     */
-    public void setSSORealm(SSORealm ssoRealm)
-    {
-        _ssoRealm = ssoRealm;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Credential getSingleSignOn(Request request,Response response)
-    {
-        if (_ssoRealm!=null)
-            return _ssoRealm.getSingleSignOn(request,response);
-        return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void setSingleSignOn(Request request,Response response,Principal principal,Credential credential)
-    {
-        if (_ssoRealm!=null)
-            _ssoRealm.setSingleSignOn(request,response,principal,credential);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void clearSingleSignOn(String username)
-    {
-        if (_ssoRealm!=null)
-            _ssoRealm.clearSingleSignOn(username);
-    }
-    
-  
-    
-    
-    
-    /** 
+
+    /**
      * @see org.mortbay.component.AbstractLifeCycle#doStart()
      */
     protected void doStart() throws Exception
     {
         super.doStart();
         if (_scanner!=null)
-            _scanner.stop(); 
+            _scanner.stop();
 
         if (getRefreshInterval() > 0)
         {
             _scanner = new Scanner();
             _scanner.setScanInterval(getRefreshInterval());
-            List dirList = new ArrayList(1);
+            List<File> dirList = new ArrayList<File>(1);
             dirList.add(_configResource.getFile());
             _scanner.setScanDirs(dirList);
             _scanner.setFilenameFilter(new FilenameFilter ()
@@ -419,7 +285,7 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
                 }
                 public String toString()
                 {
-                    return "HashUserRealm$Scanner";
+                    return "HashLoginService$Scanner";
                 }
 
             });
@@ -429,7 +295,7 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
         }
     }
 
-    /** 
+    /**
      * @see org.mortbay.component.AbstractLifeCycle#doStop()
      */
     protected void doStop() throws Exception
@@ -440,64 +306,89 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
         _scanner=null;
     }
 
-
-
     /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class User implements Principal
+    public LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException
     {
-        List roles=null;
-
-        /* ------------------------------------------------------------ */
-        private UserRealm getUserRealm()
+        KnownUser user;
+        synchronized (this)
         {
-            return HashUserRealm.this;
+            user = getKnownUser(((UserPasswordLoginCredentials)loginCredentials).getUsername());
         }
-        
+        if (user != null && user.authenticate(((UserPasswordLoginCredentials)loginCredentials).getPassword()))
+        {
+            subject.getPrincipals().add(user);
+            return new LoginResult(true, user, user.roles, subject);
+        }
+        return new LoginResult(false, null, null, null);
+    }
+
+    protected KnownUser getKnownUser(String userName)
+    {
+        return (KnownUser)_users.get(userName);
+    }
+
+    public void logout(Subject subject) throws AuthException
+    {
+        subject.getPrincipals(KnownUser.class).clear();
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static class User implements Principal
+    {
+        String[] roles= NO_ROLES;
+
         public String getName()
         {
             return "Anonymous";
         }
-                
+
         public boolean isAuthenticated()
         {
             return false;
         }
-        
+
         public String toString()
         {
             return getName();
-        }        
+        }
     }
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class KnownUser extends User
+    public static class KnownUser extends User
     {
         private String _userName;
         private Credential _cred;
-        
+
         /* -------------------------------------------------------- */
         KnownUser(String name,Credential credential)
         {
             _userName=name;
             _cred=credential;
         }
-        
+
+        public KnownUser(String name,Credential credential,String[] roles)
+        {
+            this(name,credential);
+            this.roles = roles;
+        }
+
         /* -------------------------------------------------------- */
         boolean authenticate(Object credentials)
         {
             return _cred!=null && _cred.check(credentials);
         }
-        
+
         /* ------------------------------------------------------------ */
         public String getName()
         {
             return _userName;
         }
-        
+
         /* -------------------------------------------------------- */
         public boolean isAuthenticated()
         {
@@ -505,38 +396,4 @@ public class HashUserRealm extends AbstractLifeCycle implements UserRealm, SSORe
         }
     }
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class WrappedUser extends User
-    {   
-        private Principal user;
-        private String role;
-
-        WrappedUser(Principal user, String role)
-        {
-            this.user=user;
-            this.role=role;
-        }
-
-        Principal getUserPrincipal()
-        {
-            return user;    
-        }
-
-        public String getName()
-        {
-            return "role:"+role;
-        }
-                
-        public boolean isAuthenticated()
-        {
-            return true;
-        }
-        
-        public boolean isUserInRole(String role)
-        {
-            return this.role.equals(role);
-        }
-    }
 }

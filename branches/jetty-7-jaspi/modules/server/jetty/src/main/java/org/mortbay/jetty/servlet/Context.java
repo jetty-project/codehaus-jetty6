@@ -27,7 +27,7 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.handler.SecurityHandler;
-import org.mortbay.jetty.security.ConstraintSecurityHandler;
+import org.mortbay.util.Loader;
 import org.mortbay.util.Loader;
 
 
@@ -74,7 +74,7 @@ public class Context extends ContextHandler
     /* ------------------------------------------------------------ */
     public Context(HandlerContainer parent, String contextPath, int options)
     {
-        this(parent,contextPath,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?new ConstraintSecurityHandler():null,null,null);
+        this(parent,contextPath,((options&SESSIONS)!=0)?new SessionHandler():null,((options&SECURITY)!=0)?newSecurityHandler():null,null,null);
     }
     
     /* ------------------------------------------------------------ */
@@ -133,11 +133,12 @@ public class Context extends ContextHandler
     }    
 
     /* ------------------------------------------------------------ */
+    //TODO jaspi doesn't this kinda suck?
     static SecurityHandler newSecurityHandler()
     {
         try
         {
-            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.ConstraintsSecurityHandler");
+            Class<?> l = Loader.loadClass(Context.class,"org.mortbay.jetty.security.ConstraintSecurityHandler");
             return (SecurityHandler)l.newInstance();
         }
         catch(Exception e)
@@ -262,9 +263,9 @@ public class Context extends ContextHandler
 
     /* ------------------------------------------------------------ */
     /**
-     * @param securityHandler The {@link org.mortbay.jetty.security.ConstraintSecurityHandler} to set on this context.
+     * @param securityHandler The {@link org.mortbay.jetty.handler.SecurityHandler} to set on this context.
      */
-    public void setSecurityHandler(ConstraintSecurityHandler securityHandler)
+    public void setSecurityHandler(SecurityHandler securityHandler)
     {
         if(_securityHandler==securityHandler)
             return;

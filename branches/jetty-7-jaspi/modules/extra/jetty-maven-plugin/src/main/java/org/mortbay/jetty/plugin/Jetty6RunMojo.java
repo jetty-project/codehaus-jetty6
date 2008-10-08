@@ -21,11 +21,11 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.RequestLog;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.plugin.util.JettyPluginServer;
-import org.mortbay.jetty.security.jaspi.modules.LoginService;
 import org.mortbay.xml.XmlConfiguration;
 
 /**

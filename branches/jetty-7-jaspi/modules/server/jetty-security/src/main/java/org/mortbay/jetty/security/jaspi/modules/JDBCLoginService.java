@@ -1,5 +1,4 @@
 // ========================================================================
-// $Id$
 // Copyright 2003-2004 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,31 +12,36 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty.security.jaspi.modules;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.UserRealm;
+import javax.security.auth.Subject;
+import javax.security.auth.message.AuthException;
+
+import org.mortbay.jetty.security.Password;
+import org.mortbay.jetty.LoginCredentials;
+import org.mortbay.jetty.LoginResult;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 
 /* ------------------------------------------------------------ */
 /** HashMapped User Realm with JDBC as data source.
- * JDBCUserRealm extends HashUserRealm and adds a method to fetch user
+ * JDBCLoginService extends HashULoginService and adds a method to fetch user
  * information from database.
- * The authenticate() method checks the inherited HashMap for the user.
+ * The login() method checks the inherited Map for the user.
  * If the user is not found, it will fetch details from the database
- * and populate the inherited HashMap. It then calls the HashUserRealm
- * authenticate() method to perform the actual authentication.
+ * and populate the inherited Map. It then calls the superclass
+ * login() method to perform the actual authentication.
  * Periodically (controlled by configuration parameter), internal
  * hashes are cleared. Caching can be disabled by setting cache
  * refresh interval to zero.
@@ -54,55 +58,50 @@ import org.mortbay.util.Loader;
  * @author Ben Alex
  */
 
-public class JDBCUserRealm extends HashUserRealm implements UserRealm
+public class JDBCLoginService extends HashLoginService
 {
 
     private String _jdbcDriver;
     private String _url;
     private String _userName;
     private String _password;
-    private String _userTable;
     private String _userTableKey;
-    private String _userTableUserField;
     private String _userTablePasswordField;
-    private String _roleTable;
-    private String _roleTableKey;
     private String _roleTableRoleField;
-    private String _userRoleTable;
-    private String _userRoleTableUserKey;
-    private String _userRoleTableRoleKey;
     private int _cacheTime;
-    
+
     private long _lastHashPurge;
     private Connection _con;
     private String _userSql;
     private String _roleSql;
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** Constructor.
      */
-    public JDBCUserRealm()
+    public JDBCLoginService()
     {
         super();
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param name 
+    /** Constructor.
+     * @param name name of login service
      */
-    public JDBCUserRealm(String name)
+    public JDBCLoginService(String name)
     {
         super(name);
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** Constructor.
      * @param name Realm name
      * @param config Filename or url of JDBC connection properties file.
-     * @exception IOException 
-     * @exception ClassNotFoundException 
+     * @exception java.io.IOException problem loading configuration
+     * @exception ClassNotFoundException problem loading driver
+     * @throws IllegalAccessException problem using driver
+     * @throws InstantiationException problem creating driver
      */
-    public JDBCUserRealm(String name, String config)
+    public JDBCLoginService(String name, String config)
         throws IOException,
                ClassNotFoundException,
                InstantiationException,
@@ -112,38 +111,51 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
         setConfig(config);
         Loader.loadClass(this.getClass(),_jdbcDriver).newInstance();
         connectDatabase();
-    }    
+    }
 
+    public String getName()
+    {
+        return super.getName();
+    }
+
+    public void setName(String name)
+    {
+        super.setName(name);
+    }
+    public String getConfig()
+    {
+        return super.getConfig();
+    }
     /* ------------------------------------------------------------ */
     /** Load JDBC connection configuration from properties file.
-     *     
-     * @exception IOException 
+     *
+     * @param config Filename or url of user properties file.
+     * @exception java.io.IOException
      */
-    protected void loadConfig()
+    public void setConfig(String config)
         throws IOException
-    {        
+    {
+        super.setConfig(config);
         Properties properties = new Properties();
-        
-        properties.load(getConfigResource().getInputStream());
-        
+        Resource resource=Resource.newResource(config);
+        properties.load(resource.getInputStream());
+
         _jdbcDriver = properties.getProperty("jdbcdriver");
         _url = properties.getProperty("url");
         _userName = properties.getProperty("username");
         _password = properties.getProperty("password");
-        _userTable = properties.getProperty("usertable");
+        String _userTable = properties.getProperty("usertable");
         _userTableKey = properties.getProperty("usertablekey");
-        _userTableUserField = properties.getProperty("usertableuserfield");
+        String _userTableUserField = properties.getProperty("usertableuserfield");
         _userTablePasswordField = properties.getProperty("usertablepasswordfield");
-        _roleTable = properties.getProperty("roletable");
-        _roleTableKey = properties.getProperty("roletablekey");
+        String _roleTable = properties.getProperty("roletable");
+        String _roleTableKey = properties.getProperty("roletablekey");
         _roleTableRoleField = properties.getProperty("roletablerolefield");
-        _userRoleTable = properties.getProperty("userroletable");
-        _userRoleTableUserKey = properties.getProperty("userroletableuserkey");
-        _userRoleTableRoleKey = properties.getProperty("userroletablerolekey");
-        // default cachetime = 30s
-        String cachetime = properties.getProperty("cachetime");
-        _cacheTime = cachetime!=null ? new Integer(cachetime).intValue() : 30;
-        
+        String _userRoleTable = properties.getProperty("userroletable");
+        String _userRoleTableUserKey = properties.getProperty("userroletableuserkey");
+        String _userRoleTableRoleKey = properties.getProperty("userroletablerolekey");
+        _cacheTime = new Integer(properties.getProperty("cachetime"));
+
         if (_jdbcDriver == null || _jdbcDriver.equals("")
             || _url == null || _url.equals("")
             || _userName == null || _userName.equals("")
@@ -168,15 +180,11 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
     }
 
     /* ------------------------------------------------------------ */
-    public void logout(Principal user)
-    {}
-    
-    /* ------------------------------------------------------------ */
     /** (re)Connect to database with parameters setup by loadConfig()
      */
     public void connectDatabase()
     {
-        try 
+        try
         {
              Class.forName(_jdbcDriver);
             _con = DriverManager.getConnection(_url, _userName, _password);
@@ -192,11 +200,11 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
                       + " could not connect to database; will try later", e);
         }
     }
-    
+
+
     /* ------------------------------------------------------------ */
-    public Principal authenticate(String username,
-                                  Object credentials,
-                                  Request request)
+    @Override
+    public LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException
     {
         synchronized (this)
         {
@@ -204,64 +212,56 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
             if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
             {
                 _users.clear();
-                _roles.clear();
                 _lastHashPurge = now;
             }
-            Principal user = super.getPrincipal(username);
-            if (user == null)
-            {
-                loadUser(username);
-                user = super.getPrincipal(username);
-            }
+            //TODO JASPI not sure if this should be in sync block.  Was not in JDBCUserRealm
+            return super.login(subject, loginCredentials);
         }
-        return super.authenticate(username, credentials, request);
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Check if a user is in a role.
-     * @param user The user, which must be from this realm 
-     * @param roleName 
-     * @return True if the user can act in the role.
-     */
-    public synchronized boolean isUserInRole(Principal user, String roleName)
+
+    @Override
+    protected KnownUser getKnownUser(String userName)
     {
-        if(super.getPrincipal(user.getName())==null)
-            loadUser(user.getName());
-        return super.isUserInRole(user, roleName);
+        KnownUser user = super.getKnownUser(userName);
+        if (user == null)
+        {
+            user = loadUser(userName);
+        }
+        return user;
     }
-    
 
-
-    
     /* ------------------------------------------------------------ */
-    private void loadUser(String username)
+    private KnownUser loadUser(String username)
     {
         try
         {
             if (null==_con)
                 connectDatabase();
-            
+
             if (null==_con)
                 throw new SQLException("Can't connect to database");
-            
+
             PreparedStatement stat = _con.prepareStatement(_userSql);
             stat.setObject(1, username);
             ResultSet rs = stat.executeQuery();
-    
+
             if (rs.next())
             {
                 int key = rs.getInt(_userTableKey);
-                put(username, rs.getString(_userTablePasswordField));
+                String credentials = rs.getString(_userTablePasswordField);
                 stat.close();
-                
+
                 stat = _con.prepareStatement(_roleSql);
                 stat.setInt(1, key);
                 rs = stat.executeQuery();
-
+                List<String> roles = new ArrayList<String>();
                 while (rs.next())
-                    addUserToRole(username, rs.getString(_roleTableRoleField));
-                
+                    roles.add(rs.getString(_roleTableRoleField));
+
                 stat.close();
+                KnownUser user = new KnownUser(username, new Password(credentials), roles.toArray(new String[roles.size()]));
+                put(username, user);
+                return user;
             }
         }
         catch (SQLException e)
@@ -270,5 +270,6 @@ public class JDBCUserRealm extends HashUserRealm implements UserRealm
                       + " could not load user information from database", e);
             connectDatabase();
         }
+        return null;
     }
 }

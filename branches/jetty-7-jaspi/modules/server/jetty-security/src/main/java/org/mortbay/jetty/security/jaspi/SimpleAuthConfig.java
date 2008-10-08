@@ -29,7 +29,7 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.Subject;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class SimpleAuthConfig implements ServerAuthConfig
 {

@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.security.JettyMessageInfo;
+import org.mortbay.jetty.LoginService;
 
 /**
  * @version $Rev$ $Date$

@@ -18,21 +18,22 @@
  */
 
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.security.auth.Subject;
+import javax.security.auth.message.AuthException;
+
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
-public interface CrossContextPsuedoSession<T>
+public interface LoginService
 {
 
-    T fetch(HttpServletRequest request);
+    LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException;
 
-    void store(T data, HttpServletResponse response);
+    void logout(Subject subject) throws AuthException;
 
-    void clear(HttpServletRequest request);
-
+    @Deprecated
+    String getName();
 }

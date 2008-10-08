@@ -18,7 +18,7 @@
  */
 
 
-package org.mortbay.jetty.security.jaspi.modules;
+package org.mortbay.jetty;
 
 import java.security.Principal;
 
@@ -27,7 +27,7 @@ import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.Subject;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class LoginResult
 {
