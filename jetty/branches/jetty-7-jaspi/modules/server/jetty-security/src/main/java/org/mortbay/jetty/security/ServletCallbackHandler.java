@@ -36,7 +36,7 @@ import javax.security.auth.message.callback.TrustStoreCallback;
 /**
  *
  * Idiot class required by jaspi stupidity @#*($)#@&^)$@#&*$@
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class ServletCallbackHandler implements CallbackHandler
 {

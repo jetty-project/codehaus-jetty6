@@ -18,11 +18,11 @@
  */
 
 
-package org.mortbay.jetty.security.jaspi.modules;
+package org.mortbay.jetty;
 
 /**
  * Marker interface for classes replacing CallbackHandler to supply e.g. username/pw to login services.
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public interface LoginCredentials
 {

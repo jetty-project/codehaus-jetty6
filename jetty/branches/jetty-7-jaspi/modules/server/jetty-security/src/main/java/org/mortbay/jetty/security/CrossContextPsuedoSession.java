@@ -18,22 +18,21 @@
  */
 
 
-package org.mortbay.jetty.security.jaspi.modules;
+package org.mortbay.jetty.security;
 
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @version $Rev$ $Date$
  */
-public interface LoginService
+public interface CrossContextPsuedoSession<T>
 {
 
-    LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException;
+    T fetch(HttpServletRequest request);
 
-    void logout(Subject subject) throws AuthException;
+    void store(T data, HttpServletResponse response);
 
-    @Deprecated
-    String getName();
+    void clear(HttpServletRequest request);
+
 }

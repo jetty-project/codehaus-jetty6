@@ -45,7 +45,7 @@ import org.mortbay.jetty.security.ConstraintSecurityHandler;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.jaspi.modules.BasicAuthModule;
 import org.mortbay.jetty.security.jaspi.modules.HashLoginService;
-import org.mortbay.jetty.security.jaspi.modules.LoginService;
+import org.mortbay.jetty.LoginService;
 import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
 import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
 

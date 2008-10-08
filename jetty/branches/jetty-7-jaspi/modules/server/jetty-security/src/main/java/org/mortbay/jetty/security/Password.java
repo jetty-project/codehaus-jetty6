@@ -14,6 +14,7 @@
 
 package org.mortbay.jetty.security;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.mortbay.log.Log;
 
@@ -86,6 +87,9 @@ public class Password extends Credential
         
         if (credentials instanceof String)
             return credentials.equals(_pw);
+
+        if (credentials instanceof char[])
+            return Arrays.equals(_pw.toCharArray(), (char[]) credentials);
         
         if (credentials instanceof Credential)
             return ((Credential)credentials).check(_pw);

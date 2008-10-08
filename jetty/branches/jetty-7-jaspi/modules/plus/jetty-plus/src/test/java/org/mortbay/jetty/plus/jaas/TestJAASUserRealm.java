@@ -38,7 +38,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.mortbay.jetty.security.jaspi.modules.LoginResult;
+import org.mortbay.jetty.LoginResult;
 import org.mortbay.jetty.security.jaspi.modules.UserPasswordLoginCredentials;
 
 

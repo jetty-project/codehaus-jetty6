@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Cookie;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class HashCrossContextPsuedoSession<T> implements CrossContextPsuedoSession<T>
 {

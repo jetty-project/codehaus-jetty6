@@ -161,7 +161,7 @@ public abstract class Credential
                 else if(credentials instanceof Credential)
                 {
                     // Allow credential to attempt check - i.e. this'll work
-                    // for DigestAuthenticator$Digest credentials
+                    // for DigestAuthModule$Digest credentials
                     return ((Credential)credentials).check(this);
                 }
                 else

@@ -21,7 +21,7 @@
 package org.mortbay.jetty.security.jaspi.modules;
 
 import java.io.IOException;
-import java.security.Principal;
+import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -30,27 +30,42 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
+import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.security.B64Code;
+import org.mortbay.jetty.HttpHeaders;
+import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.LoginCredentials;
+import org.mortbay.jetty.LoginResult;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.JettyMessageInfo;
+import org.mortbay.log.Log;
 
 /**
  * @version $Rev$ $Date$
  */
-public class ClientCertAuthModule extends BaseAuthModule
+public class BasicAuthModule extends BaseAuthModule
 {
 
+    private String realmName;
+    private static final String REALM_KEY = "org.mortbay.jetty.security.jaspi.modules.RealmName";
 
-    public ClientCertAuthModule()
+    public BasicAuthModule()
     {
     }
 
-    public ClientCertAuthModule(CallbackHandler callbackHandler, LoginService loginService)
+    public BasicAuthModule(CallbackHandler callbackHandler, LoginService loginService, String realmName)
     {
         super(callbackHandler, loginService);
+        this.realmName = realmName;
+    }
+
+    @Override
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException
+    {
+        super.initialize(requestPolicy, responsePolicy, handler, options);
+        realmName = (String) options.get(REALM_KEY);
     }
 
     @Override
@@ -58,40 +73,32 @@ public class ClientCertAuthModule extends BaseAuthModule
     {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
-        java.security.cert.X509Certificate[] certs =
-            (java.security.cert.X509Certificate[])
-            request.getAttribute("javax.servlet.request.X509Certificate");
+        String credentials = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         try
         {
-        // Need certificates.
-        if (certs==null || certs.length==0 || certs[0]==null)
-        {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"A client certificate is required for accessing this web application but the server's listener is not configured for mutual authentication (or the client did not provide a certificate).");
-            return AuthStatus.SEND_FAILURE;
-        }
-            Principal principal = certs[0].getSubjectDN();
-            if (principal==null)
-                principal=certs[0].getIssuerDN();
-            final String username=principal==null?"clientcert":principal.getName();
-            //TODO no idea if this is correct
-            final char[] password = B64Code.encode(certs[0].getSignature());
-
-            LoginCredentials loginCredentials = new UserPasswordLoginCredentials(username, password);
-            LoginResult loginResult = loginService.login(clientSubject, loginCredentials);
-            if (loginResult.isSuccess())
+            if (credentials != null)
             {
-                callbackHandler.handle(new Callback[] {loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
-                messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__CERT_AUTH);
-                return AuthStatus.SUCCESS;
+                if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
+                LoginCredentials loginCredentials = new UserPasswordLoginCredentials(credentials);
+                LoginResult loginResult = loginService.login(clientSubject, loginCredentials);
+                //TODO what should happen if !isMandatory but credentials exist and are wrong?
+                if (loginResult.isSuccess())
+                {
+                    callbackHandler.handle(new Callback[]{loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
+                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
+                    return AuthStatus.SUCCESS;
+                }
+
             }
 
             if (!isMandatory(messageInfo))
             {
                 return AuthStatus.SUCCESS;
             }
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"The provided client certificate does not correspond to a trusted user.");
-            return AuthStatus.SEND_FAILURE;
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "basic realm=\"" + realmName + '"');
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return AuthStatus.SEND_CONTINUE;
         }
         catch (IOException e)
         {
