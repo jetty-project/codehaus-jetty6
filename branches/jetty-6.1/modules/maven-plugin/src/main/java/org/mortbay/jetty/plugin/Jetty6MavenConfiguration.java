@@ -30,6 +30,7 @@ import org.mortbay.jetty.plus.annotation.RunAsCollection;
 import org.mortbay.jetty.plus.webapp.Configuration;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
@@ -124,7 +125,7 @@ public class Jetty6MavenConfiguration extends Configuration
             //able to use annotations on on jdk1.5 and above
             Class annotationParserClass = Thread.currentThread().getContextClassLoader().loadClass("org.mortbay.jetty.annotations.AnnotationParser");
             Method parseAnnotationsMethod = 
-                annotationParserClass.getMethod("parseAnnotations", new Class[] {Class.class, RunAsCollection.class, InjectionCollection.class, LifeCycleCallbackCollection.class });
+                annotationParserClass.getMethod("parseAnnotations", new Class[] {WebAppContext.class, Class.class, RunAsCollection.class, InjectionCollection.class, LifeCycleCallbackCollection.class });
 
             //look thru _servlets
             Iterator itor = LazyList.iterator(_servlets);
@@ -132,7 +133,7 @@ public class Jetty6MavenConfiguration extends Configuration
             {
                 ServletHolder holder = (ServletHolder)itor.next();
                 Class servlet = getWebAppContext().loadClass(holder.getClassName());
-                parseAnnotationsMethod.invoke(null, new Object[] {servlet, _runAsCollection,  _injections, _callbacks});
+                parseAnnotationsMethod.invoke(null, new Object[] {getWebAppContext(), servlet, _runAsCollection,  _injections, _callbacks});
             }
 
             //look thru _filters
@@ -141,7 +142,7 @@ public class Jetty6MavenConfiguration extends Configuration
             {
                 FilterHolder holder = (FilterHolder)itor.next();
                 Class filter = getWebAppContext().loadClass(holder.getClassName());
-                parseAnnotationsMethod.invoke(null, new Object[] {filter, null, _injections, _callbacks});
+                parseAnnotationsMethod.invoke(null, new Object[] {getWebAppContext(), filter, null, _injections, _callbacks});
             }
 
             //look thru _listeners
@@ -149,7 +150,7 @@ public class Jetty6MavenConfiguration extends Configuration
             while (itor.hasNext())
             {
                 Object listener = itor.next();
-                parseAnnotationsMethod.invoke(null, new Object[] {listener.getClass(), null, _injections, _callbacks});
+                parseAnnotationsMethod.invoke(null, new Object[] {getWebAppContext(), listener.getClass(), null, _injections, _callbacks});
             }
         }
         else
