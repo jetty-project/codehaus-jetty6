@@ -32,6 +32,11 @@ import javax.security.auth.message.callback.CertStoreCallback;
 import javax.security.auth.message.callback.PrivateKeyCallback;
 import javax.security.auth.message.callback.SecretKeyCallback;
 import javax.security.auth.message.callback.TrustStoreCallback;
+import javax.security.auth.Subject;
+
+import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.ServerAuthException;
 
 /**
  *
@@ -40,9 +45,15 @@ import javax.security.auth.message.callback.TrustStoreCallback;
  */
 public class ServletCallbackHandler implements CallbackHandler
 {
+
+    private final LoginService loginService;
     private final ThreadLocal<CallerPrincipalCallback> callerPrincipals = new ThreadLocal<CallerPrincipalCallback>();
     private final ThreadLocal<GroupPrincipalCallback> groupPrincipals = new ThreadLocal<GroupPrincipalCallback>();
 
+    public ServletCallbackHandler(LoginService loginService) {
+        if (loginService == null) throw new NullPointerException("No login service provided");
+        this.loginService = loginService;
+    }
 
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException
     {
@@ -59,7 +70,18 @@ public class ServletCallbackHandler implements CallbackHandler
             }
             else if (callback instanceof PasswordValidationCallback)
             {
-                //should we care?
+                PasswordValidationCallback passwordValidationCallback = (PasswordValidationCallback) callback;
+                Subject subject = passwordValidationCallback.getSubject();
+                LoginCallback loginCallback = new LoginCallback(subject,
+                        passwordValidationCallback.getUsername(),
+                        passwordValidationCallback.getPassword());
+                try {
+                    loginService.login(loginCallback);
+                } catch (ServerAuthException e) {
+                    throw (IOException)new IOException("Could not login").initCause(e);
+                }
+                passwordValidationCallback.setResult(loginCallback.isSuccess());
+                subject.getPrivateCredentials().add(loginCallback);
             }
             //server to jaspi communication
             //TODO implement these

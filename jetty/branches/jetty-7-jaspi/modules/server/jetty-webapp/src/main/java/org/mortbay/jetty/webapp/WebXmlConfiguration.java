@@ -1039,7 +1039,7 @@ public class WebXmlConfiguration implements Configuration
             }
 
             ServerAuthContext serverAuthContext=null;
-            ServletCallbackHandler callbackHandler=new ServletCallbackHandler();
+            ServletCallbackHandler callbackHandler=new ServletCallbackHandler(loginService);
             String m=method.toString(false, true);
             if (Constraint.__FORM_AUTH.equals(m))
             {

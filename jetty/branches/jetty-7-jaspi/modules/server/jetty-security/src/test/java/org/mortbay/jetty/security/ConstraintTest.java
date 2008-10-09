@@ -54,8 +54,8 @@ public class ConstraintTest extends TestCase
     ContextHandler _context = new ContextHandler();
     SessionHandler _session = new SessionHandler();
     ConstraintSecurityHandler _security = new ConstraintSecurityHandler();
-    final ServletCallbackHandler callbackHandler = new ServletCallbackHandler();
     LoginService loginService = new HashLoginService("TestLoginService", Collections.<String, HashLoginService.User>singletonMap("user", new HashLoginService.KnownUser("user", new Password("pass"), new String[] {"user"})));
+    final ServletCallbackHandler callbackHandler = new ServletCallbackHandler(loginService);
     RequestHandler _handler = new RequestHandler();
     private static final String APP_CONTEXT = "localhost /ctx";
 

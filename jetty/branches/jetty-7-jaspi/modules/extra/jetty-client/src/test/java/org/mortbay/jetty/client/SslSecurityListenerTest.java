@@ -155,9 +155,9 @@ public class SslSecurityListenerTest extends TestCase
         cm.setConstraint(constraint);
         cm.setPathSpec("/*");
 
-        LoginService userRealm = new HashLoginService("MyRealm","src/test/resources/realm.properties");
-        ServletCallbackHandler callbackHandler = new ServletCallbackHandler();
-        BasicAuthModule authModule = new BasicAuthModule(callbackHandler, userRealm, "MyRealm");
+        LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
+        ServletCallbackHandler callbackHandler = new ServletCallbackHandler(loginService);
+        BasicAuthModule authModule = new BasicAuthModule(callbackHandler, loginService, "MyRealm");
         ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
         ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
                 new SimpleAuthConfig(APP_CONTEXT, authModule),
