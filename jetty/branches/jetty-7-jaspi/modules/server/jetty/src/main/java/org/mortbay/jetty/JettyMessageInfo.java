@@ -40,7 +40,7 @@ public class JettyMessageInfo
     public static final String AUTH_METHOD_KEY = "javax.servlet.http.authType";
     private HttpServletRequest request;
     private HttpServletResponse response;
-    private final Map map;
+    private final MIMap map;
 
     public JettyMessageInfo(HttpServletRequest request, HttpServletResponse response, boolean isAuthMandatory)
     {
@@ -77,7 +77,11 @@ public class JettyMessageInfo
 
     public String getAuthMethod()
     {
-        return (String) map.get(AUTH_METHOD_KEY);
+        return map.getAuthMethod();
+    }
+
+    public boolean isAuthMandatory() {
+        return map.isAuthMandatory();
     }
 
 
@@ -205,6 +209,14 @@ public class JettyMessageInfo
                 if (authMethod != null) delegate.put(AUTH_METHOD_KEY, authMethod);
             }
             return delegate;
+        }
+
+        boolean isAuthMandatory() {
+            return isMandatory;
+        }
+
+        String getAuthMethod() {
+            return authMethod;
         }
     }
 }

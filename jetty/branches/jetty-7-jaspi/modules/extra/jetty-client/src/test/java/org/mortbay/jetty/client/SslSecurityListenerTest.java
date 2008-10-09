@@ -163,7 +163,7 @@ public class SslSecurityListenerTest extends TestCase
                 new SimpleAuthConfig(APP_CONTEXT, authModule),
                 null,
                 callbackHandler,
-                null);
+                null, true);
         sh.setServerAuthentication(serverAuthentication);
         sh.setConstraintMappings(new ConstraintMapping[] { cm });
         _server.setHandler(sh);

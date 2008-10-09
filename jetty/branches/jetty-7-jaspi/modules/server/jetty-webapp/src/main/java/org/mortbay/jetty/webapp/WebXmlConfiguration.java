@@ -1041,6 +1041,7 @@ public class WebXmlConfiguration implements Configuration
             ServerAuthContext serverAuthContext=null;
             ServletCallbackHandler callbackHandler=new ServletCallbackHandler(loginService);
             String m=method.toString(false, true);
+            boolean allowLazyAuthentication = true;
             if (Constraint.__FORM_AUTH.equals(m))
             {
                 XmlParser.Node formConfig=node.get("form-login-config");
@@ -1057,6 +1058,7 @@ public class WebXmlConfiguration implements Configuration
                         errorPageName=errorPage.toString(false, true);
                     }
                     serverAuthContext=new FormAuthModule(callbackHandler, loginPageName, errorPageName);
+                    allowLazyAuthentication = false;
                 } else
                 {
 //                    ??
@@ -1082,7 +1084,8 @@ public class WebXmlConfiguration implements Configuration
                     null,
                     callbackHandler,
                     //TODO??
-                    null);
+                    null,
+                    allowLazyAuthentication);
             _securityHandler.setServerAuthentication(serverAuthentication);
         }
 

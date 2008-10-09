@@ -27,7 +27,8 @@ package org.mortbay.jetty;
  */
 public interface ServerAuthentication {
 
-    ServerAuthResult validateRequest(JettyMessageInfo messageInfo, boolean authRequired) throws ServerAuthException;
+    ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException;
 
+    //most likely validatedUser is not needed here.
     ServerAuthStatus secureResponse(JettyMessageInfo messageInfo, ServerAuthResult validatedUser) throws ServerAuthException;
 }

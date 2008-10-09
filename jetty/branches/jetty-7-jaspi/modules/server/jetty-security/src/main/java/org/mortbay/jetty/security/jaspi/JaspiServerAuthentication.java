@@ -41,6 +41,7 @@ import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.security.ServletCallbackHandler;
 import org.mortbay.jetty.security.SimpleAuthResult;
+import org.mortbay.jetty.security.LazyAuthResult;
 
 /**
  * @version $Rev$ $Date$
@@ -52,8 +53,9 @@ public class JaspiServerAuthentication implements ServerAuthentication {
     private final Map authProperties;
     private final ServletCallbackHandler callbackHandler;
     private final Subject serviceSubject;
+    private final boolean allowLazyAuthentication;
 
-    public JaspiServerAuthentication(String authContextId, ServerAuthConfig authConfig, Map authProperties, ServletCallbackHandler callbackHandler, Subject serviceSubject) {
+    public JaspiServerAuthentication(String authContextId, ServerAuthConfig authConfig, Map authProperties, ServletCallbackHandler callbackHandler, Subject serviceSubject, boolean allowLazyAuthentication) {
         if (callbackHandler == null) throw new NullPointerException("No CallbackHandler");
         if (authConfig == null) throw new NullPointerException("No AuthConfig");
         this.authContextId = authContextId;
@@ -61,9 +63,13 @@ public class JaspiServerAuthentication implements ServerAuthentication {
         this.authProperties = authProperties;
         this.callbackHandler = callbackHandler;
         this.serviceSubject = serviceSubject;
+        this.allowLazyAuthentication = allowLazyAuthentication;
     }
 
-    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo, boolean authRequired) throws ServerAuthException {
+    public ServerAuthResult validateRequest(JettyMessageInfo messageInfo) throws ServerAuthException {
+        if (allowLazyAuthentication && !messageInfo.isAuthMandatory()) {
+            return new LazyAuthResult(this, messageInfo);
+        }
         try {
             ServerAuthContext authContext = authConfig.getAuthContext(authContextId, serviceSubject, authProperties);
             Subject clientSubject = new Subject();

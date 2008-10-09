@@ -21,7 +21,6 @@
 package org.mortbay.jetty.security;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.Map;
 
 import org.mortbay.jetty.RunAsToken;
@@ -33,7 +32,6 @@ import org.mortbay.jetty.servlet.ServletHolder;
  */
 public class ConstraintUserIdentity extends AbstractUserIdentity
 {
-    private static final ServerAuthResult NO_AUTH_RESULTS = new SimpleAuthResult(null, null, null, Collections.<String>emptyList(), null);
 
     private ServletHolder servletHolder;
     private RunAsToken _runAsRole;
@@ -44,7 +42,7 @@ public class ConstraintUserIdentity extends AbstractUserIdentity
 
     public ConstraintUserIdentity()
     {
-        super(NO_AUTH_RESULTS);
+        super(SimpleAuthResult.NO_AUTH_RESULTS);
     }
 
 
