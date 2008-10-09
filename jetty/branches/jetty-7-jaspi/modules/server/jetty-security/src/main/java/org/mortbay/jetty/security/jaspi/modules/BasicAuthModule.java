@@ -24,23 +24,17 @@ import java.io.IOException;
 import java.util.Map;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.callback.CallerPrincipalCallback;
-import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.JettyMessageInfo;
-import org.mortbay.jetty.LoginCallback;
 import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.log.Log;
 
@@ -57,9 +51,9 @@ public class BasicAuthModule extends BaseAuthModule
     {
     }
 
-    public BasicAuthModule(CallbackHandler callbackHandler, LoginService loginService, String realmName)
+    public BasicAuthModule(CallbackHandler callbackHandler, String realmName)
     {
-        super(callbackHandler, loginService);
+        super(callbackHandler);
         this.realmName = realmName;
     }
 
@@ -82,14 +76,7 @@ public class BasicAuthModule extends BaseAuthModule
             if (credentials != null)
             {
                 if (Log.isDebugEnabled()) Log.debug("Credentials: " + credentials);
-                LoginCallback loginCallback = new LoginCallback(clientSubject, credentials);
-                loginService.login(loginCallback);
-                if (loginCallback.isSuccess())
-                {
-                    CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                    GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject,  loginCallback.getGroups().toArray(new String[loginCallback.getGroups().size()]));
-                    callbackHandler.handle(new Callback[] {callerPrincipalCallback, groupPrincipalCallback});
-                    messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__BASIC_AUTH);
+                if (login(clientSubject, credentials, Constraint.__BASIC_AUTH, messageInfo)) {
                     return AuthStatus.SUCCESS;
                 }
 
@@ -109,8 +96,6 @@ public class BasicAuthModule extends BaseAuthModule
         }
         catch (UnsupportedCallbackException e)
         {
-            throw new AuthException(e.getMessage());
-        } catch (ServerAuthException e) {
             throw new AuthException(e.getMessage());
         }
 

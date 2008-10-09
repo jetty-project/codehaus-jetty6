@@ -24,24 +24,17 @@ import java.io.IOException;
 import java.security.Principal;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.callback.CallerPrincipalCallback;
-import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.util.B64Code;
 import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.LoginCredentials;
-import org.mortbay.jetty.LoginCallback;
-import org.mortbay.jetty.ServerAuthException;
 
 /**
  * @version $Rev$ $Date$
@@ -54,9 +47,9 @@ public class ClientCertAuthModule extends BaseAuthModule
     {
     }
 
-    public ClientCertAuthModule(CallbackHandler callbackHandler, LoginService loginService)
+    public ClientCertAuthModule(CallbackHandler callbackHandler)
     {
-        super(callbackHandler, loginService);
+        super(callbackHandler);
     }
 
     @Override
@@ -83,15 +76,8 @@ public class ClientCertAuthModule extends BaseAuthModule
             //TODO no idea if this is correct
             final char[] password = B64Code.encode(certs[0].getSignature());
 
-            LoginCallback loginCallback = new LoginCallback(clientSubject, username, password);
-            loginService.login(loginCallback);
-            if (loginCallback.isSuccess())
-            {
-                CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
-                GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject,  loginCallback.getGroups().toArray(new String[loginCallback.getGroups().size()]));
-                callbackHandler.handle(new Callback[] {callerPrincipalCallback, groupPrincipalCallback});
-                //TODO is cert_auth correct?
-                messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__CERT_AUTH);
+            //TODO is cert_auth correct?
+            if (login(clientSubject, username, password, Constraint.__CERT_AUTH, messageInfo)) {
                 return AuthStatus.SUCCESS;
             }
 
@@ -108,8 +94,6 @@ public class ClientCertAuthModule extends BaseAuthModule
         }
         catch (UnsupportedCallbackException e)
         {
-            throw new AuthException(e.getMessage());
-        } catch (ServerAuthException e) {
             throw new AuthException(e.getMessage());
         }
 

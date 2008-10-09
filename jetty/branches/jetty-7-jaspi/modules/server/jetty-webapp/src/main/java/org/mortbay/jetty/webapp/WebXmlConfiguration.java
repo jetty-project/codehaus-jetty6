@@ -1056,22 +1056,22 @@ public class WebXmlConfiguration implements Configuration
                     {
                         errorPageName=errorPage.toString(false, true);
                     }
-                    serverAuthContext=new FormAuthModule(callbackHandler, loginService, loginPageName, errorPageName);
+                    serverAuthContext=new FormAuthModule(callbackHandler, loginPageName, errorPageName);
                 } else
                 {
 //                    ??
                 }
             } else if (Constraint.__BASIC_AUTH.equals(m))
             {
-                serverAuthContext=new BasicAuthModule(callbackHandler, loginService, realmName);
+                serverAuthContext=new BasicAuthModule(callbackHandler, realmName);
             } else if (Constraint.__DIGEST_AUTH.equals(m))
             {
-                serverAuthContext=new DigestAuthModule(callbackHandler, loginService, realmName);
+                serverAuthContext=new DigestAuthModule(callbackHandler, realmName);
             } else if (Constraint.__CERT_AUTH.equals(m) ||
                     Constraint.__CERT_AUTH2.equals(m))
             {
                 //TODO figure out how to configure max handshake?
-                serverAuthContext=new ClientCertAuthModule(callbackHandler, loginService);
+                serverAuthContext=new ClientCertAuthModule(callbackHandler);
             } else
                 Log.warn("UNKNOWN AUTH METHOD: " + m);
             //TODO set this to host-name<space>context-root

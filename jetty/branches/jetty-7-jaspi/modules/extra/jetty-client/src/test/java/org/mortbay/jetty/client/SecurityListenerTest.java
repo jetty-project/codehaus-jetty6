@@ -281,7 +281,7 @@ public class SecurityListenerTest extends TestCase
 
          LoginService loginService = new HashLoginService("MyRealm","src/test/resources/realm.properties");
          ServletCallbackHandler callbackHandler = new ServletCallbackHandler(loginService);
-         BasicAuthModule authModule = new BasicAuthModule(callbackHandler, loginService, "MyRealm");
+         BasicAuthModule authModule = new BasicAuthModule(callbackHandler, "MyRealm");
          ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
          ServerAuthentication serverAuthentication = new JaspiServerAuthentication(APP_CONTEXT,
                  new SimpleAuthConfig(APP_CONTEXT, authModule),
