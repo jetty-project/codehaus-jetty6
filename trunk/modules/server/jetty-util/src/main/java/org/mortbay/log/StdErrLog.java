@@ -26,8 +26,9 @@ import org.mortbay.util.DateCache;
 public class StdErrLog implements Logger
 {    
     private static DateCache _dateCache;
-    private static boolean debug = System.getProperty("DEBUG",null)!=null;
-    private String name;
+    private static boolean _debug = System.getProperty("DEBUG",null)!=null;
+    private String _name;
+    private boolean _hideStacks=true;
     
     static
     {
@@ -49,44 +50,60 @@ public class StdErrLog implements Logger
     
     public StdErrLog(String name)
     {    
-        this.name=name==null?"":name;
+        this._name=name==null?"":name;
     }
     
     public boolean isDebugEnabled()
     {
-        return debug;
+        return _debug;
     }
     
     public void setDebugEnabled(boolean enabled)
     {
-        debug=enabled;
+        _debug=enabled;
     }
     
+    public boolean isHideStacks()
+    {
+        return _hideStacks;
+    }
+
+    public void setHideStacks(boolean hideStacks)
+    {
+        _hideStacks = hideStacks;
+    }
+
     public void info(String msg,Object arg0, Object arg1)
     {
         String d=_dateCache.now();
         int ms=_dateCache.lastMs();
-        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":INFO:  "+format(msg,arg0,arg1));
+        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+_name+":INFO:  "+format(msg,arg0,arg1));
     }
     
     public void debug(String msg,Throwable th)
     {
-        if (debug)
+        if (_debug)
         {
             String d=_dateCache.now();
             int ms=_dateCache.lastMs();
-            System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":DEBUG: "+msg);
-            if (th!=null) th.printStackTrace();
+            System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+_name+":DEBUG: "+msg);
+            if (th!=null) 
+            {
+                if (_hideStacks)
+                    System.err.println(th);
+                else
+                    th.printStackTrace();
+            }
         }
     }
     
     public void debug(String msg,Object arg0, Object arg1)
     {
-        if (debug)
+        if (_debug)
         {
             String d=_dateCache.now();
             int ms=_dateCache.lastMs();
-            System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":DEBUG: "+format(msg,arg0,arg1));
+            System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+_name+":DEBUG: "+format(msg,arg0,arg1));
         }
     }
     
@@ -94,16 +111,21 @@ public class StdErrLog implements Logger
     {
         String d=_dateCache.now();
         int ms=_dateCache.lastMs();
-        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":WARN:  "+format(msg,arg0,arg1));
+        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+_name+":WARN:  "+format(msg,arg0,arg1));
     }
     
     public void warn(String msg, Throwable th)
     {
         String d=_dateCache.now();
         int ms=_dateCache.lastMs();
-        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+name+":WARN:  "+msg);
-        if (th!=null)
-            th.printStackTrace();
+        System.err.println(d+(ms>99?".":(ms>0?".0":".00"))+ms+":"+_name+":WARN:  "+msg);
+        if (th!=null) 
+        {
+            if (_hideStacks)
+                System.err.println(th);
+            else
+                th.printStackTrace();
+        }
     }
 
     private String format(String msg, Object arg0, Object arg1)
@@ -120,15 +142,15 @@ public class StdErrLog implements Logger
     
     public Logger getLogger(String name)
     {
-        if ((name==null && this.name==null) ||
-            (name!=null && name.equals(this.name)))
+        if ((name==null && this._name==null) ||
+            (name!=null && name.equals(this._name)))
             return this;
         return new StdErrLog(name);
     }
     
     public String toString()
     {
-        return "STDERR"+name;
+        return "STDERR"+_name;
     }
 
 }
