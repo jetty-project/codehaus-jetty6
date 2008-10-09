@@ -17,7 +17,7 @@
     <module>install</module>
   </modules>
   <properties>
-    <cometd-version>1.0-SNAPSHOT</cometd-version>
+    <cometd-version>1.0.beta4</cometd-version>
   </properties>
   <repositories>
     <repository>
