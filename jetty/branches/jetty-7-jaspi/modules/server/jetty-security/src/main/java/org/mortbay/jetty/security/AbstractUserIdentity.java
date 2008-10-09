@@ -22,16 +22,16 @@ package org.mortbay.jetty.security;
 
 import java.security.Principal;
 
-import org.mortbay.jetty.AuthResult;
+import org.mortbay.jetty.ServerAuthResult;
 import org.mortbay.jetty.UserIdentity;
 
 /**
  * @version $Rev$ $Date$
  */
 public abstract class AbstractUserIdentity implements UserIdentity {
-    private final AuthResult authResult;
+    private final ServerAuthResult authResult;
 
-    protected AbstractUserIdentity(AuthResult authResult) {
+    protected AbstractUserIdentity(ServerAuthResult authResult) {
         this.authResult = authResult;
     }
 
@@ -39,7 +39,7 @@ public abstract class AbstractUserIdentity implements UserIdentity {
         return authResult.getUserPrincipal();
     }
 
-    protected AuthResult getAuthResult() {
+    protected ServerAuthResult getAuthResult() {
         return authResult;
     }
 }

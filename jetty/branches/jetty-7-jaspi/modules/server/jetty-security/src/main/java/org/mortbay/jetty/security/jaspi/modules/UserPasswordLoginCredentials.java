@@ -23,7 +23,7 @@ package org.mortbay.jetty.security.jaspi.modules;
 import java.util.Arrays;
 import java.io.UnsupportedEncodingException;
 
-import org.mortbay.jetty.security.B64Code;
+import org.mortbay.util.B64Code;
 import org.mortbay.jetty.LoginCredentials;
 import org.mortbay.util.StringUtil;
 

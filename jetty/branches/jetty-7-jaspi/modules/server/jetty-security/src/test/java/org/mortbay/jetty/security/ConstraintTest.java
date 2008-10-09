@@ -39,6 +39,7 @@ import org.mortbay.jetty.security.jaspi.SimpleAuthConfig;
 import org.mortbay.jetty.ServerAuthentication;
 import org.mortbay.jetty.security.jaspi.JaspiServerAuthentication;
 import org.mortbay.jetty.servlet.SessionHandler;
+import org.mortbay.util.B64Code;
 
 /**
  * @author gregw

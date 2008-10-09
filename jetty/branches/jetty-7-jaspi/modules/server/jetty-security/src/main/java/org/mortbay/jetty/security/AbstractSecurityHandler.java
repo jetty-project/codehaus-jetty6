@@ -23,19 +23,19 @@ package org.mortbay.jetty.security;
 import java.io.IOException;
 import java.security.Principal;
 
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.JettyMessageInfo;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.jetty.UserIdentity;
-import org.mortbay.jetty.AuthResult;
+import org.mortbay.jetty.ServerAuthException;
+import org.mortbay.jetty.ServerAuthResult;
+import org.mortbay.jetty.ServerAuthStatus;
 import org.mortbay.jetty.ServerAuthentication;
+import org.mortbay.jetty.UserIdentity;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.handler.SecurityHandler;
 
@@ -158,7 +158,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                 boolean isAuthMandatory = isAuthMandatory(base_request, base_response, constraintInfo);
                 //TODO check with greg about whether requirement that these be the request/response passed to the resource(servlet) is realistic (i.e. this requires no wrapping between here and invocation)
                 //TODO we have to get the auth context from the authconfig on each call.
-                MessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
+                JettyMessageInfo messageInfo = new JettyMessageInfo(request, response, isAuthMandatory);
 //                String authContextID = authConfig.getAuthContextID(messageInfo);
 //                ServerAuthContext authContext = authConfig.getAuthContext(authContextID, serviceSubject, authProperties);
 
@@ -167,9 +167,9 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
 
                 try
                 {
-                    AuthResult authResult = serverAuthentication.validateRequest(messageInfo, isAuthMandatory);
+                    ServerAuthResult authResult = serverAuthentication.validateRequest(messageInfo, isAuthMandatory);
 //                    AuthStatus authStatus = authContext.validateRequest(messageInfo, clientSubject, serviceSubject);
-                    if (!isAuthMandatory || authResult.getAuthStatus() == AuthStatus.SUCCESS)
+                    if (!isAuthMandatory || authResult.getAuthStatus() == ServerAuthStatus.SUCCESS)
                     {
                         //JASPI 3.8.  Supply the UserPrincipal and ClientSubject to the web resource permission check
                         //JASPI 3.8.4 establish request values
@@ -222,8 +222,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                 }
                 catch (Error e) {
                     throw e;
-                }
-                finally
+                } finally
                 {
                     //jaspi clean up subject
 //                    authContext.cleanSubject(messageInfo, clientSubject);
@@ -262,7 +261,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
                 }
             }
         }
-        catch (AuthException e)
+        catch (ServerAuthException e)
         {
             //jaspi 3.8.3 send HTTP 500 internal server error, with message from AuthException
             response.sendError(Response.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -281,7 +280,7 @@ public abstract class AbstractSecurityHandler extends HandlerWrapper implements 
         }
     }
 
-    protected abstract UserIdentity newUserIdentity(AuthResult authResult);
+    protected abstract UserIdentity newUserIdentity(ServerAuthResult authResult);
 
     protected abstract UserIdentity newSystemUserIdentity();
 

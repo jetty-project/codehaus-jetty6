@@ -28,27 +28,28 @@ import java.util.Arrays;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.Subject;
 
-import org.mortbay.jetty.AuthResult;
+import org.mortbay.jetty.ServerAuthResult;
+import org.mortbay.jetty.ServerAuthStatus;
 
 /**
  * @version $Rev$ $Date$
  */
-public class SimpleAuthResult implements AuthResult {
+public class SimpleAuthResult implements ServerAuthResult {
 
-    private final AuthStatus authStatus;
+    private final ServerAuthStatus authStatus;
     private final Subject clientSubject;
     private final Principal userPrincipal;
     private final List<String> groups;
     private final String authMethod;
 
-    public SimpleAuthResult(AuthStatus authStatus, Subject clientSubject, Principal userPrincipal, List<String> groups, String authMethod) {
+    public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, Principal userPrincipal, List<String> groups, String authMethod) {
         this.authStatus = authStatus;
         this.clientSubject = clientSubject;
         this.userPrincipal = userPrincipal;
         this.groups = groups;
         this.authMethod = userPrincipal == null? null: authMethod;
     }
-    public SimpleAuthResult(AuthStatus authStatus, Subject clientSubject, Principal userPrincipal, String[] groups, String authMethod) {
+    public SimpleAuthResult(ServerAuthStatus authStatus, Subject clientSubject, Principal userPrincipal, String[] groups, String authMethod) {
         this.authStatus = authStatus;
         this.clientSubject = clientSubject;
         this.userPrincipal = userPrincipal;
@@ -56,7 +57,7 @@ public class SimpleAuthResult implements AuthResult {
         this.authMethod = userPrincipal == null? null: authMethod;
     }
 
-    public AuthStatus getAuthStatus() {
+    public ServerAuthStatus getAuthStatus() {
         return authStatus;
     }
 

@@ -18,24 +18,23 @@
  */
 
 
-package org.mortbay.jetty.security;
+package org.mortbay.jetty;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Collection;
 
-import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
 
 /**
+ * Almost an implementation of jaspi MessageInfo.
+ *
  * @version $Rev$ $Date$
  */
-public class JettyMessageInfo implements MessageInfo
+public class JettyMessageInfo
 {
     public static final String MANDATORY_KEY = "javax.security.auth.message.MessagePolicy.isMandatory";
     public static final String AUTH_METHOD_KEY = "javax.servlet.http.authType";
@@ -56,28 +55,24 @@ public class JettyMessageInfo implements MessageInfo
         return map;
     }
 
-    public Object getRequestMessage()
+    public HttpServletRequest getRequestMessage()
     {
         return request;
     }
 
-    public Object getResponseMessage()
+    public HttpServletResponse getResponseMessage()
     {
         return response;
     }
 
-    public void setRequestMessage(Object request)
+    public void setRequestMessage(HttpServletRequest request)
     {
-        if (!(request instanceof HttpServletRequest))
-            throw new IllegalArgumentException("request must be an HttpServletRequest, not: " + request);
-        this.request = (HttpServletRequest) request;
+        this.request = request;
     }
 
-    public void setResponseMessage(Object response)
+    public void setResponseMessage(HttpServletResponse response)
     {
-        if (!(response instanceof HttpServletResponse))
-            throw new IllegalArgumentException("request must be an HttpServletRequest, not: " + response);
-        this.response = (HttpServletResponse) response;
+        this.response = response;
     }
 
     public String getAuthMethod()

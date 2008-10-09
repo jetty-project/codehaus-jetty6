@@ -25,7 +25,6 @@ import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -38,8 +37,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.mortbay.jetty.LoginResult;
-import org.mortbay.jetty.security.jaspi.modules.UserPasswordLoginCredentials;
+import org.mortbay.jetty.LoginCallback;
 
 
 /* ---------------------------------------------------- */
@@ -200,17 +198,18 @@ public class TestJAASUserRealm extends TestCase
             
             loginService.setLoginModuleName ("ds");
 
-            LoginResult loginResult = loginService.login(new Subject(), new UserPasswordLoginCredentials("me", "blah".toCharArray()));
-            assertFalse (loginResult.isSuccess());
+            LoginCallback loginCallback = new LoginCallback(new Subject(), "me", "blah".toCharArray());
+            loginService.login(loginCallback);
+            assertFalse (loginCallback.isSuccess());
+
+            loginCallback = new LoginCallback(new Subject(), "me", "me".toCharArray());
+            loginService.login (loginCallback);
             
-            loginResult = loginService.login (new Subject(), new UserPasswordLoginCredentials("me", "me".toCharArray()));
-            
-            assertTrue (loginResult.isSuccess());
-            assertNotNull ("CallerPrincipalCallback expected", loginResult.getCallerPrincipalCallback());
-            Principal userPrincipal = loginResult.getCallerPrincipalCallback().getPrincipal();
+            assertTrue (loginCallback.isSuccess());
+            Principal userPrincipal = loginCallback.getUserPrincipal();
             assertNotNull ("principal expected", userPrincipal);
             assertTrue (userPrincipal.getName().equals("me"));
-            List<String> groups = Arrays.asList(loginResult.getGroupPrincipalCallback().getGroups());
+            List<String> groups = loginCallback.getGroups();
 
             assertTrue (groups.contains("roleA"));
             assertTrue (groups.contains("roleB"));
@@ -266,17 +265,18 @@ public class TestJAASUserRealm extends TestCase
         JAASLoginService loginService = new JAASLoginService("props");
         loginService.setLoginModuleName ("props");
 
-        LoginResult loginResult = loginService.login(new Subject(), new UserPasswordLoginCredentials("user", "wrong".toCharArray()));
-        assertFalse (loginResult.isSuccess());
+        LoginCallback loginCallback = new LoginCallback(new Subject(), "user", "wrong".toCharArray());
+        loginService.login(loginCallback);
+        assertFalse (loginCallback.isSuccess());
 
-        loginResult = loginService.login (new Subject(), new UserPasswordLoginCredentials("user", "user".toCharArray()));
+        loginCallback = new LoginCallback(new Subject(), "user", "user".toCharArray());
+        loginService.login(loginCallback);
 
-        assertTrue (loginResult.isSuccess());
-        assertNotNull ("CallerPrincipalCallback expected", loginResult.getCallerPrincipalCallback());
-        Principal userPrincipal = loginResult.getCallerPrincipalCallback().getPrincipal();
+        assertTrue (loginCallback.isSuccess());
+        Principal userPrincipal = loginCallback.getUserPrincipal();
         assertNotNull ("principal expected", userPrincipal);
         assertEquals (userPrincipal.getName(),"user");
-        List<String> groups = Arrays.asList(loginResult.getGroupPrincipalCallback().getGroups());
+        List<String> groups = loginCallback.getGroups();
 
         assertTrue (groups.contains("pleb"));
         assertTrue (groups.contains("user"));

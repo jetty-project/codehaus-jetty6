@@ -24,12 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
-
+import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.security.Password;
-import org.mortbay.jetty.LoginCredentials;
-import org.mortbay.jetty.LoginResult;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
@@ -204,7 +201,7 @@ public class JDBCLoginService extends HashLoginService
 
     /* ------------------------------------------------------------ */
     @Override
-    public LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException
+    public void login(LoginCallback loginCallback) throws ServerAuthException
     {
         synchronized (this)
         {
@@ -215,7 +212,7 @@ public class JDBCLoginService extends HashLoginService
                 _lastHashPurge = now;
             }
             //TODO JASPI not sure if this should be in sync block.  Was not in JDBCUserRealm
-            return super.login(subject, loginCredentials);
+            super.login(loginCallback);
         }
     }
 

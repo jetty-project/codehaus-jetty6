@@ -21,8 +21,6 @@
 package org.mortbay.jetty;
 
 import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
-
 
 /**
  * @version $Rev$ $Date$
@@ -30,9 +28,9 @@ import javax.security.auth.message.AuthException;
 public interface LoginService
 {
 
-    LoginResult login(Subject subject, LoginCredentials loginCredentials) throws AuthException;
+    void login(LoginCallback loginCallback) throws ServerAuthException;
 
-    void logout(Subject subject) throws AuthException;
+    void logout(Subject subject) throws ServerAuthException;
 
     @Deprecated
     String getName();

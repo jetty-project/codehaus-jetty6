@@ -34,18 +34,20 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.callback.CallerPrincipalCallback;
+import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
+import org.mortbay.jetty.JettyMessageInfo;
+import org.mortbay.jetty.LoginCallback;
+import org.mortbay.jetty.LoginService;
+import org.mortbay.jetty.ServerAuthException;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.CrossContextPsuedoSession;
-import org.mortbay.jetty.security.JettyMessageInfo;
-import org.mortbay.jetty.LoginService;
-import org.mortbay.jetty.LoginCredentials;
-import org.mortbay.jetty.LoginResult;
 import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
@@ -314,26 +316,29 @@ public class FormAuthModule extends BaseAuthModule
     private boolean tryLogin(MessageInfo messageInfo, Subject clientSubject, HttpServletResponse response, HttpSession session, String username, char[] password)
             throws AuthException, IOException, UnsupportedCallbackException
     {
-        LoginCredentials loginCredentials = new UserPasswordLoginCredentials(username, password);
-        LoginResult loginResult = loginService.login(clientSubject, loginCredentials);
-        //TODO what should happen if !isMandatory but credentials exist and are wrong?
-        if (loginResult.isSuccess())
-        {
-            callbackHandler.handle(new Callback[]{loginResult.getCallerPrincipalCallback(), loginResult.getGroupPrincipalCallback()});
-            messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
-
-            FormCredential form_cred = new FormCredential(username, password, loginResult.getCallerPrincipalCallback().getPrincipal());
-
-            session.setAttribute(__J_AUTHENTICATED, form_cred);
-            // Sign-on to SSO mechanism
-            if (ssoSource != null)
+        try {
+            LoginCallback loginCallback = new LoginCallback(clientSubject, username, password);
+            loginService.login(loginCallback);
+            if (loginCallback.isSuccess())
             {
-                UserInfo userInfo = new UserInfo(username, password);
-                ssoSource.store(userInfo,  response);
-            }
+                CallerPrincipalCallback callerPrincipalCallback = new CallerPrincipalCallback(clientSubject, loginCallback.getUserPrincipal());
+                GroupPrincipalCallback groupPrincipalCallback = new GroupPrincipalCallback(clientSubject,  loginCallback.getGroups().toArray(new String[loginCallback.getGroups().size()]));
+                callbackHandler.handle(new Callback[] {callerPrincipalCallback, groupPrincipalCallback});
+                messageInfo.getMap().put(JettyMessageInfo.AUTH_METHOD_KEY, Constraint.__FORM_AUTH);
+                FormCredential form_cred = new FormCredential(username, password, loginCallback.getUserPrincipal());
 
+                session.setAttribute(__J_AUTHENTICATED, form_cred);
+                // Sign-on to SSO mechanism
+                if (ssoSource != null)
+                {
+                    UserInfo userInfo = new UserInfo(username, password);
+                    ssoSource.store(userInfo,  response);
+                }
+            }
+            return loginCallback.isSuccess();
+        } catch (ServerAuthException e) {
+            throw new AuthException(e.getMessage());
         }
-        return loginResult.isSuccess();
     }
 
 

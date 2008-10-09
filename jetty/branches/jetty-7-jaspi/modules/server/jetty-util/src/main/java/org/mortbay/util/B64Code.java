@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.jetty.security;
+package org.mortbay.util;
 
 import java.io.UnsupportedEncodingException;
 
