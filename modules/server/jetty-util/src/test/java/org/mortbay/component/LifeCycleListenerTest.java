@@ -1,5 +1,8 @@
 package org.mortbay.component;
 
+import org.mortbay.log.Log;
+import org.mortbay.log.StdErrLog;
+
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.framework.Test;
@@ -7,7 +10,7 @@ import junit.textui.TestRunner;
 
 public class LifeCycleListenerTest extends TestCase
 {
-    static Exception cause = new Exception("test exception");
+    static Exception cause = new Exception("expected test exception");
 
     public LifeCycleListenerTest(String name)
     {
@@ -17,6 +20,7 @@ public class LifeCycleListenerTest extends TestCase
     public static void main(String[] args)
     {
         TestRunner.run(suite());
+        ((StdErrLog)Log.getLog()).setHideStacks(true);
     }
 
     public static Test suite()
@@ -99,7 +103,7 @@ public class LifeCycleListenerTest extends TestCase
 
         // check that the stopping event occurs before the stopped event
         assertTrue("The stopping event must occur before the stopped event",listener.stoppingTime < listener.stoppedTime);
-        System.out.println("STOPING TIME : " + listener.stoppingTime + " : " + listener.stoppedTime);
+        // System.out.println("STOPING TIME : " + listener.stoppingTime + " : " + listener.stoppedTime);
 
         // check that the lifecycle's state is stopped
         assertTrue("The lifecycle state is not stooped",lifecycle.isStopped());
