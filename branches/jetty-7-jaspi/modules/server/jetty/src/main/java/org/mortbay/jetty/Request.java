@@ -51,7 +51,6 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.handler.CompleteHandler;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.SContext;
-import org.mortbay.jetty.UserIdentity;
 import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -105,7 +104,6 @@ public class  Request extends Suspendable implements HttpServletRequest
     private EndPoint _endp;
     
     private Attributes _attributes;
-    private String _authType;
     private String _characterEncoding;
     private String _queryEncoding;
     private String _serverName;
@@ -171,7 +169,6 @@ public class  Request extends Suspendable implements HttpServletRequest
             throw new IllegalStateException("Request in context!");
         if(_attributes!=null)
             _attributes.clearAttributes();
-        _authType=null;
         _characterEncoding=null;
         _queryEncoding=null;
         _context=null;
@@ -278,7 +275,7 @@ public class  Request extends Suspendable implements HttpServletRequest
      */
     public String getAuthType()
     {
-        return _authType;
+        return _userIdentity.getAuthMethod();
     }
 
     /* ------------------------------------------------------------ */
@@ -1336,16 +1333,7 @@ public class  Request extends Suspendable implements HttpServletRequest
     {
         return _inputState;
     }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param authType The authType to set.
-     */
-    public void setAuthType(String authType)
-    {
-        _authType = authType;
-    }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param cookies The cookies to set.

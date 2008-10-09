@@ -39,6 +39,10 @@ public abstract class AbstractUserIdentity implements UserIdentity {
         return authResult.getUserPrincipal();
     }
 
+    public String getAuthMethod() {
+        return authResult.getAuthMethod();
+    }
+
     protected ServerAuthResult getAuthResult() {
         return authResult;
     }
