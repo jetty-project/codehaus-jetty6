@@ -29,6 +29,8 @@ public interface UserIdentity
 {
     Principal getUserPrincipal();
 
+    String getAuthMethod();
+
     /* ------------------------------------------------------------ */
     /** Check if the user is in a role.
      * @param role A role name.
@@ -71,6 +73,10 @@ public interface UserIdentity
         {
             return null;
         }/* ------------------------------------------------------------ */
+
+        public String getAuthMethod() {
+            return null;
+        }
 
         //jaspi called from Request.isUserInRole and ConstraintSecurityHandler.check
         public boolean isUserInRole(String role)
